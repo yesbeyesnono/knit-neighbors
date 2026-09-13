@@ -209,6 +209,19 @@ details .seg{margin-top:8px;justify-content:center}
 .gate .muted{font-size:.88rem}
 .tech .vbadge{font-size:.65rem;background:#8a6d1a;color:#fff;padding:1px 6px;border-radius:999px;margin-left:2px}
 .vcount{font-size:13px;color:#8a6d1a;font-weight:600}
+/* 내 모임 목록 */
+.msec{padding:14px 16px 6px;font-size:13px;font-weight:700;color:var(--ink3)}
+.mitem{display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer;background:#fff}
+.mitem .mdate{width:46px;height:50px;border-radius:12px;background:var(--ink);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;flex:none}
+.mitem .mdate b{font-size:18px}.mitem .mdate span{font-size:11px;opacity:.85;margin-top:2px}
+.mitem .mdate.done{background:#e5e5e5;color:#777}
+.mitem .mtx{flex:1;min-width:0}
+.mitem .mtt{display:flex;align-items:center;gap:6px}.mitem .mtt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mitem .role{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:#000;color:#fff;flex:none}
+.mitem .role.p{background:#f2f2f2;color:#333}
+.mitem .msub{font-size:13px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mitem .mstat{font-size:12px;font-weight:700;color:var(--ink);flex:none;padding:3px 9px;border-radius:999px;background:#f2f2f2}
+.mitem .mstat.done{color:#999}
 #v-compose textarea::placeholder{color:var(--ink3)}
 .mfields{display:flex;flex-direction:column;gap:10px;background:#f5f5f5;border-radius:14px;padding:14px}
 .mfields .mtitle{font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:6px}
@@ -1165,12 +1178,12 @@ function meetupCard(m){
 async function joinMeetup(id){
   const { data:roomId, error } = await sb.rpc('join_meetup', { p_meetup_id:id });
   if(error) return toast(error.message.replace(/^.*?: /,''));
-  await loadMyRooms(); toast('참여했어요. 단체 채팅방이 열렸어요'); closeSheet(); openRoom(roomId);
+  await loadMyRooms(); toast('참여했어요. 단체 채팅방이 열렸어요. 마이 › 모임에서 확인할 수 있어요'); closeSheet(); openRoom(roomId);
 }
 async function leaveMeetup(id){
   if(!confirm('모임에서 나갈까요? 채팅방에서도 나가요.')) return;
   const { error } = await sb.rpc('leave_meetup', { p_meetup_id:id }); if(error) return toast(error.message);
-  await loadMyRooms(); toast('모임에서 나왔어요'); closeSheet(); if(view==='comm') loadFeed(); if(view==='map') loadPins();
+  await loadMyRooms(); toast('모임에서 나왔어요'); closeSheet(); if(view==='comm') loadFeed(); if(view==='map') loadPins(); if(view==='my') renderMy();
 }
 async function openMeetup(id){
   await loadTech();
@@ -1470,7 +1483,7 @@ async function renderMy(){
     ${bio?`<div class="pbio">${esc(bio)}</div>`:'<div class="pbio muted">소개를 적어 보세요</div>'}
     <div class="pfriends" id="pfriends" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>
     <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o" onclick="openSkills()">내 뜨개 단계</button><button class="btn o ic" title="공유" onclick="shareProfile()">${ICON.share.replace('<svg','<svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')}</button></div>
-    <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="media" class="${myTab==='media'?'on':''}">미디어</button></div>
+    <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="media" class="${myTab==='media'?'on':''}">미디어</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
   renderMyFriends(); loadMyFeed();
@@ -1480,9 +1493,29 @@ async function renderMyFriends(){
   const friends = rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee:r.requester);
   const inbox = rows.filter(r=>r.status==='pending'&&r.addressee_id===me.id).length;
   const el=$('#pfriends'); if(!el) return;
-  el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}${myProfile?.cert_count?` · <span class="vcount">🏅 작품 인증 ${myProfile.cert_count}</span>`:''}</span><span style="margin-left:auto">›</span>`;
+  let meetN=0; if(myRoomIds.size){ const { count } = await sb.from('meetups').select('id',{count:'exact',head:true}).in('room_id',[...myRoomIds]); meetN=count||0; }
+  el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}${myProfile?.cert_count?` · <span class="vcount">🏅 작품 인증 ${myProfile.cert_count}</span>`:''}${meetN?` · 모임 ${meetN}`:''}</span><span style="margin-left:auto">›</span>`;
 }
-async function loadMyFeed(){ return loadUserFeed(me.id, myTab, $('#myFeed')); }
+async function loadMyFeed(){ if(myTab==='meetups') return loadMyMeetups($('#myFeed')); return loadUserFeed(me.id, myTab, $('#myFeed')); }
+// 내 모임: 참여·주최한 모임을 예정/완료로 나눠 표시
+function dday(iso){ const d=new Date(iso), now=new Date(); const a=new Date(d.getFullYear(),d.getMonth(),d.getDate()), b=new Date(now.getFullYear(),now.getMonth(),now.getDate()); const n=Math.round((a-b)/86400000); return n===0?'오늘':n>0?`D-${n}`:`${-n}일 전`; }
+async function loadMyMeetups(el){
+  el.innerHTML='<div class="empty">불러오는 중…</div>';
+  await Promise.all([loadMyRooms(), loadTech()]);
+  const ids=[...myRoomIds]; if(!ids.length){ el.innerHTML='<div class="empty">참여한 모임이 없어요.<br>지도나 커뮤니티 "모임" 탭에서 참여해 보세요</div>'; return; }
+  const { data, error } = await sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(id,nickname,avatar_url)').in('room_id', ids).order('starts_at');
+  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
+  const now=Date.now(); const up=(data||[]).filter(m=>new Date(m.starts_at)>=now), past=(data||[]).filter(m=>new Date(m.starts_at)<now).reverse();
+  const row = (m, done) => `<div class="mitem" onclick="openMeetup('${m.id}')">
+      <div class="mdate ${done?'done':''}"><b>${new Date(m.starts_at).getDate()}</b><span>${new Date(m.starts_at).getMonth()+1}월</span></div>
+      <div class="mtx"><div class="mtt"><b>${esc(m.title)}</b>${m.created_by===me.id?'<span class="role">주최</span>':'<span class="role p">참여</span>'}</div>
+        <div class="msub">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}</div>
+        <div class="msub">${esc(m.place_name)} · 참여 ${m.participant_count||0}명${m.capacity?`/${m.capacity}`:''}</div></div>
+      <div class="mstat ${done?'done':''}">${done?'완료':dday(m.starts_at)}</div>
+    </div>`;
+  el.innerHTML = `<div class="msec">예정 ${up.length}</div>${up.length?up.map(m=>row(m,false)).join(''):'<div class="empty" style="padding:20px">예정된 모임이 없어요</div>'}
+    <div class="msec">완료 ${past.length}</div>${past.length?past.map(m=>row(m,true)).join(''):'<div class="empty" style="padding:20px">아직 완료한 모임이 없어요</div>'}`;
+}
 function openSettings(){
   const p=myProfile||{};
   openSheet(`<b style="font-size:1.05rem">설정</b>
