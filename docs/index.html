@@ -144,6 +144,37 @@ details .seg{margin-top:8px;justify-content:center}
 .ladder div b{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:.72rem;flex:none}
 .ladder div span{color:var(--ink3);font-size:.78rem;margin-left:auto}
 .simrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+/* community (threads) */
+.compose{gap:8px}
+.cbox{display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:#fff}
+.cbox textarea{border:0;padding:6px 0;background:transparent;min-height:44px;font-size:.95rem}
+.cbox .tools{display:flex;align-items:center;gap:8px;margin-top:4px}
+.cbox .tools .cnt{margin-left:auto;font-size:.75rem;color:var(--ink3);font-variant-numeric:tabular-nums}
+.pv{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pv div{width:64px;height:64px;border-radius:8px;background:center/cover;position:relative}
+.pv div b{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:.7rem;display:grid;place-items:center;cursor:pointer}
+.feed{display:flex;flex-direction:column}
+.post{display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:#fff;cursor:pointer}
+.post .col{flex:1;min-width:0}
+.post .who{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.post .who b{cursor:pointer}
+.post .who .lvchip{font-size:.68rem;padding:1px 7px}
+.post .who time{margin-left:auto;font-size:.75rem;color:var(--ink3)}
+.post .txt{white-space:pre-wrap;margin:4px 0 6px;font-size:.95rem;word-break:break-word}
+.pgrid{display:grid;gap:4px;border-radius:12px;overflow:hidden;margin:6px 0}
+.pgrid.n1{grid-template-columns:1fr}.pgrid.n2,.pgrid.n4{grid-template-columns:1fr 1fr}.pgrid.n3{grid-template-columns:2fr 1fr}
+.pgrid img{width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:1}
+.pgrid.n1 img{aspect-ratio:4/3}
+.pgrid.n3 img:first-child{grid-row:span 2;aspect-ratio:auto}
+.acts{display:flex;gap:18px;font-size:.85rem;color:var(--ink2);margin-top:4px}
+.acts button{background:none;border:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;gap:5px;align-items:center;padding:4px 0}
+.acts button.on{color:var(--rose);font-weight:700}
+.acts .more{margin-left:auto;color:var(--ink3)}
+.subtabs{display:flex;gap:16px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--bg)}
+.subtabs button{background:none;border:0;font:inherit;padding:10px 2px;color:var(--ink3);border-bottom:2px solid transparent;cursor:pointer;font-size:.9rem}
+.subtabs button.on{color:var(--ink);font-weight:700;border-color:var(--ink)}
+.replyto{font-size:.78rem;color:var(--ink3);margin-bottom:2px}
+.fab{position:absolute;right:16px;bottom:78px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:0;font-size:1.5rem;box-shadow:0 6px 18px rgba(52,69,111,.35);cursor:pointer;z-index:5}
 </style>
 </head>
 <body>
@@ -188,6 +219,29 @@ details .seg{margin-top:8px;justify-content:center}
     </div>
   </section>
 
+  <!-- 커뮤니티 (Threads 스타일) -->
+  <section class="view" id="v-comm">
+    <div class="top"><h1>커뮤니티</h1></div>
+    <div class="subtabs" id="commTabs"><button data-f="all" class="on">전체</button><button data-f="dong">우리 동네</button><button data-f="friends">친구</button></div>
+    <div class="cbox" id="cbox">
+      <div id="cboxAva"></div>
+      <div style="flex:1;min-width:0">
+        <textarea id="cText" maxlength="500" placeholder="무슨 뜨개 하고 계세요?" rows="1" oninput="autoGrow(this);updateCnt()"></textarea>
+        <div class="pv" id="cPv"></div>
+        <div class="tools"><button class="btn sm o" onclick="$('#cFile').click()">📷 사진</button><input id="cFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files)"><span class="cnt" id="cCnt">0/500</span><button class="btn sm" id="cPost" onclick="submitPost()">게시</button></div>
+      </div>
+    </div>
+    <div class="feed" id="feed"></div>
+    <div style="padding:12px 16px"><button class="btn o" id="feedMore" onclick="loadFeed(true)" hidden>더 보기</button></div>
+  </section>
+
+  <!-- 글 상세 (원글 + 답글) -->
+  <section class="view" id="v-post">
+    <div class="top"><button class="back" onclick="go('comm')">‹</button><h1>글</h1></div>
+    <div class="feed" id="postBody"></div>
+    <div class="compose"><input id="replyIn" placeholder="답글 달기" maxlength="500" onkeydown="if(event.key==='Enter')submitReply()"><button class="btn" onclick="submitReply()">답글</button></div>
+  </section>
+
   <!-- 친구 -->
   <section class="view" id="v-friends">
     <div class="top"><h1>친구</h1></div>
@@ -221,6 +275,7 @@ details .seg{margin-top:8px;justify-content:center}
 
   <nav id="nav">
     <button data-v="map"><span class="ic">🗺️</span>지도</button>
+    <button data-v="comm"><span class="ic">🧵</span>커뮤니티</button>
     <button data-v="friends"><span class="ic">🤝</span>친구<span class="badge" id="badgeFriends" hidden></span></button>
     <button data-v="chats"><span class="ic">💬</span>채팅</button>
     <button data-v="my"><span class="ic">🧶</span>마이</button>
@@ -341,8 +396,8 @@ function parseGeo(hex){
 }
 
 // ============ 화면 전환 ============
-function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','friends','chats','my'].includes(v); $('#nav').style.display=navOn?'flex':'none'; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===v)); }
-function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
+function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my'].includes(v); $('#nav').style.display=navOn?'flex':'none'; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===v)); }
+function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
 $('#nav').onclick = e => { const b=e.target.closest('button'); if(b) go(b.dataset.v); };
 
 // ============ 온보딩 ============
@@ -628,6 +683,123 @@ async function createMeetup(){
   if(error) return toast('실패: '+error.message);
   await sb.from('messages').insert({room_id:roomId,sender_id:me.id,body:`📍 모임: ${row.title}\n${place}\n${new Date(row.starts_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`});
   toast('모임을 만들었어요'); closeSheet();
+}
+
+// ============ 커뮤니티 (Threads 스타일) ============
+let commFilter='all', feedRows=[], feedCursor=null, likedSet=new Set(), curPost=null, cPhotos=[];
+const FEED_PAGE = 30;
+const AUTHOR_SEL = 'author:profiles!posts_author_id_fkey(id,nickname,avatar_url,dong_name,craft,level_crochet,level_knit)';
+function autoGrow(t){ t.style.height='auto'; t.style.height=Math.min(160, t.scrollHeight)+'px'; }
+function updateCnt(){ $('#cCnt').textContent = $('#cText').value.length+'/500'; }
+$('#commTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; commFilter=b.dataset.f; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadFeed(); };
+async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); loadFeed(); }
+async function friendIds(){ const rows=await fetchFriendships(); return rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee_id:r.requester_id); }
+async function loadFeed(more){
+  if(!more){ feedRows=[]; feedCursor=null; $('#feed').innerHTML='<div class="empty">불러오는 중…</div>'; }
+  let q = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).order('created_at',{ascending:false}).limit(FEED_PAGE);
+  if(feedCursor) q = q.lt('created_at', feedCursor);
+  if(commFilter==='dong'){ if(!myProfile?.dong_code){ $('#feed').innerHTML='<div class="empty">프로필에서 동네를 먼저 정해 주세요</div>'; return; } q = q.eq('dong_code', myProfile.dong_code); }
+  if(commFilter==='friends'){ const ids=await friendIds(); ids.push(me.id); q = q.in('author_id', ids); }
+  const { data, error } = await q;
+  if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
+  feedRows = feedRows.concat(data||[]);
+  feedCursor = data?.length ? data[data.length-1].created_at : feedCursor;
+  $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
+  await loadLikes(data||[]);
+  renderFeed();
+}
+async function loadLikes(rows){ if(!rows.length) return; const { data } = await sb.from('post_likes').select('post_id').eq('profile_id', me.id).in('post_id', rows.map(r=>r.id)); (data||[]).forEach(l=>likedSet.add(l.post_id)); }
+function renderFeed(){
+  $('#feed').innerHTML = feedRows.length ? feedRows.map(p=>postCard(p)).join('') : `<div class="empty">아직 글이 없어요.<br>지금 뜨는 것, 막힌 부분, 완성작을 올려 보세요</div>`;
+}
+function postCard(p, opts={}){
+  const a = p.author||{}; const mine = p.author_id===me.id;
+  const n = (p.photos||[]).length;
+  return `<div class="post" onclick="openPost('${p.id}')">
+    <div onclick="event.stopPropagation();openProfile('${a.id}')">${avatar(a)}</div>
+    <div class="col">
+      ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 답글</div>`:''}
+      <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><span class="muted">${esc(a.dong_name||'')}</span>${lvChips(a)}<time>${ago(p.created_at)}</time></div>
+      ${p.body?`<div class="txt">${esc(p.body)}</div>`:''}
+      ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto('${esc(u)}')">`).join('')}</div>`:''}
+      <div class="acts">
+        <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${likedSet.has(p.id)?'♥':'♡'} <span>${p.like_count||0}</span></button>
+        <button onclick="event.stopPropagation();openPost('${p.id}')">💬 <span>${p.reply_count||0}</span></button>
+        ${mine?`<button class="more" onclick="event.stopPropagation();deletePost('${p.id}')">삭제</button>`:''}
+      </div>
+    </div></div>`;
+}
+function openPhoto(u){ openSheet(`<img src="${esc(u)}" style="width:100%;border-radius:12px" alt="">`); }
+async function toggleLike(id, btn){
+  const on = likedSet.has(id);
+  const r = on ? await sb.from('post_likes').delete().eq('post_id',id).eq('profile_id',me.id)
+               : await sb.from('post_likes').insert({post_id:id, profile_id:me.id});
+  if(r.error) return toast('실패: '+r.error.message);
+  if(on) likedSet.delete(id); else likedSet.add(id);
+  const bump = on?-1:1;
+  [...feedRows, curPost, ...(curPost?.replies||[])].filter(Boolean).forEach(p=>{ if(p.id===id) p.like_count=(p.like_count||0)+bump; });
+  if(btn){ btn.classList.toggle('on',!on); const cnt=btn.querySelector('span'); btn.firstChild.textContent = (on?'♡':'♥')+' '; cnt.textContent = Math.max(0,(parseInt(cnt.textContent)||0)+bump); }
+}
+// 사진 선택 → 1280px 리사이즈 → 미리보기
+async function pickPhotos(files){
+  for(const f of [...files].slice(0, 4 - cPhotos.length)){
+    const blob = await shrinkImage(f, 1280);
+    cPhotos.push({ blob, url: URL.createObjectURL(blob) });
+  }
+  renderPv();
+}
+function renderPv(){ $('#cPv').innerHTML = cPhotos.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="cPhotos.splice(${i},1);renderPv()">✕</b></div>`).join(''); }
+function shrinkImage(file, max){
+  return new Promise(res=>{ const img=new Image(); img.onload=()=>{ const k=Math.min(1, max/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k); c.getContext('2d').drawImage(img,0,0,c.width,c.height); c.toBlob(b=>res(b),'image/jpeg',0.85); URL.revokeObjectURL(img.src); }; img.src=URL.createObjectURL(file); });
+}
+async function uploadPhotos(list){
+  const urls=[];
+  for(const [i,p] of list.entries()){
+    const path = `${me.id}/${Date.now()}-${i}.jpg`;
+    const { error } = await sb.storage.from('posts').upload(path, p.blob, { contentType:'image/jpeg', upsert:false });
+    if(error) throw new Error('사진 업로드 실패: '+error.message);
+    urls.push(sb.storage.from('posts').getPublicUrl(path).data.publicUrl);
+  }
+  return urls;
+}
+async function submitPost(){
+  const body = $('#cText').value.trim();
+  if(!body && !cPhotos.length) return toast('내용이나 사진을 넣어 주세요');
+  $('#cPost').disabled = true;
+  try{
+    const photos = await uploadPhotos(cPhotos);
+    const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos });
+    if(error) throw new Error(error.message);
+    $('#cText').value=''; autoGrow($('#cText')); updateCnt(); cPhotos=[]; renderPv();
+    toast('게시했어요'); loadFeed();
+  }catch(e){ toast(e.message); }
+  $('#cPost').disabled = false;
+}
+async function deletePost(id){
+  if(!confirm('이 글을 삭제할까요? 답글도 함께 지워져요.')) return;
+  const { error } = await sb.from('posts').delete().eq('id', id);
+  if(error) return toast('실패: '+error.message);
+  toast('삭제했어요');
+  if(view==='post' && curPost?.id===id) go('comm'); else if(view==='post') openPost(curPost.id); else loadFeed();
+}
+async function openPost(id){
+  const [{data:p},{data:replies}] = await Promise.all([
+    sb.from('posts').select('*, '+AUTHOR_SEL).eq('id', id).single(),
+    sb.from('posts').select('*, '+AUTHOR_SEL).eq('parent_id', id).order('created_at')
+  ]);
+  if(!p) return toast('글을 찾을 수 없어요');
+  curPost = p; curPost.replies = replies||[];
+  await loadLikes([p, ...curPost.replies]);
+  show('post');
+  $('#postBody').innerHTML = postCard(p) + (curPost.replies.length ? curPost.replies.map(r=>postCard(r,{replyTo:p.author?.nickname})).join('') : '<div class="empty">첫 답글을 남겨 보세요</div>');
+  $('#replyIn').value='';
+}
+async function submitReply(){
+  const t=$('#replyIn').value.trim(); if(!t||!curPost) return;
+  const { error } = await sb.from('posts').insert({ author_id: me.id, parent_id: curPost.id, body: t });
+  if(error) return toast('실패: '+error.message);
+  $('#replyIn').value=''; openPost(curPost.id);
+  const f=feedRows.find(x=>x.id===curPost.id); if(f) f.reply_count=(f.reply_count||0)+1;
 }
 
 // ============ 뜨개 단계 자가진단 ============

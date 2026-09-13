@@ -601,3 +601,93 @@ $$;
 revoke execute on function public.compute_skill_level(text[], text) from public, anon;
 revoke execute on function public.expand_prereqs(text[]) from public, anon;
 revoke execute on function public.profiles_apply_skills() from public, anon, authenticated;
+
+-- ---------------------------------------------------------------
+-- 9. 커뮤니티 (Threads 스타일) — 2026-09-13
+-- ---------------------------------------------------------------
+create table public.posts (
+  id           uuid primary key default gen_random_uuid(),
+  author_id    uuid not null references public.profiles(id) on delete cascade,
+  parent_id    uuid references public.posts(id) on delete cascade,   -- null=원글, 값=답글
+  body         text check (body is null or char_length(body) <= 500),
+  photos       text[] not null default '{}',                          -- storage 'posts' 버킷 URL, 최대 4장
+  dong_code    text,                                                  -- 작성 시점 작성자 동네 (우리 동네 피드용)
+  reply_count  integer not null default 0,
+  like_count   integer not null default 0,
+  created_at   timestamptz not null default now(),
+  check (body is not null or cardinality(photos) > 0),
+  check (cardinality(photos) <= 4)
+);
+create index posts_feed_idx on public.posts (created_at desc) where parent_id is null;
+create index posts_parent_idx on public.posts (parent_id, created_at);
+create index posts_author_idx on public.posts (author_id, created_at desc);
+create index posts_dong_idx on public.posts (dong_code, created_at desc) where parent_id is null;
+
+create table public.post_likes (
+  post_id     uuid not null references public.posts(id) on delete cascade,
+  profile_id  uuid not null references public.profiles(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  primary key (post_id, profile_id)
+);
+create index post_likes_profile_idx on public.post_likes (profile_id);
+
+create or replace function public.posts_before_insert()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if new.dong_code is null then
+    select dong_code into new.dong_code from public.profiles where id = new.author_id;
+  end if;
+  return new;
+end $$;
+create trigger posts_before_insert before insert on public.posts
+  for each row execute function public.posts_before_insert();
+
+create or replace function public.posts_reply_count()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' and new.parent_id is not null then
+    update public.posts set reply_count = reply_count + 1 where id = new.parent_id;
+  elsif tg_op = 'DELETE' and old.parent_id is not null then
+    update public.posts set reply_count = greatest(reply_count - 1, 0) where id = old.parent_id;
+  end if;
+  return null;
+end $$;
+create trigger posts_reply_count after insert or delete on public.posts
+  for each row execute function public.posts_reply_count();
+
+create or replace function public.post_like_count()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    update public.posts set like_count = like_count + 1 where id = new.post_id;
+  else
+    update public.posts set like_count = greatest(like_count - 1, 0) where id = old.post_id;
+  end if;
+  return null;
+end $$;
+create trigger post_like_count after insert or delete on public.post_likes
+  for each row execute function public.post_like_count();
+
+revoke execute on function public.posts_before_insert() from public, anon, authenticated;
+revoke execute on function public.posts_reply_count() from public, anon, authenticated;
+revoke execute on function public.post_like_count() from public, anon, authenticated;
+
+alter table public.posts enable row level security;
+alter table public.post_likes enable row level security;
+create policy "posts_select" on public.posts for select to authenticated
+  using (not public.is_blocked(auth.uid(), author_id)
+         and exists (select 1 from public.profiles p where p.id = author_id and p.suspended_at is null));
+create policy "posts_insert_own" on public.posts for insert to authenticated with check (author_id = auth.uid());
+create policy "posts_delete_own" on public.posts for delete to authenticated using (author_id = auth.uid());
+create policy "post_likes_select" on public.post_likes for select to authenticated using (true);
+create policy "post_likes_insert_own" on public.post_likes for insert to authenticated with check (profile_id = auth.uid());
+create policy "post_likes_delete_own" on public.post_likes for delete to authenticated using (profile_id = auth.uid());
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('posts', 'posts', true, 5242880, array['image/jpeg','image/png','image/webp'])
+on conflict (id) do nothing;
+create policy "storage_posts_read" on storage.objects for select to public using (bucket_id = 'posts');
+create policy "storage_posts_insert_own" on storage.objects for insert to authenticated
+  with check (bucket_id = 'posts' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "storage_posts_delete_own" on storage.objects for delete to authenticated
+  using (bucket_id = 'posts' and (storage.foldername(name))[1] = auth.uid()::text);
