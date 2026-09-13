@@ -147,6 +147,36 @@ details .seg{margin-top:8px;justify-content:center}
 .csheet .tools .ib{background:none;border:0;padding:0;cursor:pointer;color:var(--ink3);display:inline-flex}
 .csheet .tools .ib svg{width:24px;height:24px}
 .csheet .tools .btn{margin-left:auto;width:auto;border-radius:999px;padding:9px 18px;font-size:.92rem}
+/* 전체 화면 작성 페이지 */
+#v-compose .top{border-bottom:1px solid var(--line);padding:10px 12px 10px 8px}
+#v-compose .top .back{font-size:1.4rem;padding:4px 10px}
+#v-compose .top h1{font-size:1.05rem;text-align:center}
+#v-compose .top .btn{width:auto;border-radius:999px;padding:8px 16px;font-size:.9rem}
+#v-compose .body{padding:14px 16px 24px;gap:12px}
+#v-compose .kind{display:flex;gap:6px;background:#f2f2f2;padding:4px;border-radius:12px;align-self:flex-start}
+#v-compose .kind button{font:inherit;border:0;background:transparent;padding:7px 16px;border-radius:9px;color:var(--ink3);cursor:pointer;font-weight:600;font-size:.9rem}
+#v-compose .kind button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+#v-compose .row2{display:flex;gap:12px;align-items:flex-start}
+#v-compose .cname{font-weight:700;font-size:16px;margin-bottom:2px}
+#v-compose textarea{border:0;padding:2px 0;background:transparent;min-height:110px;font-size:16px;line-height:1.45;resize:none}
+#v-compose textarea::placeholder{color:var(--ink3)}
+.mfields{display:flex;flex-direction:column;gap:10px;background:#f5f5f5;border-radius:14px;padding:14px}
+.mfields .mtitle{font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:6px}
+.mfields label.f{font-size:.8rem;color:var(--ink2)}
+.mfields input{background:#fff}
+.mfields .sw{display:flex;align-items:center;justify-content:space-between;font-size:.92rem}
+.mfields .sw input{width:auto}
+#v-compose .tools{display:flex;align-items:center;gap:14px;border-top:1px solid var(--line);padding-top:12px;color:var(--ink3);font-size:.85rem}
+#v-compose .tools .ib{background:none;border:0;padding:0;cursor:pointer;color:var(--ink);display:inline-flex}
+#v-compose .tools .ib svg{width:24px;height:24px}
+/* 모임 카드 (글 안) */
+.mcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:4px 0 10px;background:#fafafa}
+.mcard .mh{font-size:12px;color:var(--ink3);font-weight:700;letter-spacing:.02em;margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.mcard b{font-size:16px;display:block}
+.mcard .ml{font-size:14px;color:var(--ink2);margin-top:3px}
+.mcard .mrow{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:14px;color:var(--ink2)}
+.mcard .mrow .btn{width:auto;padding:8px 16px;font-size:.88rem;border-radius:999px;margin-left:auto}
+.mcard .mrow .btn.o{background:#fff}
 nav button[data-v="plus"]{color:var(--ink);background:#f2f2f2;border-radius:12px;margin:0 6px;flex:0 0 56px}
 nav button[data-v="plus"] svg{stroke-width:2.2}
 .lvhead{display:flex;align-items:center;gap:14px;padding:4px 2px}
@@ -396,6 +426,30 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
     <div class="body" id="skillsBody"></div>
   </section>
 
+  <!-- 새 글 / 모임 만들기 (전체 화면) -->
+  <section class="view" id="v-compose">
+    <div class="top"><button class="back" onclick="closeCompose()">✕</button><h1 id="composeTitle">새 글</h1><button class="btn" id="sPost" onclick="submitCompose()">게시</button></div>
+    <div class="body">
+      <div class="kind" id="composeKind"><button data-k="post" class="on">글</button><button data-k="meetup">모임</button></div>
+      <div class="row2"><div id="sAva"></div><div style="flex:1;min-width:0"><div class="cname" id="sName"></div>
+        <textarea id="sText" maxlength="500" placeholder="새로운 소식이 있나요?"></textarea>
+        <div class="pv" id="sPv"></div></div></div>
+      <div class="mfields" id="mfields" hidden>
+        <div class="mtitle">📍 모임 정보</div>
+        <label class="f">모임 이름<input id="mTitle" maxlength="60" placeholder="예: 토요 뜨개 모임"></label>
+        <label class="f">장소<input id="mPlace" maxlength="80" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label>
+        <label class="f">일시<input id="mTime" type="datetime-local"></label>
+        <div class="sw"><span>지도에 공개 (동네 뜨개인 누구나 참여)</span><input type="checkbox" id="mPublic" checked></div>
+        <div class="muted" style="font-size:.8rem">모임을 만들면 참여자용 단체 채팅방이 함께 생기고, 지도에 핀이 표시돼요. 첫 만남은 카페 같은 공공장소에서.</div>
+      </div>
+      <div class="tools">
+        <button type="button" class="ib" title="사진" onclick="$('#sFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 15.5 15.6 11l-6.4 6.5"/></svg></button>
+        <input id="sFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
+        <span id="sHint">누구나 볼 수 있어요</span>
+      </div>
+    </div>
+  </section>
+
   <!-- 다른 사람 프로필 (Threads 프로필 페이지) -->
   <section class="view" id="v-profile">
     <div class="top"><button class="back" onclick="closeProfile()">‹</button><h1 id="profTitle"></h1><button class="ib" title="더보기" onclick="profileMenu()" style="font-size:1.2rem;font-weight:700;letter-spacing:1px">···</button></div>
@@ -513,7 +567,7 @@ sb.auth.onAuthStateChange(async (ev, session) => {
   if(wasIn && view!=='login') return;   // TOKEN_REFRESHED·탭 복귀 등: 보던 화면 유지
   await loadMe();
   if(!myProfile?.onboarded_at){ openOnboard(false); }
-  else { go('map'); watchFriends(); }
+  else { go('map'); watchFriends(); loadMyRooms(); }
 });
 
 async function loadMe(){
@@ -527,10 +581,10 @@ function parseGeo(hex){
 }
 
 // ============ 화면 전환 ============
-const NAV_OF = { friends:'my', skills:'my', post:'comm', profile:'' };
+const NAV_OF = { friends:'my', skills:'my', post:'comm', profile:'', compose:'' };
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
-$('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openCompose(); return; } go(b.dataset.v); };
+$('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openCompose('post'); return; } go(b.dataset.v); };
 
 // ============ 온보딩 ============
 seg('#f_craft', CRAFT); seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
@@ -683,14 +737,14 @@ async function fetchPins(){
   const c = MapAdapter.center();
   const [{data:people,error}, {data:meetups}] = await Promise.all([
     sb.rpc('nearby_profiles',{p_lat:c.lat,p_lng:c.lng,p_radius_m:RADIUS_M,p_craft:filter.craft,p_beginner_ok:filter.bok}),
-    sb.from('meetups').select('id,title,place_name,starts_at,location').eq('is_public',true).gte('starts_at',new Date().toISOString())
+    sb.from('meetups').select('id,title,place_name,starts_at,location,participant_count,room_id').eq('is_public',true).gte('starts_at',new Date().toISOString())
   ]);
   if(error) return toast('근처 조회 실패: '+error.message);
   MapAdapter.clear();
   if(myProfile?._c) MapAdapter.marker({...myProfile._c,label:'나',avatar:myProfile.avatar_url,cls:'me'});
   const shown = filter.sim ? (people||[]).filter(p=>{ const d=simDiff(p); return d!==null && Math.abs(d)<=1; }) : (people||[]);
   shown.forEach(p=>MapAdapter.marker({lat:p.lat,lng:p.lng,label:p.nickname,avatar:p.avatar_url,cls:p.craft==='knit'?'knit':'',onClick:()=>showPinCard(p)}));
-  (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:m.title,cls:'meet',onClick:()=>toast(`${m.title} · ${m.place_name} · ${new Date(m.starts_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`)}); });
+  (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:m.title,cls:'meet',onClick:()=>openMeetup(m.id)}); });
   pins = people||[];
 }
 function showPinCard(p){
@@ -749,7 +803,7 @@ async function loadUserFeed(uid, tab, el){
   if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
   const pids=[...new Set((data||[]).map(r=>r.parent_id).filter(Boolean))];
   if(pids.length){ const { data:parents } = await sb.from('posts').select('id, '+AUTHOR_SEL).in('id', pids); const byId={}; (parents||[]).forEach(x=>byId[x.id]=x); (data||[]).forEach(r=>{ r.parent = byId[r.parent_id]||null; }); }
-  await loadLikes(data||[]);
+  await Promise.all([loadLikes(data||[]), attachMeetups(data||[])]);
   const mine = uid===me.id;
   const emptyMsg = { posts: mine?'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요':'아직 올린 글이 없어요', replies: mine?'아직 남긴 답글이 없어요':'아직 남긴 답글이 없어요', media:'사진이 있는 글이 없어요' }[tab];
   el.innerHTML = (data||[]).length ? data.map(p=>postCard(p,{noLine:true, replyTo: p.parent?.author?.nickname})).join('') : `<div class="empty" style="white-space:pre-line">${emptyMsg}</div>`;
@@ -895,9 +949,10 @@ async function createMeetup(){
   const place=$('#mtPlace').value.trim(); if(!place) return toast('장소를 적어 주세요');
   const c = myProfile?._c;
   const row={room_id:roomId,created_by:me.id,title:$('#mtTitle').value.trim()||'모임',place_name:place,starts_at:new Date($('#mtTime').value).toISOString(),is_public:$('#mtPublic').checked, location: c?`SRID=4326;POINT(${c.lng} ${c.lat})`:null};
-  const { error } = await sb.from('meetups').insert(row);
+  const { data:mt, error } = await sb.from('meetups').insert(row).select('id').single();
   if(error) return toast('실패: '+error.message);
-  await sb.from('messages').insert({room_id:roomId,sender_id:me.id,body:`📍 모임: ${row.title}\n${place}\n${new Date(row.starts_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`});
+  await sb.from('messages').insert({room_id:roomId,sender_id:me.id,body:`📍 모임: ${row.title}\n${place}\n${fmtWhen(row.starts_at)}`});
+  if(row.is_public) await sb.from('posts').insert({ author_id: me.id, body: row.title, meetup_id: mt.id });
   toast('모임을 만들었어요'); closeSheet();
 }
 
@@ -918,7 +973,7 @@ async function loadFeed(more){
     if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
     feedRows = feedRows.concat(data||[]); feedOffset += (data||[]).length;
     $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
-    await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[])]); renderFeed(); return;
+    await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[]), attachMeetups(data||[])]); renderFeed(); return;
   }
   let q = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).order('created_at',{ascending:false}).limit(FEED_PAGE);
   if(feedCursor) q = q.lt('created_at', feedCursor);
@@ -929,7 +984,7 @@ async function loadFeed(more){
   feedRows = feedRows.concat(data||[]);
   feedCursor = data?.length ? data[data.length-1].created_at : feedCursor;
   $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
-  await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[])]);
+  await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[]), attachMeetups(data||[])]);
   renderFeed();
 }
 async function loadFirstReplies(rows){
@@ -948,6 +1003,43 @@ const ICON = {
   reply: '<svg viewBox="0 0 24 24"><path d="M20.5 12c0 4.1-3.8 7.4-8.5 7.4-1 0-2-.1-2.9-.4L4.5 20.5l1.1-3.6C4.3 15.6 3.5 13.9 3.5 12c0-4.1 3.8-7.4 8.5-7.4s8.5 3.3 8.5 7.4z"/></svg>',
   share: '<svg viewBox="0 0 24 24"><path d="M21 3 10.5 13.5M21 3l-6.5 18-4-7.5L3 9.5 21 3z"/></svg>'
 };
+// 내가 속한 방 목록 (참여 여부 판단)
+let myRoomIds = new Set();
+async function loadMyRooms(){ if(!me) return; const { data } = await sb.from('room_members').select('room_id').eq('profile_id', me.id); myRoomIds = new Set((data||[]).map(r=>r.room_id)); }
+async function attachMeetups(rows){
+  const ids=[...new Set((rows||[]).map(r=>r.meetup_id).filter(Boolean))]; if(!ids.length) return;
+  const { data } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by').in('id', ids);
+  const byId={}; (data||[]).forEach(m=>byId[m.id]=m); rows.forEach(r=>{ if(r.meetup_id) r.meetup = byId[r.meetup_id]||null; });
+}
+function fmtWhen(iso){ const d=new Date(iso); const day=['일','월','화','수','목','금','토'][d.getDay()]; const h=d.getHours(), m=d.getMinutes(); return `${d.getMonth()+1}월 ${d.getDate()}일 (${day}) ${h<12?'오전':'오후'} ${h%12||12}:${String(m).padStart(2,'0')}`; }
+function meetupCard(m){
+  if(!m) return '';
+  const joined = myRoomIds.has(m.room_id); const past = new Date(m.starts_at) < new Date();
+  const btn = past ? '<span class="muted">종료</span>' : joined ? `<button class="btn o" onclick="event.stopPropagation();openRoom('${m.room_id}')">참여 중 · 채팅</button>` : `<button class="btn" onclick="event.stopPropagation();joinMeetup('${m.id}')">참여하기</button>`;
+  return `<div class="mcard" onclick="event.stopPropagation();openMeetup('${m.id}')"><div class="mh">📍 모임${m.is_public?'':' · 초대만'}</div><b>${esc(m.title)}</b><div class="ml">${esc(m.place_name)}</div><div class="ml">${fmtWhen(m.starts_at)}</div><div class="mrow"><span>참여 ${m.participant_count||0}명</span>${btn}</div></div>`;
+}
+async function joinMeetup(id){
+  const { data:roomId, error } = await sb.rpc('join_meetup', { p_meetup_id:id });
+  if(error) return toast(error.message.replace(/^.*?: /,''));
+  await loadMyRooms(); toast('참여했어요. 단체 채팅방이 열렸어요'); closeSheet(); openRoom(roomId);
+}
+async function leaveMeetup(id){
+  if(!confirm('모임에서 나갈까요? 채팅방에서도 나가요.')) return;
+  const { error } = await sb.rpc('leave_meetup', { p_meetup_id:id }); if(error) return toast(error.message);
+  await loadMyRooms(); toast('모임에서 나왔어요'); closeSheet(); if(view==='comm') loadFeed(); if(view==='map') loadPins();
+}
+async function openMeetup(id){
+  const { data:m } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by, host:profiles!meetups_created_by_fkey(id,nickname,avatar_url,dong_name)').eq('id', id).single();
+  if(!m) return toast('모임을 찾을 수 없어요');
+  const joined = myRoomIds.has(m.room_id), past = new Date(m.starts_at) < new Date();
+  openSheet(`<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700">📍 모임${m.is_public?'':' · 초대만'}</div>
+    <b style="font-size:1.25rem">${esc(m.title)}</b>
+    <div>${esc(m.place_name)}</div><div class="muted">${fmtWhen(m.starts_at)}</div>
+    ${m.descr?`<div style="white-space:pre-wrap">${esc(m.descr)}</div>`:''}
+    <div class="row" style="cursor:pointer" onclick="closeSheet();openProfile('${m.host?.id}')">${avatar(m.host||{})}<div><b>${esc(m.host?.nickname||'')}</b><div class="muted">주최 · ${esc(m.host?.dong_name||'')}</div></div></div>
+    <div class="muted">참여 ${m.participant_count||0}명</div>
+    ${past?'<button class="btn o" disabled>종료된 모임</button>': joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">모임 나가기</button>`:''}` : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
+}
 function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
 function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
 function postCard(p, opts={}){
@@ -962,6 +1054,7 @@ function postCard(p, opts={}){
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}${mine?`<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}')">···</button>`:''}</div>
       ${p.body?`<div class="txt">${esc(p.body)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto('${esc(u)}')">`).join('')}</div>`:''}
+      ${p.meetup?meetupCard(p.meetup):''}
       <div class="acts">
         <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${ICON.heart}<span>${p.like_count||''}</span></button>
         <button onclick="event.stopPropagation();openPost('${p.id}')">${ICON.reply}<span>${p.reply_count||''}</span></button>
@@ -1001,31 +1094,52 @@ function renderPv(which){
   el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">✕</b></div>`).join('');
 }
 // ＋ 버튼: 어디서든 새 글 작성 시트
-function openCompose(){
-  sPhotos=[];
-  openSheet(`<div class="csheet">
-    <div class="hd2"><button onclick="closeSheet()">취소</button><span>새 글</span><span style="width:36px"></span></div>
-    <div class="row2">${avatar(myProfile||{})}<div style="flex:1;min-width:0"><div class="cname">${esc(myProfile?.nickname||'')}</div>
-      <textarea id="sText" maxlength="500" placeholder="새로운 소식이 있나요?" autofocus></textarea>
-      <div class="pv" id="sPv"></div></div></div>
-    <div class="tools">
-      <button type="button" class="ib" title="사진" onclick="$('#sFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 15.5 15.6 11l-6.4 6.5"/></svg></button>
-      <input id="sFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
-      <span class="muted" style="font-size:.8rem">누구나 볼 수 있어요</span>
-      <button class="btn" id="sPost" onclick="submitCompose()">게시</button>
-    </div></div>`);
-  setTimeout(()=>$('#sText')?.focus(), 60);
+let composeBack=null, composeKind='post';
+function openCompose(kind){
+  sPhotos=[]; composeKind = kind||'post';
+  if(view!=='compose') composeBack = view;
+  $('#sAva').innerHTML = avatar(myProfile||{}); $('#sName').textContent = myProfile?.nickname||'';
+  $('#sText').value=''; $('#sPv').innerHTML=''; $('#sPost').disabled=false;
+  const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7)); d.setHours(14,0,0,0);
+  $('#mTime').value = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  $('#mTitle').value=''; $('#mPlace').value=''; $('#mPublic').checked=true;
+  setComposeKind(composeKind);
+  show('compose');
+  setTimeout(()=>$(composeKind==='meetup'?'#mTitle':'#sText')?.focus(), 80);
 }
+function setComposeKind(k){
+  composeKind=k; [...$('#composeKind').children].forEach(b=>b.classList.toggle('on', b.dataset.k===k));
+  $('#mfields').hidden = k!=='meetup';
+  $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : '새 글';
+  $('#sText').placeholder = k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : '새로운 소식이 있나요?';
+  $('#sPost').textContent = k==='meetup' ? '만들기' : '게시';
+  $('#sHint').textContent = k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : '누구나 볼 수 있어요';
+}
+$('#composeKind').onclick = e => { const b=e.target.closest('button'); if(b) setComposeKind(b.dataset.k); };
+function closeCompose(){ const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
 async function submitCompose(){
   const body = $('#sText').value.trim();
-  if(!body && !sPhotos.length) return toast('내용이나 사진을 넣어 주세요');
   $('#sPost').disabled = true;
   try{
-    const photos = await uploadPhotos(sPhotos);
-    const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos });
-    if(error) throw new Error(error.message);
-    sPhotos=[]; closeSheet(); toast('게시했어요');
-    if(view==='comm'){ commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); loadFeed(); } else go('comm');
+    if(composeKind==='meetup'){
+      const title=$('#mTitle').value.trim(), place=$('#mPlace').value.trim(), when=$('#mTime').value;
+      if(!title) throw new Error('모임 이름을 적어 주세요');
+      if(!place) throw new Error('장소를 적어 주세요');
+      if(!when || new Date(when) < new Date()) throw new Error('일시를 지금 이후로 정해 주세요');
+      const photos = await uploadPhotos(sPhotos);
+      const c = myProfile?._c;
+      const { data:postId, error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mPublic').checked, p_body: body||null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:photos });
+      if(error) throw new Error(error.message);
+      await loadMyRooms();
+      sPhotos=[]; toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
+    } else {
+      if(!body && !sPhotos.length) throw new Error('내용이나 사진을 넣어 주세요');
+      const photos = await uploadPhotos(sPhotos);
+      const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos });
+      if(error) throw new Error(error.message);
+      sPhotos=[]; toast('게시했어요');
+    }
+    composeBack=null; commFilter='all'; go('comm'); [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); loadFeed();
   }catch(e){ toast(e.message); $('#sPost').disabled=false; }
 }
 function shrinkImage(file, max){
@@ -1068,7 +1182,7 @@ async function openPost(id){
   ]);
   if(!p) return toast('글을 찾을 수 없어요');
   curPost = p; curPost.replies = replies||[];
-  await loadLikes([p, ...curPost.replies]);
+  await Promise.all([loadLikes([p, ...curPost.replies]), attachMeetups([p])]);
   show('post');
   $('#postBody').innerHTML = postCard(p,{noLine:true}) + `<div class="thread-head">답글</div>` + (curPost.replies.length ? curPost.replies.map(r=>postCard(r,{noLine:true})).join('') : '<div class="empty">첫 답글을 남겨 보세요</div>');
   $('#replyAva').innerHTML = avatar(myProfile||{});

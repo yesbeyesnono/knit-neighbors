@@ -748,3 +748,70 @@ language sql stable security invoker set search_path = public, extensions as $$
   limit p_limit offset p_offset;
 $$;
 revoke execute on function public.feed_ranked(integer, integer) from public, anon;
+
+-- ---------------------------------------------------------------
+-- 11. 모임 개설·참여 (2026-09-13) — ＋ 버튼 '모임' 탭
+-- 글(posts.meetup_id) ↔ 모임 연결, 참여자 수 트리거, create_meetup / join_meetup / leave_meetup
+-- ---------------------------------------------------------------
+alter table public.posts add column meetup_id uuid references public.meetups(id) on delete set null;
+create index posts_meetup_idx on public.posts (meetup_id) where meetup_id is not null;
+alter table public.meetups add column participant_count integer not null default 0;
+alter table public.meetups add column descr text check (descr is null or char_length(descr) <= 300);
+
+create or replace function public.meetup_count_sync()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare rid uuid := coalesce(new.room_id, old.room_id);
+begin
+  update public.meetups m set participant_count = (select count(*) from public.room_members rm where rm.room_id = rid) where m.room_id = rid;
+  return null;
+end $$;
+create trigger room_members_meetup_count after insert or delete on public.room_members
+  for each row execute function public.meetup_count_sync();
+
+-- 모임 개설: 단체방 + 모임 + 커뮤니티 글 (모임 행을 먼저 만들고 주최자를 방에 넣어야 카운트가 맞음)
+create or replace function public.create_meetup(
+  p_title text, p_place text, p_starts_at timestamptz, p_is_public boolean,
+  p_body text default null, p_lat double precision default null, p_lng double precision default null, p_photos text[] default '{}'
+)
+returns uuid language plpgsql security definer set search_path = public, extensions as $$
+declare v_room uuid; v_meetup uuid; v_post uuid; v_loc geography;
+begin
+  if auth.uid() is null then raise exception '로그인이 필요해요'; end if;
+  if p_lat is not null and p_lng is not null then v_loc := st_setsrid(st_makepoint(p_lng, p_lat), 4326)::geography;
+  else select location into v_loc from public.profiles where id = auth.uid(); end if;
+  insert into public.rooms (kind, title, created_by) values ('group', left(p_title, 40), auth.uid()) returning id into v_room;
+  insert into public.meetups (room_id, created_by, title, place_name, location, starts_at, is_public, descr)
+    values (v_room, auth.uid(), p_title, p_place, v_loc, p_starts_at, p_is_public, p_body) returning id into v_meetup;
+  insert into public.room_members (room_id, profile_id) values (v_room, auth.uid());
+  insert into public.posts (author_id, body, photos, meetup_id)
+    values (auth.uid(), coalesce(nullif(p_body,''), p_title), coalesce(p_photos,'{}'), v_meetup) returning id into v_post;
+  return v_post;
+end $$;
+
+create or replace function public.join_meetup(p_meetup_id uuid)
+returns uuid language plpgsql security definer set search_path = public as $$
+declare v_room uuid; v_public boolean;
+begin
+  if auth.uid() is null then raise exception '로그인이 필요해요'; end if;
+  select room_id, is_public into v_room, v_public from public.meetups where id = p_meetup_id;
+  if v_room is null then raise exception '모임을 찾을 수 없어요'; end if;
+  if not v_public and not exists (select 1 from public.room_members where room_id = v_room and profile_id = auth.uid()) then
+    raise exception '초대된 사람만 참여할 수 있어요';
+  end if;
+  insert into public.room_members (room_id, profile_id) values (v_room, auth.uid()) on conflict do nothing;
+  return v_room;
+end $$;
+
+create or replace function public.leave_meetup(p_meetup_id uuid)
+returns void language plpgsql security definer set search_path = public as $$
+declare v_room uuid;
+begin
+  select room_id into v_room from public.meetups where id = p_meetup_id;
+  delete from public.room_members where room_id = v_room and profile_id = auth.uid();
+end $$;
+
+revoke execute on function public.meetup_count_sync() from public, anon, authenticated;
+revoke execute on function public.create_meetup(text, text, timestamptz, boolean, text, double precision, double precision, text[]) from public, anon;
+revoke execute on function public.join_meetup(uuid) from public, anon;
+revoke execute on function public.leave_meetup(uuid) from public, anon;
+-- feed_ranked: 반환 컬럼에 meetup_id 추가, 모임 글 ×1.4 부스트 (10절 함수에 반영)
