@@ -169,6 +169,7 @@ details .seg{margin-top:8px;justify-content:center}
 #v-compose textarea{border:0;padding:2px 0;background:transparent;min-height:110px;font-size:16px;line-height:1.45;resize:none}
 #v-compose.meet textarea{min-height:64px}
 #v-compose .row2 > div{min-width:0}
+#v-compose.meet .cname{margin-bottom:8px}
 #v-compose input[type="datetime-local"],#v-compose input[type="number"]{min-width:0;width:100%;max-width:100%}
 .mfields .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .mfields .seg button{padding:7px 12px;font-size:.85rem}
@@ -193,6 +194,9 @@ details .seg{margin-top:8px;justify-content:center}
 .wfields .mtitle{font-weight:700;font-size:.95rem}
 .wfields label.f{font-size:.8rem;color:var(--ink2)}
 .wfields input{background:#fff}
+.wfields .tchips{display:flex;flex-wrap:wrap;gap:5px}
+.wfields .tchips span,.wcard .tchips span.custom{font-size:12px;padding:3px 9px;border-radius:999px;background:#fff;border:1px dashed #8a6d1a;color:#8a6d1a}
+.mfields label.f textarea,.wfields label.f textarea{font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
 .wfields .tsel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
 .wfields .tsel .tabs{margin-bottom:8px}
 .wfields .tsel .lvgrp{margin-top:6px}
@@ -396,8 +400,8 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
         <div class="row" style="margin-top:8px"><button type="button" class="btn sm o" onclick="detectLocation()">다시 확인</button><button type="button" class="btn sm o" onclick="manualDong()">직접 입력</button></div>
         <div class="muted" style="margin-top:6px">정확한 위치는 저장하지 않아요. 500m 격자로 흐려진 좌표만 저장돼요.</div>
       </div>
-      <label class="f">뜨개 경력<div class="seg" id="f_exp"></div></label>
-      <label class="f">만나기 좋은 시간<div class="seg" id="f_avail"></div></label>
+      <div class="f">뜨개 경력<div class="seg" id="f_exp"></div></div>
+      <div class="f">만나기 좋은 시간<div class="seg" id="f_avail"></div></div>
       <label class="f"><span>소개 <span class="muted">(선택, 300자)</span></span><textarea id="f_bio" maxlength="300" placeholder="예: 퇴근 후 코바늘. 가디건 완성이 목표. 같이 뜨실 분 환영"></textarea></label>
       <label class="f"><span>MBTI <span class="muted">(선택)</span></span><input id="f_mbti" maxlength="4" placeholder="ENFP" style="text-transform:uppercase"></label>
       <div class="muted" style="font-size:.85rem">대바늘·코바늘 여부와 실력 단계는 다음 화면 "내 뜨개 단계"에서 기법을 체크하면 자동으로 정해져요.</div>
@@ -479,10 +483,16 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
           <div class="mtitle">🏅 작품 인증</div>
           <div class="hint" style="font-size:.8rem;color:var(--ink2)">완성한 작품 사진과 사용한 기법을 올리면 내 기법 체크에 <b>인증</b> 표시가 붙고, 모임을 열 수 있어요.</div>
           <label class="f">작품 이름<input id="wTitle" maxlength="60" placeholder="예: 그래니 스퀘어 가디건"></label>
-          <label class="f">사용한 기법 <span class="picked" id="wPicked">0개 선택</span>
-            <div class="tsel"><div class="tabs" id="wCraftTabs"><button data-c="crochet" class="on">코바늘</button><button data-c="knitting">대바늘</button></div><div id="wTechList"></div></div>
-          </label>
+          <div class="f">사용한 기법 <span class="picked" id="wPicked">0개 선택</span>
+            <div class="tsel"><div class="tabs" id="wCraftTabs"><button type="button" data-c="crochet" class="on">코바늘</button><button type="button" data-c="knitting">대바늘</button></div><div id="wTechList"></div></div>
+          </div>
+          <div class="f">목록에 없는 기법 <span class="muted">(직접 입력, 쉼표로 구분)</span>
+            <input id="wCustom" maxlength="200" placeholder="예: 브리오슈 2색, 튀니지안 심플 스티치">
+            <div class="tchips" id="wCustomChips"></div>
+            <span class="hint" style="font-size:.78rem;color:var(--ink3)">기본 목록은 60종이에요. 여기 적어 주신 기법은 모아서 목록에 추가할게요.</span>
+          </div>
           <label class="f">실 정보 <span class="muted">(선택)</span><input id="wYarn" maxlength="80" placeholder="예: 하마나카 아메리, 5호 코바늘"></label>
+          <label class="f">한 줄 소감 <span class="muted">(선택)</span><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px;background:#fff"></textarea></label>
           <div class="hint" style="font-size:.8rem;color:var(--ink2)">사진은 아래 📷 로 1~4장 (필수)</div>
         </div>
         <div class="gate" id="mgate" hidden>
@@ -493,14 +503,15 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
         <div class="mfields" id="mfields" hidden>
           <div class="mtitle">📍 모임 정보</div>
           <label class="f">모임 이름<input id="mTitle" maxlength="60" placeholder="예: 토요 뜨개 모임"></label>
-          <label class="f">모임 유형<div class="seg" id="mKind"></div></label>
+          <div class="f">모임 유형<div class="seg" id="mKind"></div></div>
           <label class="f" id="mTechWrap" hidden>배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label>
-          <label class="f">종목<div class="seg" id="mCraft"></div></label>
-          <label class="f">권장 뜨개 단계<div class="lv"><select id="mLvMin"></select><span>~</span><select id="mLvMax"></select></div><span class="hint">참여자에게 "내 단계에 맞아요 / 조금 높아요"로 보여요</span></label>
+          <div class="f">종목<div class="seg" id="mCraft"></div></div>
+          <div class="f">권장 뜨개 단계<div class="lv"><select id="mLvMin"></select><span>~</span><select id="mLvMax"></select></div><span class="hint">참여자에게 "내 단계에 맞아요 / 조금 높아요"로 보여요</span></div>
           <label class="f">장소<input id="mPlace" maxlength="80" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label>
           <div class="g2"><label class="f">일시<input id="mTime" type="datetime-local"></label><label class="f">소요 시간<select id="mDur"><option value="60">1시간</option><option value="90">1시간 30분</option><option value="120" selected>2시간</option><option value="180">3시간</option><option value="240">반나절</option></select></label></div>
           <div class="g2"><label class="f">반복<select id="mRepeat"><option value="once">한 번</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option></select></label><label class="f">정원<input id="mCap" type="number" min="2" max="100" placeholder="비우면 제한 없음"></label></div>
           <div class="g2"><label class="f">참가비<input id="mFee" maxlength="40" placeholder="예: 무료 / 각자 음료 / 5,000원"></label><label class="f">준비물<input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘"></label></div>
+          <label class="f">모임 소개 <span class="muted">(선택)</span><textarea id="mDesc" maxlength="300" placeholder="예: 초보 환영, 실·바늘 지참. 각자 뜨면서 수다" style="min-height:64px;background:#fff"></textarea></label>
           <div class="sw"><span>지도에 공개 (동네 뜨개인 누구나 참여)</span><input type="checkbox" id="mPublic" checked></div>
         </div>
         <textarea id="sText" maxlength="500" placeholder="새로운 소식이 있나요?"></textarea>
@@ -1110,12 +1121,12 @@ async function loadMyRooms(){ if(!me) return; const { data } = await sb.from('ro
 async function attachWorks(rows){
   const ids=[...new Set((rows||[]).map(r=>r.work_id).filter(Boolean))]; if(!ids.length) return;
   await loadTech();
-  const { data } = await sb.from('works').select('id,title,yarn_info,techniques,note').in('id', ids);
+  const { data } = await sb.from('works').select('id,title,yarn_info,techniques,custom_techniques,note').in('id', ids);
   const byId={}; (data||[]).forEach(w=>byId[w.id]=w); rows.forEach(r=>{ if(r.work_id) r.work = byId[r.work_id]||null; });
 }
 function workCard(w){
   if(!w) return '';
-  return `<div class="wcard"><div class="wh">🏅 작품 인증</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}<div class="tchips">${(w.techniques||[]).map(id=>`<span>${esc(techName(id))}</span>`).join('')}</div></div>`;
+  return `<div class="wcard"><div class="wh">🏅 작품 인증</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}<div class="tchips">${(w.techniques||[]).map(id=>`<span>${esc(techName(id))}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="custom">${esc(t)}</span>`).join('')}</div></div>`;
 }
 async function attachMeetups(rows){
   const ids=[...new Set((rows||[]).map(r=>r.meetup_id).filter(Boolean))]; if(!ids.length) return;
@@ -1229,7 +1240,9 @@ function renderPv(which){
   el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">✕</b></div>`).join('');
 }
 // ＋ 버튼: 어디서든 새 글 작성 시트
-let composeBack=null, composeKind='post', wTechSel=new Set(), wCraft='crochet';
+let composeBack=null, composeKind='post', wTechSel=new Set(), wCraft='crochet', wCustom=[];
+function renderWCustom(){ const el=$('#wCustomChips'); if(!el) return; el.innerHTML = wCustom.map((t,i)=>`<span>${esc(t)} <b style="cursor:pointer" onclick="wCustom.splice(${i},1);renderWCustom()">✕</b></span>`).join(''); }
+function commitWCustom(){ const v=$('#wCustom').value; if(!v.trim()) return; v.split(/[,，\n]/).map(x=>x.trim()).filter(Boolean).forEach(x=>{ if(!wCustom.includes(x) && wCustom.length<20) wCustom.push(x); }); $('#wCustom').value=''; renderWCustom(); }
 function openCompose(kind){
   sPhotos=[]; composeKind = kind||'post';
   if(view!=='compose') composeBack = view;
@@ -1246,7 +1259,7 @@ function openCompose(kind){
     loadTech().then(()=>{ const grp = c => TECH.filter(t=>t.craft===c).map(t=>`<option value="${t.id}">${t.level}단계 · ${esc(t.name_ko)}</option>`).join(''); $('#mTech').innerHTML = `<optgroup label="코바늘">${grp('crochet')}</optgroup><optgroup label="대바늘">${grp('knitting')}</optgroup>`; });
   }
   segSet('#mKind','free'); segSet('#mCraft','both'); $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value='';
-  $('#wTitle').value=''; $('#wYarn').value=''; wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
+  $('#wTitle').value=''; $('#wYarn').value=''; $('#wNote').value=''; $('#mDesc').value=''; $('#wCustom').value=''; wCustom=[]; renderWCustom(); wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
   loadTech().then(renderWTech);
   setComposeKind(composeKind);
   show('compose');
@@ -1258,7 +1271,7 @@ function setComposeKind(k){
   $('#mfields').hidden = !(k==='meetup' && certified);
   $('#mgate').hidden = !(k==='meetup' && !certified);
   $('#wfields').hidden = k!=='work';
-  $('#sText').hidden = (k==='meetup' && !certified);
+  $('#sText').hidden = (k!=='post');
   $('#v-compose').classList.toggle('meet', k!=='post');
   $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : k==='work' ? '작품 인증' : '새 글';
   $('#sText').placeholder = k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : k==='work' ? '한 줄 소감 (예: 눈 위치 세 번 옮겼어요)' : '새로운 소식이 있나요?';
@@ -1270,6 +1283,7 @@ function renderWTech(){
   $('#wCraftTabs').innerHTML = `<button data-c="crochet" class="${wCraft==='crochet'?'on':''}">코바늘</button><button data-c="knitting" class="${wCraft==='knitting'?'on':''}">대바늘</button>`;
   $('#wCraftTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; wCraft=b.dataset.c; renderWTech(); };
   const ver = new Set(myProfile?.verified_skills||[]);
+  const ci=$('#wCustom'); if(ci && !ci._bound){ ci._bound=true; ci.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===','){ e.preventDefault(); commitWCustom(); } }); ci.addEventListener('blur', commitWCustom); }
   $('#wTechList').innerHTML = [1,2,3,4,5].map(l=>{ const ts=TECH.filter(t=>t.craft===wCraft&&t.level===l); return `<div class="lvgrp"><div class="lvh">${l}단계 ${LVNAME[l]}</div><div class="techs">${ts.map(t=>`<button type="button" class="tech ${wTechSel.has(t.id)?'on':''}" onclick="toggleWTech('${t.id}')">${wTechSel.has(t.id)?'✓ ':''}${esc(t.name_ko)}${ver.has(t.id)?'<span class="vbadge">인증</span>':''}</button>`).join('')}</div></div>`; }).join('');
   $('#wPicked').textContent = `${wTechSel.size}개 선택`;
 }
@@ -1293,16 +1307,17 @@ async function submitCompose(){
       if(kind==='workshop' && !$('#mTech').value) throw new Error('배울 기법을 골라 주세요');
       const extra = { kind, craft: segVal('#mCraft')||'both', level_min: lmin?+lmin:null, level_max: lmax?+lmax:null, technique_id: kind==='workshop'?$('#mTech').value:null,
         capacity: $('#mCap').value?+$('#mCap').value:null, fee: $('#mFee').value.trim()||null, bring: $('#mBring').value.trim()||null, duration_min:+$('#mDur').value, repeat:$('#mRepeat').value };
-      const { data:postId, error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mPublic').checked, p_body: body||null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:photos, p_extra: extra });
+      const { data:postId, error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mPublic').checked, p_body: $('#mDesc').value.trim()||null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:photos, p_extra: extra });
       if(error) throw new Error(error.message);
       await loadMyRooms();
       sPhotos=[]; toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
     } else if(composeKind==='work'){
       const title=$('#wTitle').value.trim(); if(!title) throw new Error('작품 이름을 적어 주세요');
-      if(!wTechSel.size) throw new Error('사용한 기법을 하나 이상 골라 주세요');
+      commitWCustom();
+      if(!wTechSel.size && !wCustom.length) throw new Error('사용한 기법을 하나 이상 골라 주세요');
       if(!sPhotos.length) throw new Error('작품 사진을 1장 이상 올려 주세요');
       const photos = await uploadPhotos(sPhotos);
-      const { error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn:$('#wYarn').value.trim()||null, p_note: body||null });
+      const { error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn:$('#wYarn').value.trim()||null, p_note: $('#wNote').value.trim()||null, p_custom: wCustom });
       if(error) throw new Error(error.message);
       await loadMe(); sPhotos=[]; toast(`작품 인증 완료! 이제 모임을 열 수 있어요`);
     } else {

@@ -852,3 +852,5 @@ alter table public.profiles
   add column verified_skills text[] not null default '{}',
   add column cert_count integer not null default 0;
 -- works_apply_cert 트리거 / create_work 함수 / create_meetup 조건: 적용된 마이그레이션 'work_certification' 참조
+-- works.custom_techniques text[]: 목록(60종)에 없는 기법 자유 입력 (기법사전 확장 후보). 집계 뷰 custom_technique_stats
+-- create_work(..., p_custom text[]) : 알려진 기법 0개여도 자유 입력이 있으면 인증 가능
