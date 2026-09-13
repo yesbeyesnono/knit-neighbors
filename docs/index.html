@@ -232,13 +232,26 @@ details .seg{margin-top:8px;justify-content:center}
 .rv .rvb .ph{display:flex;gap:6px;margin-top:6px;overflow-x:auto}
 .rv .rvb .ph img{height:84px;border-radius:8px;flex:none}
 .rvbanner{background:#e8f3e8;border-radius:14px;padding:12px 14px;font-size:14px}
-/* 인라인 답글 */
+/* 인라인 답글: 본문 시작선(아바타 40 + 간격 12 + 여백 16 = 68px)에서 세로선과 함께 이어짐 */
 .pgroup{display:contents}
-.rrow{display:flex;align-items:center;gap:10px;padding:8px 16px 10px 64px;background:#fff}
-.rrow .ava.sm{width:28px;height:28px;font-size:.7rem}
-.rrow input{flex:1;border:1px solid var(--line);border-radius:999px;background:#fafafa;padding:9px 14px;font-size:16px}
-.rrow .btn{width:auto;border-radius:999px;padding:8px 14px}
-.rfold{padding:6px 16px 12px 64px;font-size:13px;color:var(--ink3);cursor:pointer;border-bottom:1px solid var(--line);background:#fff}
+.post.has-reply{border-bottom:0;padding-bottom:0}
+.rthread{margin:0 0 0 62px;padding:2px 16px 10px 12px;border-left:2px solid #e3e3e3;background:#fff;border-bottom:1px solid var(--line)}
+.rpost{display:flex;gap:8px;padding:8px 0 2px}
+.rpost .ava.sm,.rrow .ava.sm{width:28px;height:28px;font-size:.7rem;flex:none}
+.rpost .rb{flex:1;min-width:0}
+.rpost .who{display:flex;align-items:baseline;gap:6px;overflow:hidden}
+.rpost .who b{font-weight:700;font-size:15px;white-space:nowrap;cursor:pointer}
+.rpost .who time{font-size:13px;color:var(--ink3)}
+.rpost .who .menu{margin-left:auto;background:none;border:0;color:var(--ink);font-size:1rem;padding:0 0 0 8px;cursor:pointer;letter-spacing:1px}
+.rpost .txt{font-size:15px;margin:1px 0 2px;white-space:pre-wrap;word-break:break-word}
+.rpost .acts{gap:10px;margin:0}
+.rpost .acts button{padding:4px 6px 4px 0;font-size:13px}
+.rpost .acts button svg{width:18px;height:18px}
+.rempty{font-size:13px;color:var(--ink3);padding:8px 0}
+.rrow{display:flex;align-items:center;gap:8px;padding:8px 0 4px}
+.rrow input{flex:1;border:1px solid var(--line);border-radius:999px;background:#fafafa;padding:9px 14px;font-size:16px;min-width:0}
+.rrow .btn{width:auto;border-radius:999px;padding:8px 14px;flex:none}
+.rfold{padding:8px 0 0;font-size:13px;color:var(--ink3);cursor:pointer}
 .acts button.on2{color:var(--ink);font-weight:700}
 .acts button.on2 svg{fill:var(--ink);stroke:var(--ink)}
 .rvbanner b{display:block;font-size:15px}
@@ -1133,7 +1146,7 @@ async function loadFeed(more){
     if(data?.length){ const { data:wk } = await sb.from('posts').select('id,work_id,review_of').in('id', data.map(r=>r.id)); const wm={}; (wk||[]).forEach(x=>wm[x.id]=x); data.forEach(r=>{ r.work_id = wm[r.id]?.work_id||null; r.review_of = wm[r.id]?.review_of||null; }); }
     feedRows = feedRows.concat(data||[]); feedOffset += (data||[]).length;
     $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
-    await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[]), attachMeetups(data||[]), attachWorks(data||[])]); renderFeed(); return;
+    await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), attachWorks(data||[])]); renderFeed(); return;
   }
   let q = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).order('created_at',{ascending:false}).limit(FEED_PAGE);
   if(feedCursor) q = q.lt('created_at', feedCursor);
@@ -1163,7 +1176,7 @@ async function loadFeed(more){
   feedRows = feedRows.concat(data||[]);
   feedCursor = data?.length ? data[data.length-1].created_at : feedCursor;
   $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
-  await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[]), attachMeetups(data||[]), attachWorks(data||[])]);
+  await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), attachWorks(data||[])]);
   renderFeed();
 }
 async function loadFirstReplies(rows){
@@ -1180,18 +1193,29 @@ function renderFeed(){
 // 글 + (펼친 경우) 답글 목록 + 답글 입력을 한 묶음으로. 접힌 상태에선 첫 답글 1개만 미리보기
 function postGroup(p, opts={}){
   const open = expandedReplies.has(p.id);
-  let html;
+  let html = postCard(p,{noLine:true, cls: open?'has-reply':'', replyTo:opts.replyTo});
   if(open){
     const rs = p.replies||[];
-    html = postCard(p,{line:true,cls:'has-reply',replyTo:opts.replyTo}) + rs.map(r=>postCard(r,{noLine:true,cls:'reply'})).join('') +
-      `<div class="rrow"><div class="ava sm">${avatar(myProfile||{}).replace('class="ava"','class="ava sm"')}</div><input id="rin-${p.id}" placeholder="답글을 남겨보세요…" maxlength="500" onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)submitInlineReply('${p.id}')"><button class="btn sm" onclick="submitInlineReply('${p.id}')">게시</button></div>
-      <div class="rfold" onclick="toggleReplies('${p.id}')">답글 접기 ▴</div>`;
-  } else if(p.firstReply){
-    html = postCard(p,{line:true,cls:'has-reply',replyTo:opts.replyTo}) + postCard(p.firstReply,{noLine:true,cls:'reply'});
-  } else html = postCard(p,{noLine:true,replyTo:opts.replyTo});
+    html += `<div class="rthread">
+      ${rs.length ? rs.map(r=>replyCard(r)).join('') : '<div class="rempty">첫 답글을 남겨 보세요</div>'}
+      <div class="rrow">${avatar(myProfile||{}).replace('class="ava"','class="ava sm"')}<input id="rin-${p.id}" placeholder="답글을 남겨보세요…" maxlength="500" onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)submitInlineReply('${p.id}')"><button class="btn sm" onclick="submitInlineReply('${p.id}')">게시</button></div>
+      <div class="rfold" onclick="toggleReplies('${p.id}')">답글 접기 ▴</div>
+    </div>`;
+  }
   return `<div class="pgroup" id="pg-${p.id}">${html}</div>`;
 }
-function findPost(id){ return [...feedRows, ...feedRows.map(x=>x.firstReply), curPost].filter(Boolean).find(x=>x.id===id); }
+// 펼친 답글 한 줄 (작은 아바타, 이름·시간, 본문, 좋아요)
+function replyCard(r){
+  const a=r.author||{}; const mine=r.author_id===me.id;
+  return `<div class="rpost" id="rp-${r.id}">
+    <div onclick="openProfile('${a.id}')">${avatar(a).replace('class="ava"','class="ava sm"')}</div>
+    <div class="rb">
+      <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time>${mine?`<button class="menu" onclick="deletePost('${r.id}')">···</button>`:''}</div>
+      ${r.body?`<div class="txt">${esc(r.body)}</div>`:''}
+      <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button></div>
+    </div></div>`;
+}
+function findPost(id){ return [...feedRows, ...feedRows.flatMap(x=>x.replies||[]), curPost].filter(Boolean).find(x=>x.id===id); }
 async function toggleReplies(id){
   const grp = document.getElementById('pg-'+id);
   const p = findPost(id);
@@ -1486,6 +1510,7 @@ async function deletePost(id){
   const { error } = await sb.from('posts').delete().eq('id', id);
   if(error) return toast('실패: '+error.message);
   toast('삭제했어요');
+  if(p?.parent_id){ const par=findPost(p.parent_id); if(par){ par.replies=(par.replies||[]).filter(r=>r.id!==id); par.reply_count=Math.max(0,(par.reply_count||0)-1); const g=document.getElementById('pg-'+par.id); if(g){ g.outerHTML=postGroup(par); return; } } }
   if(view==='post' && curPost?.id===id) go('comm'); else if(view==='post') openPost(curPost.id); else if(view==='my') loadMyFeed(); else if(view==='profile') loadUserFeed(profId, profTab, $('#profFeed')); else loadFeed();
 }
 async function cancelMeetup(mid){
