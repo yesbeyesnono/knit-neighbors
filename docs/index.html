@@ -8,56 +8,60 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{
-  --bg:#FBF9F5; --bg2:#F2EEE6; --ink:#2B2723; --ink2:#5E574F; --ink3:#8C847B; --line:#E3DDD2;
-  --accent:#34456F; --accent-ink:#fff; --accent-soft:#E7EAF3;
+  --bg:#fff; --bg2:#f5f5f5; --ink:#000; --ink2:#555; --ink3:#999; --line:#e6e6e6;
+  --accent:#000; --accent-ink:#fff; --accent-soft:#f2f2f2;
   --yarn:#C9922F; --yarn-soft:#F6EBD3; --moss:#5C7A4C; --moss-soft:#E6EDDF; --rose:#B5605A; --rose-soft:#F3E2E0;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:#DED8CC;font-family:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--ink);font-size:15px;line-height:1.55;word-break:keep-all}
+body{background:#e9e9e9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);font-size:15px;line-height:1.4;letter-spacing:-0.01em;word-break:keep-all}
 #app{max-width:430px;height:100%;margin:0 auto;background:var(--bg);position:relative;display:flex;flex-direction:column;overflow:hidden}
-@media (min-width:480px){#app{height:calc(100% - 32px);margin-top:16px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.18)}}
+@media (min-width:480px){#app{height:calc(100% - 32px);margin-top:16px;border-radius:28px;box-shadow:0 20px 60px rgba(0,0,0,.18);border:6px solid #111}}
 .view{flex:1;overflow-y:auto;display:none;flex-direction:column}
 .view.on{display:flex}
-.top{display:flex;align-items:center;gap:10px;padding:14px 18px 10px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
-.top h1{font-family:"Gowun Batang",serif;font-size:1.25rem;margin:0;flex:1}
-.top .back{background:none;border:0;font-size:1.3rem;padding:0 6px 0 0;cursor:pointer;color:var(--ink2)}
-.body{padding:16px 18px 24px;display:flex;flex-direction:column;gap:14px}
-nav{display:flex;border-top:1px solid var(--line);background:var(--bg);padding:6px 0 max(8px,env(safe-area-inset-bottom))}
-nav button{flex:1;background:none;border:0;font:inherit;font-size:.72rem;color:var(--ink3);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;position:relative}
-nav button .ic{font-size:1.25rem;line-height:1}
-nav button.on{color:var(--accent);font-weight:700}
-nav .badge{position:absolute;top:2px;right:calc(50% - 20px);background:var(--rose);color:#fff;font-size:.62rem;font-weight:700;border-radius:999px;padding:0 5px;min-width:16px;text-align:center}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:500;cursor:pointer;width:100%}
-.btn.o{background:transparent;color:var(--ink2);border:1px solid var(--line)}
-.btn.y{background:var(--yarn);color:#fff}
-.btn.r{background:var(--rose-soft);color:var(--rose)}
-.btn.m{background:var(--moss);color:#fff}
-.btn.sm{padding:7px 12px;font-size:.85rem;width:auto;border-radius:8px}
+.top{display:flex;align-items:center;gap:12px;padding:14px 16px 8px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:0}
+.top h1{font-family:inherit;font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;margin:0;flex:1;text-align:center}
+.top .back + h1{text-align:left;font-size:1.05rem;font-weight:700}
+.top .back{background:none;border:0;font-size:1.5rem;padding:0 6px 0 0;cursor:pointer;color:var(--ink)}
+.top .ib{background:none;border:0;padding:4px;cursor:pointer;color:var(--ink);display:inline-flex}
+.top .ib svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.body{padding:12px 16px 24px;display:flex;flex-direction:column;gap:12px}
+nav{display:flex;border-top:1px solid var(--line);background:var(--bg);padding:6px 6px max(10px,env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:0;color:#b5b5b5;display:flex;align-items:center;justify-content:center;padding:10px 0;cursor:pointer;position:relative;border-radius:14px}
+nav button svg{width:27px;height:27px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--ink)}
+nav button.on svg.fillable{fill:var(--ink)}
+nav .badge{position:absolute;top:6px;right:calc(50% - 18px);background:#ff3040;color:#fff;font-size:.62rem;font-weight:700;border-radius:999px;padding:0 5px;min-width:16px;height:16px;line-height:16px;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:#fff;border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:600;cursor:pointer;width:100%}
+.btn.o{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.y{background:var(--ink);color:#fff}
+.btn.r{background:transparent;color:#ff3040;border:1px solid var(--line)}
+.btn.m{background:var(--ink);color:#fff}
+.btn.sm{padding:7px 14px;font-size:.85rem;width:auto;border-radius:999px}
 .btn:disabled{opacity:.5;cursor:default}
 .btn[hidden]{display:none}
-.g{background:#fff;color:#1f1f1f;border:1px solid #dadce0}
+.g{background:#fff;color:#000;border:1px solid var(--line);border-radius:999px}
 .g img{width:18px;height:18px}
-input,select,textarea{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+input,select,textarea{font:inherit;width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
 textarea{resize:vertical;min-height:70px}
 label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--ink2);font-weight:500}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .seg button{font:inherit;font-size:.85rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer}
-.seg button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-.chip{display:inline-block;font-size:.75rem;padding:2px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:500}
-.chip.y{background:var(--yarn-soft);color:var(--yarn)} .chip.m{background:var(--moss-soft);color:var(--moss)} .chip.r{background:var(--rose-soft);color:var(--rose)}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip{display:inline-block;font-size:.75rem;padding:2px 9px;border-radius:999px;background:#f2f2f2;color:#333;font-weight:500}
+.chip.y{background:#f2f2f2;color:#333} .chip.m{background:#e8f3e8;color:#2f6b3a} .chip.r{background:#fde8ea;color:#c9303f}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .card.soft{background:var(--bg2);border:0}
 .card b.t{display:block;font-size:.78rem;color:var(--ink3);font-weight:500;margin-bottom:2px}
 .row{display:flex;align-items:center;gap:10px}
-.ava{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;font-weight:700;color:var(--accent);flex:none;overflow:hidden;font-size:.9rem}
+.ava{width:40px;height:40px;border-radius:50%;background:#efefef;display:grid;place-items:center;font-weight:700;color:#444;flex:none;overflow:hidden;font-size:.9rem}
 .ava img{width:100%;height:100%;object-fit:cover}
 .ava.lg{width:64px;height:64px;font-size:1.3rem}
 .muted{color:var(--ink3);font-size:.82rem}
-.story{font-family:"Gowun Batang",serif;color:var(--ink2);border-left:3px solid var(--yarn);padding:2px 12px;margin:4px 0}
+.story{color:var(--ink2);border-left:2px solid var(--ink);padding:2px 12px;margin:4px 0}
 .empty{text-align:center;color:var(--ink3);padding:40px 20px;font-size:.9rem}
-.list{display:flex;flex-direction:column;gap:10px}
-.item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.list{display:flex;flex-direction:column;gap:0}
+.item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#fff;border:0;border-bottom:1px solid var(--line);border-radius:0;cursor:pointer}
 .item .tx{flex:1;min-width:0}
 .item .tx b{display:block}
 .item .tx span{display:block;color:var(--ink3);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -68,12 +72,12 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--
 .mapui>*{pointer-events:auto}
 .filters{top:0;padding:12px 14px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .filters button{flex:none;font:inherit;font-size:.8rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.filters button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .pincard{bottom:14px;padding:0 14px}
 .pincard .card{box-shadow:0 8px 30px rgba(0,0,0,.18);cursor:pointer}
 .locbtn{position:absolute;right:14px;bottom:110px;z-index:400;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:1.1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
-.pin{width:34px;height:34px;border-radius:50%;background:var(--yarn);color:#fff;display:grid;place-items:center;font-size:.62rem;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);white-space:nowrap;overflow:hidden;cursor:pointer}
-.pin.me{background:var(--accent)} .pin.knit{background:var(--moss)}
+.pin{width:34px;height:34px;border-radius:50%;background:#C9922F;color:#fff;display:grid;place-items:center;font-size:.62rem;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);white-space:nowrap;overflow:hidden;cursor:pointer}
+.pin.me{background:#000} .pin.knit{background:#5C7A4C}
 .leaflet-div-icon{background:none;border:0}
 /* sheet */
 .sheetwrap{position:absolute;inset:0;z-index:1100;display:none;align-items:flex-end;background:rgba(43,39,35,.35)}
@@ -85,7 +89,7 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--
 /* chat */
 .msgs{flex:1;display:flex;flex-direction:column;gap:8px;padding:14px 16px}
 .bub{max-width:78%;padding:8px 12px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:.92rem;align-self:flex-start}
-.bub.me{align-self:flex-end;background:var(--accent-soft);border-color:transparent}
+.bub.me{align-self:flex-end;background:var(--ink);color:#fff;border-color:transparent}
 .bub .who{display:block;font-size:.7rem;color:var(--ink3);margin-bottom:2px}
 .bub time{display:block;font-size:.65rem;color:var(--ink3);margin-top:3px;text-align:right}
 .compose{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--bg)}
@@ -94,37 +98,55 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--
 .toast{position:absolute;left:50%;transform:translateX(-50%);bottom:90px;background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:.85rem;z-index:1300;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
 .login{justify-content:center;padding:40px 28px;gap:18px;text-align:center}
-.login h1{font-family:"Gowun Batang",serif;font-size:2.2rem;margin:0}
+.login h1{font-family:inherit;font-size:2.4rem;font-weight:800;letter-spacing:-0.04em;margin:0}
 .login p{color:var(--ink2);margin:0}
 details{font-size:.85rem;color:var(--ink3)}
 details .seg{margin-top:8px;justify-content:center}
-.devbar{font-size:.7rem;color:var(--ink3);text-align:center;padding:4px;background:var(--yarn-soft)}
+.devbar{font-size:.7rem;color:var(--ink3);text-align:center;padding:8px}
 /* skills (뜨개 단계 자가진단) */
 .tabs{display:flex;gap:4px;background:var(--bg2);padding:4px;border-radius:10px}
 .tabs button{flex:1;font:inherit;border:0;background:transparent;padding:8px;border-radius:8px;color:var(--ink2);cursor:pointer}
 .tabs button.on{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+/* Threads 프로필 (마이) */
+#v-my .body{padding:0;gap:0}
+.ptop{display:flex;align-items:flex-start;gap:14px;padding:6px 16px 0}
+.ptop .pinfo{flex:1;min-width:0}
+.ptop h2{margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-0.03em;line-height:1.2}
+.ptop .phandle{color:var(--ink);font-size:15px;margin-top:2px}
+.ptop .ava.lg{width:68px;height:68px;font-size:1.4rem}
+.pbio{padding:12px 16px 0;font-size:15px;white-space:pre-wrap;line-height:1.45}
+.pfriends{display:flex;align-items:center;gap:10px;padding:12px 16px 4px;color:var(--ink3);font-size:15px;cursor:pointer}
+.stack{display:flex}.stack .ava{width:24px;height:24px;font-size:.6rem;border:2px solid #fff;margin-left:-8px;box-sizing:content-box}.stack .ava:first-child{margin-left:0}
+.pbtns{display:flex;gap:8px;padding:12px 16px 4px}
+.pbtns .btn{flex:1;padding:9px 0;font-size:.92rem;font-weight:600;border-radius:10px}
+.pbtns .btn.ic{flex:0 0 46px}
+.pbtns .btn.ic svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#v-my .subtabs{margin-top:8px;border-bottom:1px solid var(--line);padding:0}
+#v-my .subtabs button{flex:1;padding:12px 0;font-size:.95rem;color:var(--ink3);border-bottom:1.5px solid transparent;font-weight:500}
+#v-my .subtabs button.on{color:var(--ink);border-color:var(--ink);font-weight:700}
+#v-my .feed .empty{padding:48px 20px}
 .lvhead{display:flex;align-items:center;gap:14px;padding:4px 2px}
-.lvbig{font-family:"Gowun Batang",serif;font-size:2.6rem;line-height:1;color:var(--accent);min-width:48px;text-align:center}
+.lvbig{font-family:inherit;font-size:2.6rem;font-weight:800;line-height:1;color:var(--ink);min-width:48px;text-align:center}
 .lvbig small{display:block;font-family:"Noto Sans KR",sans-serif;font-size:.7rem;color:var(--ink3);margin-top:4px}
 .lvbar{display:flex;gap:4px;margin-top:6px}
 .lvbar i{flex:1;height:7px;border-radius:4px;background:var(--line);display:block;position:relative;overflow:hidden}
-.lvbar i b{position:absolute;left:0;top:0;bottom:0;background:var(--yarn);display:block}
-.lvbar i.done b{background:var(--accent)}
+.lvbar i b{position:absolute;left:0;top:0;bottom:0;background:#bbb;display:block}
+.lvbar i.done b{background:var(--ink)}
 .lvsec{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
-.lvsec.done{border-color:var(--accent)}
+.lvsec.done{border-color:var(--ink)}
 .lvsec .hd{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none}
 .lvsec .hd .n{width:28px;height:28px;border-radius:50%;background:var(--bg2);display:grid;place-items:center;font-weight:700;font-size:.85rem;color:var(--ink2);flex:none}
-.lvsec.done .hd .n{background:var(--accent);color:#fff}
+.lvsec.done .hd .n{background:var(--ink);color:#fff}
 .lvsec .hd .t{flex:1;min-width:0}.lvsec .hd .t b{display:block}.lvsec .hd .t span{font-size:.78rem;color:var(--ink3)}
 .lvsec .hd .pct{font-size:.8rem;color:var(--ink2);font-variant-numeric:tabular-nums}
 .lvsec .hd .car{color:var(--ink3);transition:transform .2s}.lvsec.open .hd .car{transform:rotate(90deg)}
 .techs{display:none;flex-wrap:wrap;gap:6px;padding:2px 12px 12px}
 .lvsec.open .techs{display:flex}
 .tech{font:inherit;font-size:.85rem;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
-.tech.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
+.tech.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:500}
 .tech .sym{font-size:.75rem;opacity:.7}
 .lvchip{display:inline-flex;align-items:center;gap:4px;font-size:.75rem;padding:2px 9px;border-radius:999px;background:var(--bg2);color:var(--ink2);font-weight:500}
-.lvchip b{color:var(--accent)}
+.lvchip b{color:var(--ink)}
 /* explainer slides */
 .slides{position:absolute;inset:0;z-index:1200;background:var(--bg);display:none;flex-direction:column}
 .slides.on{display:flex}
@@ -132,16 +154,16 @@ details .seg{margin-top:8px;justify-content:center}
 .track::-webkit-scrollbar{display:none}
 .slide{flex:none;width:100%;scroll-snap-align:start;padding:40px 28px 16px;display:flex;flex-direction:column;justify-content:center;gap:16px;text-align:center}
 .slide .big{font-size:3rem;line-height:1}
-.slide h2{font-family:"Gowun Batang",serif;font-size:1.5rem;margin:0;text-wrap:balance}
+.slide h2{font-family:inherit;font-size:1.5rem;font-weight:800;margin:0;text-wrap:balance}
 .slide p{color:var(--ink2);margin:0 auto;max-width:30ch}
 .slide .ex{background:var(--bg2);border-radius:12px;padding:12px 14px;font-size:.88rem;text-align:left;max-width:300px;margin:0 auto;width:100%}
 .dots{display:flex;justify-content:center;gap:6px;padding:8px}
 .dots i{width:6px;height:6px;border-radius:3px;background:var(--line);transition:width .2s}
-.dots i.on{background:var(--accent);width:18px}
+.dots i.on{background:var(--ink);width:18px}
 .slidebar{padding:8px 24px 28px;display:flex;gap:10px}
 .ladder{display:flex;flex-direction:column-reverse;gap:5px;max-width:280px;margin:0 auto;width:100%;text-align:left}
 .ladder div{display:flex;gap:10px;align-items:center;font-size:.85rem;padding:7px 10px;border-radius:8px;background:var(--bg2)}
-.ladder div b{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:.72rem;flex:none}
+.ladder div b{width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:.72rem;flex:none}
 .ladder div span{color:var(--ink3);font-size:.78rem;margin-left:auto}
 .simrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 /* community (threads) */
@@ -176,81 +198,81 @@ details .seg{margin-top:8px;justify-content:center}
 .replyto{font-size:.78rem;color:var(--ink3);margin-bottom:2px}
 .fab{display:none}
 /* ===== Threads look — 커뮤니티·스레드·채팅 화면 한정 ===== */
-#v-comm,#v-post,#v-chats,#v-room{--tbg:#fff;--tink:#000;--tmute:#999;--tline:#e6e6e6;--tred:#ff3040;
+#app{--tbg:#fff;--tink:#000;--tmute:#999;--tline:#e6e6e6;--tred:#ff3040;
   background:var(--tbg);color:var(--tink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:16px;line-height:1.35;letter-spacing:-0.01em;word-break:break-word}
-#v-comm .top,#v-post .top,#v-chats .top,#v-room .top{background:var(--tbg);border-bottom:0;padding:14px 16px 10px;gap:12px}
-#v-comm .top h1,#v-post .top h1,#v-chats .top h1,#v-room .top h1{font-family:inherit;font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;text-align:center;flex:1}
-#v-post .top h1,#v-room .top h1{text-align:left;font-size:1.05rem;font-weight:700}
-#v-post .top .back,#v-room .top .back{color:var(--tink);font-size:1.5rem}
-#v-comm .top .btn,#v-post .top .btn,#v-chats .top .btn,#v-room .top .btn{background:transparent;border:0;color:var(--tink);font-weight:600;font-size:.9rem;padding:4px 0;width:auto}
-#v-comm .subtabs{border-bottom:1px solid var(--tline);padding:0;background:var(--tbg)}
-#v-comm .subtabs button{flex:1;padding:12px 0;font-size:.95rem;color:var(--tmute);border-bottom:1.5px solid transparent;font-weight:500}
-#v-comm .subtabs button.on{color:var(--tink);border-color:var(--tink);font-weight:700}
+.top,.top,.top,.top{background:var(--tbg);border-bottom:0;padding:14px 16px 10px;gap:12px}
+.top h1,.top h1,.top h1,.top h1{font-family:inherit;font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;text-align:center;flex:1}
+.top h1,.top h1{text-align:left;font-size:1.05rem;font-weight:700}
+.top .back,.top .back{color:var(--tink);font-size:1.5rem}
+.top .btn,.top .btn,.top .btn,.top .btn{background:transparent;border:0;color:var(--tink);font-weight:600;font-size:.9rem;padding:4px 0;width:auto}
+.subtabs{border-bottom:1px solid var(--tline);padding:0;background:var(--tbg)}
+.subtabs button{flex:1;padding:12px 0;font-size:.95rem;color:var(--tmute);border-bottom:1.5px solid transparent;font-weight:500}
+.subtabs button.on{color:var(--tink);border-color:var(--tink);font-weight:700}
 /* 작성 행 */
-#v-comm .cbox{border-bottom:1px solid var(--tline);padding:14px 16px 12px;align-items:flex-start;gap:12px}
-#v-comm .cbox .ava,#v-comm .post .ava,#v-post .post .ava,#v-post .compose .ava{width:40px;height:40px;font-size:.9rem;background:#efefef;color:#444}
-#v-comm .cbox .cname{font-weight:700;font-size:16px;line-height:1.3}
-#v-comm .cbox textarea{font-family:inherit;font-size:16px;color:var(--tink);padding:0;min-height:22px;line-height:1.35;margin-top:1px}
-#v-comm .cbox textarea::placeholder{color:var(--tmute)}
-#v-comm .cbox .tools{margin-top:10px;gap:16px}
-#v-comm .cbox .tools .ib{background:none;border:0;padding:0;cursor:pointer;color:var(--tmute);display:inline-flex}
-#v-comm .cbox .tools .ib svg{width:22px;height:22px}
-#v-comm .cbox .tools .cnt{font-size:.8rem}
-#v-comm .cbox .tools .btn{background:var(--tink);color:#fff;border-radius:999px;padding:7px 16px;font-size:.9rem;font-weight:600;width:auto}
-#v-comm .cbox .tools .btn:disabled{opacity:.3}
-#v-comm .pv div{border-radius:10px}
+.cbox{border-bottom:1px solid var(--tline);padding:14px 16px 12px;align-items:flex-start;gap:12px}
+.cbox .ava,.post .ava,.post .ava,.compose .ava{width:40px;height:40px;font-size:.9rem;background:#efefef;color:#444}
+.cbox .cname{font-weight:700;font-size:16px;line-height:1.3}
+.cbox textarea{font-family:inherit;font-size:16px;color:var(--tink);padding:0;min-height:22px;line-height:1.35;margin-top:1px}
+.cbox textarea::placeholder{color:var(--tmute)}
+.cbox .tools{margin-top:10px;gap:16px}
+.cbox .tools .ib{background:none;border:0;padding:0;cursor:pointer;color:var(--tmute);display:inline-flex}
+.cbox .tools .ib svg{width:22px;height:22px}
+.cbox .tools .cnt{font-size:.8rem}
+.cbox .tools .btn{background:var(--tink);color:#fff;border-radius:999px;padding:7px 16px;font-size:.9rem;font-weight:600;width:auto}
+.cbox .tools .btn:disabled{opacity:.3}
+.pv div{border-radius:10px}
 /* 글 카드 */
-#v-comm .post,#v-post .post{padding:12px 16px 6px;border-bottom:1px solid var(--tline);background:var(--tbg);gap:12px}
-#v-comm .post.has-reply{border-bottom:0;padding-bottom:0}
-#v-comm .post.reply{padding-top:4px}
-#v-comm .post .avacol,#v-post .post .avacol{display:flex;flex-direction:column;align-items:center;flex:none;align-self:stretch}
-#v-comm .post .tline,#v-post .post .tline{width:2px;flex:1;min-height:16px;background:#dcdcdc;margin-top:6px;border-radius:1px}
-#v-comm .post .who,#v-post .post .who{gap:6px;align-items:baseline;flex-wrap:nowrap;overflow:hidden;line-height:1.3}
-#v-comm .post .who b,#v-post .post .who b{font-weight:700;font-size:16px;white-space:nowrap}
-#v-comm .post .who time,#v-post .post .who time{margin:0;font-size:15px;color:var(--tmute);flex:none}
-#v-comm .post .who .sub,#v-post .post .who .sub{color:var(--tmute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#v-comm .post .who .menu,#v-post .post .who .menu{margin-left:auto;background:none;border:0;color:var(--tink);font-size:1.1rem;line-height:1;padding:0 0 0 8px;cursor:pointer;flex:none;letter-spacing:1px}
-#v-comm .post .txt,#v-post .post .txt{font-size:16px;margin:1px 0 6px;color:var(--tink);line-height:1.4}
-#v-comm .pgrid,#v-post .pgrid{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:0;margin:6px -16px 8px 0;padding-right:16px}
-#v-comm .pgrid::-webkit-scrollbar,#v-post .pgrid::-webkit-scrollbar{display:none}
-#v-comm .pgrid img,#v-post .pgrid img{height:280px;width:auto;max-width:82%;aspect-ratio:auto;border-radius:12px;flex:none;scroll-snap-align:start;object-fit:cover;border:1px solid var(--tline)}
-#v-comm .pgrid.n1 img,#v-post .pgrid.n1 img{max-width:100%;height:auto;max-height:420px;aspect-ratio:auto}
-#v-comm .acts,#v-post .acts{gap:14px;margin:4px 0 6px;color:var(--tink)}
-#v-comm .acts button,#v-post .acts button{padding:6px 6px 6px 0;font-size:14px;gap:6px;color:var(--tink);font-weight:500;font-variant-numeric:tabular-nums}
-#v-comm .acts button svg,#v-post .acts button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#v-comm .acts button.on,#v-post .acts button.on{color:var(--tred);font-weight:500}
-#v-comm .acts button.on svg,#v-post .acts button.on svg{fill:var(--tred);stroke:var(--tred)}
-#v-comm .replyto,#v-post .replyto{font-size:13px;color:var(--tmute);margin-bottom:2px}
-#v-comm .empty,#v-post .empty{color:var(--tmute);font-size:14px}
-#v-comm .feedmore .btn{background:transparent;color:var(--tmute);border:1px solid var(--tline);border-radius:999px;font-size:.9rem}
-#v-post .thread-head{padding:12px 16px 8px;font-size:15px;font-weight:700;color:var(--tink);border-bottom:1px solid var(--tline)}
+.post,.post{padding:12px 16px 6px;border-bottom:1px solid var(--tline);background:var(--tbg);gap:12px}
+.post.has-reply{border-bottom:0;padding-bottom:0}
+.post.reply{padding-top:4px}
+.post .avacol,.post .avacol{display:flex;flex-direction:column;align-items:center;flex:none;align-self:stretch}
+.post .tline,.post .tline{width:2px;flex:1;min-height:16px;background:#dcdcdc;margin-top:6px;border-radius:1px}
+.post .who,.post .who{gap:6px;align-items:baseline;flex-wrap:nowrap;overflow:hidden;line-height:1.3}
+.post .who b,.post .who b{font-weight:700;font-size:16px;white-space:nowrap}
+.post .who time,.post .who time{margin:0;font-size:15px;color:var(--tmute);flex:none}
+.post .who .sub,.post .who .sub{color:var(--tmute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post .who .menu,.post .who .menu{margin-left:auto;background:none;border:0;color:var(--tink);font-size:1.1rem;line-height:1;padding:0 0 0 8px;cursor:pointer;flex:none;letter-spacing:1px}
+.post .txt,.post .txt{font-size:16px;margin:1px 0 6px;color:var(--tink);line-height:1.4}
+.pgrid,.pgrid{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:0;margin:6px -16px 8px 0;padding-right:16px}
+.pgrid::-webkit-scrollbar,.pgrid::-webkit-scrollbar{display:none}
+.pgrid img,.pgrid img{height:280px;width:auto;max-width:82%;aspect-ratio:auto;border-radius:12px;flex:none;scroll-snap-align:start;object-fit:cover;border:1px solid var(--tline)}
+.pgrid.n1 img,.pgrid.n1 img{max-width:100%;height:auto;max-height:420px;aspect-ratio:auto}
+.acts,.acts{gap:14px;margin:4px 0 6px;color:var(--tink)}
+.acts button,.acts button{padding:6px 6px 6px 0;font-size:14px;gap:6px;color:var(--tink);font-weight:500;font-variant-numeric:tabular-nums}
+.acts button svg,.acts button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.acts button.on,.acts button.on{color:var(--tred);font-weight:500}
+.acts button.on svg,.acts button.on svg{fill:var(--tred);stroke:var(--tred)}
+.replyto,.replyto{font-size:13px;color:var(--tmute);margin-bottom:2px}
+.empty,.empty{color:var(--tmute);font-size:14px}
+.feedmore .btn{background:transparent;color:var(--tmute);border:1px solid var(--tline);border-radius:999px;font-size:.9rem}
+.thread-head{padding:12px 16px 8px;font-size:15px;font-weight:700;color:var(--tink);border-bottom:1px solid var(--tline)}
 /* 답글 입력 */
-#v-post .compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 16px;align-items:center;gap:10px}
-#v-post .compose .ava{width:36px;height:36px}
-#v-post .compose input{border:1px solid var(--tline);border-radius:999px;background:#fafafa;padding:10px 14px;font-family:inherit;font-size:15px}
-#v-post .compose input::placeholder{color:var(--tmute)}
-#v-post .compose .btn{background:var(--tink);color:#fff;border-radius:999px;padding:9px 14px;font-size:.9rem;font-weight:600;width:auto}
+.compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 16px;align-items:center;gap:10px}
+.compose .ava{width:36px;height:36px}
+.compose input{border:1px solid var(--tline);border-radius:999px;background:#fafafa;padding:10px 14px;font-family:inherit;font-size:15px}
+.compose input::placeholder{color:var(--tmute)}
+.compose .btn{background:var(--tink);color:#fff;border-radius:999px;padding:9px 14px;font-size:.9rem;font-weight:600;width:auto}
 /* 채팅 (Instagram DM) */
-#v-chats .top,#v-room .top{border-bottom:1px solid var(--tline)}
-#v-chats .body{padding:0;gap:0}
-#v-chats .list{gap:0}
-#v-chats .item{border:0;border-bottom:1px solid var(--tline);border-radius:0;padding:12px 16px;background:var(--tbg);gap:12px}
-#v-chats .item .ava{width:52px;height:52px;background:#efefef;color:#444;font-size:1rem}
-#v-chats .item .tx b{font-weight:600;font-size:16px}
-#v-chats .item .tx b .muted{font-weight:400}
-#v-chats .item .tx span{color:var(--tmute);font-size:14px}
-#v-chats .item > .muted{color:var(--tmute);font-size:13px}
-#v-chats .empty{color:var(--tmute);font-size:14px}
-#v-room .msgs{padding:12px 14px;gap:3px}
-#v-room .bub{background:#efefef;border:0;border-radius:20px;padding:9px 14px;font-size:16px;color:var(--tink);max-width:76%}
-#v-room .bub.me{background:var(--tink);color:#fff}
-#v-room .bub .who{color:var(--tmute);font-size:12px;margin:0 0 2px 2px}
-#v-room .bub time{display:none}
-#v-room .bub .muted{color:inherit;opacity:.7}
-#v-room .compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 12px;align-items:center}
-#v-room .compose input{border:1px solid var(--tline);border-radius:999px;background:var(--tbg);padding:10px 16px;font-family:inherit;font-size:16px}
-#v-room .compose input::placeholder{color:var(--tmute)}
-#v-room .compose .btn{background:transparent;color:var(--tink);font-weight:600;padding:8px 4px 8px 8px;width:auto}
+.top,.top{border-bottom:1px solid var(--tline)}
+.body{padding:0;gap:0}
+.list{gap:0}
+.item{border:0;border-bottom:1px solid var(--tline);border-radius:0;padding:12px 16px;background:var(--tbg);gap:12px}
+.item .ava{width:52px;height:52px;background:#efefef;color:#444;font-size:1rem}
+.item .tx b{font-weight:600;font-size:16px}
+.item .tx b .muted{font-weight:400}
+.item .tx span{color:var(--tmute);font-size:14px}
+.item > .muted{color:var(--tmute);font-size:13px}
+.empty{color:var(--tmute);font-size:14px}
+.msgs{padding:12px 14px;gap:3px}
+.bub{background:#efefef;border:0;border-radius:20px;padding:9px 14px;font-size:16px;color:var(--tink);max-width:76%}
+.bub.me{background:var(--tink);color:#fff}
+.bub .who{color:var(--tmute);font-size:12px;margin:0 0 2px 2px}
+.bub time{display:none}
+.bub .muted{color:inherit;opacity:.7}
+.compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 12px;align-items:center}
+.compose input{border:1px solid var(--tline);border-radius:999px;background:var(--tbg);padding:10px 16px;font-family:inherit;font-size:16px}
+.compose input::placeholder{color:var(--tmute)}
+.compose .btn{background:transparent;color:var(--tink);font-weight:600;padding:8px 4px 8px 8px;width:auto}
 </style>
 </head>
 <body>
@@ -259,7 +281,6 @@ details .seg{margin-top:8px;justify-content:center}
 
   <!-- 로그인 -->
   <section class="view login" id="v-login">
-    <div style="font-size:3rem">🧶</div>
     <h1>뜨개동네</h1>
     <p>우리 동네에서 같이 뜰 사람을 지도에서 찾아요</p>
     <button class="btn g" onclick="loginGoogle()"><img alt="" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">Google로 계속하기</button>
@@ -279,6 +300,7 @@ details .seg{margin-top:8px;justify-content:center}
       <label class="f">뜨개 경력<div class="seg" id="f_exp"></div></label>
       <label class="f">지금 뜨는 것 (지도 핀에 한 단어로 보여요)<input id="f_now" maxlength="40" placeholder="예: 그래니 스퀘어 가디건"></label>
       <label class="f">요즘 막히는 부분<input id="f_stuck" maxlength="100" placeholder="예: 레이글런 줄이기가 어려워요"></label>
+      <label class="f">소개 (선택, 300자)<textarea id="f_bio" maxlength="300" placeholder="예: 퇴근 후 코바늘. 가디건 완성이 목표. 같이 뜨실 분 환영"></textarea></label>
       <label class="f">MBTI (선택)<input id="f_mbti" maxlength="4" placeholder="ENFP" style="text-transform:uppercase"></label>
       <label class="f">만나기 좋은 시간<div class="seg" id="f_avail"></div></label>
       <label class="f"><span><input type="checkbox" id="f_bok" style="width:auto;margin-right:6px">초보 환영</span></label>
@@ -327,7 +349,7 @@ details .seg{margin-top:8px;justify-content:center}
 
   <!-- 친구 -->
   <section class="view" id="v-friends">
-    <div class="top"><h1>친구</h1></div>
+    <div class="top"><button class="back" onclick="go('my')">‹</button><h1>친구</h1></div>
     <div class="body" id="friendsBody"></div>
   </section>
 
@@ -352,16 +374,16 @@ details .seg{margin-top:8px;justify-content:center}
 
   <!-- 마이 -->
   <section class="view" id="v-my">
-    <div class="top"><h1>마이</h1></div>
+    <div class="top"><span style="width:32px"></span><h1 id="myTitle">마이</h1><button class="ib" title="설정" onclick="openSettings()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
     <div class="body" id="myBody"></div>
   </section>
 
   <nav id="nav">
-    <button data-v="map"><span class="ic">🗺️</span>지도</button>
-    <button data-v="comm"><span class="ic">🧵</span>커뮤니티</button>
-    <button data-v="friends"><span class="ic">🤝</span>친구<span class="badge" id="badgeFriends" hidden></span></button>
-    <button data-v="chats"><span class="ic">💬</span>채팅</button>
-    <button data-v="my"><span class="ic">🧶</span>마이</button>
+    <button data-v="comm" title="커뮤니티"><svg class="fillable" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7v9a1.5 1.5 0 0 1-1.5 1.5h-4.5v-6h-5v6H5A1.5 1.5 0 0 1 3.5 19.5z"/></svg></button>
+    <button data-v="map" title="지도"><svg viewBox="0 0 24 24"><path d="M12 21.5s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10.5" r="2.4"/></svg></button>
+    <button data-v="plus" title="글쓰기"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button data-v="chats" title="채팅"><svg viewBox="0 0 24 24"><path d="M21 3 10.5 13.5M21 3l-6.5 18-4-7.5L3 9.5 21 3z"/></svg></button>
+    <button data-v="my" title="마이"><svg class="fillable" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6z"/></svg><span class="badge" id="badgeFriends" hidden></span></button>
   </nav>
 
   <div class="sheetwrap" id="sheetwrap" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
@@ -455,8 +477,10 @@ async function loginTest(n){
 async function logout(){ await sb.auth.signOut(); }
 
 sb.auth.onAuthStateChange(async (ev, session) => {
+  const wasIn = !!me;
   me = session?.user || null;
   if(!me){ show('login'); myProfile=null; if(friendChan){ sb.removeChannel(friendChan); friendChan=null; } return; }
+  if(wasIn && view!=='login') return;   // TOKEN_REFRESHED·탭 복귀 등: 보던 화면 유지
   await loadMe();
   if(!myProfile?.onboarded_at){ openOnboard(false); }
   else { go('map'); watchFriends(); }
@@ -473,9 +497,10 @@ function parseGeo(hex){
 }
 
 // ============ 화면 전환 ============
-function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my'].includes(v); $('#nav').style.display=navOn?'flex':'none'; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===v)); }
+const NAV_OF = { friends:'my', skills:'my', post:'comm' };
+function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
-$('#nav').onclick = e => { const b=e.target.closest('button'); if(b) go(b.dataset.v); };
+$('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ go('comm'); setTimeout(()=>{ $('#v-comm').scrollTop=0; $('#cText').focus(); },50); return; } go(b.dataset.v); };
 
 // ============ 온보딩 ============
 seg('#f_craft', CRAFT); seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
@@ -534,7 +559,7 @@ function openOnboard(edit){
   loc = { lat:p._c?.lat||null, lng:p._c?.lng||null, dong_name:p.dong_name||null, dong_code:p.dong_code||null, verified:!!p.dong_verified_at };
   if(loc.dong_name) setLocStatus(`📍 <b>${esc(loc.dong_name)}</b> <span class="muted">${loc.verified?'확인됨 ✓':'직접 입력'}</span>`); else detectLocation();
   segSet('#f_craft',p.craft); segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
-  $('#f_now').value=p.now_making||''; $('#f_stuck').value=p.stuck_on||''; $('#f_mbti').value=p.mbti||''; $('#f_bok').checked=!!p.beginner_ok;
+  $('#f_now').value=p.now_making||''; $('#f_stuck').value=p.stuck_on||''; $('#f_bio').value=p.bio||''; $('#f_mbti').value=p.mbti||''; $('#f_bok').checked=!!p.beginner_ok;
   show('onboard');
 }
 async function saveProfile(){
@@ -543,7 +568,7 @@ async function saveProfile(){
   const mbti = $('#f_mbti').value.trim().toUpperCase();
   if(mbti && !/^[EI][NS][TF][JP]$/.test(mbti)) return toast('MBTI 형식을 확인해 주세요');
   const row = { nickname:$('#f_nick').value.trim()||'뜨개인', dong_code:loc.dong_code, dong_name:loc.dong_name, dong_verified_at: loc.verified ? new Date().toISOString() : null, craft:segVal('#f_craft'), experience:segVal('#f_exp'),
-    now_making:$('#f_now').value.trim()||null, stuck_on:$('#f_stuck').value.trim()||null, mbti:mbti||null, available:segVal('#f_avail',true), beginner_ok:$('#f_bok').checked, onboarded_at:new Date().toISOString() };
+    now_making:$('#f_now').value.trim()||null, stuck_on:$('#f_stuck').value.trim()||null, bio:$('#f_bio').value.trim()||null, mbti:mbti||null, available:segVal('#f_avail',true), beginner_ok:$('#f_bok').checked, onboarded_at:new Date().toISOString() };
   const { error } = await sb.from('profiles').update(row).eq('id', me.id);
   if(error) return toast('저장 실패: '+error.message);
   // 위치: 새로 잡은 GPS만 흐려서 저장 (원본은 서버에 남지 않음). 직접 입력만 했으면 기존 좌표 유지
@@ -1027,19 +1052,54 @@ function updateDots(){ const t=$('#track'), n=t.children.length, i=slideIdx(); $
 $('#track').addEventListener('scroll', ()=>{ clearTimeout($('#track')._t); $('#track')._t=setTimeout(updateDots,80); });
 
 // ============ 마이 ============
-function renderMy(){
+let myTab='posts';
+async function renderMy(){
   const p=myProfile||{};
+  const handle=[p.dong_name||'동네 미설정', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
+  const bio = p.bio || [p.now_making?`지금 뜨는 것: ${p.now_making}`:'', p.stuck_on?`요즘 막히는 부분: ${p.stuck_on}`:''].filter(Boolean).join('\n');
+  $('#myTitle').textContent = p.nickname||'마이';
   $('#myBody').innerHTML=`
-    <div class="row">${avatar(p,true)}<div><b style="font-size:1.1rem">${esc(p.nickname||'')}</b><div class="muted">${esc(p.dong_name||'동네 미설정')} · ${esc(me.email||'')}</div><div style="margin-top:4px">${chips(p)}</div></div></div>
-    <div class="card" style="cursor:pointer" onclick="openSkills()"><b class="t">내 뜨개 단계</b><div class="row" style="flex-wrap:wrap;gap:6px">${(p.level_crochet>0||p.level_knit>0)?lvChips(p):'<span class="muted">아직 체크하지 않았어요</span>'}<span style="margin-left:auto;color:var(--ink3)">›</span></div><div class="muted" style="margin-top:4px">체크한 기법 ${(p.skills||[]).length}개 · 누르면 수정</div></div>
-    ${p.now_making?`<div class="card soft"><b class="t">지금 뜨는 것</b>${esc(p.now_making)}</div>`:''}
-    ${p.stuck_on?`<div class="card soft"><b class="t">요즘 막히는 부분</b>${esc(p.stuck_on)}</div>`:''}
-    <button class="btn o" onclick="openOnboard(true)">프로필 수정</button>
-    <label class="f"><span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)" style="width:auto;margin-right:6px">지도에 내 핀 보이기</span></label>
-    <div class="card soft muted">위치는 500m 격자로 흐려진 좌표만 저장돼요. 정확한 위치는 서버에 남지 않아요.</div>
-    <button class="btn o" onclick="logout()">로그아웃</button>
-    <div class="devbar">Supabase ${SB_URL.replace('https://','')} · 지도 ${GOOGLE_MAPS_KEY?'Google Maps':'OpenStreetMap (Google 키 미설정)'}</div>`;
+    <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname||'')}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
+    ${bio?`<div class="pbio">${esc(bio)}</div>`:'<div class="pbio muted">소개를 적어 보세요</div>'}
+    <div class="pfriends" id="pfriends" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>
+    <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o" onclick="openSkills()">내 뜨개 단계</button><button class="btn o ic" title="공유" onclick="shareProfile()">${ICON.share.replace('<svg','<svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')}</button></div>
+    <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">스레드</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="media" class="${myTab==='media'?'on':''}">미디어</button></div>
+    <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
+  $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
+  renderMyFriends(); loadMyFeed();
 }
+async function renderMyFriends(){
+  const rows = await fetchFriendships();
+  const friends = rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee:r.requester);
+  const inbox = rows.filter(r=>r.status==='pending'&&r.addressee_id===me.id).length;
+  const el=$('#pfriends'); if(!el) return;
+  el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}</span><span style="margin-left:auto">›</span>`;
+}
+async function loadMyFeed(){
+  const el=$('#myFeed'); el.innerHTML='<div class="empty">불러오는 중…</div>';
+  let q = sb.from('posts').select('*, '+AUTHOR_SEL).eq('author_id', me.id).order('created_at',{ascending:false}).limit(50);
+  if(myTab==='posts') q = q.is('parent_id', null);
+  if(myTab==='replies') q = q.not('parent_id','is', null);
+  if(myTab==='media') q = q.is('parent_id', null).neq('photos','{}');
+  const { data, error } = await q;
+  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
+  // 답글 탭: 원글 작성자 이름 (자기참조 FK는 PostgREST 임베드가 모호해서 따로 조회)
+  const pids=[...new Set((data||[]).map(r=>r.parent_id).filter(Boolean))];
+  if(pids.length){ const { data:parents } = await sb.from('posts').select('id, '+AUTHOR_SEL).in('id', pids); const byId={}; (parents||[]).forEach(x=>byId[x.id]=x); (data||[]).forEach(r=>{ r.parent = byId[r.parent_id]||null; }); }
+  await loadLikes(data||[]);
+  const emptyMsg = { posts:'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요', replies:'아직 남긴 답글이 없어요', media:'사진이 있는 글이 없어요' }[myTab];
+  el.innerHTML = (data||[]).length ? data.map(p=>postCard(p,{noLine:true, replyTo: p.parent?.author?.nickname})).join('') : `<div class="empty" style="white-space:pre-line">${emptyMsg}</div>`;
+}
+function openSettings(){
+  const p=myProfile||{};
+  openSheet(`<b style="font-size:1.05rem">설정</b>
+    <label class="f"><span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)" style="width:auto;margin-right:8px">지도에 내 핀 보이기</span></label>
+    <div class="muted" style="font-size:.85rem">위치는 500m 격자로 흐려진 좌표만 저장돼요. 정확한 위치는 서버에 남지 않아요.</div>
+    <button class="btn o" onclick="closeSheet();openSlides()">뜨개 단계 설명 다시 보기</button>
+    <button class="btn o" onclick="logout()">로그아웃</button>
+    <div class="devbar">${esc(me?.email||'')} · Supabase ${SB_URL.replace('https://','')} · 지도 ${GOOGLE_MAPS_KEY?'Google Maps':'OpenStreetMap'}</div>`);
+}
+async function shareProfile(){ const p=myProfile||{}; const text=`뜨개동네 · ${p.nickname} (${p.dong_name||''}) ${lvShort(p)}`; try{ if(navigator.share) await navigator.share({title:'뜨개동네',text}); else { await navigator.clipboard.writeText(text); toast('프로필 정보를 복사했어요'); } }catch(e){} }
 async function toggleVisible(v){ await sb.from('profiles').update({is_visible:v}).eq('id',me.id); myProfile.is_visible=v; toast(v?'지도에 보여요':'지도에서 숨겼어요'); }
 
 // ============ 시작 ============
