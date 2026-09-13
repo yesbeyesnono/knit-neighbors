@@ -222,7 +222,7 @@ details .seg{margin-top:8px;justify-content:center}
   <!-- 커뮤니티 (Threads 스타일) -->
   <section class="view" id="v-comm">
     <div class="top"><h1>커뮤니티</h1></div>
-    <div class="subtabs" id="commTabs"><button data-f="all" class="on">전체</button><button data-f="dong">우리 동네</button><button data-f="friends">친구</button></div>
+    <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="dong">우리 동네</button><button data-f="friends">친구</button></div>
     <div class="cbox" id="cbox">
       <div id="cboxAva"></div>
       <div style="flex:1;min-width:0">
@@ -686,7 +686,7 @@ async function createMeetup(){
 }
 
 // ============ 커뮤니티 (Threads 스타일) ============
-let commFilter='all', feedRows=[], feedCursor=null, likedSet=new Set(), curPost=null, cPhotos=[];
+let commFilter='rank', feedRows=[], feedCursor=null, feedOffset=0, likedSet=new Set(), curPost=null, cPhotos=[];
 const FEED_PAGE = 30;
 const AUTHOR_SEL = 'author:profiles!posts_author_id_fkey(id,nickname,avatar_url,dong_name,craft,level_crochet,level_knit)';
 function autoGrow(t){ t.style.height='auto'; t.style.height=Math.min(160, t.scrollHeight)+'px'; }
@@ -695,7 +695,15 @@ $('#commTabs').onclick = e => { const b=e.target.closest('button'); if(!b) retur
 async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); loadFeed(); }
 async function friendIds(){ const rows=await fetchFriendships(); return rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee_id:r.requester_id); }
 async function loadFeed(more){
-  if(!more){ feedRows=[]; feedCursor=null; $('#feed').innerHTML='<div class="empty">불러오는 중…</div>'; }
+  if(!more){ feedRows=[]; feedCursor=null; feedOffset=0; $('#feed').innerHTML='<div class="empty">불러오는 중…</div>'; }
+  if(commFilter==='rank'){
+    // 추천: 서버 점수순 (반응 × 거리 × 관계 × 질문 ÷ 시간)
+    const { data, error } = await sb.rpc('feed_ranked', { p_limit: FEED_PAGE, p_offset: feedOffset });
+    if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
+    feedRows = feedRows.concat(data||[]); feedOffset += (data||[]).length;
+    $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
+    await loadLikes(data||[]); renderFeed(); return;
+  }
   let q = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).order('created_at',{ascending:false}).limit(FEED_PAGE);
   if(feedCursor) q = q.lt('created_at', feedCursor);
   if(commFilter==='dong'){ if(!myProfile?.dong_code){ $('#feed').innerHTML='<div class="empty">프로필에서 동네를 먼저 정해 주세요</div>'; return; } q = q.eq('dong_code', myProfile.dong_code); }

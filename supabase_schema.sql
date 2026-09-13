@@ -691,3 +691,60 @@ create policy "storage_posts_insert_own" on storage.objects for insert to authen
   with check (bucket_id = 'posts' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy "storage_posts_delete_own" on storage.objects for delete to authenticated
   using (bucket_id = 'posts' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ---------------------------------------------------------------
+-- 10. 추천 피드 — 2026-09-13
+-- 점수 = (1+좋아요+답글×2) × 거리(같은 동네 2.0 / 3km 1.5 / 10km 1.0 / 그 외 0.5)
+--        × 친구 1.5 × 단계 비슷(±1) 1.2 × 같은 종목 1.1 × 질문 글 1.3 ÷ (경과시간h+2)^1.3
+--        작성자당 3번째 글부터 ×0.3 (다양성)
+-- ---------------------------------------------------------------
+create or replace function public.feed_ranked(p_limit integer default 30, p_offset integer default 0)
+returns table (
+  id uuid, author_id uuid, body text, photos text[], dong_code text,
+  reply_count integer, like_count integer, created_at timestamptz,
+  author jsonb, score double precision
+)
+language sql stable security invoker set search_path = public, extensions as $$
+  with me as (
+    select p.id, p.dong_code, p.location, p.craft, p.level_crochet, p.level_knit
+    from public.profiles p where p.id = auth.uid()
+  ),
+  friends as (
+    select case when f.requester_id = auth.uid() then f.addressee_id else f.requester_id end as fid
+    from public.friendships f
+    where f.status = 'accepted' and (f.requester_id = auth.uid() or f.addressee_id = auth.uid())
+  ),
+  scored as (
+    select
+      po.id, po.author_id, po.body, po.photos, po.dong_code, po.reply_count, po.like_count, po.created_at,
+      jsonb_build_object('id', a.id, 'nickname', a.nickname, 'avatar_url', a.avatar_url, 'dong_name', a.dong_name,
+                         'craft', a.craft, 'level_crochet', a.level_crochet, 'level_knit', a.level_knit) as author,
+      (1 + po.like_count + 2 * po.reply_count)::double precision
+      * case
+          when po.dong_code is not null and po.dong_code = me.dong_code then 2.0
+          when a.location is null or me.location is null then 1.0
+          when st_dwithin(a.location, me.location, 3000) then 1.5
+          when st_dwithin(a.location, me.location, 10000) then 1.0
+          else 0.5 end
+      * case when exists (select 1 from friends f where f.fid = po.author_id) then 1.5 else 1.0 end
+      * case when (me.level_crochet > 0 and a.level_crochet > 0 and abs(me.level_crochet - a.level_crochet) <= 1)
+              or (me.level_knit > 0 and a.level_knit > 0 and abs(me.level_knit - a.level_knit) <= 1) then 1.2 else 1.0 end
+      * case when me.craft is not null and a.craft is not null
+              and (me.craft = a.craft or me.craft = 'both' or a.craft = 'both') then 1.1 else 1.0 end
+      * case when po.body ~ '(\?|막히|어떻게|도와|질문|팁|방법|알려)' then 1.3 else 1.0 end
+      / power(extract(epoch from (now() - po.created_at)) / 3600.0 + 2, 1.3) as base
+    from public.posts po
+    join public.profiles a on a.id = po.author_id
+    left join me on true
+    where po.parent_id is null
+  ),
+  ranked as (
+    select s.*, row_number() over (partition by s.author_id order by s.base desc) as rn from scored s
+  )
+  select id, author_id, body, photos, dong_code, reply_count, like_count, created_at, author,
+         case when rn > 2 then base * 0.3 else base end as score
+  from ranked
+  order by score desc, created_at desc
+  limit p_limit offset p_offset;
+$$;
+revoke execute on function public.feed_ranked(integer, integer) from public, anon;
