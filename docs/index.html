@@ -108,7 +108,7 @@ details .seg{margin-top:8px;justify-content:center}
 .tabs button{flex:1;font:inherit;border:0;background:transparent;padding:8px;border-radius:8px;color:var(--ink2);cursor:pointer}
 .tabs button.on{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 /* Threads 프로필 (마이) */
-#v-my .body{padding:0;gap:0}
+#v-my .body,#v-profile .body{padding:0;gap:0}
 .ptop{display:flex;align-items:flex-start;gap:14px;padding:6px 16px 0}
 .ptop .pinfo{flex:1;min-width:0}
 .ptop h2{margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-0.03em;line-height:1.2}
@@ -121,10 +121,12 @@ details .seg{margin-top:8px;justify-content:center}
 .pbtns .btn{flex:1;padding:9px 0;font-size:.92rem;font-weight:600;border-radius:10px}
 .pbtns .btn.ic{flex:0 0 46px}
 .pbtns .btn.ic svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#v-my .subtabs{margin-top:8px;border-bottom:1px solid var(--line);padding:0}
-#v-my .subtabs button{flex:1;padding:12px 0;font-size:.95rem;color:var(--ink3);border-bottom:1.5px solid transparent;font-weight:500}
-#v-my .subtabs button.on{color:var(--ink);border-color:var(--ink);font-weight:700}
-#v-my .feed .empty{padding:48px 20px}
+#v-my .subtabs,#v-profile .subtabs{margin-top:8px;border-bottom:1px solid var(--line);padding:0}
+#v-my .subtabs button,#v-profile .subtabs button{flex:1;padding:12px 0;font-size:.95rem;color:var(--ink3);border-bottom:1.5px solid transparent;font-weight:500}
+#v-my .subtabs button.on,#v-profile .subtabs button.on{color:var(--ink);border-color:var(--ink);font-weight:700}
+#v-my .feed .empty,#v-profile .feed .empty{padding:48px 20px}
+.pmeta{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px 0}
+.pbtns .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
 .lvhead{display:flex;align-items:center;gap:14px;padding:4px 2px}
 .lvbig{font-family:inherit;font-size:2.6rem;font-weight:800;line-height:1;color:var(--ink);min-width:48px;text-align:center}
 .lvbig small{display:block;font-family:"Noto Sans KR",sans-serif;font-size:.7rem;color:var(--ink3);margin-top:4px}
@@ -372,6 +374,12 @@ details .seg{margin-top:8px;justify-content:center}
     <div class="body" id="skillsBody"></div>
   </section>
 
+  <!-- 다른 사람 프로필 (Threads 프로필 페이지) -->
+  <section class="view" id="v-profile">
+    <div class="top"><button class="back" onclick="closeProfile()">‹</button><h1 id="profTitle"></h1><button class="ib" title="더보기" onclick="profileMenu()" style="font-size:1.2rem;font-weight:700;letter-spacing:1px">···</button></div>
+    <div class="body" id="profBody"></div>
+  </section>
+
   <!-- 마이 -->
   <section class="view" id="v-my">
     <div class="top"><span style="width:32px"></span><h1 id="myTitle">마이</h1><button class="ib" title="설정" onclick="openSettings()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
@@ -497,7 +505,7 @@ function parseGeo(hex){
 }
 
 // ============ 화면 전환 ============
-const NAV_OF = { friends:'my', skills:'my', post:'comm' };
+const NAV_OF = { friends:'my', skills:'my', post:'comm', profile:'' };
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
 $('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ go('comm'); setTimeout(()=>{ $('#v-comm').scrollTop=0; $('#cText').focus(); },50); return; } go(b.dataset.v); };
@@ -655,32 +663,59 @@ function showPinCard(p){
 function centerMe(){ if(myProfile?._c) MapAdapter.setCenter(myProfile._c); else toast('프로필에서 동네를 먼저 정해 주세요'); }
 
 // ============ 프로필 시트 ============
+let profBack=null, profId=null, profTab='posts', profData=null;
 async function openProfile(id){
-  const [{data:p},{data:works},{data:rel}] = await Promise.all([
+  if(id===me.id) return go('my');
+  const [{data:p},{data:rel}] = await Promise.all([
     sb.from('profiles').select('*').eq('id',id).single(),
-    sb.from('works').select('*').eq('profile_id',id).order('created_at',{ascending:false}).limit(6),
     sb.from('friendships').select('*').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`)
   ]);
   if(!p) return toast('프로필을 불러올 수 없어요');
+  closeSheet();
+  if(view!=='profile'){ profBack = view; profTab='posts'; }
+  profId=id; profData=p;
   const r = rel?.[0];
   let action;
-  if(!r) action = `<button class="btn" onclick="requestFriend('${id}')">🤝 친구 신청</button>`;
-  else if(r.status==='accepted') action = `<button class="btn m" onclick="openDirectRoom('${id}')">💬 채팅 열기</button>`;
+  if(!r) action = `<button class="btn primary" onclick="requestFriend('${id}')">친구 신청</button>`;
+  else if(r.status==='accepted') action = `<button class="btn primary" onclick="openDirectRoom('${id}')">메시지</button>`;
   else if(r.status==='pending' && r.requester_id===me.id) action = `<button class="btn o" disabled>신청 대기 중</button>`;
-  else if(r.status==='pending') action = `<div class="row"><button class="btn" onclick="respond('${id}','accepted')">수락</button><button class="btn o" onclick="respond('${id}','declined')">거절</button></div>`;
+  else if(r.status==='pending') action = `<button class="btn primary" onclick="respond('${id}','accepted')">수락</button><button class="btn o" onclick="respond('${id}','declined')">거절</button>`;
   else if(r.status==='blocked') action = `<button class="btn o" disabled>차단됨</button>`;
-  else action = `<button class="btn o" disabled>거절된 신청 (30일 후 재신청)</button>`;
-  openSheet(`
-    <div class="row">${avatar(p,true)}<div><b style="font-size:1.1rem">${esc(p.nickname)}</b><div class="muted">${esc(p.dong_name||'')}${p.dong_verified_at?' ✓':''}</div><div style="margin-top:4px">${chips(p)}</div></div></div>
-    ${(p.level_crochet>0||p.level_knit>0)?`<div class="card soft"><b class="t">뜨개 단계</b><div class="row" style="flex-wrap:wrap;gap:6px">${lvChips(p)} ${simBadge(p)}</div></div>`:''}
-    ${p.now_making?`<div class="card soft"><b class="t">지금 뜨는 것</b>${esc(p.now_making)}</div>`:''}
-    ${p.stuck_on?`<div class="card soft"><b class="t">요즘 막히는 부분</b><div class="story">${esc(p.stuck_on)}</div></div>`:''}
-    ${p.available?.length?`<div class="card soft"><b class="t">만나기 좋은 시간</b>${p.available.map(a=>AVAIL[a]).join(' · ')}</div>`:''}
-    ${p.bio?`<div class="card soft">${esc(p.bio)}</div>`:''}
-    <div class="card soft"><b class="t">완성작</b>${works?.length?`<div class="gallery">${works.map(w=>`<div style="background:url(${esc(w.photo_url)}) center/cover"></div>`).join('')}</div>`:'<span class="muted">아직 없어요</span>'}</div>
-    ${action}
-    <div class="row" style="justify-content:center;gap:16px"><button class="btn sm o" onclick="reportUser('${id}')">🚩 신고</button><button class="btn sm o" onclick="blockUser('${id}')">⛔ 차단</button></div>
-  `);
+  else action = `<button class="btn o" disabled>거절됨 · 30일 후 재신청</button>`;
+  const handle=[p.dong_name?`${p.dong_name}${p.dong_verified_at?' ✓':''}`:'', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
+  const bio = p.bio || [p.now_making?`지금 뜨는 것: ${p.now_making}`:'', p.stuck_on?`요즘 막히는 부분: ${p.stuck_on}`:''].filter(Boolean).join('\n');
+  const meta = [simBadge(p), p.experience?`<span class="chip">${EXP[p.experience]}</span>`:'', p.mbti?`<span class="chip">${esc(p.mbti)}</span>`:'', p.beginner_ok?'<span class="chip m">초보 환영</span>':'', p.available?.length?`<span class="chip">${p.available.map(a=>AVAIL[a]).join(' · ')}</span>`:''].filter(Boolean).join('');
+  $('#profTitle').textContent = p.nickname;
+  $('#profBody').innerHTML = `
+    <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
+    ${bio?`<div class="pbio">${esc(bio)}</div>`:''}
+    ${meta?`<div class="pmeta">${meta}</div>`:''}
+    ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
+    <div class="pbtns">${action}<button class="btn o ic" title="공유" onclick="shareUser()">${ICON.share.replace('<svg','<svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')}</button></div>
+    <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">스레드</button><button data-t="replies" class="${profTab==='replies'?'on':''}">답글</button><button data-t="media" class="${profTab==='media'?'on':''}">미디어</button></div>
+    <div class="feed" id="profFeed"><div class="empty">불러오는 중…</div></div>`;
+  $('#profTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; profTab=b.dataset.t; [...$('#profTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadUserFeed(profId, profTab, $('#profFeed')); };
+  show('profile');
+  loadUserFeed(id, profTab, $('#profFeed'));
+}
+function closeProfile(){ const b=profBack||'map'; profBack=null; if(b==='post' && curPost) return openPost(curPost.id); if(['map','comm','chats','my','friends'].includes(b)) go(b); else go('map'); }
+function profileMenu(){ const id=profId; openSheet(`<button class="btn o" onclick="closeSheet();reportUser('${id}')">🚩 신고</button><button class="btn r" onclick="closeSheet();blockUser('${id}')">차단</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
+async function shareUser(){ const p=profData||{}; const text=`뜨개동네 · ${p.nickname} (${p.dong_name||''}) ${lvShort(p)}`; try{ if(navigator.share) await navigator.share({title:'뜨개동네',text}); else { await navigator.clipboard.writeText(text); toast('프로필 정보를 복사했어요'); } }catch(e){} }
+// 특정 사용자 글 목록 (마이·프로필 공용)
+async function loadUserFeed(uid, tab, el){
+  el.innerHTML='<div class="empty">불러오는 중…</div>';
+  let q = sb.from('posts').select('*, '+AUTHOR_SEL).eq('author_id', uid).order('created_at',{ascending:false}).limit(50);
+  if(tab==='posts') q = q.is('parent_id', null);
+  if(tab==='replies') q = q.not('parent_id','is', null);
+  if(tab==='media') q = q.is('parent_id', null).neq('photos','{}');
+  const { data, error } = await q;
+  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
+  const pids=[...new Set((data||[]).map(r=>r.parent_id).filter(Boolean))];
+  if(pids.length){ const { data:parents } = await sb.from('posts').select('id, '+AUTHOR_SEL).in('id', pids); const byId={}; (parents||[]).forEach(x=>byId[x.id]=x); (data||[]).forEach(r=>{ r.parent = byId[r.parent_id]||null; }); }
+  await loadLikes(data||[]);
+  const mine = uid===me.id;
+  const emptyMsg = { posts: mine?'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요':'아직 올린 글이 없어요', replies: mine?'아직 남긴 답글이 없어요':'아직 남긴 답글이 없어요', media:'사진이 있는 글이 없어요' }[tab];
+  el.innerHTML = (data||[]).length ? data.map(p=>postCard(p,{noLine:true, replyTo: p.parent?.author?.nickname})).join('') : `<div class="empty" style="white-space:pre-line">${emptyMsg}</div>`;
 }
 function requestFriend(id){
   openSheet(`<b>친구 신청</b><p class="muted" style="margin:0">한 줄 메시지를 함께 보내면 수락률이 올라가요 (선택, 100자)</p><textarea id="reqMsg" maxlength="100" placeholder="예: 저도 그 도안 뜨고 있어요"></textarea><button class="btn" onclick="sendRequest('${id}')">보내기</button>`);
@@ -694,7 +729,7 @@ async function respond(id, status){
   const { error } = await sb.from('friendships').update({ status }).eq('requester_id',id).eq('addressee_id',me.id);
   if(error) return toast('실패: '+error.message);
   toast(status==='accepted'?'친구가 됐어요. 채팅방이 열렸어요':'거절했어요');
-  if(view==='friends') renderFriends(); else closeSheet();
+  if(view==='friends') renderFriends(); else if(view==='profile') openProfile(id); else closeSheet();
 }
 async function blockUser(id){
   if(!confirm('차단하면 지도와 채팅에서 서로 보이지 않아요. 차단할까요?')) return;
@@ -703,7 +738,7 @@ async function blockUser(id){
   if(rel?.length) r = await sb.from('friendships').update({status:'blocked'}).eq('requester_id',rel[0].requester_id).eq('addressee_id',rel[0].addressee_id);
   else r = await sb.from('friendships').insert({requester_id:me.id,addressee_id:id,status:'pending'}).then(()=>sb.from('friendships').update({status:'blocked'}).eq('requester_id',me.id).eq('addressee_id',id));
   if(r.error) return toast('실패: '+r.error.message);
-  toast('차단했어요'); closeSheet(); loadPins();
+  toast('차단했어요'); closeSheet(); if(view==='profile') closeProfile(); loadPins();
 }
 function reportUser(id){
   openSheet(`<b>신고</b><label class="f">사유<select id="repReason"><option value="spam">스팸·광고</option><option value="harassment">괴롭힘·불쾌한 언행</option><option value="inappropriate">부적절한 내용</option><option value="fake">사칭·허위 프로필</option><option value="other">기타</option></select></label><textarea id="repDetail" maxlength="500" placeholder="자세한 내용 (선택)"></textarea><button class="btn r" onclick="sendReport('${id}')">신고하기</button>`);
@@ -1075,21 +1110,7 @@ async function renderMyFriends(){
   const el=$('#pfriends'); if(!el) return;
   el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}</span><span style="margin-left:auto">›</span>`;
 }
-async function loadMyFeed(){
-  const el=$('#myFeed'); el.innerHTML='<div class="empty">불러오는 중…</div>';
-  let q = sb.from('posts').select('*, '+AUTHOR_SEL).eq('author_id', me.id).order('created_at',{ascending:false}).limit(50);
-  if(myTab==='posts') q = q.is('parent_id', null);
-  if(myTab==='replies') q = q.not('parent_id','is', null);
-  if(myTab==='media') q = q.is('parent_id', null).neq('photos','{}');
-  const { data, error } = await q;
-  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
-  // 답글 탭: 원글 작성자 이름 (자기참조 FK는 PostgREST 임베드가 모호해서 따로 조회)
-  const pids=[...new Set((data||[]).map(r=>r.parent_id).filter(Boolean))];
-  if(pids.length){ const { data:parents } = await sb.from('posts').select('id, '+AUTHOR_SEL).in('id', pids); const byId={}; (parents||[]).forEach(x=>byId[x.id]=x); (data||[]).forEach(r=>{ r.parent = byId[r.parent_id]||null; }); }
-  await loadLikes(data||[]);
-  const emptyMsg = { posts:'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요', replies:'아직 남긴 답글이 없어요', media:'사진이 있는 글이 없어요' }[myTab];
-  el.innerHTML = (data||[]).length ? data.map(p=>postCard(p,{noLine:true, replyTo: p.parent?.author?.nickname})).join('') : `<div class="empty" style="white-space:pre-line">${emptyMsg}</div>`;
-}
+async function loadMyFeed(){ return loadUserFeed(me.id, myTab, $('#myFeed')); }
 function openSettings(){
   const p=myProfile||{};
   openSheet(`<b style="font-size:1.05rem">설정</b>
