@@ -535,7 +535,7 @@ const CRAFT = {knit:'대바늘', crochet:'코바늘', both:'둘 다'};
 const EXP = {new:'막 시작', under_1y:'1년 미만', '1_3y':'1~3년', over_3y:'3년+'};
 const AVAIL = {weekday_day:'평일 낮', weekday_evening:'평일 저녁', weekend:'주말'};
 
-let me = null, myProfile = null, view = 'map', pins = [], filter = {craft:null, bok:null}, roomId = null, roomChan = null, friendChan = null;
+let me = null, myProfile = null, view = 'map', pins = [], filter = {mode:'all'}, roomId = null, roomChan = null, friendChan = null;
 
 // ============ 유틸 ============
 function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2200); }
@@ -721,9 +721,20 @@ const GMap = {
 };
 
 // ============ 지도 홈 ============
-const FILTERS = [['craft',null,'전체'],['craft','knit','대바늘'],['craft','crochet','코바늘'],['bok',true,'초보 환영'],['sim',true,'🤝 비슷한 수준']];
-function renderFilters(){ $('#filters').innerHTML = FILTERS.map(([k,v,l],i)=>`<button data-i="${i}" class="${filter[k]===v&&(k!=='craft'||v!==null||(filter.craft===null&&filter.bok===null&&!filter.sim))?'on':''}">${l}</button>`).join(''); }
-$('#filters').onclick = e => { const b=e.target.closest('button'); if(!b)return; const [k,v]=FILTERS[b.dataset.i]; if(k==='craft'&&v===null){filter={craft:null,bok:null,sim:null};} else if(k==='bok'){filter.bok=filter.bok?null:true;} else if(k==='sim'){ if(!(myProfile?.level_crochet>0||myProfile?.level_knit>0)) return toast('먼저 마이에서 내 뜨개 단계를 체크해 주세요'); filter.sim=filter.sim?null:true;} else {filter.craft=filter.craft===v?null:v;} renderFilters(); loadPins(); };
+// 지도 필터 (단일 선택): 전체 · 모임 · 비슷한 수준 · 시간 맞음 · 친구 (+ 초보 환영: 내 단계가 1 이하일 때만)
+function filterList(){
+  const list=[['all','전체'],['meet','모임'],['sim','비슷한 수준'],['time','시간 맞음'],['friends','친구']];
+  if((myProfile?.level_crochet||0)<=1 && (myProfile?.level_knit||0)<=1) list.push(['bok','초보 환영']);
+  return list;
+}
+function renderFilters(){ $('#filters').innerHTML = filterList().map(([k,l])=>`<button data-k="${k}" class="${filter.mode===k?'on':''}">${l}</button>`).join(''); }
+$('#filters').onclick = e => {
+  const b=e.target.closest('button'); if(!b) return; const k=b.dataset.k;
+  if(k==='sim' && !(myProfile?.level_crochet>0||myProfile?.level_knit>0)) return toast('먼저 마이 › 내 뜨개 단계를 체크해 주세요');
+  if(k==='time' && !(myProfile?.available||[]).length) return toast('프로필 편집에서 만나기 좋은 시간을 먼저 골라 주세요');
+  filter.mode = (filter.mode===k && k!=='all') ? 'all' : k;
+  renderFilters(); loadPins();
+};
 async function initMap(){
   const c = myProfile?._c || {lat:37.5665,lng:126.9780};
   await MapAdapter.init($('#map'), c);
@@ -736,15 +747,20 @@ function loadPins(){ clearTimeout(pinTimer); pinTimer=setTimeout(fetchPins, 250)
 async function fetchPins(){
   const c = MapAdapter.center();
   const [{data:people,error}, {data:meetups}] = await Promise.all([
-    sb.rpc('nearby_profiles',{p_lat:c.lat,p_lng:c.lng,p_radius_m:RADIUS_M,p_craft:filter.craft,p_beginner_ok:filter.bok}),
+    sb.rpc('nearby_profiles',{p_lat:c.lat,p_lng:c.lng,p_radius_m:RADIUS_M,p_craft:null,p_beginner_ok:filter.mode==='bok'?true:null}),
     sb.from('meetups').select('id,title,place_name,starts_at,location,participant_count,room_id').eq('is_public',true).gte('starts_at',new Date().toISOString())
   ]);
   if(error) return toast('근처 조회 실패: '+error.message);
   MapAdapter.clear();
   if(myProfile?._c) MapAdapter.marker({...myProfile._c,label:'나',avatar:myProfile.avatar_url,cls:'me'});
-  const shown = filter.sim ? (people||[]).filter(p=>{ const d=simDiff(p); return d!==null && Math.abs(d)<=1; }) : (people||[]);
+  let shown = people||[];
+  if(filter.mode==='meet') shown = [];
+  if(filter.mode==='sim') shown = shown.filter(p=>{ const d=simDiff(p); return d!==null && Math.abs(d)<=1; });
+  if(filter.mode==='time'){ const mine=new Set(myProfile?.available||[]); shown = shown.filter(p=>(p.available||[]).some(a=>mine.has(a))); }
+  if(filter.mode==='friends'){ const ids=new Set(await friendIds()); shown = shown.filter(p=>ids.has(p.id)); }
   shown.forEach(p=>MapAdapter.marker({lat:p.lat,lng:p.lng,label:p.nickname,avatar:p.avatar_url,cls:p.craft==='knit'?'knit':'',onClick:()=>showPinCard(p)}));
-  (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:m.title,cls:'meet',onClick:()=>openMeetup(m.id)}); });
+  if(filter.mode==='all' || filter.mode==='meet') (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:m.title,cls:'meet',onClick:()=>openMeetup(m.id)}); });
+  if(filter.mode!=='all' && !shown.length && !(filter.mode==='meet' && (meetups||[]).length)) toast({meet:'근처에 예정된 모임이 없어요', sim:'비슷한 수준의 이웃이 이 범위엔 없어요', time:'시간이 맞는 이웃이 이 범위엔 없어요', friends:'이 범위엔 친구가 없어요', bok:'초보 환영 이웃이 이 범위엔 없어요'}[filter.mode]);
   pins = people||[];
 }
 function showPinCard(p){
