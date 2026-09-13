@@ -76,8 +76,17 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--
 .pincard{bottom:14px;padding:0 14px}
 .pincard .card{box-shadow:0 8px 30px rgba(0,0,0,.18);cursor:pointer}
 .locbtn{position:absolute;right:14px;bottom:110px;z-index:400;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:1.1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
-.pin{width:34px;height:34px;border-radius:50%;background:#C9922F;color:#fff;display:grid;place-items:center;font-size:.62rem;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);white-space:nowrap;overflow:hidden;cursor:pointer}
-.pin.me{background:#000} .pin.knit{background:#5C7A4C}
+.upin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));font-family:inherit}
+.upin .lbl{background:#000;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;letter-spacing:-0.01em}
+.upin .face{width:42px;height:42px;border-radius:50%;background:#fff;border:2.5px solid #000;display:grid;place-items:center;font-weight:800;font-size:16px;color:#000;overflow:hidden}
+.upin .face img{width:100%;height:100%;object-fit:cover}
+.upin .tail{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #000;margin-top:-2px}
+.upin.me .face{background:#000;color:#fff}
+.upin.me .lbl{background:#fff;color:#000;border:1.5px solid #000}
+.upin.meet .face{background:#000;color:#fff;border-radius:12px;font-size:11px;width:46px;height:34px}
+.upin.meet .lbl{background:#fff;color:#000;border:1.5px solid #000}
+.upin.knit .face{border-color:#5C7A4C}
+.upin.knit .tail{border-top-color:#5C7A4C}
 .leaflet-div-icon{background:none;border:0}
 /* sheet */
 .sheetwrap{position:absolute;inset:0;z-index:1100;display:none;align-items:flex-end;background:rgba(43,39,35,.35)}
@@ -613,12 +622,16 @@ const MapAdapter = {
   onMove(cb){ this.impl.onMove(cb); },
   center(){ return this.impl.center(); }
 };
+function pinHtml({label, sub, avatar, cls}){
+  const ini = (label||'?').slice(0,1);
+  return `<div class="upin ${cls||''}"><div class="lbl">${esc(label)}</div><div class="face">${cls==='meet'?'모임':(avatar?`<img src="${esc(avatar)}" alt="">`:esc(ini))}</div><div class="tail"></div></div>`;
+}
 const LMap = {
   map:null, layer:null,
   async init(el, c){ this.map=L.map(el,{zoomControl:false,attributionControl:true}).setView([c.lat,c.lng],14); L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(this.map); this.layer=L.layerGroup().addTo(this.map); },
   setCenter(c){ this.map.setView([c.lat,c.lng],14); },
   clear(){ this.layer.clearLayers(); },
-  marker({lat,lng,label,cls,onClick}){ const m=L.marker([lat,lng],{icon:L.divIcon({html:`<div class="pin ${cls||''}">${esc(label)}</div>`,iconSize:[34,34],iconAnchor:[17,17]})}); if(onClick)m.on('click',onClick); m.addTo(this.layer); },
+  marker(o){ const m=L.marker([o.lat,o.lng],{icon:L.divIcon({html:pinHtml(o).replace('class="upin','style="position:static;transform:none" class="upin'),iconSize:[0,0],iconAnchor:[0,0]})}); if(o.onClick)m.on('click',o.onClick); m.addTo(this.layer); },
   onMove(cb){ this.map.on('moveend',cb); },
   center(){ const c=this.map.getCenter(); return {lat:c.lat,lng:c.lng}; }
 };
@@ -634,10 +647,21 @@ function makeHtmlPin(){
 }
 const GMap = {
   map:null, markers:[],
-  async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,disableDefaultUI:true,clickableIcons:false}); this.Pin=makeHtmlPin(); },
+  async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,disableDefaultUI:true,clickableIcons:false,
+    // 업체·명소 아이콘 숨김 + 지도 톤 다운 → 사용자 핀만 또렷하게
+    styles:[
+      {featureType:'poi',stylers:[{visibility:'off'}]},
+      {featureType:'poi.park',elementType:'geometry',stylers:[{visibility:'on'},{saturation:-30}]},
+      {featureType:'transit',elementType:'labels.icon',stylers:[{visibility:'off'}]},
+      {featureType:'road',elementType:'geometry',stylers:[{saturation:-70},{lightness:20}]},
+      {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#8a8a8a'}]},
+      {featureType:'landscape',stylers:[{saturation:-40},{lightness:10}]},
+      {featureType:'water',stylers:[{saturation:-50},{lightness:10}]},
+      {featureType:'administrative',elementType:'labels.text.fill',stylers:[{color:'#555'}]}
+    ]}); this.Pin=makeHtmlPin(); },
   setCenter(c){ this.map.setCenter(c); this.map.setZoom(14); },
   clear(){ this.markers.forEach(m=>m.setMap(null)); this.markers=[]; },
-  marker({lat,lng,label,cls,onClick}){ const d=document.createElement('div'); d.className='pin '+(cls||''); d.textContent=label; d.style.position='absolute'; d.style.transform='translate(-50%,-50%)'; const m=new this.Pin(new google.maps.LatLng(lat,lng), d, onClick); m.setMap(this.map); this.markers.push(m); },
+  marker(o){ const w=document.createElement('div'); w.innerHTML=pinHtml(o); const d=w.firstElementChild; const m=new this.Pin(new google.maps.LatLng(o.lat,o.lng), d, o.onClick); m.setMap(this.map); this.markers.push(m); },
   onMove(cb){ this.map.addListener('idle',cb); },
   center(){ const c=this.map?.getCenter?.(); return c ? {lat:c.lat(),lng:c.lng()} : (myProfile?._c || {lat:37.5665,lng:126.9780}); }
 };
@@ -663,10 +687,10 @@ async function fetchPins(){
   ]);
   if(error) return toast('근처 조회 실패: '+error.message);
   MapAdapter.clear();
-  if(myProfile?._c) MapAdapter.marker({...myProfile._c,label:'나',cls:'me'});
+  if(myProfile?._c) MapAdapter.marker({...myProfile._c,label:'나',avatar:myProfile.avatar_url,cls:'me'});
   const shown = filter.sim ? (people||[]).filter(p=>{ const d=simDiff(p); return d!==null && Math.abs(d)<=1; }) : (people||[]);
-  shown.forEach(p=>MapAdapter.marker({lat:p.lat,lng:p.lng,label:(p.now_making||p.nickname).slice(0,3),cls:p.craft==='knit'?'knit':'',onClick:()=>showPinCard(p)}));
-  (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:'모임',cls:'me',onClick:()=>toast(`${m.title} · ${m.place_name} · ${new Date(m.starts_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`)}); });
+  shown.forEach(p=>MapAdapter.marker({lat:p.lat,lng:p.lng,label:p.nickname,avatar:p.avatar_url,cls:p.craft==='knit'?'knit':'',onClick:()=>showPinCard(p)}));
+  (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:m.title,cls:'meet',onClick:()=>toast(`${m.title} · ${m.place_name} · ${new Date(m.starts_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`)}); });
   pins = people||[];
 }
 function showPinCard(p){
