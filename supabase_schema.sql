@@ -862,3 +862,14 @@ alter table public.profiles
 alter table public.posts add column review_of uuid references public.meetups(id) on delete set null;
 create index posts_review_idx on public.posts (review_of, created_at desc) where review_of is not null;
 alter table public.meetups add column review_count integer not null default 0;
+
+-- ---------------------------------------------------------------
+-- 15. 보안 강화·주최자 취소 (2026-09-14 전체 검토)
+--   custom_technique_stats 뷰 security_invoker + authenticated 접근 차단
+--   profiles: level_crochet/level_knit/verified_skills/cert_count/suspended_at 컬럼 UPDATE 권한 회수 (서버 계산값 위조 방지)
+--   works: 직접 insert/update 정책 제거 (create_work 함수로만)
+--   posts_insert_own: meetup_id/work_id/review_of 는 클라이언트가 못 붙임 + 정지 계정 차단(is_active_user)
+--   meetups: 직접 insert 정책 제거 (create_meetup으로만), room_id/created_by/카운트 컬럼 UPDATE 회수
+--   create_meetup(p_extra.room_id): 기존 단체방에 모임 붙이기 (멤버만)
+--   cancel_meetup(meetup_id): 주최자만, 시작 전만. 모임·안내 글 삭제, 방·채팅은 유지 + 취소 메시지
+-- ---------------------------------------------------------------
