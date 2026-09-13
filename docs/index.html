@@ -194,10 +194,11 @@ details .seg{margin-top:8px;justify-content:center}
     <div class="top"><button class="back" id="obBack" onclick="go('my')" hidden>‹</button><h1 id="obTitle">프로필 만들기</h1></div>
     <div class="body">
       <label class="f">닉네임<input id="f_nick" maxlength="20"></label>
-      <label class="f">동네
-        <select id="f_dong"></select>
-      </label>
-      <button class="btn o sm" onclick="useGps()">📍 현재 위치로 핀 위치 정하기 (500m 격자로 흐려져 저장)</button>
+      <div class="card soft" id="locCard"><b class="t">내 동네 (자동 인식)</b>
+        <div id="locStatus">📍 위치 확인 중…</div>
+        <div class="row" style="margin-top:8px"><button type="button" class="btn sm o" onclick="detectLocation()">다시 확인</button><button type="button" class="btn sm o" onclick="manualDong()">직접 입력</button></div>
+        <div class="muted" style="margin-top:6px">정확한 위치는 저장하지 않아요. 500m 격자로 흐려진 좌표만 저장돼요.</div>
+      </div>
       <label class="f">뜨개 스타일<div class="seg" id="f_craft"></div></label>
       <label class="f">뜨개 경력<div class="seg" id="f_exp"></div></label>
       <label class="f">지금 뜨는 것 (지도 핀에 한 단어로 보여요)<input id="f_now" maxlength="40" placeholder="예: 그래니 스퀘어 가디건"></label>
@@ -342,12 +343,6 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-const DONGS = [
-  ['1168010100','역삼1동',37.4999,127.0374],['1168010800','역삼2동',37.4956,127.0470],['1168010500','삼성1동',37.5140,127.0560],
-  ['1168010600','논현1동',37.5110,127.0280],['1168011400','도곡1동',37.4900,127.0440],['1168011000','대치2동',37.5000,127.0630],
-  ['1144012000','연남동',37.5627,126.9250],['1144012200','서교동',37.5530,126.9200],['1120011500','성수1가1동',37.5445,127.0557],
-  ['4113511000','판교동',37.3948,127.1112],['1111011800','혜화동',37.5860,127.0010],['1141011900','망원1동',37.5560,126.9030],
-];
 const CRAFT = {knit:'대바늘', crochet:'코바늘', both:'둘 다'};
 const EXP = {new:'막 시작', under_1y:'1년 미만', '1_3y':'1~3년', over_3y:'3년+'};
 const AVAIL = {weekday_day:'평일 낮', weekday_evening:'평일 저녁', weekend:'주말'};
@@ -402,33 +397,75 @@ $('#nav').onclick = e => { const b=e.target.closest('button'); if(b) go(b.datase
 
 // ============ 온보딩 ============
 seg('#f_craft', CRAFT); seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
-$('#f_dong').innerHTML = DONGS.map(d=>`<option value="${d[0]}">${d[1]}</option>`).join('');
-let gps = null;
+let loc = { lat:null, lng:null, dong_name:null, dong_code:null, verified:false };
+function setLocStatus(html){ $('#locStatus').innerHTML = html; }
+// Google Maps 스크립트 로더 (지도·역지오코딩 공용, 1회만 주입)
+function loadGoogleMaps(){
+  if(!GOOGLE_MAPS_KEY) return Promise.reject(new Error('no key'));
+  if(window.google?.maps?.Map) return Promise.resolve();
+  if(loadGoogleMaps.p) return loadGoogleMaps.p;
+  loadGoogleMaps.p = new Promise((res, rej)=>{ window.__gm=res; const sc=document.createElement('script'); sc.onerror=()=>rej(new Error('maps load failed')); sc.src=`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&callback=__gm&language=ko&region=KR&loading=async`; document.head.appendChild(sc); });
+  return loadGoogleMaps.p;
+}
+// 좌표 → 동네 이름. 1순위 Google Geocoder(Geocoding API 켜져 있을 때), 2순위 OpenStreetMap Nominatim
+async function reverseGeocode(lat, lng){
+  try{
+    await loadGoogleMaps();
+    const { results } = await Promise.race([ new google.maps.Geocoder().geocode({ location:{lat,lng}, language:'ko' }), new Promise((_,rej)=>setTimeout(()=>rej(new Error('geocode timeout')),4000)) ]);
+    const comps = results?.[0]?.address_components||[];
+    const pick = t => comps.find(c=>c.types.includes(t))?.long_name;
+    const dong = pick('sublocality_level_2') || pick('sublocality_level_1') || pick('neighborhood');
+    const gu = pick('sublocality_level_1'), si = pick('locality') || pick('administrative_area_level_1');
+    if(dong) return { dong_name: dong, dong_code: [si,gu,dong].filter(Boolean).join('|') };
+  }catch(e){ /* Geocoding API 미활성 등 → 폴백 */ }
+  const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=ko&zoom=16`, { headers:{ 'Accept':'application/json' } });
+  const j = await r.json(); const a = j.address||{};
+  const dong = a.suburb || a.quarter || a.neighbourhood || a.village || a.town;   // suburb=행정동(역삼2동), quarter=법정동(역삼동)
+  const gu = a.borough || a.city_district || a.county, si = a.city || a.province || a.state;
+  if(!dong) throw new Error('동네를 찾지 못했어요');
+  return { dong_name: dong, dong_code: [si,gu,dong].filter(Boolean).join('|') };
+}
+function detectLocation(){
+  if(!navigator.geolocation){ setLocStatus('이 브라우저는 위치를 지원하지 않아요. 직접 입력해 주세요.'); return; }
+  setLocStatus('📍 위치 확인 중…');
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const { latitude:lat, longitude:lng } = pos.coords;
+    try{
+      const d = await reverseGeocode(lat, lng);
+      loc = { lat, lng, dong_name:d.dong_name, dong_code:d.dong_code, verified:true };
+      setLocStatus(`📍 <b>${esc(d.dong_name)}</b> <span class="muted">${esc(d.dong_code.split('|').slice(0,-1).join(' '))}</span> ✓`);
+    }catch(e){ loc = { lat, lng, dong_name:null, dong_code:null, verified:true }; setLocStatus('위치는 잡았지만 동네 이름을 찾지 못했어요. 직접 입력해 주세요.'); }
+  }, err=>{
+    setLocStatus(err.code===1 ? '위치 권한이 거부됐어요. 브라우저 설정에서 허용하거나 직접 입력해 주세요.' : '위치를 가져오지 못했어요. 다시 확인하거나 직접 입력해 주세요.');
+  }, { enableHighAccuracy:false, timeout:10000, maximumAge:300000 });
+}
+function manualDong(){
+  const v = prompt('동네 이름을 입력해 주세요 (예: 역삼동)', loc.dong_name||''); if(v===null) return;
+  const name = v.trim(); if(!name) return;
+  loc.dong_name = name; loc.dong_code = loc.dong_code || name; loc.verified = false;
+  setLocStatus(`📍 <b>${esc(name)}</b> <span class="muted">직접 입력</span>${loc.lat?'':' · 지도 핀은 위치 확인 후 표시돼요'}`);
+}
 function openOnboard(edit){
   const p = myProfile||{};
   $('#obTitle').textContent = edit?'프로필 수정':'프로필 만들기'; $('#obBack').hidden=!edit;
-  $('#f_nick').value=p.nickname||''; $('#f_dong').value=p.dong_code||DONGS[0][0];
+  $('#f_nick').value=p.nickname||'';
+  loc = { lat:p._c?.lat||null, lng:p._c?.lng||null, dong_name:p.dong_name||null, dong_code:p.dong_code||null, verified:!!p.dong_verified_at };
+  if(loc.dong_name) setLocStatus(`📍 <b>${esc(loc.dong_name)}</b> <span class="muted">${loc.verified?'확인됨 ✓':'직접 입력'}</span>`); else detectLocation();
   segSet('#f_craft',p.craft); segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
   $('#f_now').value=p.now_making||''; $('#f_stuck').value=p.stuck_on||''; $('#f_mbti').value=p.mbti||''; $('#f_bok').checked=!!p.beginner_ok;
-  gps=null; show('onboard');
-}
-function useGps(){
-  if(!navigator.geolocation) return toast('이 브라우저는 위치를 지원하지 않아요');
-  navigator.geolocation.getCurrentPosition(pos=>{ gps={lat:pos.coords.latitude,lng:pos.coords.longitude}; toast('현재 위치를 사용해요 (저장은 흐려진 좌표만)'); }, ()=>toast('위치 권한이 거부됐어요. 동네 중심으로 저장돼요'));
+  show('onboard');
 }
 async function saveProfile(){
   const edit = !$('#obBack').hidden;
-  const dong = DONGS.find(d=>d[0]===$('#f_dong').value);
+  if(!loc.dong_name) return toast('동네를 확인해 주세요 (자동 인식 또는 직접 입력)');
   const mbti = $('#f_mbti').value.trim().toUpperCase();
   if(mbti && !/^[EI][NS][TF][JP]$/.test(mbti)) return toast('MBTI 형식을 확인해 주세요');
-  const row = { nickname:$('#f_nick').value.trim()||'뜨개인', dong_code:dong[0], dong_name:dong[1], craft:segVal('#f_craft'), experience:segVal('#f_exp'),
+  const row = { nickname:$('#f_nick').value.trim()||'뜨개인', dong_code:loc.dong_code, dong_name:loc.dong_name, dong_verified_at: loc.verified ? new Date().toISOString() : null, craft:segVal('#f_craft'), experience:segVal('#f_exp'),
     now_making:$('#f_now').value.trim()||null, stuck_on:$('#f_stuck').value.trim()||null, mbti:mbti||null, available:segVal('#f_avail',true), beginner_ok:$('#f_bok').checked, onboarded_at:new Date().toISOString() };
   const { error } = await sb.from('profiles').update(row).eq('id', me.id);
   if(error) return toast('저장 실패: '+error.message);
-  // 위치: GPS가 있으면 GPS를, 없으면 동네 중심을 흐려서 저장 (원본은 서버에 남지 않음)
-  const src = gps || {lat:dong[2], lng:dong[3]};
-  const r = await sb.rpc('set_fuzzy_location', { p_lat:src.lat, p_lng:src.lng });
-  if(r.error) toast('위치 저장 실패: '+r.error.message);
+  // 위치: 새로 잡은 GPS만 흐려서 저장 (원본은 서버에 남지 않음). 직접 입력만 했으면 기존 좌표 유지
+  if(loc.lat && loc.verified){ const r = await sb.rpc('set_fuzzy_location', { p_lat:loc.lat, p_lng:loc.lng }); if(r.error) toast('위치 저장 실패: '+r.error.message); }
   await loadMe(); toast('저장했어요'); watchFriends();
   if(!(myProfile.skills||[]).length && !edit) openSlides(()=>openSkills()); else go(edit?'my':'map');
 }
@@ -469,7 +506,7 @@ function makeHtmlPin(){
 }
 const GMap = {
   map:null, markers:[],
-  init(el, c){ return new Promise(res=>{ const make=()=>{ this.map=new google.maps.Map(el,{center:c,zoom:14,disableDefaultUI:true,clickableIcons:false}); this.Pin=makeHtmlPin(); res(); }; if(window.google?.maps?.Map) return make(); window.__gm=make; const s=document.createElement('script'); s.src=`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&callback=__gm&language=ko&region=KR&loading=async`; document.head.appendChild(s); }); },
+  async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,disableDefaultUI:true,clickableIcons:false}); this.Pin=makeHtmlPin(); },
   setCenter(c){ this.map.setCenter(c); this.map.setZoom(14); },
   clear(){ this.markers.forEach(m=>m.setMap(null)); this.markers=[]; },
   marker({lat,lng,label,cls,onClick}){ const d=document.createElement('div'); d.className='pin '+(cls||''); d.textContent=label; d.style.position='absolute'; d.style.transform='translate(-50%,-50%)'; const m=new this.Pin(new google.maps.LatLng(lat,lng), d, onClick); m.setMap(this.map); this.markers.push(m); },
@@ -482,7 +519,7 @@ const FILTERS = [['craft',null,'전체'],['craft','knit','대바늘'],['craft','
 function renderFilters(){ $('#filters').innerHTML = FILTERS.map(([k,v,l],i)=>`<button data-i="${i}" class="${filter[k]===v&&(k!=='craft'||v!==null||(filter.craft===null&&filter.bok===null&&!filter.sim))?'on':''}">${l}</button>`).join(''); }
 $('#filters').onclick = e => { const b=e.target.closest('button'); if(!b)return; const [k,v]=FILTERS[b.dataset.i]; if(k==='craft'&&v===null){filter={craft:null,bok:null,sim:null};} else if(k==='bok'){filter.bok=filter.bok?null:true;} else if(k==='sim'){ if(!(myProfile?.level_crochet>0||myProfile?.level_knit>0)) return toast('먼저 마이에서 내 뜨개 단계를 체크해 주세요'); filter.sim=filter.sim?null:true;} else {filter.craft=filter.craft===v?null:v;} renderFilters(); loadPins(); };
 async function initMap(){
-  const c = myProfile?._c || {lat:37.4999,lng:127.0374};
+  const c = myProfile?._c || {lat:37.5665,lng:126.9780};
   await MapAdapter.init($('#map'), c);
   renderFilters();
   MapAdapter.onMove(()=>loadPins());
