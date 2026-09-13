@@ -199,7 +199,7 @@ details .seg{margin-top:8px;justify-content:center}
 .subtabs button.on{color:var(--ink);font-weight:700;border-color:var(--ink)}
 .replyto{font-size:.78rem;color:var(--ink3);margin-bottom:2px}
 .fab{display:none}
-/* ===== Threads look — 커뮤니티·스레드·채팅 화면 한정 ===== */
+/* ===== 커뮤니티·글·채팅 화면 스타일 ===== */
 #app{--tbg:#fff;--tink:#000;--tmute:#999;--tline:#e6e6e6;--tred:#ff3040;
   background:var(--tbg);color:var(--tink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:16px;line-height:1.35;letter-spacing:-0.01em;word-break:break-word}
 .top,.top,.top,.top{background:var(--tbg);border-bottom:0;padding:14px 16px 10px;gap:12px}
@@ -344,7 +344,7 @@ details .seg{margin-top:8px;justify-content:center}
 
   <!-- 글 상세 (원글 + 답글) -->
   <section class="view" id="v-post">
-    <div class="top"><button class="back" onclick="go('comm')">‹</button><h1>스레드</h1></div>
+    <div class="top"><button class="back" onclick="go('comm')">‹</button><h1>글</h1></div>
     <div class="feed" id="postBody"></div>
     <div class="compose"><div id="replyAva"></div><input id="replyIn" placeholder="답글을 남겨보세요…" maxlength="500" onkeydown="if(event.key==='Enter')submitReply()"><button class="btn" onclick="submitReply()">게시</button></div>
   </section>
@@ -692,7 +692,7 @@ async function openProfile(id){
     ${meta?`<div class="pmeta">${meta}</div>`:''}
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}<button class="btn o ic" title="공유" onclick="shareUser()">${ICON.share.replace('<svg','<svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')}</button></div>
-    <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">스레드</button><button data-t="replies" class="${profTab==='replies'?'on':''}">답글</button><button data-t="media" class="${profTab==='media'?'on':''}">미디어</button></div>
+    <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="replies" class="${profTab==='replies'?'on':''}">답글</button><button data-t="media" class="${profTab==='media'?'on':''}">미디어</button></div>
     <div class="feed" id="profFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#profTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; profTab=b.dataset.t; [...$('#profTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadUserFeed(profId, profTab, $('#profFeed')); };
   show('profile');
@@ -1098,7 +1098,7 @@ async function renderMy(){
     ${bio?`<div class="pbio">${esc(bio)}</div>`:'<div class="pbio muted">소개를 적어 보세요</div>'}
     <div class="pfriends" id="pfriends" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>
     <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o" onclick="openSkills()">내 뜨개 단계</button><button class="btn o ic" title="공유" onclick="shareProfile()">${ICON.share.replace('<svg','<svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')}</button></div>
-    <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">스레드</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="media" class="${myTab==='media'?'on':''}">미디어</button></div>
+    <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="media" class="${myTab==='media'?'on':''}">미디어</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
   renderMyFriends(); loadMyFeed();
