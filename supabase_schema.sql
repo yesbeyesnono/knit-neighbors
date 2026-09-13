@@ -815,3 +815,23 @@ revoke execute on function public.create_meetup(text, text, timestamptz, boolean
 revoke execute on function public.join_meetup(uuid) from public, anon;
 revoke execute on function public.leave_meetup(uuid) from public, anon;
 -- feed_ranked: 반환 컬럼에 meetup_id 추가, 모임 글 ×1.4 부스트 (10절 함수에 반영)
+
+-- ---------------------------------------------------------------
+-- 12. 모임 상세 항목 (2026-09-13) — 온라인 뜨개 모임(Meetup·소모임·당근·공방 워크숍) 공통 항목 + 뜨개동네 고유 항목
+--   공통: 유형(자유/워크숍/프로젝트/나눔)·종목·정원·참가비·준비물·소요 시간·반복
+--   고유: 권장 뜨개 단계(level_min~max) → 참여자에게 '내 단계에 맞아요/조금 높아요', 배울 기법(technique_id, 기법사전 연결)
+-- ---------------------------------------------------------------
+alter table public.meetups
+  add column kind text not null default 'free' check (kind in ('free','workshop','project','swap')),
+  add column craft text check (craft is null or craft in ('knit','crochet','both')),
+  add column level_min smallint check (level_min is null or level_min between 1 and 5),
+  add column level_max smallint check (level_max is null or level_max between 1 and 5),
+  add column technique_id text references public.techniques(id),
+  add column capacity smallint check (capacity is null or capacity between 2 and 100),
+  add column fee text check (fee is null or char_length(fee) <= 40),
+  add column bring text check (bring is null or char_length(bring) <= 120),
+  add column duration_min smallint check (duration_min is null or duration_min between 30 and 480),
+  add column repeat text not null default 'once' check (repeat in ('once','weekly','biweekly','monthly'));
+-- create_meetup(…, p_extra jsonb): kind/craft/level_min/level_max/technique_id/capacity/fee/bring/duration_min/repeat 를 jsonb로 받음
+-- join_meetup: 정원(capacity) 초과 시 '정원이 찼어요' 예외
+-- profiles_apply_skills: skills에서 craft 자동 판정 (C*만 → crochet, K*만 → knit, 둘 다 → both)

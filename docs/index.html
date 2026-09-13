@@ -13,6 +13,7 @@
   --yarn:#C9922F; --yarn-soft:#F6EBD3; --moss:#5C7A4C; --moss-soft:#E6EDDF; --rose:#B5605A; --rose-soft:#F3E2E0;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%;margin:0}
 body{background:#e9e9e9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);font-size:15px;line-height:1.4;letter-spacing:-0.01em;word-break:keep-all}
 #app{max-width:430px;height:100%;margin:0 auto;background:var(--bg);position:relative;display:flex;flex-direction:column;overflow:hidden}
@@ -166,6 +167,21 @@ details .seg{margin-top:8px;justify-content:center}
 #v-compose .row2{display:flex;gap:12px;align-items:flex-start}
 #v-compose .cname{font-weight:700;font-size:16px;margin-bottom:2px}
 #v-compose textarea{border:0;padding:2px 0;background:transparent;min-height:110px;font-size:16px;line-height:1.45;resize:none}
+#v-compose.meet textarea{min-height:64px}
+#v-compose .row2 > div{min-width:0}
+#v-compose input[type="datetime-local"],#v-compose input[type="number"]{min-width:0;width:100%;max-width:100%}
+.mfields .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mfields .seg button{padding:7px 12px;font-size:.85rem}
+.mfields select{font:inherit;width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.mfields .lv{display:flex;align-items:center;gap:8px}
+.mfields .lv select{flex:1}
+.mfields .hint{font-size:.78rem;color:var(--ink3)}
+.mcard .mtags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.mcard .mtags span{font-size:12px;padding:2px 8px;border-radius:999px;background:#eee;color:#333}
+.mcard .mtags span.ok{background:#e8f3e8;color:#2f6b3a}
+.mcard .mtags span.warn{background:#fff3e0;color:#9a5a00}
+.mcard .mtags span.full{background:#fde8ea;color:#c9303f}
+.mcard .kind{font-size:12px;font-weight:700;color:var(--ink);background:#f2f2f2;padding:2px 8px;border-radius:6px;margin-left:6px}
 #v-compose textarea::placeholder{color:var(--ink3)}
 .mfields{display:flex;flex-direction:column;gap:10px;background:#f5f5f5;border-radius:14px;padding:14px}
 .mfields .mtitle{font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:6px}
@@ -379,7 +395,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
   <!-- 커뮤니티 (Threads 스타일) -->
   <section class="view" id="v-comm">
     <div class="top"><h1>커뮤니티</h1></div>
-    <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="dong">우리 동네</button><button data-f="friends">친구</button></div>
+    <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="meet">모임</button><button data-f="dong">우리 동네</button><button data-f="friends">친구</button></div>
     <div class="cbox" id="cbox">
       <div id="cboxAva"></div>
       <div style="flex:1;min-width:0">
@@ -436,16 +452,21 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
     <div class="body">
       <div class="kind" id="composeKind"><button data-k="post" class="on">글</button><button data-k="meetup">모임</button></div>
       <div class="row2"><div id="sAva"></div><div style="flex:1;min-width:0"><div class="cname" id="sName"></div>
+        <div class="mfields" id="mfields" hidden>
+          <div class="mtitle">📍 모임 정보</div>
+          <label class="f">모임 이름<input id="mTitle" maxlength="60" placeholder="예: 토요 뜨개 모임"></label>
+          <label class="f">모임 유형<div class="seg" id="mKind"></div></label>
+          <label class="f" id="mTechWrap" hidden>배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label>
+          <label class="f">종목<div class="seg" id="mCraft"></div></label>
+          <label class="f">권장 뜨개 단계<div class="lv"><select id="mLvMin"></select><span>~</span><select id="mLvMax"></select></div><span class="hint">참여자에게 "내 단계에 맞아요 / 조금 높아요"로 보여요</span></label>
+          <label class="f">장소<input id="mPlace" maxlength="80" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label>
+          <div class="g2"><label class="f">일시<input id="mTime" type="datetime-local"></label><label class="f">소요 시간<select id="mDur"><option value="60">1시간</option><option value="90">1시간 30분</option><option value="120" selected>2시간</option><option value="180">3시간</option><option value="240">반나절</option></select></label></div>
+          <div class="g2"><label class="f">반복<select id="mRepeat"><option value="once">한 번</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option></select></label><label class="f">정원<input id="mCap" type="number" min="2" max="100" placeholder="비우면 제한 없음"></label></div>
+          <div class="g2"><label class="f">참가비<input id="mFee" maxlength="40" placeholder="예: 무료 / 각자 음료 / 5,000원"></label><label class="f">준비물<input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘"></label></div>
+          <div class="sw"><span>지도에 공개 (동네 뜨개인 누구나 참여)</span><input type="checkbox" id="mPublic" checked></div>
+        </div>
         <textarea id="sText" maxlength="500" placeholder="새로운 소식이 있나요?"></textarea>
         <div class="pv" id="sPv"></div></div></div>
-      <div class="mfields" id="mfields" hidden>
-        <div class="mtitle">📍 모임 정보</div>
-        <label class="f">모임 이름<input id="mTitle" maxlength="60" placeholder="예: 토요 뜨개 모임"></label>
-        <label class="f">장소<input id="mPlace" maxlength="80" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label>
-        <label class="f">일시<input id="mTime" type="datetime-local"></label>
-        <div class="sw"><span>지도에 공개 (동네 뜨개인 누구나 참여)</span><input type="checkbox" id="mPublic" checked></div>
-        <div class="muted" style="font-size:.8rem">모임을 만들면 참여자용 단체 채팅방이 함께 생기고, 지도에 핀이 표시돼요. 첫 만남은 카페 같은 공공장소에서.</div>
-      </div>
       <div class="tools">
         <button type="button" class="ib" title="사진" onclick="$('#sFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 15.5 15.6 11l-6.4 6.5"/></svg></button>
         <input id="sFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
@@ -538,6 +559,9 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const CRAFT = {knit:'대바늘', crochet:'코바늘', both:'둘 다'};
 const EXP = {new:'막 시작', under_1y:'1년 미만', '1_3y':'1~3년', over_3y:'3년+'};
 const AVAIL = {weekday_day:'평일 낮', weekday_evening:'평일 저녁', weekend:'주말'};
+const MKIND = {free:'자유 뜨개', workshop:'기법 배우기', project:'프로젝트 함께', swap:'실·도안 나눔'};
+const MCRAFT = {both:'모두', knit:'대바늘', crochet:'코바늘'};
+const MREPEAT = {once:'', weekly:'매주', biweekly:'격주', monthly:'매월'};
 
 let me = null, myProfile = null, view = 'map', pins = [], filter = {mode:'all'}, roomId = null, roomChan = null, friendChan = null;
 
@@ -982,7 +1006,7 @@ const AUTHOR_SEL = 'author:profiles!posts_author_id_fkey(id,nickname,avatar_url,
 function autoGrow(t){ t.style.height='auto'; t.style.height=Math.min(160, t.scrollHeight)+'px'; }
 function updateCnt(){ const n=$('#cText').value.length; $('#cCnt').textContent = n>400 ? n+'/500' : ''; }
 $('#commTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; commFilter=b.dataset.f; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadFeed(); };
-async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); $('#cboxName').textContent = myProfile?.nickname||''; loadFeed(); }
+async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); $('#cboxName').textContent = myProfile?.nickname||''; loadTech(); loadFeed(); }
 async function friendIds(){ const rows=await fetchFriendships(); return rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee_id:r.requester_id); }
 async function loadFeed(more){
   if(!more){ feedRows=[]; feedCursor=null; feedOffset=0; $('#feed').innerHTML='<div class="empty">불러오는 중…</div>'; }
@@ -996,6 +1020,17 @@ async function loadFeed(more){
   }
   let q = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).order('created_at',{ascending:false}).limit(FEED_PAGE);
   if(feedCursor) q = q.lt('created_at', feedCursor);
+  if(commFilter==='meet'){
+    let mq = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).not('meetup_id','is',null).order('created_at',{ascending:false}).limit(100);
+    const { data, error } = await mq;
+    if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
+    await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), loadTech()]);
+    const now=Date.now();
+    feedRows = (data||[]).filter(p=>p.meetup).sort((a,b)=>{ const ap=new Date(a.meetup.starts_at)<now, bp=new Date(b.meetup.starts_at)<now; if(ap!==bp) return ap?1:-1; return ap ? new Date(b.meetup.starts_at)-new Date(a.meetup.starts_at) : new Date(a.meetup.starts_at)-new Date(b.meetup.starts_at); });
+    $('#feedMore').hidden = true;
+    $('#feed').innerHTML = feedRows.length ? feedRows.map(p=>postCard(p,{noLine:true})).join('') : '<div class="empty">예정된 모임이 없어요.<br>＋ 버튼 › 모임 탭에서 첫 모임을 만들어 보세요</div>';
+    return;
+  }
   if(commFilter==='dong'){ if(!myProfile?.dong_code){ $('#feed').innerHTML='<div class="empty">프로필에서 동네를 먼저 정해 주세요</div>'; return; } q = q.eq('dong_code', myProfile.dong_code); }
   if(commFilter==='friends'){ const ids=await friendIds(); ids.push(me.id); q = q.in('author_id', ids); }
   const { data, error } = await q;
@@ -1027,15 +1062,37 @@ let myRoomIds = new Set();
 async function loadMyRooms(){ if(!me) return; const { data } = await sb.from('room_members').select('room_id').eq('profile_id', me.id); myRoomIds = new Set((data||[]).map(r=>r.room_id)); }
 async function attachMeetups(rows){
   const ids=[...new Set((rows||[]).map(r=>r.meetup_id).filter(Boolean))]; if(!ids.length) return;
-  const { data } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by').in('id', ids);
+  const { data } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by,kind,craft,level_min,level_max,technique_id,capacity,fee,bring,duration_min,repeat').in('id', ids);
   const byId={}; (data||[]).forEach(m=>byId[m.id]=m); rows.forEach(r=>{ if(r.meetup_id) r.meetup = byId[r.meetup_id]||null; });
 }
 function fmtWhen(iso){ const d=new Date(iso); const day=['일','월','화','수','목','금','토'][d.getDay()]; const h=d.getHours(), m=d.getMinutes(); return `${d.getMonth()+1}월 ${d.getDate()}일 (${day}) ${h<12?'오전':'오후'} ${h%12||12}:${String(m).padStart(2,'0')}`; }
+// 내 단계와 모임 권장 단계 비교
+function levelFit(m){
+  if(!m.level_min && !m.level_max) return {cls:'', txt:'누구나'};
+  const mine = m.craft==='knit' ? myProfile?.level_knit : m.craft==='crochet' ? myProfile?.level_crochet : Math.max(myProfile?.level_crochet||0, myProfile?.level_knit||0);
+  const lo=m.level_min||1, hi=m.level_max||5;
+  if(!mine) return {cls:'', txt:`권장 ${lo}~${hi}단계`};
+  if(mine>=lo && mine<=hi) return {cls:'ok', txt:`내 단계에 맞아요 (${lo}~${hi}단계)`};
+  if(mine<lo) return {cls:'warn', txt:`조금 높아요 (권장 ${lo}~${hi}단계)`};
+  return {cls:'', txt:`권장 ${lo}~${hi}단계 · 알려줄 수 있어요`};
+}
+function techName(id){ const t=TECH.find(x=>x.id===id); return t? t.name_ko : id; }
+function meetupTags(m){
+  const fit=levelFit(m); const full = m.capacity && (m.participant_count||0) >= m.capacity;
+  return [ `<span class="${fit.cls}">${fit.txt}</span>`,
+    m.craft&&m.craft!=='both'?`<span>${MCRAFT[m.craft]}</span>`:'',
+    m.kind==='workshop'&&m.technique_id?`<span>배우기: ${esc(techName(m.technique_id))}</span>`:'',
+    m.repeat&&m.repeat!=='once'?`<span>${MREPEAT[m.repeat]}</span>`:'',
+    m.duration_min?`<span>${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간'+(m.duration_min%60?' '+m.duration_min%60+'분':''):m.duration_min+'분'}</span>`:'',
+    m.fee?`<span>${esc(m.fee)}</span>`:'<span>무료</span>',
+    m.capacity?`<span class="${full?'full':''}">${full?'정원 마감':`정원 ${m.participant_count||0}/${m.capacity}`}</span>`:'' ].filter(Boolean).join('');
+}
 function meetupCard(m){
   if(!m) return '';
   const joined = myRoomIds.has(m.room_id); const past = new Date(m.starts_at) < new Date();
-  const btn = past ? '<span class="muted">종료</span>' : joined ? `<button class="btn o" onclick="event.stopPropagation();openRoom('${m.room_id}')">참여 중 · 채팅</button>` : `<button class="btn" onclick="event.stopPropagation();joinMeetup('${m.id}')">참여하기</button>`;
-  return `<div class="mcard" onclick="event.stopPropagation();openMeetup('${m.id}')"><div class="mh">📍 모임${m.is_public?'':' · 초대만'}</div><b>${esc(m.title)}</b><div class="ml">${esc(m.place_name)}</div><div class="ml">${fmtWhen(m.starts_at)}</div><div class="mrow"><span>참여 ${m.participant_count||0}명</span>${btn}</div></div>`;
+  const full = m.capacity && (m.participant_count||0) >= m.capacity;
+  const btn = past ? '<span class="muted">종료</span>' : joined ? `<button class="btn o" onclick="event.stopPropagation();openRoom('${m.room_id}')">참여 중 · 채팅</button>` : full ? '<span class="muted">마감</span>' : `<button class="btn" onclick="event.stopPropagation();joinMeetup('${m.id}')">참여하기</button>`;
+  return `<div class="mcard" onclick="event.stopPropagation();openMeetup('${m.id}')"><div class="mh">📍 모임${m.is_public?'':' · 초대만'}<span class="kind">${MKIND[m.kind]||'자유 뜨개'}</span></div><b>${esc(m.title)}</b><div class="ml">${esc(m.place_name)}</div><div class="ml">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}</div>${m.bring?`<div class="ml">준비물: ${esc(m.bring)}</div>`:''}<div class="mtags">${meetupTags(m)}</div><div class="mrow"><span>참여 ${m.participant_count||0}명</span>${btn}</div></div>`;
 }
 async function joinMeetup(id){
   const { data:roomId, error } = await sb.rpc('join_meetup', { p_meetup_id:id });
@@ -1048,16 +1105,18 @@ async function leaveMeetup(id){
   await loadMyRooms(); toast('모임에서 나왔어요'); closeSheet(); if(view==='comm') loadFeed(); if(view==='map') loadPins();
 }
 async function openMeetup(id){
-  const { data:m } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by, host:profiles!meetups_created_by_fkey(id,nickname,avatar_url,dong_name)').eq('id', id).single();
+  await loadTech();
+  const { data:m } = await sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(id,nickname,avatar_url,dong_name,level_crochet,level_knit)').eq('id', id).single();
   if(!m) return toast('모임을 찾을 수 없어요');
-  const joined = myRoomIds.has(m.room_id), past = new Date(m.starts_at) < new Date();
-  openSheet(`<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700">📍 모임${m.is_public?'':' · 초대만'}</div>
+  const joined = myRoomIds.has(m.room_id), past = new Date(m.starts_at) < new Date(), full = m.capacity && (m.participant_count||0) >= m.capacity;
+  openSheet(`<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700">📍 모임${m.is_public?'':' · 초대만'} · ${MKIND[m.kind]||'자유 뜨개'}</div>
     <b style="font-size:1.25rem">${esc(m.title)}</b>
-    <div>${esc(m.place_name)}</div><div class="muted">${fmtWhen(m.starts_at)}</div>
+    <div>${esc(m.place_name)}</div><div class="muted">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}${m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''}</div>
+    <div class="mcard" style="margin:0"><div class="mtags" style="margin:0">${meetupTags(m)}</div>${m.bring?`<div class="ml" style="margin-top:8px">준비물: ${esc(m.bring)}</div>`:''}</div>
     ${m.descr?`<div style="white-space:pre-wrap">${esc(m.descr)}</div>`:''}
     <div class="row" style="cursor:pointer" onclick="closeSheet();openProfile('${m.host?.id}')">${avatar(m.host||{})}<div><b>${esc(m.host?.nickname||'')}</b><div class="muted">주최 · ${esc(m.host?.dong_name||'')}</div></div></div>
     <div class="muted">참여 ${m.participant_count||0}명</div>
-    ${past?'<button class="btn o" disabled>종료된 모임</button>': joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">모임 나가기</button>`:''}` : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
+    ${past?'<button class="btn o" disabled>종료된 모임</button>': joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">모임 나가기</button>`:''}` : full ? '<button class="btn o" disabled>정원이 찼어요</button>' : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
 }
 function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
 function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
@@ -1121,14 +1180,22 @@ function openCompose(kind){
   $('#sText').value=''; $('#sPv').innerHTML=''; $('#sPost').disabled=false;
   const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7)); d.setHours(14,0,0,0);
   $('#mTime').value = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  $('#mTitle').value=''; $('#mPlace').value=''; $('#mPublic').checked=true;
+  $('#mTitle').value=''; $('#mPlace').value=''; $('#mPublic').checked=true; $('#mCap').value=''; $('#mFee').value=''; $('#mBring').value=''; $('#mDur').value='120'; $('#mRepeat').value='once';
+  if(!$('#mKind').children.length){
+    seg('#mKind', MKIND); seg('#mCraft', MCRAFT);
+    const lvOpts = lbl => `<option value="">${lbl}</option>` + [1,2,3,4,5].map(l=>`<option value="${l}">${l}단계 ${LVNAME[l]}</option>`).join('');
+    $('#mLvMin').innerHTML = lvOpts('제한 없음'); $('#mLvMax').innerHTML = lvOpts('제한 없음');
+    $('#mKind').addEventListener('click', ()=>{ $('#mTechWrap').hidden = segVal('#mKind')!=='workshop'; });
+    loadTech().then(()=>{ const grp = c => TECH.filter(t=>t.craft===c).map(t=>`<option value="${t.id}">${t.level}단계 · ${esc(t.name_ko)}</option>`).join(''); $('#mTech').innerHTML = `<optgroup label="코바늘">${grp('crochet')}</optgroup><optgroup label="대바늘">${grp('knitting')}</optgroup>`; });
+  }
+  segSet('#mKind','free'); segSet('#mCraft','both'); $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value='';
   setComposeKind(composeKind);
   show('compose');
   setTimeout(()=>$(composeKind==='meetup'?'#mTitle':'#sText')?.focus(), 80);
 }
 function setComposeKind(k){
   composeKind=k; [...$('#composeKind').children].forEach(b=>b.classList.toggle('on', b.dataset.k===k));
-  $('#mfields').hidden = k!=='meetup';
+  $('#mfields').hidden = k!=='meetup'; $('#v-compose').classList.toggle('meet', k==='meetup');
   $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : '새 글';
   $('#sText').placeholder = k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : '새로운 소식이 있나요?';
   $('#sPost').textContent = k==='meetup' ? '만들기' : '게시';
@@ -1147,7 +1214,13 @@ async function submitCompose(){
       if(!when || new Date(when) < new Date()) throw new Error('일시를 지금 이후로 정해 주세요');
       const photos = await uploadPhotos(sPhotos);
       const c = myProfile?._c;
-      const { data:postId, error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mPublic').checked, p_body: body||null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:photos });
+      const lmin=$('#mLvMin').value, lmax=$('#mLvMax').value;
+      if(lmin && lmax && +lmin > +lmax) throw new Error('권장 단계 범위를 확인해 주세요');
+      const kind = segVal('#mKind')||'free';
+      if(kind==='workshop' && !$('#mTech').value) throw new Error('배울 기법을 골라 주세요');
+      const extra = { kind, craft: segVal('#mCraft')||'both', level_min: lmin?+lmin:null, level_max: lmax?+lmax:null, technique_id: kind==='workshop'?$('#mTech').value:null,
+        capacity: $('#mCap').value?+$('#mCap').value:null, fee: $('#mFee').value.trim()||null, bring: $('#mBring').value.trim()||null, duration_min:+$('#mDur').value, repeat:$('#mRepeat').value };
+      const { data:postId, error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mPublic').checked, p_body: body||null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:photos, p_extra: extra });
       if(error) throw new Error(error.message);
       await loadMyRooms();
       sPhotos=[]; toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
