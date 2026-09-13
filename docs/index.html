@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>뜨개동네</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+  --bg:#FBF9F5; --bg2:#F2EEE6; --ink:#2B2723; --ink2:#5E574F; --ink3:#8C847B; --line:#E3DDD2;
+  --accent:#34456F; --accent-ink:#fff; --accent-soft:#E7EAF3;
+  --yarn:#C9922F; --yarn-soft:#F6EBD3; --moss:#5C7A4C; --moss-soft:#E6EDDF; --rose:#B5605A; --rose-soft:#F3E2E0;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#DED8CC;font-family:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--ink);font-size:15px;line-height:1.55;word-break:keep-all}
+#app{max-width:430px;height:100%;margin:0 auto;background:var(--bg);position:relative;display:flex;flex-direction:column;overflow:hidden}
+@media (min-width:480px){#app{height:calc(100% - 32px);margin-top:16px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.18)}}
+.view{flex:1;overflow-y:auto;display:none;flex-direction:column}
+.view.on{display:flex}
+.top{display:flex;align-items:center;gap:10px;padding:14px 18px 10px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+.top h1{font-family:"Gowun Batang",serif;font-size:1.25rem;margin:0;flex:1}
+.top .back{background:none;border:0;font-size:1.3rem;padding:0 6px 0 0;cursor:pointer;color:var(--ink2)}
+.body{padding:16px 18px 24px;display:flex;flex-direction:column;gap:14px}
+nav{display:flex;border-top:1px solid var(--line);background:var(--bg);padding:6px 0 max(8px,env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:0;font:inherit;font-size:.72rem;color:var(--ink3);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;position:relative}
+nav button .ic{font-size:1.25rem;line-height:1}
+nav button.on{color:var(--accent);font-weight:700}
+nav .badge{position:absolute;top:2px;right:calc(50% - 20px);background:var(--rose);color:#fff;font-size:.62rem;font-weight:700;border-radius:999px;padding:0 5px;min-width:16px;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:500;cursor:pointer;width:100%}
+.btn.o{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+.btn.y{background:var(--yarn);color:#fff}
+.btn.r{background:var(--rose-soft);color:var(--rose)}
+.btn.m{background:var(--moss);color:#fff}
+.btn.sm{padding:7px 12px;font-size:.85rem;width:auto;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn[hidden]{display:none}
+.g{background:#fff;color:#1f1f1f;border:1px solid #dadce0}
+.g img{width:18px;height:18px}
+input,select,textarea{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+textarea{resize:vertical;min-height:70px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--ink2);font-weight:500}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:.85rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip{display:inline-block;font-size:.75rem;padding:2px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:500}
+.chip.y{background:var(--yarn-soft);color:var(--yarn)} .chip.m{background:var(--moss-soft);color:var(--moss)} .chip.r{background:var(--rose-soft);color:var(--rose)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card.soft{background:var(--bg2);border:0}
+.card b.t{display:block;font-size:.78rem;color:var(--ink3);font-weight:500;margin-bottom:2px}
+.row{display:flex;align-items:center;gap:10px}
+.ava{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;font-weight:700;color:var(--accent);flex:none;overflow:hidden;font-size:.9rem}
+.ava img{width:100%;height:100%;object-fit:cover}
+.ava.lg{width:64px;height:64px;font-size:1.3rem}
+.muted{color:var(--ink3);font-size:.82rem}
+.story{font-family:"Gowun Batang",serif;color:var(--ink2);border-left:3px solid var(--yarn);padding:2px 12px;margin:4px 0}
+.empty{text-align:center;color:var(--ink3);padding:40px 20px;font-size:.9rem}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.item .tx{flex:1;min-width:0}
+.item .tx b{display:block}
+.item .tx span{display:block;color:var(--ink3);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* map */
+#mapview{position:relative}
+#map{position:absolute;inset:0;background:var(--bg2)}
+.mapui{position:absolute;left:0;right:0;z-index:400;pointer-events:none}
+.mapui>*{pointer-events:auto}
+.filters{top:0;padding:12px 14px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.filters button{flex:none;font:inherit;font-size:.8rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.filters button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pincard{bottom:14px;padding:0 14px}
+.pincard .card{box-shadow:0 8px 30px rgba(0,0,0,.18);cursor:pointer}
+.locbtn{position:absolute;right:14px;bottom:110px;z-index:400;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:1.1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.pin{width:34px;height:34px;border-radius:50%;background:var(--yarn);color:#fff;display:grid;place-items:center;font-size:.62rem;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);white-space:nowrap;overflow:hidden;cursor:pointer}
+.pin.me{background:var(--accent)} .pin.knit{background:var(--moss)}
+.leaflet-div-icon{background:none;border:0}
+/* sheet */
+.sheetwrap{position:absolute;inset:0;z-index:1100;display:none;align-items:flex-end;background:rgba(43,39,35,.35)}
+.sheetwrap.on{display:flex}
+.sheet{background:var(--bg);width:100%;max-height:88%;overflow-y:auto;border-radius:20px 20px 0 0;padding:14px 18px 28px;display:flex;flex-direction:column;gap:12px}
+.sheet .hd{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 4px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gallery div{aspect-ratio:1;border-radius:6px;background:var(--yarn-soft)}
+/* chat */
+.msgs{flex:1;display:flex;flex-direction:column;gap:8px;padding:14px 16px}
+.bub{max-width:78%;padding:8px 12px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:.92rem;align-self:flex-start}
+.bub.me{align-self:flex-end;background:var(--accent-soft);border-color:transparent}
+.bub .who{display:block;font-size:.7rem;color:var(--ink3);margin-bottom:2px}
+.bub time{display:block;font-size:.65rem;color:var(--ink3);margin-top:3px;text-align:right}
+.compose{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--bg)}
+.compose input{flex:1}
+.compose button{width:auto;padding:10px 14px}
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:90px;background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:.85rem;z-index:1300;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.login{justify-content:center;padding:40px 28px;gap:18px;text-align:center}
+.login h1{font-family:"Gowun Batang",serif;font-size:2.2rem;margin:0}
+.login p{color:var(--ink2);margin:0}
+details{font-size:.85rem;color:var(--ink3)}
+details .seg{margin-top:8px;justify-content:center}
+.devbar{font-size:.7rem;color:var(--ink3);text-align:center;padding:4px;background:var(--yarn-soft)}
+/* skills (뜨개 단계 자가진단) */
+.tabs{display:flex;gap:4px;background:var(--bg2);padding:4px;border-radius:10px}
+.tabs button{flex:1;font:inherit;border:0;background:transparent;padding:8px;border-radius:8px;color:var(--ink2);cursor:pointer}
+.tabs button.on{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.lvhead{display:flex;align-items:center;gap:14px;padding:4px 2px}
+.lvbig{font-family:"Gowun Batang",serif;font-size:2.6rem;line-height:1;color:var(--accent);min-width:48px;text-align:center}
+.lvbig small{display:block;font-family:"Noto Sans KR",sans-serif;font-size:.7rem;color:var(--ink3);margin-top:4px}
+.lvbar{display:flex;gap:4px;margin-top:6px}
+.lvbar i{flex:1;height:7px;border-radius:4px;background:var(--line);display:block;position:relative;overflow:hidden}
+.lvbar i b{position:absolute;left:0;top:0;bottom:0;background:var(--yarn);display:block}
+.lvbar i.done b{background:var(--accent)}
+.lvsec{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+.lvsec.done{border-color:var(--accent)}
+.lvsec .hd{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none}
+.lvsec .hd .n{width:28px;height:28px;border-radius:50%;background:var(--bg2);display:grid;place-items:center;font-weight:700;font-size:.85rem;color:var(--ink2);flex:none}
+.lvsec.done .hd .n{background:var(--accent);color:#fff}
+.lvsec .hd .t{flex:1;min-width:0}.lvsec .hd .t b{display:block}.lvsec .hd .t span{font-size:.78rem;color:var(--ink3)}
+.lvsec .hd .pct{font-size:.8rem;color:var(--ink2);font-variant-numeric:tabular-nums}
+.lvsec .hd .car{color:var(--ink3);transition:transform .2s}.lvsec.open .hd .car{transform:rotate(90deg)}
+.techs{display:none;flex-wrap:wrap;gap:6px;padding:2px 12px 12px}
+.lvsec.open .techs{display:flex}
+.tech{font:inherit;font-size:.85rem;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.tech.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
+.tech .sym{font-size:.75rem;opacity:.7}
+.lvchip{display:inline-flex;align-items:center;gap:4px;font-size:.75rem;padding:2px 9px;border-radius:999px;background:var(--bg2);color:var(--ink2);font-weight:500}
+.lvchip b{color:var(--accent)}
+/* explainer slides */
+.slides{position:absolute;inset:0;z-index:1200;background:var(--bg);display:none;flex-direction:column}
+.slides.on{display:flex}
+.track{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.track::-webkit-scrollbar{display:none}
+.slide{flex:none;width:100%;scroll-snap-align:start;padding:40px 28px 16px;display:flex;flex-direction:column;justify-content:center;gap:16px;text-align:center}
+.slide .big{font-size:3rem;line-height:1}
+.slide h2{font-family:"Gowun Batang",serif;font-size:1.5rem;margin:0;text-wrap:balance}
+.slide p{color:var(--ink2);margin:0 auto;max-width:30ch}
+.slide .ex{background:var(--bg2);border-radius:12px;padding:12px 14px;font-size:.88rem;text-align:left;max-width:300px;margin:0 auto;width:100%}
+.dots{display:flex;justify-content:center;gap:6px;padding:8px}
+.dots i{width:6px;height:6px;border-radius:3px;background:var(--line);transition:width .2s}
+.dots i.on{background:var(--accent);width:18px}
+.slidebar{padding:8px 24px 28px;display:flex;gap:10px}
+.ladder{display:flex;flex-direction:column-reverse;gap:5px;max-width:280px;margin:0 auto;width:100%;text-align:left}
+.ladder div{display:flex;gap:10px;align-items:center;font-size:.85rem;padding:7px 10px;border-radius:8px;background:var(--bg2)}
+.ladder div b{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:.72rem;flex:none}
+.ladder div span{color:var(--ink3);font-size:.78rem;margin-left:auto}
+.simrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="toast" id="toast"></div>
+
+  <!-- 로그인 -->
+  <section class="view login" id="v-login">
+    <div style="font-size:3rem">🧶</div>
+    <h1>뜨개동네</h1>
+    <p>우리 동네에서 같이 뜰 사람을 지도에서 찾아요</p>
+    <button class="btn g" onclick="loginGoogle()"><img alt="" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">Google로 계속하기</button>
+  </section>
+
+  <!-- 온보딩 / 프로필 편집 -->
+  <section class="view" id="v-onboard">
+    <div class="top"><button class="back" id="obBack" onclick="go('my')" hidden>‹</button><h1 id="obTitle">프로필 만들기</h1></div>
+    <div class="body">
+      <label class="f">닉네임<input id="f_nick" maxlength="20"></label>
+      <label class="f">동네
+        <select id="f_dong"></select>
+      </label>
+      <button class="btn o sm" onclick="useGps()">📍 현재 위치로 핀 위치 정하기 (500m 격자로 흐려져 저장)</button>
+      <label class="f">뜨개 스타일<div class="seg" id="f_craft"></div></label>
+      <label class="f">뜨개 경력<div class="seg" id="f_exp"></div></label>
+      <label class="f">지금 뜨는 것 (지도 핀에 한 단어로 보여요)<input id="f_now" maxlength="40" placeholder="예: 그래니 스퀘어 가디건"></label>
+      <label class="f">요즘 막히는 부분<input id="f_stuck" maxlength="100" placeholder="예: 레이글런 줄이기가 어려워요"></label>
+      <label class="f">MBTI (선택)<input id="f_mbti" maxlength="4" placeholder="ENFP" style="text-transform:uppercase"></label>
+      <label class="f">만나기 좋은 시간<div class="seg" id="f_avail"></div></label>
+      <label class="f"><span><input type="checkbox" id="f_bok" style="width:auto;margin-right:6px">초보 환영</span></label>
+      <button class="btn" onclick="saveProfile()">저장하고 지도로</button>
+    </div>
+  </section>
+
+  <!-- 지도 홈 -->
+  <section class="view" id="v-map">
+    <div id="mapview" style="flex:1;position:relative">
+      <div id="map"></div>
+      <div class="mapui filters" id="filters"></div>
+      <button class="locbtn" title="내 동네로" onclick="centerMe()">◎</button>
+      <div class="mapui pincard" id="pincard" hidden></div>
+    </div>
+  </section>
+
+  <!-- 친구 -->
+  <section class="view" id="v-friends">
+    <div class="top"><h1>친구</h1></div>
+    <div class="body" id="friendsBody"></div>
+  </section>
+
+  <!-- 채팅 목록 -->
+  <section class="view" id="v-chats">
+    <div class="top"><h1>채팅</h1><button class="btn sm o" onclick="openGroupForm()">＋ 단체방</button></div>
+    <div class="body" id="chatsBody"></div>
+  </section>
+
+  <!-- 채팅방 -->
+  <section class="view" id="v-room">
+    <div class="top"><button class="back" onclick="leaveRoom()">‹</button><h1 id="roomTitle"></h1><button class="btn sm o" id="meetBtn" onclick="openMeetupForm()" hidden>📍 모임</button></div>
+    <div class="msgs" id="msgs"></div>
+    <div class="compose"><input id="msgIn" placeholder="메시지" onkeydown="if(event.key==='Enter')sendMsg()"><button class="btn" onclick="sendMsg()">보내기</button></div>
+  </section>
+
+  <!-- 뜨개 단계 자가진단 -->
+  <section class="view" id="v-skills">
+    <div class="top"><button class="back" onclick="leaveSkills()">‹</button><h1>내 뜨개 단계</h1><button class="btn sm o" onclick="openSlides()">ⓘ 설명</button></div>
+    <div class="body" id="skillsBody"></div>
+  </section>
+
+  <!-- 마이 -->
+  <section class="view" id="v-my">
+    <div class="top"><h1>마이</h1></div>
+    <div class="body" id="myBody"></div>
+  </section>
+
+  <nav id="nav">
+    <button data-v="map"><span class="ic">🗺️</span>지도</button>
+    <button data-v="friends"><span class="ic">🤝</span>친구<span class="badge" id="badgeFriends" hidden></span></button>
+    <button data-v="chats"><span class="ic">💬</span>채팅</button>
+    <button data-v="my"><span class="ic">🧶</span>마이</button>
+  </nav>
+
+  <div class="sheetwrap" id="sheetwrap" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
+
+  <!-- 단계 설명 카드 슬라이드 -->
+  <div class="slides" id="slides">
+    <div class="track" id="track">
+      <div class="slide">
+        <div class="big">🧶</div>
+        <h2>내 뜨개는 어디쯤일까요?</h2>
+        <p>knitup이 정리한 뜨개 기법 60가지를 5단계로 나눴어요. 할 수 있는 기법을 누르기만 하면 지금 내 단계가 보여요.</p>
+        <div class="ex">코바늘 30가지 · 대바늘 30가지<br><span class="muted">둘 다 하시면 두 단계가 따로 표시돼요</span></div>
+      </div>
+      <div class="slide">
+        <div class="big">📶</div>
+        <h2>다섯 단계예요</h2>
+        <div class="ladder">
+          <div><b>1</b>입문<span>첫 수업에서 배우는 기초</span></div>
+          <div><b>2</b>초급<span>기초 조합, 단순 성형</span></div>
+          <div><b>3</b>중급<span>실용 소품 완성</span></div>
+          <div><b>4</b>상급<span>의류·복합 무늬</span></div>
+          <div><b>5</b>전문<span>특수 기법</span></div>
+        </div>
+        <p>목도리를 뜰 수 있으면 2단계, 모자와 가방을 완성해 봤다면 3단계쯤이에요.</p>
+      </div>
+      <div class="slide">
+        <div class="big">👆</div>
+        <h2>할 수 있는 것만 누르세요</h2>
+        <p>위 단계 기법을 누르면 그 기법에 필요한 아래 기법들은 자동으로 함께 체크돼요.</p>
+        <div class="ex">예) <b>긴뜨기</b>를 누르면<br>→ 사슬뜨기 · 짧은뜨기 · 기둥코·왕복뜨기가 같이 체크</div>
+      </div>
+      <div class="slide">
+        <div class="big">📏</div>
+        <h2>단계는 이렇게 정해져요</h2>
+        <p>한 단계 기법의 <b>절반 이상</b>을 할 수 있으면 그 단계예요. 전부 알아야 하는 게 아니에요.</p>
+        <div class="ex">3단계 기법 7개 중 4개 체크 → <b>3단계 중급</b><br>3단계 기법 7개 중 2개 체크 → 아직 2단계</div>
+      </div>
+      <div class="slide">
+        <div class="big">🤝</div>
+        <h2>비슷한 수준의 이웃을 만나요</h2>
+        <p>내 단계는 지도 핀과 프로필에 표시돼요. 상대와 비교해서 이렇게 알려드려요.</p>
+        <div class="simrow"><span class="chip m">비슷해요 · 1단계 차이 이내</span><span class="chip y">배울 수 있어요 · 상대가 2단계 이상 위</span><span class="chip">알려줄 수 있어요 · 내가 2단계 이상 위</span></div>
+        <p class="muted">단계는 마이에서 언제든 바꿀 수 있어요. 정직하게 체크할수록 잘 맞는 친구를 만나요.</p>
+      </div>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="slidebar"><button class="btn o" id="slideSkip" onclick="closeSlides()">건너뛰기</button><button class="btn" id="slideNext" onclick="slideNext()">다음</button></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ============ 설정 ============
+const SB_URL = 'https://thfcrodfaitzrzlrxyir.supabase.co';
+const SB_KEY = 'sb_publishable_lOC6sE1BIpj5JZPnpwPCpg_DxvVvT2y';
+const GOOGLE_MAPS_KEY = 'AIzaSyDKtumtEPLqAj25Nw5vaG0Kq_MF2wWLGNs';   // Google Cloud 콘솔 Maps JavaScript API 키. 비우면 OpenStreetMap으로 표시.
+const RADIUS_M = 5000;
+
+const sb = supabase.createClient(SB_URL, SB_KEY);
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const DONGS = [
+  ['1168010100','역삼1동',37.4999,127.0374],['1168010800','역삼2동',37.4956,127.0470],['1168010500','삼성1동',37.5140,127.0560],
+  ['1168010600','논현1동',37.5110,127.0280],['1168011400','도곡1동',37.4900,127.0440],['1168011000','대치2동',37.5000,127.0630],
+  ['1144012000','연남동',37.5627,126.9250],['1144012200','서교동',37.5530,126.9200],['1120011500','성수1가1동',37.5445,127.0557],
+  ['4113511000','판교동',37.3948,127.1112],['1111011800','혜화동',37.5860,127.0010],['1141011900','망원1동',37.5560,126.9030],
+];
+const CRAFT = {knit:'대바늘', crochet:'코바늘', both:'둘 다'};
+const EXP = {new:'막 시작', under_1y:'1년 미만', '1_3y':'1~3년', over_3y:'3년+'};
+const AVAIL = {weekday_day:'평일 낮', weekday_evening:'평일 저녁', weekend:'주말'};
+
+let me = null, myProfile = null, view = 'map', pins = [], filter = {craft:null, bok:null}, roomId = null, roomChan = null, friendChan = null;
+
+// ============ 유틸 ============
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2200); }
+function avatar(p, lg){ const ini=(p?.nickname||'?').slice(0,1); return `<div class="ava${lg?' lg':''}">${p?.avatar_url?`<img src="${esc(p.avatar_url)}" alt="">`:esc(ini)}</div>`; }
+function ago(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분 전'; if(d<86400)return Math.floor(d/3600)+'시간 전'; return Math.floor(d/86400)+'일 전'; }
+function hhmm(t){ return new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}); }
+function chips(p){ return [p.craft&&`<span class="chip y">${CRAFT[p.craft]}</span>`, p.experience&&`<span class="chip">${EXP[p.experience]}</span>`, p.beginner_ok&&`<span class="chip m">초보 환영</span>`, p.mbti&&`<span class="chip">${esc(p.mbti)}</span>`].filter(Boolean).join(' '); }
+function openSheet(html){ $('#sheet').innerHTML='<div class="hd"></div>'+html; $('#sheetwrap').classList.add('on'); }
+function closeSheet(){ $('#sheetwrap').classList.remove('on'); }
+function seg(id, opts, multi){ const el=$(id); el.innerHTML=Object.entries(opts).map(([k,v])=>`<button type="button" data-k="${k}">${v}</button>`).join(''); el.onclick=e=>{ const b=e.target.closest('button'); if(!b)return; if(multi){b.classList.toggle('on');} else { [...el.children].forEach(c=>c.classList.toggle('on',c===b)); } }; }
+function segVal(id, multi){ const on=[...$(id).querySelectorAll('.on')].map(b=>b.dataset.k); return multi?on:(on[0]||null); }
+function segSet(id, val){ const vals=Array.isArray(val)?val:[val]; [...$(id).children].forEach(b=>b.classList.toggle('on',vals.includes(b.dataset.k))); }
+
+// ============ 인증 ============
+async function loginGoogle(){
+  const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.href.split('#')[0] } });
+  if(error) toast('구글 로그인 오류: '+error.message);
+}
+async function loginTest(n){
+  const { error } = await sb.auth.signInWithPassword({ email:`tester${n}@example.com`, password:'knit1234' });
+  if(error) toast('로그인 실패: '+error.message);
+}
+async function logout(){ await sb.auth.signOut(); }
+
+sb.auth.onAuthStateChange(async (ev, session) => {
+  me = session?.user || null;
+  if(!me){ show('login'); myProfile=null; return; }
+  await loadMe();
+  if(!myProfile?.onboarded_at){ openOnboard(false); }
+  else { go('map'); watchFriends(); }
+});
+
+async function loadMe(){
+  const { data } = await sb.from('profiles').select('*').eq('id', me.id).single();
+  myProfile = data;
+  if(myProfile?.location){ const c = parseGeo(myProfile.location); if(c) myProfile._c = c; }
+}
+// PostGIS geography → EWKB hex 파싱 (SRID 4326 point)
+function parseGeo(hex){
+  try{ if(typeof hex!=='string')return null; const b=new Uint8Array(hex.match(/../g).map(h=>parseInt(h,16))); const dv=new DataView(b.buffer); const le=b[0]===1; let o=5; const type=dv.getUint32(1,le); if(type&0x20000000)o+=4; const x=dv.getFloat64(o,le), y=dv.getFloat64(o+8,le); return {lat:y,lng:x}; }catch(e){ return null; }
+}
+
+// ============ 화면 전환 ============
+function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','friends','chats','my'].includes(v); $('#nav').style.display=navOn?'flex':'none'; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===v)); }
+function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
+$('#nav').onclick = e => { const b=e.target.closest('button'); if(b) go(b.dataset.v); };
+
+// ============ 온보딩 ============
+seg('#f_craft', CRAFT); seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
+$('#f_dong').innerHTML = DONGS.map(d=>`<option value="${d[0]}">${d[1]}</option>`).join('');
+let gps = null;
+function openOnboard(edit){
+  const p = myProfile||{};
+  $('#obTitle').textContent = edit?'프로필 수정':'프로필 만들기'; $('#obBack').hidden=!edit;
+  $('#f_nick').value=p.nickname||''; $('#f_dong').value=p.dong_code||DONGS[0][0];
+  segSet('#f_craft',p.craft); segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
+  $('#f_now').value=p.now_making||''; $('#f_stuck').value=p.stuck_on||''; $('#f_mbti').value=p.mbti||''; $('#f_bok').checked=!!p.beginner_ok;
+  gps=null; show('onboard');
+}
+function useGps(){
+  if(!navigator.geolocation) return toast('이 브라우저는 위치를 지원하지 않아요');
+  navigator.geolocation.getCurrentPosition(pos=>{ gps={lat:pos.coords.latitude,lng:pos.coords.longitude}; toast('현재 위치를 사용해요 (저장은 흐려진 좌표만)'); }, ()=>toast('위치 권한이 거부됐어요. 동네 중심으로 저장돼요'));
+}
+async function saveProfile(){
+  const edit = !$('#obBack').hidden;
+  const dong = DONGS.find(d=>d[0]===$('#f_dong').value);
+  const mbti = $('#f_mbti').value.trim().toUpperCase();
+  if(mbti && !/^[EI][NS][TF][JP]$/.test(mbti)) return toast('MBTI 형식을 확인해 주세요');
+  const row = { nickname:$('#f_nick').value.trim()||'뜨개인', dong_code:dong[0], dong_name:dong[1], craft:segVal('#f_craft'), experience:segVal('#f_exp'),
+    now_making:$('#f_now').value.trim()||null, stuck_on:$('#f_stuck').value.trim()||null, mbti:mbti||null, available:segVal('#f_avail',true), beginner_ok:$('#f_bok').checked, onboarded_at:new Date().toISOString() };
+  const { error } = await sb.from('profiles').update(row).eq('id', me.id);
+  if(error) return toast('저장 실패: '+error.message);
+  // 위치: GPS가 있으면 GPS를, 없으면 동네 중심을 흐려서 저장 (원본은 서버에 남지 않음)
+  const src = gps || {lat:dong[2], lng:dong[3]};
+  const r = await sb.rpc('set_fuzzy_location', { p_lat:src.lat, p_lng:src.lng });
+  if(r.error) toast('위치 저장 실패: '+r.error.message);
+  await loadMe(); toast('저장했어요'); watchFriends();
+  if(!(myProfile.skills||[]).length && !edit) openSlides(()=>openSkills()); else go(edit?'my':'map');
+}
+
+// ============ 지도 어댑터 (Google Maps ↔ Leaflet/OSM) ============
+const MapAdapter = {
+  impl:null, ready:false, pending:null,
+  init(el, center){
+    if(this.pending) return this.pending;   // 로그인 이벤트가 두 번 와도 지도는 한 번만 생성
+    this.impl = GOOGLE_MAPS_KEY ? GMap : LMap;
+    this.pending = Promise.resolve(this.impl.init(el, center)).then(()=>{ this.ready=true; });
+    return this.pending;
+  },
+  setCenter(c){ this.impl.setCenter(c); },
+  clear(){ this.impl.clear(); },
+  marker(o){ this.impl.marker(o); },
+  onMove(cb){ this.impl.onMove(cb); },
+  center(){ return this.impl.center(); }
+};
+const LMap = {
+  map:null, layer:null,
+  async init(el, c){ this.map=L.map(el,{zoomControl:false,attributionControl:true}).setView([c.lat,c.lng],14); L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(this.map); this.layer=L.layerGroup().addTo(this.map); },
+  setCenter(c){ this.map.setView([c.lat,c.lng],14); },
+  clear(){ this.layer.clearLayers(); },
+  marker({lat,lng,label,cls,onClick}){ const m=L.marker([lat,lng],{icon:L.divIcon({html:`<div class="pin ${cls||''}">${esc(label)}</div>`,iconSize:[34,34],iconAnchor:[17,17]})}); if(onClick)m.on('click',onClick); m.addTo(this.layer); },
+  onMove(cb){ this.map.on('moveend',cb); },
+  center(){ const c=this.map.getCenter(); return {lat:c.lat,lng:c.lng}; }
+};
+// Google Maps용 HTML 핀 (OverlayView) — Advanced Marker 없이 어떤 지도에서도 동작
+function makeHtmlPin(){
+  class HtmlPin extends google.maps.OverlayView {
+    constructor(pos, el, onClick){ super(); this.pos=pos; this.el=el; if(onClick){ el.addEventListener('click', e=>{ e.stopPropagation(); onClick(); }); } }
+    onAdd(){ this.getPanes().overlayMouseTarget.appendChild(this.el); google.maps.OverlayView.preventMapHitsFrom(this.el); }
+    draw(){ const p=this.getProjection()?.fromLatLngToDivPixel(this.pos); if(!p) return; this.el.style.left=p.x+'px'; this.el.style.top=p.y+'px'; }
+    onRemove(){ this.el.remove(); }
+  }
+  return HtmlPin;
+}
+const GMap = {
+  map:null, markers:[],
+  init(el, c){ return new Promise(res=>{ const make=()=>{ this.map=new google.maps.Map(el,{center:c,zoom:14,disableDefaultUI:true,clickableIcons:false}); this.Pin=makeHtmlPin(); res(); }; if(window.google?.maps?.Map) return make(); window.__gm=make; const s=document.createElement('script'); s.src=`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&callback=__gm&language=ko&region=KR&loading=async`; document.head.appendChild(s); }); },
+  setCenter(c){ this.map.setCenter(c); this.map.setZoom(14); },
+  clear(){ this.markers.forEach(m=>m.setMap(null)); this.markers=[]; },
+  marker({lat,lng,label,cls,onClick}){ const d=document.createElement('div'); d.className='pin '+(cls||''); d.textContent=label; d.style.position='absolute'; d.style.transform='translate(-50%,-50%)'; const m=new this.Pin(new google.maps.LatLng(lat,lng), d, onClick); m.setMap(this.map); this.markers.push(m); },
+  onMove(cb){ this.map.addListener('idle',cb); },
+  center(){ const c=this.map.getCenter(); return {lat:c.lat(),lng:c.lng()}; }
+};
+
+// ============ 지도 홈 ============
+const FILTERS = [['craft',null,'전체'],['craft','knit','대바늘'],['craft','crochet','코바늘'],['bok',true,'초보 환영'],['sim',true,'🤝 비슷한 수준']];
+function renderFilters(){ $('#filters').innerHTML = FILTERS.map(([k,v,l],i)=>`<button data-i="${i}" class="${filter[k]===v&&(k!=='craft'||v!==null||(filter.craft===null&&filter.bok===null&&!filter.sim))?'on':''}">${l}</button>`).join(''); }
+$('#filters').onclick = e => { const b=e.target.closest('button'); if(!b)return; const [k,v]=FILTERS[b.dataset.i]; if(k==='craft'&&v===null){filter={craft:null,bok:null,sim:null};} else if(k==='bok'){filter.bok=filter.bok?null:true;} else if(k==='sim'){ if(!(myProfile?.level_crochet>0||myProfile?.level_knit>0)) return toast('먼저 마이에서 내 뜨개 단계를 체크해 주세요'); filter.sim=filter.sim?null:true;} else {filter.craft=filter.craft===v?null:v;} renderFilters(); loadPins(); };
+async function initMap(){
+  const c = myProfile?._c || {lat:37.4999,lng:127.0374};
+  await MapAdapter.init($('#map'), c);
+  renderFilters();
+  MapAdapter.onMove(()=>loadPins());
+  loadPins();
+}
+let pinTimer=null;
+function loadPins(){ clearTimeout(pinTimer); pinTimer=setTimeout(fetchPins, 250); }
+async function fetchPins(){
+  const c = MapAdapter.center();
+  const [{data:people,error}, {data:meetups}] = await Promise.all([
+    sb.rpc('nearby_profiles',{p_lat:c.lat,p_lng:c.lng,p_radius_m:RADIUS_M,p_craft:filter.craft,p_beginner_ok:filter.bok}),
+    sb.from('meetups').select('id,title,place_name,starts_at,location').eq('is_public',true).gte('starts_at',new Date().toISOString())
+  ]);
+  if(error) return toast('근처 조회 실패: '+error.message);
+  MapAdapter.clear();
+  if(myProfile?._c) MapAdapter.marker({...myProfile._c,label:'나',cls:'me'});
+  const shown = filter.sim ? (people||[]).filter(p=>{ const d=simDiff(p); return d!==null && Math.abs(d)<=1; }) : (people||[]);
+  shown.forEach(p=>MapAdapter.marker({lat:p.lat,lng:p.lng,label:(p.now_making||p.nickname).slice(0,3),cls:p.craft==='knit'?'knit':'',onClick:()=>showPinCard(p)}));
+  (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:'모임',cls:'me',onClick:()=>toast(`${m.title} · ${m.place_name} · ${new Date(m.starts_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`)}); });
+  pins = people||[];
+}
+function showPinCard(p){
+  $('#pincard').hidden=false;
+  $('#pincard').innerHTML = `<div class="card" onclick="openProfile('${p.id}')"><div class="row">${avatar(p)}<div style="flex:1;min-width:0"><b>${esc(p.nickname)}</b> <span class="muted">${esc(p.dong_name||'')} · ${Math.round(p.distance_m)}m</span><div class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CRAFT[p.craft]||''} · 지금 뜨는 것: ${esc(p.now_making||'-')}</div><div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">${lvChips(p)} ${simBadge(p)}</div></div><span style="color:var(--ink3)">›</span></div></div>`;
+}
+function centerMe(){ if(myProfile?._c) MapAdapter.setCenter(myProfile._c); else toast('프로필에서 동네를 먼저 정해 주세요'); }
+
+// ============ 프로필 시트 ============
+async function openProfile(id){
+  const [{data:p},{data:works},{data:rel}] = await Promise.all([
+    sb.from('profiles').select('*').eq('id',id).single(),
+    sb.from('works').select('*').eq('profile_id',id).order('created_at',{ascending:false}).limit(6),
+    sb.from('friendships').select('*').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`)
+  ]);
+  if(!p) return toast('프로필을 불러올 수 없어요');
+  const r = rel?.[0];
+  let action;
+  if(!r) action = `<button class="btn" onclick="requestFriend('${id}')">🤝 친구 신청</button>`;
+  else if(r.status==='accepted') action = `<button class="btn m" onclick="openDirectRoom('${id}')">💬 채팅 열기</button>`;
+  else if(r.status==='pending' && r.requester_id===me.id) action = `<button class="btn o" disabled>신청 대기 중</button>`;
+  else if(r.status==='pending') action = `<div class="row"><button class="btn" onclick="respond('${id}','accepted')">수락</button><button class="btn o" onclick="respond('${id}','declined')">거절</button></div>`;
+  else if(r.status==='blocked') action = `<button class="btn o" disabled>차단됨</button>`;
+  else action = `<button class="btn o" disabled>거절된 신청 (30일 후 재신청)</button>`;
+  openSheet(`
+    <div class="row">${avatar(p,true)}<div><b style="font-size:1.1rem">${esc(p.nickname)}</b><div class="muted">${esc(p.dong_name||'')}${p.dong_verified_at?' ✓':''}</div><div style="margin-top:4px">${chips(p)}</div></div></div>
+    ${(p.level_crochet>0||p.level_knit>0)?`<div class="card soft"><b class="t">뜨개 단계</b><div class="row" style="flex-wrap:wrap;gap:6px">${lvChips(p)} ${simBadge(p)}</div></div>`:''}
+    ${p.now_making?`<div class="card soft"><b class="t">지금 뜨는 것</b>${esc(p.now_making)}</div>`:''}
+    ${p.stuck_on?`<div class="card soft"><b class="t">요즘 막히는 부분</b><div class="story">${esc(p.stuck_on)}</div></div>`:''}
+    ${p.available?.length?`<div class="card soft"><b class="t">만나기 좋은 시간</b>${p.available.map(a=>AVAIL[a]).join(' · ')}</div>`:''}
+    ${p.bio?`<div class="card soft">${esc(p.bio)}</div>`:''}
+    <div class="card soft"><b class="t">완성작</b>${works?.length?`<div class="gallery">${works.map(w=>`<div style="background:url(${esc(w.photo_url)}) center/cover"></div>`).join('')}</div>`:'<span class="muted">아직 없어요</span>'}</div>
+    ${action}
+    <div class="row" style="justify-content:center;gap:16px"><button class="btn sm o" onclick="reportUser('${id}')">🚩 신고</button><button class="btn sm o" onclick="blockUser('${id}')">⛔ 차단</button></div>
+  `);
+}
+function requestFriend(id){
+  openSheet(`<b>친구 신청</b><p class="muted" style="margin:0">한 줄 메시지를 함께 보내면 수락률이 올라가요 (선택, 100자)</p><textarea id="reqMsg" maxlength="100" placeholder="예: 저도 그 도안 뜨고 있어요"></textarea><button class="btn" onclick="sendRequest('${id}')">보내기</button>`);
+}
+async function sendRequest(id){
+  const { error } = await sb.from('friendships').insert({ requester_id:me.id, addressee_id:id, message:$('#reqMsg').value.trim()||null });
+  if(error) return toast(error.message.replace(/^.*?: /,''));
+  toast('친구 신청을 보냈어요'); openProfile(id);
+}
+async function respond(id, status){
+  const { error } = await sb.from('friendships').update({ status }).eq('requester_id',id).eq('addressee_id',me.id);
+  if(error) return toast('실패: '+error.message);
+  toast(status==='accepted'?'친구가 됐어요. 채팅방이 열렸어요':'거절했어요');
+  if(view==='friends') renderFriends(); else closeSheet();
+}
+async function blockUser(id){
+  if(!confirm('차단하면 지도와 채팅에서 서로 보이지 않아요. 차단할까요?')) return;
+  const { data:rel } = await sb.from('friendships').select('requester_id,addressee_id').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`);
+  let r;
+  if(rel?.length) r = await sb.from('friendships').update({status:'blocked'}).eq('requester_id',rel[0].requester_id).eq('addressee_id',rel[0].addressee_id);
+  else r = await sb.from('friendships').insert({requester_id:me.id,addressee_id:id,status:'pending'}).then(()=>sb.from('friendships').update({status:'blocked'}).eq('requester_id',me.id).eq('addressee_id',id));
+  if(r.error) return toast('실패: '+r.error.message);
+  toast('차단했어요'); closeSheet(); loadPins();
+}
+function reportUser(id){
+  openSheet(`<b>신고</b><label class="f">사유<select id="repReason"><option value="spam">스팸·광고</option><option value="harassment">괴롭힘·불쾌한 언행</option><option value="inappropriate">부적절한 내용</option><option value="fake">사칭·허위 프로필</option><option value="other">기타</option></select></label><textarea id="repDetail" maxlength="500" placeholder="자세한 내용 (선택)"></textarea><button class="btn r" onclick="sendReport('${id}')">신고하기</button>`);
+}
+async function sendReport(id){
+  const { error } = await sb.from('reports').insert({reporter_id:me.id,reported_id:id,reason:$('#repReason').value,detail:$('#repDetail').value.trim()||null});
+  if(error) return toast(error.code==='23505'?'이미 신고한 사용자예요':'실패: '+error.message);
+  toast('신고를 접수했어요. 검토 전까지 이 사용자는 숨겨져요'); closeSheet();
+}
+
+// ============ 친구 ============
+async function fetchFriendships(){
+  const { data } = await sb.from('friendships').select('*, requester:profiles!friendships_requester_id_fkey(id,nickname,avatar_url,dong_name,craft,now_making), addressee:profiles!friendships_addressee_id_fkey(id,nickname,avatar_url,dong_name,craft,now_making)').neq('status','blocked').order('created_at',{ascending:false});
+  return data||[];
+}
+async function renderFriends(){
+  const rows = await fetchFriendships();
+  const inbox = rows.filter(r=>r.status==='pending'&&r.addressee_id===me.id);
+  const sent = rows.filter(r=>r.status==='pending'&&r.requester_id===me.id);
+  const friends = rows.filter(r=>r.status==='accepted');
+  $('#badgeFriends').hidden=!inbox.length; $('#badgeFriends').textContent=inbox.length;
+  const item = (p,extra,onclick)=>`<div class="item" onclick="${onclick}">${avatar(p)}<div class="tx"><b>${esc(p.nickname)}</b><span>${esc(p.dong_name||'')} · ${CRAFT[p.craft]||''} · ${esc(p.now_making||'')}</span>${extra||''}</div></div>`;
+  $('#friendsBody').innerHTML = `
+    <h3 style="margin:0;font-size:.95rem">받은 신청 ${inbox.length?`<span class="chip r">${inbox.length}</span>`:''}</h3>
+    <div class="list">${inbox.length?inbox.map(r=>item(r.requester, `${r.message?`<div class="story" style="font-size:.85rem">${esc(r.message)}</div>`:''}<div class="row" style="margin-top:6px"><button class="btn sm" onclick="event.stopPropagation();respond('${r.requester_id}','accepted')">수락</button><button class="btn sm o" onclick="event.stopPropagation();respond('${r.requester_id}','declined')">거절</button></div>`, `openProfile('${r.requester_id}')`)).join(''):'<div class="muted">받은 신청이 없어요</div>'}</div>
+    <h3 style="margin:8px 0 0;font-size:.95rem">친구 ${friends.length}</h3>
+    <div class="list">${friends.length?friends.map(r=>{const p=r.requester_id===me.id?r.addressee:r.requester; return item(p,'',`openDirectRoom('${p.id}')`);}).join(''):'<div class="muted">지도에서 이웃 뜨개인을 찾아 친구 신청을 보내 보세요</div>'}</div>
+    ${sent.length?`<h3 style="margin:8px 0 0;font-size:.95rem">보낸 신청 ${sent.length}</h3><div class="list">${sent.map(r=>item(r.addressee,'<span class="muted">대기 중</span>',`openProfile('${r.addressee_id}')`)).join('')}</div>`:''}
+  `;
+}
+function watchFriends(){
+  if(friendChan) return;
+  friendChan = sb.channel('friend-inbox').on('postgres_changes',{event:'*',schema:'public',table:'friendships',filter:`addressee_id=eq.${me.id}`},payload=>{
+    if(payload.eventType==='INSERT') toast('새 친구 신청이 왔어요');
+    refreshBadge(); if(view==='friends') renderFriends();
+  }).on('postgres_changes',{event:'UPDATE',schema:'public',table:'friendships',filter:`requester_id=eq.${me.id}`},payload=>{
+    if(payload.new.status==='accepted') toast('친구 신청이 수락됐어요');
+  }).subscribe();
+  refreshBadge();
+}
+async function refreshBadge(){ const {count}=await sb.from('friendships').select('*',{count:'exact',head:true}).eq('addressee_id',me.id).eq('status','pending'); $('#badgeFriends').hidden=!count; $('#badgeFriends').textContent=count||''; }
+
+// ============ 채팅 ============
+async function fetchRooms(){
+  const { data, error } = await sb.from('rooms').select('id,kind,title,created_at, room_members(profile_id, profiles(id,nickname,avatar_url)), messages(body,photo_url,place,created_at,sender_id)').order('created_at',{foreignTable:'messages',ascending:false}).limit(1,{foreignTable:'messages'});
+  if(error){ toast('채팅 조회 실패: '+error.message); return []; }
+  return (data||[]).map(r=>{ r.others=r.room_members.map(m=>m.profiles).filter(p=>p&&p.id!==me.id); r.name=r.kind==='direct'?(r.others[0]?.nickname||'(나간 사용자)'):(r.title||r.others.map(p=>p.nickname).join(', ')); r.last=r.messages?.[0]; return r; })
+    .sort((a,b)=>new Date(b.last?.created_at||b.created_at)-new Date(a.last?.created_at||a.created_at));
+}
+async function renderChats(){
+  const rooms = await fetchRooms();
+  $('#chatsBody').innerHTML = rooms.length ? `<div class="list">${rooms.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">👥</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${esc(r.last?.body||(r.last?.photo_url?'📷 사진':r.last?.place?'📍 장소':'대화를 시작해 보세요'))}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>';
+}
+async function openDirectRoom(otherId){
+  const rooms = await fetchRooms();
+  const r = rooms.find(x=>x.kind==='direct'&&x.others.some(p=>p.id===otherId));
+  if(!r) return toast('채팅방을 찾을 수 없어요');
+  openRoom(r.id);
+}
+let roomInfo=null;
+async function openRoom(id){
+  roomId=id; closeSheet();
+  const { data:r } = await sb.from('rooms').select('id,kind,title,created_by, room_members(profile_id, profiles(id,nickname,avatar_url))').eq('id',id).single();
+  if(!r) return toast('방을 열 수 없어요');
+  roomInfo=r; const others=r.room_members.map(m=>m.profiles).filter(p=>p&&p.id!==me.id);
+  $('#roomTitle').textContent = r.kind==='direct'?(others[0]?.nickname||'채팅'):(r.title||others.map(p=>p.nickname).join(', '));
+  $('#meetBtn').hidden = r.kind!=='group';
+  show('room');
+  const { data:msgs } = await sb.from('messages').select('*').eq('room_id',id).order('created_at').limit(200);
+  $('#msgs').innerHTML=''; (msgs||[]).forEach(appendMsg); scrollMsgs();
+  await sb.from('room_members').update({last_read_at:new Date().toISOString()}).eq('room_id',id).eq('profile_id',me.id);
+  if(roomChan) sb.removeChannel(roomChan);
+  roomChan = sb.channel('room:'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`room_id=eq.${id}`},p=>{ appendMsg(p.new); scrollMsgs(); }).subscribe();
+}
+function nameOf(uid){ const m=roomInfo?.room_members.find(m=>m.profile_id===uid); return m?.profiles?.nickname||'알 수 없음'; }
+function appendMsg(m){
+  const mine=m.sender_id===me.id; const el=document.createElement('div'); el.className='bub'+(mine?' me':'');
+  let body = m.body?esc(m.body):''; if(m.place) body += `<div>📍 ${esc(m.place.name)}${m.place.address?`<div class="muted">${esc(m.place.address)}</div>`:''}</div>`; if(m.photo_url) body+=`<img src="${esc(m.photo_url)}" style="max-width:100%;border-radius:8px">`;
+  el.innerHTML = `${!mine&&roomInfo?.kind==='group'?`<span class="who">${esc(nameOf(m.sender_id))}</span>`:''}${body}<time>${hhmm(m.created_at)}</time>`;
+  $('#msgs').appendChild(el);
+}
+function scrollMsgs(){ const v=$('#v-room'); v.scrollTop=v.scrollHeight; }
+async function sendMsg(){
+  const t=$('#msgIn').value.trim(); if(!t||!roomId)return;
+  $('#msgIn').value='';
+  const { error } = await sb.from('messages').insert({room_id:roomId,sender_id:me.id,body:t});
+  if(error){ toast('전송 실패: '+error.message); $('#msgIn').value=t; }
+}
+function leaveRoom(){ if(roomChan){ sb.removeChannel(roomChan); roomChan=null; } roomId=null; go('chats'); }
+
+// 단체방
+async function openGroupForm(){
+  const rows=(await fetchFriendships()).filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee:r.requester);
+  if(!rows.length) return toast('친구가 있어야 단체방을 만들 수 있어요');
+  openSheet(`<b>단체방 만들기</b><label class="f">방 이름<input id="grpTitle" maxlength="40" placeholder="예: 토요 뜨개"></label><label class="f">초대할 친구<div class="seg" id="grpMembers">${rows.map(p=>`<button type="button" data-k="${p.id}">${esc(p.nickname)}</button>`).join('')}</div></label><button class="btn" onclick="createGroup()">만들기</button>`);
+  $('#grpMembers').onclick=e=>{const b=e.target.closest('button'); if(b)b.classList.toggle('on');};
+}
+async function createGroup(){
+  const ids=segVal('#grpMembers',true); if(!ids.length) return toast('초대할 친구를 골라 주세요');
+  // 방 id를 클라이언트에서 정함: 멤버가 생기기 전에는 RLS 때문에 insert 결과를 읽어올 수 없음
+  const room = { id: crypto.randomUUID() };
+  const { error } = await sb.from('rooms').insert({id:room.id,kind:'group',title:$('#grpTitle').value.trim()||null,created_by:me.id});
+  if(error) return toast('실패: '+error.message);
+  const r1 = await sb.from('room_members').insert({room_id:room.id,profile_id:me.id});
+  if(r1.error) return toast('실패: '+r1.error.message);
+  const r2 = await sb.from('room_members').insert(ids.map(id=>({room_id:room.id,profile_id:id})));
+  if(r2.error) return toast('초대 실패: '+r2.error.message);
+  toast('단체방을 만들었어요'); openRoom(room.id);
+}
+// 모임 (단체방에서)
+function openMeetupForm(){
+  const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7)); d.setHours(14,0,0,0);
+  const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  openSheet(`<b>모임 만들기</b><label class="f">제목<input id="mtTitle" maxlength="60" value="${esc($('#roomTitle').textContent)} 모임"></label><label class="f">장소<input id="mtPlace" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label><label class="f">시간<input id="mtTime" type="datetime-local" value="${local}"></label><label class="f"><span><input type="checkbox" id="mtPublic" style="width:auto;margin-right:6px">지도에 공개 (다른 뜨개인도 볼 수 있어요)</span></label><div class="card soft muted">첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</div><button class="btn" onclick="createMeetup()">만들기</button>`);
+}
+async function createMeetup(){
+  const place=$('#mtPlace').value.trim(); if(!place) return toast('장소를 적어 주세요');
+  const c = myProfile?._c;
+  const row={room_id:roomId,created_by:me.id,title:$('#mtTitle').value.trim()||'모임',place_name:place,starts_at:new Date($('#mtTime').value).toISOString(),is_public:$('#mtPublic').checked, location: c?`SRID=4326;POINT(${c.lng} ${c.lat})`:null};
+  const { error } = await sb.from('meetups').insert(row);
+  if(error) return toast('실패: '+error.message);
+  await sb.from('messages').insert({room_id:roomId,sender_id:me.id,body:`📍 모임: ${row.title}\n${place}\n${new Date(row.starts_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`});
+  toast('모임을 만들었어요'); closeSheet();
+}
+
+// ============ 뜨개 단계 자가진단 ============
+const LVNAME = {0:'아직 없음',1:'입문',2:'초급',3:'중급',4:'상급',5:'전문'};
+const LVDESC = {1:'첫 수업에서 배우는 기초',2:'기초 조합, 단순 성형',3:'실용 소품 완성 수준',4:'의류·복합 무늬 수준',5:'특수 기법, 전용 학습 필요'};
+const CRAFTKEY = {crochet:'crochet', knitting:'knitting'};
+let TECH = [], skills = new Set(), skillCraft = 'crochet', skillTimer = null, openLv = null, skillsDirty = false, slideAfter = null;
+
+async function loadTech(){ if(TECH.length) return; const { data, error } = await sb.from('techniques').select('*').order('sort'); if(error) toast('기법 목록 로드 실패: '+error.message); TECH = data||[]; }
+function techOf(craft){ return TECH.filter(t=>t.craft===craft); }
+function lvStats(craft, set){ // 단계별 {done,total}
+  const s = {}; techOf(craft).forEach(t=>{ s[t.level] = s[t.level]||{done:0,total:0}; s[t.level].total++; if(set.has(t.id)) s[t.level].done++; }); return s;
+}
+function lvOf(craft, set){ const s = lvStats(craft,set); let lv=0; for(let l=1;l<=5;l++){ if(s[l] && s[l].done*2 >= s[l].total) lv=l; } return lv; }
+function prereqClosure(id, acc){ acc.add(id); const t=TECH.find(x=>x.id===id); (t?.prereq||[]).forEach(p=>{ if(!acc.has(p)) prereqClosure(p, acc); }); return acc; }
+function dependents(id){ // id를 선행으로 갖는 모든 기법 (재귀)
+  const out=new Set(); const walk=x=>{ TECH.filter(t=>t.prereq.includes(x)).forEach(t=>{ if(!out.has(t.id)){ out.add(t.id); walk(t.id); } }); }; walk(id); return out;
+}
+function myCrafts(){ const c=myProfile?.craft; return c==='both'?['crochet','knitting']:c==='knit'?['knitting']:['crochet']; }
+
+async function openSkills(craft){
+  await loadTech();
+  skills = new Set(myProfile?.skills||[]);
+  skillCraft = craft || myCrafts()[0];
+  openLv = null; skillsDirty=false;
+  show('skills'); renderSkills();
+}
+function renderSkills(){
+  const craft = skillCraft, st = lvStats(craft, skills), lv = lvOf(craft, skills);
+  const cs = myCrafts();
+  const next = lv<5 ? (st[lv+1] ? Math.max(0, Math.ceil(st[lv+1].total/2) - st[lv+1].done) : 0) : 0;
+  if(openLv===null) openLv = Math.min(5, Math.max(1, lv+1));
+  $('#skillsBody').innerHTML = `
+    ${cs.length>1||true?`<div class="tabs"><button class="${craft==='crochet'?'on':''}" onclick="switchCraft('crochet')">코바늘</button><button class="${craft==='knitting'?'on':''}" onclick="switchCraft('knitting')">대바늘</button></div>`:''}
+    <div class="lvhead"><div class="lvbig">${lv||'–'}<small>단계</small></div><div style="flex:1"><b>${craft==='crochet'?'코바늘':'대바늘'} ${lv?LVNAME[lv]:'아직 단계 없음'}</b><div class="muted">${lv?LVDESC[lv]:'할 수 있는 기법을 눌러 보세요'}${lv<5&&next?` · ${lv+1}단계까지 ${next}개 남음`:''}</div>
+      <div class="lvbar">${[1,2,3,4,5].map(l=>`<i class="${l<=lv?'done':''}"><b style="width:${st[l]?Math.round(st[l].done/st[l].total*100):0}%"></b></i>`).join('')}</div></div></div>
+    ${[1,2,3,4,5].map(l=>{ const s=st[l]||{done:0,total:0}; const done=s.done*2>=s.total&&s.total>0; return `
+      <div class="lvsec ${done?'done':''} ${openLv===l?'open':''}" data-lv="${l}">
+        <div class="hd" onclick="toggleLv(${l})"><div class="n">${l}</div><div class="t"><b>${LVNAME[l]}</b><span>${LVDESC[l]}</span></div><div class="pct">${s.done}/${s.total}</div><span class="car">›</span></div>
+        <div class="techs">${techOf(craft).filter(t=>t.level===l).map(t=>`<button type="button" class="tech ${skills.has(t.id)?'on':''}" onclick="toggleTech('${t.id}')" title="${esc(t.descr||'')}">${skills.has(t.id)?'✓ ':''}${esc(t.name_ko)}${t.symbol&&t.symbol!=='–'&&t.symbol!=='조합'?`<span class="sym">${esc(t.symbol)}</span>`:''}</button>`).join('')}</div>
+      </div>`; }).join('')}
+    <div class="card soft muted">한 단계 기법의 절반 이상을 체크하면 그 단계로 표시돼요. 위 단계 기법을 누르면 필요한 아래 기법이 자동으로 체크돼요.</div>
+    <button class="btn" onclick="finishSkills()">저장하고 나가기</button>`;
+}
+function switchCraft(c){ skillCraft=c; openLv=null; renderSkills(); }
+function toggleLv(l){ openLv = openLv===l?null:l; document.querySelectorAll('.lvsec').forEach(el=>el.classList.toggle('open', +el.dataset.lv===openLv)); }
+function toggleTech(id){
+  if(skills.has(id)){ skills.delete(id); dependents(id).forEach(d=>skills.delete(d)); }
+  else { prereqClosure(id, skills); }
+  skillsDirty=true; renderSkills(); clearTimeout(skillTimer); skillTimer=setTimeout(saveSkills, 900);
+}
+async function saveSkills(){
+  clearTimeout(skillTimer); if(!me) return;
+  const { data, error } = await sb.from('profiles').update({ skills:[...skills] }).eq('id', me.id).select('skills,level_crochet,level_knit').single();
+  if(error) return toast('저장 실패: '+error.message);
+  Object.assign(myProfile, data); skillsDirty=false;
+}
+async function finishSkills(){ if(skillsDirty) await saveSkills(); toast(`코바늘 ${myProfile.level_crochet}단계 · 대바늘 ${myProfile.level_knit}단계로 저장했어요`); go('map'); }
+async function leaveSkills(){ if(skillsDirty) await saveSkills(); go('my'); }
+
+// 단계 표시·비교
+function lvChips(p){ const out=[]; if(p.level_crochet>0) out.push(`<span class="lvchip">코바늘 <b>${p.level_crochet}단계</b> ${LVNAME[p.level_crochet]}</span>`); if(p.level_knit>0) out.push(`<span class="lvchip">대바늘 <b>${p.level_knit}단계</b> ${LVNAME[p.level_knit]}</span>`); return out.join(' '); }
+function simDiff(p){ // 공통 종목 기준 (상대 − 나). 비교 불가면 null
+  const pairs=[['level_crochet'],['level_knit']].map(([k])=>(myProfile?.[k]>0&&p[k]>0)?p[k]-myProfile[k]:null).filter(v=>v!==null);
+  if(!pairs.length) return null; return pairs.reduce((a,b)=>Math.abs(a)<=Math.abs(b)?a:b);
+}
+function simBadge(p){ const d=simDiff(p); if(d===null) return ''; if(Math.abs(d)<=1) return '<span class="chip m">🤝 비슷해요</span>'; if(d>=2) return '<span class="chip y">📚 배울 수 있어요</span>'; return '<span class="chip">🧑‍🏫 알려줄 수 있어요</span>'; }
+
+// 설명 슬라이드
+function openSlides(after){ slideAfter = typeof after==='function'?after:null; $('#slides').classList.add('on'); $('#track').scrollTo({left:0}); updateDots(); }
+function closeSlides(){ $('#slides').classList.remove('on'); const f=slideAfter; slideAfter=null; if(f) f(); }
+function slideIdx(){ const t=$('#track'); return Math.round(t.scrollLeft / t.clientWidth); }
+function slideNext(){ const t=$('#track'), n=t.children.length, i=slideIdx(); if(i>=n-1) return closeSlides(); t.scrollTo({left:(i+1)*t.clientWidth, behavior:'smooth'}); }
+function updateDots(){ const t=$('#track'), n=t.children.length, i=slideIdx(); $('#dots').innerHTML=Array.from({length:n},(_,k)=>`<i class="${k===i?'on':''}"></i>`).join(''); $('#slideNext').textContent = i>=n-1?'시작하기':'다음'; $('#slideSkip').hidden = i>=n-1; }
+$('#track').addEventListener('scroll', ()=>{ clearTimeout($('#track')._t); $('#track')._t=setTimeout(updateDots,80); });
+
+// ============ 마이 ============
+function renderMy(){
+  const p=myProfile||{};
+  $('#myBody').innerHTML=`
+    <div class="row">${avatar(p,true)}<div><b style="font-size:1.1rem">${esc(p.nickname||'')}</b><div class="muted">${esc(p.dong_name||'동네 미설정')} · ${esc(me.email||'')}</div><div style="margin-top:4px">${chips(p)}</div></div></div>
+    <div class="card" style="cursor:pointer" onclick="openSkills()"><b class="t">내 뜨개 단계</b><div class="row" style="flex-wrap:wrap;gap:6px">${(p.level_crochet>0||p.level_knit>0)?lvChips(p):'<span class="muted">아직 체크하지 않았어요</span>'}<span style="margin-left:auto;color:var(--ink3)">›</span></div><div class="muted" style="margin-top:4px">체크한 기법 ${(p.skills||[]).length}개 · 누르면 수정</div></div>
+    ${p.now_making?`<div class="card soft"><b class="t">지금 뜨는 것</b>${esc(p.now_making)}</div>`:''}
+    ${p.stuck_on?`<div class="card soft"><b class="t">요즘 막히는 부분</b>${esc(p.stuck_on)}</div>`:''}
+    <button class="btn o" onclick="openOnboard(true)">프로필 수정</button>
+    <label class="f"><span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)" style="width:auto;margin-right:6px">지도에 내 핀 보이기</span></label>
+    <div class="card soft muted">위치는 500m 격자로 흐려진 좌표만 저장돼요. 정확한 위치는 서버에 남지 않아요.</div>
+    <button class="btn o" onclick="logout()">로그아웃</button>
+    <div class="devbar">Supabase ${SB_URL.replace('https://','')} · 지도 ${GOOGLE_MAPS_KEY?'Google Maps':'OpenStreetMap (Google 키 미설정)'}</div>`;
+}
+async function toggleVisible(v){ await sb.from('profiles').update({is_visible:v}).eq('id',me.id); myProfile.is_visible=v; toast(v?'지도에 보여요':'지도에서 숨겼어요'); }
+
+// ============ 시작 ============
+show('login');
+</script>
+</body>
+</html>
