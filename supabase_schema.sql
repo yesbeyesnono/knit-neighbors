@@ -835,3 +835,20 @@ alter table public.meetups
 -- create_meetup(…, p_extra jsonb): kind/craft/level_min/level_max/technique_id/capacity/fee/bring/duration_min/repeat 를 jsonb로 받음
 -- join_meetup: 정원(capacity) 초과 시 '정원이 찼어요' 예외
 -- profiles_apply_skills: skills에서 craft 자동 판정 (C*만 → crochet, K*만 → knit, 둘 다 → both)
+
+-- ---------------------------------------------------------------
+-- 13. 작품 인증 (2026-09-13) — 모임 개설 조건
+--   works: photos[]·techniques[]·note 추가. posts.work_id 로 커뮤니티 '작품' 탭에 노출
+--   profiles: verified_skills(인증된 기법 합집합)·cert_count — works 트리거가 유지, skills에 선행 포함 자동 체크
+--   create_work(title, photos, techniques, yarn, note) → 글 id.  create_meetup 은 works 1건 이상 없으면 예외
+-- ---------------------------------------------------------------
+alter table public.works
+  add column photos text[] not null default '{}',
+  add column techniques text[] not null default '{}',
+  add column note text check (note is null or char_length(note) <= 300);
+alter table public.posts add column work_id uuid references public.works(id) on delete set null;
+create index posts_work_idx on public.posts (work_id) where work_id is not null;
+alter table public.profiles
+  add column verified_skills text[] not null default '{}',
+  add column cert_count integer not null default 0;
+-- works_apply_cert 트리거 / create_work 함수 / create_meetup 조건: 적용된 마이그레이션 'work_certification' 참조

@@ -182,6 +182,29 @@ details .seg{margin-top:8px;justify-content:center}
 .mcard .mtags span.warn{background:#fff3e0;color:#9a5a00}
 .mcard .mtags span.full{background:#fde8ea;color:#c9303f}
 .mcard .kind{font-size:12px;font-weight:700;color:var(--ink);background:#f2f2f2;padding:2px 8px;border-radius:6px;margin-left:6px}
+/* 작품 인증 */
+.wcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:4px 0 10px;background:#fafafa}
+.wcard .wh{font-size:12px;color:#8a6d1a;font-weight:700;margin-bottom:4px}
+.wcard b{font-size:16px;display:block}
+.wcard .ml{font-size:14px;color:var(--ink2);margin-top:3px}
+.wcard .tchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.wcard .tchips span{font-size:12px;padding:3px 9px;border-radius:999px;background:#fff;border:1px solid var(--line);color:#333}
+.wfields{display:flex;flex-direction:column;gap:10px;background:#fbf6e6;border-radius:14px;padding:14px}
+.wfields .mtitle{font-weight:700;font-size:.95rem}
+.wfields label.f{font-size:.8rem;color:var(--ink2)}
+.wfields input{background:#fff}
+.wfields .tsel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.wfields .tsel .tabs{margin-bottom:8px}
+.wfields .tsel .lvgrp{margin-top:6px}
+.wfields .tsel .lvgrp .lvh{font-size:.75rem;color:var(--ink3);font-weight:600;margin:6px 0 4px}
+.wfields .tsel .techs{display:flex;flex-wrap:wrap;gap:6px;padding:0}
+.wfields .tsel .tech{font-size:.82rem;padding:6px 11px}
+.wfields .picked{font-size:.8rem;color:var(--ink2)}
+.gate{background:#f5f5f5;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.gate b{font-size:1rem}
+.gate .muted{font-size:.88rem}
+.tech .vbadge{font-size:.65rem;background:#8a6d1a;color:#fff;padding:1px 6px;border-radius:999px;margin-left:2px}
+.vcount{font-size:13px;color:#8a6d1a;font-weight:600}
 #v-compose textarea::placeholder{color:var(--ink3)}
 .mfields{display:flex;flex-direction:column;gap:10px;background:#f5f5f5;border-radius:14px;padding:14px}
 .mfields .mtitle{font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:6px}
@@ -395,7 +418,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
   <!-- 커뮤니티 (Threads 스타일) -->
   <section class="view" id="v-comm">
     <div class="top"><h1>커뮤니티</h1></div>
-    <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="meet">모임</button><button data-f="dong">우리 동네</button><button data-f="friends">친구</button></div>
+    <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="meet">모임</button><button data-f="work">작품</button><button data-f="dong">우리 동네</button><button data-f="friends">친구</button></div>
     <div class="cbox" id="cbox">
       <div id="cboxAva"></div>
       <div style="flex:1;min-width:0">
@@ -450,8 +473,23 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
   <section class="view" id="v-compose">
     <div class="top"><button class="back" onclick="closeCompose()">✕</button><h1 id="composeTitle">새 글</h1><button class="btn" id="sPost" onclick="submitCompose()">게시</button></div>
     <div class="body">
-      <div class="kind" id="composeKind"><button data-k="post" class="on">글</button><button data-k="meetup">모임</button></div>
+      <div class="kind" id="composeKind"><button data-k="post" class="on">글</button><button data-k="work">작품 인증</button><button data-k="meetup">모임</button></div>
       <div class="row2"><div id="sAva"></div><div style="flex:1;min-width:0"><div class="cname" id="sName"></div>
+        <div class="wfields" id="wfields" hidden>
+          <div class="mtitle">🏅 작품 인증</div>
+          <div class="hint" style="font-size:.8rem;color:var(--ink2)">완성한 작품 사진과 사용한 기법을 올리면 내 기법 체크에 <b>인증</b> 표시가 붙고, 모임을 열 수 있어요.</div>
+          <label class="f">작품 이름<input id="wTitle" maxlength="60" placeholder="예: 그래니 스퀘어 가디건"></label>
+          <label class="f">사용한 기법 <span class="picked" id="wPicked">0개 선택</span>
+            <div class="tsel"><div class="tabs" id="wCraftTabs"><button data-c="crochet" class="on">코바늘</button><button data-c="knitting">대바늘</button></div><div id="wTechList"></div></div>
+          </label>
+          <label class="f">실 정보 <span class="muted">(선택)</span><input id="wYarn" maxlength="80" placeholder="예: 하마나카 아메리, 5호 코바늘"></label>
+          <div class="hint" style="font-size:.8rem;color:var(--ink2)">사진은 아래 📷 로 1~4장 (필수)</div>
+        </div>
+        <div class="gate" id="mgate" hidden>
+          <b>🏅 모임을 열려면 작품 인증이 필요해요</b>
+          <div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div>
+          <button class="btn" type="button" onclick="setComposeKind('work')">작품 인증하러 가기</button>
+        </div>
         <div class="mfields" id="mfields" hidden>
           <div class="mtitle">📍 모임 정보</div>
           <label class="f">모임 이름<input id="mTitle" maxlength="60" placeholder="예: 토요 뜨개 모임"></label>
@@ -823,7 +861,7 @@ async function openProfile(id){
   $('#profBody').innerHTML = `
     <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
     ${bio?`<div class="pbio">${esc(bio)}</div>`:''}
-    ${meta?`<div class="pmeta">${meta}</div>`:''}
+    ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:#fbf6e6;color:#8a6d1a">🏅 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}<button class="btn o ic" title="공유" onclick="shareUser()">${ICON.share.replace('<svg','<svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')}</button></div>
     <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="replies" class="${profTab==='replies'?'on':''}">답글</button><button data-t="media" class="${profTab==='media'?'on':''}">미디어</button></div>
@@ -846,7 +884,7 @@ async function loadUserFeed(uid, tab, el){
   if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
   const pids=[...new Set((data||[]).map(r=>r.parent_id).filter(Boolean))];
   if(pids.length){ const { data:parents } = await sb.from('posts').select('id, '+AUTHOR_SEL).in('id', pids); const byId={}; (parents||[]).forEach(x=>byId[x.id]=x); (data||[]).forEach(r=>{ r.parent = byId[r.parent_id]||null; }); }
-  await Promise.all([loadLikes(data||[]), attachMeetups(data||[])]);
+  await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), attachWorks(data||[])]);
   const mine = uid===me.id;
   const emptyMsg = { posts: mine?'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요':'아직 올린 글이 없어요', replies: mine?'아직 남긴 답글이 없어요':'아직 남긴 답글이 없어요', media:'사진이 있는 글이 없어요' }[tab];
   el.innerHTML = (data||[]).length ? data.map(p=>postCard(p,{noLine:true, replyTo: p.parent?.author?.nickname})).join('') : `<div class="empty" style="white-space:pre-line">${emptyMsg}</div>`;
@@ -1014,9 +1052,10 @@ async function loadFeed(more){
     // 추천: 서버 점수순 (반응 × 거리 × 관계 × 질문 ÷ 시간)
     const { data, error } = await sb.rpc('feed_ranked', { p_limit: FEED_PAGE, p_offset: feedOffset });
     if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
+    if(data?.length){ const { data:wk } = await sb.from('posts').select('id,work_id').in('id', data.map(r=>r.id)).not('work_id','is',null); const wm={}; (wk||[]).forEach(x=>wm[x.id]=x.work_id); data.forEach(r=>{ r.work_id = wm[r.id]||null; }); }
     feedRows = feedRows.concat(data||[]); feedOffset += (data||[]).length;
     $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
-    await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[]), attachMeetups(data||[])]); renderFeed(); return;
+    await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[]), attachMeetups(data||[]), attachWorks(data||[])]); renderFeed(); return;
   }
   let q = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).order('created_at',{ascending:false}).limit(FEED_PAGE);
   if(feedCursor) q = q.lt('created_at', feedCursor);
@@ -1031,6 +1070,14 @@ async function loadFeed(more){
     $('#feed').innerHTML = feedRows.length ? feedRows.map(p=>postCard(p,{noLine:true})).join('') : '<div class="empty">예정된 모임이 없어요.<br>＋ 버튼 › 모임 탭에서 첫 모임을 만들어 보세요</div>';
     return;
   }
+  if(commFilter==='work'){
+    const { data, error } = await sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).not('work_id','is',null).order('created_at',{ascending:false}).limit(100);
+    if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
+    await Promise.all([loadLikes(data||[]), attachWorks(data||[])]);
+    feedRows = data||[]; $('#feedMore').hidden = true;
+    $('#feed').innerHTML = feedRows.length ? feedRows.map(p=>postCard(p,{noLine:true})).join('') : '<div class="empty">아직 인증된 작품이 없어요.<br>＋ 버튼 › 작품 인증에서 첫 작품을 올려 보세요</div>';
+    return;
+  }
   if(commFilter==='dong'){ if(!myProfile?.dong_code){ $('#feed').innerHTML='<div class="empty">프로필에서 동네를 먼저 정해 주세요</div>'; return; } q = q.eq('dong_code', myProfile.dong_code); }
   if(commFilter==='friends'){ const ids=await friendIds(); ids.push(me.id); q = q.in('author_id', ids); }
   const { data, error } = await q;
@@ -1038,7 +1085,7 @@ async function loadFeed(more){
   feedRows = feedRows.concat(data||[]);
   feedCursor = data?.length ? data[data.length-1].created_at : feedCursor;
   $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
-  await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[]), attachMeetups(data||[])]);
+  await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[]), attachMeetups(data||[]), attachWorks(data||[])]);
   renderFeed();
 }
 async function loadFirstReplies(rows){
@@ -1060,6 +1107,16 @@ const ICON = {
 // 내가 속한 방 목록 (참여 여부 판단)
 let myRoomIds = new Set();
 async function loadMyRooms(){ if(!me) return; const { data } = await sb.from('room_members').select('room_id').eq('profile_id', me.id); myRoomIds = new Set((data||[]).map(r=>r.room_id)); }
+async function attachWorks(rows){
+  const ids=[...new Set((rows||[]).map(r=>r.work_id).filter(Boolean))]; if(!ids.length) return;
+  await loadTech();
+  const { data } = await sb.from('works').select('id,title,yarn_info,techniques,note').in('id', ids);
+  const byId={}; (data||[]).forEach(w=>byId[w.id]=w); rows.forEach(r=>{ if(r.work_id) r.work = byId[r.work_id]||null; });
+}
+function workCard(w){
+  if(!w) return '';
+  return `<div class="wcard"><div class="wh">🏅 작품 인증</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}<div class="tchips">${(w.techniques||[]).map(id=>`<span>${esc(techName(id))}</span>`).join('')}</div></div>`;
+}
 async function attachMeetups(rows){
   const ids=[...new Set((rows||[]).map(r=>r.meetup_id).filter(Boolean))]; if(!ids.length) return;
   const { data } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by,kind,craft,level_min,level_max,technique_id,capacity,fee,bring,duration_min,repeat').in('id', ids);
@@ -1132,7 +1189,7 @@ function postCard(p, opts={}){
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}${mine?`<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}')">···</button>`:''}</div>
       ${p.body?`<div class="txt">${esc(p.body)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto('${esc(u)}')">`).join('')}</div>`:''}
-      ${p.meetup?meetupCard(p.meetup):''}
+      ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work):''}
       <div class="acts">
         <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${ICON.heart}<span>${p.like_count||''}</span></button>
         <button onclick="event.stopPropagation();openPost('${p.id}')">${ICON.reply}<span>${p.reply_count||''}</span></button>
@@ -1172,7 +1229,7 @@ function renderPv(which){
   el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">✕</b></div>`).join('');
 }
 // ＋ 버튼: 어디서든 새 글 작성 시트
-let composeBack=null, composeKind='post';
+let composeBack=null, composeKind='post', wTechSel=new Set(), wCraft='crochet';
 function openCompose(kind){
   sPhotos=[]; composeKind = kind||'post';
   if(view!=='compose') composeBack = view;
@@ -1189,18 +1246,34 @@ function openCompose(kind){
     loadTech().then(()=>{ const grp = c => TECH.filter(t=>t.craft===c).map(t=>`<option value="${t.id}">${t.level}단계 · ${esc(t.name_ko)}</option>`).join(''); $('#mTech').innerHTML = `<optgroup label="코바늘">${grp('crochet')}</optgroup><optgroup label="대바늘">${grp('knitting')}</optgroup>`; });
   }
   segSet('#mKind','free'); segSet('#mCraft','both'); $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value='';
+  $('#wTitle').value=''; $('#wYarn').value=''; wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
+  loadTech().then(renderWTech);
   setComposeKind(composeKind);
   show('compose');
   setTimeout(()=>$(composeKind==='meetup'?'#mTitle':'#sText')?.focus(), 80);
 }
 function setComposeKind(k){
   composeKind=k; [...$('#composeKind').children].forEach(b=>b.classList.toggle('on', b.dataset.k===k));
-  $('#mfields').hidden = k!=='meetup'; $('#v-compose').classList.toggle('meet', k==='meetup');
-  $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : '새 글';
-  $('#sText').placeholder = k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : '새로운 소식이 있나요?';
-  $('#sPost').textContent = k==='meetup' ? '만들기' : '게시';
-  $('#sHint').textContent = k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : '누구나 볼 수 있어요';
+  const certified = (myProfile?.cert_count||0) > 0;
+  $('#mfields').hidden = !(k==='meetup' && certified);
+  $('#mgate').hidden = !(k==='meetup' && !certified);
+  $('#wfields').hidden = k!=='work';
+  $('#sText').hidden = (k==='meetup' && !certified);
+  $('#v-compose').classList.toggle('meet', k!=='post');
+  $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : k==='work' ? '작품 인증' : '새 글';
+  $('#sText').placeholder = k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : k==='work' ? '한 줄 소감 (예: 눈 위치 세 번 옮겼어요)' : '새로운 소식이 있나요?';
+  $('#sPost').textContent = k==='meetup' ? '만들기' : k==='work' ? '인증' : '게시';
+  $('#sPost').disabled = (k==='meetup' && !certified);
+  $('#sHint').textContent = k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : k==='work' ? '사진 1~4장 필수 · 커뮤니티 "작품" 탭에 올라가요' : '누구나 볼 수 있어요';
 }
+function renderWTech(){
+  $('#wCraftTabs').innerHTML = `<button data-c="crochet" class="${wCraft==='crochet'?'on':''}">코바늘</button><button data-c="knitting" class="${wCraft==='knitting'?'on':''}">대바늘</button>`;
+  $('#wCraftTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; wCraft=b.dataset.c; renderWTech(); };
+  const ver = new Set(myProfile?.verified_skills||[]);
+  $('#wTechList').innerHTML = [1,2,3,4,5].map(l=>{ const ts=TECH.filter(t=>t.craft===wCraft&&t.level===l); return `<div class="lvgrp"><div class="lvh">${l}단계 ${LVNAME[l]}</div><div class="techs">${ts.map(t=>`<button type="button" class="tech ${wTechSel.has(t.id)?'on':''}" onclick="toggleWTech('${t.id}')">${wTechSel.has(t.id)?'✓ ':''}${esc(t.name_ko)}${ver.has(t.id)?'<span class="vbadge">인증</span>':''}</button>`).join('')}</div></div>`; }).join('');
+  $('#wPicked').textContent = `${wTechSel.size}개 선택`;
+}
+function toggleWTech(id){ if(wTechSel.has(id)) wTechSel.delete(id); else wTechSel.add(id); renderWTech(); }
 $('#composeKind').onclick = e => { const b=e.target.closest('button'); if(b) setComposeKind(b.dataset.k); };
 function closeCompose(){ const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
 async function submitCompose(){
@@ -1224,6 +1297,14 @@ async function submitCompose(){
       if(error) throw new Error(error.message);
       await loadMyRooms();
       sPhotos=[]; toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
+    } else if(composeKind==='work'){
+      const title=$('#wTitle').value.trim(); if(!title) throw new Error('작품 이름을 적어 주세요');
+      if(!wTechSel.size) throw new Error('사용한 기법을 하나 이상 골라 주세요');
+      if(!sPhotos.length) throw new Error('작품 사진을 1장 이상 올려 주세요');
+      const photos = await uploadPhotos(sPhotos);
+      const { error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn:$('#wYarn').value.trim()||null, p_note: body||null });
+      if(error) throw new Error(error.message);
+      await loadMe(); sPhotos=[]; toast(`작품 인증 완료! 이제 모임을 열 수 있어요`);
     } else {
       if(!body && !sPhotos.length) throw new Error('내용이나 사진을 넣어 주세요');
       const photos = await uploadPhotos(sPhotos);
@@ -1274,7 +1355,7 @@ async function openPost(id){
   ]);
   if(!p) return toast('글을 찾을 수 없어요');
   curPost = p; curPost.replies = replies||[];
-  await Promise.all([loadLikes([p, ...curPost.replies]), attachMeetups([p])]);
+  await Promise.all([loadLikes([p, ...curPost.replies]), attachMeetups([p]), attachWorks([p])]);
   show('post');
   $('#postBody').innerHTML = postCard(p,{noLine:true}) + `<div class="thread-head">답글</div>` + (curPost.replies.length ? curPost.replies.map(r=>postCard(r,{noLine:true})).join('') : '<div class="empty">첫 답글을 남겨 보세요</div>');
   $('#replyAva').innerHTML = avatar(myProfile||{});
@@ -1325,9 +1406,9 @@ function renderSkills(){
     ${[1,2,3,4,5].map(l=>{ const s=st[l]||{done:0,total:0}; const done=s.done*2>=s.total&&s.total>0; return `
       <div class="lvsec ${done?'done':''} ${openLv===l?'open':''}" data-lv="${l}">
         <div class="hd" onclick="toggleLv(${l})"><div class="n">${l}</div><div class="t"><b>${LVNAME[l]}</b><span>${LVDESC[l]}</span></div><div class="pct">${s.done}/${s.total}</div><span class="car">›</span></div>
-        <div class="techs">${techOf(craft).filter(t=>t.level===l).map(t=>`<button type="button" class="tech ${skills.has(t.id)?'on':''}" onclick="toggleTech('${t.id}')" title="${esc(t.descr||'')}">${skills.has(t.id)?'✓ ':''}${esc(t.name_ko)}${t.symbol&&t.symbol!=='–'&&t.symbol!=='조합'?`<span class="sym">${esc(t.symbol)}</span>`:''}</button>`).join('')}</div>
+        <div class="techs">${techOf(craft).filter(t=>t.level===l).map(t=>`<button type="button" class="tech ${skills.has(t.id)?'on':''}" onclick="toggleTech('${t.id}')" title="${esc(t.descr||'')}">${skills.has(t.id)?'✓ ':''}${esc(t.name_ko)}${(myProfile?.verified_skills||[]).includes(t.id)?'<span class="vbadge">인증</span>':(t.symbol&&t.symbol!=='–'&&t.symbol!=='조합'?`<span class="sym">${esc(t.symbol)}</span>`:'')}</button>`).join('')}</div>
       </div>`; }).join('')}
-    <div class="card soft muted">한 단계 기법의 절반 이상을 체크하면 그 단계로 표시돼요. 위 단계 기법을 누르면 필요한 아래 기법이 자동으로 체크돼요.</div>
+    <div class="card soft muted">한 단계 기법의 절반 이상을 체크하면 그 단계로 표시돼요. 위 단계 기법을 누르면 필요한 아래 기법이 자동으로 체크돼요. <b>인증</b> 표시는 작품 인증으로 증명된 기법이에요.</div>
     <button class="btn" onclick="finishSkills()">저장하고 나가기</button>`;
 }
 function switchCraft(c){ skillCraft=c; openLv=null; renderSkills(); }
@@ -1384,7 +1465,7 @@ async function renderMyFriends(){
   const friends = rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee:r.requester);
   const inbox = rows.filter(r=>r.status==='pending'&&r.addressee_id===me.id).length;
   const el=$('#pfriends'); if(!el) return;
-  el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}</span><span style="margin-left:auto">›</span>`;
+  el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}${myProfile?.cert_count?` · <span class="vcount">🏅 작품 인증 ${myProfile.cert_count}</span>`:''}</span><span style="margin-left:auto">›</span>`;
 }
 async function loadMyFeed(){ return loadUserFeed(me.id, myTab, $('#myFeed')); }
 function openSettings(){
