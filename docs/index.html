@@ -209,6 +209,19 @@ details .seg{margin-top:8px;justify-content:center}
 .gate .muted{font-size:.88rem}
 .tech .vbadge{font-size:.65rem;background:#8a6d1a;color:#fff;padding:1px 6px;border-radius:999px;margin-left:2px}
 .vcount{font-size:13px;color:#8a6d1a;font-weight:600}
+/* 모임 후기 */
+.rvtag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#2f6b3a;background:#e8f3e8;padding:3px 10px;border-radius:999px;margin:0 0 6px;cursor:pointer}
+.rvlist{display:flex;flex-direction:column;gap:12px}
+.rv{display:flex;gap:10px}
+.rv .ava{width:32px;height:32px;font-size:.8rem}
+.rv .rvb{flex:1;min-width:0}
+.rv .rvb b{font-size:14px}
+.rv .rvb .t{font-size:14px;white-space:pre-wrap;margin-top:2px}
+.rv .rvb .ph{display:flex;gap:6px;margin-top:6px;overflow-x:auto}
+.rv .rvb .ph img{height:84px;border-radius:8px;flex:none}
+.rvbanner{background:#e8f3e8;border-radius:14px;padding:12px 14px;font-size:14px}
+.rvbanner b{display:block;font-size:15px}
+.mitem .mstat.rv{background:#e8f3e8;color:#2f6b3a}
 /* 내 모임 목록 */
 .msec{padding:14px 16px 6px;font-size:13px;font-weight:700;color:var(--ink3)}
 .mitem{display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer;background:#fff}
@@ -508,6 +521,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
           <label class="f">한 줄 소감 <span class="muted">(선택)</span><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px;background:#fff"></textarea></label>
           <div class="hint" style="font-size:.8rem;color:var(--ink2)">사진은 아래 📷 로 1~4장 (필수)</div>
         </div>
+        <div class="rvbanner" id="rvbanner" hidden><span class="muted" style="font-size:12px">🧶 모임 후기</span><b id="rvTitle"></b><span class="muted" id="rvSub"></span></div>
         <div class="gate" id="mgate" hidden>
           <b>🏅 모임을 열려면 작품 인증이 필요해요</b>
           <div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div>
@@ -1076,7 +1090,7 @@ async function loadFeed(more){
     // 추천: 서버 점수순 (반응 × 거리 × 관계 × 질문 ÷ 시간)
     const { data, error } = await sb.rpc('feed_ranked', { p_limit: FEED_PAGE, p_offset: feedOffset });
     if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
-    if(data?.length){ const { data:wk } = await sb.from('posts').select('id,work_id').in('id', data.map(r=>r.id)).not('work_id','is',null); const wm={}; (wk||[]).forEach(x=>wm[x.id]=x.work_id); data.forEach(r=>{ r.work_id = wm[r.id]||null; }); }
+    if(data?.length){ const { data:wk } = await sb.from('posts').select('id,work_id,review_of').in('id', data.map(r=>r.id)); const wm={}; (wk||[]).forEach(x=>wm[x.id]=x); data.forEach(r=>{ r.work_id = wm[r.id]?.work_id||null; r.review_of = wm[r.id]?.review_of||null; }); }
     feedRows = feedRows.concat(data||[]); feedOffset += (data||[]).length;
     $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
     await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[]), attachMeetups(data||[]), attachWorks(data||[])]); renderFeed(); return;
@@ -1132,6 +1146,8 @@ const ICON = {
 let myRoomIds = new Set();
 async function loadMyRooms(){ if(!me) return; const { data } = await sb.from('room_members').select('room_id').eq('profile_id', me.id); myRoomIds = new Set((data||[]).map(r=>r.room_id)); }
 async function attachWorks(rows){
+  const rids=[...new Set((rows||[]).map(r=>r.review_of).filter(Boolean))];
+  if(rids.length){ const { data:ms } = await sb.from('meetups').select('id,title,place_name,starts_at').in('id', rids); const mm={}; (ms||[]).forEach(m=>mm[m.id]=m); rows.forEach(r=>{ if(r.review_of) r.review_meetup = mm[r.review_of]||null; }); }
   const ids=[...new Set((rows||[]).map(r=>r.work_id).filter(Boolean))]; if(!ids.length) return;
   await loadTech();
   const { data } = await sb.from('works').select('id,title,yarn_info,techniques,custom_techniques,note').in('id', ids);
@@ -1143,7 +1159,7 @@ function workCard(w){
 }
 async function attachMeetups(rows){
   const ids=[...new Set((rows||[]).map(r=>r.meetup_id).filter(Boolean))]; if(!ids.length) return;
-  const { data } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by,kind,craft,level_min,level_max,technique_id,capacity,fee,bring,duration_min,repeat').in('id', ids);
+  const { data } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by,kind,craft,level_min,level_max,technique_id,capacity,fee,bring,duration_min,repeat,review_count').in('id', ids);
   const byId={}; (data||[]).forEach(m=>byId[m.id]=m); rows.forEach(r=>{ if(r.meetup_id) r.meetup = byId[r.meetup_id]||null; });
 }
 function fmtWhen(iso){ const d=new Date(iso); const day=['일','월','화','수','목','금','토'][d.getDay()]; const h=d.getHours(), m=d.getMinutes(); return `${d.getMonth()+1}월 ${d.getDate()}일 (${day}) ${h<12?'오전':'오후'} ${h%12||12}:${String(m).padStart(2,'0')}`; }
@@ -1172,8 +1188,8 @@ function meetupCard(m){
   if(!m) return '';
   const joined = myRoomIds.has(m.room_id); const past = new Date(m.starts_at) < new Date();
   const full = m.capacity && (m.participant_count||0) >= m.capacity;
-  const btn = past ? '<span class="muted">종료</span>' : joined ? `<button class="btn o" onclick="event.stopPropagation();openRoom('${m.room_id}')">참여 중 · 채팅</button>` : full ? '<span class="muted">마감</span>' : `<button class="btn" onclick="event.stopPropagation();joinMeetup('${m.id}')">참여하기</button>`;
-  return `<div class="mcard" onclick="event.stopPropagation();openMeetup('${m.id}')"><div class="mh">📍 모임${m.is_public?'':' · 초대만'}<span class="kind">${MKIND[m.kind]||'자유 뜨개'}</span></div><b>${esc(m.title)}</b><div class="ml">${esc(m.place_name)}</div><div class="ml">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}</div>${m.bring?`<div class="ml">준비물: ${esc(m.bring)}</div>`:''}<div class="mtags">${meetupTags(m)}</div><div class="mrow"><span>참여 ${m.participant_count||0}명</span>${btn}</div></div>`;
+  const btn = past ? `<button class="btn o" onclick="event.stopPropagation();openMeetup('${m.id}')">${joined?'후기 쓰기 · ':''}후기 ${m.review_count||0}</button>` : joined ? `<button class="btn o" onclick="event.stopPropagation();openRoom('${m.room_id}')">참여 중 · 채팅</button>` : full ? '<span class="muted">마감</span>' : `<button class="btn" onclick="event.stopPropagation();joinMeetup('${m.id}')">참여하기</button>`;
+  return `<div class="mcard" onclick="event.stopPropagation();openMeetup('${m.id}')"><div class="mh">📍 모임${m.is_public?'':' · 초대만'}<span class="kind">${MKIND[m.kind]||'자유 뜨개'}</span></div><b>${esc(m.title)}</b><div class="ml">${esc(m.place_name)}</div><div class="ml">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}</div>${m.bring?`<div class="ml">준비물: ${esc(m.bring)}</div>`:''}<div class="mtags">${meetupTags(m)}</div><div class="mrow"><span>${past?'종료 · ':''}참여 ${m.participant_count||0}명</span>${btn}</div></div>`;
 }
 async function joinMeetup(id){
   const { data:roomId, error } = await sb.rpc('join_meetup', { p_meetup_id:id });
@@ -1190,6 +1206,11 @@ async function openMeetup(id){
   const { data:m } = await sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(id,nickname,avatar_url,dong_name,level_crochet,level_knit)').eq('id', id).single();
   if(!m) return toast('모임을 찾을 수 없어요');
   const joined = myRoomIds.has(m.room_id), past = new Date(m.starts_at) < new Date(), full = m.capacity && (m.participant_count||0) >= m.capacity;
+  let reviews=[], myReviewed=false;
+  if(past){ const { data:rv } = await sb.from('posts').select('*, '+AUTHOR_SEL).eq('review_of', id).order('created_at'); reviews=rv||[]; myReviewed = reviews.some(r=>r.author_id===me.id); }
+  const reviewHtml = past ? `<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700;margin-top:4px">🧶 후기 ${reviews.length}</div>
+    ${reviews.length?`<div class="rvlist">${reviews.map(r=>`<div class="rv"><div onclick="closeSheet();openProfile('${r.author.id}')">${avatar(r.author)}</div><div class="rvb"><b>${esc(r.author.nickname)}</b> <span class="muted" style="font-size:12px">${agoShort(r.created_at)}</span>${r.body?`<div class="t">${esc(r.body)}</div>`:''}${(r.photos||[]).length?`<div class="ph">${r.photos.map(u=>`<img src="${esc(u)}" alt="" onclick="openPhoto('${esc(u)}')">`).join('')}</div>`:''}</div></div>`).join('')}</div>`:'<div class="muted">아직 후기가 없어요</div>'}
+    ${joined && !myReviewed ? `<button class="btn" onclick="closeSheet();openCompose('review','${m.id}')">후기 쓰기</button>` : ''}` : '';
   openSheet(`<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700">📍 모임${m.is_public?'':' · 초대만'} · ${MKIND[m.kind]||'자유 뜨개'}</div>
     <b style="font-size:1.25rem">${esc(m.title)}</b>
     <div>${esc(m.place_name)}</div><div class="muted">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}${m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''}</div>
@@ -1197,7 +1218,7 @@ async function openMeetup(id){
     ${m.descr?`<div style="white-space:pre-wrap">${esc(m.descr)}</div>`:''}
     <div class="row" style="cursor:pointer" onclick="closeSheet();openProfile('${m.host?.id}')">${avatar(m.host||{})}<div><b>${esc(m.host?.nickname||'')}</b><div class="muted">주최 · ${esc(m.host?.dong_name||'')}</div></div></div>
     <div class="muted">참여 ${m.participant_count||0}명</div>
-    ${past?'<button class="btn o" disabled>종료된 모임</button>': joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">모임 나가기</button>`:''}` : full ? '<button class="btn o" disabled>정원이 찼어요</button>' : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
+    ${past? reviewHtml + (joined?`<button class="btn o" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>`:'') : joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">모임 나가기</button>`:''}` : full ? '<button class="btn o" disabled>정원이 찼어요</button>' : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
 }
 function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
 function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
@@ -1210,6 +1231,7 @@ function postCard(p, opts={}){
     <div class="avacol"><div onclick="event.stopPropagation();openProfile('${a.id}')">${avatar(a)}</div>${showLine?'<div class="tline"></div>':''}</div>
     <div class="col">
       ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 답글</div>`:''}
+      ${p.review_meetup?`<div class="rvtag" onclick="event.stopPropagation();openMeetup('${p.review_of}')">🧶 모임 후기 · ${esc(p.review_meetup.title)}</div>`:''}
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}${mine?`<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}')">···</button>`:''}</div>
       ${p.body?`<div class="txt">${esc(p.body)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto('${esc(u)}')">`).join('')}</div>`:''}
@@ -1256,8 +1278,10 @@ function renderPv(which){
 let composeBack=null, composeKind='post', wTechSel=new Set(), wCraft='crochet', wCustom=[];
 function renderWCustom(){ const el=$('#wCustomChips'); if(!el) return; el.innerHTML = wCustom.map((t,i)=>`<span>${esc(t)} <b style="cursor:pointer" onclick="wCustom.splice(${i},1);renderWCustom()">✕</b></span>`).join(''); }
 function commitWCustom(){ const v=$('#wCustom').value; if(!v.trim()) return; v.split(/[,，\n]/).map(x=>x.trim()).filter(Boolean).forEach(x=>{ if(!wCustom.includes(x) && wCustom.length<20) wCustom.push(x); }); $('#wCustom').value=''; renderWCustom(); }
-function openCompose(kind){
-  sPhotos=[]; composeKind = kind||'post';
+let reviewMeetup=null;
+async function openCompose(kind, meetupId){
+  sPhotos=[]; composeKind = kind||'post'; reviewMeetup=null;
+  if(kind==='review' && meetupId){ const { data:m } = await sb.from('meetups').select('id,title,place_name,starts_at').eq('id', meetupId).single(); reviewMeetup=m; }
   if(view!=='compose') composeBack = view;
   $('#sAva').innerHTML = avatar(myProfile||{}); $('#sName').textContent = myProfile?.nickname||'';
   $('#sText').value=''; $('#sPv').innerHTML=''; $('#sPost').disabled=false;
@@ -1281,16 +1305,19 @@ function openCompose(kind){
 function setComposeKind(k){
   composeKind=k; [...$('#composeKind').children].forEach(b=>b.classList.toggle('on', b.dataset.k===k));
   const certified = (myProfile?.cert_count||0) > 0;
+  $('#composeKind').hidden = (k==='review');
+  $('#rvbanner').hidden = (k!=='review');
+  if(k==='review' && reviewMeetup){ $('#rvTitle').textContent=reviewMeetup.title; $('#rvSub').textContent=`${reviewMeetup.place_name} · ${fmtWhen(reviewMeetup.starts_at)}`; }
   $('#mfields').hidden = !(k==='meetup' && certified);
   $('#mgate').hidden = !(k==='meetup' && !certified);
   $('#wfields').hidden = k!=='work';
-  $('#sText').hidden = (k!=='post');
+  $('#sText').hidden = !(k==='post' || k==='review');
   $('#v-compose').classList.toggle('meet', k!=='post');
-  $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : k==='work' ? '작품 인증' : '새 글';
-  $('#sText').placeholder = k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : k==='work' ? '한 줄 소감 (예: 눈 위치 세 번 옮겼어요)' : '새로운 소식이 있나요?';
+  $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : k==='work' ? '작품 인증' : k==='review' ? '모임 후기' : '새 글';
+  $('#sText').placeholder = k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : k==='work' ? '한 줄 소감 (예: 눈 위치 세 번 옮겼어요)' : k==='review' ? '어땠어요? 배운 것, 분위기, 다음에 갈 사람에게 팁' : '새로운 소식이 있나요?';
   $('#sPost').textContent = k==='meetup' ? '만들기' : k==='work' ? '인증' : '게시';
   $('#sPost').disabled = (k==='meetup' && !certified);
-  $('#sHint').textContent = k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : k==='work' ? '사진 1~4장 필수 · 커뮤니티 "작품" 탭에 올라가요' : '누구나 볼 수 있어요';
+  $('#sHint').textContent = k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : k==='work' ? '사진 1~4장 필수 · 커뮤니티 "작품" 탭에 올라가요' : k==='review' ? '사진과 함께 올리면 다음 참여자에게 도움이 돼요' : '누구나 볼 수 있어요';
 }
 function renderWTech(){
   $('#wCraftTabs').innerHTML = `<button data-c="crochet" class="${wCraft==='crochet'?'on':''}">코바늘</button><button data-c="knitting" class="${wCraft==='knitting'?'on':''}">대바늘</button>`;
@@ -1324,6 +1351,13 @@ async function submitCompose(){
       if(error) throw new Error(error.message);
       await loadMyRooms();
       sPhotos=[]; toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
+    } else if(composeKind==='review'){
+      if(!reviewMeetup) throw new Error('모임 정보를 찾을 수 없어요');
+      if(!body && !sPhotos.length) throw new Error('후기 내용이나 사진을 넣어 주세요');
+      const photos = await uploadPhotos(sPhotos);
+      const { error } = await sb.rpc('create_review', { p_meetup_id: reviewMeetup.id, p_body: body||null, p_photos: photos });
+      if(error) throw new Error(error.message.replace(/^.*?: /,''));
+      sPhotos=[]; toast('후기를 남겼어요');
     } else if(composeKind==='work'){
       const title=$('#wTitle').value.trim(); if(!title) throw new Error('작품 이름을 적어 주세요');
       commitWCustom();
@@ -1511,7 +1545,7 @@ async function loadMyMeetups(el){
       <div class="mtx"><div class="mtt"><b>${esc(m.title)}</b>${m.created_by===me.id?'<span class="role">주최</span>':'<span class="role p">참여</span>'}</div>
         <div class="msub">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}</div>
         <div class="msub">${esc(m.place_name)} · 참여 ${m.participant_count||0}명${m.capacity?`/${m.capacity}`:''}</div></div>
-      <div class="mstat ${done?'done':''}">${done?'완료':dday(m.starts_at)}</div>
+      <div class="mstat ${done?(m.review_count?'rv':'done'):''}">${done?(m.review_count?`후기 ${m.review_count}`:'후기 쓰기'):dday(m.starts_at)}</div>
     </div>`;
   el.innerHTML = `<div class="msec">예정 ${up.length}</div>${up.length?up.map(m=>row(m,false)).join(''):'<div class="empty" style="padding:20px">예정된 모임이 없어요</div>'}
     <div class="msec">완료 ${past.length}</div>${past.length?past.map(m=>row(m,true)).join(''):'<div class="empty" style="padding:20px">아직 완료한 모임이 없어요</div>'}`;

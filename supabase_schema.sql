@@ -854,3 +854,11 @@ alter table public.profiles
 -- works_apply_cert 트리거 / create_work 함수 / create_meetup 조건: 적용된 마이그레이션 'work_certification' 참조
 -- works.custom_techniques text[]: 목록(60종)에 없는 기법 자유 입력 (기법사전 확장 후보). 집계 뷰 custom_technique_stats
 -- create_work(..., p_custom text[]) : 알려진 기법 0개여도 자유 입력이 있으면 인증 가능
+
+-- ---------------------------------------------------------------
+-- 14. 모임 후기 (2026-09-13) — 종료된 모임의 참여자가 글+사진으로 남김
+--   posts.review_of → meetups.id, meetups.review_count(트리거), create_review(meetup_id, body, photos): 종료+참여자+1인1회
+-- ---------------------------------------------------------------
+alter table public.posts add column review_of uuid references public.meetups(id) on delete set null;
+create index posts_review_idx on public.posts (review_of, created_at desc) where review_of is not null;
+alter table public.meetups add column review_count integer not null default 0;
