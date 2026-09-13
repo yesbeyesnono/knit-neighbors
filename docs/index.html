@@ -174,7 +174,83 @@ details .seg{margin-top:8px;justify-content:center}
 .subtabs button{background:none;border:0;font:inherit;padding:10px 2px;color:var(--ink3);border-bottom:2px solid transparent;cursor:pointer;font-size:.9rem}
 .subtabs button.on{color:var(--ink);font-weight:700;border-color:var(--ink)}
 .replyto{font-size:.78rem;color:var(--ink3);margin-bottom:2px}
-.fab{position:absolute;right:16px;bottom:78px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:0;font-size:1.5rem;box-shadow:0 6px 18px rgba(52,69,111,.35);cursor:pointer;z-index:5}
+.fab{display:none}
+/* ===== Threads look — 커뮤니티·스레드·채팅 화면 한정 ===== */
+#v-comm,#v-post,#v-chats,#v-room{--tbg:#fff;--tink:#000;--tmute:#999;--tline:#e6e6e6;--tred:#ff3040;
+  background:var(--tbg);color:var(--tink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:16px;line-height:1.35;letter-spacing:-0.01em;word-break:break-word}
+#v-comm .top,#v-post .top,#v-chats .top,#v-room .top{background:var(--tbg);border-bottom:0;padding:14px 16px 10px;gap:12px}
+#v-comm .top h1,#v-post .top h1,#v-chats .top h1,#v-room .top h1{font-family:inherit;font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;text-align:center;flex:1}
+#v-post .top h1,#v-room .top h1{text-align:left;font-size:1.05rem;font-weight:700}
+#v-post .top .back,#v-room .top .back{color:var(--tink);font-size:1.5rem}
+#v-comm .top .btn,#v-post .top .btn,#v-chats .top .btn,#v-room .top .btn{background:transparent;border:0;color:var(--tink);font-weight:600;font-size:.9rem;padding:4px 0;width:auto}
+#v-comm .subtabs{border-bottom:1px solid var(--tline);padding:0;background:var(--tbg)}
+#v-comm .subtabs button{flex:1;padding:12px 0;font-size:.95rem;color:var(--tmute);border-bottom:1.5px solid transparent;font-weight:500}
+#v-comm .subtabs button.on{color:var(--tink);border-color:var(--tink);font-weight:700}
+/* 작성 행 */
+#v-comm .cbox{border-bottom:1px solid var(--tline);padding:14px 16px 12px;align-items:flex-start;gap:12px}
+#v-comm .cbox .ava,#v-comm .post .ava,#v-post .post .ava,#v-post .compose .ava{width:40px;height:40px;font-size:.9rem;background:#efefef;color:#444}
+#v-comm .cbox .cname{font-weight:700;font-size:16px;line-height:1.3}
+#v-comm .cbox textarea{font-family:inherit;font-size:16px;color:var(--tink);padding:0;min-height:22px;line-height:1.35;margin-top:1px}
+#v-comm .cbox textarea::placeholder{color:var(--tmute)}
+#v-comm .cbox .tools{margin-top:10px;gap:16px}
+#v-comm .cbox .tools .ib{background:none;border:0;padding:0;cursor:pointer;color:var(--tmute);display:inline-flex}
+#v-comm .cbox .tools .ib svg{width:22px;height:22px}
+#v-comm .cbox .tools .cnt{font-size:.8rem}
+#v-comm .cbox .tools .btn{background:var(--tink);color:#fff;border-radius:999px;padding:7px 16px;font-size:.9rem;font-weight:600;width:auto}
+#v-comm .cbox .tools .btn:disabled{opacity:.3}
+#v-comm .pv div{border-radius:10px}
+/* 글 카드 */
+#v-comm .post,#v-post .post{padding:12px 16px 6px;border-bottom:1px solid var(--tline);background:var(--tbg);gap:12px}
+#v-comm .post.has-reply{border-bottom:0;padding-bottom:0}
+#v-comm .post.reply{padding-top:4px}
+#v-comm .post .avacol,#v-post .post .avacol{display:flex;flex-direction:column;align-items:center;flex:none;align-self:stretch}
+#v-comm .post .tline,#v-post .post .tline{width:2px;flex:1;min-height:16px;background:#dcdcdc;margin-top:6px;border-radius:1px}
+#v-comm .post .who,#v-post .post .who{gap:6px;align-items:baseline;flex-wrap:nowrap;overflow:hidden;line-height:1.3}
+#v-comm .post .who b,#v-post .post .who b{font-weight:700;font-size:16px;white-space:nowrap}
+#v-comm .post .who time,#v-post .post .who time{margin:0;font-size:15px;color:var(--tmute);flex:none}
+#v-comm .post .who .sub,#v-post .post .who .sub{color:var(--tmute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-comm .post .who .menu,#v-post .post .who .menu{margin-left:auto;background:none;border:0;color:var(--tink);font-size:1.1rem;line-height:1;padding:0 0 0 8px;cursor:pointer;flex:none;letter-spacing:1px}
+#v-comm .post .txt,#v-post .post .txt{font-size:16px;margin:1px 0 6px;color:var(--tink);line-height:1.4}
+#v-comm .pgrid,#v-post .pgrid{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:0;margin:6px -16px 8px 0;padding-right:16px}
+#v-comm .pgrid::-webkit-scrollbar,#v-post .pgrid::-webkit-scrollbar{display:none}
+#v-comm .pgrid img,#v-post .pgrid img{height:280px;width:auto;max-width:82%;aspect-ratio:auto;border-radius:12px;flex:none;scroll-snap-align:start;object-fit:cover;border:1px solid var(--tline)}
+#v-comm .pgrid.n1 img,#v-post .pgrid.n1 img{max-width:100%;height:auto;max-height:420px;aspect-ratio:auto}
+#v-comm .acts,#v-post .acts{gap:14px;margin:4px 0 6px;color:var(--tink)}
+#v-comm .acts button,#v-post .acts button{padding:6px 6px 6px 0;font-size:14px;gap:6px;color:var(--tink);font-weight:500;font-variant-numeric:tabular-nums}
+#v-comm .acts button svg,#v-post .acts button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#v-comm .acts button.on,#v-post .acts button.on{color:var(--tred);font-weight:500}
+#v-comm .acts button.on svg,#v-post .acts button.on svg{fill:var(--tred);stroke:var(--tred)}
+#v-comm .replyto,#v-post .replyto{font-size:13px;color:var(--tmute);margin-bottom:2px}
+#v-comm .empty,#v-post .empty{color:var(--tmute);font-size:14px}
+#v-comm .feedmore .btn{background:transparent;color:var(--tmute);border:1px solid var(--tline);border-radius:999px;font-size:.9rem}
+#v-post .thread-head{padding:12px 16px 8px;font-size:15px;font-weight:700;color:var(--tink);border-bottom:1px solid var(--tline)}
+/* 답글 입력 */
+#v-post .compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 16px;align-items:center;gap:10px}
+#v-post .compose .ava{width:36px;height:36px}
+#v-post .compose input{border:1px solid var(--tline);border-radius:999px;background:#fafafa;padding:10px 14px;font-family:inherit;font-size:15px}
+#v-post .compose input::placeholder{color:var(--tmute)}
+#v-post .compose .btn{background:var(--tink);color:#fff;border-radius:999px;padding:9px 14px;font-size:.9rem;font-weight:600;width:auto}
+/* 채팅 (Instagram DM) */
+#v-chats .top,#v-room .top{border-bottom:1px solid var(--tline)}
+#v-chats .body{padding:0;gap:0}
+#v-chats .list{gap:0}
+#v-chats .item{border:0;border-bottom:1px solid var(--tline);border-radius:0;padding:12px 16px;background:var(--tbg);gap:12px}
+#v-chats .item .ava{width:52px;height:52px;background:#efefef;color:#444;font-size:1rem}
+#v-chats .item .tx b{font-weight:600;font-size:16px}
+#v-chats .item .tx b .muted{font-weight:400}
+#v-chats .item .tx span{color:var(--tmute);font-size:14px}
+#v-chats .item > .muted{color:var(--tmute);font-size:13px}
+#v-chats .empty{color:var(--tmute);font-size:14px}
+#v-room .msgs{padding:12px 14px;gap:3px}
+#v-room .bub{background:#efefef;border:0;border-radius:20px;padding:9px 14px;font-size:16px;color:var(--tink);max-width:76%}
+#v-room .bub.me{background:var(--tink);color:#fff}
+#v-room .bub .who{color:var(--tmute);font-size:12px;margin:0 0 2px 2px}
+#v-room .bub time{display:none}
+#v-room .bub .muted{color:inherit;opacity:.7}
+#v-room .compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 12px;align-items:center}
+#v-room .compose input{border:1px solid var(--tline);border-radius:999px;background:var(--tbg);padding:10px 16px;font-family:inherit;font-size:16px}
+#v-room .compose input::placeholder{color:var(--tmute)}
+#v-room .compose .btn{background:transparent;color:var(--tink);font-weight:600;padding:8px 4px 8px 8px;width:auto}
 </style>
 </head>
 <body>
@@ -227,20 +303,26 @@ details .seg{margin-top:8px;justify-content:center}
     <div class="cbox" id="cbox">
       <div id="cboxAva"></div>
       <div style="flex:1;min-width:0">
-        <textarea id="cText" maxlength="500" placeholder="무슨 뜨개 하고 계세요?" rows="1" oninput="autoGrow(this);updateCnt()"></textarea>
+        <div class="cname" id="cboxName"></div>
+        <textarea id="cText" maxlength="500" placeholder="새로운 소식이 있나요?" rows="1" oninput="autoGrow(this);updateCnt()"></textarea>
         <div class="pv" id="cPv"></div>
-        <div class="tools"><button class="btn sm o" onclick="$('#cFile').click()">📷 사진</button><input id="cFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files)"><span class="cnt" id="cCnt">0/500</span><button class="btn sm" id="cPost" onclick="submitPost()">게시</button></div>
+        <div class="tools">
+          <button type="button" class="ib" title="사진" onclick="$('#cFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 15.5 15.6 11l-6.4 6.5"/></svg></button>
+          <input id="cFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files)">
+          <span class="cnt" id="cCnt"></span>
+          <button class="btn" id="cPost" onclick="submitPost()">게시</button>
+        </div>
       </div>
     </div>
     <div class="feed" id="feed"></div>
-    <div style="padding:12px 16px"><button class="btn o" id="feedMore" onclick="loadFeed(true)" hidden>더 보기</button></div>
+    <div class="feedmore" style="padding:12px 16px"><button class="btn" id="feedMore" onclick="loadFeed(true)" hidden>더 보기</button></div>
   </section>
 
   <!-- 글 상세 (원글 + 답글) -->
   <section class="view" id="v-post">
-    <div class="top"><button class="back" onclick="go('comm')">‹</button><h1>글</h1></div>
+    <div class="top"><button class="back" onclick="go('comm')">‹</button><h1>스레드</h1></div>
     <div class="feed" id="postBody"></div>
-    <div class="compose"><input id="replyIn" placeholder="답글 달기" maxlength="500" onkeydown="if(event.key==='Enter')submitReply()"><button class="btn" onclick="submitReply()">답글</button></div>
+    <div class="compose"><div id="replyAva"></div><input id="replyIn" placeholder="답글을 남겨보세요…" maxlength="500" onkeydown="if(event.key==='Enter')submitReply()"><button class="btn" onclick="submitReply()">게시</button></div>
   </section>
 
   <!-- 친구 -->
@@ -374,7 +456,7 @@ async function logout(){ await sb.auth.signOut(); }
 
 sb.auth.onAuthStateChange(async (ev, session) => {
   me = session?.user || null;
-  if(!me){ show('login'); myProfile=null; return; }
+  if(!me){ show('login'); myProfile=null; if(friendChan){ sb.removeChannel(friendChan); friendChan=null; } return; }
   await loadMe();
   if(!myProfile?.onboarded_at){ openOnboard(false); }
   else { go('map'); watchFriends(); }
@@ -511,7 +593,7 @@ const GMap = {
   clear(){ this.markers.forEach(m=>m.setMap(null)); this.markers=[]; },
   marker({lat,lng,label,cls,onClick}){ const d=document.createElement('div'); d.className='pin '+(cls||''); d.textContent=label; d.style.position='absolute'; d.style.transform='translate(-50%,-50%)'; const m=new this.Pin(new google.maps.LatLng(lat,lng), d, onClick); m.setMap(this.map); this.markers.push(m); },
   onMove(cb){ this.map.addListener('idle',cb); },
-  center(){ const c=this.map.getCenter(); return {lat:c.lat(),lng:c.lng()}; }
+  center(){ const c=this.map?.getCenter?.(); return c ? {lat:c.lat(),lng:c.lng()} : (myProfile?._c || {lat:37.5665,lng:126.9780}); }
 };
 
 // ============ 지도 홈 ============
@@ -637,7 +719,7 @@ function watchFriends(){
   }).subscribe();
   refreshBadge();
 }
-async function refreshBadge(){ const {count}=await sb.from('friendships').select('*',{count:'exact',head:true}).eq('addressee_id',me.id).eq('status','pending'); $('#badgeFriends').hidden=!count; $('#badgeFriends').textContent=count||''; }
+async function refreshBadge(){ if(!me) return; const {count}=await sb.from('friendships').select('*',{count:'exact',head:true}).eq('addressee_id',me.id).eq('status','pending'); $('#badgeFriends').hidden=!count; $('#badgeFriends').textContent=count||''; }
 
 // ============ 채팅 ============
 async function fetchRooms(){
@@ -727,9 +809,9 @@ let commFilter='rank', feedRows=[], feedCursor=null, feedOffset=0, likedSet=new 
 const FEED_PAGE = 30;
 const AUTHOR_SEL = 'author:profiles!posts_author_id_fkey(id,nickname,avatar_url,dong_name,craft,level_crochet,level_knit)';
 function autoGrow(t){ t.style.height='auto'; t.style.height=Math.min(160, t.scrollHeight)+'px'; }
-function updateCnt(){ $('#cCnt').textContent = $('#cText').value.length+'/500'; }
+function updateCnt(){ const n=$('#cText').value.length; $('#cCnt').textContent = n>400 ? n+'/500' : ''; }
 $('#commTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; commFilter=b.dataset.f; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadFeed(); };
-async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); loadFeed(); }
+async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); $('#cboxName').textContent = myProfile?.nickname||''; loadFeed(); }
 async function friendIds(){ const rows=await fetchFriendships(); return rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee_id:r.requester_id); }
 async function loadFeed(more){
   if(!more){ feedRows=[]; feedCursor=null; feedOffset=0; $('#feed').innerHTML='<div class="empty">불러오는 중…</div>'; }
@@ -739,7 +821,7 @@ async function loadFeed(more){
     if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
     feedRows = feedRows.concat(data||[]); feedOffset += (data||[]).length;
     $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
-    await loadLikes(data||[]); renderFeed(); return;
+    await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[])]); renderFeed(); return;
   }
   let q = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).order('created_at',{ascending:false}).limit(FEED_PAGE);
   if(feedCursor) q = q.lt('created_at', feedCursor);
@@ -750,29 +832,51 @@ async function loadFeed(more){
   feedRows = feedRows.concat(data||[]);
   feedCursor = data?.length ? data[data.length-1].created_at : feedCursor;
   $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
-  await loadLikes(data||[]);
+  await Promise.all([loadLikes(data||[]), loadFirstReplies(data||[])]);
   renderFeed();
+}
+async function loadFirstReplies(rows){
+  const ids = rows.filter(r=>r.reply_count>0).map(r=>r.id); if(!ids.length) return;
+  const { data } = await sb.from('posts').select('*, '+AUTHOR_SEL).in('parent_id', ids).order('created_at');
+  const first = {}; (data||[]).forEach(r=>{ if(!first[r.parent_id]) first[r.parent_id]=r; });
+  rows.forEach(r=>{ r.firstReply = first[r.id]||null; });
+  await loadLikes(Object.values(first));
 }
 async function loadLikes(rows){ if(!rows.length) return; const { data } = await sb.from('post_likes').select('post_id').eq('profile_id', me.id).in('post_id', rows.map(r=>r.id)); (data||[]).forEach(l=>likedSet.add(l.post_id)); }
 function renderFeed(){
-  $('#feed').innerHTML = feedRows.length ? feedRows.map(p=>postCard(p)).join('') : `<div class="empty">아직 글이 없어요.<br>지금 뜨는 것, 막힌 부분, 완성작을 올려 보세요</div>`;
+  $('#feed').innerHTML = feedRows.length ? feedRows.map(p=> p.firstReply ? postCard(p,{line:true,cls:'has-reply'}) + postCard(p.firstReply,{noLine:true,cls:'reply'}) : postCard(p,{noLine:true})).join('') : `<div class="empty">아직 글이 없어요.<br>지금 뜨는 것, 막힌 부분, 완성작을 올려 보세요</div>`;
 }
+const ICON = {
+  heart: '<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C1 8.2 3.2 4.5 6.9 4.5c2 0 3.5 1 4.1 2.2.6-1.2 2.1-2.2 4.1-2.2 3.7 0 5.9 3.7 4.5 7.3C19.5 16.4 12 21 12 21z"/></svg>',
+  reply: '<svg viewBox="0 0 24 24"><path d="M20.5 12c0 4.1-3.8 7.4-8.5 7.4-1 0-2-.1-2.9-.4L4.5 20.5l1.1-3.6C4.3 15.6 3.5 13.9 3.5 12c0-4.1 3.8-7.4 8.5-7.4s8.5 3.3 8.5 7.4z"/></svg>',
+  share: '<svg viewBox="0 0 24 24"><path d="M21 3 10.5 13.5M21 3l-6.5 18-4-7.5L3 9.5 21 3z"/></svg>'
+};
+function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
+function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
 function postCard(p, opts={}){
   const a = p.author||{}; const mine = p.author_id===me.id;
   const n = (p.photos||[]).length;
-  return `<div class="post" onclick="openPost('${p.id}')">
-    <div onclick="event.stopPropagation();openProfile('${a.id}')">${avatar(a)}</div>
+  const sub = [a.dong_name, lvShort(a)].filter(Boolean).join(' · ');
+  const showLine = opts.line || (!opts.noLine && p.reply_count>0);
+  return `<div class="post ${opts.cls||''}" onclick="openPost('${p.id}')">
+    <div class="avacol"><div onclick="event.stopPropagation();openProfile('${a.id}')">${avatar(a)}</div>${showLine?'<div class="tline"></div>':''}</div>
     <div class="col">
       ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 답글</div>`:''}
-      <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><span class="muted">${esc(a.dong_name||'')}</span>${lvChips(a)}<time>${ago(p.created_at)}</time></div>
+      <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}${mine?`<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}')">···</button>`:''}</div>
       ${p.body?`<div class="txt">${esc(p.body)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto('${esc(u)}')">`).join('')}</div>`:''}
       <div class="acts">
-        <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${likedSet.has(p.id)?'♥':'♡'} <span>${p.like_count||0}</span></button>
-        <button onclick="event.stopPropagation();openPost('${p.id}')">💬 <span>${p.reply_count||0}</span></button>
-        ${mine?`<button class="more" onclick="event.stopPropagation();deletePost('${p.id}')">삭제</button>`:''}
+        <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${ICON.heart}<span>${p.like_count||''}</span></button>
+        <button onclick="event.stopPropagation();openPost('${p.id}')">${ICON.reply}<span>${p.reply_count||''}</span></button>
+        <button onclick="event.stopPropagation();sharePost('${p.id}')">${ICON.share}</button>
       </div>
     </div></div>`;
+}
+function postMenu(id){ openSheet(`<button class="btn r" onclick="closeSheet();deletePost('${id}')">삭제</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
+async function sharePost(id){
+  const p=[...feedRows, ...feedRows.map(x=>x.firstReply), curPost, ...(curPost?.replies||[])].find(x=>x&&x.id===id);
+  const text = p ? `${p.author?.nickname}: ${p.body||'(사진)'}` : '뜨개동네 글';
+  try{ if(navigator.share) await navigator.share({ title:'뜨개동네', text }); else { await navigator.clipboard.writeText(text); toast('내용을 복사했어요'); } }catch(e){}
 }
 function openPhoto(u){ openSheet(`<img src="${esc(u)}" style="width:100%;border-radius:12px" alt="">`); }
 async function toggleLike(id, btn){
@@ -782,8 +886,8 @@ async function toggleLike(id, btn){
   if(r.error) return toast('실패: '+r.error.message);
   if(on) likedSet.delete(id); else likedSet.add(id);
   const bump = on?-1:1;
-  [...feedRows, curPost, ...(curPost?.replies||[])].filter(Boolean).forEach(p=>{ if(p.id===id) p.like_count=(p.like_count||0)+bump; });
-  if(btn){ btn.classList.toggle('on',!on); const cnt=btn.querySelector('span'); btn.firstChild.textContent = (on?'♡':'♥')+' '; cnt.textContent = Math.max(0,(parseInt(cnt.textContent)||0)+bump); }
+  [...feedRows, ...feedRows.map(x=>x.firstReply), curPost, ...(curPost?.replies||[])].filter(Boolean).forEach(p=>{ if(p.id===id) p.like_count=(p.like_count||0)+bump; });
+  if(btn){ btn.classList.toggle('on',!on); const cnt=btn.querySelector('span'); const v=Math.max(0,(parseInt(cnt.textContent)||0)+bump); cnt.textContent = v||''; }
 }
 // 사진 선택 → 1280px 리사이즈 → 미리보기
 async function pickPhotos(files){
@@ -836,7 +940,8 @@ async function openPost(id){
   curPost = p; curPost.replies = replies||[];
   await loadLikes([p, ...curPost.replies]);
   show('post');
-  $('#postBody').innerHTML = postCard(p) + (curPost.replies.length ? curPost.replies.map(r=>postCard(r,{replyTo:p.author?.nickname})).join('') : '<div class="empty">첫 답글을 남겨 보세요</div>');
+  $('#postBody').innerHTML = postCard(p,{noLine:true}) + `<div class="thread-head">답글</div>` + (curPost.replies.length ? curPost.replies.map(r=>postCard(r,{noLine:true})).join('') : '<div class="empty">첫 답글을 남겨 보세요</div>');
+  $('#replyAva').innerHTML = avatar(myProfile||{});
   $('#replyIn').value='';
 }
 async function submitReply(){
