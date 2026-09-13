@@ -26,6 +26,13 @@ body{background:#e9e9e9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
 .top .ib{background:none;border:0;padding:4px;cursor:pointer;color:var(--ink);display:inline-flex}
 .top .ib svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .body{padding:12px 16px 24px;display:flex;flex-direction:column;gap:12px}
+.body.form{gap:20px;padding:16px 16px 32px}
+.body.form label.f{gap:8px;font-size:.88rem;font-weight:600;color:var(--ink)}
+.body.form label.f .muted{font-weight:400}
+.body.form input,.body.form textarea{padding:12px 14px;font-size:16px}
+.body.form .seg button{padding:9px 16px;font-size:.92rem}
+.body.form .card.soft b.t{font-size:.88rem;color:var(--ink);font-weight:600;margin-bottom:6px}
+.body.form .btn{padding:14px;font-size:1rem;margin-top:4px}
 nav{display:flex;border-top:1px solid var(--line);background:var(--bg);padding:6px 6px max(10px,env(safe-area-inset-bottom))}
 nav button{flex:1;background:none;border:0;color:#b5b5b5;display:flex;align-items:center;justify-content:center;padding:10px 0;cursor:pointer;position:relative;border-radius:14px}
 nav button svg{width:27px;height:27px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -343,22 +350,19 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
   <!-- 온보딩 / 프로필 편집 -->
   <section class="view" id="v-onboard">
     <div class="top"><button class="back" id="obBack" onclick="go('my')" hidden>‹</button><h1 id="obTitle">프로필 만들기</h1></div>
-    <div class="body">
-      <label class="f">닉네임<input id="f_nick" maxlength="20"></label>
+    <div class="body form">
+      <label class="f">닉네임<input id="f_nick" maxlength="20" placeholder="지도와 글에 보이는 이름"></label>
       <div class="card soft" id="locCard"><b class="t">내 동네 (자동 인식)</b>
         <div id="locStatus">📍 위치 확인 중…</div>
         <div class="row" style="margin-top:8px"><button type="button" class="btn sm o" onclick="detectLocation()">다시 확인</button><button type="button" class="btn sm o" onclick="manualDong()">직접 입력</button></div>
         <div class="muted" style="margin-top:6px">정확한 위치는 저장하지 않아요. 500m 격자로 흐려진 좌표만 저장돼요.</div>
       </div>
-      <label class="f">뜨개 스타일<div class="seg" id="f_craft"></div></label>
       <label class="f">뜨개 경력<div class="seg" id="f_exp"></div></label>
-      <label class="f">지금 뜨는 것 (지도 핀에 한 단어로 보여요)<input id="f_now" maxlength="40" placeholder="예: 그래니 스퀘어 가디건"></label>
-      <label class="f">요즘 막히는 부분<input id="f_stuck" maxlength="100" placeholder="예: 레이글런 줄이기가 어려워요"></label>
-      <label class="f">소개 (선택, 300자)<textarea id="f_bio" maxlength="300" placeholder="예: 퇴근 후 코바늘. 가디건 완성이 목표. 같이 뜨실 분 환영"></textarea></label>
-      <label class="f">MBTI (선택)<input id="f_mbti" maxlength="4" placeholder="ENFP" style="text-transform:uppercase"></label>
       <label class="f">만나기 좋은 시간<div class="seg" id="f_avail"></div></label>
-      <label class="f"><span><input type="checkbox" id="f_bok" style="width:auto;margin-right:6px">초보 환영</span></label>
-      <button class="btn" onclick="saveProfile()">저장하고 지도로</button>
+      <label class="f"><span>소개 <span class="muted">(선택, 300자)</span></span><textarea id="f_bio" maxlength="300" placeholder="예: 퇴근 후 코바늘. 가디건 완성이 목표. 같이 뜨실 분 환영"></textarea></label>
+      <label class="f"><span>MBTI <span class="muted">(선택)</span></span><input id="f_mbti" maxlength="4" placeholder="ENFP" style="text-transform:uppercase"></label>
+      <div class="muted" style="font-size:.85rem">대바늘·코바늘 여부와 실력 단계는 다음 화면 "내 뜨개 단계"에서 기법을 체크하면 자동으로 정해져요.</div>
+      <button class="btn" id="obSave" onclick="saveProfile()">저장하고 다음으로</button>
     </div>
   </section>
 
@@ -542,7 +546,7 @@ function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'
 function avatar(p, lg){ const ini=(p?.nickname||'?').slice(0,1); return `<div class="ava${lg?' lg':''}">${p?.avatar_url?`<img src="${esc(p.avatar_url)}" alt="">`:esc(ini)}</div>`; }
 function ago(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분 전'; if(d<86400)return Math.floor(d/3600)+'시간 전'; return Math.floor(d/86400)+'일 전'; }
 function hhmm(t){ return new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}); }
-function chips(p){ return [p.craft&&`<span class="chip y">${CRAFT[p.craft]}</span>`, p.experience&&`<span class="chip">${EXP[p.experience]}</span>`, p.beginner_ok&&`<span class="chip m">초보 환영</span>`, p.mbti&&`<span class="chip">${esc(p.mbti)}</span>`].filter(Boolean).join(' '); }
+function chips(p){ return [p.craft&&`<span class="chip y">${CRAFT[p.craft]}</span>`, p.experience&&`<span class="chip">${EXP[p.experience]}</span>`, p.mbti&&`<span class="chip">${esc(p.mbti)}</span>`].filter(Boolean).join(' '); }
 function openSheet(html){ $('#sheet').innerHTML='<div class="hd"></div>'+html; $('#sheetwrap').classList.add('on'); }
 function closeSheet(){ $('#sheetwrap').classList.remove('on'); }
 function seg(id, opts, multi){ const el=$(id); el.innerHTML=Object.entries(opts).map(([k,v])=>`<button type="button" data-k="${k}">${v}</button>`).join(''); el.onclick=e=>{ const b=e.target.closest('button'); if(!b)return; if(multi){b.classList.toggle('on');} else { [...el.children].forEach(c=>c.classList.toggle('on',c===b)); } }; }
@@ -587,7 +591,7 @@ function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') o
 $('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openCompose('post'); return; } go(b.dataset.v); };
 
 // ============ 온보딩 ============
-seg('#f_craft', CRAFT); seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
+seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
 let loc = { lat:null, lng:null, dong_name:null, dong_code:null, verified:false };
 function setLocStatus(html){ $('#locStatus').innerHTML = html; }
 // Google Maps 스크립트 로더 (지도·역지오코딩 공용, 1회만 주입)
@@ -642,8 +646,9 @@ function openOnboard(edit){
   $('#f_nick').value=p.nickname||'';
   loc = { lat:p._c?.lat||null, lng:p._c?.lng||null, dong_name:p.dong_name||null, dong_code:p.dong_code||null, verified:!!p.dong_verified_at };
   if(loc.dong_name) setLocStatus(`📍 <b>${esc(loc.dong_name)}</b> <span class="muted">${loc.verified?'확인됨 ✓':'직접 입력'}</span>`); else detectLocation();
-  segSet('#f_craft',p.craft); segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
-  $('#f_now').value=p.now_making||''; $('#f_stuck').value=p.stuck_on||''; $('#f_bio').value=p.bio||''; $('#f_mbti').value=p.mbti||''; $('#f_bok').checked=!!p.beginner_ok;
+  segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
+  $('#f_bio').value=p.bio||''; $('#f_mbti').value=p.mbti||'';
+  $('#obSave').textContent = edit ? '저장' : '저장하고 다음으로';
   show('onboard');
 }
 async function saveProfile(){
@@ -651,8 +656,8 @@ async function saveProfile(){
   if(!loc.dong_name) return toast('동네를 확인해 주세요 (자동 인식 또는 직접 입력)');
   const mbti = $('#f_mbti').value.trim().toUpperCase();
   if(mbti && !/^[EI][NS][TF][JP]$/.test(mbti)) return toast('MBTI 형식을 확인해 주세요');
-  const row = { nickname:$('#f_nick').value.trim()||'뜨개인', dong_code:loc.dong_code, dong_name:loc.dong_name, dong_verified_at: loc.verified ? new Date().toISOString() : null, craft:segVal('#f_craft'), experience:segVal('#f_exp'),
-    now_making:$('#f_now').value.trim()||null, stuck_on:$('#f_stuck').value.trim()||null, bio:$('#f_bio').value.trim()||null, mbti:mbti||null, available:segVal('#f_avail',true), beginner_ok:$('#f_bok').checked, onboarded_at:new Date().toISOString() };
+  const row = { nickname:$('#f_nick').value.trim()||'뜨개인', dong_code:loc.dong_code, dong_name:loc.dong_name, dong_verified_at: loc.verified ? new Date().toISOString() : null, experience:segVal('#f_exp'),
+    bio:$('#f_bio').value.trim()||null, mbti:mbti||null, available:segVal('#f_avail',true), onboarded_at:new Date().toISOString() };
   const { error } = await sb.from('profiles').update(row).eq('id', me.id);
   if(error) return toast('저장 실패: '+error.message);
   // 위치: 새로 잡은 GPS만 흐려서 저장 (원본은 서버에 남지 않음). 직접 입력만 했으면 기존 좌표 유지
@@ -723,9 +728,7 @@ const GMap = {
 // ============ 지도 홈 ============
 // 지도 필터 (단일 선택): 전체 · 모임 · 비슷한 수준 · 시간 맞음 · 친구 (+ 초보 환영: 내 단계가 1 이하일 때만)
 function filterList(){
-  const list=[['all','전체'],['meet','모임'],['sim','비슷한 수준'],['time','시간 맞음'],['friends','친구']];
-  if((myProfile?.level_crochet||0)<=1 && (myProfile?.level_knit||0)<=1) list.push(['bok','초보 환영']);
-  return list;
+  return [['all','전체'],['meet','모임'],['sim','비슷한 수준'],['time','시간 맞음'],['friends','친구']];
 }
 function renderFilters(){ $('#filters').innerHTML = filterList().map(([k,l])=>`<button data-k="${k}" class="${filter.mode===k?'on':''}">${l}</button>`).join(''); }
 $('#filters').onclick = e => {
@@ -747,7 +750,7 @@ function loadPins(){ clearTimeout(pinTimer); pinTimer=setTimeout(fetchPins, 250)
 async function fetchPins(){
   const c = MapAdapter.center();
   const [{data:people,error}, {data:meetups}] = await Promise.all([
-    sb.rpc('nearby_profiles',{p_lat:c.lat,p_lng:c.lng,p_radius_m:RADIUS_M,p_craft:null,p_beginner_ok:filter.mode==='bok'?true:null}),
+    sb.rpc('nearby_profiles',{p_lat:c.lat,p_lng:c.lng,p_radius_m:RADIUS_M,p_craft:null,p_beginner_ok:null}),
     sb.from('meetups').select('id,title,place_name,starts_at,location,participant_count,room_id').eq('is_public',true).gte('starts_at',new Date().toISOString())
   ]);
   if(error) return toast('근처 조회 실패: '+error.message);
@@ -791,7 +794,7 @@ async function openProfile(id){
   else action = `<button class="btn o" disabled>거절됨 · 30일 후 재신청</button>`;
   const handle=[p.dong_name?`${p.dong_name}${p.dong_verified_at?' ✓':''}`:'', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
   const bio = p.bio || [p.now_making?`지금 뜨는 것: ${p.now_making}`:'', p.stuck_on?`요즘 막히는 부분: ${p.stuck_on}`:''].filter(Boolean).join('\n');
-  const meta = [simBadge(p), p.experience?`<span class="chip">${EXP[p.experience]}</span>`:'', p.mbti?`<span class="chip">${esc(p.mbti)}</span>`:'', p.beginner_ok?'<span class="chip m">초보 환영</span>':'', p.available?.length?`<span class="chip">${p.available.map(a=>AVAIL[a]).join(' · ')}</span>`:''].filter(Boolean).join('');
+  const meta = [simBadge(p), p.experience?`<span class="chip">${EXP[p.experience]}</span>`:'', p.mbti?`<span class="chip">${esc(p.mbti)}</span>`:'', p.available?.length?`<span class="chip">${p.available.map(a=>AVAIL[a]).join(' · ')}</span>`:''].filter(Boolean).join('');
   $('#profTitle').textContent = p.nickname;
   $('#profBody').innerHTML = `
     <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
@@ -1263,7 +1266,7 @@ function toggleTech(id){
 }
 async function saveSkills(){
   clearTimeout(skillTimer); if(!me) return;
-  const { data, error } = await sb.from('profiles').update({ skills:[...skills] }).eq('id', me.id).select('skills,level_crochet,level_knit').single();
+  const { data, error } = await sb.from('profiles').update({ skills:[...skills] }).eq('id', me.id).select('skills,level_crochet,level_knit,craft').single();
   if(error) return toast('저장 실패: '+error.message);
   Object.assign(myProfile, data); skillsDirty=false;
 }
