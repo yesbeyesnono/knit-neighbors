@@ -356,8 +356,9 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .top h1,.top h1{text-align:left;font-size:1.05rem;font-weight:700}
 .top .back,.top .back{color:var(--tink);font-size:1.5rem}
 .top .btn,.top .btn,.top .btn,.top .btn{background:transparent;border:0;color:var(--tink);font-weight:600;font-size:.9rem;padding:4px 0;width:auto}
-.subtabs{border-bottom:1px solid var(--tline);padding:0;background:var(--tbg)}
-.subtabs button{flex:1;padding:12px 0;font-size:.95rem;color:var(--tmute);border-bottom:1.5px solid transparent;font-weight:500}
+.subtabs{border-bottom:1px solid var(--tline);padding:0 8px;background:var(--tbg);overflow-x:auto;scrollbar-width:none;gap:0}
+.subtabs::-webkit-scrollbar{display:none}
+.subtabs button{flex:1 0 auto;min-width:60px;padding:12px 10px;font-size:.95rem;color:var(--tmute);border-bottom:1.5px solid transparent;font-weight:500;white-space:nowrap}
 .subtabs button.on{color:var(--tink);border-color:var(--tink);font-weight:700}
 /* 작성 행 */
 .cbox{border-bottom:1px solid var(--tline);padding:14px 16px 12px;align-items:flex-start;gap:12px}
@@ -470,7 +471,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
   <!-- 커뮤니티 (Threads 스타일) -->
   <section class="view" id="v-comm">
     <div class="top"><h1>커뮤니티</h1></div>
-    <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="meet">모임</button><button data-f="work">작품</button><button data-f="dong">우리 동네</button><button data-f="friends">친구</button></div>
+    <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="meet">모임</button><button data-f="work">작품</button><button data-f="dong">동네</button><button data-f="friends">친구</button></div>
     <div class="cbox" id="cbox">
       <div id="cboxAva"></div>
       <div style="flex:1;min-width:0">
