@@ -51,4 +51,4 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
+        submit_to_testflight: false   # 외부 테스트 심사 자동 제출은 테스트 정보 입력 후 true로
