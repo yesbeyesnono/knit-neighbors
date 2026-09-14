@@ -2,3 +2,4 @@
 _shots/
 *.tmp
 .~lock.*
+*.p8
