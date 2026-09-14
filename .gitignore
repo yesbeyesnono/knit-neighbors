@@ -3,3 +3,16 @@ _shots/
 *.tmp
 .~lock.*
 *.p8
+node_modules/
+android/build/
+android/app/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+*.keystore
+*.jks
+android/keys/
+android/keystore.properties

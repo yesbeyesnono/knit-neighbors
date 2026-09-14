@@ -1,0 +1,23 @@
+{
+  "appId": "kr.co.firmtech.knitneighbors",
+  "appName": "뜨개동네",
+  "webDir": "docs",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#ffffff"
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#ffffff"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffff",
+      "showSpinner": false
+    }
+  }
+}

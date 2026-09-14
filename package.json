@@ -1,0 +1,32 @@
+{
+  "name": "knit-neighbors",
+  "version": "1.0.0",
+  "description": "동네 뜨개 친구를 지도에서 찾고, 프로필을 보고 친구가 되고, 채팅으로 약속을 잡는 위치기반 뜨개 커뮤니티.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yesbeyesnono/knit-neighbors.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/yesbeyesnono/knit-neighbors/issues"
+  },
+  "homepage": "https://github.com/yesbeyesnono/knit-neighbors#readme",
+  "private": "true",
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/browser": "^8.0.4",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
+  }
+}

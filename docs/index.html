@@ -668,7 +668,38 @@ const GOOGLE_MAPS_KEY = 'AIzaSyDKtumtEPLqAj25Nw5vaG0Kq_MF2wWLGNs';   // Google C
 const RADIUS_M = 5000;
 
 if(typeof supabase==='undefined'){ document.body.innerHTML='<div style="padding:40px 24px;text-align:center;font-family:sans-serif"><b>연결에 문제가 있어요</b><br><br>네트워크를 확인하고 다시 열어 주세요.<br><span style="color:#999;font-size:13px">(필수 스크립트를 불러오지 못했어요)</span></div>'; throw new Error('supabase-js not loaded'); }
-const sb = supabase.createClient(SB_URL, SB_KEY);
+const CAP = window.Capacitor;
+const isNative = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
+const NATIVE_REDIRECT = 'knitneighbors://auth';
+const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { flowType: isNative ? 'pkce' : 'implicit', detectSessionInUrl: !isNative } });
+// 네이티브 앱: 시스템 브라우저(Custom Tab / SFSafariViewController)로 로그인 → knitneighbors://auth?code=… 로 복귀
+async function nativeOAuth(provider){
+  const { data, error } = await sb.auth.signInWithOAuth({ provider, options:{ redirectTo: NATIVE_REDIRECT, skipBrowserRedirect: true } });
+  if(error) return toast('로그인 오류: '+error.message);
+  await CAP.Plugins.Browser.open({ url: data.url, presentationStyle: 'popover' });
+}
+if(isNative){
+  CAP.Plugins.App.addListener('appUrlOpen', async ({ url }) => {
+    if(!url || !url.startsWith(NATIVE_REDIRECT)) return;
+    try{ await CAP.Plugins.Browser.close(); }catch(e){}
+    const u = new URL(url); const code = u.searchParams.get('code'); const err = u.searchParams.get('error_description') || u.searchParams.get('error');
+    if(err) return toast('로그인 실패: '+err);
+    if(code){ const { error } = await sb.auth.exchangeCodeForSession(code); if(error) toast('로그인 실패: '+error.message); }
+  });
+  // 안드로이드 뒤로 가기: 화면 계층대로 처리
+  CAP.Plugins.App.addListener('backButton', () => {
+    if($('#sheetwrap').classList.contains('on')) return closeSheet();
+    if($('#slides').classList.contains('on')) return closeSlides();
+    if(view==='room') return leaveRoom();
+    if(view==='post') return closePost();
+    if(view==='profile') return closeProfile();
+    if(view==='compose') return closeCompose();
+    if(view==='skills') return leaveSkills();
+    if(view==='friends') return go('my');
+    if(view!=='map' && view!=='login') return go('map');
+    CAP.Plugins.App.exitApp();
+  });
+}
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -696,10 +727,12 @@ function segSet(id, val){ const vals=Array.isArray(val)?val:[val]; [...$(id).chi
 
 // ============ 인증 ============
 async function loginGoogle(){
+  if(isNative) return nativeOAuth('google');
   const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.href.split('#')[0] } });
   if(error) toast('구글 로그인 오류: '+error.message);
 }
 async function loginApple(){
+  if(isNative) return nativeOAuth('apple');
   const { error } = await sb.auth.signInWithOAuth({ provider:'apple', options:{ redirectTo: location.href.split('#')[0].split('?')[0] } });
   if(error) toast('Apple 로그인 오류: '+error.message);
 }
@@ -752,6 +785,7 @@ function parseGeo(hex){
 const NAV_OF = { friends:'my', skills:'my', post:'comm', profile:'', compose:'' };
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
+document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(a && isNative){ e.preventDefault(); CAP.Plugins.Browser.open({ url: new URL(a.getAttribute('href'), 'https://yesbeyesnono.github.io/knit-neighbors/').href }); } });
 $('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openCompose('post'); return; } go(b.dataset.v); };
 
 // ============ 온보딩 ============
