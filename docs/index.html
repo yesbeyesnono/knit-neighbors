@@ -450,6 +450,8 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
     <h1>뜨개동네</h1>
     <p>우리 동네에서 같이 뜰 사람을 지도에서 찾아요</p>
     <button class="btn g" onclick="loginGoogle()"><img alt="" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">Google로 계속하기</button>
+    <button class="btn" onclick="loginApple()" style="background:#000;color:#fff"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.6 1.3 10.1.9 1.2 1.9 2.6 3.2 2.5 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.2 3.1-2.5.9-1.4 1.3-2.7 1.4-2.8-.1 0-2.9-1.1-2.9-4zM14 5.2c.7-.8 1.2-2 1-3.2-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.5 2.9-1.3z"/></svg>Apple로 계속하기</button>
+    <p class="muted" style="font-size:.78rem;line-height:1.5">계속하면 <a href="terms.html" target="_blank" style="color:inherit">이용약관</a>과 <a href="privacy.html" target="_blank" style="color:inherit">개인정보처리방침</a>에 동의하는 것으로 봅니다.</p>
   </section>
 
   <!-- 온보딩 / 프로필 편집 -->
@@ -467,6 +469,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
       <label class="f"><span>소개 <span class="muted">(선택, 300자)</span></span><textarea id="f_bio" maxlength="300" placeholder="예: 퇴근 후 코바늘. 가디건 완성이 목표. 같이 뜨실 분 환영"></textarea></label>
       <label class="f"><span>MBTI <span class="muted">(선택)</span></span><input id="f_mbti" maxlength="4" placeholder="ENFP" style="text-transform:uppercase"></label>
       <div class="muted" style="font-size:.85rem">대바늘·코바늘 여부와 실력 단계는 다음 화면 "내 뜨개 단계"에서 기법을 체크하면 자동으로 정해져요.</div>
+      <label class="f" id="agreeWrap"><span style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:.9rem;line-height:1.45"><input type="checkbox" id="f_agree" style="width:auto;margin-top:3px"><span>(필수) <a href="terms.html" target="_blank">이용약관</a>·<a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a>·<a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다. 위치 정보는 500m 격자로 흐려진 좌표만 저장됩니다.</span></span></label>
       <button class="btn" id="obSave" onclick="saveProfile()">저장하고 다음으로</button>
     </div>
   </section>
@@ -696,6 +699,10 @@ async function loginGoogle(){
   const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.href.split('#')[0] } });
   if(error) toast('구글 로그인 오류: '+error.message);
 }
+async function loginApple(){
+  const { error } = await sb.auth.signInWithOAuth({ provider:'apple', options:{ redirectTo: location.href.split('#')[0].split('?')[0] } });
+  if(error) toast('Apple 로그인 오류: '+error.message);
+}
 async function loginTest(n){
   const { error } = await sb.auth.signInWithPassword({ email:`tester${n}@example.com`, password:'knit1234' });
   if(error) toast('로그인 실패: '+error.message);
@@ -715,8 +722,21 @@ sb.auth.onAuthStateChange(async (ev, session) => {
   initStarted=true;
   await loadMe();
   if(!myProfile?.onboarded_at){ openOnboard(false); }
-  else { go('map'); watchFriends(); loadMyRooms(); }
+  else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); }
 });
+function openConsent(){
+  openSheet(`<b style="font-size:1.05rem">이용약관 동의</b>
+    <div class="muted" style="font-size:.9rem;line-height:1.5">뜨개동네를 계속 이용하려면 <a href="terms.html" target="_blank">이용약관</a>, <a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a>, <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의가 필요해요. 위치 정보는 500m 격자로 흐려진 좌표만 저장돼요.</div>
+    <label class="f"><span style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input type="checkbox" id="cAgree" style="width:auto;margin-top:3px"><span>위 내용을 읽었고 동의합니다 (필수)</span></span></label>
+    <button class="btn" onclick="submitConsent()">동의하고 계속</button>
+    <button class="btn o" onclick="logout()">동의하지 않음 (로그아웃)</button>`);
+}
+async function submitConsent(){
+  if(!$('#cAgree').checked) return toast('동의 항목을 체크해 주세요');
+  const { error } = await sb.from('profiles').update({ terms_agreed_at: new Date().toISOString() }).eq('id', me.id);
+  if(error) return toast('저장 실패: '+error.message);
+  myProfile.terms_agreed_at = new Date().toISOString(); closeSheet(); toast('감사합니다');
+}
 
 async function loadMe(){
   const { data } = await sb.from('profiles').select('*').eq('id', me.id).single();
@@ -793,16 +813,17 @@ function openOnboard(edit){
   if(loc.dong_name) setLocStatus(`📍 <b>${esc(loc.dong_name)}</b> <span class="muted">${loc.verified?'확인됨 ✓':'직접 입력'}</span>`); else detectLocation();
   segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
   $('#f_bio').value=p.bio||''; $('#f_mbti').value=p.mbti||'';
-  $('#obSave').textContent = edit ? '저장' : '저장하고 다음으로';
+  $('#obSave').textContent = edit ? '저장' : '저장하고 다음으로'; $('#agreeWrap').hidden = edit; if(!edit) $('#f_agree').checked = !!p.terms_agreed_at;
   show('onboard');
 }
 async function saveProfile(){
   const edit = !$('#obBack').hidden;
   if(!loc.dong_name) return toast('동네를 확인해 주세요 (자동 인식 또는 직접 입력)');
+  if(!edit && !$('#f_agree').checked) return toast('이용약관과 개인정보처리방침에 동의해 주세요');
   const mbti = $('#f_mbti').value.trim().toUpperCase();
   if(mbti && !/^[EI][NS][TF][JP]$/.test(mbti)) return toast('MBTI 형식을 확인해 주세요');
   const row = { nickname:$('#f_nick').value.trim()||'뜨개인', dong_code:loc.dong_code, dong_name:loc.dong_name, dong_verified_at: loc.verified ? new Date().toISOString() : null, experience:segVal('#f_exp'),
-    bio:$('#f_bio').value.trim()||null, mbti:mbti||null, available:segVal('#f_avail',true), onboarded_at:new Date().toISOString() };
+    bio:$('#f_bio').value.trim()||null, mbti:mbti||null, available:segVal('#f_avail',true), onboarded_at:new Date().toISOString(), ...(edit?{}:{terms_agreed_at:new Date().toISOString()}) };
   const { error } = await sb.from('profiles').update(row).eq('id', me.id);
   if(error) return toast('저장 실패: '+error.message);
   // 위치: 새로 잡은 GPS만 흐려서 저장 (원본은 서버에 남지 않음). 직접 입력만 했으면 기존 좌표 유지
@@ -1087,6 +1108,7 @@ function appendMsg(m){
 function scrollMsgs(){ const v=$('#v-room'); v.scrollTop=v.scrollHeight; }
 async function sendMsg(){
   const t=$('#msgIn').value.trim(); if(!t||!roomId)return;
+  await loadBanned(); if(hasBanned(t)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
   $('#msgIn').value='';
   const { error } = await sb.from('messages').insert({room_id:roomId,sender_id:me.id,body:t});
   if(error){ toast('전송 실패: '+error.message); $('#msgIn').value=t; }
@@ -1210,7 +1232,7 @@ function replyCard(r){
   return `<div class="rpost" id="rp-${r.id}">
     <div onclick="openProfile('${a.id}')">${avatar(a).replace('class="ava"','class="ava sm"')}</div>
     <div class="rb">
-      <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time>${mine?`<button class="menu" onclick="deletePost('${r.id}')">···</button>`:''}</div>
+      <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time><button class="menu" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
       ${r.body?`<div class="txt">${esc(r.body)}</div>`:''}
       <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button></div>
     </div></div>`;
@@ -1228,6 +1250,7 @@ async function toggleReplies(id){
 }
 async function submitInlineReply(pid){
   const inp=document.getElementById('rin-'+pid); const t=inp?.value.trim(); if(!t) return;
+  await loadBanned(); if(hasBanned(t)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
   const { data, error } = await sb.from('posts').insert({ author_id: me.id, parent_id: pid, body: t }).select('*, '+AUTHOR_SEL).single();
   if(error) return toast('실패: '+error.message);
   const p=findPost(pid); if(p){ p.replies=[...(p.replies||[]), data]; p.reply_count=(p.reply_count||0)+1; if(!p.firstReply) p.firstReply=data; }
@@ -1329,7 +1352,7 @@ function postCard(p, opts={}){
     <div class="col">
       ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 답글</div>`:''}
       ${p.review_meetup?`<div class="rvtag" onclick="event.stopPropagation();openMeetup('${p.review_of}')">🧶 모임 후기 · ${esc(p.review_meetup.title)}</div>`:''}
-      <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}${mine?`<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}')">···</button>`:''}</div>
+      <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}','${a.id}')">···</button></div>
       ${p.body?`<div class="txt">${esc(p.body)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`).join('')}</div>`:''}
       ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work):''}
@@ -1340,7 +1363,18 @@ function postCard(p, opts={}){
       </div>
     </div></div>`;
 }
-function postMenu(id){ openSheet(`<button class="btn r" onclick="closeSheet();deletePost('${id}')">삭제</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
+function postMenu(id, authorId){
+  if(authorId===me.id) return openSheet(`<button class="btn r" onclick="closeSheet();deletePost('${id}')">삭제</button><button class="btn o" onclick="closeSheet()">취소</button>`);
+  openSheet(`<button class="btn o" onclick="closeSheet();reportPost('${id}')">🚩 이 글 신고</button><button class="btn o" onclick="closeSheet();reportUser('${authorId}')">🚩 작성자 신고</button><button class="btn r" onclick="closeSheet();blockUser('${authorId}')">작성자 차단</button><button class="btn o" onclick="closeSheet()">취소</button>`);
+}
+function reportPost(id){
+  openSheet(`<b>글 신고</b><div class="muted" style="font-size:.85rem">신고가 3건 쌓이면 글이 자동으로 숨겨지고, 운영자가 24시간 안에 확인해요.</div><label class="f">사유<select id="prReason"><option value="spam">스팸·광고</option><option value="harassment">괴롭힘·혐오</option><option value="inappropriate">부적절한 내용(성적·폭력)</option><option value="fake">허위·사기</option><option value="other">기타</option></select></label><textarea id="prDetail" maxlength="500" placeholder="자세한 내용 (선택)"></textarea><button class="btn r" onclick="sendPostReport('${id}')">신고하기</button>`);
+}
+async function sendPostReport(id){
+  const { error } = await sb.from('post_reports').insert({ post_id:id, reporter_id:me.id, reason:$('#prReason').value, detail:$('#prDetail').value.trim()||null });
+  if(error) return toast(error.code==='23505'?'이미 신고한 글이에요':'실패: '+error.message);
+  toast('신고를 접수했어요. 검토 후 조치할게요'); closeSheet();
+}
 async function sharePost(id){
   const p=[...feedRows, ...feedRows.map(x=>x.firstReply), curPost, ...(curPost?.replies||[])].find(x=>x&&x.id===id);
   const text = p ? `${p.author?.nickname}: ${p.body||'(사진)'}` : '뜨개동네 글';
@@ -1432,6 +1466,7 @@ async function submitCompose(){
   const body = $('#sText').value.trim();
   $('#sPost').disabled = true;
   try{
+    await loadBanned(); if(hasBanned(body) || hasBanned($('#wNote').value) || hasBanned($('#mDesc').value) || hasBanned($('#mTitle').value)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     if(composeKind==='meetup'){
       const title=$('#mTitle').value.trim(), place=$('#mPlace').value.trim(), when=$('#mTime').value;
       if(!title) throw new Error('모임 이름을 적어 주세요');
@@ -1546,6 +1581,9 @@ async function submitReply(){
 const LVNAME = {0:'아직 없음',1:'입문',2:'초급',3:'중급',4:'상급',5:'전문'};
 const LVDESC = {1:'첫 수업에서 배우는 기초',2:'기초 조합, 단순 성형',3:'실용 소품 완성 수준',4:'의류·복합 무늬 수준',5:'특수 기법, 전용 학습 필요'};
 const CRAFTKEY = {crochet:'crochet', knitting:'knitting'};
+let BANNED = [];
+async function loadBanned(){ if(BANNED.length) return; const { data } = await sb.from('banned_words').select('word'); BANNED=(data||[]).map(x=>x.word); }
+function hasBanned(t){ const l=(t||'').toLowerCase(); return BANNED.some(w=>l.includes(w)); }
 let TECH = [], skills = new Set(), skillCraft = 'crochet', skillTimer = null, openLv = null, skillsDirty = false, slideAfter = null;
 
 async function loadTech(){ if(TECH.length) return; const { data, error } = await sb.from('techniques').select('*').order('sort'); if(error) toast('기법 목록 로드 실패: '+error.message); TECH = data||[]; }
@@ -1667,8 +1705,25 @@ function openSettings(){
     <label class="f"><span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)" style="width:auto;margin-right:8px">지도에 내 핀 보이기</span></label>
     <div class="muted" style="font-size:.85rem">위치는 500m 격자로 흐려진 좌표만 저장돼요. 정확한 위치는 서버에 남지 않아요.</div>
     <button class="btn o" onclick="closeSheet();openSlides()">뜨개 단계 설명 다시 보기</button>
+    <div class="row" style="gap:6px;flex-wrap:wrap;font-size:.85rem"><a href="terms.html" target="_blank">이용약관</a> · <a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a> · <a href="privacy.html" target="_blank">개인정보처리방침</a> · <a href="mailto:knitup.official@gmail.com">문의</a></div>
     <button class="btn o" onclick="logout()">로그아웃</button>
+    <button class="btn r" onclick="deleteAccount()">계정 삭제</button>
     <div class="devbar">${esc(me?.email||'')} · Supabase ${SB_URL.replace('https://','')} · 지도 ${GOOGLE_MAPS_KEY?'Google Maps':'OpenStreetMap'}</div>`);
+}
+async function deleteAccount(){
+  if(!confirm('계정을 삭제하면 프로필·글·사진·채팅·모임 참여 기록이 모두 지워지고 복구할 수 없어요. 계속할까요?')) return;
+  const word = prompt('확인을 위해 "삭제"라고 입력해 주세요'); if(word !== '삭제') return;
+  // 1) 내가 올린 파일 삭제 (Storage API), 2) 계정·데이터 삭제 (서버 함수, cascade)
+  try{
+    for(const bucket of ['posts','avatars','works','chat-photos']){
+      const { data:files } = await sb.storage.from(bucket).list(me.id, { limit:1000 });
+      const names=(files||[]).filter(f=>f.name && !f.id?.endsWith('/')).map(f=>`${me.id}/${f.name}`);
+      if(names.length) await sb.storage.from(bucket).remove(names);
+    }
+  }catch(e){ console.warn('storage cleanup', e); }
+  const { error } = await sb.rpc('delete_my_account');
+  if(error) return toast('삭제 실패: '+error.message);
+  toast('계정이 삭제됐어요'); await sb.auth.signOut();
 }
 async function shareProfile(){ const p=myProfile||{}; const text=`뜨개동네 · ${p.nickname} (${p.dong_name||''}) ${lvShort(p)}`; try{ if(navigator.share) await navigator.share({title:'뜨개동네',text}); else { await navigator.clipboard.writeText(text); toast('프로필 정보를 복사했어요'); } }catch(e){} }
 async function toggleVisible(v){ await sb.from('profiles').update({is_visible:v}).eq('id',me.id); myProfile.is_visible=v; toast(v?'지도에 보여요':'지도에서 숨겼어요'); }

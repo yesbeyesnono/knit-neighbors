@@ -873,3 +873,10 @@ alter table public.meetups add column review_count integer not null default 0;
 --   create_meetup(p_extra.room_id): 기존 단체방에 모임 붙이기 (멤버만)
 --   cancel_meetup(meetup_id): 주최자만, 시작 전만. 모임·안내 글 삭제, 방·채팅은 유지 + 취소 메시지
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 16. 스토어 심사 대응 (2026-09-14)
+--   profiles.terms_agreed_at(약관 동의) · delete_my_account()(계정 삭제, auth.users cascade; 파일은 클라이언트가 Storage API로 정리)
+--   posts.hidden + post_reports(신고 3건 → 자동 숨김, 작성자에게만 보임) · banned_words + contains_banned() + 글/메시지/프로필 금칙어 트리거
+--   법적 문서: docs/privacy.html · terms.html · guidelines.html · delete-account.html
+-- ---------------------------------------------------------------
