@@ -793,6 +793,7 @@ seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
 let loc = { lat:null, lng:null, dong_name:null, dong_code:null, verified:false };
 function setLocStatus(html){ $('#locStatus').innerHTML = html; }
 // Google Maps 스크립트 로더 (지도·역지오코딩 공용, 1회만 주입)
+window.gm_authFailure = ()=>{ MapAdapter.fallback('gm_authFailure'); };
 function loadGoogleMaps(){
   if(!GOOGLE_MAPS_KEY) return Promise.reject(new Error('no key'));
   if(window.google?.maps?.Map) return Promise.resolve();
@@ -868,9 +869,10 @@ async function saveProfile(){
 
 // ============ 지도 어댑터 (Google Maps ↔ Leaflet/OSM) ============
 const MapAdapter = {
-  impl:null, ready:false, pending:null,
+  impl:null, ready:false, pending:null, el:null,
   init(el, center){
     if(this.pending) return this.pending;   // 로그인 이벤트가 두 번 와도 지도는 한 번만 생성
+    this.el = el;
     this.impl = GOOGLE_MAPS_KEY ? GMap : LMap;
     this.pending = Promise.resolve(this.impl.init(el, center)).then(()=>{ this.ready=true; }).catch(err=>{
       console.warn('Google Maps 로드 실패, OSM으로 전환', err);
@@ -878,6 +880,16 @@ const MapAdapter = {
       return Promise.resolve(LMap.init(el, center)).then(()=>{ this.ready=true; });
     });
     return this.pending;
+  },
+  // Google이 키 인증 실패(허용되지 않은 referrer 등)를 알리면 같은 자리에 OSM 지도를 다시 그림
+  async fallback(reason){
+    if(this.impl===LMap || !this.el) return;
+    console.warn('Google Maps 인증 실패, OSM으로 전환', reason);
+    const c = (this.ready && this.impl.center()) || myProfile?._c || {lat:37.5665,lng:126.9780};
+    this.impl = LMap; this.ready=false; this.el.innerHTML='';
+    this.pending = Promise.resolve(LMap.init(this.el, c)).then(()=>{ this.ready=true; });
+    await this.pending;
+    initMap.moveBound=false; if(typeof initMap==='function') initMap();
   },
   setCenter(c){ this.impl.setCenter(c); },
   clear(){ this.impl.clear(); },
