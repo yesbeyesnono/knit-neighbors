@@ -1,9 +1,10 @@
 # Codemagic CI — Mac 없이 iOS 빌드 → TestFlight 업로드
 # 사전 준비(Codemagic 웹에서 1회):
 #   1) codemagic.io 가입 → GitHub yesbeyesnono/knit-neighbors 연결
-#   2) Teams › Integrations › App Store Connect: App Store Connect API 키(.p8, Key ID, Issuer ID) 등록, 이름 "firmtech_asc"
-#   3) 앱 설정 › Code signing: iOS automatic 사용(위 API 키로 인증서·프로필 자동 생성)
-#   4) App Store Connect에서 앱(뜨개동네, kr.co.firmtech.knitneighbors) 먼저 생성
+#   2) Settings › Integrations › Developer Portal: App Store Connect API 키(.p8, Key ID, Issuer ID) 등록, 이름 "firmtech_asc"
+#   3) 앱 › Environment variables: 그룹 ios_creds 에 CERTIFICATE_PRIVATE_KEY(RSA 개인키 PEM, Secure 체크) 추가
+#      → 빌드 중 app-store-connect fetch-signing-files --create 가 배포 인증서·App Store 프로파일을 자동 생성
+#   4) App Store Connect에서 앱(kr.co.firmtech.knitneighbors) 먼저 생성
 workflows:
   ios-testflight:
     name: iOS → TestFlight
@@ -12,10 +13,10 @@ workflows:
     integrations:
       app_store_connect: firmtech_asc
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: kr.co.firmtech.knitneighbors
+      groups:
+        - ios_creds
       vars:
+        BUNDLE_ID: "kr.co.firmtech.knitneighbors"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
       node: 20
@@ -32,8 +33,12 @@ workflows:
         script: |
           npm ci
           npx cap sync ios
-      - name: 서명 프로필 적용
-        script: xcode-project use-profiles
+      - name: 서명 파일 준비(인증서·프로파일 자동 생성)
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
       - name: 빌드 번호 증가
         script: |
           cd ios/App
@@ -47,5 +52,3 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-        beta_groups:
-          - 내부 테스터
