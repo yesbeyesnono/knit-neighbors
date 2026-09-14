@@ -1,0 +1,51 @@
+# Codemagic CI — Mac 없이 iOS 빌드 → TestFlight 업로드
+# 사전 준비(Codemagic 웹에서 1회):
+#   1) codemagic.io 가입 → GitHub yesbeyesnono/knit-neighbors 연결
+#   2) Teams › Integrations › App Store Connect: App Store Connect API 키(.p8, Key ID, Issuer ID) 등록, 이름 "firmtech_asc"
+#   3) 앱 설정 › Code signing: iOS automatic 사용(위 API 키로 인증서·프로필 자동 생성)
+#   4) App Store Connect에서 앱(뜨개동네, kr.co.firmtech.knitneighbors) 먼저 생성
+workflows:
+  ios-testflight:
+    name: iOS → TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: firmtech_asc
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: kr.co.firmtech.knitneighbors
+      vars:
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
+        XCODE_SCHEME: "App"
+      node: 20
+      xcode: latest
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - name: 의존성 설치·웹 자산 동기화
+        script: |
+          npm ci
+          npx cap sync ios
+      - name: 서명 프로필 적용
+        script: xcode-project use-profiles
+      - name: 빌드 번호 증가
+        script: |
+          cd ios/App
+          agvtool new-version -all "$BUILD_NUMBER"
+      - name: IPA 빌드
+        script: xcode-project build-ipa --project "$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - 내부 테스터
