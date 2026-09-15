@@ -888,3 +888,12 @@ alter table public.meetups add column review_count integer not null default 0;
 -- ---------------------------------------------------------------
 alter table public.profiles add column if not exists wave_until timestamptz;
 -- nearby_profiles 재정의: 기존 select 목록 끝에 (p.wave_until is not null and p.wave_until > now()) as waving 추가 (drop function 후 create)
+
+-- ---------------------------------------------------------------
+-- 18. @멘션 + 활동(알림) — 2026-09-15 (마이그레이션 mentions_and_notifications)
+--   posts.mentions uuid[] (답글 저장 시 클라이언트가 @선택한 사용자 id 배열 전달)
+--   notifications(recipient_id, actor_id, kind[mention|reply|like|friend_request|friend_accept|meetup_join|review], post_id, root_post_id, meetup_id, snippet, read_at)
+--   RLS: 본인 것만 select/update/delete, insert는 트리거(security definer push_notification)만
+--   트리거: posts_notify(답글→원글 작성자, 멘션→언급된 사람, 후기→모임 개설자) · post_likes_notify(취소 시 삭제) · friendships_notify · room_members_notify(모임 참여→개설자)
+--   realtime publication에 notifications 추가 (마이 탭 배지·토스트)
+-- ---------------------------------------------------------------
