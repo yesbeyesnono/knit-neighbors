@@ -880,3 +880,11 @@ alter table public.meetups add column review_count integer not null default 0;
 --   posts.hidden + post_reports(신고 3건 → 자동 숨김, 작성자에게만 보임) · banned_words + contains_banned() + 글/메시지/프로필 금칙어 트리거
 --   법적 문서: docs/privacy.html · terms.html · guidelines.html · delete-account.html
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 17. 🙋 뜨친구 구해요(손 들기) — 2026-09-15
+--   profiles.wave_until: 마이에서 토글 시 now()+14일. 지도 핀에 손 배지, '손 든 이웃' 필터
+--   nearby_profiles 반환에 waving boolean 추가 (wave_until > now())
+-- ---------------------------------------------------------------
+alter table public.profiles add column if not exists wave_until timestamptz;
+-- nearby_profiles 재정의: 기존 select 목록 끝에 (p.wave_until is not null and p.wave_until > now()) as waving 추가 (drop function 후 create)

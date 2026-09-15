@@ -86,7 +86,8 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--
 #map{position:absolute;inset:0;background:var(--bg2)}
 .mapui{position:absolute;left:0;right:0;z-index:400;pointer-events:none}
 .mapui>*{pointer-events:auto}
-.filters{top:0;padding:12px 14px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.filters{top:0;padding:12px 14px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;pointer-events:auto;-webkit-overflow-scrolling:touch}
+.filters button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .filters button{flex:none;font:inherit;font-size:.8rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .pincard{bottom:14px;padding:0 14px}
@@ -105,6 +106,11 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--
 .upin.meet .lbl{background:#fff;color:#000;border:1.5px solid #000}
 .upin.knit .face{border-color:#5C7A4C}
 .upin.knit .tail{border-top-color:#5C7A4C}
+.upin .facewrap{position:relative}
+.upin .hand{position:absolute;right:-9px;top:-9px;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid #000;display:grid;place-items:center;font-size:13px;line-height:1;animation:wave 1.6s ease-in-out infinite;transform-origin:70% 90%}
+@keyframes wave{0%,100%{transform:rotate(0)}25%{transform:rotate(14deg)}75%{transform:rotate(-8deg)}}
+.wavebadge{display:inline-flex;align-items:center;gap:5px;background:#000;color:#fff;border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:600}
+.pbtns .btn.wave.on{background:#000;color:#fff;border-color:#000}
 .leaflet-div-icon{background:none;border:0}
 /* sheet */
 .sheetwrap{position:absolute;inset:0;z-index:1100;display:none;align-items:flex-end;background:rgba(43,39,35,.35)}
@@ -372,6 +378,9 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .top .btn,.top .btn,.top .btn,.top .btn{background:transparent;border:0;color:var(--tink);font-weight:600;font-size:.9rem;padding:4px 0;width:auto}
 .subtabs{border-bottom:1px solid var(--tline);padding:0 8px;background:var(--tbg);overflow-x:auto;scrollbar-width:none;gap:0}
 .subtabs::-webkit-scrollbar{display:none}
+/* 커뮤니티: 제목은 스크롤로 올라가고 카테고리 탭이 상단에 고정(스크롤·키보드 후 탭이 제목 밑에 숨던 문제) */
+#v-comm .top{position:static}
+#v-comm .subtabs{position:sticky;top:0;z-index:6;flex:none}
 .subtabs button{flex:1 0 auto;min-width:60px;padding:12px 10px;font-size:.95rem;color:var(--tmute);border-bottom:1.5px solid transparent;font-weight:500;white-space:nowrap}
 .subtabs button.on{color:var(--tink);border-color:var(--tink);font-weight:700}
 /* 작성 행 */
@@ -898,13 +907,15 @@ const MapAdapter = {
   onMove(cb){ this.impl.onMove(cb); },
   center(){ return this.impl.center(); }
 };
-function pinHtml({label, sub, avatar, cls}){
+function pinHtml({label, sub, avatar, cls, wave}){
   const ini = (label||'?').slice(0,1);
-  return `<div class="upin ${cls||''}"><div class="lbl">${esc(label)}</div><div class="face">${cls==='meet'?'모임':(avatar?`<img src="${esc(avatar)}" alt="">`:esc(ini))}</div><div class="tail"></div></div>`;
+  const face = `<div class="face">${cls==='meet'?'모임':(avatar?`<img src="${esc(avatar)}" alt="">`:esc(ini))}</div>`;
+  return `<div class="upin ${cls||''}"><div class="lbl">${esc(label)}</div>${wave?`<div class="facewrap">${face}<div class="hand" title="뜨개 친구를 찾고 있어요">🙋</div></div>`:face}<div class="tail"></div></div>`;
 }
+function isWaving(p){ return !!(p && p.wave_until && new Date(p.wave_until) > new Date()); }
 const LMap = {
   map:null, layer:null,
-  async init(el, c){ this.map=L.map(el,{zoomControl:false,attributionControl:true}).setView([c.lat,c.lng],14); L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(this.map); this.layer=L.layerGroup().addTo(this.map); },
+  async init(el, c){ this.map=L.map(el,{zoomControl:false,attributionControl:true,minZoom:9,maxZoom:18}).setView([c.lat,c.lng],14); L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(this.map); this.layer=L.layerGroup().addTo(this.map); },
   setCenter(c){ this.map.setView([c.lat,c.lng],14); },
   clear(){ this.layer.clearLayers(); },
   marker(o){ const m=L.marker([o.lat,o.lng],{icon:L.divIcon({html:pinHtml(o).replace('class="upin','style="position:static;transform:none" class="upin'),iconSize:[0,0],iconAnchor:[0,0]})}); if(o.onClick)m.on('click',o.onClick); m.addTo(this.layer); },
@@ -923,7 +934,7 @@ function makeHtmlPin(){
 }
 const GMap = {
   map:null, markers:[],
-  async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,disableDefaultUI:true,clickableIcons:false,
+  async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,minZoom:9,maxZoom:18,gestureHandling:'greedy',disableDefaultUI:true,clickableIcons:false,
     // 업체·명소 아이콘 숨김 + 지도 톤 다운 → 사용자 핀만 또렷하게
     styles:[
       {featureType:'poi',stylers:[{visibility:'off'}]},
@@ -945,7 +956,7 @@ const GMap = {
 // ============ 지도 홈 ============
 // 지도 필터 (단일 선택): 전체 · 모임 · 비슷한 수준 · 시간 맞음 · 친구 (+ 초보 환영: 내 단계가 1 이하일 때만)
 function filterList(){
-  return [['all','전체'],['meet','모임'],['sim','비슷한 수준'],['time','시간 맞음'],['friends','친구']];
+  return [['all','전체'],['wave','🙋 손 든 이웃'],['meet','모임'],['sim','비슷한 수준'],['time','시간 맞음'],['friends','친구']];
 }
 function renderFilters(){ $('#filters').innerHTML = filterList().map(([k,l])=>`<button data-k="${k}" class="${filter.mode===k?'on':''}">${l}</button>`).join(''); }
 $('#filters').onclick = e => {
@@ -972,22 +983,23 @@ async function fetchPins(){
   ]);
   if(error) return toast('근처 조회 실패: '+error.message);
   MapAdapter.clear();
-  if(myProfile?._c) MapAdapter.marker({...myProfile._c,label:'나',avatar:myProfile.avatar_url,cls:'me'});
+  if(myProfile?._c) MapAdapter.marker({...myProfile._c,label:'나',avatar:myProfile.avatar_url,cls:'me',wave:isWaving(myProfile)});
   let shown = people||[];
   if(filter.mode==='meet') shown = [];
   if(filter.mode==='sim') shown = shown.filter(p=>{ const d=simDiff(p); return d!==null && Math.abs(d)<=1; });
   if(filter.mode==='time'){ const mine=new Set(myProfile?.available||[]); shown = shown.filter(p=>(p.available||[]).some(a=>mine.has(a))); }
   if(filter.mode==='friends'){ const ids=new Set(await friendIds()); shown = shown.filter(p=>ids.has(p.id)); }
-  shown.forEach(p=>MapAdapter.marker({lat:p.lat,lng:p.lng,label:p.nickname,avatar:p.avatar_url,cls:p.craft==='knit'?'knit':'',onClick:()=>showPinCard(p)}));
+  if(filter.mode==='wave') shown = shown.filter(p=>p.waving);
+  shown.forEach(p=>MapAdapter.marker({lat:p.lat,lng:p.lng,label:p.nickname,avatar:p.avatar_url,cls:p.craft==='knit'?'knit':'',wave:!!p.waving,onClick:()=>showPinCard(p)}));
   if(filter.mode==='all' || filter.mode==='meet') (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:m.title,cls:'meet',onClick:()=>openMeetup(m.id)}); });
   let em=$('#mapview .mapempty'); if(!em){ em=document.createElement('div'); em.className='mapempty'; $('#mapview').appendChild(em); }
   const emptyNow = filter.mode!=='all' && !shown.length && !(filter.mode==='meet' && (meetups||[]).length);
-  em.hidden=!emptyNow; if(emptyNow) em.textContent={meet:'근처에 예정된 모임이 없어요', sim:'비슷한 수준의 이웃이 이 범위엔 없어요', time:'시간이 맞는 이웃이 이 범위엔 없어요', friends:'이 범위엔 친구가 없어요'}[filter.mode]||'';
+  em.hidden=!emptyNow; if(emptyNow) em.textContent={meet:'근처에 예정된 모임이 없어요', sim:'비슷한 수준의 이웃이 이 범위엔 없어요', time:'시간이 맞는 이웃이 이 범위엔 없어요', friends:'이 범위엔 친구가 없어요', wave:'이 범위엔 손 든 이웃이 아직 없어요 🙋'}[filter.mode]||'';
   pins = people||[];
 }
 function showPinCard(p){
   $('#pincard').hidden=false;
-  $('#pincard').innerHTML = `<div class="card" onclick="openProfile('${p.id}')"><button class="pcx" onclick="event.stopPropagation();$('#pincard').hidden=true">✕</button><div class="row">${avatar(p)}<div style="flex:1;min-width:0"><b>${esc(p.nickname)}</b> <span class="muted">${esc(p.dong_name||'')} · ${Math.round(p.distance_m)}m</span><div class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CRAFT[p.craft]||''} · 지금 뜨는 것: ${esc(p.now_making||'-')}</div><div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">${lvChips(p)} ${simBadge(p)}</div></div><span style="color:var(--ink3)">›</span></div></div>`;
+  $('#pincard').innerHTML = `<div class="card" onclick="openProfile('${p.id}')"><button class="pcx" onclick="event.stopPropagation();$('#pincard').hidden=true">✕</button><div class="row">${avatar(p)}<div style="flex:1;min-width:0"><b>${esc(p.nickname)}</b> <span class="muted">${esc(p.dong_name||'')} · ${Math.round(p.distance_m)}m</span><div class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CRAFT[p.craft]||''} · 지금 뜨는 것: ${esc(p.now_making||'-')}</div><div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">${lvChips(p)} ${simBadge(p)}</div>${p.waving?`<div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="wavebadge">🙋 뜨개 친구를 찾고 있어요</span><button class="btn primary sm" onclick="event.stopPropagation();requestFriend('${p.id}')">친구 신청</button></div>`:''}</div><span style="color:var(--ink3)">›</span></div></div>`;
 }
 function centerMe(){ if(myProfile?._c) MapAdapter.setCenter(myProfile._c); else toast('프로필에서 동네를 먼저 정해 주세요'); }
 
@@ -1016,7 +1028,7 @@ async function openProfile(id){
   const meta = [simBadge(p), p.experience?`<span class="chip">${EXP[p.experience]}</span>`:'', p.mbti?`<span class="chip">${esc(p.mbti)}</span>`:'', p.available?.length?`<span class="chip">${p.available.map(a=>AVAIL[a]).join(' · ')}</span>`:''].filter(Boolean).join('');
   $('#profTitle').textContent = p.nickname;
   $('#profBody').innerHTML = `
-    <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
+    <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}</h2><div class="phandle">${esc(handle)}</div>${isWaving(p)?'<div style="margin-top:8px"><span class="wavebadge">🙋 뜨개 친구를 찾고 있어요 · 편하게 친구 신청해 주세요</span></div>':''}</div>${avatar(p,true)}</div>
     ${bio?`<div class="pbio">${esc(bio)}</div>`:''}
     ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:#fbf6e6;color:#8a6d1a">🏅 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
@@ -1703,6 +1715,15 @@ $('#track').addEventListener('scroll', ()=>{ clearTimeout($('#track')._t); $('#t
 
 // ============ 마이 ============
 let myTab='posts';
+async function toggleWave(){
+  const on = !isWaving(myProfile);
+  const wave_until = on ? new Date(Date.now()+14*864e5).toISOString() : null;
+  const {error} = await sb.from('profiles').update({wave_until}).eq('id', me.id);
+  if(error) return toast('저장 실패: '+error.message);
+  myProfile.wave_until = wave_until; renderMy();
+  toast(on ? '지도에서 손을 들었어요 🙋 14일 동안 이웃에게 표시돼요' : '손을 내렸어요');
+  if(MapAdapter.ready) loadPins();
+}
 async function renderMy(){
   const p=myProfile||{};
   const handle=[p.dong_name||'동네 미설정', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
@@ -1712,7 +1733,7 @@ async function renderMy(){
     <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname||'')}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
     ${bio?`<div class="pbio">${esc(bio)}</div>`:'<div class="pbio muted">소개를 적어 보세요</div>'}
     <div class="pfriends" id="pfriends" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>
-    <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o" onclick="openSkills()">내 뜨개 단계</button><button class="btn o ic" title="공유" onclick="shareProfile()">${ICON.share.replace('<svg','<svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')}</button></div>
+    <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o" onclick="openSkills()">내 뜨개 단계</button><button class="btn o wave ${isWaving(p)?'on':''}" onclick="toggleWave()" title="지도 핀에 손을 들어 뜨개 친구를 찾고 있다고 알려요">🙋 ${isWaving(p)?'손 든 중':'손 들기'}</button><button class="btn o ic" title="공유" onclick="shareProfile()">${ICON.share.replace('<svg','<svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"')}</button></div>
     <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
