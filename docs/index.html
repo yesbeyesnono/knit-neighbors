@@ -386,6 +386,31 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 /* 커뮤니티: 제목은 스크롤로 올라가고 카테고리 탭이 상단에 고정(스크롤·키보드 후 탭이 제목 밑에 숨던 문제) */
 #v-comm .top{position:static}
 #v-comm .subtabs{position:sticky;top:0;z-index:6;flex:none}
+/* 아이콘 시스템: 기본은 이모지, body.icons 이면 docs/icons/<key>.svg 이미지로 교체 (ICON_IMAGES 상수) */
+.ico{font-style:normal;display:inline-block;line-height:1}
+.ico>b{font-weight:inherit}
+body.icons .ico{width:1.15em;height:1.15em;vertical-align:-0.2em;background:center/contain no-repeat}
+body.icons .ico>b{display:none}
+body.icons .ico[data-ico="wave"]{background-image:url(icons/wave.svg)}
+body.icons .ico[data-ico="location"]{background-image:url(icons/location.svg)}
+body.icons .ico[data-ico="yarn"]{background-image:url(icons/yarn.svg)}
+body.icons .ico[data-ico="cert"]{background-image:url(icons/cert.svg)}
+body.icons .ico[data-ico="check"]{background-image:url(icons/check.svg)}
+body.icons .ico[data-ico="close"]{background-image:url(icons/close.svg)}
+body.icons .ico[data-ico="handshake"]{background-image:url(icons/handshake.svg)}
+body.icons .ico[data-ico="report"]{background-image:url(icons/report.svg)}
+body.icons .ico[data-ico="camera"]{background-image:url(icons/camera.svg)}
+body.icons .ico[data-ico="heart"]{background-image:url(icons/heart.svg)}
+body.icons .ico[data-ico="reply"]{background-image:url(icons/reply.svg)}
+body.icons .ico[data-ico="party"]{background-image:url(icons/party.svg)}
+body.icons .ico[data-ico="review"]{background-image:url(icons/review.svg)}
+body.icons .ico[data-ico="group"]{background-image:url(icons/group.svg)}
+body.icons .ico[data-ico="learn"]{background-image:url(icons/learn.svg)}
+body.icons .ico[data-ico="teach"]{background-image:url(icons/teach.svg)}
+body.icons .ico[data-ico="at"]{background-image:url(icons/at.svg)}
+body.icons .ico[data-ico="signal"]{background-image:url(icons/signal.svg)}
+body.icons .ico[data-ico="tap"]{background-image:url(icons/tap.svg)}
+body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 /* @멘션 */
 .rrow,#v-post .compose{position:relative}
 .mpop{position:absolute;left:0;right:0;bottom:100%;margin-bottom:6px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.14);max-height:230px;overflow-y:auto;z-index:30;padding:4px 0}
@@ -588,7 +613,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 
   <!-- 채팅방 -->
   <section class="view" id="v-room">
-    <div class="top"><button class="back" onclick="leaveRoom()">‹</button><h1 id="roomTitle"></h1><button class="btn sm o" id="meetBtn" onclick="openMeetupForm()" hidden>📍 모임</button></div>
+    <div class="top"><button class="back" onclick="leaveRoom()">‹</button><h1 id="roomTitle"></h1><button class="btn sm o" id="meetBtn" onclick="openMeetupForm()" hidden><i class="ico" data-ico="location"><b>📍</b></i> 모임</button></div>
     <div class="msgs" id="msgs"></div>
     <div class="compose"><input id="msgIn" placeholder="메시지" onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)sendMsg()"><button class="btn" onclick="sendMsg()">보내기</button></div>
   </section>
@@ -601,12 +626,12 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 
   <!-- 새 글 / 모임 만들기 (전체 화면) -->
   <section class="view" id="v-compose">
-    <div class="top"><button class="back" onclick="closeCompose()">✕</button><h1 id="composeTitle">새 글</h1><button class="btn" id="sPost" onclick="submitCompose()">게시</button></div>
+    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1 id="composeTitle">새 글</h1><button class="btn" id="sPost" onclick="submitCompose()">게시</button></div>
     <div class="body">
       <div class="kind" id="composeKind"><button data-k="post" class="on">글</button><button data-k="work">작품 인증</button><button data-k="meetup">모임</button></div>
       <div class="row2"><div id="sAva"></div><div style="flex:1;min-width:0"><div class="cname" id="sName"></div>
         <div class="wfields" id="wfields" hidden>
-          <div class="mtitle">🏅 작품 인증</div>
+          <div class="mtitle"><i class="ico" data-ico="cert"><b>🏅</b></i> 작품 인증</div>
           <div class="hint" style="font-size:.8rem;color:var(--ink2)">완성한 작품 사진과 사용한 기법을 올리면 내 기법 체크에 <b>인증</b> 표시가 붙고, 모임을 열 수 있어요.</div>
           <label class="f">작품 이름<input id="wTitle" maxlength="60" placeholder="예: 그래니 스퀘어 가디건"></label>
           <div class="f">사용한 기법 <span class="picked" id="wPicked">0개 선택</span>
@@ -619,16 +644,16 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
           </div>
           <label class="f">실 정보 <span class="muted">(선택)</span><input id="wYarn" maxlength="80" placeholder="예: 하마나카 아메리, 5호 코바늘"></label>
           <label class="f">한 줄 소감 <span class="muted">(선택)</span><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px;background:#fff"></textarea></label>
-          <div class="hint" style="font-size:.8rem;color:var(--ink2)">사진은 아래 📷 로 1~4장 (필수)</div>
+          <div class="hint" style="font-size:.8rem;color:var(--ink2)">사진은 아래 <i class="ico" data-ico="camera"><b>📷</b></i> 로 1~4장 (필수)</div>
         </div>
-        <div class="rvbanner" id="rvbanner" hidden><span class="muted" style="font-size:12px">🧶 모임 후기</span><b id="rvTitle"></b><span class="muted" id="rvSub"></span></div>
+        <div class="rvbanner" id="rvbanner" hidden><span class="muted" style="font-size:12px"><i class="ico" data-ico="yarn"><b>🧶</b></i> 모임 후기</span><b id="rvTitle"></b><span class="muted" id="rvSub"></span></div>
         <div class="gate" id="mgate" hidden>
-          <b>🏅 모임을 열려면 작품 인증이 필요해요</b>
+          <b><i class="ico" data-ico="cert"><b>🏅</b></i> 모임을 열려면 작품 인증이 필요해요</b>
           <div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div>
           <button class="btn" type="button" onclick="setComposeKind('work')">작품 인증하러 가기</button>
         </div>
         <div class="mfields" id="mfields" hidden>
-          <div class="mtitle">📍 모임 정보</div>
+          <div class="mtitle"><i class="ico" data-ico="location"><b>📍</b></i> 모임 정보</div>
           <label class="f">모임 이름<input id="mTitle" maxlength="60" placeholder="예: 토요 뜨개 모임"></label>
           <div class="f">모임 유형<div class="seg" id="mKind"></div></div>
           <label class="f" id="mTechWrap" hidden>배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label>
@@ -683,13 +708,13 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
   <div class="slides" id="slides">
     <div class="track" id="track">
       <div class="slide">
-        <div class="big">🧶</div>
+        <div class="big"><i class="ico" data-ico="yarn"><b>🧶</b></i></div>
         <h2>내 뜨개는 어디쯤일까요?</h2>
         <p>knitup이 정리한 뜨개 기법 60가지를 5단계로 나눴어요. 할 수 있는 기법을 누르기만 하면 지금 내 단계가 보여요.</p>
         <div class="ex">코바늘 30가지 · 대바늘 30가지<br><span class="muted">둘 다 하시면 두 단계가 따로 표시돼요</span></div>
       </div>
       <div class="slide">
-        <div class="big">📶</div>
+        <div class="big"><i class="ico" data-ico="signal"><b>📶</b></i></div>
         <h2>다섯 단계예요</h2>
         <div class="ladder">
           <div><b>1</b>입문<span>첫 수업에서 배우는 기초</span></div>
@@ -701,19 +726,19 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
         <p>목도리를 뜰 수 있으면 2단계, 모자와 가방을 완성해 봤다면 3단계쯤이에요.</p>
       </div>
       <div class="slide">
-        <div class="big">👆</div>
+        <div class="big"><i class="ico" data-ico="tap"><b>👆</b></i></div>
         <h2>할 수 있는 것만 누르세요</h2>
         <p>위 단계 기법을 누르면 그 기법에 필요한 아래 기법들은 자동으로 함께 체크돼요.</p>
         <div class="ex">예) <b>긴뜨기</b>를 누르면<br>→ 사슬뜨기 · 짧은뜨기 · 기둥코·왕복뜨기가 같이 체크</div>
       </div>
       <div class="slide">
-        <div class="big">📏</div>
+        <div class="big"><i class="ico" data-ico="ruler"><b>📏</b></i></div>
         <h2>단계는 이렇게 정해져요</h2>
         <p>한 단계 기법의 <b>절반 이상</b>을 할 수 있으면 그 단계예요. 전부 알아야 하는 게 아니에요.</p>
         <div class="ex">3단계 기법 7개 중 4개 체크 → <b>3단계 중급</b><br>3단계 기법 7개 중 2개 체크 → 아직 2단계</div>
       </div>
       <div class="slide">
-        <div class="big">🤝</div>
+        <div class="big"><i class="ico" data-ico="handshake"><b>🤝</b></i></div>
         <h2>비슷한 수준의 이웃을 만나요</h2>
         <p>내 단계는 지도 핀과 프로필에 표시돼요. 상대와 비교해서 이렇게 알려드려요.</p>
         <div class="simrow"><span class="chip m">비슷해요 · 1단계 차이 이내</span><span class="chip y">배울 수 있어요 · 상대가 2단계 이상 위</span><span class="chip">알려줄 수 있어요 · 내가 2단계 이상 위</span></div>
@@ -737,6 +762,12 @@ const RADIUS_M = 5000;
 if(typeof supabase==='undefined'){ document.body.innerHTML='<div style="padding:40px 24px;text-align:center;font-family:sans-serif"><b>연결에 문제가 있어요</b><br><br>네트워크를 확인하고 다시 열어 주세요.<br><span style="color:#999;font-size:13px">(필수 스크립트를 불러오지 못했어요)</span></div>'; throw new Error('supabase-js not loaded'); }
 const CAP = window.Capacitor;
 const isNative = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
+// ===== 아이콘 =====
+// 키 → 이모지(기본 표시). 디자인 이미지가 docs/icons/<key>.svg 로 들어오면 ICON_IMAGES=true 로 바꿔 일괄 교체
+const ICON_IMAGES = false;
+const EMOJI = { wave:'🙋', location:'📍', yarn:'🧶', cert:'🏅', check:'✓', close:'✕', handshake:'🤝', report:'🚩', camera:'📷', heart:'♥', reply:'💬', party:'🎉', review:'📝', group:'👥', learn:'📚', teach:'🧑‍🏫', at:'@', signal:'📶', tap:'👆', ruler:'📏' };
+function ico(k){ return `<i class="ico" data-ico="${k}"><b>${EMOJI[k]||''}</b></i>`; }
+if(ICON_IMAGES) document.body.classList.add('icons');
 const NATIVE_REDIRECT = 'knitneighbors://auth';
 const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { flowType: isNative ? 'pkce' : 'implicit', detectSessionInUrl: !isNative } });
 // 네이티브 앱: 시스템 브라우저(Custom Tab / SFSafariViewController)로 로그인 → knitneighbors://auth?code=… 로 복귀
@@ -895,7 +926,7 @@ function detectLocation(){
     try{
       const d = await reverseGeocode(lat, lng);
       loc = { lat, lng, dong_name:d.dong_name, dong_code:d.dong_code, verified:true };
-      setLocStatus(`📍 <b>${esc(d.dong_name)}</b> <span class="muted">${esc(d.dong_code.split('|').slice(0,-1).join(' '))}</span> ✓`);
+      setLocStatus(`${ico('location')} <b>${esc(d.dong_name)}</b> <span class="muted">${esc(d.dong_code.split('|').slice(0,-1).join(' '))}</span> ${ico('check')}`);
     }catch(e){ loc = { lat, lng, dong_name:null, dong_code:null, verified:true }; setLocStatus('위치는 잡았지만 동네 이름을 찾지 못했어요. 직접 입력해 주세요.'); }
   }, err=>{
     setLocStatus(err.code===1 ? '위치 권한이 거부됐어요. 브라우저 설정에서 허용하거나 직접 입력해 주세요.' : '위치를 가져오지 못했어요. 다시 확인하거나 직접 입력해 주세요.');
@@ -912,7 +943,7 @@ function openOnboard(edit){
   $('#obTitle').textContent = edit?'프로필 수정':'프로필 만들기'; $('#obBack').hidden=!edit;
   $('#f_nick').value=p.nickname||'';
   loc = { lat:p._c?.lat||null, lng:p._c?.lng||null, dong_name:p.dong_name||null, dong_code:p.dong_code||null, verified:!!p.dong_verified_at };
-  if(loc.dong_name) setLocStatus(`📍 <b>${esc(loc.dong_name)}</b> <span class="muted">${loc.verified?'확인됨 ✓':'직접 입력'}</span>`); else detectLocation();
+  if(loc.dong_name) setLocStatus(`${ico('location')} <b>${esc(loc.dong_name)}</b> <span class="muted">${loc.verified?'확인됨 '+ico('check'):'직접 입력'}</span>`); else detectLocation();
   segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
   $('#f_bio').value=p.bio||''; $('#f_mbti').value=p.mbti||'';
   $('#obSave').textContent = edit ? '저장' : '저장하고 다음으로'; $('#agreeWrap').hidden = edit; if(!edit) $('#f_agree').checked = !!p.terms_agreed_at;
@@ -967,7 +998,7 @@ const MapAdapter = {
 function pinHtml({label, sub, avatar, cls, wave}){
   const ini = (label||'?').slice(0,1);
   const face = `<div class="face">${cls==='meet'?'모임':(avatar?`<img src="${esc(avatar)}" alt="">`:esc(ini))}</div>`;
-  return `<div class="upin ${cls||''}"><div class="lbl">${esc(label)}</div>${wave?`<div class="facewrap">${face}<div class="hand" title="뜨개 친구를 찾고 있어요">🙋</div></div>`:face}<div class="tail"></div></div>`;
+  return `<div class="upin ${cls||''}"><div class="lbl">${esc(label)}</div>${wave?`<div class="facewrap">${face}<div class="hand" title="뜨개 친구를 찾고 있어요">${ico('wave')}</div></div>`:face}<div class="tail"></div></div>`;
 }
 function isWaving(p){ return !!(p && p.wave_until && new Date(p.wave_until) > new Date()); }
 const LMap = {
@@ -1013,7 +1044,7 @@ const GMap = {
 // ============ 지도 홈 ============
 // 지도 필터 (단일 선택): 전체 · 모임 · 비슷한 수준 · 시간 맞음 · 친구 (+ 초보 환영: 내 단계가 1 이하일 때만)
 function filterList(){
-  return [['all','전체'],['wave','🙋 친구 찾는 이웃'],['meet','모임'],['sim','비슷한 수준'],['time','시간 맞음'],['friends','친구']];
+  return [['all','전체'],['wave',ico('wave')+' 친구 찾는 이웃'],['meet','모임'],['sim','비슷한 수준'],['time','시간 맞음'],['friends','친구']];
 }
 function renderFilters(){ $('#filters').innerHTML = filterList().map(([k,l])=>`<button data-k="${k}" class="${filter.mode===k?'on':''}">${l}</button>`).join(''); }
 $('#filters').onclick = e => {
@@ -1057,7 +1088,7 @@ async function fetchPins(){
 }
 function showPinCard(p){
   $('#pincard').hidden=false;
-  $('#pincard').innerHTML = `<div class="card" onclick="openProfile('${p.id}')"><button class="pcx" onclick="event.stopPropagation();$('#pincard').hidden=true">✕</button><div class="row">${avatar(p)}<div style="flex:1;min-width:0"><b>${esc(p.nickname)}</b> <span class="muted">${esc(p.dong_name||'')} · ${Math.round(p.distance_m)}m</span><div class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CRAFT[p.craft]||''} · 지금 뜨는 것: ${esc(p.now_making||'-')}</div><div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">${lvChips(p)} ${simBadge(p)}</div>${p.waving?`<div style="margin-top:8px"><span class="wavebadge">🙋 뜨개 친구를 찾고 있어요</span><div class="muted" style="margin:6px 0 8px">먼저 인사해 주면 반가워해요</div><button class="btn primary sm" onclick="event.stopPropagation();requestFriend('${p.id}',true)">인사하며 친구 신청</button></div>`:''}</div><span style="color:var(--ink3)">›</span></div></div>`;
+  $('#pincard').innerHTML = `<div class="card" onclick="openProfile('${p.id}')"><button class="pcx" onclick="event.stopPropagation();$('#pincard').hidden=true">${ico('close')}</button><div class="row">${avatar(p)}<div style="flex:1;min-width:0"><b>${esc(p.nickname)}</b> <span class="muted">${esc(p.dong_name||'')} · ${Math.round(p.distance_m)}m</span><div class="muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CRAFT[p.craft]||''} · 지금 뜨는 것: ${esc(p.now_making||'-')}</div><div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">${lvChips(p)} ${simBadge(p)}</div>${p.waving?`<div style="margin-top:8px"><span class="wavebadge">${ico('wave')} 뜨개 친구를 찾고 있어요</span><div class="muted" style="margin:6px 0 8px">먼저 인사해 주면 반가워해요</div><button class="btn primary sm" onclick="event.stopPropagation();requestFriend('${p.id}',true)">인사하며 친구 신청</button></div>`:''}</div><span style="color:var(--ink3)">›</span></div></div>`;
 }
 function centerMe(){ if(myProfile?._c) MapAdapter.setCenter(myProfile._c); else toast('프로필에서 동네를 먼저 정해 주세요'); }
 
@@ -1086,9 +1117,9 @@ async function openProfile(id){
   const meta = [simBadge(p), p.experience?`<span class="chip">${EXP[p.experience]}</span>`:'', p.mbti?`<span class="chip">${esc(p.mbti)}</span>`:'', p.available?.length?`<span class="chip">${p.available.map(a=>AVAIL[a]).join(' · ')}</span>`:''].filter(Boolean).join('');
   $('#profTitle').textContent = p.nickname; if(!openProfile.scrollBound){ openProfile.scrollBound=true; $('#v-profile').addEventListener('scroll', e=>$('#profTitle').classList.toggle('show', e.target.scrollTop>70)); } $('#profTitle').classList.remove('show');
   $('#profBody').innerHTML = `
-    <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}</h2><div class="phandle">${esc(handle)}</div>${isWaving(p)?'<div style="margin-top:8px"><span class="wavebadge">🙋 뜨개 친구를 찾고 있어요 · 먼저 인사해 주면 반가워해요</span></div>':''}</div>${avatar(p,true)}</div>
+    <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}</h2><div class="phandle">${esc(handle)}</div>${isWaving(p)?'<div style="margin-top:8px"><span class="wavebadge">'+ico('wave')+' 뜨개 친구를 찾고 있어요 · 먼저 인사해 주면 반가워해요</span></div>':''}</div>${avatar(p,true)}</div>
     ${bio?`<div class="pbio">${esc(bio)}</div>`:''}
-    ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:#fbf6e6;color:#8a6d1a">🏅 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
+    ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:#fbf6e6;color:#8a6d1a">${ico('cert')} 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}</div>
     <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="replies" class="${profTab==='replies'?'on':''}">답글</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button></div>
@@ -1098,7 +1129,7 @@ async function openProfile(id){
   loadUserFeed(id, profTab, $('#profFeed'));
 }
 function closeProfile(){ const b=profBack||'map'; profBack=null; if(b==='post' && curPost) return openPost(curPost.id); if(['map','comm','chats','my','friends'].includes(b)) go(b); else go('map'); }
-function profileMenu(){ const id=profId; openSheet(`<button class="btn o" onclick="closeSheet();reportUser('${id}')">🚩 신고</button><button class="btn r" onclick="closeSheet();blockUser('${id}')">차단</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
+function profileMenu(){ const id=profId; openSheet(`<button class="btn o" onclick="closeSheet();reportUser('${id}')">${ico('report')} 신고</button><button class="btn r" onclick="closeSheet();blockUser('${id}')">차단</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
 async function shareUser(){ const p=profData||{}; const text=`뜨개동네 · ${p.nickname} (${p.dong_name||''}) ${lvShort(p)}`; try{ if(navigator.share) await navigator.share({title:'뜨개동네',text}); else { await navigator.clipboard.writeText(text); toast('프로필 정보를 복사했어요'); } }catch(e){} }
 // 특정 사용자 글 목록 (마이·프로필 공용)
 async function loadUserFeed(uid, tab, el){
@@ -1160,11 +1191,11 @@ async function renderFriends(){
   const inbox = rows.filter(r=>r.status==='pending'&&r.addressee_id===me.id);
   const sent = rows.filter(r=>r.status==='pending'&&r.requester_id===me.id);
   const friends = rows.filter(r=>r.status==='accepted');
-  const row = (p, act, extra, onclick)=>{ p=p||{nickname:'(탈퇴한 사용자)'}; const sub=[p.dong_name?`<span>${esc(p.dong_name)}</span>`:'', lvChips(p)].filter(Boolean).join(''); return `<div class="frow" onclick="${onclick}">${avatar(p)}<div class="tx"><b>${esc(p.nickname)}${isWaving(p)?' 🙋':''}</b><div class="sub">${sub||'<span>동네 미설정</span>'}</div>${extra||''}</div>${act?`<div class="act" onclick="event.stopPropagation()">${act}</div>`:''}</div>`; };
+  const row = (p, act, extra, onclick)=>{ p=p||{nickname:'(탈퇴한 사용자)'}; const sub=[p.dong_name?`<span>${esc(p.dong_name)}</span>`:'', lvChips(p)].filter(Boolean).join(''); return `<div class="frow" onclick="${onclick}">${avatar(p)}<div class="tx"><b>${esc(p.nickname)}${isWaving(p)?' '+ico('wave'):''}</b><div class="sub">${sub||'<span>동네 미설정</span>'}</div>${extra||''}</div>${act?`<div class="act" onclick="event.stopPropagation()">${act}</div>`:''}</div>`; };
   let body;
   if(friendTab==='inbox') body = inbox.length ? inbox.map(r=>row(r.requester, `<button class="btn sm" onclick="respond('${r.requester_id}','accepted')">수락</button><button class="btn sm o" onclick="respond('${r.requester_id}','declined')">거절</button>`, r.message?`<div class="msg">${esc(r.message)}</div>`:'', `openProfile('${r.requester_id}')`)).join('') : '<div class="empty">받은 신청이 없어요</div>';
   else if(friendTab==='sent') body = sent.length ? sent.map(r=>row(r.addressee, `<button class="btn sm o" disabled>대기 중</button>`, '', `openProfile('${r.addressee_id}')`)).join('') : '<div class="empty">보낸 신청이 없어요</div>';
-  else body = friends.length ? friends.map(r=>{ const p=(r.requester_id===me.id?r.addressee:r.requester)||{}; const id=r.requester_id===me.id?r.addressee_id:r.requester_id; return row(p, `<button class="btn sm o" onclick="openDirectRoom('${id}')">메시지</button>`, '', `openProfile('${id}')`); }).join('') : `<div class="empty">아직 친구가 없어요<br><span class="muted">지도에서 🙋 손 든 이웃에게 먼저 인사해 보세요</span><br><br><button class="btn sm" onclick="go('map')">지도에서 이웃 찾기</button></div>`;
+  else body = friends.length ? friends.map(r=>{ const p=(r.requester_id===me.id?r.addressee:r.requester)||{}; const id=r.requester_id===me.id?r.addressee_id:r.requester_id; return row(p, `<button class="btn sm o" onclick="openDirectRoom('${id}')">메시지</button>`, '', `openProfile('${id}')`); }).join('') : `<div class="empty">아직 친구가 없어요<br><span class="muted">지도에서 ${ico('wave')} 손 든 이웃에게 먼저 인사해 보세요</span><br><br><button class="btn sm" onclick="go('map')">지도에서 이웃 찾기</button></div>`;
   $('#friendsBody').innerHTML = `<div class="fseg"><button class="${friendTab==='friends'?'on':''}" onclick="friendTab='friends';renderFriends()">친구 ${friends.length}</button><button class="${friendTab==='inbox'?'on':''}" onclick="friendTab='inbox';renderFriends()">받은 신청${inbox.length?` <span class="chip r">${inbox.length}</span>`:''}</button><button class="${friendTab==='sent'?'on':''}" onclick="friendTab='sent';renderFriends()">보낸 신청${sent.length?' '+sent.length:''}</button></div><div class="list">${body}</div>`;
 }
 function watchFriends(){
@@ -1183,7 +1214,7 @@ function watchFriends(){
 async function refreshBadge(){ if(!me) return; const {count}=await sb.from('notifications').select('*',{count:'exact',head:true}).eq('recipient_id',me.id).is('read_at',null); ['badgeFriends','badgeAct'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.hidden=!count; el.textContent=count||''; } }); }
 // ===== 활동(알림) =====
 const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요' };
-const NTF_ICON = { mention:'@', reply:'💬', like:'♥', friend_request:'🤝', friend_accept:'🎉', meetup_join:'🧶', review:'📝' };
+const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review') };
 let actRows = [];
 function openActivity(){ show('activity'); renderActivity(); }
 async function renderActivity(){
@@ -1210,7 +1241,7 @@ async function fetchRooms(){
 }
 async function renderChats(){
   const rooms = await fetchRooms();
-  $('#chatsBody').innerHTML = rooms.length ? `<div class="list">${rooms.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">👥</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${esc(r.last?.body||(r.last?.photo_url?'📷 사진':r.last?.place?'📍 장소':'대화를 시작해 보세요'))}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>';
+  $('#chatsBody').innerHTML = rooms.length ? `<div class="list">${rooms.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${esc(r.last?.body||(r.last?.photo_url?'📷 사진':r.last?.place?'📍 장소':'대화를 시작해 보세요'))}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>';
 }
 async function openDirectRoom(otherId){
   const rooms = await fetchRooms();
@@ -1466,7 +1497,7 @@ async function attachWorks(rows){
 }
 function workCard(w){
   if(!w) return '';
-  return `<div class="wcard"><div class="wh">🏅 작품 인증</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}<div class="tchips">${(w.techniques||[]).map(id=>`<span>${esc(techName(id))}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="custom">${esc(t)}</span>`).join('')}</div></div>`;
+  return `<div class="wcard"><div class="wh">${ico('cert')} 작품 인증</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}<div class="tchips">${(w.techniques||[]).map(id=>`<span>${esc(techName(id))}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="custom">${esc(t)}</span>`).join('')}</div></div>`;
 }
 async function attachMeetups(rows){
   const ids=[...new Set((rows||[]).map(r=>r.meetup_id).filter(Boolean))]; if(!ids.length) return;
@@ -1557,7 +1588,7 @@ function postCard(p, opts={}){
 }
 function postMenu(id, authorId){
   if(authorId===me.id) return openSheet(`<button class="btn r" onclick="closeSheet();deletePost('${id}')">삭제</button><button class="btn o" onclick="closeSheet()">취소</button>`);
-  openSheet(`<button class="btn o" onclick="closeSheet();reportPost('${id}')">🚩 이 글 신고</button><button class="btn o" onclick="closeSheet();reportUser('${authorId}')">🚩 작성자 신고</button><button class="btn r" onclick="closeSheet();blockUser('${authorId}')">작성자 차단</button><button class="btn o" onclick="closeSheet()">취소</button>`);
+  openSheet(`<button class="btn o" onclick="closeSheet();reportPost('${id}')">${ico('report')} 이 글 신고</button><button class="btn o" onclick="closeSheet();reportUser('${authorId}')">${ico('report')} 작성자 신고</button><button class="btn r" onclick="closeSheet();blockUser('${authorId}')">작성자 차단</button><button class="btn o" onclick="closeSheet()">취소</button>`);
 }
 function reportPost(id){
   openSheet(`<b>글 신고</b><div class="muted" style="font-size:.85rem">신고가 3건 쌓이면 글이 자동으로 숨겨지고, 운영자가 24시간 안에 확인해요.</div><label class="f">사유<select id="prReason"><option value="spam">스팸·광고</option><option value="harassment">괴롭힘·혐오</option><option value="inappropriate">부적절한 내용(성적·폭력)</option><option value="fake">허위·사기</option><option value="other">기타</option></select></label><textarea id="prDetail" maxlength="500" placeholder="자세한 내용 (선택)"></textarea><button class="btn r" onclick="sendPostReport('${id}')">신고하기</button>`);
@@ -1596,11 +1627,11 @@ async function pickPhotos(files, which){
 }
 function renderPv(which){
   const arr = which==='s' ? sPhotos : cPhotos, el = which==='s' ? $('#sPv') : $('#cPv'); if(!el) return;
-  el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">✕</b></div>`).join('');
+  el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">${ico('close')}</b></div>`).join('');
 }
 // ＋ 버튼: 어디서든 새 글 작성 시트
 let composeBack=null, composeKind='post', wTechSel=new Set(), wCraft='crochet', wCustom=[];
-function renderWCustom(){ const el=$('#wCustomChips'); if(!el) return; el.innerHTML = wCustom.map((t,i)=>`<span>${esc(t)} <b style="cursor:pointer" onclick="wCustom.splice(${i},1);renderWCustom()">✕</b></span>`).join(''); }
+function renderWCustom(){ const el=$('#wCustomChips'); if(!el) return; el.innerHTML = wCustom.map((t,i)=>`<span>${esc(t)} <b style="cursor:pointer" onclick="wCustom.splice(${i},1);renderWCustom()">${ico('close')}</b></span>`).join(''); }
 function commitWCustom(){ const v=$('#wCustom').value; if(!v.trim()) return; v.split(/[,，\n]/).map(x=>x.trim()).filter(Boolean).forEach(x=>{ if(!wCustom.includes(x) && wCustom.length<20) wCustom.push(x); }); $('#wCustom').value=''; renderWCustom(); }
 let reviewMeetup=null;
 async function openCompose(kind, meetupId){
@@ -1657,7 +1688,7 @@ function renderWTech(){
   $('#wCraftTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; wCraft=b.dataset.c; renderWTech(); };
   const ver = new Set(myProfile?.verified_skills||[]);
   const ci=$('#wCustom'); if(ci && !ci._bound){ ci._bound=true; ci.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===','){ e.preventDefault(); commitWCustom(); } }); ci.addEventListener('blur', commitWCustom); }
-  $('#wTechList').innerHTML = [1,2,3,4,5].map(l=>{ const ts=TECH.filter(t=>t.craft===wCraft&&t.level===l); return `<div class="lvgrp"><div class="lvh">${l}단계 ${LVNAME[l]}</div><div class="techs">${ts.map(t=>`<button type="button" class="tech ${wTechSel.has(t.id)?'on':''}" onclick="toggleWTech('${t.id}')">${wTechSel.has(t.id)?'✓ ':''}${esc(t.name_ko)}${ver.has(t.id)?'<span class="vbadge">인증</span>':''}</button>`).join('')}</div></div>`; }).join('');
+  $('#wTechList').innerHTML = [1,2,3,4,5].map(l=>{ const ts=TECH.filter(t=>t.craft===wCraft&&t.level===l); return `<div class="lvgrp"><div class="lvh">${l}단계 ${LVNAME[l]}</div><div class="techs">${ts.map(t=>`<button type="button" class="tech ${wTechSel.has(t.id)?'on':''}" onclick="toggleWTech('${t.id}')">${wTechSel.has(t.id)?ico('check')+' ':''}${esc(t.name_ko)}${ver.has(t.id)?'<span class="vbadge">인증</span>':''}</button>`).join('')}</div></div>`; }).join('');
   $('#wPicked').textContent = `${wTechSel.size}개 선택`;
 }
 function toggleWTech(id){ if(wTechSel.has(id)) wTechSel.delete(id); else wTechSel.add(id); renderWTech(); }
@@ -1846,7 +1877,7 @@ function simDiff(p){ // 공통 종목 기준 (상대 − 나). 비교 불가면 
   const pairs=[['level_crochet'],['level_knit']].map(([k])=>(myProfile?.[k]>0&&p[k]>0)?p[k]-myProfile[k]:null).filter(v=>v!==null);
   if(!pairs.length) return null; return pairs.reduce((a,b)=>Math.abs(a)<=Math.abs(b)?a:b);
 }
-function simBadge(p){ const d=simDiff(p); if(d===null) return ''; if(Math.abs(d)<=1) return '<span class="chip m">🤝 비슷해요</span>'; if(d>=2) return '<span class="chip y">📚 배울 수 있어요</span>'; return '<span class="chip">🧑‍🏫 알려줄 수 있어요</span>'; }
+function simBadge(p){ const d=simDiff(p); if(d===null) return ''; if(Math.abs(d)<=1) return '<span class="chip m">'+ico('handshake')+' 비슷해요</span>'; if(d>=2) return '<span class="chip y">'+ico('learn')+' 배울 수 있어요</span>'; return '<span class="chip">'+ico('teach')+' 알려줄 수 있어요</span>'; }
 
 // 설명 슬라이드
 function openSlides(after){ slideAfter = typeof after==='function'?after:null; $('#slides').classList.add('on'); $('#track').scrollTo({left:0}); updateDots(); }
@@ -1861,7 +1892,7 @@ let myTab='posts';
 async function toggleWave(){
   const on = !isWaving(myProfile);
   if(on && !localStorage.getItem('waveInfoSeen')){
-    openSheet(`<b style="font-size:1.05rem">🙋 뜨개 친구를 찾고 있다고 알릴게요</b>
+    openSheet(`<b style="font-size:1.05rem">${ico('wave')} 뜨개 친구를 찾고 있다고 알릴게요</b>
       <div class="muted" style="font-size:.92rem;line-height:1.55">지도의 내 핀에 손이 올라가고, 이웃들이 <b>"먼저 말 걸어도 되는 사람"</b>으로 봐요. 먼저 다가가기 어려운 분들을 위한 표시예요.<br>14일 뒤 자동으로 내려가고, 언제든 다시 누르면 내릴 수 있어요.</div>
       <button class="btn" onclick="localStorage.setItem('waveInfoSeen','1');closeSheet();setWave(true)">알리기</button><button class="btn o" onclick="closeSheet()">나중에</button>`);
     return;
@@ -1885,7 +1916,7 @@ async function renderMy(){
     <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname||'')}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
     ${bio?`<div class="pbio">${esc(bio)}</div>`:'<div class="pbio muted">소개를 적어 보세요</div>'}
     <div class="pfriends" id="pfriends" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>
-    <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o" onclick="openSkills()">내 뜨개 단계</button><button class="btn o wave ${isWaving(p)?'on':''}" onclick="toggleWave()" title="지도 핀에 손을 들어 뜨개 친구를 찾고 있다고 알려요">🙋 ${isWaving(p)?'친구 찾는 중':'뜨개 친구 찾기'}</button></div>
+    <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o" onclick="openSkills()">내 뜨개 단계</button><button class="btn o wave ${isWaving(p)?'on':''}" onclick="toggleWave()" title="지도 핀에 손을 들어 뜨개 친구를 찾고 있다고 알려요">${ico('wave')} ${isWaving(p)?'친구 찾는 중':'뜨개 친구 찾기'}</button></div>
     <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
