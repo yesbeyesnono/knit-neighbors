@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>뜨개동네</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -56,6 +56,8 @@ nav .badge{position:absolute;top:6px;right:calc(50% - 18px);background:#ff3040;c
 .g{background:#fff;color:#000;border:1px solid var(--line);border-radius:999px}
 .g img{width:18px;height:18px}
 input,select,textarea{font:inherit;width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none}
+/* iOS: 입력칸 글자가 16px보다 작으면 포커스 시 화면이 자동 확대됨 → 모바일에서는 모든 입력칸 16px 고정 */
+@media (max-width:767px){ input,select,textarea{font-size:16px!important} }
 input[type=checkbox],input[type=radio]{-webkit-appearance:auto;appearance:auto;width:22px;height:22px;min-width:22px;padding:0;margin:0;accent-color:#000;flex:none}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
 input::placeholder,textarea::placeholder{color:#a3a3a3}
