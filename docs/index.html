@@ -409,7 +409,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 /* 뜨개동네 지기 */
 .item.support .ava{background:var(--ink);color:#fff}
 body.icons .item.support .ava .ico{filter:invert(1);width:24px;height:24px}
-.item.support .tx b .tag{font-size:.7rem;background:var(--ink);color:#fff;border-radius:999px;padding:1px 7px;margin-left:6px;font-weight:600;vertical-align:1px}
+.item.support .tx b .tag{display:inline-block;width:auto;font-size:.7rem;background:var(--ink);color:#fff;border-radius:999px;padding:1px 7px;margin-left:6px;font-weight:600;vertical-align:1px}
 .notice{margin:4px 0 10px;background:#f4f4f4;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.5;color:var(--ink2)}
 .notice b{color:var(--ink);display:block;margin-bottom:3px}
 /* 아이콘 시스템: 기본은 이모지, body.icons 이면 docs/icons/<key>.svg 이미지로 교체 (ICON_IMAGES 상수) */
@@ -569,11 +569,11 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 온보딩 / 프로필 편집 -->
   <section class="view" id="v-onboard">
-    <div class="top"><button class="back" id="obBack" onclick="go('my')" hidden><svg viewBox="0 0 24 24"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="obTitle">프로필 만들기</h1></div>
+    <div class="top"><button class="back" id="obBack" onclick="go('my')" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="obTitle">프로필 만들기</h1></div>
     <div class="body form">
       <label class="f">닉네임<input id="f_nick" maxlength="20" placeholder="지도와 글에 보이는 이름"></label>
       <div class="card soft" id="locCard"><b class="t">내 동네 (자동 인식)</b>
-        <div id="locStatus">📍 위치 확인 중…</div>
+        <div id="locStatus"><i class="ico" data-ico="location"><b>📍</b></i> 위치 확인 중…</div>
         <div class="row" style="margin-top:8px"><button type="button" class="btn sm o" onclick="detectLocation()">다시 확인</button><button type="button" class="btn sm o" onclick="manualDong()">직접 입력</button></div>
         <div class="muted" style="margin-top:6px">정확한 위치는 저장하지 않아요. 500m 격자로 흐려진 좌표만 저장돼요.</div>
       </div>
@@ -601,14 +601,14 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
   <section class="view" id="v-comm">
     <div class="top"><h1>커뮤니티</h1></div>
     <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="meet">모임</button><button data-f="work">작품</button><button data-f="dong">동네</button><button data-f="friends">친구</button></div>
-    <div class="cbox" id="cbox">
+    <div class="cbox" id="cbox" hidden>
       <div id="cboxAva"></div>
       <div style="flex:1;min-width:0">
         <div class="cname" id="cboxName"></div>
         <textarea id="cText" maxlength="500" placeholder="새로운 소식이 있나요?" rows="1" oninput="autoGrow(this);updateCnt()"></textarea>
         <div class="pv" id="cPv"></div>
         <div class="tools">
-          <button type="button" class="ib" title="사진" onclick="$('#cFile').click()"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"></rect><circle cx="8.6" cy="9.4" r="1.5"></circle><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"></path></svg></button>
+          <button type="button" class="ib" title="사진" onclick="$('#cFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5" width="17.2" height="14" rx="2"></rect><circle cx="8.6" cy="9.4" r="1.5"></circle><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"></path></svg></button>
           <input id="cFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files)">
           <span class="cnt" id="cCnt"></span>
           <button class="btn" id="cPost" onclick="submitPost()">게시</button>
@@ -621,14 +621,14 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 글 상세 (원글 + 답글) -->
   <section class="view" id="v-post">
-    <div class="top"><button class="back" onclick="closePost()"><svg viewBox="0 0 24 24"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>글</h1></div>
+    <div class="top"><button class="back" onclick="closePost()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>글</h1></div>
     <div class="feed" id="postBody"></div>
     <div class="compose"><div id="replyAva"></div><div class="mpop" id="mpop-detail" hidden></div><input id="replyIn" placeholder="답글을 남겨보세요…" maxlength="500" oninput="mentionInput(this,'detail')" onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)submitReply()"><button class="btn" onclick="submitReply()">게시</button></div>
   </section>
 
   <!-- 친구 -->
   <section class="view" id="v-friends">
-    <div class="top"><button class="back" onclick="go('my')"><svg viewBox="0 0 24 24"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>친구</h1></div>
+    <div class="top"><button class="back" onclick="go('my')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>친구</h1></div>
     <div class="body" id="friendsBody"></div>
   </section>
 
@@ -640,14 +640,14 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 채팅방 -->
   <section class="view" id="v-room">
-    <div class="top"><button class="back" onclick="leaveRoom()"><svg viewBox="0 0 24 24"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="roomTitle"></h1><button class="btn sm o" id="meetBtn" onclick="openMeetupForm()" hidden><i class="ico" data-ico="location"><b>📍</b></i> 모임</button></div>
+    <div class="top"><button class="back" onclick="leaveRoom()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="roomTitle"></h1><button class="btn sm o" id="meetBtn" onclick="openMeetupForm()" hidden><i class="ico" data-ico="location"><b>📍</b></i> 모임</button></div>
     <div class="msgs" id="msgs"></div>
     <div class="compose"><input id="msgIn" placeholder="메시지" onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)sendMsg()"><button class="btn" onclick="sendMsg()">보내기</button></div>
   </section>
 
   <!-- 뜨개 단계 자가진단 -->
   <section class="view" id="v-skills">
-    <div class="top"><button class="back" onclick="leaveSkills()"><svg viewBox="0 0 24 24"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>내 뜨개 단계</h1><button class="btn sm o" onclick="openSlides()">ⓘ 설명</button></div>
+    <div class="top"><button class="back" onclick="leaveSkills()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>내 뜨개 단계</h1><button class="btn sm o" onclick="openSlides()">ⓘ 설명</button></div>
     <div class="body" id="skillsBody"></div>
   </section>
 
@@ -696,7 +696,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
         <textarea id="sText" maxlength="500" placeholder="새로운 소식이 있나요?" rows="3" oninput="autoGrow(this)"></textarea>
         <div class="pv" id="sPv"></div></div></div>
       <div class="tools">
-        <button type="button" class="ib" title="사진" onclick="$('#sFile').click()"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"></rect><circle cx="8.6" cy="9.4" r="1.5"></circle><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"></path></svg></button>
+        <button type="button" class="ib" title="사진" onclick="$('#sFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5" width="17.2" height="14" rx="2"></rect><circle cx="8.6" cy="9.4" r="1.5"></circle><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"></path></svg></button>
         <input id="sFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
         <span id="sHint"></span>
       </div>
@@ -705,28 +705,28 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 다른 사람 프로필 (Threads 프로필 페이지) -->
   <section class="view" id="v-profile">
-    <div class="top"><button class="back" onclick="closeProfile()"><svg viewBox="0 0 24 24"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="profTitle"></h1><button class="ib" title="더보기" onclick="profileMenu()" style="font-size:1.2rem;font-weight:700;letter-spacing:1px">···</button></div>
+    <div class="top"><button class="back" onclick="closeProfile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="profTitle"></h1><button class="ib" title="더보기" onclick="profileMenu()" style="font-size:1.2rem;font-weight:700;letter-spacing:1px">···</button></div>
     <div class="body" id="profBody"></div>
   </section>
 
   <!-- 활동(알림) -->
   <section class="view" id="v-activity">
-    <div class="top"><button class="back" onclick="go('my')"><svg viewBox="0 0 24 24"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>활동</h1></div>
+    <div class="top"><button class="back" onclick="go('my')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>활동</h1></div>
     <div class="body list" id="actBody"></div>
   </section>
 
   <!-- 마이 -->
   <section class="view" id="v-my">
-    <div class="top"><button class="ib" title="활동" onclick="openActivity()"><svg viewBox="0 0 24 24"><path d="M12 3.2a5.8 5.8 0 0 0-5.8 5.8c0 3-.7 4.4-1.6 5.5-.3.36-.05.9.4.9h14c.45 0 .7-.54.4-.9-.9-1.1-1.6-2.5-1.6-5.5A5.8 5.8 0 0 0 12 3.2Z"></path><path d="M9.9 19.5a2.2 2.2 0 0 0 4.2 0"></path></svg><span class="badge" id="badgeAct" hidden></span></button><h1 id="myTitle">마이</h1><button class="ib" title="설정" onclick="openSettings()"><svg viewBox="0 0 24 24"><path d="M4 6.2h7"></path><circle cx="14.2" cy="6.2" r="2.1"></circle><path d="M17.6 6.2H20"></path><path d="M4 12h2.6"></path><circle cx="9.3" cy="12" r="2.1"></circle><path d="M12.7 12H20"></path><path d="M4 17.8h11.2"></path><circle cx="17.9" cy="17.8" r="2.1"></circle></svg></button></div>
+    <div class="top"><button class="ib" title="활동" onclick="openActivity()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2a5.8 5.8 0 0 0-5.8 5.8c0 3-.7 4.4-1.6 5.5-.3.36-.05.9.4.9h14c.45 0 .7-.54.4-.9-.9-1.1-1.6-2.5-1.6-5.5A5.8 5.8 0 0 0 12 3.2Z"></path><path d="M9.9 19.5a2.2 2.2 0 0 0 4.2 0"></path></svg><span class="badge" id="badgeAct" hidden></span></button><h1 id="myTitle">마이</h1><button class="ib" title="설정" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.2h7"></path><circle cx="14.2" cy="6.2" r="2.1"></circle><path d="M17.6 6.2H20"></path><path d="M4 12h2.6"></path><circle cx="9.3" cy="12" r="2.1"></circle><path d="M12.7 12H20"></path><path d="M4 17.8h11.2"></path><circle cx="17.9" cy="17.8" r="2.1"></circle></svg></button></div>
     <div class="body" id="myBody"></div>
   </section>
 
   <nav id="nav">
-    <button data-v="comm" title="커뮤니티"><svg viewBox="0 0 24 24"><path d="M4.2 10.4 12 3.6l7.8 6.8v9.4a1.6 1.6 0 0 1-1.6 1.6H5.8a1.6 1.6 0 0 1-1.6-1.6Z"></path><path d="M9.6 21.4v-5.6h4.8v5.6"></path></svg></button>
-    <button data-v="map" title="지도"><svg viewBox="0 0 24 24"><path d="M12 21.4S5 15.7 5 10.2a7 7 0 0 1 14 0c0 5.5-7 11.2-7 11.2Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></button>
-    <button data-v="plus" title="글쓰기"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
-    <button data-v="chats" title="채팅"><svg viewBox="0 0 24 24"><path d="M21.5 2.5 11.3 12.7"></path><path d="M21.5 2.5 14.9 21.3l-3.6-8.6-8.6-3.6Z"></path></svg></button>
-    <button data-v="my" title="마이"><svg viewBox="0 0 24 24"><circle cx="12" cy="7.9" r="3.9"></circle><path d="M4.6 20.4c.6-4 3.6-6.2 7.4-6.2s6.8 2.2 7.4 6.2"></path></svg><span class="badge" id="badgeFriends" hidden></span></button>
+    <button data-v="comm" title="커뮤니티"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 10.4 12 3.6l7.8 6.8v9.4a1.6 1.6 0 0 1-1.6 1.6H5.8a1.6 1.6 0 0 1-1.6-1.6Z"></path><path d="M9.6 21.4v-5.6h4.8v5.6"></path></svg></button>
+    <button data-v="map" title="지도"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.4S5 15.7 5 10.2a7 7 0 0 1 14 0c0 5.5-7 11.2-7 11.2Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></button>
+    <button data-v="plus" title="글쓰기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></button>
+    <button data-v="chats" title="채팅"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2.5 11.3 12.7"></path><path d="M21.5 2.5 14.9 21.3l-3.6-8.6-8.6-3.6Z"></path></svg></button>
+    <button data-v="my" title="마이"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.9" r="3.9"></circle><path d="M4.6 20.4c.6-4 3.6-6.2 7.4-6.2s6.8 2.2 7.4 6.2"></path></svg><span class="badge" id="badgeFriends" hidden></span></button>
   </nav>
 
   <div class="sheetwrap" id="sheetwrap" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
@@ -947,7 +947,7 @@ async function reverseGeocode(lat, lng){
 }
 function detectLocation(){
   if(!navigator.geolocation){ setLocStatus('이 브라우저는 위치를 지원하지 않아요. 직접 입력해 주세요.'); return; }
-  setLocStatus('📍 위치 확인 중…');
+  setLocStatus(ico('location')+' 위치 확인 중…');
   navigator.geolocation.getCurrentPosition(async pos=>{
     const { latitude:lat, longitude:lng } = pos.coords;
     try{
@@ -963,7 +963,7 @@ function manualDong(){
   const v = prompt('동네 이름을 입력해 주세요 (예: 역삼동)', loc.dong_name||''); if(v===null) return;
   const name = v.trim(); if(!name) return;
   loc.dong_name = name; loc.dong_code = loc.dong_code || name; loc.verified = false;
-  setLocStatus(`📍 <b>${esc(name)}</b> <span class="muted">직접 입력</span>${loc.lat?'':' · 지도 핀은 위치 확인 후 표시돼요'}`);
+  setLocStatus(`${ico('location')} <b>${esc(name)}</b> <span class="muted">직접 입력</span>${loc.lat?'':' · 지도 핀은 위치 확인 후 표시돼요'}`);
 }
 function openOnboard(edit){
   const p = myProfile||{};
@@ -1176,7 +1176,7 @@ async function loadUserFeed(uid, tab, el){
   if(uid!==me.id || true){ feedRows = (data||[]); }
 }
 function requestFriend(id, wave){
-  openSheet(`<b>${wave?'🙋 인사하며 친구 신청':'친구 신청'}</b><p class="muted" style="margin:0">${wave?'뜨개 친구를 찾는 이웃이에요. 짧은 인사만으로도 충분해요':'한 줄 메시지를 함께 보내면 수락률이 올라가요 (선택, 100자)'}</p><textarea id="reqMsg" maxlength="100" placeholder="예: 저도 그 도안 뜨고 있어요">${wave?'손 드신 거 보고 인사드려요 🧶 같이 떠요!':''}</textarea><button class="btn" onclick="sendRequest('${id}')">보내기</button>`);
+  openSheet(`<b>${wave?ico('wave')+' 인사하며 친구 신청':'친구 신청'}</b><p class="muted" style="margin:0">${wave?'뜨개 친구를 찾는 이웃이에요. 짧은 인사만으로도 충분해요':'한 줄 메시지를 함께 보내면 수락률이 올라가요 (선택, 100자)'}</p><textarea id="reqMsg" maxlength="100" placeholder="예: 저도 그 도안 뜨고 있어요">${wave?'손 드신 거 보고 인사드려요 🧶 같이 떠요!':''}</textarea><button class="btn" onclick="sendRequest('${id}')">보내기</button>`);
 }
 async function sendRequest(id){
   const { error } = await sb.from('friendships').insert({ requester_id:me.id, addressee_id:id, message:$('#reqMsg').value.trim()||null });
@@ -1278,7 +1278,7 @@ async function renderChats(){
   const rooms = await fetchRooms();
   const sup = rooms.find(isSupportRoom); const rest = rooms.filter(r=>r!==sup);
   const supRow = me.id===SUPPORT_ID ? '' : `<div class="item support" onclick="${sup?`openRoom('${sup.id}')`:'openSupportRoom()'}"><div class="ava">${ico('yarn')}</div><div class="tx"><b>뜨개동네 지기<span class="tag">운영진</span></b><span>${esc(sup?.last?.body||'궁금한 점·불편한 점을 편하게 남겨 주세요')}</span></div><span class="muted">${sup?.last?ago(sup.last.created_at):''}</span></div>`;
-  $('#chatsBody').innerHTML = supRow + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${esc(r.last?.body||(r.last?.photo_url?'📷 사진':r.last?.place?'📍 장소':'대화를 시작해 보세요'))}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
+  $('#chatsBody').innerHTML = supRow + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
 }
 async function openDirectRoom(otherId){
   const rooms = await fetchRooms();
@@ -1306,7 +1306,7 @@ async function openRoom(id){
 function nameOf(uid){ const m=roomInfo?.room_members.find(m=>m.profile_id===uid); return m?.profiles?.nickname||'알 수 없음'; }
 function appendMsg(m){
   const mine=m.sender_id===me.id; const el=document.createElement('div'); el.className='bub'+(mine?' me':'');
-  let body = m.body?esc(m.body):''; if(m.place) body += `<div>📍 ${esc(m.place.name)}${m.place.address?`<div class="muted">${esc(m.place.address)}</div>`:''}</div>`; if(m.photo_url) body+=`<img src="${esc(m.photo_url)}" style="max-width:100%;border-radius:8px">`;
+  let body = m.body?esc(m.body):''; if(m.place) body += `<div>${ico('location')} ${esc(m.place.name)}${m.place.address?`<div class="muted">${esc(m.place.address)}</div>`:''}</div>`; if(m.photo_url) body+=`<img src="${esc(m.photo_url)}" style="max-width:100%;border-radius:8px">`;
   el.innerHTML = `${!mine&&roomInfo?.kind==='group'?`<span class="who">${esc(nameOf(m.sender_id))}</span>`:''}${body}<time>${hhmm(m.created_at)}</time>`;
   $('#msgs').appendChild(el);
 }
@@ -1517,9 +1517,9 @@ async function submitInlineReply(pid){
   const grp=document.getElementById('pg-'+pid); if(grp && p){ grp.outerHTML=postGroup(p); }
 }
 const ICON = {
-  heart: '<svg viewBox="0 0 24 24"><path d="M12 20.6S3.2 15.2 3.2 9.2a4.8 4.8 0 0 1 8.8-2.6 4.8 4.8 0 0 1 8.8 2.6c0 6-8.8 11.4-8.8 11.4Z"></path></svg>',
-  reply: '<svg viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.3-1.2A8.5 8.5 0 1 0 12 3.5Z"></path></svg>',
-  share: '<svg viewBox="0 0 24 24"><path d="M12 14.5V3.5"></path><path d="M8.2 6.8 12 3l3.8 3.8"></path><path d="M7.5 10.5H6a1.8 1.8 0 0 0-1.8 1.8v6.4A1.8 1.8 0 0 0 6 20.5h12a1.8 1.8 0 0 0 1.8-1.8v-6.4a1.8 1.8 0 0 0-1.8-1.8h-1.5"></path></svg>'
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.6S3.2 15.2 3.2 9.2a4.8 4.8 0 0 1 8.8-2.6 4.8 4.8 0 0 1 8.8 2.6c0 6-8.8 11.4-8.8 11.4Z"></path></svg>',
+  reply: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.3-1.2A8.5 8.5 0 1 0 12 3.5Z"></path></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5V3.5"></path><path d="M8.2 6.8 12 3l3.8 3.8"></path><path d="M7.5 10.5H6a1.8 1.8 0 0 0-1.8 1.8v6.4A1.8 1.8 0 0 0 6 20.5h12a1.8 1.8 0 0 0 1.8-1.8v-6.4a1.8 1.8 0 0 0-1.8-1.8h-1.5"></path></svg>'
 };
 // 내가 속한 방 목록 (참여 여부 판단)
 let myRoomIds = new Set();
@@ -1569,7 +1569,7 @@ function meetupCard(m){
   const joined = myRoomIds.has(m.room_id); const past = new Date(m.starts_at) < new Date();
   const full = m.capacity && (m.participant_count||0) >= m.capacity;
   const btn = past ? `<button class="btn o" onclick="event.stopPropagation();openMeetup('${m.id}')">${joined?'후기 쓰기 · ':''}후기 ${m.review_count||0}</button>` : joined ? `<button class="btn o" onclick="event.stopPropagation();openRoom('${m.room_id}')">참여 중 · 채팅</button>` : full ? '<span class="muted">마감</span>' : `<button class="btn" onclick="event.stopPropagation();joinMeetup('${m.id}')">참여하기</button>`;
-  return `<div class="mcard" onclick="event.stopPropagation();openMeetup('${m.id}')"><div class="mh">📍 모임${m.is_public?'':' · 초대만'}<span class="kind">${MKIND[m.kind]||'자유 뜨개'}</span></div><b>${esc(m.title)}</b><div class="ml">${esc(m.place_name)}</div><div class="ml">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}</div>${m.bring?`<div class="ml">준비물: ${esc(m.bring)}</div>`:''}<div class="mtags">${meetupTags(m)}</div><div class="mrow"><span>${past?'종료 · ':''}참여 ${m.participant_count||0}명</span>${btn}</div></div>`;
+  return `<div class="mcard" onclick="event.stopPropagation();openMeetup('${m.id}')"><div class="mh">${ico('location')} 모임${m.is_public?'':' · 초대만'}<span class="kind">${MKIND[m.kind]||'자유 뜨개'}</span></div><b>${esc(m.title)}</b><div class="ml">${esc(m.place_name)}</div><div class="ml">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}</div>${m.bring?`<div class="ml">준비물: ${esc(m.bring)}</div>`:''}<div class="mtags">${meetupTags(m)}</div><div class="mrow"><span>${past?'종료 · ':''}참여 ${m.participant_count||0}명</span>${btn}</div></div>`;
 }
 async function joinMeetup(id){
   const { data:roomId, error } = await sb.rpc('join_meetup', { p_meetup_id:id });
@@ -1588,10 +1588,10 @@ async function openMeetup(id){
   const joined = myRoomIds.has(m.room_id), past = new Date(m.starts_at) < new Date(), full = m.capacity && (m.participant_count||0) >= m.capacity;
   let reviews=[], myReviewed=false;
   if(past){ const { data:rv } = await sb.from('posts').select('*, '+AUTHOR_SEL).eq('review_of', id).order('created_at'); reviews=rv||[]; myReviewed = reviews.some(r=>r.author_id===me.id); }
-  const reviewHtml = past ? `<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700;margin-top:4px">🧶 후기 ${reviews.length}</div>
+  const reviewHtml = past ? `<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700;margin-top:4px">${ico('yarn')} 후기 ${reviews.length}</div>
     ${reviews.length?`<div class="rvlist">${reviews.map(r=>`<div class="rv"><div onclick="closeSheet();${r.author?.id?`openProfile('${r.author.id}')`:''}">${avatar(r.author||{})}</div><div class="rvb"><b>${esc(r.author?.nickname||'(탈퇴한 사용자)')}</b> <span class="muted" style="font-size:12px">${agoShort(r.created_at)}</span>${r.body?`<div class="t">${esc(r.body)}</div>`:''}${(r.photos||[]).length?`<div class="ph">${r.photos.map(u=>`<img src="${esc(u)}" alt="" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div></div>`).join('')}</div>`:'<div class="muted">아직 후기가 없어요</div>'}
     ${joined && !myReviewed ? `<button class="btn" onclick="closeSheet();openCompose('review','${m.id}')">후기 쓰기</button>` : ''}` : '';
-  openSheet(`<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700">📍 모임${m.is_public?'':' · 초대만'} · ${MKIND[m.kind]||'자유 뜨개'}</div>
+  openSheet(`<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700">${ico('location')} 모임${m.is_public?'':' · 초대만'} · ${MKIND[m.kind]||'자유 뜨개'}</div>
     <b style="font-size:1.25rem">${esc(m.title)}</b>
     <div>${esc(m.place_name)}</div><div class="muted">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}${m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''}</div>
     <div class="mcard" style="margin:0"><div class="mtags" style="margin:0">${meetupTags(m)}</div>${m.bring?`<div class="ml" style="margin-top:8px">준비물: ${esc(m.bring)}</div>`:''}</div>
@@ -1611,7 +1611,7 @@ function postCard(p, opts={}){
     <div class="avacol"><div onclick="event.stopPropagation();openProfile('${a.id}')">${avatar(a)}</div>${showLine?'<div class="tline"></div>':''}</div>
     <div class="col">
       ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 답글</div>`:''}
-      ${p.review_meetup?`<div class="rvtag" onclick="event.stopPropagation();openMeetup('${p.review_of}')">🧶 모임 후기 · ${esc(p.review_meetup.title)}</div>`:''}
+      ${p.review_meetup?`<div class="rvtag" onclick="event.stopPropagation();openMeetup('${p.review_of}')">${ico('yarn')} 모임 후기 · ${esc(p.review_meetup.title)}</div>`:''}
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}','${a.id}')">···</button></div>
       ${p.body?`<div class="txt">${bodyHtml(p)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`).join('')}</div>`:''}
@@ -1887,7 +1887,7 @@ function renderSkills(){
     ${[1,2,3,4,5].map(l=>{ const s=st[l]||{done:0,total:0}; const done=s.done*2>=s.total&&s.total>0; return `
       <div class="lvsec ${done?'done':''} ${openLv===l?'open':''}" data-lv="${l}">
         <div class="hd" onclick="toggleLv(${l})"><div class="n">${l}</div><div class="t"><b>${LVNAME[l]}</b><span>${LVDESC[l]}</span></div><div class="pct">${s.done}/${s.total}</div><span class="car">›</span></div>
-        <div class="techs">${techOf(craft).filter(t=>t.level===l).map(t=>`<button type="button" class="tech ${skills.has(t.id)?'on':''}" onclick="toggleTech('${t.id}')" title="${esc(t.descr||'')}">${skills.has(t.id)?'✓ ':''}${esc(t.name_ko)}${(myProfile?.verified_skills||[]).includes(t.id)?'<span class="vbadge">인증</span>':''}</button>`).join('')}</div>
+        <div class="techs">${techOf(craft).filter(t=>t.level===l).map(t=>`<button type="button" class="tech ${skills.has(t.id)?'on':''}" onclick="toggleTech('${t.id}')" title="${esc(t.descr||'')}">${skills.has(t.id)?ico('check')+' ':''}${esc(t.name_ko)}${(myProfile?.verified_skills||[]).includes(t.id)?'<span class="vbadge">인증</span>':''}</button>`).join('')}</div>
       </div>`; }).join('')}
     <div class="card soft muted">한 단계 기법의 절반 이상을 체크하면 그 단계로 표시돼요. 위 단계 기법을 누르면 필요한 아래 기법이 자동으로 체크돼요. <b>인증</b> 표시는 작품 인증으로 증명된 기법이에요.</div>
     <button class="btn" onclick="finishSkills()">저장하고 나가기</button>`;
@@ -1965,7 +1965,7 @@ async function renderMyFriends(){
   const inbox = rows.filter(r=>r.status==='pending'&&r.addressee_id===me.id).length;
   const el=$('#pfriends'); if(!el) return;
   let meetN=0; if(myRoomIds.size){ const { count } = await sb.from('meetups').select('id',{count:'exact',head:true}).in('room_id',[...myRoomIds]); meetN=count||0; }
-  el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}${myProfile?.cert_count?` · <span class="vcount">🏅 작품 인증 ${myProfile.cert_count}</span>`:''}${meetN?` · 모임 ${meetN}`:''}</span><span style="margin-left:auto">›</span>`;
+  el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}${myProfile?.cert_count?` · <span class="vcount">${ico('cert')} 작품 인증 ${myProfile.cert_count}</span>`:''}${meetN?` · 모임 ${meetN}`:''}</span><span style="margin-left:auto">›</span>`;
 }
 async function loadMyFeed(){ if(myTab==='meetups') return loadMyMeetups($('#myFeed')); return loadUserFeed(me.id, myTab, $('#myFeed')); }
 // 내 모임: 참여·주최한 모임을 예정/완료로 나눠 표시
