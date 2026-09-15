@@ -387,6 +387,31 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 /* 커뮤니티: 제목은 스크롤로 올라가고 카테고리 탭이 상단에 고정(스크롤·키보드 후 탭이 제목 밑에 숨던 문제) */
 #v-comm .top{position:static}
 #v-comm .subtabs{position:sticky;top:0;z-index:6;flex:none}
+/* 내 뜨개 단계: 좌우 여백 + 작품 인증 섹션과 같은 톤 */
+#skillsBody{padding:12px 16px 28px;gap:12px}
+#skillsBody .lvsec .techs{gap:6px;padding:4px 12px 12px}
+#skillsBody .tech{font-size:.82rem;padding:6px 11px}
+#skillsBody .lvhead{padding:4px 2px 2px}
+/* 새 글 상단바: 제목 정확히 가운데, 게시는 검정 알약 버튼 */
+#v-compose .top{display:grid;grid-template-columns:64px 1fr 64px;align-items:center;padding-left:8px;padding-right:12px}
+#v-compose .top .back{width:auto;justify-self:start;padding:4px 8px}
+#v-compose .top h1{text-align:center;font-size:1.05rem;font-weight:700;margin:0}
+#v-compose .top .btn{justify-self:end;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:8px 16px;font-size:.9rem;font-weight:700;width:auto;min-width:56px}
+#v-compose .top .btn:disabled{opacity:.35}
+/* 설정 시트 목록 */
+.sgrp{font-size:.75rem;color:var(--ink3);font-weight:600;letter-spacing:.02em;margin:6px 0 -6px}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 2px;border-bottom:1px solid var(--line);font-size:15px;color:var(--ink);text-decoration:none;cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;width:100%;font-family:inherit;text-align:left}
+.srow:last-child{border-bottom:0}
+.srow .car{color:var(--ink3);font-size:1.1rem}
+.srow.danger{color:#c9303f}
+.srow input[type=checkbox]{margin:0}
+.sheet .slist{display:flex;flex-direction:column;margin:0 0 4px}
+/* 뜨개동네 지기 */
+.item.support .ava{background:var(--ink);color:#fff}
+body.icons .item.support .ava .ico{filter:invert(1);width:24px;height:24px}
+.item.support .tx b .tag{font-size:.7rem;background:var(--ink);color:#fff;border-radius:999px;padding:1px 7px;margin-left:6px;font-weight:600;vertical-align:1px}
+.notice{margin:4px 0 10px;background:#f4f4f4;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.5;color:var(--ink2)}
+.notice b{color:var(--ink);display:block;margin-bottom:3px}
 /* 아이콘 시스템: 기본은 이모지, body.icons 이면 docs/icons/<key>.svg 이미지로 교체 (ICON_IMAGES 상수) */
 .ico{font-style:normal;display:inline-block;line-height:1}
 .ico>b{font-weight:inherit}
@@ -1051,7 +1076,7 @@ function filterList(){
 function renderFilters(){ $('#filters').innerHTML = filterList().map(([k,l])=>`<button data-k="${k}" class="${filter.mode===k?'on':''}">${l}</button>`).join(''); }
 $('#filters').onclick = e => {
   const b=e.target.closest('button'); if(!b) return; const k=b.dataset.k;
-  if(k==='sim' && !(myProfile?.level_crochet>0||myProfile?.level_knit>0)) return toast('먼저 마이 › 내 뜨개 단계를 체크해 주세요');
+  if(k==='sim' && !(myProfile?.level_crochet>0||myProfile?.level_knit>0)) return toast('먼저 마이 › 설정 › 내 뜨개 단계를 체크해 주세요');
   if(k==='time' && !(myProfile?.available||[]).length) return toast('프로필 편집에서 만나기 좋은 시간을 먼저 골라 주세요');
   filter.mode = (filter.mode===k && k!=='all') ? 'all' : k;
   renderFilters(); loadPins();
@@ -1235,6 +1260,14 @@ async function openNotif(i){
 }
 
 // ============ 채팅 ============
+const SUPPORT_ID = 'e120eb67-b254-4008-92d8-08c95c821e9e';   // 뜨개동네 지기(운영진) 계정
+const SUPPORT_NOTICE = '뜨개동네를 만드는 사람들에게 바로 닿는 창구예요. 앱을 쓰다 궁금한 점, 불편한 점, 있었으면 하는 기능을 편하게 남겨 주세요. 지기가 읽고 답해 드려요.';
+async function openSupportRoom(){
+  const { data, error } = await sb.rpc('open_support_room', { p_support: SUPPORT_ID });
+  if(error) return toast('채팅방을 열 수 없어요: '+error.message);
+  openRoom(data);
+}
+function isSupportRoom(r){ return r?.kind==='direct' && (r.others||r.room_members?.map(m=>m.profiles)||[]).some(p=>p && p.id===SUPPORT_ID); }
 async function fetchRooms(){
   const { data, error } = await sb.from('rooms').select('id,kind,title,created_at, room_members(profile_id, profiles(id,nickname,avatar_url)), messages(body,photo_url,place,created_at,sender_id)').order('created_at',{foreignTable:'messages',ascending:false}).limit(1,{foreignTable:'messages'});
   if(error){ toast('채팅 조회 실패: '+error.message); return []; }
@@ -1243,7 +1276,9 @@ async function fetchRooms(){
 }
 async function renderChats(){
   const rooms = await fetchRooms();
-  $('#chatsBody').innerHTML = rooms.length ? `<div class="list">${rooms.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${esc(r.last?.body||(r.last?.photo_url?'📷 사진':r.last?.place?'📍 장소':'대화를 시작해 보세요'))}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>';
+  const sup = rooms.find(isSupportRoom); const rest = rooms.filter(r=>r!==sup);
+  const supRow = me.id===SUPPORT_ID ? '' : `<div class="item support" onclick="${sup?`openRoom('${sup.id}')`:'openSupportRoom()'}"><div class="ava">${ico('yarn')}</div><div class="tx"><b>뜨개동네 지기<span class="tag">운영진</span></b><span>${esc(sup?.last?.body||'궁금한 점·불편한 점을 편하게 남겨 주세요')}</span></div><span class="muted">${sup?.last?ago(sup.last.created_at):''}</span></div>`;
+  $('#chatsBody').innerHTML = supRow + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${esc(r.last?.body||(r.last?.photo_url?'📷 사진':r.last?.place?'📍 장소':'대화를 시작해 보세요'))}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
 }
 async function openDirectRoom(otherId){
   const rooms = await fetchRooms();
@@ -1263,7 +1298,7 @@ async function openRoom(id){
   $('#meetBtn').hidden = r.kind!=='group';
   show('room');
   const { data:msgs } = await sb.from('messages').select('*').eq('room_id',id).order('created_at').limit(200);
-  $('#msgs').innerHTML=''; (msgs||[]).forEach(appendMsg); scrollMsgs();
+  $('#msgs').innerHTML = (isSupportRoom(r) && me.id!==SUPPORT_ID) ? `<div class="notice"><b>뜨개동네 지기 · 운영진</b>${SUPPORT_NOTICE}</div>` : ''; (msgs||[]).forEach(appendMsg); scrollMsgs();
   await sb.from('room_members').update({last_read_at:new Date().toISOString()}).eq('room_id',id).eq('profile_id',me.id);
   if(roomChan) sb.removeChannel(roomChan);
   roomChan = sb.channel('room:'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`room_id=eq.${id}`},p=>{ appendMsg(p.new); scrollMsgs(); }).subscribe();
@@ -1852,7 +1887,7 @@ function renderSkills(){
     ${[1,2,3,4,5].map(l=>{ const s=st[l]||{done:0,total:0}; const done=s.done*2>=s.total&&s.total>0; return `
       <div class="lvsec ${done?'done':''} ${openLv===l?'open':''}" data-lv="${l}">
         <div class="hd" onclick="toggleLv(${l})"><div class="n">${l}</div><div class="t"><b>${LVNAME[l]}</b><span>${LVDESC[l]}</span></div><div class="pct">${s.done}/${s.total}</div><span class="car">›</span></div>
-        <div class="techs">${techOf(craft).filter(t=>t.level===l).map(t=>`<button type="button" class="tech ${skills.has(t.id)?'on':''}" onclick="toggleTech('${t.id}')" title="${esc(t.descr||'')}">${skills.has(t.id)?'✓ ':''}${esc(t.name_ko)}${(myProfile?.verified_skills||[]).includes(t.id)?'<span class="vbadge">인증</span>':(t.symbol&&t.symbol!=='–'&&t.symbol!=='조합'?`<span class="sym">${esc(t.symbol)}</span>`:'')}</button>`).join('')}</div>
+        <div class="techs">${techOf(craft).filter(t=>t.level===l).map(t=>`<button type="button" class="tech ${skills.has(t.id)?'on':''}" onclick="toggleTech('${t.id}')" title="${esc(t.descr||'')}">${skills.has(t.id)?'✓ ':''}${esc(t.name_ko)}${(myProfile?.verified_skills||[]).includes(t.id)?'<span class="vbadge">인증</span>':''}</button>`).join('')}</div>
       </div>`; }).join('')}
     <div class="card soft muted">한 단계 기법의 절반 이상을 체크하면 그 단계로 표시돼요. 위 단계 기법을 누르면 필요한 아래 기법이 자동으로 체크돼요. <b>인증</b> 표시는 작품 인증으로 증명된 기법이에요.</div>
     <button class="btn" onclick="finishSkills()">저장하고 나가기</button>`;
@@ -1918,7 +1953,7 @@ async function renderMy(){
     <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname||'')}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
     ${bio?`<div class="pbio">${esc(bio)}</div>`:'<div class="pbio muted">소개를 적어 보세요</div>'}
     <div class="pfriends" id="pfriends" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>
-    <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o" onclick="openSkills()">내 뜨개 단계</button><button class="btn o wave ${isWaving(p)?'on':''}" onclick="toggleWave()" title="지도 핀에 손을 들어 뜨개 친구를 찾고 있다고 알려요">${ico('wave')} ${isWaving(p)?'친구 찾는 중':'뜨개 친구 찾기'}</button></div>
+    <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o wave ${isWaving(p)?'on':''}" onclick="toggleWave()" title="지도 핀에 손을 들어 뜨개 친구를 찾고 있다고 알려요">${ico('wave')} ${isWaving(p)?'친구 찾는 중':'뜨개 친구 찾기'}</button></div>
     <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
@@ -1955,12 +1990,28 @@ async function loadMyMeetups(el){
 function openSettings(){
   const p=myProfile||{};
   openSheet(`<b style="font-size:1.05rem">설정</b>
-    <label class="f"><span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)" style="width:auto;margin-right:8px">지도에 내 핀 보이기</span></label>
-    <div class="muted" style="font-size:.85rem">위치는 500m 격자로 흐려진 좌표만 저장돼요. 정확한 위치는 서버에 남지 않아요.</div>
-    <button class="btn o" onclick="closeSheet();openSlides()">뜨개 단계 설명 다시 보기</button>
-    <div class="row" style="gap:6px;flex-wrap:wrap;font-size:.85rem"><a href="terms.html" target="_blank">이용약관</a> · <a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a> · <a href="privacy.html" target="_blank">개인정보처리방침</a> · <a href="mailto:knitup.official@gmail.com">문의</a></div>
-    <button class="btn o" onclick="logout()">로그아웃</button>
-    <button class="btn r" onclick="deleteAccount()">계정 삭제</button>
+    <div class="sgrp">내 뜨개</div>
+    <div class="slist">
+      <button class="srow" onclick="closeSheet();openSkills()"><span>내 뜨개 단계 <span class="muted">${lvShort(p)||'아직 없음'}</span></span><span class="car">›</span></button>
+      <button class="srow" onclick="closeSheet();openSlides()"><span>뜨개 단계 설명</span><span class="car">›</span></button>
+      <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 500m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
+    </div>
+    <div class="sgrp">도움</div>
+    <div class="slist">
+      <button class="srow" onclick="closeSheet();openSupportRoom()"><span>뜨개동네 지기에게 말하기<br><span class="muted">궁금한 점·불편한 점·바라는 기능</span></span><span class="car">›</span></button>
+      <a class="srow" href="mailto:knitup.official@gmail.com"><span>이메일 문의</span><span class="car">›</span></a>
+    </div>
+    <div class="sgrp">약관·정책</div>
+    <div class="slist">
+      <a class="srow" href="terms.html" target="_blank"><span>이용약관</span><span class="car">›</span></a>
+      <a class="srow" href="guidelines.html" target="_blank"><span>커뮤니티 가이드라인</span><span class="car">›</span></a>
+      <a class="srow" href="privacy.html" target="_blank"><span>개인정보처리방침</span><span class="car">›</span></a>
+    </div>
+    <div class="sgrp">계정</div>
+    <div class="slist">
+      <button class="srow" onclick="logout()"><span>로그아웃</span><span class="car">›</span></button>
+      <button class="srow danger" onclick="deleteAccount()"><span>계정 삭제</span><span class="car">›</span></button>
+    </div>
     <div class="devbar">${esc(me?.email||'')} · Supabase ${SB_URL.replace('https://','')} · 지도 ${GOOGLE_MAPS_KEY?'Google Maps':'OpenStreetMap'}</div>`);
 }
 async function deleteAccount(){

@@ -897,3 +897,9 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   트리거: posts_notify(답글→원글 작성자, 멘션→언급된 사람, 후기→모임 개설자) · post_likes_notify(취소 시 삭제) · friendships_notify · room_members_notify(모임 참여→개설자)
 --   realtime publication에 notifications 추가 (마이 탭 배지·토스트)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 19. 뜨개동네 지기(운영진) 채팅 — 2026-09-15 (마이그레이션 support_room)
+--   open_support_room(p_support uuid) security definer: 친구가 아니어도 지기와 1:1 방 생성/조회
+--   지기 계정 = knitup.official@gmail.com 프로필(e120eb67-…), 닉네임 '뜨개동네 지기'. 앱 SUPPORT_ID 상수
+-- ---------------------------------------------------------------
