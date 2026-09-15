@@ -285,6 +285,9 @@ details .seg{margin-top:8px;justify-content:center}
 .mfields .sw input{width:auto}
 #v-compose .tools{display:flex;align-items:center;gap:14px;border-top:1px solid var(--line);padding-top:12px;color:var(--ink3);font-size:.85rem}
 #v-compose .tools .ib{background:none;border:0;padding:0;cursor:pointer;color:var(--ink);display:inline-flex}
+#sHint{flex:1;min-width:0;line-height:1.4}
+#sHint .q{color:var(--ink2)}
+#sHint .src{color:var(--ink3);font-size:.78rem;margin-left:6px;white-space:nowrap}
 #v-compose .tools .ib svg{width:24px;height:24px}
 /* 모임 카드 (글 안) */
 .mcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:4px 0 10px;background:#fafafa}
@@ -595,7 +598,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
       <div class="tools">
         <button type="button" class="ib" title="사진" onclick="$('#sFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 15.5 15.6 11l-6.4 6.5"/></svg></button>
         <input id="sFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
-        <span id="sHint">누구나 볼 수 있어요</span>
+        <span id="sHint"></span>
       </div>
     </div>
   </section>
@@ -1493,6 +1496,15 @@ async function openCompose(kind, meetupId){
   show('compose');
   setTimeout(()=>$(composeKind==='meetup'?'#mTitle':'#sText')?.focus(), 80);
 }
+// 저작권 만료 작품(작가 사망 1962년 이전)에서 고른 구절, 직역. 하루 단위로 순환
+const QUOTES = [
+  ['가장 중요한 것은 눈에 보이지 않아', '어린 왕자'],
+  ['네가 장미를 위해 쓴 시간이 그 장미를 소중하게 만든 거야', '어린 왕자'],
+  ['나비는 달을 세지 않고 순간을 센다. 그래서 시간은 충분하다', '타고르'],
+  ['인내가 전부입니다', '릴케'],
+  ['희망은 깃털 달린 것, 영혼에 내려앉아 노래한다', '에밀리 디킨슨'],
+];
+function quoteHtml(){ const d=Math.floor(Date.now()/864e5); const [q,src]=QUOTES[d%QUOTES.length]; return `<span class="q">${esc(q)}</span><span class="src">— ${esc(src)}</span>`; }
 function setComposeKind(k){
   composeKind=k; [...$('#composeKind').children].forEach(b=>b.classList.toggle('on', b.dataset.k===k));
   const certified = (myProfile?.cert_count||0) > 0;
@@ -1508,7 +1520,7 @@ function setComposeKind(k){
   $('#sText').placeholder = k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : k==='work' ? '한 줄 소감 (예: 눈 위치 세 번 옮겼어요)' : k==='review' ? '어땠어요? 배운 것, 분위기, 다음에 갈 사람에게 팁' : '새로운 소식이 있나요?';
   $('#sPost').textContent = k==='meetup' ? '만들기' : k==='work' ? '인증' : '게시';
   $('#sPost').disabled = (k==='meetup' && !certified);
-  $('#sHint').textContent = k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : k==='work' ? '사진 1~4장 필수 · 커뮤니티 "작품" 탭에 올라가요' : k==='review' ? '사진과 함께 올리면 다음 참여자에게 도움이 돼요' : '누구나 볼 수 있어요';
+  $('#sHint').innerHTML = k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : k==='work' ? '사진 1~4장 필수 · 커뮤니티 "작품" 탭에 올라가요' : k==='review' ? '사진과 함께 올리면 다음 참여자에게 도움이 돼요' : quoteHtml();
 }
 function renderWTech(){
   $('#wCraftTabs').innerHTML = `<button data-c="crochet" class="${wCraft==='crochet'?'on':''}">코바늘</button><button data-c="knitting" class="${wCraft==='knitting'?'on':''}">대바늘</button>`;
