@@ -386,6 +386,15 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 /* 커뮤니티: 제목은 스크롤로 올라가고 카테고리 탭이 상단에 고정(스크롤·키보드 후 탭이 제목 밑에 숨던 문제) */
 #v-comm .top{position:static}
 #v-comm .subtabs{position:sticky;top:0;z-index:6;flex:none}
+/* iOS 노치·다이내믹 아일랜드: WebView를 전체 화면으로 쓰고(contentInset never) 상태바 높이만큼 위쪽 여백을 CSS로 확보 */
+#app::before{content:'';position:absolute;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:60;pointer-events:none}
+.top{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+#v-compose .top{padding-top:calc(10px + env(safe-area-inset-top,0px))}
+#v-comm .subtabs{top:env(safe-area-inset-top,0px)}
+.filters{top:env(safe-area-inset-top,0px)}
+.mapempty{top:calc(70px + env(safe-area-inset-top,0px))}
+.slides{padding-top:env(safe-area-inset-top,0px)}
+.sheet{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}
 .subtabs button{flex:1 0 auto;min-width:60px;padding:12px 10px;font-size:.95rem;color:var(--tmute);border-bottom:1.5px solid transparent;font-weight:500;white-space:nowrap}
 .subtabs button.on{color:var(--tink);border-color:var(--tink);font-weight:700}
 /* 작성 행 */
