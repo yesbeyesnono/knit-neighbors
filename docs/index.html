@@ -791,6 +791,7 @@ const CAP = window.Capacitor;
 const isNative = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
 // ===== 아이콘 =====
 // 키 → 이모지(기본 표시). 디자인 이미지가 docs/icons/<key>.svg 로 들어오면 ICON_IMAGES=true 로 바꿔 일괄 교체
+const APP_VERSION = '1.0.1';
 const ICON_IMAGES = true;
 const EMOJI = { wave:'🙋', location:'📍', yarn:'🧶', cert:'🏅', check:'✓', close:'✕', handshake:'🤝', report:'🚩', camera:'📷', heart:'♥', reply:'💬', party:'🎉', review:'📝', group:'👥', learn:'📚', teach:'🧑‍🏫', at:'@', signal:'📶', tap:'👆', ruler:'📏' };
 function ico(k){ return `<i class="ico" data-ico="${k}"><b>${EMOJI[k]||''}</b></i>`; }
@@ -2012,7 +2013,7 @@ function openSettings(){
       <button class="srow" onclick="logout()"><span>로그아웃</span><span class="car">›</span></button>
       <button class="srow danger" onclick="deleteAccount()"><span>계정 삭제</span><span class="car">›</span></button>
     </div>
-    <div class="devbar">${esc(me?.email||'')} · Supabase ${SB_URL.replace('https://','')} · 지도 ${GOOGLE_MAPS_KEY?'Google Maps':'OpenStreetMap'}</div>`);
+    <div class="devbar">뜨개동네 ${APP_VERSION} · ${esc(me?.email||'')}</div>`);
 }
 async function deleteAccount(){
   if(!confirm('계정을 삭제하면 프로필·글·사진·채팅·모임 참여 기록이 모두 지워지고 복구할 수 없어요. 계속할까요?')) return;
