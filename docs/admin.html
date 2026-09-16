@@ -72,6 +72,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#support" data-v="support">지기 문의함 <span class="n" id="nSup" hidden></span></a>
     <a href="#banned" data-v="banned">금칙어</a>
     <a href="#broadcast" data-v="broadcast">공지·알림 보내기</a>
+    <a href="#shops" data-v="shops">파트너 가게</a>
     <div class="grp">현황</div>
     <a href="#dash" data-v="dash">대시보드</a>
     <a href="#dong" data-v="dong">동네 분포</a>
@@ -339,11 +340,58 @@ VIEWS.export = async()=>{
 };
 async function exportPosts(){ const {data}=await sb.from('posts').select('id,author_id,parent_id,body,photos,like_count,reply_count,mentions,solved_reply_id,meetup_id,work_id,review_of,created_at').eq('hidden',false).order('created_at').limit(50000); download('posts.jsonl', jsonl(data||[])); }
 async function exportMeetups(){ const {data}=await sb.from('meetups').select('*').order('created_at').limit(10000); download('meetups.jsonl', jsonl(data||[])); }
+// ===== 파트너 가게 =====
+const SHOP_KIND={yarn:'실·부자재',studio:'공방',cafe:'카페',other:'기타'}; const SPOST_KIND={sale:'할인',new:'신상',meetup:'모임',class:'클래스',notice:'소식'};
+VIEWS.shops = async()=>{
+  const {data:shops}=await sb.from('shops').select('*, owner:profiles!shops_owner_id_fkey(nickname), shop_posts(id), shop_follows(profile_id)').order('created_at');
+  $('#main').innerHTML=`<h1>파트너 가게 <small>공방·실 판매소 등이 소식을 올리는 계정</small></h1>
+  <div class="row"><button class="p" onclick="openShopForm()">가게 추가</button></div>
+  <table><tr><th>가게</th><th>종류</th><th>주소</th><th>오너 계정</th><th>소식</th><th>팔로워</th><th>상태</th></tr>
+  ${(shops||[]).map(x=>`<tr class="clk" onclick="openShopForm('${x.id}')"><td><b>${esc(x.name)}</b></td><td>${SHOP_KIND[x.kind]||x.kind}</td><td class="muted">${esc(x.address||'')}${x.location?'':' <span class="chip r">좌표 없음</span>'}</td><td>${x.owner?esc(x.owner.nickname):'<span class="muted">미지정</span>'}</td><td>${(x.shop_posts||[]).length}</td><td>${(x.shop_follows||[]).length}</td><td>${x.is_active?'<span class="chip g">공개</span>':'<span class="chip">숨김</span>'}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">없음</td></tr>'}</table>
+  <p class="muted">오너 계정을 지정하면 그 계정의 앱 ＋ 버튼에 "가게 소식" 탭이 생겨 직접 올릴 수 있어요. 오너 없이도 여기서 대신 올릴 수 있습니다.</p>`;
+};
+async function openShopForm(id){
+  let x={kind:'yarn',links:{},radius_m:5000,is_active:true}; let posts=[];
+  if(id){ const r=await sb.from('shops').select('*, owner:profiles!shops_owner_id_fkey(nickname)').eq('id',id).single(); x=r.data||x; if(x.location){ const c=parseGeo(x.location); if(c){ x.lat=c.lat; x.lng=c.lng; } } const pr=await sb.from('shop_posts').select('*').eq('shop_id',id).order('created_at',{ascending:false}); posts=pr.data||[]; }
+  const L=x.links||{};
+  openPanel(`<h2 style="margin-top:0">${id?'가게 수정':'가게 추가'}</h2>
+    <div class="row"><input id="shName" placeholder="가게 이름" value="${esc(x.name||'')}" style="flex:1"><select id="shKind">${Object.entries(SHOP_KIND).map(([k,l])=>`<option value="${k}" ${x.kind===k?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="row"><input id="shAddr" placeholder="주소 (도로명)" value="${esc(x.address||'')}" style="flex:1"><button onclick="geocodeShop()">좌표 찾기</button></div>
+    <div class="row"><input id="shLat" placeholder="위도" value="${x.lat??''}" style="width:130px"><input id="shLng" placeholder="경도" value="${x.lng??''}" style="width:130px"><span class="muted" id="shGeoMsg">좌표가 있어야 지도에 핀이 보여요</span></div>
+    <textarea id="shDescr" placeholder="소개" style="min-height:60px">${esc(x.descr||'')}</textarea>
+    <div class="row"><input id="shHours" placeholder="영업시간 (예: 11:00~19:00, 월 휴무)" value="${esc(x.hours||'')}" style="flex:1"><input id="shPhone" placeholder="전화" value="${esc(x.phone||'')}" style="width:150px"></div>
+    <div class="row"><input id="lkInsta" placeholder="인스타그램 URL" value="${esc(L.instagram||'')}" style="flex:1"><input id="lkStore" placeholder="스토어 URL" value="${esc(L.store||'')}" style="flex:1"></div>
+    <div class="row"><input id="lkWeb" placeholder="홈페이지 URL" value="${esc(L.web||'')}" style="flex:1"><input id="shRadius" type="number" placeholder="종 표시 반경(m)" value="${x.radius_m||5000}" style="width:150px"></div>
+    <div class="row"><label><input type="checkbox" id="shActive" ${x.is_active!==false?'checked':''}> 앱에 공개</label></div>
+    <div class="row"><input id="shOwnerQ" placeholder="오너 계정 검색 (이메일·닉네임)" style="flex:1"><button onclick="findOwner()">찾기</button></div>
+    <div id="ownerPick" class="muted"><span id="ownerCur">${x.owner?'현재 오너: '+esc(x.owner.nickname):'오너 미지정'}</span> <span id="ownerSel"></span></div>
+    <input type="hidden" id="shOwnerId" value="${x.owner_id||''}">
+    <div class="row"><button class="p" onclick="saveShop('${id||''}')">저장</button>${id?`<button onclick="openShopPostForm('${id}')">소식 올리기 (대신)</button>`:''}</div>
+    ${id?`<h2>소식 ${posts.length}</h2>${posts.map(p=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="chip">${SPOST_KIND[p.kind]||p.kind}</span><b>${esc(p.title)}</b> <span class="muted">${fmt(p.created_at)}${p.hidden?' · 숨김':''}</span><div class="muted">${esc((p.body||'').slice(0,120))}</div><div class="row"><button onclick="hideShopPost('${p.id}',${!p.hidden})">${p.hidden?'복구':'숨김'}</button></div></div>`).join('')||'<div class="muted">없음</div>'}`:''}`);
+}
+function parseGeo(hex){ try{ if(typeof hex!=='string')return null; const b=new Uint8Array(hex.match(/../g).map(h=>parseInt(h,16))); const dv=new DataView(b.buffer); const le=b[0]===1; let o=5; const type=dv.getUint32(1,le); if(type&0x20000000)o+=4; const x=dv.getFloat64(o,le), y=dv.getFloat64(o+8,le); return {lat:y,lng:x}; }catch(e){ return null; } }
+async function geocodeShop(){ const q=$('#shAddr').value.trim(); if(!q) return toast('주소를 입력하세요'); $('#shGeoMsg').textContent='찾는 중…'; try{ const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=kr&q='+encodeURIComponent(q)); const j=await r.json(); if(!j.length){ $('#shGeoMsg').textContent='못 찾았어요. 영문 주소나 지번으로 다시 시도하거나 좌표를 직접 입력하세요'; return; } $('#shLat').value=(+j[0].lat).toFixed(6); $('#shLng').value=(+j[0].lon).toFixed(6); $('#shGeoMsg').textContent='찾음: '+j[0].display_name.slice(0,60); }catch(e){ $('#shGeoMsg').textContent='조회 실패'; } }
+async function findOwner(){ const q=$('#shOwnerQ').value.trim(); const {data}=await sb.rpc('admin_find_users',{p_q:q,p_limit:8}); $('#ownerSel').innerHTML=(data||[]).map(u=>`<button data-id="${u.id}" data-n="${esc(u.nickname)}" onclick="pickOwner(this)">${esc(u.nickname)} · ${esc(u.email)}</button>`).join(' ')||'<span class="muted">없음</span>'; }
+function pickOwner(b){ $('#shOwnerId').value=b.dataset.id; $('#ownerCur').textContent='선택: '+b.dataset.n; }
+async function saveShop(id){
+  const p={ name:$('#shName').value.trim(), kind:$('#shKind').value, address:$('#shAddr').value.trim()||null, descr:$('#shDescr').value.trim()||null, hours:$('#shHours').value.trim()||null, phone:$('#shPhone').value.trim()||null, links:{instagram:$('#lkInsta').value.trim()||undefined, store:$('#lkStore').value.trim()||undefined, web:$('#lkWeb').value.trim()||undefined}, radius_m:+$('#shRadius').value||5000, is_active:$('#shActive').checked, owner_id:$('#shOwnerId').value||'' };
+  if(!p.name) return toast('가게 이름을 입력하세요');
+  if($('#shLat').value&&$('#shLng').value){ p.lat=+$('#shLat').value; p.lng=+$('#shLng').value; }
+  if(id) p.id=id;
+  const {error}=await sb.rpc('admin_upsert_shop',{p}); if(error) return toast(error.message); toast('저장했어요'); closePanel(); route();
+}
+function openShopPostForm(shopId){ openPanel(`<h2 style="margin-top:0">가게 소식 올리기 (관리자 대신 작성)</h2>
+  <div class="row"><select id="spKind">${Object.entries(SPOST_KIND).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><input id="spEnds" type="date"><span class="muted">마감일(선택)</span></div>
+  <input id="spTitle" placeholder="제목" style="width:100%;margin:6px 0"><textarea id="spBody" placeholder="내용"></textarea>
+  <input id="spPhotos" placeholder="사진 URL (쉼표로 구분, 선택)" style="width:100%;margin:6px 0">
+  <div class="row"><button class="p" onclick="saveShopPost('${shopId}')">올리기</button><button onclick="openShopForm('${shopId}')">취소</button></div>`); }
+async function saveShopPost(shopId){ const title=$('#spTitle').value.trim(); if(!title) return toast('제목을 입력하세요'); const photos=$('#spPhotos').value.split(',').map(x=>x.trim()).filter(Boolean); const ends=$('#spEnds').value?new Date($('#spEnds').value+'T23:59:59').toISOString():null; const {error}=await sb.rpc('admin_shop_post',{p:{shop_id:shopId,kind:$('#spKind').value,title,body:$('#spBody').value.trim()||null,photos,ends_at:ends}}); if(error) return toast(error.message); toast('올렸어요. 팔로워에게 알림이 갔어요'); openShopForm(shopId); }
+async function hideShopPost(id, hidden){ const {error}=await sb.rpc('admin_shop_post',{p:{id,hidden}}); if(error) return toast(error.message); toast(hidden?'숨겼어요':'복구했어요'); route(); }
 // ===== 로그·설정 =====
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',upsert_shop:'가게 저장',shop_post:'가게 소식'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

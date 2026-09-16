@@ -387,6 +387,35 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 /* 커뮤니티: 제목은 스크롤로 올라가고 카테고리 탭이 상단에 고정(스크롤·키보드 후 탭이 제목 밑에 숨던 문제) */
 #v-comm .top{position:static}
 #v-comm .subtabs{position:sticky;top:0;z-index:6;flex:none}
+/* 가게(파트너) 핀: 각진 상점 모양 + 새 소식 종 */
+.upin.shop .face{border-radius:10px;background:#fff;border:2.5px solid #000;width:44px;height:38px;font-size:10px;font-weight:800;letter-spacing:-.02em}
+.upin.shop .face svg{width:22px;height:22px;stroke:#000;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.upin.shop .lbl{background:#fff;color:#000;border:1.5px solid #000}
+.upin .bell{position:absolute;right:-10px;top:-10px;width:24px;height:24px;border-radius:50%;background:#ffd400;border:1.5px solid #000;display:grid;place-items:center;animation:ring 1.4s ease-in-out infinite;transform-origin:50% 10%}
+.upin .bell svg{width:14px;height:14px;stroke:#000;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(18deg)}30%{transform:rotate(-14deg)}45%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(0)}}
+/* 가게 페이지 */
+.shophead{padding:14px 16px 6px}
+.shophead h2{margin:0;font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
+.shophead .kind{display:inline-block;font-size:.72rem;background:#000;color:#fff;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:3px}
+.shopinfo{padding:4px 16px 10px;color:var(--ink2);font-size:.92rem;line-height:1.55}
+.shoplinks{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 12px}
+.shoplinks a,.shoplinks button{font:inherit;font-size:.85rem;border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+.shoplinks button.on{background:#000;color:#fff;border-color:#000}
+.spost{padding:14px 16px;border-top:1px solid var(--line)}
+.spost .k{display:inline-block;font-size:.72rem;border-radius:999px;padding:2px 8px;background:#f0f0f0;color:#333;margin-right:6px}
+.spost .k.sale{background:#fde8ea;color:#c9303f}.spost .k.new{background:#e8f3e8;color:#2f6b3a}.spost .k.meetup,.spost .k.class{background:#e6f1fb;color:#185fa5}
+.spost b{font-size:16px}
+.spost .txt{white-space:pre-wrap;margin:6px 0;font-size:15px;line-height:1.45}
+.spost time{font-size:13px;color:var(--ink3)}
+.spost .ends{font-size:12px;color:#c9303f;margin-left:6px}
+.shopcard{margin:10px 16px 0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fafafa;display:flex;align-items:center;gap:12px;cursor:pointer}
+.shopcard .sq{width:44px;height:44px;border-radius:10px;border:2px solid #000;display:grid;place-items:center;background:#fff}
+.shopcard .sq svg{width:22px;height:22px;stroke:#000;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pfields{display:flex;flex-direction:column;gap:10px;background:#eef3ff;border-radius:14px;padding:14px}
+.pfields .mtitle{font-weight:700;font-size:.95rem}
+.pfields label.f{font-size:.8rem;color:var(--ink2)}
+.pfields input,.pfields select,.pfields textarea{background:#fff}
 .solvedtag{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;font-weight:700;color:#2f6b3a;background:#e8f3e8;border-radius:999px;padding:2px 9px;margin:2px 0 4px}
 .solvedchip{font-size:.7rem;padding:1px 7px}
 .rpost .acts button.on2{color:#2f6b3a;font-weight:700}
@@ -669,7 +698,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
   <section class="view" id="v-compose">
     <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1 id="composeTitle">새 글</h1><button class="btn" id="sPost" onclick="submitCompose()">게시</button></div>
     <div class="body">
-      <div class="kind" id="composeKind"><button data-k="post" class="on">글</button><button data-k="work">작품 인증</button><button data-k="meetup">모임</button></div>
+      <div class="kind" id="composeKind"><button data-k="post" class="on">글</button><button data-k="work">작품 인증</button><button data-k="meetup">모임</button><button data-k="shop" hidden id="kShop">가게 소식</button></div>
       <div class="row2"><div id="sAva"></div><div style="flex:1;min-width:0"><div class="cname" id="sName"></div>
         <div class="wfields" id="wfields" hidden>
           <div class="mtitle"><i class="ico" data-ico="cert"><b>🏅</b></i> 작품 인증</div>
@@ -698,6 +727,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
           <div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div>
           <button class="btn" type="button" onclick="setComposeKind('work')">작품 인증하러 가기</button>
         </div>
+        <div class="pfields" id="pfields" hidden>
+          <div class="mtitle" id="pShopName">가게 소식</div>
+          <div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">종류<select id="pKind"><option value="notice">소식</option><option value="sale">할인</option><option value="new">신상</option><option value="meetup">모임</option><option value="class">클래스</option></select></label><label class="f">마감일 <span class="muted">(선택)</span><input id="pEnds" type="date"></label></div>
+          <label class="f">제목<input id="pTitle" maxlength="60" placeholder="예: 가을 신상 실 입고 · 10% 할인"></label>
+          <span class="hint" style="font-size:.78rem;color:var(--ink3)">팔로워에게 알림이 가고, 근처 이웃의 지도 핀에 종이 울려요. 사진은 아래 카메라로.</span>
+        </div>
         <div class="mfields" id="mfields" hidden>
           <div class="mtitle"><i class="ico" data-ico="location"><b>📍</b></i> 모임 정보</div>
           <label class="f">모임 이름<input id="mTitle" maxlength="60" placeholder="예: 토요 뜨개 모임"></label>
@@ -723,6 +758,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
   </section>
 
   <!-- 다른 사람 프로필 (Threads 프로필 페이지) -->
+  <!-- 가게(파트너) 페이지 -->
+  <section class="view" id="v-shop">
+    <div class="top"><button class="back" onclick="closeShop()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="shopTitle"></h1><span style="width:32px"></span></div>
+    <div class="body" id="shopBody" style="padding:0;gap:0"></div>
+  </section>
+
   <section class="view" id="v-profile">
     <div class="top"><button class="back" onclick="closeProfile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="profTitle"></h1><button class="ib" title="더보기" onclick="profileMenu()" style="font-size:1.2rem;font-weight:700;letter-spacing:1px">···</button></div>
     <div class="body" id="profBody"></div>
@@ -916,9 +957,11 @@ async function submitConsent(){
   myProfile.terms_agreed_at = new Date().toISOString(); closeSheet(); toast('감사합니다');
 }
 
+let myShop = null;   // 내가 오너인 가게(파트너 계정)
 async function loadMe(){
   const { data } = await sb.from('profiles').select('*').eq('id', me.id).single();
   myProfile = data;
+  const { data:shop } = await sb.from('shops').select('*').eq('owner_id', me.id).maybeSingle(); myShop = shop||null;
   if(myProfile?.location){ const c = parseGeo(myProfile.location); if(c) myProfile._c = c; }
 }
 // PostGIS geography → EWKB hex 파싱 (SRID 4326 point)
@@ -927,8 +970,8 @@ function parseGeo(hex){
 }
 
 // ============ 화면 전환 ============
-const NAV_OF = { friends:'my', skills:'my', activity:'my', post:'comm', profile:'', compose:'' };
-function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my','activity'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
+const NAV_OF = { friends:'my', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
+function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my','activity','shop'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
 document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(a && isNative){ e.preventDefault(); CAP.Plugins.Browser.open({ url: new URL(a.getAttribute('href'), 'https://yesbeyesnono.github.io/knit-neighbors/').href }); } });
 $('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openCompose('post'); return; } go(b.dataset.v); };
@@ -1043,10 +1086,13 @@ const MapAdapter = {
   center(){ return this.impl.center(); },
   zoom(){ return this.impl.zoom?.() || 14; }
 };
-function pinHtml({label, sub, avatar, cls, wave}){
+const SHOP_SVG = '<svg viewBox="0 0 24 24"><path d="M3.5 9.5 5 4.5h14l1.5 5"/><path d="M3.5 9.5a2.8 2.8 0 0 0 5.6 0 2.8 2.8 0 0 0 5.8 0 2.8 2.8 0 0 0 5.6 0"/><path d="M5 12v7.5h14V12"/><path d="M10 19.5v-5h4v5"/></svg>';
+const BELL_SVG = '<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
+function pinHtml({label, sub, avatar, cls, wave, bell}){
   const ini = (label||'?').slice(0,1);
-  const face = `<div class="face">${cls==='meet'?'모임':(avatar?`<img src="${esc(avatar)}" alt="">`:esc(ini))}</div>`;
-  return `<div class="upin ${cls||''}"><div class="lbl">${esc(label)}</div>${wave?`<div class="facewrap">${face}<div class="hand" title="뜨개 친구를 찾고 있어요">${ico('wave')}</div></div>`:face}<div class="tail"></div></div>`;
+  const face = `<div class="face">${cls==='meet'?'모임':cls==='shop'?SHOP_SVG:(avatar?`<img src="${esc(avatar)}" alt="">`:esc(ini))}</div>`;
+  const badge = wave ? `<div class="hand" title="뜨개 친구를 찾고 있어요">${ico('wave')}</div>` : bell ? `<div class="bell" title="새 소식">${BELL_SVG}</div>` : '';
+  return `<div class="upin ${cls||''}"><div class="lbl">${esc(label)}</div>${badge?`<div class="facewrap">${face}${badge}</div>`:face}<div class="tail"></div></div>`;
 }
 function isWaving(p){ return !!(p && p.wave_until && new Date(p.wave_until) > new Date()); }
 const LMap = {
@@ -1094,7 +1140,7 @@ const GMap = {
 // ============ 지도 홈 ============
 // 지도 필터 (단일 선택): 전체 · 모임 · 비슷한 수준 · 시간 맞음 · 친구 (+ 초보 환영: 내 단계가 1 이하일 때만)
 function filterList(){
-  return [['all','전체'],['wave',ico('wave')+' 친구 찾는 이웃'],['meet','모임'],['sim','비슷한 수준'],['time','시간 맞음'],['friends','친구']];
+  return [['all','전체'],['wave',ico('wave')+' 친구 찾는 이웃'],['meet','모임'],['shop','가게'],['sim','비슷한 수준'],['time','시간 맞음'],['friends','친구']];
 }
 function renderFilters(){ $('#filters').innerHTML = filterList().map(([k,l])=>`<button data-k="${k}" class="${filter.mode===k?'on':''}">${l}</button>`).join(''); }
 $('#filters').onclick = e => {
@@ -1127,8 +1173,9 @@ let pinTimer=null;
 function loadPins(){ clearTimeout(pinTimer); pinTimer=setTimeout(fetchPins, 250); }
 async function fetchPins(){
   const c = MapAdapter.center();
-  const [{data:people,error}, {data:meetups}] = await Promise.all([
+  const [{data:people,error}, {data:shops}, {data:meetups}] = await Promise.all([
     sb.rpc('nearby_profiles',{p_lat:c.lat,p_lng:c.lng,p_radius_m:RADIUS_M,p_craft:null,p_beginner_ok:null}),
+    sb.rpc('nearby_shops',{p_lat:c.lat,p_lng:c.lng,p_radius_m:RADIUS_M*2}).then(r=>r).catch(()=>({data:[]})),
     sb.from('meetups').select('id,title,place_name,starts_at,location,participant_count,room_id').eq('is_public',true).gte('starts_at',new Date().toISOString())
   ]);
   if(error) return toast('근처 조회 실패: '+error.message);
@@ -1140,7 +1187,7 @@ async function fetchPins(){
   };
   const mePin = myProfile?._c ? {lat:myProfile._c.lat,lng:myProfile._c.lng,me:true} : null;
   let shown = people||[];
-  if(filter.mode==='meet') shown = [];
+  if(filter.mode==='meet' || filter.mode==='shop') shown = [];
   if(filter.mode==='sim') shown = shown.filter(p=>{ const d=simDiff(p); return d!==null && Math.abs(d)<=1; });
   if(filter.mode==='time'){ const mine=new Set(myProfile?.available||[]); shown = shown.filter(p=>(p.available||[]).some(a=>mine.has(a))); }
   if(filter.mode==='friends'){ const ids=new Set(await friendIds()); shown = shown.filter(p=>ids.has(p.id)); }
@@ -1149,10 +1196,11 @@ async function fetchPins(){
   if(mePin) MapAdapter.marker({lat:mePin.lat,lng:mePin.lng,label:'나',avatar:myProfile.avatar_url,cls:'me',wave:isWaving(myProfile)});
   pts.filter(x=>x.p).forEach(({lat,lng,p})=>MapAdapter.marker({lat,lng,label:p.nickname,avatar:p.avatar_url,cls:p.craft==='knit'?'knit':'',wave:!!p.waving,onClick:()=>showPinCard(p)}));
   if(filter.mode==='all' || filter.mode==='meet') (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:m.title,cls:'meet',onClick:()=>openMeetup(m.id)}); });
+  if(filter.mode==='all' || filter.mode==='shop') (shops||[]).forEach(sh=>{ if(sh.lat!=null) MapAdapter.marker({lat:sh.lat,lng:sh.lng,label:sh.name,cls:'shop',bell:!!sh.unread,onClick:()=>openShop(sh.id)}); });
   let em=$('#mapview .mapempty'); if(!em){ em=document.createElement('div'); em.className='mapempty'; $('#mapview').appendChild(em); }
-  const emptyNow = filter.mode!=='all' && !shown.length && !(filter.mode==='meet' && (meetups||[]).length);
+  const emptyNow = filter.mode!=='all' && !shown.length && !(filter.mode==='meet' && (meetups||[]).length) && !(filter.mode==='shop' && (shops||[]).length);
   if(!emptyNow && shown.some(p=>p.waving) && !localStorage.getItem('waveTipSeen')){ localStorage.setItem('waveTipSeen','1'); const tip='🙋 손 든 이웃은 뜨개 친구를 찾는 중이에요. 먼저 인사해 보세요'; em.textContent=tip; em.hidden=false; setTimeout(()=>{ if(em.textContent===tip) em.hidden=true; }, 6000); return void (pins = people||[]); }
-  em.hidden=!emptyNow; if(emptyNow) em.textContent={meet:'근처에 예정된 모임이 없어요', sim:'비슷한 수준의 이웃이 이 범위엔 없어요', time:'시간이 맞는 이웃이 이 범위엔 없어요', friends:'이 범위엔 친구가 없어요', wave:'이 범위엔 친구를 찾는 이웃이 아직 없어요 🙋'}[filter.mode]||'';
+  em.hidden=!emptyNow; if(emptyNow) em.textContent={meet:'근처에 예정된 모임이 없어요', sim:'비슷한 수준의 이웃이 이 범위엔 없어요', time:'시간이 맞는 이웃이 이 범위엔 없어요', friends:'이 범위엔 친구가 없어요', wave:'이 범위엔 친구를 찾는 이웃이 아직 없어요 🙋', shop:'이 범위엔 등록된 가게가 아직 없어요'}[filter.mode]||'';
   pins = people||[];
 }
 function showPinCard(p){
@@ -1163,6 +1211,40 @@ function centerMe(){ if(myProfile?._c) MapAdapter.setCenter(myProfile._c); else 
 
 // ============ 프로필 시트 ============
 let profBack=null, profId=null, profTab='posts', profData=null;
+// ===== 가게(파트너) =====
+let shopBack=null, curShop=null;
+const SHOP_KIND = { yarn:'실·부자재', studio:'공방', cafe:'카페', other:'가게' };
+const SPOST_KIND = { sale:'할인', new:'신상', meetup:'모임', class:'클래스', notice:'소식' };
+async function openShop(id){
+  if(view!=='shop') shopBack = view; closeSheet();
+  const [{data:sh},{data:posts},{data:fol}] = await Promise.all([
+    sb.from('shops').select('*').eq('id',id).single(),
+    sb.from('shop_posts').select('*').eq('shop_id',id).order('created_at',{ascending:false}).limit(50),
+    sb.from('shop_follows').select('shop_id').eq('shop_id',id).eq('profile_id',me.id)
+  ]);
+  if(!sh) return toast('가게를 찾을 수 없어요');
+  curShop=sh; const following=!!(fol&&fol.length); const mine = sh.owner_id===me.id;
+  const links=sh.links||{}; const L=[['instagram','인스타그램'],['store','스토어'],['web','홈페이지'],['naver','네이버'],['kakao','카카오']].filter(([k])=>links[k]).map(([k,l])=>`<a href="${esc(links[k])}" target="_blank" rel="noopener">${l}</a>`).join('');
+  const c = sh.location ? parseGeo(sh.location) : null;
+  $('#shopTitle').textContent = sh.name;
+  $('#shopBody').innerHTML = `
+    <div class="shophead"><h2>${esc(sh.name)}<span class="kind">${SHOP_KIND[sh.kind]||'가게'}</span></h2></div>
+    <div class="shopinfo">${sh.descr?esc(sh.descr)+'<br>':''}${sh.address?ico('location')+' '+esc(sh.address)+'<br>':''}${sh.hours?'⏰ '+esc(sh.hours)+'<br>':''}${sh.phone?'☎ '+esc(sh.phone):''}</div>
+    <div class="shoplinks"><button class="${following?'on':''}" onclick="toggleFollowShop('${sh.id}',${!following})">${following?'팔로우 중':'팔로우'}</button>${L}${c?`<a href="https://map.kakao.com/link/map/${encodeURIComponent(sh.name)},${c.lat},${c.lng}" target="_blank" rel="noopener">길찾기</a>`:''}${mine?`<button onclick="openCompose('shop')">소식 올리기</button>`:''}</div>
+    ${(posts||[]).length ? (posts||[]).map(p=>`<div class="spost" id="sp-${p.id}"><span class="k ${p.kind}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`).join('') : '<div class="empty">아직 올라온 소식이 없어요</div>'}
+    <div class="muted" style="padding:16px;font-size:.8rem">가게 소식은 가게가 직접 올려요. 뜨개동네는 판매·예약에 관여하지 않아요. 문제가 있으면 설정 › 지기에게 알려 주세요.</div>`;
+  show('shop');
+  $('#v-shop').scrollTop=0;
+  if(!mine){ await sb.from('shop_reads').upsert({profile_id:me.id, shop_id:id, last_read_at:new Date().toISOString()}); if(MapAdapter.ready) loadPins(); }
+}
+function fmtd(t){ const d=new Date(t); return `${d.getMonth()+1}/${d.getDate()}`; }
+function closeShop(){ const b=shopBack||'map'; shopBack=null; go(['map','comm','chats','my','activity'].includes(b)?b:'map'); }
+async function toggleFollowShop(id, on){
+  const r = on ? await sb.from('shop_follows').insert({profile_id:me.id, shop_id:id}) : await sb.from('shop_follows').delete().eq('profile_id',me.id).eq('shop_id',id);
+  if(r.error) return toast('실패: '+r.error.message);
+  toast(on?'팔로우했어요. 새 소식이 활동에 알림으로 와요':'팔로우를 취소했어요'); openShop(id);
+}
+async function deleteShopPost(id){ if(!confirm('이 소식을 삭제할까요?')) return; const {error}=await sb.from('shop_posts').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); openShop(curShop.id); }
 async function openProfile(id){
   if(id===me.id) return go('my');
   const [{data:p},{data:rel}] = await Promise.all([
@@ -1289,21 +1371,22 @@ function watchFriends(){
 }
 async function refreshBadge(){ if(!me) return; const {count}=await sb.from('notifications').select('*',{count:'exact',head:true}).eq('recipient_id',me.id).is('read_at',null); ['badgeFriends','badgeAct'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.hidden=!count; el.textContent=count||''; } }); }
 // ===== 활동(알림) =====
-const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요', notice:'의 공지예요' };
-const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn') };
+const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요', notice:'의 공지예요', shop_post:'의 가게에 새 소식이 올라왔어요' };
+const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn'), shop_post:ico('location') };
 let actRows = [];
 function openActivity(){ show('activity'); renderActivity(); }
 async function renderActivity(){
-  const { data, error } = await sb.from('notifications').select('*, actor:profiles!notifications_actor_id_fkey(id,nickname,avatar_url)').eq('recipient_id', me.id).order('created_at',{ascending:false}).limit(100);
+  const { data, error } = await sb.from('notifications').select('*, actor:profiles!notifications_actor_id_fkey(id,nickname,avatar_url), shop:shops(name)').eq('recipient_id', me.id).order('created_at',{ascending:false}).limit(100);
   if(error){ $('#actBody').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
   actRows = data||[];
-  $('#actBody').innerHTML = actRows.length ? actRows.map((n,i)=>{ const a=n.actor||{nickname:'(탈퇴한 사용자)'}; return `<div class="ntf ${n.read_at?'':'unread'}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${avatar(a)}<div class="tx"><b>${esc(a.nickname)}</b>${NTF_TEXT[n.kind]||''}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}</div><time>${agoShort(n.created_at)}</time></div>`; }).join('')
+  $('#actBody').innerHTML = actRows.length ? actRows.map((n,i)=>{ const a=n.actor||{nickname:'(탈퇴한 사용자)'}; const who = n.kind==='shop_post' && n.shop ? {nickname:n.shop.name} : a; const txt = n.kind==='shop_post' && n.shop ? '에 새 소식이 올라왔어요' : (NTF_TEXT[n.kind]||''); return `<div class="ntf ${n.read_at?'':'unread'}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${n.kind==='shop_post'?`<div class="ava">${SHOP_SVG}</div>`:avatar(a)}<div class="tx"><b>${esc(who.nickname)}</b>${txt}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}</div><time>${agoShort(n.created_at)}</time></div>`; }).join('')
     : '<div class="empty">아직 활동이 없어요<br>글을 쓰거나 이웃에게 먼저 인사해 보세요</div>';
   if(actRows.some(n=>!n.read_at)){ await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',me.id).is('read_at',null); refreshBadge(); }
 }
 async function openNotif(i){
   const n=actRows[i]; if(!n) return;
   if(n.kind==='notice') return openSupportRoom();
+  if(n.kind==='shop_post' && n.shop_id) return openShop(n.shop_id);
   if(n.kind==='friend_request'||n.kind==='friend_accept') return openProfile(n.actor_id);
   if(n.kind==='meetup_join') return openMeetup(n.meetup_id);
   if(n.root_post_id||n.post_id){ await openPost(n.root_post_id||n.post_id); if((n.kind==='mention'||n.kind==='reply') && n.actor?.id) setTimeout(()=>prefillMention('detail', n.actor.id, n.actor.nickname), 100); }
@@ -1765,6 +1848,7 @@ async function openCompose(kind, meetupId){
     loadTech().then(()=>{ const grp = c => TECH.filter(t=>t.craft===c).map(t=>`<option value="${t.id}">${t.level}단계 · ${esc(t.name_ko)}</option>`).join(''); $('#mTech').innerHTML = `<optgroup label="코바늘">${grp('crochet')}</optgroup><optgroup label="대바늘">${grp('knitting')}</optgroup>`; });
   }
   segSet('#mKind','free'); segSet('#mCraft','both'); $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value='';
+  $('#kShop').hidden = !myShop; if(myShop) $('#pShopName').textContent = myShop.name+' 소식'; $('#pTitle').value=''; $('#pEnds').value=''; $('#pKind').value='notice';
   $('#wTitle').value=''; $('#wYarn').value=''; $('#wYarnWeight').value=''; $('#wNeedle').value=''; $('#wNote').value=''; $('#mDesc').value=''; $('#wCustom').value=''; wCustom=[]; renderWCustom(); wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
   loadTech().then(renderWTech);
   setComposeKind(composeKind);
@@ -1789,13 +1873,14 @@ function setComposeKind(k){
   $('#mfields').hidden = !(k==='meetup' && certified);
   $('#mgate').hidden = !(k==='meetup' && !certified);
   $('#wfields').hidden = k!=='work';
-  $('#sText').hidden = !(k==='post' || k==='review');
+  $('#pfields').hidden = k!=='shop';
+  $('#sText').hidden = !(k==='post' || k==='review' || k==='shop');
   $('#v-compose').classList.toggle('meet', k!=='post');
-  $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : k==='work' ? '작품 인증' : k==='review' ? '모임 후기' : '새 글';
-  $('#sText').placeholder = k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : k==='work' ? '한 줄 소감 (예: 눈 위치 세 번 옮겼어요)' : k==='review' ? '어땠어요? 배운 것, 분위기, 다음에 갈 사람에게 팁' : '새로운 소식이 있나요?';
-  $('#sPost').textContent = k==='meetup' ? '만들기' : k==='work' ? '인증' : '게시';
+  $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : k==='work' ? '작품 인증' : k==='review' ? '모임 후기' : k==='shop' ? '가게 소식' : '새 글';
+  $('#sText').placeholder = k==='shop' ? '소식 내용 (예: 이번 주 토요일까지 전 상품 10% 할인, 2층 클래스 모집)' : k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : k==='work' ? '한 줄 소감 (예: 눈 위치 세 번 옮겼어요)' : k==='review' ? '어땠어요? 배운 것, 분위기, 다음에 갈 사람에게 팁' : '새로운 소식이 있나요?';
+  $('#sPost').textContent = k==='meetup' ? '만들기' : k==='work' ? '인증' : k==='shop' ? '올리기' : '게시';
   $('#sPost').disabled = (k==='meetup' && !certified);
-  $('#sHint').innerHTML = k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : k==='work' ? '사진 1~4장 필수 · 커뮤니티 "작품" 탭에 올라가요' : k==='review' ? '사진과 함께 올리면 다음 참여자에게 도움이 돼요' : quoteHtml();
+  $('#sHint').innerHTML = k==='shop' ? '팔로워 알림 + 근처 지도 핀에 종 표시' : k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : k==='work' ? '사진 1~4장 필수 · 커뮤니티 "작품" 탭에 올라가요' : k==='review' ? '사진과 함께 올리면 다음 참여자에게 도움이 돼요' : quoteHtml();
 }
 function renderWTech(){
   $('#wCraftTabs').innerHTML = `<button data-c="crochet" class="${wCraft==='crochet'?'on':''}">코바늘</button><button data-c="knitting" class="${wCraft==='knitting'?'on':''}">대바늘</button>`;
@@ -1837,6 +1922,14 @@ async function submitCompose(){
       const { error } = await sb.rpc('create_review', { p_meetup_id: reviewMeetup.id, p_body: body||null, p_photos: photos });
       if(error) throw new Error(error.message.replace(/^.*?: /,''));
       sPhotos=[]; toast('후기를 남겼어요');
+    } else if(composeKind==='shop'){
+      if(!myShop) throw new Error('가게 계정만 올릴 수 있어요');
+      const title=$('#pTitle').value.trim(); if(!title) throw new Error('제목을 적어 주세요');
+      const photos = await uploadPhotos(sPhotos);
+      const ends = $('#pEnds').value ? new Date($('#pEnds').value+'T23:59:59').toISOString() : null;
+      const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind: $('#pKind').value, title, body: body||null, photos, ends_at: ends });
+      if(error) throw new Error(error.message);
+      sPhotos=[]; toast('소식을 올렸어요'); composeBack=null; return openShop(myShop.id);
     } else if(composeKind==='work'){
       const title=$('#wTitle').value.trim(); if(!title) throw new Error('작품 이름을 적어 주세요');
       commitWCustom();
@@ -2030,6 +2123,7 @@ async function renderMy(){
     <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname||'')}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
     ${bio?`<div class="pbio">${esc(bio)}</div>`:'<div class="pbio muted">소개를 적어 보세요</div>'}
     <div class="pfriends" id="pfriends" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>
+    ${myShop?`<div class="shopcard" onclick="openShop('${myShop.id}')"><div class="sq">${SHOP_SVG}</div><div style="flex:1;min-width:0"><b>${esc(myShop.name)}</b><div class="muted">내 가게 · 소식 올리기 · 팔로워 보기</div></div><span style="color:var(--ink3)">›</span></div>`:''}
     <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o wave ${isWaving(p)?'on':''}" onclick="toggleWave()" title="지도 핀에 손을 들어 뜨개 친구를 찾고 있다고 알려요">${ico('wave')} ${isWaving(p)?'친구 찾는 중':'뜨개 친구 찾기'}</button></div>
     <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
