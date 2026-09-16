@@ -586,14 +586,14 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <div class="card soft" id="locCard"><b class="t">내 동네 (자동 인식)</b>
         <div id="locStatus"><i class="ico" data-ico="location"><b>📍</b></i> 위치 확인 중…</div>
         <div class="row" style="margin-top:8px"><button type="button" class="btn sm o" onclick="detectLocation()">다시 확인</button><button type="button" class="btn sm o" onclick="manualDong()">직접 입력</button></div>
-        <div class="muted" style="margin-top:6px">정확한 위치는 저장하지 않아요. 500m 격자로 흐려진 좌표만 저장돼요.</div>
+        <div class="muted" style="margin-top:6px">정확한 위치는 저장하지 않아요. 200m 격자로 흐려진 좌표만 저장돼요.</div>
       </div>
       <div class="f">뜨개 경력<div class="seg" id="f_exp"></div></div>
       <div class="f">만나기 좋은 시간<div class="seg" id="f_avail"></div></div>
       <label class="f"><span>소개 <span class="muted">(선택, 300자)</span></span><textarea id="f_bio" maxlength="300" placeholder="예: 퇴근 후 코바늘. 가디건 완성이 목표. 같이 뜨실 분 환영"></textarea></label>
       <label class="f"><span>MBTI <span class="muted">(선택)</span></span><input id="f_mbti" maxlength="4" placeholder="ENFP" style="text-transform:uppercase"></label>
       <div class="muted" style="font-size:.85rem">대바늘·코바늘 여부와 실력 단계는 다음 화면 "내 뜨개 단계"에서 기법을 체크하면 자동으로 정해져요.</div>
-      <label class="f" id="agreeWrap"><span style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:.9rem;line-height:1.45"><input type="checkbox" id="f_agree" style="width:auto;margin-top:3px"><span>(필수) <a href="terms.html" target="_blank">이용약관</a>·<a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a>·<a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다. 위치 정보는 500m 격자로 흐려진 좌표만 저장됩니다.</span></span></label>
+      <label class="f" id="agreeWrap"><span style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:.9rem;line-height:1.45"><input type="checkbox" id="f_agree" style="width:auto;margin-top:3px"><span>(필수) <a href="terms.html" target="_blank">이용약관</a>·<a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a>·<a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다. 위치 정보는 200m 격자로 흐려진 좌표만 저장됩니다.</span></span></label>
       <button class="btn" id="obSave" onclick="saveProfile()">저장하고 다음으로</button>
     </div>
   </section>
@@ -896,7 +896,7 @@ sb.auth.onAuthStateChange(async (ev, session) => {
 });
 function openConsent(){
   openSheet(`<b style="font-size:1.05rem">이용약관 동의</b>
-    <div class="muted" style="font-size:.9rem;line-height:1.5">뜨개동네를 계속 이용하려면 <a href="terms.html" target="_blank">이용약관</a>, <a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a>, <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의가 필요해요. 위치 정보는 500m 격자로 흐려진 좌표만 저장돼요.</div>
+    <div class="muted" style="font-size:.9rem;line-height:1.5">뜨개동네를 계속 이용하려면 <a href="terms.html" target="_blank">이용약관</a>, <a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a>, <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의가 필요해요. 위치 정보는 200m 격자로 흐려진 좌표만 저장돼요.</div>
     <label class="f"><span style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input type="checkbox" id="cAgree" style="width:auto;margin-top:3px"><span>위 내용을 읽었고 동의합니다 (필수)</span></span></label>
     <button class="btn" onclick="submitConsent()">동의하고 계속</button>
     <button class="btn o" onclick="logout()">동의하지 않음 (로그아웃)</button>`);
@@ -1032,7 +1032,8 @@ const MapAdapter = {
   clear(){ this.impl.clear(); },
   marker(o){ this.impl.marker(o); },
   onMove(cb){ this.impl.onMove(cb); },
-  center(){ return this.impl.center(); }
+  center(){ return this.impl.center(); },
+  zoom(){ return this.impl.zoom?.() || 14; }
 };
 function pinHtml({label, sub, avatar, cls, wave}){
   const ini = (label||'?').slice(0,1);
@@ -1047,7 +1048,8 @@ const LMap = {
   clear(){ this.layer.clearLayers(); },
   marker(o){ const m=L.marker([o.lat,o.lng],{icon:L.divIcon({html:pinHtml(o).replace('class="upin','style="position:static;transform:none" class="upin'),iconSize:[0,0],iconAnchor:[0,0]})}); if(o.onClick)m.on('click',o.onClick); m.addTo(this.layer); },
   onMove(cb){ this.map.on('moveend',cb); },
-  center(){ const c=this.map.getCenter(); return {lat:c.lat,lng:c.lng}; }
+  center(){ const c=this.map.getCenter(); return {lat:c.lat,lng:c.lng}; },
+  zoom(){ return this.map.getZoom(); }
 };
 // Google Maps용 HTML 핀 (OverlayView) — Advanced Marker 없이 어떤 지도에서도 동작
 function makeHtmlPin(){
@@ -1077,7 +1079,8 @@ const GMap = {
   clear(){ this.markers.forEach(m=>m.setMap(null)); this.markers=[]; },
   marker(o){ const w=document.createElement('div'); w.innerHTML=pinHtml(o); const d=w.firstElementChild; const m=new this.Pin(new google.maps.LatLng(o.lat,o.lng), d, o.onClick); m.setMap(this.map); this.markers.push(m); },
   onMove(cb){ this.map.addListener('idle',cb); },
-  center(){ const c=this.map?.getCenter?.(); return c ? {lat:c.lat(),lng:c.lng()} : (myProfile?._c || {lat:37.5665,lng:126.9780}); }
+  center(){ const c=this.map?.getCenter?.(); return c ? {lat:c.lat(),lng:c.lng()} : (myProfile?._c || {lat:37.5665,lng:126.9780}); },
+  zoom(){ return this.map?.getZoom?.() || 14; }
 };
 
 // ============ 지도 홈 ============
@@ -1093,7 +1096,19 @@ $('#filters').onclick = e => {
   filter.mode = (filter.mode===k && k!=='all') ? 'all' : k;
   renderFilters(); loadPins();
 };
+async function refreshLocationDaily(){
+  if(!myProfile?.dong_verified_at || !navigator.geolocation) return;
+  const last=+localStorage.getItem('locRefreshAt')||0; if(Date.now()-last < 864e5) return;
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    localStorage.setItem('locRefreshAt', String(Date.now()));
+    const {latitude:lat, longitude:lng} = pos.coords;
+    const r = await sb.rpc('set_fuzzy_location', { p_lat:lat, p_lng:lng }); if(r.error) return;
+    const cell=0.0018; const c={lat:Math.floor(lat/cell)*cell+cell/2, lng:Math.floor(lng/cell)*cell+cell/2};
+    if(myProfile._c && (Math.abs(myProfile._c.lat-c.lat)>1e-6 || Math.abs(myProfile._c.lng-c.lng)>1e-6)){ myProfile._c=c; if(MapAdapter.ready) loadPins(); }
+  }, ()=>{}, { enableHighAccuracy:false, timeout:8000, maximumAge:600000 });
+}
 async function initMap(){
+  refreshLocationDaily();
   const c = myProfile?._c || {lat:37.5665,lng:126.9780};
   await MapAdapter.init($('#map'), c);
   renderFilters();
@@ -1110,14 +1125,21 @@ async function fetchPins(){
   ]);
   if(error) return toast('근처 조회 실패: '+error.message);
   MapAdapter.clear();
-  if(myProfile?._c) MapAdapter.marker({...myProfile._c,label:'나',avatar:myProfile.avatar_url,cls:'me',wave:isWaving(myProfile)});
+  const spread = (list)=>{   // 같은 좌표 그룹을 화면상 26px 반지름 원으로 분산
+    const z=MapAdapter.zoom(); const dLng=360/(256*Math.pow(2,z)); const groups={};
+    list.forEach(p=>{ const k=p.lat.toFixed(5)+','+p.lng.toFixed(5); (groups[k] ||= []).push(p); });
+    Object.values(groups).forEach(g=>{ if(g.length<2) return; const r=26*dLng; g.forEach((p,i)=>{ const a=i/g.length*2*Math.PI - Math.PI/2; p.lng=p.lng + r*Math.cos(a); p.lat=p.lat + r*Math.sin(a)*Math.cos(p.lat*Math.PI/180); }); });
+  };
+  const mePin = myProfile?._c ? {lat:myProfile._c.lat,lng:myProfile._c.lng,me:true} : null;
   let shown = people||[];
   if(filter.mode==='meet') shown = [];
   if(filter.mode==='sim') shown = shown.filter(p=>{ const d=simDiff(p); return d!==null && Math.abs(d)<=1; });
   if(filter.mode==='time'){ const mine=new Set(myProfile?.available||[]); shown = shown.filter(p=>(p.available||[]).some(a=>mine.has(a))); }
   if(filter.mode==='friends'){ const ids=new Set(await friendIds()); shown = shown.filter(p=>ids.has(p.id)); }
   if(filter.mode==='wave') shown = shown.filter(p=>p.waving);
-  shown.forEach(p=>MapAdapter.marker({lat:p.lat,lng:p.lng,label:p.nickname,avatar:p.avatar_url,cls:p.craft==='knit'?'knit':'',wave:!!p.waving,onClick:()=>showPinCard(p)}));
+  const pts = shown.map(p=>({lat:p.lat,lng:p.lng,p})); if(mePin) pts.push(mePin); spread(pts);
+  if(mePin) MapAdapter.marker({lat:mePin.lat,lng:mePin.lng,label:'나',avatar:myProfile.avatar_url,cls:'me',wave:isWaving(myProfile)});
+  pts.filter(x=>x.p).forEach(({lat,lng,p})=>MapAdapter.marker({lat,lng,label:p.nickname,avatar:p.avatar_url,cls:p.craft==='knit'?'knit':'',wave:!!p.waving,onClick:()=>showPinCard(p)}));
   if(filter.mode==='all' || filter.mode==='meet') (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:m.title,cls:'meet',onClick:()=>openMeetup(m.id)}); });
   let em=$('#mapview .mapempty'); if(!em){ em=document.createElement('div'); em.className='mapempty'; $('#mapview').appendChild(em); }
   const emptyNow = filter.mode!=='all' && !shown.length && !(filter.mode==='meet' && (meetups||[]).length);
@@ -2025,7 +2047,7 @@ function openSettings(){
     <div class="slist">
       <button class="srow" onclick="closeSheet();openSkills()"><span>내 뜨개 단계 <span class="muted">${lvShort(p)||'아직 없음'}</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openSlides()"><span>뜨개 단계 설명</span><span class="car">›</span></button>
-      <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 500m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
+      <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 200m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
     </div>
     <div class="sgrp">도움</div>
     <div class="slist">

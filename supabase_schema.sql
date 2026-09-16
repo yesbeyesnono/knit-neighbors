@@ -903,3 +903,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   open_support_room(p_support uuid) security definer: 친구가 아니어도 지기와 1:1 방 생성/조회
 --   지기 계정 = knitup.official@gmail.com 프로필(e120eb67-…), 닉네임 '뜨개동네 지기'. 앱 SUPPORT_ID 상수
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 20. 위치 흐리기 변경 — 2026-09-16 (마이그레이션 fuzzy_location_200m_center)
+--   set_fuzzy_location: 200m 격자(0.0018°) 중심에 고정, 무작위 오프셋 제거. 기존 좌표 재정렬.
+--   앱: 같은 지점 핀은 화면상 26px 원으로 분산(fetchPins spread), 하루 1회 조용히 위치 갱신(refreshLocationDaily)
+--   문서: privacy.html · terms.html · 앱 문구 '200m 격자'
+-- ---------------------------------------------------------------
