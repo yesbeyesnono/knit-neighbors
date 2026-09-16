@@ -387,6 +387,9 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 /* 커뮤니티: 제목은 스크롤로 올라가고 카테고리 탭이 상단에 고정(스크롤·키보드 후 탭이 제목 밑에 숨던 문제) */
 #v-comm .top{position:static}
 #v-comm .subtabs{position:sticky;top:0;z-index:6;flex:none}
+.solvedtag{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;font-weight:700;color:#2f6b3a;background:#e8f3e8;border-radius:999px;padding:2px 9px;margin:2px 0 4px}
+.solvedchip{font-size:.7rem;padding:1px 7px}
+.rpost .acts button.on2{color:#2f6b3a;font-weight:700}
 /* 채팅 입력창 (카카오톡식): + 사진 · 알약 입력 · 전송, 홈 인디케이터 위 여백 */
 #v-room .compose.kk{display:flex;align-items:center;gap:8px;padding:8px 10px max(8px, env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:#fff}
 #v-room .kkplus{width:38px;height:38px;border-radius:50%;background:#f1f1f1;border:0;display:grid;place-items:center;flex:none;color:var(--ink);cursor:pointer;padding:0}
@@ -680,7 +683,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
             <div class="tchips" id="wCustomChips"></div>
             <span class="hint" style="font-size:.78rem;color:var(--ink3)">기본 목록은 60종이에요. 여기 적어 주신 기법은 모아서 목록에 추가할게요.</span>
           </div>
-          <label class="f">실 정보 <span class="muted">(선택)</span><input id="wYarn" maxlength="80" placeholder="예: 하마나카 아메리, 5호 코바늘"></label>
+          <div class="mtitle" style="font-size:.85rem;color:var(--ink2)">실·바늘 <span class="muted">(선택)</span></div>
+          <label class="f">실 이름<input id="wYarn" maxlength="60" placeholder="예: 하마나카 아메리"></label>
+          <div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <label class="f">굵기<select id="wYarnWeight"><option value="">선택</option><option>레이스</option><option>극세</option><option>세</option><option>중세(DK)</option><option>중(Worsted)</option><option>굵은(Bulky)</option><option>극태</option></select></label>
+            <label class="f">바늘 호수<input id="wNeedle" maxlength="20" placeholder="예: 5호, 4.0mm"></label>
+          </div>
           <label class="f">한 줄 소감 <span class="muted">(선택)</span><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px;background:#fff"></textarea></label>
           <div class="hint" style="font-size:.8rem;color:var(--ink2)">사진은 아래 <i class="ico" data-ico="camera"><b>📷</b></i> 로 1~4장 (필수)</div>
         </div>
@@ -1209,12 +1217,19 @@ async function loadUserFeed(uid, tab, el){
   el.innerHTML = (data||[]).length ? data.map(p=> p.parent_id ? postCard(p,{noLine:true, replyTo: p.parent?.author?.nickname}) : postGroup(p)).join('') : `<div class="empty" style="white-space:pre-line">${emptyMsg}</div>`;
   if(uid!==me.id || true){ feedRows = (data||[]); }
 }
-function requestFriend(id, wave){
+async function requestFriend(id, wave){
+  const { data:rel } = await sb.from('friendships').select('requester_id,addressee_id,status,created_at').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`).limit(1);
+  const r = rel?.[0];
+  if(r?.status==='pending' && r.requester_id===me.id) return openSheet(`<b style="font-size:1.05rem">이미 인사를 건넸어요</b><div class="muted" style="font-size:.92rem;line-height:1.55">${agoShort(r.created_at)} 전에 친구 신청을 보냈어요. 상대가 앱을 열어 확인하면 알림으로 알려 드릴게요. 답이 늦어도 너무 서운해하지 마세요, 뜨개하느라 바쁠 수 있으니까요 🧶</div><button class="btn" onclick="closeSheet()">기다려 볼게요</button>`);
+  if(r?.status==='pending' && r.addressee_id===me.id) return openSheet(`<b style="font-size:1.05rem">이분이 먼저 인사를 건넸어요</b><div class="muted" style="font-size:.92rem">받은 친구 신청이 있어요. 수락하면 바로 채팅방이 열려요.</div>${r.message?`<div class="story">"${esc(r.message)}"</div>`:''}<button class="btn" onclick="closeSheet();respond('${id}','accepted')">수락하기</button><button class="btn o" onclick="closeSheet()">나중에</button>`);
+  if(r?.status==='accepted') return openDirectRoom(id);
+  if(r?.status==='declined') return toast('거절된 신청은 30일 뒤 다시 보낼 수 있어요');
+  if(r?.status==='blocked') return toast('차단 상태라 신청할 수 없어요');
   openSheet(`<b>${wave?ico('wave')+' 인사하며 친구 신청':'친구 신청'}</b><p class="muted" style="margin:0">${wave?'뜨개 친구를 찾는 이웃이에요. 짧은 인사만으로도 충분해요':'한 줄 메시지를 함께 보내면 수락률이 올라가요 (선택, 100자)'}</p><textarea id="reqMsg" maxlength="100" placeholder="예: 저도 그 도안 뜨고 있어요">${wave?'손 드신 거 보고 인사드려요 🧶 같이 떠요!':''}</textarea><button class="btn" onclick="sendRequest('${id}')">보내기</button>`);
 }
 async function sendRequest(id){
   const { error } = await sb.from('friendships').insert({ requester_id:me.id, addressee_id:id, message:$('#reqMsg').value.trim()||null });
-  if(error) return toast(error.message.replace(/^.*?: /,''));
+  if(error){ if(error.code==='23505') { closeSheet(); return toast('이미 친구 신청을 보냈어요. 상대가 확인할 때까지 기다려 주세요'); } return toast(error.message.replace(/^.*?: /,'')); }
   toast('친구 신청을 보냈어요'); openProfile(id);
 }
 async function respond(id, status){
@@ -1274,8 +1289,8 @@ function watchFriends(){
 }
 async function refreshBadge(){ if(!me) return; const {count}=await sb.from('notifications').select('*',{count:'exact',head:true}).eq('recipient_id',me.id).is('read_at',null); ['badgeFriends','badgeAct'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.hidden=!count; el.textContent=count||''; } }); }
 // ===== 활동(알림) =====
-const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요' };
-const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review') };
+const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요' };
+const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check') };
 let actRows = [];
 function openActivity(){ show('activity'); renderActivity(); }
 async function renderActivity(){
@@ -1423,7 +1438,7 @@ async function loadFeed(more){
     // 추천: 서버 점수순 (반응 × 거리 × 관계 × 질문 ÷ 시간)
     const { data, error } = await sb.rpc('feed_ranked', { p_limit: FEED_PAGE, p_offset: feedOffset });
     if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
-    if(data?.length){ const { data:wk } = await sb.from('posts').select('id,work_id,review_of,mentions').in('id', data.map(r=>r.id)); const wm={}; (wk||[]).forEach(x=>wm[x.id]=x); data.forEach(r=>{ r.work_id = wm[r.id]?.work_id||null; r.review_of = wm[r.id]?.review_of||null; r.mentions = wm[r.id]?.mentions||[]; }); }
+    if(data?.length){ const { data:wk } = await sb.from('posts').select('id,work_id,review_of,mentions,solved_reply_id').in('id', data.map(r=>r.id)); const wm={}; (wk||[]).forEach(x=>wm[x.id]=x); data.forEach(r=>{ r.work_id = wm[r.id]?.work_id||null; r.review_of = wm[r.id]?.review_of||null; r.mentions = wm[r.id]?.mentions||[]; r.solved_reply_id = wm[r.id]?.solved_reply_id||null; }); }
     feedRows = feedRows.concat(data||[]); feedOffset += (data||[]).length;
     $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
     await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), attachWorks(data||[])]); renderFeed(); return;
@@ -1540,13 +1555,20 @@ function postGroup(p, opts={}){
 // 펼친 답글 한 줄 (작은 아바타, 이름·시간, 본문, 좋아요)
 function replyCard(r){
   const a=r.author||{}; const mine=r.author_id===me.id;
+  const root=findPost(r.parent_id); const rootMine=root?.author_id===me.id; const solved=root?.solved_reply_id===r.id;
   return `<div class="rpost" id="rp-${r.id}">
     <div onclick="openProfile('${a.id}')">${avatar(a).replace('class="ava"','class="ava sm"')}</div>
     <div class="rb">
-      <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time><button class="menu" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
+      <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time>${solved?'<span class="chip m solvedchip">'+ico('check')+' 해결한 답글</span>':''}<button class="menu" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
       ${r.body?`<div class="txt">${bodyHtml(r)}</div>`:''}
-      <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button>${!mine&&a.id?`<button onclick="replyTo('${r.parent_id}','${a.id}',this.dataset.n)" data-n="${esc(a.nickname||'')}">답글</button>`:''}</div>
+      <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button>${!mine&&a.id?`<button onclick="replyTo('${r.parent_id}','${a.id}',this.dataset.n)" data-n="${esc(a.nickname||'')}">답글</button>`:''}${rootMine&&!mine?`<button class="${solved?'on2':''}" onclick="markSolved('${r.parent_id}','${solved?'':r.id}')">${solved?'해결 취소':'해결됐어요'}</button>`:''}</div>
     </div></div>`;
+}
+async function markSolved(rootId, replyId){
+  const { error } = await sb.rpc('mark_solved', { p_post: rootId, p_reply: replyId||null });
+  if(error) return toast('실패: '+error.message);
+  const p=findPost(rootId); if(p){ p.solved_reply_id = replyId||null; const grp=document.getElementById('pg-'+rootId); if(grp) grp.outerHTML=postGroup(p); }
+  toast(replyId ? '해결로 표시했어요. 답글 쓴 분에게 알림이 가요' : '해결 표시를 취소했어요');
 }
 function findPost(id){ return [...feedRows, ...feedRows.flatMap(x=>x.replies||[]), curPost].filter(Boolean).find(x=>x.id===id); }
 async function toggleReplies(id){
@@ -1666,6 +1688,7 @@ function postCard(p, opts={}){
       ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 답글</div>`:''}
       ${p.review_meetup?`<div class="rvtag" onclick="event.stopPropagation();openMeetup('${p.review_of}')">${ico('yarn')} 모임 후기 · ${esc(p.review_meetup.title)}</div>`:''}
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}','${a.id}')">···</button></div>
+      ${p.solved_reply_id?`<div class="solvedtag">${ico('check')} 해결됐어요</div>`:''}
       ${p.body?`<div class="txt">${bodyHtml(p)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`).join('')}</div>`:''}
       ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work):''}
@@ -1741,7 +1764,7 @@ async function openCompose(kind, meetupId){
     loadTech().then(()=>{ const grp = c => TECH.filter(t=>t.craft===c).map(t=>`<option value="${t.id}">${t.level}단계 · ${esc(t.name_ko)}</option>`).join(''); $('#mTech').innerHTML = `<optgroup label="코바늘">${grp('crochet')}</optgroup><optgroup label="대바늘">${grp('knitting')}</optgroup>`; });
   }
   segSet('#mKind','free'); segSet('#mCraft','both'); $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value='';
-  $('#wTitle').value=''; $('#wYarn').value=''; $('#wNote').value=''; $('#mDesc').value=''; $('#wCustom').value=''; wCustom=[]; renderWCustom(); wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
+  $('#wTitle').value=''; $('#wYarn').value=''; $('#wYarnWeight').value=''; $('#wNeedle').value=''; $('#wNote').value=''; $('#mDesc').value=''; $('#wCustom').value=''; wCustom=[]; renderWCustom(); wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
   loadTech().then(renderWTech);
   setComposeKind(composeKind);
   show('compose');
@@ -1819,7 +1842,7 @@ async function submitCompose(){
       if(!wTechSel.size && !wCustom.length) throw new Error('사용한 기법을 하나 이상 골라 주세요');
       if(!sPhotos.length) throw new Error('작품 사진을 1장 이상 올려 주세요');
       const photos = await uploadPhotos(sPhotos);
-      const { error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn:$('#wYarn').value.trim()||null, p_note: $('#wNote').value.trim()||null, p_custom: wCustom });
+      const { error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn:[$('#wYarn').value.trim(), $('#wYarnWeight').value, $('#wNeedle').value.trim()].filter(Boolean).join(' · ')||null, p_note: $('#wNote').value.trim()||null, p_custom: wCustom, p_yarn_meta:{ name:$('#wYarn').value.trim()||null, weight:$('#wYarnWeight').value||null, needle:$('#wNeedle').value.trim()||null } });
       if(error) throw new Error(error.message);
       await loadMe(); sPhotos=[]; toast(`작품 인증 완료! 이제 모임을 열 수 있어요`);
     } else {

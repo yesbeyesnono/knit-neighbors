@@ -910,3 +910,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   앱: 같은 지점 핀은 화면상 26px 원으로 분산(fetchPins spread), 하루 1회 조용히 위치 갱신(refreshLocationDaily)
 --   문서: privacy.html · terms.html · 앱 문구 '200m 격자'
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 21. 데이터 수집 3종 — 2026-09-16 (마이그레이션 data_collection_skill_events_yarn_solved)
+--   a) skill_events(profile_id, kind add|remove|level, technique_id, craft, level, source manual|cert|backfill): profiles 트리거 profiles_log_skills. RLS 정책 없음(서버 분석 전용)
+--   b) works.yarn_name / yarn_weight / needle_size + create_work(..., p_yarn_meta jsonb)
+--   c) posts.solved_reply_id + mark_solved(p_post, p_reply) (원글 작성자만, 알림 kind 'solved')
+--   개인정보처리방침: 가명·익명 처리 후 통계·연구·서비스 개선 활용 문구 추가
+-- ---------------------------------------------------------------
