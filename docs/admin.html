@@ -228,7 +228,7 @@ async function supportRooms(){
 }
 VIEWS.support = async()=>{
   const rooms=await supportRooms();
-  $('#main').innerHTML=`<h1>지기 문의함 <small>미답변 ${rooms.filter(r=>r.unanswered).length} · 답장은 앱에서 knitup.official 계정(뜨개동네 지기)으로</small></h1>
+  $('#main').innerHTML=`<h1>지기 문의함 <small>미답변 ${rooms.filter(r=>r.unanswered).length} · 행을 누르면 대화를 보고 바로 답장할 수 있어요</small></h1>
   <table><tr><th>사용자</th><th>마지막 메시지</th><th style="width:120px">시각</th><th style="width:90px">상태</th></tr>
   ${rooms.map(r=>`<tr class="clk" onclick="openRoomPanel('${r.id}')"><td><b>${esc(r.user?.nickname||'(탈퇴)')}</b><div class="muted">${esc(r.user?.dong_name||'')}</div></td><td>${r.last.sender_id===SUPPORT_ID?'<span class="muted">지기: </span>':''}${esc(r.last.body||(r.last.photo_url?'(사진)':''))}</td><td class="muted">${fmt(r.last.created_at)}</td><td>${r.unanswered?'<span class="chip r">미답변</span>':'<span class="chip g">답변함</span>'}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">아직 문의가 없어요</td></tr>'}</table>
   <p class="muted">앱 웹 버전: <a href="https://yesbeyesnono.github.io/knit-neighbors/" target="_blank">yesbeyesnono.github.io/knit-neighbors</a> — 지기 계정으로 로그인하면 채팅 탭에서 답장할 수 있어요.</p>`;
@@ -238,7 +238,15 @@ async function openRoomPanel(id){
   const { data:mem } = await sb.from('room_members').select('profile_id, profiles(nickname)').eq('room_id',id);
   const name=(mem||[]).map(m=>m.profiles).find(p=>p)?.nickname;
   const user=(mem||[]).find(m=>m.profile_id!==SUPPORT_ID);
-  openPanel(`<h2 style="margin-top:0">${esc(user?.profiles?.nickname||name||'대화')}</h2><div class="muted">읽기 전용 · 답장은 앱에서 지기 계정으로</div><div style="margin-top:10px">${(msgs||[]).map(m=>`<div class="msg ${m.sender_id===SUPPORT_ID?'sup':''}">${esc(m.body||'')}${m.photo_url?'<div class="muted">(사진)</div>':''}<time>${fmt(m.created_at)}</time></div>`).join('')}</div>`);
+  openPanel(`<h2 style="margin-top:0">${esc(user?.profiles?.nickname||name||'대화')}</h2><div class="muted">답장은 사용자에게 <b>뜨개동네 지기</b> 이름으로 전달돼요 · 보낸 관리자는 로그에 기록</div>
+    <div id="roomMsgs" style="margin:10px 0 70px">${(msgs||[]).map(m=>`<div class="msg ${m.sender_id===SUPPORT_ID?'sup':''}">${esc(m.body||'')}${m.photo_url?'<div class="muted">(사진)</div>':''}<time>${fmt(m.created_at)}</time></div>`).join('')||'<div class="muted">메시지 없음</div>'}</div>
+    <div style="position:sticky;bottom:0;background:#fff;padding:10px 0;border-top:1px solid var(--line);display:flex;gap:8px"><textarea id="replyBody" style="min-height:44px;flex:1" placeholder="답장 내용 (Enter=줄바꿈, Ctrl+Enter=보내기)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))sendSupportReply('${id}')"></textarea><button class="p" onclick="sendSupportReply('${id}')">보내기</button></div>`);
+  const box=$('#panel'); box.scrollTop=box.scrollHeight;
+}
+async function sendSupportReply(roomId){
+  const t=$('#replyBody').value.trim(); if(!t) return toast('내용을 입력하세요');
+  const {error}=await sb.rpc('admin_reply_support',{p_room:roomId,p_body:t}); if(error) return toast(error.message);
+  toast('보냈어요'); openRoomPanel(roomId); refreshBadges(); if(location.hash==='#support') VIEWS.support();
 }
 // ===== 금칙어 =====
 VIEWS.banned = async()=>{
@@ -335,7 +343,7 @@ async function exportMeetups(){ const {data}=await sb.from('meetups').select('*'
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

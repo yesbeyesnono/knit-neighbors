@@ -926,3 +926,4 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_resolve_report / admin_banned_word / admin_broadcast(알림 kind 'notice') / admin_stats / admin_set_admin / admin_find_users(이메일 포함)
 --   초기 관리자: knitup.official, yesbeyesnono, cocos.jay
 -- ---------------------------------------------------------------
+--   + admin_reply_support(p_room, p_body): 관리자가 콘솔에서 지기 이름(sender=지기 계정)으로 답장, admin_logs 'reply_support' 기록
