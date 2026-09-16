@@ -918,3 +918,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   c) posts.solved_reply_id + mark_solved(p_post, p_reply) (원글 작성자만, 알림 kind 'solved')
 --   개인정보처리방침: 가명·익명 처리 후 통계·연구·서비스 개선 활용 문구 추가
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 22. 관리자 콘솔 docs/admin.html — 2026-09-16 (마이그레이션 admin_console, admin_manage_admins)
+--   admins(profile_id) + is_admin() · 관리자 열람 정책(*_admin_select) 14개 테이블 · banned_words 관리자 쓰기
+--   admin_logs(모든 관리자 행위 기록, 삭제 불가) · RPC: admin_hide_post / admin_delete_post / admin_suspend_user /
+--   admin_resolve_report / admin_banned_word / admin_broadcast(알림 kind 'notice') / admin_stats / admin_set_admin / admin_find_users(이메일 포함)
+--   초기 관리자: knitup.official, yesbeyesnono, cocos.jay
+-- ---------------------------------------------------------------
