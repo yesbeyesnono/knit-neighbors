@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#FBF3E6">
+<meta name="theme-color" content="#F7F8F3">
 <title>뜨개동네</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{
-  --bg:#FBF3E6; --bg2:#F4E6D2; --ink:#3A2A1E; --ink2:#6B5744; --ink3:#9C8A76; --line:#E7D6BC;
-  --accent:#4B5A32; --accent-ink:#fff; --accent-soft:#E4E7D5; --card:#FFFCF6;
-  --mustard:#D9A441; --mustard-soft:#F7E7C7; --burgundy:#7A2E2E; --burgundy-soft:#EFDAD6; --terra:#B5502E; --terra-soft:#F3DED2;
-  --yarn:#D9A441; --yarn-soft:#F7E7C7; --moss:#4B5A32; --moss-soft:#E4E7D5; --rose:#B5502E; --rose-soft:#F3DED2;
+  --bg:#F7F8F3; --bg2:#EEF0E6; --ink:#20261A; --ink2:#566049; --ink3:#8E977F; --line:#E1E5D6;
+  --accent:#4B5A32; --accent-ink:#fff; --accent-soft:#E4E9D6; --card:#FFFFFF;
+  --mustard:#7A8B4F; --mustard-soft:#EAEFD9; --burgundy:#9B3B33; --burgundy-soft:#F3E1DE; --terra:#6B7F3A; --terra-soft:#EAEFD9;
+  --yarn:#7A8B4F; --yarn-soft:#EAEFD9; --moss:#4B5A32; --moss-soft:#E4E9D6; --rose:#C0503E; --rose-soft:#F3E1DE; --like:#C0503E; --deep:#2F3B1F;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -21,7 +21,7 @@ html,body{height:100%;margin:0}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 button,a,.item,.post,.pin,.upin{touch-action:manipulation}
 @media (max-width:479px){ input,select,textarea{font-size:16px} }
-body{background:#E4D3B8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);font-size:15px;line-height:1.4;letter-spacing:-0.01em;word-break:keep-all}
+body{background:#DDE2D0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);font-size:15px;line-height:1.4;letter-spacing:-0.01em;word-break:keep-all}
 #app{max-width:430px;height:100%;margin:0 auto;background:var(--bg);position:relative;display:flex;flex-direction:column;overflow:hidden}
 @supports (height:100dvh){ @media (max-width:479px){ #app{height:100dvh} } }
 @media (min-width:480px){#app{height:calc(100% - 32px);margin-top:16px;border-radius:28px;box-shadow:0 20px 60px rgba(0,0,0,.18);border:6px solid #111}}
@@ -47,11 +47,11 @@ nav button{flex:1;background:none;border:0;color:var(--ink3);display:flex;align-
 nav button svg{width:27px;height:27px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 nav button.on{color:var(--ink)}
 nav button.on svg{stroke-width:2.5}
-nav .badge{position:absolute;top:6px;right:calc(50% - 18px);background:#B5502E;color:#fff;font-size:.62rem;font-weight:700;border-radius:999px;padding:0 5px;min-width:16px;height:16px;line-height:16px;text-align:center}
+nav .badge{position:absolute;top:6px;right:calc(50% - 18px);background:var(--like);color:#fff;font-size:.62rem;font-weight:700;border-radius:999px;padding:0 5px;min-width:16px;height:16px;line-height:16px;text-align:center}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:#fff;border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:600;cursor:pointer;width:100%}
 .btn.o{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .btn.y{background:var(--ink);color:#fff}
-.btn.r{background:transparent;color:#B5502E;border:1px solid var(--line)}
+.btn.r{background:transparent;color:var(--like);border:1px solid var(--line)}
 .btn.m{background:var(--ink);color:#fff}
 .btn.sm{padding:7px 14px;font-size:.85rem;width:auto;border-radius:999px}
 .btn:disabled{opacity:.5;cursor:default}
@@ -204,12 +204,12 @@ details .seg{margin-top:8px;justify-content:center}
 .mcard .mtags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .mcard .mtags span{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--bg2);color:var(--ink2)}
 .mcard .mtags span.ok{background:var(--accent-soft);color:var(--accent)}
-.mcard .mtags span.warn{background:#fff3e0;color:#9a5a00}
+.mcard .mtags span.warn{background:var(--burgundy-soft);color:var(--burgundy)}
 .mcard .mtags span.full{background:var(--burgundy-soft);color:var(--burgundy)}
 .mcard .kind{font-size:12px;font-weight:700;color:var(--ink);background:var(--bg2);padding:2px 8px;border-radius:6px;margin-left:6px}
 /* 작품 인증 */
 .wcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:4px 0 10px;background:var(--card)}
-.wcard .wh{font-size:12px;color:#93701e;font-weight:700;margin-bottom:4px}
+.wcard .wh{font-size:12px;color:var(--accent);font-weight:700;margin-bottom:4px}
 .wcard b{font-size:16px;display:block}
 .wcard .ml{font-size:14px;color:var(--ink2);margin-top:3px}
 .wcard .tchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
@@ -219,7 +219,7 @@ details .seg{margin-top:8px;justify-content:center}
 .wfields label.f{font-size:.8rem;color:var(--ink2)}
 .wfields input{background:var(--card)}
 .wfields .tchips{display:flex;flex-wrap:wrap;gap:5px}
-.wfields .tchips span,.wcard .tchips span.custom{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--card);border:1px dashed #93701e;color:#93701e}
+.wfields .tchips span,.wcard .tchips span.custom{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--card);border:1px dashed var(--accent);color:var(--accent)}
 .mfields label.f textarea,.wfields label.f textarea{font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
 .wfields .tsel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
 .wfields .tsel .tabs{margin-bottom:8px}
@@ -231,8 +231,8 @@ details .seg{margin-top:8px;justify-content:center}
 .gate{background:var(--bg2);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
 .gate b{font-size:1rem}
 .gate .muted{font-size:.88rem}
-.tech .vbadge{font-size:.65rem;background:#93701e;color:#fff;padding:1px 6px;border-radius:999px;margin-left:2px}
-.vcount{font-size:13px;color:#93701e;font-weight:600}
+.tech .vbadge{font-size:.65rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:999px;margin-left:2px}
+.vcount{font-size:13px;color:var(--accent);font-weight:600}
 /* 모임 후기 */
 .rvtag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:3px 10px;border-radius:999px;margin:0 0 6px;cursor:pointer}
 .rvlist{display:flex;flex-direction:column;gap:12px}
@@ -377,7 +377,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .replyto{font-size:.78rem;color:var(--ink3);margin-bottom:2px}
 .fab{display:none}
 /* ===== 커뮤니티·글·채팅 화면 스타일 ===== */
-#app{--tbg:var(--bg);--tink:var(--ink);--tmute:var(--ink3);--tline:var(--line);--tred:#B5502E;
+#app{--tbg:var(--bg);--tink:var(--ink);--tmute:var(--ink3);--tline:var(--line);--tred:var(--like);
   background:var(--tbg);color:var(--tink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:16px;line-height:1.35;letter-spacing:-0.01em;word-break:break-word}
 .top,.top,.top,.top{background:var(--tbg);border-bottom:0;padding:14px 16px 10px;gap:12px}
 .top h1,.top h1,.top h1,.top h1{font-family:inherit;font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;text-align:center;flex:1}
@@ -429,7 +429,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 #v-room .kkbox input{flex:1;border:0;background:transparent;padding:8px 0;font-size:16px;min-width:0;border-radius:0;box-shadow:none}
 #v-room .kksend{width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;border:0;display:grid;place-items:center;flex:none;cursor:pointer;padding:0}
 #v-room .kksend svg{width:18px;height:18px}
-.bub img.chatph{display:block;max-width:220px;width:100%;border-radius:12px;background:#E4D3B8;min-height:60px}
+.bub img.chatph{display:block;max-width:220px;width:100%;border-radius:12px;background:#DDE2D0;min-height:60px}
 #v-room .bub.ph{padding:0;background:transparent;border:0}
 #v-room .bub.ph time{display:block;text-align:right}
 /* 내 뜨개 단계: 좌우 여백 + 작품 인증 섹션과 같은 톤 */
@@ -494,7 +494,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .mention{color:var(--terra);font-weight:600;cursor:pointer}
 /* 🔔 활동 */
 .top .ib{position:relative}
-.top .ib .badge{position:absolute;top:-2px;right:-4px;background:#B5502E;color:#fff;font-size:.62rem;font-weight:700;border-radius:999px;padding:0 5px;min-width:16px;height:16px;line-height:16px;text-align:center}
+.top .ib .badge{position:absolute;top:-2px;right:-4px;background:var(--like);color:#fff;font-size:.62rem;font-weight:700;border-radius:999px;padding:0 5px;min-width:16px;height:16px;line-height:16px;text-align:center}
 #myTitle,#profTitle{opacity:0;transition:opacity .15s}
 #myTitle.show,#profTitle.show{opacity:1}
 #actBody{padding:0}
@@ -609,8 +609,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .ava{background:var(--accent-soft);color:var(--accent)}
 .item.support .ava,.upin.me .face{background:var(--accent);color:#fff}
 .chip{background:var(--accent-soft);color:var(--accent)}
-.chip.y{background:var(--mustard-soft);color:#93701e}.chip.r{background:var(--burgundy-soft);color:var(--burgundy)}.chip.m{background:var(--accent-soft);color:var(--accent)}
-.lvchip{background:var(--mustard-soft);color:#93701e}.lvchip b{color:#6f5416}
+.chip.y{background:var(--mustard-soft);color:var(--accent)}.chip.r{background:var(--burgundy-soft);color:var(--burgundy)}.chip.m{background:var(--accent-soft);color:var(--accent)}
+.lvchip{background:var(--mustard-soft);color:var(--accent)}.lvchip b{color:var(--ink)}
 nav{background:var(--bg)} nav button{color:var(--ink3)} nav button.on{color:var(--accent)}
 nav button[data-v="plus"]{background:var(--accent);color:#fff}
 .bub{background:var(--card);border:1px solid var(--line)} .bub.me{background:var(--accent);color:#fff;border-color:transparent}
@@ -630,12 +630,15 @@ body.icons .wavebadge .ico[data-ico="wave"],body.icons .filters button.on .ico[d
 .solvedtag{background:var(--accent-soft);color:var(--accent)}
 .upin .lbl{background:var(--accent)} .upin .face{border-color:var(--accent);color:var(--accent);background:var(--card)} .upin .tail{border-top-color:var(--accent)}
 .upin.me .lbl,.upin.meet .lbl,.upin.shop .lbl{background:var(--card);color:var(--accent);border-color:var(--accent)}
-.upin.meet .face{background:var(--accent);color:#fff} .upin.shop .face{background:var(--card);border-color:var(--terra)} .upin.shop .face svg{stroke:var(--terra)} .upin.shop .tail{border-top-color:var(--terra)} .upin.shop .lbl{color:var(--terra);border-color:var(--terra)}
+.upin.meet .face{background:var(--accent);color:#fff} .upin.shop .face{background:var(--card);border-color:var(--deep)} .upin.shop .face svg{stroke:var(--deep)} .upin.shop .tail{border-top-color:var(--deep)} .upin.shop .lbl{color:var(--deep);border-color:var(--deep)}
 .upin.knit .face{border-color:var(--terra);color:var(--terra)} .upin.knit .tail{border-top-color:var(--terra)} .upin.knit .lbl{background:var(--terra)}
 .locbtn{background:var(--card);border-color:var(--line);color:var(--accent)}
 #v-compose .top .btn,#v-room .kksend,.rrow .btn,.cbox .btn{background:var(--accent);color:#fff}
 input[type=checkbox],input[type=radio]{accent-color:var(--accent)}
 nav .badge,.top .ib .badge{background:var(--terra)}
+
+.upin .bell{background:#DDE6B8;border-color:var(--deep)} .upin .bell svg{stroke:var(--deep)}
+.top h1,.ptop h2,.shophead h2{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -1326,7 +1329,7 @@ async function openProfile(id){
   $('#profBody').innerHTML = `
     <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}</h2><div class="phandle">${esc(handle)}</div>${isWaving(p)?'<div style="margin-top:8px"><span class="wavebadge">'+ico('wave')+' 뜨개 친구를 찾고 있어요 · 먼저 인사해 주면 반가워해요</span></div>':''}</div>${avatar(p,true)}</div>
     ${bio?`<div class="pbio">${esc(bio)}</div>`:''}
-    ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:var(--mustard-soft);color:#93701e">${ico('cert')} 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
+    ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:var(--mustard-soft);color:var(--accent)">${ico('cert')} 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}</div>
     <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="replies" class="${profTab==='replies'?'on':''}">답글</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button></div>

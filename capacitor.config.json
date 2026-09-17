@@ -7,16 +7,16 @@
   },
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#FBF3E6"
+    "backgroundColor": "#F7F8F3"
   },
   "ios": {
     "contentInset": "never",
-    "backgroundColor": "#FBF3E6"
+    "backgroundColor": "#F7F8F3"
   },
   "plugins": {
     "SplashScreen": {
       "launchAutoHide": true,
-      "backgroundColor": "#FBF3E6",
+      "backgroundColor": "#F7F8F3",
       "showSpinner": false
     }
   }
