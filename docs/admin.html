@@ -240,9 +240,11 @@ async function openRoomPanel(id){
   const name=(mem||[]).map(m=>m.profiles).find(p=>p)?.nickname;
   const user=(mem||[]).find(m=>m.profile_id!==SUPPORT_ID);
   openPanel(`<h2 style="margin-top:0">${esc(user?.profiles?.nickname||name||'대화')}</h2><div class="muted">답장은 사용자에게 <b>뜨개동네 지기</b> 이름으로 전달돼요 · 보낸 관리자는 로그에 기록</div>
-    <div id="roomMsgs" style="margin:10px 0 70px">${(msgs||[]).map(m=>`<div class="msg ${m.sender_id===SUPPORT_ID?'sup':''}">${esc(m.body||'')}${m.photo_url?'<div class="muted">(사진)</div>':''}<time>${fmt(m.created_at)}</time></div>`).join('')||'<div class="muted">메시지 없음</div>'}</div>
+    <div id="roomMsgs" style="margin:10px 0 70px">${(msgs||[]).map(m=>`<div class="msg ${m.sender_id===SUPPORT_ID?'sup':''}">${esc(m.body||'')}${m.photo_url?`<img class="cph" data-ref="${esc(m.photo_url)}" alt="사진 불러오는 중…" style="display:block;max-width:240px;width:100%;border-radius:10px;margin-top:4px;background:#e9e9e9;min-height:60px;cursor:pointer" onclick="window.open(this.src,'_blank')">`:''}<time>${fmt(m.created_at)}</time></div>`).join('')||'<div class="muted">메시지 없음</div>'}</div>
     <div style="position:sticky;bottom:0;background:#fff;padding:10px 0;border-top:1px solid var(--line);display:flex;gap:8px"><textarea id="replyBody" style="min-height:44px;flex:1" placeholder="답장 내용 (Enter=줄바꿈, Ctrl+Enter=보내기)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))sendSupportReply('${id}')"></textarea><button class="p" onclick="sendSupportReply('${id}')">보내기</button></div>`);
   const box=$('#panel'); box.scrollTop=box.scrollHeight;
+  // 채팅 사진은 비공개 버킷 → 1시간 서명 URL로 표시
+  document.querySelectorAll('#roomMsgs img.cph').forEach(async img=>{ const ref=img.dataset.ref; if(/^https?:/.test(ref)){ img.src=ref; return; } const { data, error } = await sb.storage.from('chat-photos').createSignedUrl(ref, 3600); if(data?.signedUrl){ img.src=data.signedUrl; img.onload=()=>{ box.scrollTop=box.scrollHeight; }; } else img.alt='사진을 불러올 수 없어요'+(error?': '+error.message:''); });
 }
 async function sendSupportReply(roomId){
   const t=$('#replyBody').value.trim(); if(!t) return toast('내용을 입력하세요');
