@@ -1150,6 +1150,22 @@ $('#filters').onclick = e => {
   filter.mode = (filter.mode===k && k!=='all') ? 'all' : k;
   renderFilters(); loadPins();
 };
+// 위치는 가입 때 값으로 고정. 사용자가 원할 때만 '현위치 재검색'으로 좌표+동네 이름을 함께 바꿈
+function relocateNow(){
+  if(!navigator.geolocation) return toast('이 기기는 위치를 지원하지 않아요');
+  closeSheet(); toast('현재 위치 확인 중…');
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const { latitude:lat, longitude:lng } = pos.coords;
+    let d=null; try{ d = await reverseGeocode(lat, lng); }catch(e){}
+    if(!d?.dong_name) return toast('동네 이름을 찾지 못했어요. 프로필 편집에서 직접 입력해 주세요');
+    if(!confirm(`내 동네를 "${d.dong_name}"(으)로 바꿀까요?
+지도의 내 핀도 이 위치(200m 격자)로 옮겨져요.`)) return;
+    const r = await sb.rpc('set_fuzzy_location', { p_lat:lat, p_lng:lng }); if(r.error) return toast('위치 저장 실패: '+r.error.message);
+    const u = await sb.from('profiles').update({ dong_name:d.dong_name, dong_code:d.dong_code, dong_verified_at:new Date().toISOString() }).eq('id', me.id); if(u.error) return toast('저장 실패: '+u.error.message);
+    await loadMe(); toast(`동네를 ${d.dong_name}(으)로 바꿨어요`);
+    if(view==='my') renderMy(); if(MapAdapter.ready){ if(myProfile._c) MapAdapter.setCenter(myProfile._c); loadPins(); }
+  }, err=>toast(err.code===1 ? '위치 권한이 꺼져 있어요. 기기 설정에서 허용해 주세요' : '위치를 가져오지 못했어요. 잠시 후 다시 시도해 주세요'), { enableHighAccuracy:false, timeout:10000, maximumAge:60000 });
+}
 async function refreshLocationDaily(){
   if(!myProfile?.dong_verified_at || !navigator.geolocation) return;
   const last=+localStorage.getItem('locRefreshAt')||0; if(Date.now()-last < 864e5) return;
@@ -1162,7 +1178,6 @@ async function refreshLocationDaily(){
   }, ()=>{}, { enableHighAccuracy:false, timeout:8000, maximumAge:600000 });
 }
 async function initMap(){
-  refreshLocationDaily();
   const c = myProfile?._c || {lat:37.5665,lng:126.9780};
   await MapAdapter.init($('#map'), c);
   renderFilters();
@@ -2165,6 +2180,7 @@ function openSettings(){
     <div class="slist">
       <button class="srow" onclick="closeSheet();openSkills()"><span>내 뜨개 단계 <span class="muted">${lvShort(p)||'아직 없음'}</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openSlides()"><span>뜨개 단계 설명</span><span class="car">›</span></button>
+      <button class="srow" onclick="relocateNow()"><span>현위치로 동네 다시 설정<br><span class="muted">지금 ${esc(p.dong_name||'미설정')} · 가입한 위치로 고정돼 있어요</span></span><span class="car">›</span></button>
       <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 200m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
     </div>
     <div class="sgrp">도움</div>
