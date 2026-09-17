@@ -67,6 +67,10 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
 <div id="app">
   <aside>
     <div class="brand">뜨개동네 관리자<small id="who"></small></div>
+    <div class="grp">현황</div>
+    <a href="#dash" data-v="dash">대시보드</a>
+    <a href="#dong" data-v="dong">동네 분포</a>
+    <a href="#content" data-v="content">글·모임·인증</a>
     <div class="grp">운영</div>
     <a href="#reports" data-v="reports">신고함 <span class="n" id="nRep" hidden></span></a>
     <a href="#users" data-v="users">사용자</a>
@@ -74,10 +78,6 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#banned" data-v="banned">금칙어</a>
     <a href="#broadcast" data-v="broadcast">공지·알림 보내기</a>
     <a href="#shops" data-v="shops">파트너 가게</a>
-    <div class="grp">현황</div>
-    <a href="#dash" data-v="dash">대시보드</a>
-    <a href="#dong" data-v="dong">동네 분포</a>
-    <a href="#content" data-v="content">글·모임·인증</a>
     <div class="grp">AI 데이터</div>
     <a href="#ai-photos" data-v="ai-photos">사진↔기법 라벨</a>
     <a href="#ai-path" data-v="ai-path">학습 경로</a>
@@ -244,10 +244,26 @@ async function openRoomPanel(id){
   const user=(mem||[]).find(m=>m.profile_id!==SUPPORT_ID);
   openPanel(`<h2 style="margin-top:0">${esc(user?.profiles?.nickname||name||'대화')}</h2><div class="muted">답장은 사용자에게 <b>뜨개동네 지기</b> 이름으로 전달돼요 · 보낸 관리자는 로그에 기록</div>
     <div id="roomMsgs" style="margin:10px 0 70px">${(msgs||[]).map(m=>`<div class="msg ${m.sender_id===SUPPORT_ID?'sup':''}">${esc(m.body||'')}${m.photo_url?`<img class="cph" data-ref="${esc(m.photo_url)}" alt="사진 불러오는 중…" style="display:block;max-width:240px;width:100%;border-radius:10px;margin-top:4px;background:#e9e9e9;min-height:60px;cursor:pointer" onclick="window.open(this.src,'_blank')">`:''}<time>${fmt(m.created_at)}</time></div>`).join('')||'<div class="muted">메시지 없음</div>'}</div>
-    <div style="position:sticky;bottom:0;background:#fff;padding:10px 0;border-top:1px solid var(--line);display:flex;gap:8px"><textarea id="replyBody" style="min-height:44px;flex:1" placeholder="답장 내용 (Enter=줄바꿈, Ctrl+Enter=보내기)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))sendSupportReply('${id}')"></textarea><button class="p" onclick="sendSupportReply('${id}')">보내기</button></div>`);
+    <div style="position:sticky;bottom:0;background:#fff;padding:10px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-end"><button title="사진 보내기" onclick="$('#replyFile').click()" style="width:40px;height:40px;border-radius:50%;font-size:20px;padding:0;flex:none">＋</button><input id="replyFile" type="file" accept="image/*" hidden onchange="sendSupportPhoto('${id}', this.files[0]); this.value=''"><textarea id="replyBody" style="min-height:44px;flex:1" placeholder="답장 내용 (Enter=줄바꿈, Ctrl+Enter=보내기)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))sendSupportReply('${id}')"></textarea><button class="p" onclick="sendSupportReply('${id}')">보내기</button></div>`);
   const box=$('#panel'); box.scrollTop=box.scrollHeight;
   // 채팅 사진은 비공개 버킷 → 1시간 서명 URL로 표시
   document.querySelectorAll('#roomMsgs img.cph').forEach(async img=>{ const ref=img.dataset.ref; if(/^https?:/.test(ref)){ img.src=ref; return; } const { data, error } = await sb.storage.from('chat-photos').createSignedUrl(ref, 3600); if(data?.signedUrl){ img.src=data.signedUrl; img.onload=()=>{ box.scrollTop=box.scrollHeight; }; } else img.alt='사진을 불러올 수 없어요'+(error?': '+error.message:''); });
+}
+async function shrinkImage(file, max){
+  const draw=(src,w,h)=>{ const k=Math.min(1,max/Math.max(w,h)); const c=document.createElement('canvas'); c.width=Math.round(w*k); c.height=Math.round(h*k); c.getContext('2d').drawImage(src,0,0,c.width,c.height); return new Promise(r=>c.toBlob(b=>r(b),'image/jpeg',0.85)); };
+  if(window.createImageBitmap){ try{ const bm=await createImageBitmap(file,{imageOrientation:'from-image'}); const out=await draw(bm,bm.width,bm.height); bm.close?.(); if(out) return out; }catch(e){} }
+  return new Promise((res,rej)=>{ const img=new Image(); img.onload=async()=>{ const out=await draw(img,img.width,img.height); URL.revokeObjectURL(img.src); out?res(out):rej(new Error('사진을 처리하지 못했어요')); }; img.onerror=()=>rej(new Error('이 사진 형식은 열 수 없어요. JPG/PNG로 올려 주세요')); img.src=URL.createObjectURL(file); });
+}
+async function sendSupportPhoto(roomId, file){
+  if(!file) return; toast('사진 보내는 중…');
+  try{
+    const blob=await shrinkImage(file,1280);
+    const path=`${me.id}/${roomId}/${Date.now()}.jpg`;   // 본인 폴더에 올리고, 2번째 폴더가 방 id라 방 참여자가 읽을 수 있음
+    const up=await sb.storage.from('chat-photos').upload(path, blob, {contentType:'image/jpeg', upsert:false}); if(up.error) throw new Error(up.error.message);
+    const body=$('#replyBody').value.trim()||null;
+    const {error}=await sb.rpc('admin_reply_support',{p_room:roomId,p_body:body,p_photo:path}); if(error) throw new Error(error.message);
+    toast('보냈어요'); openRoomPanel(roomId); refreshBadges(); if(location.hash==='#support') VIEWS.support();
+  }catch(e){ toast('사진 전송 실패: '+e.message); }
 }
 async function sendSupportReply(roomId){
   const t=$('#replyBody').value.trim(); if(!t) return toast('내용을 입력하세요');
