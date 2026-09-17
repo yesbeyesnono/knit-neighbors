@@ -52,6 +52,15 @@ textarea{width:100%;min-height:90px}
 .msg{padding:6px 10px;border-radius:12px;background:var(--bg2);margin:4px 0;max-width:80%;font-size:13px}
 .msg.sup{background:#111;color:#fff;margin-left:auto}
 .msg time{display:block;font-size:10px;opacity:.6;margin-top:2px}
+.info{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}
+.info svg{width:100%;height:auto;display:block}
+.info .big{font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.info .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 18px}
+.info .kpi{background:var(--bg2);border-radius:12px;padding:10px 12px}.info .kpi .l{font-size:11px;color:var(--ink3)}.info .kpi .v{font-size:20px;font-weight:700}
+.info h3{font-size:13px;margin:14px 0 6px;color:var(--ink2)}
+.info .rk{display:grid;grid-template-columns:54px 1fr 34px;gap:8px;align-items:center;font-size:12.5px;padding:2px 0}
+.info .rk .w{background:var(--bg2);border-radius:3px}.info .rk b{display:block;height:10px;border-radius:3px;background:#111}
+@media(max-width:900px){.info{grid-template-columns:1fr}}
 #dongMap{height:520px;border:1px solid var(--line);border-radius:12px;background:#eee;z-index:1}
 .leaflet-tooltip.dlabel{background:#111;color:#fff;border:0;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;box-shadow:none;white-space:nowrap}
 .leaflet-tooltip.dlabel::before{display:none}
@@ -163,10 +172,54 @@ VIEWS.dash = async()=>{
   <h2>뜨개 단계 분포</h2><div class="card">${lvRow(s.levels.crochet,'코바늘')}${lvRow(s.levels.knit,'대바늘')}</div>`;
 };
 // ===== 동네 분포 =====
+let dongTab='info', KR=null;
+const SIDO_SHORT={'서울특별시':'서울','부산광역시':'부산','대구광역시':'대구','인천광역시':'인천','광주광역시':'광주','대전광역시':'대전','울산광역시':'울산','세종특별자치시':'세종','경기도':'경기','강원도':'강원','충청북도':'충북','충청남도':'충남','전라북도':'전북','전라남도':'전남','경상북도':'경북','경상남도':'경남','제주특별자치도':'제주'};
+const SIDO_LABEL={'서울':[126.98,37.56],'부산':[129.08,35.2],'대구':[128.58,35.85],'인천':[126.38,37.58],'광주':[126.85,35.15],'대전':[127.4,36.33],'울산':[129.28,35.55],'세종':[127.27,36.58],'경기':[127.42,37.2],'강원':[128.3,37.75],'충북':[127.75,36.9],'충남':[126.75,36.5],'전북':[127.1,35.75],'전남':[126.95,34.85],'경북':[128.8,36.4],'경남':[128.2,35.35],'제주':[126.55,33.38]};
+function inRing(x,y,ring){ let c=false; for(let i=0,j=ring.length-1;i<ring.length;j=i++){ const xi=ring[i][0], yi=ring[i][1], xj=ring[j][0], yj=ring[j][1]; if(((yi>y)!==(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) c=!c; } return c; }
+function sidoOf(lng,lat){ for(const f of KR){ if(f.rings.some(r=>inRing(lng,lat,r))) return SIDO_SHORT[f.name]||f.name; } let best=null,bd=1e9; for(const [k,[x,y]] of Object.entries(SIDO_LABEL)){ const dd=(x-lng)**2+(y-lat)**2; if(dd<bd){bd=dd;best=k;} } return best; }
 VIEWS.dong = async()=>{
   const { data:m, error } = await sb.rpc('admin_dong_map'); if(error) throw error;
+  const tabs=`<div class="tabs"><button class="${dongTab==='info'?'on':''}" onclick="dongTab='info';route()">전국 인포그래픽</button><button class="${dongTab==='map'?'on':''}" onclick="dongTab='map';route()">상세 지도</button></div>`;
+  if(dongTab==='map') return renderDongLeaflet(m, tabs);
+  if(!KR){ const r=await fetch('kr-provinces.json'); KR=await r.json(); }
+  const dongs=(m.dongs||[]).filter(d=>d.lat!=null); const total=dongs.reduce((a,d)=>a+d.n,0); const waving=dongs.reduce((a,d)=>a+(d.waving||0),0);
+  const bySido={}; dongs.forEach(d=>{ d.sido=sidoOf(d.lng,d.lat); bySido[d.sido]=(bySido[d.sido]||0)+d.n; });
+  const maxS=Math.max(1,...Object.values(bySido));
+  // 투영: 경도 124.6~131.0, 위도 33.0~38.7 (위도 36°에서 가로 보정)
+  const W=560,H=640,k=Math.cos(36*Math.PI/180), X0=124.6,X1=131.0,Y0=33.0,Y1=38.75; const sx=W/((X1-X0)*k), sy=H/(Y1-Y0), sc=Math.min(sx,sy);
+  const PX=lng=>((lng-X0)*k)*sc+ (W-(X1-X0)*k*sc)/2, PY=lat=>(Y1-lat)*sc;
+  const shade=n=>{ if(!n) return '#ececec'; const t=Math.sqrt(n/maxS); const v=Math.round(200-t*183); return `rgb(${v},${v},${v})`; };
+  const paths=KR.map(f=>{ const sn=SIDO_SHORT[f.name]; const n=bySido[sn]||0; return `<path d="${f.rings.map(r=>'M'+r.map(([x,y])=>PX(x).toFixed(1)+','+PY(y).toFixed(1)).join('L')+'Z').join('')}" fill="${shade(n)}" stroke="#fff" stroke-width="1"><title>${f.name} ${n}명</title></path>`; }).join('');
+  const labels=Object.entries(SIDO_LABEL).map(([sn,[x,y]])=>{ const n=bySido[sn]||0; const dark=n && Math.sqrt(n/maxS)>.45; return `<text x="${PX(x).toFixed(1)}" y="${PY(y).toFixed(1)}" text-anchor="middle" font-size="${n?12:10}" font-weight="${n?700:400}" fill="${dark?'#fff':n?'#111':'#9a9a9a'}">${sn}${n?' '+n:''}</text>`; }).join('');
+  const maxD=Math.max(1,...dongs.map(d=>d.n));
+  const bubbles=dongs.slice().sort((a,b)=>b.n-a.n).map(d=>`<circle cx="${PX(d.lng).toFixed(1)}" cy="${PY(d.lat).toFixed(1)}" r="${(4+Math.sqrt(d.n/maxD)*12).toFixed(1)}" fill="#ff3040" fill-opacity=".8" stroke="${d.waving?'#ffb300':'#fff'}" stroke-width="${d.waving?2.5:1.2}"><title>${esc(d.dong)} ${d.n}명${d.waving?' · 친구 찾는 중 '+d.waving:''}</title></circle>`).join('');
+  const sq=(x,y,c,t)=>`<rect x="${(PX(x)-4).toFixed(1)}" y="${(PY(y)-4).toFixed(1)}" width="8" height="8" rx="2" fill="${c}" stroke="#fff" stroke-width="1.2"><title>${esc(t)}</title></rect>`;
+  const extras=(m.meetups||[]).filter(x=>x.lat!=null).map(x=>sq(x.lng,x.lat,'#185fa5','모임 · '+x.title)).join('')+(m.shops||[]).filter(x=>x.lat!=null).map(x=>sq(x.lng,x.lat,'#111','가게 · '+x.name)).join('');
+  // 수도권 확대 인셋 (동해 쪽 빈 공간에 배치): 사용자가 몰린 서울·경기 동네를 이름과 함께 표시
+  const IX=372, IY=250, IW=180, IH=170, bx0=126.55, bx1=127.35, by0=37.2, by1=37.8; const isc=Math.min(IW/((bx1-bx0)*k), IH/(by1-by0));
+  const QX=lng=>IX+((lng-bx0)*k)*isc, QY=lat=>IY+(by1-lat)*isc;
+  const inBox=d=>d.lng>=bx0&&d.lng<=bx1&&d.lat>=by0&&d.lat<=by1;
+  const insetPaths=KR.filter(f=>['서울특별시','경기도','인천광역시'].includes(f.name)).map(f=>`<path d="${f.rings.map(r=>'M'+r.map(([x,y])=>QX(x).toFixed(1)+','+QY(y).toFixed(1)).join('L')+'Z').join('')}" fill="${f.name==='서울특별시'?'#dcdcdc':'#efefef'}" stroke="#fff" stroke-width="1"/>`).join('');
+  const insetDongs=dongs.filter(inBox).sort((a,b)=>b.n-a.n);
+  const insetBubbles=insetDongs.map((d,i)=>`<circle cx="${QX(d.lng).toFixed(1)}" cy="${QY(d.lat).toFixed(1)}" r="${(4+Math.sqrt(d.n/maxD)*9).toFixed(1)}" fill="#ff3040" fill-opacity=".85" stroke="${d.waving?'#ffb300':'#fff'}" stroke-width="${d.waving?2.2:1}"><title>${esc(d.dong)} ${d.n}명</title></circle>${i<6?`<text x="${(QX(d.lng)+8+Math.sqrt(d.n/maxD)*9).toFixed(1)}" y="${(QY(d.lat)+3.5).toFixed(1)}" font-size="9.5" font-weight="600" fill="#111" paint-order="stroke" stroke="#fff" stroke-width="2.5">${esc(d.dong)} ${d.n}</text>`:''}`).join('');
+  const inset = insetDongs.length ? `<rect x="${PX(bx0).toFixed(1)}" y="${PY(by1).toFixed(1)}" width="${(PX(bx1)-PX(bx0)).toFixed(1)}" height="${(PY(by0)-PY(by1)).toFixed(1)}" fill="none" stroke="#111" stroke-width="1" stroke-dasharray="3 2"/><line x1="${PX(bx1).toFixed(1)}" y1="${PY(by1).toFixed(1)}" x2="${IX}" y2="${IY}" stroke="#111" stroke-width=".7" stroke-dasharray="3 2"/><line x1="${PX(bx1).toFixed(1)}" y1="${PY(by0).toFixed(1)}" x2="${IX}" y2="${IY+IH}" stroke="#111" stroke-width=".7" stroke-dasharray="3 2"/><clipPath id="insetClip"><rect x="${IX}" y="${IY}" width="${IW}" height="${IH}" rx="10"/></clipPath><rect x="${IX}" y="${IY}" width="${IW}" height="${IH}" rx="10" fill="#fafafa" stroke="#111" stroke-width="1"/><g clip-path="url(#insetClip)">${insetPaths}${insetBubbles}</g><text x="${IX+8}" y="${IY+15}" font-size="10.5" font-weight="700" fill="#111">수도권 확대</text>` : '';
+  const sidoRank=Object.entries(bySido).sort((a,b)=>b[1]-a[1]);
+  $('#main').innerHTML=`<h1>동네 분포 <small>${new Date().toLocaleDateString('ko-KR')} 기준</small></h1>${tabs}
+  <div class="info">
+    <div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="전국 사용자 분포">${paths}${labels}${extras}${bubbles}${inset}</svg>
+      <div class="legend"><span><i style="background:#ff3040"></i>동네(원 크기 = 사용자 수)</span><span><i style="background:#fff;border:2.5px solid #ffb300"></i>친구 찾는 중 있음</span><span><i style="background:#185fa5;border-radius:3px"></i>예정 모임</span><span><i style="background:#111;border-radius:3px"></i>파트너 가게</span></div></div>
+    <div>
+      <div class="muted">뜨개동네 이웃</div><div class="big">${total}<span style="font-size:18px;font-weight:600">명</span></div>
+      <div class="kpis"><div class="kpi"><div class="l">활동 동네</div><div class="v">${dongs.length}곳</div></div><div class="kpi"><div class="l">시·도</div><div class="v">${sidoRank.length}곳</div></div><div class="kpi"><div class="l">친구 찾는 중</div><div class="v">${waving}명</div></div><div class="kpi"><div class="l">예정 모임 · 가게</div><div class="v">${(m.meetups||[]).length} · ${(m.shops||[]).length}</div></div></div>
+      <h3>시·도별</h3>${sidoRank.map(([sn,n])=>`<div class="rk"><span>${sn}</span><span class="w"><b style="width:${Math.round(n/maxS*100)}%"></b></span><span class="muted">${n}</span></div>`).join('')||'<div class="muted">데이터 없음</div>'}
+      <h3>동네 상위 10</h3>${dongs.slice().sort((a,b)=>b.n-a.n).slice(0,10).map(d=>`<div class="rk" style="grid-template-columns:110px 1fr 34px"><span>${esc(d.dong)} <span class="muted">${d.sido||''}</span></span><span class="w"><b style="width:${Math.round(d.n/maxD*100)}%;background:#ff3040"></b></span><span class="muted">${d.n}</span></div>`).join('')}
+    </div>
+  </div>
+  <p class="muted">시·도는 저장된 좌표(200m 격자)로 판정해요. 원·도형에 마우스를 올리면 이름과 수가 보여요. 동네 단위로 확대해 보려면 "상세 지도" 탭.</p>`;
+};
+function renderDongLeaflet(m, tabs){
   const dongs=m.dongs||[]; const max=Math.max(1,...dongs.map(d=>d.n)); const total=dongs.reduce((a,d)=>a+d.n,0);
-  $('#main').innerHTML=`<h1>동네 분포 <small>사용자 ${total}명 · 동네 ${dongs.length}곳 · 원이 클수록 사용자가 많아요</small></h1>
+  $('#main').innerHTML=`<h1>동네 분포 <small>사용자 ${total}명 · 동네 ${dongs.length}곳 · 원이 클수록 사용자가 많아요</small></h1>${tabs}
   <div id="dongMap"></div>
   <div class="legend"><span><i style="background:#111"></i>사용자(동네별)</span><span><i style="background:#ffb300"></i>친구 찾는 중 포함</span><span><i style="background:#185fa5;border-radius:3px"></i>예정 모임 ${m.meetups.length}</span><span><i style="background:#c9303f;border-radius:3px"></i>파트너 가게 ${m.shops.length}</span></div>
   <h2>동네별 순위</h2><div class="card">${dongs.map(d=>`<div class="hbar" style="cursor:pointer" onclick="focusDong(${d.lat},${d.lng})"><span>${esc(d.dong)}</span><span class="w"><b style="width:${Math.round(d.n/max*100)}%"></b></span><span class="muted">${d.n}</span></div>`).join('')||'<div class="muted">데이터 없음</div>'}</div>`;
@@ -183,8 +236,8 @@ VIEWS.dong = async()=>{
   m.shops.forEach(x=>{ if(x.lat==null) return; pts.push([x.lat,x.lng]); L.marker([x.lat,x.lng],{icon:L.divIcon({className:'',html:'<div style="width:14px;height:14px;background:#c9303f;border:2px solid #fff;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.4)"></div>',iconSize:[14,14]})}).bindPopup(`<b>${esc(x.name)}</b><br>파트너 가게`).addTo(map); });
   map.setView([37.5665,126.978],11);
   const fit=()=>{ map.invalidateSize(); if(pts.length) map.fitBounds(pts,{padding:[50,50],maxZoom:13}); };
-  setTimeout(fit, 300); setTimeout(fit, 1200);   // 레이아웃이 잡힌 뒤 범위 맞춤(초기 크기 0 대비 2회)
-};
+  setTimeout(fit, 300); setTimeout(fit, 1200);
+}
 function focusDong(lat,lng){ if(window._dongMap&&lat!=null){ window._dongMap.setView([lat,lng],14); $('#dongMap').scrollIntoView({behavior:'smooth',block:'center'}); } }
 // ===== 신고함 =====
 let repTab='open';
