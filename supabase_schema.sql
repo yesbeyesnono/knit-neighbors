@@ -937,3 +937,4 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   등록: 쎄비하우스(성수, 연무장5가길 28, 37.5431317/127.0555276, 반경 8km)
 -- ---------------------------------------------------------------
 --   + admin_reply_support(p_room, p_body, p_photo): 사진 답장(경로 = <관리자 uid>/<room>/<ts>.jpg, 방 참여자 읽기 가능) · storage_chat_photos_admin_read 정책
+--   + admin_dong_map(): 동네별 사용자 수·평균 좌표·친구 찾는 중 수, 예정 모임, 파트너 가게 → 관리자 동네 분포 지도(Leaflet)

@@ -52,6 +52,11 @@ textarea{width:100%;min-height:90px}
 .msg{padding:6px 10px;border-radius:12px;background:var(--bg2);margin:4px 0;max-width:80%;font-size:13px}
 .msg.sup{background:#111;color:#fff;margin-left:auto}
 .msg time{display:block;font-size:10px;opacity:.6;margin-top:2px}
+#dongMap{height:520px;border:1px solid var(--line);border-radius:12px;background:#eee;z-index:1}
+.leaflet-tooltip.dlabel{background:#111;color:#fff;border:0;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;box-shadow:none;white-space:nowrap}
+.leaflet-tooltip.dlabel::before{display:none}
+.legend{display:flex;gap:14px;align-items:center;margin:8px 2px;font-size:12px;color:var(--ink2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#111;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:99}
 #toast.on{opacity:1}
 pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow:auto;white-space:pre-wrap}
@@ -94,6 +99,8 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
 <div id="scrim" onclick="closePanel()"></div>
 <div class="panel" id="panel"><button class="x" onclick="closePanel()">✕</button><div id="panelBody"></div></div>
 <div id="toast"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 const SB_URL='https://thfcrodfaitzrzlrxyir.supabase.co', SB_KEY='sb_publishable_lOC6sE1BIpj5JZPnpwPCpg_DxvVvT2y';
@@ -157,9 +164,28 @@ VIEWS.dash = async()=>{
 };
 // ===== 동네 분포 =====
 VIEWS.dong = async()=>{
-  const s=await stats(); const max=Math.max(1,...s.dong.map(d=>d.n));
-  $('#main').innerHTML=`<h1>동네 분포 <small>사용자 프로필의 행정동 기준 · 상위 40</small></h1><div class="card">${s.dong.map(d=>`<div class="hbar"><span>${esc(d.dong)}</span><span class="w"><b style="width:${Math.round(d.n/max*100)}%"></b></span><span class="muted">${d.n}</span></div>`).join('')||'<div class="muted">데이터 없음</div>'}</div>`;
+  const { data:m, error } = await sb.rpc('admin_dong_map'); if(error) throw error;
+  const dongs=m.dongs||[]; const max=Math.max(1,...dongs.map(d=>d.n)); const total=dongs.reduce((a,d)=>a+d.n,0);
+  $('#main').innerHTML=`<h1>동네 분포 <small>사용자 ${total}명 · 동네 ${dongs.length}곳 · 원이 클수록 사용자가 많아요</small></h1>
+  <div id="dongMap"></div>
+  <div class="legend"><span><i style="background:#111"></i>사용자(동네별)</span><span><i style="background:#ffb300"></i>친구 찾는 중 포함</span><span><i style="background:#185fa5;border-radius:3px"></i>예정 모임 ${m.meetups.length}</span><span><i style="background:#c9303f;border-radius:3px"></i>파트너 가게 ${m.shops.length}</span></div>
+  <h2>동네별 순위</h2><div class="card">${dongs.map(d=>`<div class="hbar" style="cursor:pointer" onclick="focusDong(${d.lat},${d.lng})"><span>${esc(d.dong)}</span><span class="w"><b style="width:${Math.round(d.n/max*100)}%"></b></span><span class="muted">${d.n}</span></div>`).join('')||'<div class="muted">데이터 없음</div>'}</div>`;
+  if(typeof L==='undefined'){ $('#dongMap').innerHTML='<div class="muted" style="padding:20px">지도 라이브러리를 불러오지 못했어요</div>'; return; }
+  const map=L.map('dongMap',{scrollWheelZoom:true}); window._dongMap=map;
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);
+  const pts=[];
+  dongs.forEach(d=>{ if(d.lat==null) return; pts.push([d.lat,d.lng]);
+    const r=10+Math.sqrt(d.n)*9;
+    L.circleMarker([d.lat,d.lng],{radius:r,color:d.waving?'#ffb300':'#111',weight:d.waving?3:1.5,fillColor:'#111',fillOpacity:.55})
+      .bindTooltip(`${d.dong} ${d.n}`,{permanent:true,direction:'center',className:'dlabel'})
+      .bindPopup(`<b>${esc(d.dong)}</b><br>사용자 ${d.n}명${d.waving?`<br>친구 찾는 중 ${d.waving}명`:''}`).addTo(map); });
+  m.meetups.forEach(x=>{ if(x.lat==null) return; pts.push([x.lat,x.lng]); L.marker([x.lat,x.lng],{icon:L.divIcon({className:'',html:'<div style="width:14px;height:14px;background:#185fa5;border:2px solid #fff;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.4)"></div>',iconSize:[14,14]})}).bindPopup(`<b>${esc(x.title)}</b><br>${esc(x.place||'')}<br>${fmt(x.starts_at)} · 참여 ${x.n||0}`).addTo(map); });
+  m.shops.forEach(x=>{ if(x.lat==null) return; pts.push([x.lat,x.lng]); L.marker([x.lat,x.lng],{icon:L.divIcon({className:'',html:'<div style="width:14px;height:14px;background:#c9303f;border:2px solid #fff;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.4)"></div>',iconSize:[14,14]})}).bindPopup(`<b>${esc(x.name)}</b><br>파트너 가게`).addTo(map); });
+  map.setView([37.5665,126.978],11);
+  const fit=()=>{ map.invalidateSize(); if(pts.length) map.fitBounds(pts,{padding:[50,50],maxZoom:13}); };
+  setTimeout(fit, 300); setTimeout(fit, 1200);   // 레이아웃이 잡힌 뒤 범위 맞춤(초기 크기 0 대비 2회)
 };
+function focusDong(lat,lng){ if(window._dongMap&&lat!=null){ window._dongMap.setView([lat,lng],14); $('#dongMap').scrollIntoView({behavior:'smooth',block:'center'}); } }
 // ===== 신고함 =====
 let repTab='open';
 VIEWS.reports = async()=>{
