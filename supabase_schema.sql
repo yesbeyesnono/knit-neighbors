@@ -938,3 +938,9 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 -- ---------------------------------------------------------------
 --   + admin_reply_support(p_room, p_body, p_photo): 사진 답장(경로 = <관리자 uid>/<room>/<ts>.jpg, 방 참여자 읽기 가능) · storage_chat_photos_admin_read 정책
 --   + admin_dong_map(): 동네별 사용자 수·평균 좌표·친구 찾는 중 수, 예정 모임, 파트너 가게 → 관리자 동네 분포 지도(Leaflet)
+
+-- ---------------------------------------------------------------
+-- 24. 함수 실행 권한 정리 — 2026-09-18 (마이그레이션 harden_function_grants)
+--   트리거 함수(log_skill_events, notify_on_*)는 직접 호출 불가. RPC(admin_*, is_admin, mark_solved, nearby_shops, open_support_room, create_work)는 authenticated만.
+--   default privileges: 새 함수는 PUBLIC 실행 불가(필요 시 grant execute ... to authenticated 명시)
+-- ---------------------------------------------------------------
