@@ -699,7 +699,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 친구 -->
   <section class="view" id="v-friends">
-    <div class="top"><button class="back" onclick="go('my')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>친구</h1></div>
+    <div class="top"><button class="back" onclick="go('chats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>친구</h1></div>
     <div class="body" id="friendsBody"></div>
   </section>
 
@@ -998,7 +998,7 @@ function parseGeo(hex){
 }
 
 // ============ 화면 전환 ============
-const NAV_OF = { friends:'my', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
+const NAV_OF = { friends:'chats', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my','activity','shop'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
 document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(a && isNative){ e.preventDefault(); CAP.Plugins.Browser.open({ url: new URL(a.getAttribute('href'), 'https://yesbeyesnono.github.io/knit-neighbors/').href }); } });
