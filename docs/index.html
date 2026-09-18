@@ -1246,6 +1246,7 @@ async function openShop(id){
     <div class="shophead"><h2>${esc(sh.name)}<span class="kind">${SHOP_KIND[sh.kind]||'가게'}</span></h2></div>
     <div class="shopinfo">${sh.descr?esc(sh.descr)+'<br>':''}${sh.address?ico('location')+' '+esc(sh.address)+'<br>':''}${sh.hours?'⏰ '+esc(sh.hours)+'<br>':''}${sh.phone?'☎ '+esc(sh.phone):''}</div>
     <div class="shoplinks"><button class="${following?'on':''}" onclick="toggleFollowShop('${sh.id}',${!following})">${following?'팔로우 중':'팔로우'}</button>${L}${c?`<a href="https://map.kakao.com/link/map/${encodeURIComponent(sh.name)},${c.lat},${c.lng}" target="_blank" rel="noopener">길찾기</a>`:''}${mine?`<button onclick="openCompose('shop')">소식 올리기</button>`:''}</div>
+    ${!sh.owner_id&&!myShop?`<div class="muted" style="padding:0 16px 8px;font-size:.8rem">이 가게 사장님이신가요? <a href="#" onclick="openShopClaim('${sh.id}', curShop.name);return false" style="color:inherit;text-decoration:underline">이 가게 주인이에요</a></div>`:''}
     ${(posts||[]).length ? (posts||[]).map(p=>`<div class="spost" id="sp-${p.id}"><span class="k ${p.kind}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`).join('') : '<div class="empty">아직 올라온 소식이 없어요</div>'}
     <div class="muted" style="padding:16px;font-size:.8rem">가게 소식은 가게가 직접 올려요. 뜨개동네는 판매·예약에 관여하지 않아요. 문제가 있으면 설정 › 지기에게 알려 주세요.</div>`;
   show('shop');
@@ -1260,6 +1261,49 @@ async function toggleFollowShop(id, on){
   toast(on?'팔로우했어요. 새 소식이 활동에 알림으로 와요':'팔로우를 취소했어요'); openShop(id);
 }
 async function deleteShopPost(id){ if(!confirm('이 소식을 삭제할까요?')) return; const {error}=await sb.from('shop_posts').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); openShop(curShop.id); }
+// ===== 가게 등록 신청 =====
+let claimDoc=null;
+async function openShopClaim(shopId, shopName){
+  const { data:rows } = await sb.from('shop_claims').select('*').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(1);
+  const c = (rows||[])[0];
+  if(c && c.status==='pending') return openSheet(`<b>가게 등록 신청</b><p class="muted" style="margin:0">「${esc(c.name)}」 신청을 확인하고 있어요. 보통 1~3일 안에 활동 알림으로 결과를 알려 드려요.</p><button class="btn o" onclick="cancelShopClaim('${c.id}')">신청 취소</button>`);
+  claimDoc=null;
+  openSheet(`<b>${shopId?'이 가게 주인이에요':'우리 가게 등록 신청'}</b>
+    <p class="muted" style="margin:0">공방·실가게·뜨개 카페를 지도에 네모 핀으로 올리고 소식을 직접 전할 수 있어요. 지금 로그인한 계정이 가게 관리자가 돼요.${c&&c.status==='rejected'?`<br>지난 신청은 반려됐어요${c.reject_reason?': '+esc(c.reject_reason):''}`:''}</p>
+    <label class="f">상호<input id="clName" maxlength="60" value="${esc(shopName||'')}" ${shopId?'readonly':''} placeholder="예: 포근 뜨개공방"></label>
+    <label class="f">종류<select id="clKind">${Object.entries(SHOP_KIND).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></label>
+    <label class="f">주소<input id="clAddr" maxlength="200" placeholder="도로명 주소"></label>
+    <label class="f">연락처<input id="clPhone" maxlength="30" inputmode="tel" placeholder="가게 전화 또는 담당자 연락처"></label>
+    <label class="f">사업자등록번호<input id="clBiz" maxlength="20" inputmode="numeric" placeholder="000-00-00000"></label>
+    <label class="f">사업자등록증 사진<input id="clDoc" type="file" accept="image/*" onchange="claimDoc=this.files[0]||null"></label>
+    <textarea id="clNote" maxlength="500" placeholder="전하고 싶은 말 (선택) · 인스타그램·스토어 주소 등"></textarea>
+    <p class="muted" style="margin:0;font-size:.8rem">사업자등록증은 본인 확인에만 쓰고, 운영진만 볼 수 있으며 확인 후 삭제해요.</p>
+    <button class="btn" id="clSend" onclick="sendShopClaim('${shopId||''}')">신청하기</button>`);
+}
+async function sendShopClaim(shopId){
+  const name=$('#clName').value.trim(), address=$('#clAddr').value.trim(), phone=$('#clPhone').value.trim(), biz=$('#clBiz').value.trim();
+  if(!name) return toast('상호를 입력해 주세요');
+  if(!shopId && !address) return toast('주소를 입력해 주세요');
+  if(!phone) return toast('연락처를 입력해 주세요');
+  if(!claimDoc) return toast('사업자등록증 사진을 올려 주세요');
+  $('#clSend').disabled=true;
+  try{
+    const blob = await shrinkImage(claimDoc, 2000);
+    const path = `${me.id}/${Date.now()}.jpg`;
+    const up = await sb.storage.from('shop-docs').upload(path, blob, { contentType:'image/jpeg', upsert:false });
+    if(up.error) throw new Error('사진 업로드 실패: '+up.error.message);
+    const { error } = await sb.from('shop_claims').insert({ profile_id: me.id, shop_id: shopId||null, name, kind: $('#clKind').value, address: address||null, phone, biz_no: biz||null, doc_path: path, note: $('#clNote').value.trim()||null });
+    if(error){ await sb.storage.from('shop-docs').remove([path]); throw new Error(error.code==='23505'?'이미 확인 중인 신청이 있어요':error.message); }
+    claimDoc=null; closeSheet(); toast('신청했어요. 확인 후 활동 알림으로 알려 드릴게요');
+  }catch(e){ toast(e.message); const b=$('#clSend'); if(b) b.disabled=false; }
+}
+async function cancelShopClaim(id){
+  if(!confirm('신청을 취소할까요?')) return;
+  const { data:c } = await sb.from('shop_claims').select('doc_path').eq('id',id).maybeSingle();
+  const { error } = await sb.from('shop_claims').delete().eq('id',id); if(error) return toast(error.message);
+  if(c?.doc_path) await sb.storage.from('shop-docs').remove([c.doc_path]);
+  closeSheet(); toast('신청을 취소했어요');
+}
 async function openProfile(id){
   if(id===me.id) return go('my');
   const [{data:p},{data:rel}] = await Promise.all([
@@ -1400,6 +1444,7 @@ async function renderActivity(){
 }
 async function openNotif(i){
   const n=actRows[i]; if(!n) return;
+  if(n.kind==='notice' && n.shop_id){ const { data:shop } = await sb.from('shops').select('*').eq('owner_id', me.id).maybeSingle(); myShop = shop||myShop; return openShop(n.shop_id); }
   if(n.kind==='notice') return openSupportRoom();
   if(n.kind==='shop_post' && n.shop_id) return openShop(n.shop_id);
   if(n.kind==='friend_request'||n.kind==='friend_accept') return openProfile(n.actor_id);
@@ -2183,6 +2228,10 @@ function openSettings(){
       <button class="srow" onclick="relocateNow()"><span>현위치로 동네 다시 설정<br><span class="muted">지금 ${esc(p.dong_name||'미설정')} · 가입한 위치로 고정돼 있어요</span></span><span class="car">›</span></button>
       <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 200m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
     </div>
+    ${myShop?'':`<div class="sgrp">가게·공방</div>
+    <div class="slist">
+      <button class="srow" onclick="openShopClaim()"><span>우리 가게 등록 신청<br><span class="muted">공방·실가게·뜨개 카페 사장님이라면</span></span><span class="car">›</span></button>
+    </div>`}
     <div class="sgrp">도움</div>
     <div class="slist">
       <button class="srow" onclick="closeSheet();openSupportRoom()"><span>뜨개동네 지기에게 말하기<br><span class="muted">궁금한 점·불편한 점·바라는 기능</span></span><span class="car">›</span></button>
@@ -2206,7 +2255,7 @@ async function deleteAccount(){
   const word = prompt('확인을 위해 "삭제"라고 입력해 주세요'); if(word !== '삭제') return;
   // 1) 내가 올린 파일 삭제 (Storage API), 2) 계정·데이터 삭제 (서버 함수, cascade)
   try{
-    for(const bucket of ['posts','avatars','works','chat-photos']){
+    for(const bucket of ['posts','avatars','works','chat-photos','shop-docs']){
       const { data:files } = await sb.storage.from(bucket).list(me.id, { limit:1000 });
       const names=(files||[]).filter(f=>f.name && !f.id?.endsWith('/')).map(f=>`${me.id}/${f.name}`);
       if(names.length) await sb.storage.from(bucket).remove(names);

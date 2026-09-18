@@ -444,7 +444,14 @@ async function exportMeetups(){ const {data}=await sb.from('meetups').select('*'
 const SHOP_KIND={yarn:'실·부자재',studio:'공방',cafe:'카페',other:'기타'}; const SPOST_KIND={sale:'할인',new:'신상',meetup:'모임',class:'클래스',notice:'소식'};
 VIEWS.shops = async()=>{
   const {data:shops}=await sb.from('shops').select('*, owner:profiles!shops_owner_id_fkey(nickname), shop_posts(id), shop_follows(profile_id)').order('created_at');
-  $('#main').innerHTML=`<h1>파트너 가게 <small>공방·실 판매소 등이 소식을 올리는 계정</small></h1>
+  const {data:claims}=await sb.from('shop_claims').select('*, who:profiles!shop_claims_profile_id_fkey(nickname), shop:shops(name)').order('created_at',{ascending:false}).limit(100);
+  const pend=(claims||[]).filter(c=>c.status==='pending'), done=(claims||[]).filter(c=>c.status!=='pending');
+  $('#main').innerHTML=`<h1>가게 등록 신청 <small>대기 ${pend.length}건</small></h1>
+  <table><tr><th>신청일</th><th>상호</th><th>종류</th><th>주소·연락처</th><th>사업자번호</th><th>신청 계정</th><th>메모</th><th></th></tr>
+  ${pend.map(c=>`<tr><td class="muted">${fmt(c.created_at)}</td><td><b>${esc(c.name)}</b>${c.shop?'<br><span class="chip">기존 가게 오너 신청</span>':''}</td><td>${SHOP_KIND[c.kind]||c.kind}</td><td class="muted">${esc(c.address||'')}<br>${esc(c.phone||'')}</td><td>${esc(c.biz_no||'')}</td><td>${esc(c.who?.nickname||'')}</td><td class="muted">${esc(c.note||'')}</td><td>${c.doc_path?`<button onclick="showClaimDoc('${esc(c.doc_path)}')">서류</button> `:''}<button class="p" onclick="decideClaim('${c.id}',true,'${esc(c.doc_path||'')}')">승인</button> <button onclick="decideClaim('${c.id}',false,'${esc(c.doc_path||'')}')">반려</button></td></tr>`).join('')||'<tr><td colspan="8" class="muted">대기 중인 신청이 없어요</td></tr>'}</table>
+  ${done.length?`<p class="muted">처리됨: ${done.slice(0,10).map(c=>`${esc(c.name)} ${c.status==='approved'?'승인':'반려'}`).join(' · ')}</p>`:''}
+  <p class="muted">승인하면 가게가 '숨김' 상태로 만들어지고(기존 가게면 오너만 연결) 서류 사진은 삭제돼요. 이어서 열리는 수정 창에서 좌표를 찾고 '앱에 공개'를 켜 주세요.</p>
+  <h1>파트너 가게 <small>공방·실 판매소 등이 소식을 올리는 계정</small></h1>
   <div class="row"><button class="p" onclick="openShopForm()">가게 추가</button></div>
   <table><tr><th>가게</th><th>종류</th><th>주소</th><th>오너 계정</th><th>소식</th><th>팔로워</th><th>상태</th></tr>
   ${(shops||[]).map(x=>`<tr class="clk" onclick="openShopForm('${x.id}')"><td><b>${esc(x.name)}</b></td><td>${SHOP_KIND[x.kind]||x.kind}</td><td class="muted">${esc(x.address||'')}${x.location?'':' <span class="chip r">좌표 없음</span>'}</td><td>${x.owner?esc(x.owner.nickname):'<span class="muted">미지정</span>'}</td><td>${(x.shop_posts||[]).length}</td><td>${(x.shop_follows||[]).length}</td><td>${x.is_active?'<span class="chip g">공개</span>':'<span class="chip">숨김</span>'}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">없음</td></tr>'}</table>
@@ -487,11 +494,18 @@ function openShopPostForm(shopId){ openPanel(`<h2 style="margin-top:0">가게 �
   <div class="row"><button class="p" onclick="saveShopPost('${shopId}')">올리기</button><button onclick="openShopForm('${shopId}')">취소</button></div>`); }
 async function saveShopPost(shopId){ const title=$('#spTitle').value.trim(); if(!title) return toast('제목을 입력하세요'); const photos=$('#spPhotos').value.split(',').map(x=>x.trim()).filter(Boolean); const ends=$('#spEnds').value?new Date($('#spEnds').value+'T23:59:59').toISOString():null; const {error}=await sb.rpc('admin_shop_post',{p:{shop_id:shopId,kind:$('#spKind').value,title,body:$('#spBody').value.trim()||null,photos,ends_at:ends}}); if(error) return toast(error.message); toast('올렸어요. 팔로워에게 알림이 갔어요'); openShopForm(shopId); }
 async function hideShopPost(id, hidden){ const {error}=await sb.rpc('admin_shop_post',{p:{id,hidden}}); if(error) return toast(error.message); toast(hidden?'숨겼어요':'복구했어요'); route(); }
+async function showClaimDoc(path){ const {data,error}=await sb.storage.from('shop-docs').createSignedUrl(path, 600); if(error) return toast(error.message); window.open(data.signedUrl,'_blank','noopener'); }
+async function decideClaim(id, ok, docPath){
+  let reason=null; if(!ok){ reason=prompt('반려 사유 (신청자에게 전달돼요)'); if(reason===null) return; } else if(!confirm('승인할까요? 신청 계정이 가게 오너가 됩니다.')) return;
+  const {data:sid,error}=await sb.rpc('admin_decide_shop_claim',{p_id:id,p_approve:ok,p_reason:reason}); if(error) return toast(error.message);
+  if(docPath) await sb.storage.from('shop-docs').remove([docPath]);
+  toast(ok?'승인했어요. 좌표를 넣고 공개로 바꿔 주세요':'반려했어요'); await route(); if(ok&&sid) openShopForm(sid);
+}
 // ===== 로그·설정 =====
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',upsert_shop:'가게 저장',shop_post:'가게 소식'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

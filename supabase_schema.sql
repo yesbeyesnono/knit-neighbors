@@ -944,3 +944,13 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   트리거 함수(log_skill_events, notify_on_*)는 직접 호출 불가. RPC(admin_*, is_admin, mark_solved, nearby_shops, open_support_room, create_work)는 authenticated만.
 --   default privileges: 새 함수는 PUBLIC 실행 불가(필요 시 grant execute ... to authenticated 명시)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 25. 가게 등록 신청 — 2026-09-18 (마이그레이션 shop_claims)
+--   흐름: 개인 가입 → 설정 › 우리 가게 등록 신청(또는 오너 없는 가게 화면 › 이 가게 주인이에요) → 관리자 콘솔 › 파트너 가게에서 승인/반려
+--   shop_claims(profile_id, shop_id(기존 가게 오너 신청 시), name, kind, address, phone, biz_no, doc_path, note, status pending|approved|rejected, reject_reason, decided_by/at)
+--     RLS: 본인 select/insert(pending만)/delete(pending만), 관리자 select. 계정당 pending 1건(unique partial index)
+--   storage 'shop-docs'(비공개, 5MB, jpeg/png): <uid>/<ts>.jpg · 본인+관리자만 읽기/삭제. 처리 후 콘솔이 서류 삭제
+--   admin_decide_shop_claim(p_id, p_approve, p_reason): 승인 → 새 가게(is_active=false, 좌표는 콘솔에서 입력) 또는 기존 가게 owner_id 연결,
+--     신청자에게 지기 명의 notice 알림(승인 시 shop_id 포함 → 앱에서 가게로 이동), admin_logs approve_shop_claim/reject_shop_claim
+-- ---------------------------------------------------------------
