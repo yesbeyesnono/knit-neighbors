@@ -1651,7 +1651,8 @@ async function renderChats(){
   const rooms = await fetchRooms();
   const sup = rooms.find(isSupportRoom); const rest = rooms.filter(r=>r!==sup);
   const supRow = me.id===SUPPORT_ID ? '' : `<div class="item support" onclick="${sup?`openRoom('${sup.id}')`:'openSupportRoom()'}"><div class="ava">${ico('yarn')}</div><div class="tx"><b>뜨개동네 지기<span class="tag">운영진</span></b><span>${esc(sup?.last?.body||'궁금한 점·불편한 점을 편하게 남겨 주세요')}</span></div><span class="muted">${sup?.last?ago(sup.last.created_at):''}</span></div>`;
-  $('#chatsBody').innerHTML = supRow + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
+  $('#chatsBody').innerHTML = `<div class="pfriends" id="pfriends" style="padding-bottom:10px;border-bottom:1px solid var(--line)" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>` + supRow + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
+  renderMyFriends();
 }
 async function openDirectRoom(otherId){
   const rooms = await fetchRooms();
@@ -2375,12 +2376,11 @@ async function renderMy(){
   $('#myTitle').textContent = p.nickname||'마이'; if(!renderMy.scrollBound){ renderMy.scrollBound=true; $('#v-my').addEventListener('scroll', e=>$('#myTitle').classList.toggle('show', e.target.scrollTop>70)); } $('#myTitle').classList.toggle('show', $('#v-my').scrollTop>70);
   $('#myBody').innerHTML=`
     <div id="myRecs">${recCard(0)}</div>
-    <div class="pfriends" id="pfriends" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>
     ${myShop?`<div class="shopcard" onclick="openShop('${myShop.id}')"><div class="sq">${SHOP_SVG}</div><div style="flex:1;min-width:0"><b>${esc(myShop.name)}</b><div class="muted">내 가게 · 소식 올리기 · 팔로워 보기</div></div><span style="color:var(--ink3)">›</span></div>`:''}
     <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${myTab==='reposts'?'on':''}">리포스트</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
-  renderMyFriends(); loadMyFeed();
+  loadMyFeed();
   loadRecs().then(()=>{ const el=$('#myRecs'); if(el) el.innerHTML=recCard(0); });
 }
 async function renderMyFriends(){
@@ -2388,8 +2388,7 @@ async function renderMyFriends(){
   const friends = rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee:r.requester);
   const inbox = rows.filter(r=>r.status==='pending'&&r.addressee_id===me.id).length;
   const el=$('#pfriends'); if(!el) return;
-  let meetN=0; if(myRoomIds.size){ const { count } = await sb.from('meetups').select('id',{count:'exact',head:true}).in('room_id',[...myRoomIds]); meetN=count||0; }
-  el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}${myProfile?.cert_count?` · <span class="vcount">${ico('cert')} 작품 인증 ${myProfile.cert_count}</span>`:''}${meetN?` · 모임 ${meetN}`:''}</span><span style="margin-left:auto">›</span>`;
+  el.innerHTML = `${friends.length?`<div class="stack">${friends.slice(0,3).map(f=>avatar(f)).join('')}</div>`:''}<span>친구 ${friends.length}명${inbox?` · <b style="color:var(--ink)">받은 신청 ${inbox}</b>`:''}</span><span style="margin-left:auto">›</span>`;
 }
 async function loadMyFeed(){ if(myTab==='meetups') return loadMyMeetups($('#myFeed')); return loadUserFeed(me.id, myTab, $('#myFeed')); }
 // 내 모임: 참여·주최한 모임을 예정/완료로 나눠 표시
@@ -2415,7 +2414,7 @@ function openSettings(){
   const p=myProfile||{};
   const handle=[p.dong_name||'동네 미설정', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
   openSheet(`<b style="font-size:1.05rem">설정</b>
-    <div class="setprof">${avatar(p,true)}<div style="flex:1;min-width:0"><div class="nm">${esc(p.nickname||'')}${p.is_author?'<span class="authbadge">작가</span>':''}</div><div class="muted">${esc(handle)}</div>${p.bio?`<div class="bio">${esc(p.bio)}</div>`:''}</div></div>
+    <div class="setprof">${avatar(p,true)}<div style="flex:1;min-width:0"><div class="nm">${esc(p.nickname||'')}${p.is_author?'<span class="authbadge">작가</span>':''}</div><div class="muted">${esc(handle)}${p.cert_count?` · 작품 인증 ${p.cert_count}`:''}</div>${p.bio?`<div class="bio">${esc(p.bio)}</div>`:''}</div></div>
     <div class="sgrp">프로필</div>
     <div class="slist">
       <button class="srow" onclick="closeSheet();openOnboard(true)"><span>프로필 편집<br><span class="muted">닉네임·소개·경력·만나기 좋은 시간</span></span><span class="car">›</span></button>
