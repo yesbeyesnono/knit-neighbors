@@ -92,6 +92,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#banned" data-v="banned">금칙어</a>
     <a href="#broadcast" data-v="broadcast">공지·알림 보내기</a>
     <a href="#shops" data-v="shops">파트너 가게</a>
+    <a href="#patterns" data-v="patterns">도안</a>
     <div class="grp">AI 데이터</div>
     <a href="#ai-photos" data-v="ai-photos">사진↔기법 라벨</a>
     <a href="#ai-path" data-v="ai-path">학습 경로</a>
@@ -494,6 +495,48 @@ function openShopPostForm(shopId){ openPanel(`<h2 style="margin-top:0">가게 �
   <div class="row"><button class="p" onclick="saveShopPost('${shopId}')">올리기</button><button onclick="openShopForm('${shopId}')">취소</button></div>`); }
 async function saveShopPost(shopId){ const title=$('#spTitle').value.trim(); if(!title) return toast('제목을 입력하세요'); const photos=$('#spPhotos').value.split(',').map(x=>x.trim()).filter(Boolean); const ends=$('#spEnds').value?new Date($('#spEnds').value+'T23:59:59').toISOString():null; const {error}=await sb.rpc('admin_shop_post',{p:{shop_id:shopId,kind:$('#spKind').value,title,body:$('#spBody').value.trim()||null,photos,ends_at:ends}}); if(error) return toast(error.message); toast('올렸어요. 팔로워에게 알림이 갔어요'); openShopForm(shopId); }
 async function hideShopPost(id, hidden){ const {error}=await sb.rpc('admin_shop_post',{p:{id,hidden}}); if(error) return toast(error.message); toast(hidden?'숨겼어요':'복구했어요'); route(); }
+// ===== 도안 =====
+let PTECH=[], ptSel=new Set();
+const CRAFT_KO={crochet:'코바늘',knitting:'대바늘'};
+VIEWS.patterns = async()=>{
+  const {data}=await sb.from('patterns').select('*, author:profiles!patterns_author_id_fkey(nickname), pattern_saves(profile_id)').order('created_at',{ascending:false}).limit(500);
+  $('#main').innerHTML=`<h1>도안 <small>회원 단계에 맞춰 피드·작품 인증 후·내 단계 화면에 추천돼요</small></h1>
+  <div class="row"><button class="p" onclick="openPatternForm()">도안 추가</button></div>
+  <table><tr><th>도안</th><th>종목·단계</th><th>기법</th><th>가격</th><th>작가</th><th>찜</th><th>상태</th></tr>
+  ${(data||[]).map(x=>`<tr class="clk" onclick="openPatternForm('${x.id}')"><td><b>${esc(x.title)}</b>${(x.photos||[]).length?'':' <span class="chip r">사진 없음</span>'}${x.buy_url?'':' <span class="chip r">링크 없음</span>'}</td><td>${CRAFT_KO[x.craft]} ${x.level}단계</td><td class="muted">${(x.techniques||[]).length}개</td><td>${x.price>0?x.price.toLocaleString()+'원':'무료'}</td><td>${esc(x.author?.nickname||'')}</td><td>${(x.pattern_saves||[]).length}</td><td>${x.hidden?'<span class="chip r">숨김</span>':x.is_published?'<span class="chip g">공개</span>':'<span class="chip">비공개</span>'}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">아직 등록된 도안이 없어요. 도안이 없으면 앱에 추천 카드가 보이지 않아요.</td></tr>'}</table>
+  <p class="muted">추천 기준: 회원 단계와 같거나 한 단계 위 + 아직 체크 안 한 기법이 1~2개 든 도안 우선. 작가를 지정하지 않으면 '뜨개동네 지기' 이름으로 올라가요.</p>`;
+};
+async function openPatternForm(id){
+  if(!PTECH.length){ const r=await sb.from('techniques').select('id,craft,name_ko,level,sort').order('sort'); PTECH=r.data||[]; }
+  let x={craft:'crochet',level:1,price:0,is_published:true,hidden:false,techniques:[],photos:[]};
+  if(id){ const r=await sb.from('patterns').select('*, author:profiles!patterns_author_id_fkey(nickname)').eq('id',id).single(); x=r.data||x; }
+  ptSel=new Set(x.techniques||[]);
+  openPanel(`<h2 style="margin-top:0">${id?'도안 수정':'도안 추가'}</h2>
+    <input id="ptTitle" placeholder="도안 이름" value="${esc(x.title||'')}" style="width:100%;margin-bottom:6px">
+    <div class="row"><select id="ptCraft" onchange="renderPtTech()">${Object.entries(CRAFT_KO).map(([k,l])=>`<option value="${k}" ${x.craft===k?'selected':''}>${l}</option>`).join('')}</select><select id="ptLevel">${[1,2,3,4,5].map(l=>`<option value="${l}" ${x.level===l?'selected':''}>${l}단계</option>`).join('')}</select><input id="ptPrice" type="number" min="0" placeholder="가격(원, 0=무료)" value="${x.price||0}" style="width:150px"></div>
+    <textarea id="ptDescr" placeholder="소개 (완성 크기, 난이도 설명 등)" style="min-height:80px">${esc(x.descr||'')}</textarea>
+    <div class="row"><input id="ptYarn" placeholder="실 굵기 (예: DK)" value="${esc(x.yarn_weight||'')}" style="flex:1"><input id="ptNeedle" placeholder="바늘 (예: 4mm)" value="${esc(x.needle_size||'')}" style="flex:1"></div>
+    <input id="ptUrl" placeholder="판매·열람 링크 (https://…)" value="${esc(x.buy_url||'')}" style="width:100%;margin:6px 0">
+    <input id="ptPhotos" placeholder="사진 URL (쉼표로 구분)" value="${esc((x.photos||[]).join(', '))}" style="width:100%;margin-bottom:6px">
+    <div class="muted">쓰이는 기법 (눌러서 선택)</div><div id="ptTech" style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0"></div>
+    <div class="row"><label><input type="checkbox" id="ptPub" ${x.is_published?'checked':''}> 공개</label><label><input type="checkbox" id="ptHidden" ${x.hidden?'checked':''}> 숨김(운영 조치)</label></div>
+    <div class="row"><input id="ptOwnerQ" placeholder="작가 계정 검색 (이메일·닉네임)" style="flex:1"><button onclick="findPtAuthor()">찾기</button></div>
+    <div class="muted"><span id="ptAuthorCur">${x.author?'현재 작가: '+esc(x.author.nickname):'작가 미지정 → 뜨개동네 지기'}</span> <span id="ptAuthorSel"></span></div>
+    <input type="hidden" id="ptAuthorId" value="${x.author_id||''}">
+    <div class="row"><button class="p" onclick="savePattern('${id||''}')">저장</button></div>`);
+  renderPtTech();
+}
+function renderPtTech(){ const c=$('#ptCraft').value; $('#ptTech').innerHTML=PTECH.filter(t=>t.craft===c).map(t=>`<button type="button" data-id="${t.id}" onclick="togglePtTech('${t.id}')" style="${ptSel.has(t.id)?'background:#111;color:#fff;':''}">${t.level}·${esc(t.name_ko)}</button>`).join(''); }
+function togglePtTech(id){ ptSel.has(id)?ptSel.delete(id):ptSel.add(id); renderPtTech(); }
+async function findPtAuthor(){ const q=$('#ptOwnerQ').value.trim(); const {data}=await sb.rpc('admin_find_users',{p_q:q,p_limit:8}); $('#ptAuthorSel').innerHTML=(data||[]).map(u=>`<button data-id="${u.id}" data-n="${esc(u.nickname)}" onclick="$('#ptAuthorId').value=this.dataset.id;$('#ptAuthorCur').textContent='선택: '+this.dataset.n">${esc(u.nickname)} · ${esc(u.email)}</button>`).join(' ')||'<span class="muted">없음</span>'; }
+async function savePattern(id){
+  const craft=$('#ptCraft').value; const url=$('#ptUrl').value.trim();
+  const p={ title:$('#ptTitle').value.trim(), craft, level:+$('#ptLevel').value, price:Math.max(0,+$('#ptPrice').value||0), descr:$('#ptDescr').value.trim()||null, yarn_weight:$('#ptYarn').value.trim()||null, needle_size:$('#ptNeedle').value.trim()||null, buy_url:url, photos:$('#ptPhotos').value.split(',').map(v=>v.trim()).filter(Boolean), techniques:[...ptSel].filter(t=>PTECH.find(k=>k.id===t&&k.craft===craft)), is_published:$('#ptPub').checked, hidden:$('#ptHidden').checked, author_id:$('#ptAuthorId').value||'' };
+  if(!p.title) return toast('도안 이름을 입력하세요');
+  if(url && !/^https?:\/\//i.test(url)) return toast('링크는 http(s)://로 시작해야 해요');
+  if(id) p.id=id;
+  const {error}=await sb.rpc('admin_upsert_pattern',{p}); if(error) return toast(error.message); toast('저장했어요'); closePanel(); route();
+}
 async function showClaimDoc(path){ const {data,error}=await sb.storage.from('shop-docs').createSignedUrl(path, 600); if(error) return toast(error.message); window.open(data.signedUrl,'_blank','noopener'); }
 async function decideClaim(id, ok, docPath){
   let reason=null; if(!ok){ reason=prompt('반려 사유 (신청자에게 전달돼요)'); if(reason===null) return; } else if(!confirm('승인할까요? 신청 계정이 가게 오너가 됩니다.')) return;
@@ -505,7 +548,7 @@ async function decideClaim(id, ok, docPath){
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',upsert_pattern:'도안 저장',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

@@ -954,3 +954,17 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_decide_shop_claim(p_id, p_approve, p_reason): 승인 → 새 가게(is_active=false, 좌표는 콘솔에서 입력) 또는 기존 가게 owner_id 연결,
 --     신청자에게 지기 명의 notice 알림(승인 시 shop_id 포함 → 앱에서 가게로 이동), admin_logs approve_shop_claim/reject_shop_claim
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 26. 도안 + 단계 기반 추천 — 2026-09-18 (마이그레이션 patterns_recommend)
+--   patterns(author_id, title, descr, craft crochet|knitting, level 1~5, techniques text[], photos text[], yarn_weight, needle_size,
+--            price(0=무료), buy_url(외부 판매 링크, http(s)만), is_published, hidden)
+--     RLS: select = 공개(is_published and not hidden) 또는 본인·관리자. insert/update/delete는 authenticated에서 회수(쓰기는 RPC만, 3단계에서 작가에게 개방)
+--   pattern_saves(profile_id, pattern_id): 찜. 본인 것만
+--   admin_upsert_pattern(jsonb): 관리자 등록/수정, author_id 미지정 시 지기 계정. admin_logs 'upsert_pattern'
+--   recommend_patterns(p_limit): 내 종목의 (내 단계~내 단계+1, 단계 0이면 1~1) 도안 중
+--     아직 체크 안 한 기법 1~2개 → 0개 → 3개 이상 순, 같은 순위 안에서는 날짜별로 섞음. 내 도안·차단 상대 제외
+--     반환: new_count/new_techniques(새로 배우는 기법 이름), step_up(한 단계 위), saved
+--   앱 노출: 커뮤니티 피드 6번째 글 뒤(이후 8개마다) '다음에 떠보면 좋아요' · 작품 인증 직후 시트 · 내 뜨개 단계 화면 아래 · 설정 › 찜한 도안
+--   결제는 앱에서 하지 않음(외부 링크만)
+-- ---------------------------------------------------------------
