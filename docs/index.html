@@ -600,7 +600,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .upin.author .lbl{background:#8a6d1a}
 .authbadge{display:inline-flex;align-items:center;gap:3px;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:999px;background:#8a6d1a;color:#fff;vertical-align:middle;margin-left:6px}
 .reccard{padding:12px 0 12px 16px;border-bottom:1px solid var(--tline,var(--line));background:var(--tbg,#fff)}
-#myRecs .reccard{border-top:1px solid var(--tline,var(--line));margin-top:12px}
+#myRecs .reccard{border-bottom:1px solid var(--tline,var(--line))}
+.setprof{display:flex;align-items:center;gap:12px;padding:6px 0 2px}.setprof .nm{font-size:1.1rem;font-weight:700}.setprof .bio{white-space:pre-wrap;font-size:.9rem;color:var(--ink2);margin-top:2px}
 .acts button.on3{color:var(--ink)}.acts button.on3 svg{stroke-width:2.7}
 .patsort{display:flex;gap:8px;align-items:center;padding:10px 16px 4px;flex-wrap:wrap}
 .patsort .seg2{display:flex;gap:6px;flex-wrap:wrap}
@@ -2373,12 +2374,9 @@ async function renderMy(){
   const bio = p.bio || [p.now_making?`지금 뜨는 것: ${p.now_making}`:'', p.stuck_on?`요즘 막히는 부분: ${p.stuck_on}`:''].filter(Boolean).join('\n');
   $('#myTitle').textContent = p.nickname||'마이'; if(!renderMy.scrollBound){ renderMy.scrollBound=true; $('#v-my').addEventListener('scroll', e=>$('#myTitle').classList.toggle('show', e.target.scrollTop>70)); } $('#myTitle').classList.toggle('show', $('#v-my').scrollTop>70);
   $('#myBody').innerHTML=`
-    <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname||'')}</h2><div class="phandle">${esc(handle)}</div></div>${avatar(p,true)}</div>
-    ${bio?`<div class="pbio">${esc(bio)}</div>`:'<div class="pbio muted">소개를 적어 보세요</div>'}
+    <div id="myRecs">${recCard(0)}</div>
     <div class="pfriends" id="pfriends" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>
     ${myShop?`<div class="shopcard" onclick="openShop('${myShop.id}')"><div class="sq">${SHOP_SVG}</div><div style="flex:1;min-width:0"><b>${esc(myShop.name)}</b><div class="muted">내 가게 · 소식 올리기 · 팔로워 보기</div></div><span style="color:var(--ink3)">›</span></div>`:''}
-    <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o wave ${isWaving(p)?'on':''}" onclick="toggleWave()" title="지도 핀에 손을 들어 뜨개 친구를 찾고 있다고 알려요">${ico('wave')} ${isWaving(p)?'친구 찾는 중':'뜨개 친구 찾기'}</button></div>
-    <div id="myRecs">${recCard(0)}</div>
     <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${myTab==='reposts'?'on':''}">리포스트</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
@@ -2415,7 +2413,14 @@ async function loadMyMeetups(el){
 }
 function openSettings(){
   const p=myProfile||{};
+  const handle=[p.dong_name||'동네 미설정', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
   openSheet(`<b style="font-size:1.05rem">설정</b>
+    <div class="setprof">${avatar(p,true)}<div style="flex:1;min-width:0"><div class="nm">${esc(p.nickname||'')}${p.is_author?'<span class="authbadge">작가</span>':''}</div><div class="muted">${esc(handle)}</div>${p.bio?`<div class="bio">${esc(p.bio)}</div>`:''}</div></div>
+    <div class="sgrp">프로필</div>
+    <div class="slist">
+      <button class="srow" onclick="closeSheet();openOnboard(true)"><span>프로필 편집<br><span class="muted">닉네임·소개·경력·만나기 좋은 시간</span></span><span class="car">›</span></button>
+      <button class="srow" onclick="closeSheet();toggleWave()"><span>${ico('wave')} 뜨개 친구 찾기 <span class="muted">${isWaving(p)?'찾는 중 · 누르면 내려요':'꺼짐'}</span><br><span class="muted">지도 내 핀에 손을 들어 먼저 말 걸어도 된다고 알려요 (14일)</span></span><span class="car">›</span></button>
+    </div>
     <div class="sgrp">내 뜨개</div>
     <div class="slist">
       <button class="srow" onclick="closeSheet();openSkills()"><span>내 뜨개 단계 <span class="muted">${lvShort(p)||'아직 없음'}</span></span><span class="car">›</span></button>
