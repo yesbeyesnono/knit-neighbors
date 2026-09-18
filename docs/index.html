@@ -606,7 +606,9 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .patsort .seg2{display:flex;gap:6px;flex-wrap:wrap}
 .patsort .seg2 button{font:inherit;font-size:13px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer}
 .patsort .seg2 button.on{background:var(--ink);border-color:var(--ink);color:#fff}
-.patsort select{font:inherit;font-size:13px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);background:#fff;margin-left:auto;max-width:150px}
+.pathead{font-size:13px;font-weight:700;color:var(--ink);padding:18px 0 6px;border-bottom:2px solid var(--ink)}
+.pathead:first-child{padding-top:8px}
+.pathead span{font-weight:500;color:var(--ink3);margin-left:4px}
 .reccard .rh{display:flex;align-items:baseline;gap:8px;padding-right:16px;margin-bottom:8px}
 .reccard .rh b{font-size:15px}.reccard .rh span{font-size:12px;color:var(--ink3)}
 .recrow{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-right:16px}
@@ -1358,22 +1360,22 @@ async function savePatternForm(id){
   }catch(e){ toast(e.message); const b=$('#pfSave'); if(b) b.disabled=false; }
 }
 async function deleteMyPattern(id){ if(!confirm('이 도안을 삭제할까요?')) return; const {error}=await sb.from('patterns').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); openMyPatterns(); }
-let upSort='new', upTech='', upRows=[], upEl=null;
+let upSort='new', upRows=[], upEl=null;
 async function loadUserPatterns(uid, el){
   el.innerHTML='<div class="empty">불러오는 중…</div>'; await loadTech();
   const { data } = await sb.from('patterns').select('id,title,craft,level,photos,price,techniques,save_count,created_at').eq('author_id',uid).eq('is_published',true).eq('hidden',false).limit(200);
-  upRows=data||[]; upEl=el; upSort='new'; upTech=''; renderUserPatterns();
+  upRows=data||[]; upEl=el; upSort='new'; renderUserPatterns();
 }
 function renderUserPatterns(){
   if(!upEl) return;
   if(!upRows.length){ upEl.innerHTML='<div class="empty">아직 등록한 도안이 없어요</div>'; return; }
-  const techIds=[...new Set(upRows.flatMap(p=>p.techniques||[]))].map(id=>TECH.find(t=>t.id===id)).filter(Boolean).sort((a,b)=>a.sort-b.sort);
-  let list = upTech ? upRows.filter(p=>(p.techniques||[]).includes(upTech)) : upRows.slice();
-  const by = { new:(a,b)=>new Date(b.created_at)-new Date(a.created_at), best:(a,b)=>(b.save_count||0)-(a.save_count||0)||new Date(b.created_at)-new Date(a.created_at), level:(a,b)=>a.level-b.level||a.craft.localeCompare(b.craft), price:(a,b)=>a.price-b.price }[upSort];
+  const list = upRows.slice();
+  const by = { new:(a,b)=>new Date(b.created_at)-new Date(a.created_at), best:(a,b)=>(b.save_count||0)-(a.save_count||0)||new Date(b.created_at)-new Date(a.created_at), level:(a,b)=>a.craft.localeCompare(b.craft)||a.level-b.level||a.price-b.price, price:(a,b)=>a.price-b.price }[upSort];
   list.sort(by);
-  upEl.innerHTML = `<div class="patsort"><div class="seg2">${[['new','최신'],['best','인기'],['level','쉬운 순'],['price','가격 낮은 순']].map(([k,l])=>`<button class="${upSort===k?'on':''}" onclick="upSort='${k}';renderUserPatterns()">${l}</button>`).join('')}</div>
-    <select onchange="upTech=this.value;renderUserPatterns()"><option value="">기법 전체</option>${techIds.map(t=>`<option value="${t.id}" ${upTech===t.id?'selected':''}>${esc(t.name_ko)}</option>`).join('')}</select></div>
-    <div class="patlist" style="padding:0 16px">${list.length?list.map(p=>patItem({...p,new_count:-1,save_n:p.save_count})).join(''):'<div class="empty">이 기법을 쓰는 도안이 없어요</div>'}</div>`;
+  let prev='';
+  const items = list.map(p=>{ const k=p.craft+p.level; const head = (upSort==='level' && k!==prev) ? `<div class="pathead">${CRAFT_KO[p.craft]} ${p.level}단계 <span>${LVNAME[p.level]}</span></div>` : ''; prev=k; return head+patItem({...p,new_count:-1,save_n:p.save_count}); }).join('');
+  upEl.innerHTML = `<div class="patsort"><div class="seg2">${[['new','최신'],['best','인기'],['level','쉬운 순'],['price','가격 낮은 순']].map(([k,l])=>`<button class="${upSort===k?'on':''}" onclick="upSort='${k}';renderUserPatterns()">${l}</button>`).join('')}</div></div>
+    <div class="patlist" style="padding:0 16px">${items}</div>`;
 }
 // ===== 도안 추천 =====
 let recs=[], recsAt=0;
