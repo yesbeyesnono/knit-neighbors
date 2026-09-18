@@ -93,6 +93,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#broadcast" data-v="broadcast">공지·알림 보내기</a>
     <a href="#shops" data-v="shops">파트너 가게</a>
     <a href="#patterns" data-v="patterns">도안</a>
+    <a href="#authors" data-v="authors">작가 신청</a>
     <div class="grp">AI 데이터</div>
     <a href="#ai-photos" data-v="ai-photos">사진↔기법 라벨</a>
     <a href="#ai-path" data-v="ai-path">학습 경로</a>
@@ -495,6 +496,22 @@ function openShopPostForm(shopId){ openPanel(`<h2 style="margin-top:0">가게 �
   <div class="row"><button class="p" onclick="saveShopPost('${shopId}')">올리기</button><button onclick="openShopForm('${shopId}')">취소</button></div>`); }
 async function saveShopPost(shopId){ const title=$('#spTitle').value.trim(); if(!title) return toast('제목을 입력하세요'); const photos=$('#spPhotos').value.split(',').map(x=>x.trim()).filter(Boolean); const ends=$('#spEnds').value?new Date($('#spEnds').value+'T23:59:59').toISOString():null; const {error}=await sb.rpc('admin_shop_post',{p:{shop_id:shopId,kind:$('#spKind').value,title,body:$('#spBody').value.trim()||null,photos,ends_at:ends}}); if(error) return toast(error.message); toast('올렸어요. 팔로워에게 알림이 갔어요'); openShopForm(shopId); }
 async function hideShopPost(id, hidden){ const {error}=await sb.rpc('admin_shop_post',{p:{id,hidden}}); if(error) return toast(error.message); toast(hidden?'숨겼어요':'복구했어요'); route(); }
+// ===== 작가 신청 =====
+VIEWS.authors = async()=>{
+  const {data:apps}=await sb.from('author_applications').select('*, who:profiles!author_applications_profile_id_fkey(id,nickname,cert_count,level_crochet,level_knit)').order('created_at',{ascending:false}).limit(200);
+  const {data:authors}=await sb.from('profiles').select('id,nickname,author_since,cert_count,patterns:patterns!patterns_author_id_fkey(id)').eq('is_author',true).order('author_since',{ascending:false});
+  const pend=(apps||[]).filter(a=>a.status==='pending'), done=(apps||[]).filter(a=>a.status!=='pending');
+  $('#main').innerHTML=`<h1>작가 신청 <small>대기 ${pend.length}건 · 작품 인증 3개 이상만 신청 가능</small></h1>
+  <table><tr><th>신청일</th><th>계정</th><th>이름</th><th>인증·단계</th><th>활동 링크</th><th>소개</th><th></th></tr>
+  ${pend.map(a=>`<tr><td class="muted">${fmt(a.created_at)}</td><td><b>${esc(a.who?.nickname||'')}</b></td><td>${esc(a.real_name)}</td><td>인증 ${a.who?.cert_count||0} · 코 ${a.who?.level_crochet||0} / 대 ${a.who?.level_knit||0}</td><td>${a.link?`<a href="${esc(a.link)}" target="_blank" rel="noopener">열기</a>`:'<span class="muted">없음</span>'}</td><td class="muted">${esc(a.note||'')}</td><td><button class="p" onclick="decideAuthor('${a.id}',true)">승인</button> <button onclick="decideAuthor('${a.id}',false)">반려</button></td></tr>`).join('')||'<tr><td colspan="7" class="muted">대기 중인 신청이 없어요</td></tr>'}</table>
+  ${done.length?`<p class="muted">처리됨: ${done.slice(0,10).map(a=>`${esc(a.who?.nickname||'')} ${a.status==='approved'?'승인':'반려'}`).join(' · ')}</p>`:''}
+  <p class="muted">신청자의 인증 작품은 '글·모임·인증' 메뉴에서 확인할 수 있어요.</p>
+  <h1>작가 ${(authors||[]).length}명</h1>
+  <table><tr><th>작가</th><th>승인일</th><th>작품 인증</th><th>도안</th><th></th></tr>
+  ${(authors||[]).map(u=>`<tr><td><b>${esc(u.nickname)}</b></td><td class="muted">${u.author_since?fmt(u.author_since):''}</td><td>${u.cert_count||0}</td><td>${(u.patterns||[]).length}</td><td><button onclick="setAuthor('${u.id}',false)">작가 해제</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
+};
+async function decideAuthor(id, ok){ let reason=null; if(!ok){ reason=prompt('반려 사유 (신청자에게 전달돼요)'); if(reason===null) return; } else if(!confirm('작가로 승인할까요?')) return; const {error}=await sb.rpc('admin_decide_author',{p_id:id,p_approve:ok,p_reason:reason}); if(error) return toast(error.message); toast(ok?'승인했어요':'반려했어요'); route(); }
+async function setAuthor(id, on){ if(!confirm(on?'작가로 지정할까요?':'작가 자격을 해제할까요? 등록한 도안은 남아 있어요(필요하면 도안 메뉴에서 숨김).')) return; const {error}=await sb.rpc('admin_set_author',{p_profile:id,p_on:on}); if(error) return toast(error.message); toast('처리했어요'); route(); }
 // ===== 도안 =====
 let PTECH=[], ptSel=new Set();
 const CRAFT_KO={crochet:'코바늘',knitting:'대바늘'};
@@ -548,7 +565,7 @@ async function decideClaim(id, ok, docPath){
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',upsert_pattern:'도안 저장',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

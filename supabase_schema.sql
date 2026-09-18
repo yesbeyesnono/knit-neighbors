@@ -968,3 +968,18 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   앱 노출: 커뮤니티 피드 6번째 글 뒤(이후 8개마다) '다음에 떠보면 좋아요' · 작품 인증 직후 시트 · 내 뜨개 단계 화면 아래 · 설정 › 찜한 도안
 --   결제는 앱에서 하지 않음(외부 링크만)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 27. 작가 — 2026-09-18 (마이그레이션 authors)
+--   profiles.is_author, author_since
+--   ★ profiles 쓰기 권한 재정의: authenticated의 테이블 단위 INSERT/UPDATE 회수 후 사용자 편집 컬럼만 grant update
+--     (nickname, avatar_url, dong_*, location, mbti, craft, experience, now_making(_photo), stuck_on, bio, available, beginner_ok,
+--      is_visible, onboarded_at, skills, terms_agreed_at, wave_until). 19절의 컬럼 회수는 테이블 단위 grant 때문에 실제로는 무효였음
+--     → cert_count/verified_skills/suspended_at/level_*/is_author 는 이제 클라이언트가 못 바꿈. profiles에 컬럼을 추가하면 필요한 것만 grant 할 것
+--   author_applications(profile_id, real_name, link, note, status, reject_reason, decided_by/at): 본인 select/delete(pending), 관리자 select. insert는 RPC만
+--   apply_author(name, link, note): 작품 인증(cert_count) 3개 이상, 정지 아님, 계정당 pending 1건
+--   admin_decide_author(id, approve, reason): is_author 설정 + 지기 명의 notice 알림 + admin_logs approve_author/reject_author
+--   admin_set_author(profile, on): 수동 지정/해제
+--   author_upsert_pattern(jsonb): 작가 본인 도안 등록/수정(금칙어, 사진 4장, 하루 20건 제한). 삭제는 RLS patterns_delete_own
+--   nearby_profiles: is_author, pattern_count 반환 추가 → 지도 작가 핀(.upin.author, #8a6d1a 임시)·'작가' 필터
+-- ---------------------------------------------------------------
