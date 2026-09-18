@@ -601,6 +601,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .authbadge{display:inline-flex;align-items:center;gap:3px;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:999px;background:#8a6d1a;color:#fff;vertical-align:middle;margin-left:6px}
 .reccard{padding:12px 0 12px 16px;border-bottom:1px solid var(--tline,var(--line));background:var(--tbg,#fff)}
 #myRecs .reccard{border-top:1px solid var(--tline,var(--line));margin-top:12px}
+.acts button.on3{color:var(--ink)}.acts button.on3 svg{stroke-width:2.7}
+.patsort{display:flex;gap:8px;align-items:center;padding:10px 16px 4px;flex-wrap:wrap}
+.patsort .seg2{display:flex;gap:6px;flex-wrap:wrap}
+.patsort .seg2 button{font:inherit;font-size:13px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer}
+.patsort .seg2 button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.patsort select{font:inherit;font-size:13px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);background:#fff;margin-left:auto;max-width:150px}
 .reccard .rh{display:flex;align-items:baseline;gap:8px;padding-right:16px;margin-bottom:8px}
 .reccard .rh b{font-size:15px}.reccard .rh span{font-size:12px;color:var(--ink3)}
 .recrow{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-right:16px}
@@ -953,7 +959,7 @@ sb.auth.onAuthStateChange(async (ev, session) => {
   if(!me){
     initStarted=false; closeSheet(); $('#slides').classList.remove('on'); show('login'); myProfile=null;
     if(friendChan){ sb.removeChannel(friendChan); friendChan=null; } if(roomChan){ sb.removeChannel(roomChan); roomChan=null; }
-    likedSet=new Set(); feedRows=[]; myRoomIds=new Set(); curPost=null; roomId=null; expandedReplies=new Set();
+    likedSet=new Set(); repostSet=new Set(); feedRows=[]; myRoomIds=new Set(); curPost=null; roomId=null; expandedReplies=new Set();
     return;
   }
   if(initStarted) return;   // TOKEN_REFRESHED·탭 복귀·OAuth 중복 이벤트: 보던 화면 유지
@@ -1352,10 +1358,22 @@ async function savePatternForm(id){
   }catch(e){ toast(e.message); const b=$('#pfSave'); if(b) b.disabled=false; }
 }
 async function deleteMyPattern(id){ if(!confirm('이 도안을 삭제할까요?')) return; const {error}=await sb.from('patterns').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); openMyPatterns(); }
+let upSort='new', upTech='', upRows=[], upEl=null;
 async function loadUserPatterns(uid, el){
-  el.innerHTML='<div class="empty">불러오는 중…</div>';
-  const { data } = await sb.from('patterns').select('id,title,craft,level,photos,price').eq('author_id',uid).eq('is_published',true).eq('hidden',false).order('created_at',{ascending:false}).limit(50);
-  el.innerHTML = (data||[]).length ? `<div class="patlist" style="padding:0 16px">${data.map(p=>patItem({...p,new_count:-1})).join('')}</div>` : '<div class="empty">아직 등록한 도안이 없어요</div>';
+  el.innerHTML='<div class="empty">불러오는 중…</div>'; await loadTech();
+  const { data } = await sb.from('patterns').select('id,title,craft,level,photos,price,techniques,save_count,created_at').eq('author_id',uid).eq('is_published',true).eq('hidden',false).limit(200);
+  upRows=data||[]; upEl=el; upSort='new'; upTech=''; renderUserPatterns();
+}
+function renderUserPatterns(){
+  if(!upEl) return;
+  if(!upRows.length){ upEl.innerHTML='<div class="empty">아직 등록한 도안이 없어요</div>'; return; }
+  const techIds=[...new Set(upRows.flatMap(p=>p.techniques||[]))].map(id=>TECH.find(t=>t.id===id)).filter(Boolean).sort((a,b)=>a.sort-b.sort);
+  let list = upTech ? upRows.filter(p=>(p.techniques||[]).includes(upTech)) : upRows.slice();
+  const by = { new:(a,b)=>new Date(b.created_at)-new Date(a.created_at), best:(a,b)=>(b.save_count||0)-(a.save_count||0)||new Date(b.created_at)-new Date(a.created_at), level:(a,b)=>a.level-b.level||a.craft.localeCompare(b.craft), price:(a,b)=>a.price-b.price }[upSort];
+  list.sort(by);
+  upEl.innerHTML = `<div class="patsort"><div class="seg2">${[['new','최신'],['best','인기'],['level','쉬운 순'],['price','가격 낮은 순']].map(([k,l])=>`<button class="${upSort===k?'on':''}" onclick="upSort='${k}';renderUserPatterns()">${l}</button>`).join('')}</div>
+    <select onchange="upTech=this.value;renderUserPatterns()"><option value="">기법 전체</option>${techIds.map(t=>`<option value="${t.id}" ${upTech===t.id?'selected':''}>${esc(t.name_ko)}</option>`).join('')}</select></div>
+    <div class="patlist" style="padding:0 16px">${list.length?list.map(p=>patItem({...p,new_count:-1,save_n:p.save_count})).join(''):'<div class="empty">이 기법을 쓰는 도안이 없어요</div>'}</div>`;
 }
 // ===== 도안 추천 =====
 let recs=[], recsAt=0;
@@ -1370,7 +1388,7 @@ function priceKo(p){ return p.price>0 ? p.price.toLocaleString()+'원' : '무료
 function patThumb(p){ const u=(p.photos||[])[0]; return u?`<img class="ph" src="${esc(u)}" alt="" loading="lazy">`:`<div class="ph">${ico('yarn')}</div>`; }
 function patItem(p){
   const nw = p.new_count>0 ? `새 기법 ${esc((p.new_techniques||[]).slice(0,2).join(' · '))}${p.new_count>2?' 외':''}` : (p.new_count===0 ? '지금 바로 뜰 수 있어요' : '');
-  return `<div class="pat" onclick="openPattern('${p.id}')">${patThumb(p)}<div style="min-width:0;flex:1"><div class="tt">${esc(p.title)}</div><div class="mt">${CRAFT_KO[p.craft]||''} ${p.level}단계 · ${priceKo(p)}</div>${nw?`<div class="nw">${nw}</div>`:''}</div></div>`;
+  return `<div class="pat" onclick="openPattern('${p.id}')">${patThumb(p)}<div style="min-width:0;flex:1"><div class="tt">${esc(p.title)}</div><div class="mt">${CRAFT_KO[p.craft]||''} ${p.level}단계 · ${priceKo(p)}${p.save_n?` · 찜 ${p.save_n}`:''}</div>${nw?`<div class="nw">${nw}</div>`:''}</div></div>`;
 }
 function recCard(offset){
   if(!recs.length) return '';
@@ -1481,7 +1499,7 @@ async function openProfile(id){
     ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:#fbf6e6;color:#8a6d1a">${ico('cert')} 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}</div>
-    <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="replies" class="${profTab==='replies'?'on':''}">답글</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button>${p.is_author?`<button data-t="patterns" class="${profTab==='patterns'?'on':''}">도안</button>`:''}</div>
+    <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${profTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button>${p.is_author?`<button data-t="patterns" class="${profTab==='patterns'?'on':''}">도안</button>`:''}</div>
     <div class="feed" id="profFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#profTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; profTab=b.dataset.t; [...$('#profTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadUserFeed(profId, profTab, $('#profFeed')); };
   show('profile');
@@ -1493,6 +1511,15 @@ async function shareUser(){ const p=profData||{}; const text=`뜨개동네 · ${
 // 특정 사용자 글 목록 (마이·프로필 공용)
 async function loadUserFeed(uid, tab, el){
   if(tab==='patterns') return loadUserPatterns(uid, el);
+  if(tab==='reposts'){
+    el.innerHTML='<div class="empty">불러오는 중…</div>';
+    const { data:rp, error:e2 } = await sb.from('post_reposts').select('created_at, post:posts(*, '+AUTHOR_SEL+')').eq('profile_id', uid).order('created_at',{ascending:false}).limit(50);
+    if(e2){ el.innerHTML='<div class="empty">'+esc(e2.message)+'</div>'; return; }
+    const rows=(rp||[]).map(x=>x.post).filter(x=>x&&x.author);
+    await Promise.all([loadLikes(rows), attachMeetups(rows), attachWorks(rows)]);
+    el.innerHTML = rows.length ? rows.map(x=>postGroup(x)).join('') : `<div class="empty" style="white-space:pre-line">${uid===me.id?'아직 리포스트한 글이 없어요.\n다시 보고 싶은 글에서 리포스트 버튼을 눌러 보세요':'아직 리포스트한 글이 없어요'}</div>`;
+    feedRows = rows; return;
+  }
   el.innerHTML='<div class="empty">불러오는 중…</div>';
   let q = sb.from('posts').select('*, '+AUTHOR_SEL).eq('author_id', uid).order('created_at',{ascending:false}).limit(50);
   if(tab==='posts') q = q.is('parent_id', null);
@@ -1580,8 +1607,8 @@ function watchFriends(){
 }
 async function refreshBadge(){ if(!me) return; const {count}=await sb.from('notifications').select('*',{count:'exact',head:true}).eq('recipient_id',me.id).is('read_at',null); ['badgeFriends','badgeAct'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.hidden=!count; el.textContent=count||''; } }); }
 // ===== 활동(알림) =====
-const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요', notice:'의 공지예요', shop_post:'의 가게에 새 소식이 올라왔어요' };
-const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn'), shop_post:ico('location') };
+const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요', notice:'의 공지예요', shop_post:'의 가게에 새 소식이 올라왔어요', repost:'님이 회원님의 글을 리포스트했어요' };
+const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn'), shop_post:ico('location'), repost:ico('reply') };
 let actRows = [];
 function openActivity(){ show('activity'); renderActivity(); }
 async function renderActivity(){
@@ -1718,7 +1745,7 @@ async function createMeetup(){
 }
 
 // ============ 커뮤니티 (Threads 스타일) ============
-let commFilter='rank', feedRows=[], feedCursor=null, feedOffset=0, likedSet=new Set(), curPost=null, cPhotos=[], expandedReplies=new Set();
+let commFilter='rank', feedRows=[], feedCursor=null, feedOffset=0, likedSet=new Set(), repostSet=new Set(), curPost=null, cPhotos=[], expandedReplies=new Set();
 const FEED_PAGE = 30;
 const AUTHOR_SEL = 'author:profiles!posts_author_id_fkey(id,nickname,avatar_url,dong_name,craft,level_crochet,level_knit)';
 function autoGrow(t){ t.style.height='auto'; t.style.height=Math.min(160, t.scrollHeight)+'px'; }
@@ -1732,7 +1759,7 @@ async function loadFeed(more){
     // 추천: 서버 점수순 (반응 × 거리 × 관계 × 질문 ÷ 시간)
     const { data, error } = await sb.rpc('feed_ranked', { p_limit: FEED_PAGE, p_offset: feedOffset });
     if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
-    if(data?.length){ const { data:wk } = await sb.from('posts').select('id,work_id,review_of,mentions,solved_reply_id').in('id', data.map(r=>r.id)); const wm={}; (wk||[]).forEach(x=>wm[x.id]=x); data.forEach(r=>{ r.work_id = wm[r.id]?.work_id||null; r.review_of = wm[r.id]?.review_of||null; r.mentions = wm[r.id]?.mentions||[]; r.solved_reply_id = wm[r.id]?.solved_reply_id||null; }); }
+    if(data?.length){ const { data:wk } = await sb.from('posts').select('id,work_id,review_of,mentions,solved_reply_id,repost_count').in('id', data.map(r=>r.id)); const wm={}; (wk||[]).forEach(x=>wm[x.id]=x); data.forEach(r=>{ r.repost_count = wm[r.id]?.repost_count||0; r.work_id = wm[r.id]?.work_id||null; r.review_of = wm[r.id]?.review_of||null; r.mentions = wm[r.id]?.mentions||[]; r.solved_reply_id = wm[r.id]?.solved_reply_id||null; }); }
     feedRows = feedRows.concat(data||[]); feedOffset += (data||[]).length;
     $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
     await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), attachWorks(data||[])]); renderFeed(); return;
@@ -1775,7 +1802,7 @@ async function loadFirstReplies(rows){
   rows.forEach(r=>{ r.firstReply = first[r.id]||null; });
   await loadLikes(Object.values(first));
 }
-async function loadLikes(rows){ if(!rows.length) return; const { data } = await sb.from('post_likes').select('post_id').eq('profile_id', me.id).in('post_id', rows.map(r=>r.id)); (data||[]).forEach(l=>likedSet.add(l.post_id)); await loadMentionNames(rows); }
+async function loadLikes(rows){ if(!rows.length) return; const { data } = await sb.from('post_likes').select('post_id').eq('profile_id', me.id).in('post_id', rows.map(r=>r.id)); (data||[]).forEach(l=>likedSet.add(l.post_id)); const rp = await sb.from('post_reposts').select('post_id').eq('profile_id', me.id).in('post_id', rows.map(r=>r.id)); (rp.data||[]).forEach(l=>repostSet.add(l.post_id)); await loadMentionNames(rows); }
 // ===== @멘션 =====
 const MENTION_NAMES = {};                    // id → {nickname}
 async function loadMentionNames(rows){
@@ -1888,6 +1915,7 @@ async function submitInlineReply(pid){
 const ICON = {
   heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.6S3.2 15.2 3.2 9.2a4.8 4.8 0 0 1 8.8-2.6 4.8 4.8 0 0 1 8.8 2.6c0 6-8.8 11.4-8.8 11.4Z"></path></svg>',
   reply: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.3-1.2A8.5 8.5 0 1 0 12 3.5Z"></path></svg>',
+  repost: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l3.5 3.5L17 10"></path><path d="M3.5 11.5v-1a4 4 0 0 1 4-4h13"></path><path d="M7 21l-3.5-3.5L7 14"></path><path d="M20.5 12.5v1a4 4 0 0 1-4 4h-13"></path></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5V3.5"></path><path d="M8.2 6.8 12 3l3.8 3.8"></path><path d="M7.5 10.5H6a1.8 1.8 0 0 0-1.8 1.8v6.4A1.8 1.8 0 0 0 6 20.5h12a1.8 1.8 0 0 0 1.8-1.8v-6.4a1.8 1.8 0 0 0-1.8-1.8h-1.5"></path></svg>'
 };
 // 내가 속한 방 목록 (참여 여부 판단)
@@ -1989,13 +2017,13 @@ function postCard(p, opts={}){
       <div class="acts">
         <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${ICON.heart}<span>${p.like_count||''}</span></button>
         <button class="${expandedReplies.has(p.id)?'on2':''}" onclick="event.stopPropagation();toggleReplies('${p.parent_id||p.id}')">${ICON.reply}<span>${p.reply_count||''}</span></button>
-        <button onclick="event.stopPropagation();sharePost('${p.id}')">${ICON.share}</button>
+        ${p.parent_id?'':(mine?`<button disabled style="opacity:.45;cursor:default" onclick="event.stopPropagation()">${ICON.repost}<span>${p.repost_count||''}</span></button>`:`<button class="${repostSet.has(p.id)?'on3':''}" title="리포스트" onclick="event.stopPropagation();toggleRepost('${p.id}',this)">${ICON.repost}<span>${p.repost_count||''}</span></button>`)}
       </div>
     </div></div>`;
 }
 function postMenu(id, authorId){
-  if(authorId===me.id) return openSheet(`<button class="btn r" onclick="closeSheet();deletePost('${id}')">삭제</button><button class="btn o" onclick="closeSheet()">취소</button>`);
-  openSheet(`<button class="btn o" onclick="closeSheet();reportPost('${id}')">${ico('report')} 이 글 신고</button><button class="btn o" onclick="closeSheet();reportUser('${authorId}')">${ico('report')} 작성자 신고</button><button class="btn r" onclick="closeSheet();blockUser('${authorId}')">작성자 차단</button><button class="btn o" onclick="closeSheet()">취소</button>`);
+  if(authorId===me.id) return openSheet(`<button class="btn o" onclick="closeSheet();sharePost('${id}')">외부로 공유</button><button class="btn r" onclick="closeSheet();deletePost('${id}')">삭제</button><button class="btn o" onclick="closeSheet()">취소</button>`);
+  openSheet(`<button class="btn o" onclick="closeSheet();sharePost('${id}')">외부로 공유</button><button class="btn o" onclick="closeSheet();reportPost('${id}')">${ico('report')} 이 글 신고</button><button class="btn o" onclick="closeSheet();reportUser('${authorId}')">${ico('report')} 작성자 신고</button><button class="btn r" onclick="closeSheet();blockUser('${authorId}')">작성자 차단</button><button class="btn o" onclick="closeSheet()">취소</button>`);
 }
 function reportPost(id){
   openSheet(`<b>글 신고</b><div class="muted" style="font-size:.85rem">신고가 3건 쌓이면 글이 자동으로 숨겨지고, 운영자가 24시간 안에 확인해요.</div><label class="f">사유<select id="prReason"><option value="spam">스팸·광고</option><option value="harassment">괴롭힘·혐오</option><option value="inappropriate">부적절한 내용(성적·폭력)</option><option value="fake">허위·사기</option><option value="other">기타</option></select></label><textarea id="prDetail" maxlength="500" placeholder="자세한 내용 (선택)"></textarea><button class="btn r" onclick="sendPostReport('${id}')">신고하기</button>`);
@@ -2009,6 +2037,17 @@ async function sharePost(id){
   const p=[...feedRows, ...feedRows.map(x=>x.firstReply), curPost, ...(curPost?.replies||[])].find(x=>x&&x.id===id);
   const text = p ? `${p.author?.nickname}: ${p.body||'(사진)'}` : '뜨개동네 글';
   try{ if(navigator.share) await navigator.share({ title:'뜨개동네', text }); else { await navigator.clipboard.writeText(text); toast('내용을 복사했어요'); } }catch(e){}
+}
+async function toggleRepost(id, btn){
+  const on = repostSet.has(id);
+  const r = on ? await sb.from('post_reposts').delete().eq('post_id',id).eq('profile_id',me.id)
+               : await sb.from('post_reposts').insert({post_id:id, profile_id:me.id});
+  if(r.error) return toast(r.error.code==='42501'?'내 글은 리포스트할 수 없어요':'실패: '+r.error.message);
+  if(on) repostSet.delete(id); else repostSet.add(id);
+  const bump = on?-1:1;
+  [...feedRows, curPost].filter(Boolean).forEach(x=>{ if(x.id===id) x.repost_count=(x.repost_count||0)+bump; });
+  if(btn){ btn.classList.toggle('on3',!on); const cnt=btn.querySelector('span'); const v=Math.max(0,(parseInt(cnt.textContent)||0)+bump); cnt.textContent = v||''; }
+  toast(on?'리포스트를 취소했어요':'리포스트했어요. 내 프로필 › 리포스트에 모여요');
 }
 function openPhoto(u){ openSheet(`<img src="${esc(u)}" style="width:100%;border-radius:12px" alt="">`); }
 async function toggleLike(id, btn){
@@ -2338,7 +2377,7 @@ async function renderMy(){
     ${myShop?`<div class="shopcard" onclick="openShop('${myShop.id}')"><div class="sq">${SHOP_SVG}</div><div style="flex:1;min-width:0"><b>${esc(myShop.name)}</b><div class="muted">내 가게 · 소식 올리기 · 팔로워 보기</div></div><span style="color:var(--ink3)">›</span></div>`:''}
     <div class="pbtns"><button class="btn o" onclick="openOnboard(true)">프로필 편집</button><button class="btn o wave ${isWaving(p)?'on':''}" onclick="toggleWave()" title="지도 핀에 손을 들어 뜨개 친구를 찾고 있다고 알려요">${ico('wave')} ${isWaving(p)?'친구 찾는 중':'뜨개 친구 찾기'}</button></div>
     <div id="myRecs">${recCard(0)}</div>
-    <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
+    <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${myTab==='reposts'?'on':''}">리포스트</button><button data-t="replies" class="${myTab==='replies'?'on':''}">답글</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
   renderMyFriends(); loadMyFeed();

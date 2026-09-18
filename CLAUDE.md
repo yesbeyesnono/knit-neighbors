@@ -14,7 +14,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~27, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~28, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`, 워크플로 ios-testflight). main 푸시 → GitHub 웹훅(id 679395520) → 자동 빌드 → TestFlight(앱 이름 KOAP, 내부 테스터 그룹)
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
@@ -29,7 +29,7 @@
 - 파트너 가게: 쎄비하우스 등록됨(`002ce2de-e380-4bb5-ae38-d5ee1feb076c`, 성수 연무장5가길 28). 오너 계정 미지정.
 
 ## 앱 기능 요약
-지도(이웃·모임·가게 핀, 필터: 전체/친구 찾는 이웃/모임/가게/비슷한 수준/시간 맞음/친구, 같은 지점 핀 분산) · 커뮤니티(추천 랭킹·최신·모임·작품·동네·친구, 인라인 답글, @멘션, 해결됐어요) · ＋ 작성(글/작품 인증/모임/가게 소식/후기) · 채팅(카카오식 입력, 사진 전송, 뜨개동네 지기 고정 채널) · 마이(🔔 활동, 프로필, 뜨개 친구 찾기(손 들기 14일), 설정: 내 뜨개 단계·현위치로 동네 다시 설정·지기에게 말하기·약관·계정 삭제) · 신고/차단/금칙어/약관 동의
+지도(이웃·모임·가게 핀, 필터: 전체/친구 찾는 이웃/모임/가게/비슷한 수준/시간 맞음/친구, 같은 지점 핀 분산) · 커뮤니티(추천 랭킹·최신·모임·작품·동네·친구, 인라인 답글, @멘션, 해결됐어요, 리포스트=저장 겸 프로필 공개·외부 공유는 ··· 메뉴) · ＋ 작성(글/작품 인증/모임/가게 소식/후기) · 채팅(카카오식 입력, 사진 전송, 뜨개동네 지기 고정 채널) · 마이(🔔 활동, 프로필, 뜨개 친구 찾기(손 들기 14일), 설정: 내 뜨개 단계·현위치로 동네 다시 설정·지기에게 말하기·약관·계정 삭제) · 신고/차단/금칙어/약관 동의
 
 ## 가게·도안·작가 (2026-09-18)
 - 가게 가입: 개인 가입 → 설정 › 우리 가게 등록 신청(사업자등록증 사진, 비공개 버킷 shop-docs) 또는 오너 없는 가게 화면 › 이 가게 주인이에요 → 관리자 콘솔 › 파트너 가게에서 승인(서류 자동 삭제) → 좌표 입력·공개

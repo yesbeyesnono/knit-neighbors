@@ -981,5 +981,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_decide_author(id, approve, reason): is_author 설정 + 지기 명의 notice 알림 + admin_logs approve_author/reject_author
 --   admin_set_author(profile, on): 수동 지정/해제
 --   author_upsert_pattern(jsonb): 작가 본인 도안 등록/수정(금칙어, 사진 4장, 하루 20건 제한). 삭제는 RLS patterns_delete_own
---   nearby_profiles: is_author, pattern_count 반환 추가 → 지도 작가 핀(.upin.author, #8a6d1a 임시)·'작가' 필터
+--   nearby_profiles: is_author, pattern_count 반환 추가 → 지도 작가 핀(.upin.author, #8a6d1a)·'작가' 필터
+-- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 28. 리포스트 + 도안 찜 수 — 2026-09-18 (마이그레이션 reposts_pattern_save_count)
+--   post_reposts(post_id, profile_id): 저장 겸 프로필 공개. select 전체(authenticated), insert 본인·정지 아님·원글만·내 글 제외, delete 본인
+--   posts.repost_count (트리거 post_repost_apply: 카운트 + 알림 kind 'repost', 취소 시 알림 삭제). notifications_kind_check 에 'repost' 추가
+--   patterns.save_count (트리거 pattern_save_count) → 프로필 도안 탭 '인기' 정렬
+--   앱: 글 카드의 외부 공유 버튼 자리에 리포스트 버튼(공유는 ··· 메뉴로), 남의 프로필 탭 = 글/리포스트/인증/(도안), 마이 = 글/리포스트/답글/인증/모임
+--        프로필 도안 탭 정렬: 최신·인기(찜)·쉬운 순·가격 낮은 순 + 기법 필터
 -- ---------------------------------------------------------------
