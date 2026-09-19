@@ -2482,6 +2482,19 @@ async function toggleWave(){
   }
   setWave(on);
 }
+function waveDesc(p){ if(isWaving(p)){ const d=new Date(p.wave_until); return `지도 내 핀에 손이 올라가 있어요 · ${d.getMonth()+1}/${d.getDate()}까지 (끄면 바로 내려가요)`; } return '켜면 지도 내 핀에 손이 올라가 "먼저 말 걸어도 돼요"라고 14일 동안 알려요'; }
+// 설정 화면의 스위치: 화면을 떠나지 않고 그 자리에서 켜짐/꺼짐만 바뀐다
+async function setWaveInSettings(chk){
+  const on=chk.checked; chk.disabled=true;
+  const wave_until = on ? new Date(Date.now()+14*864e5).toISOString() : null;
+  const {error} = await sb.from('profiles').update({wave_until}).eq('id', me.id);
+  chk.disabled=false;
+  if(error){ chk.checked=!on; return toast('저장 실패: '+error.message); }
+  myProfile.wave_until = wave_until; localStorage.setItem('waveInfoSeen','1');
+  const st=$('#waveState'), ds=$('#waveDesc'); if(st) st.textContent = on?'켜짐':'꺼짐'; if(ds) ds.textContent = waveDesc(myProfile);
+  toast(on ? '뜨개 친구 찾기를 켰어요 · 14일 동안 지도에 표시돼요' : '뜨개 친구 찾기를 껐어요');
+  if(MapAdapter.ready) loadPins();
+}
 async function setWave(on){
   const wave_until = on ? new Date(Date.now()+14*864e5).toISOString() : null;
   const {error} = await sb.from('profiles').update({wave_until}).eq('id', me.id);
@@ -2539,7 +2552,7 @@ function openSettings(){
     <div class="sgrp">프로필</div>
     <div class="slist">
       <button class="srow" onclick="closeSheet();openOnboard(true)"><span>프로필 편집<br><span class="muted">닉네임·소개·경력·만나기 좋은 시간</span></span><span class="car">›</span></button>
-      <button class="srow" onclick="closeSheet();toggleWave()"><span>${ico('wave')} 뜨개 친구 찾기 <span class="muted">${isWaving(p)?'찾는 중 · 누르면 내려요':'꺼짐'}</span><br><span class="muted">지도 내 핀에 손을 들어 먼저 말 걸어도 된다고 알려요 (14일)</span></span><span class="car">›</span></button>
+      <label class="srow"><span>${ico('wave')} 뜨개 친구 찾기 <b id="waveState" style="font-size:.85rem">${isWaving(p)?'켜짐':'꺼짐'}</b><br><span class="muted" id="waveDesc">${waveDesc(p)}</span></span><input type="checkbox" id="waveChk" ${isWaving(p)?'checked':''} onchange="setWaveInSettings(this)"></label>
     </div>
     <div class="sgrp">내 뜨개</div>
     <div class="slist">
