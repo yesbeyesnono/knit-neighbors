@@ -1678,7 +1678,7 @@ async function sendReport(id){
 
 // ============ 친구 ============
 async function fetchFriendships(){
-  const { data } = await sb.from('friendships').select('*, requester:profiles!friendships_requester_id_fkey(id,nickname,avatar_url,dong_name,craft,now_making,level_crochet,level_knit,wave_until), addressee:profiles!friendships_addressee_id_fkey(id,nickname,avatar_url,dong_name,craft,now_making,level_crochet,level_knit,wave_until)').neq('status','blocked').order('created_at',{ascending:false});
+  const { data } = await sb.from('friendships').select('*, requester:profiles!friendships_requester_id_fkey(id,nickname,avatar_url,dong_name,craft,now_making,level_crochet,level_knit,wave_until), addressee:profiles!friendships_addressee_id_fkey(id,nickname,avatar_url,dong_name,craft,now_making,level_crochet,level_knit,wave_until)').or(`requester_id.eq.${me.id},addressee_id.eq.${me.id}`).neq('status','blocked').order('created_at',{ascending:false});
   return data||[];
 }
 let friendTab = 'friends';
@@ -1741,7 +1741,8 @@ async function openSupportRoom(){
 }
 function isSupportRoom(r){ return r?.kind==='direct' && (r.others||r.room_members?.map(m=>m.profiles)||[]).some(p=>p && p.id===SUPPORT_ID); }
 async function fetchRooms(){
-  const { data, error } = await sb.from('rooms').select('id,kind,title,created_at, room_members(profile_id, profiles(id,nickname,avatar_url)), messages(body,photo_url,place,created_at,sender_id)').order('created_at',{foreignTable:'messages',ascending:false}).limit(1,{foreignTable:'messages'});
+  await loadMyRooms(); if(!myRoomIds.size) return [];
+  const { data, error } = await sb.from('rooms').select('id,kind,title,created_at, room_members(profile_id, profiles(id,nickname,avatar_url)), messages(body,photo_url,place,created_at,sender_id)').in('id',[...myRoomIds]).order('created_at',{foreignTable:'messages',ascending:false}).limit(1,{foreignTable:'messages'});
   if(error){ toast('채팅 조회 실패: '+error.message); return []; }
   return (data||[]).map(r=>{ r.others=r.room_members.map(m=>m.profiles).filter(p=>p&&p.id!==me.id); r.name=r.kind==='direct'?(r.others[0]?.nickname||'(나간 사용자)'):(r.title||r.others.map(p=>p.nickname).join(', ')); r.last=r.messages?.[0]; return r; })
     .sort((a,b)=>new Date(b.last?.created_at||b.created_at)-new Date(a.last?.created_at||a.created_at));
@@ -1867,7 +1868,7 @@ async function loadFeed(more){
     $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
     await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), attachWorks(data||[])]); renderFeed(); return;
   }
-  let q = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).order('created_at',{ascending:false}).limit(FEED_PAGE);
+  let q = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).eq('hidden', false).order('created_at',{ascending:false}).limit(FEED_PAGE);
   if(feedCursor) q = q.lt('created_at', feedCursor);
   if(commFilter==='meet'){
     let mq = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).not('meetup_id','is',null).order('created_at',{ascending:false}).limit(100);
