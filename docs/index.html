@@ -1751,7 +1751,7 @@ async function renderChats(){
   const rooms = await fetchRooms();
   const sup = rooms.find(isSupportRoom); const rest = rooms.filter(r=>r!==sup);
   const supRow = me.id===SUPPORT_ID ? '' : `<div class="item support" onclick="${sup?`openRoom('${sup.id}')`:'openSupportRoom()'}"><div class="ava">${ico('yarn')}</div><div class="tx"><b>뜨개동네 지기<span class="tag">운영진</span></b><span>${esc(sup?.last?.body||'궁금한 점·불편한 점을 편하게 남겨 주세요')}</span></div><span class="muted">${sup?.last?ago(sup.last.created_at):''}</span></div>`;
-  $('#chatsBody').innerHTML = `<div class="pfriends" id="pfriends" style="padding-bottom:10px;border-bottom:1px solid var(--line)" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>` + supRow + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
+  $('#chatsBody').innerHTML = `<div class="pfriends" id="pfriends" style="padding-bottom:10px;border-bottom:1px solid var(--line)" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>` + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
   renderMyFriends();
 }
 async function openDirectRoom(otherId){
@@ -2570,7 +2570,7 @@ function openSettings(){
     </div>`}
     <div class="sgrp">도움</div>
     <div class="slist">
-      <button class="srow" onclick="closeSheet();openSupportRoom()"><span>뜨개동네 지기에게 말하기<br><span class="muted">궁금한 점·불편한 점·바라는 기능</span></span><span class="car">›</span></button>
+      <button class="srow" onclick="closeSheet();openSupportRoom()"><span>${ico('yarn')} 뜨개동네 지기에게 말하기 <span class="authbadge" style="background:var(--ink)">운영진</span><br><span class="muted" id="supHint">궁금한 점·불편한 점·바라는 기능을 채팅으로 남겨 주세요</span></span><span class="car">›</span></button>
       <a class="srow" href="mailto:knitup.official@gmail.com"><span>이메일 문의</span><span class="car">›</span></a>
     </div>
     <div class="sgrp">약관·정책</div>
@@ -2585,6 +2585,7 @@ function openSettings(){
       <button class="srow danger" onclick="deleteAccount()"><span>계정 삭제</span><span class="car">›</span></button>
     </div>
     <div class="devbar">뜨개동네 ${APP_VERSION}${FULL?' Lab':''} · ${esc(me?.email||'')}</div>`);
+  if(me.id!==SUPPORT_ID) fetchRooms().then(rs=>{ const sup=rs.find(isSupportRoom), el=$('#supHint'); if(sup?.last && el) el.textContent=(sup.last.sender_id===me.id?'나: ':'지기: ')+(sup.last.body||'사진')+' · '+ago(sup.last.created_at); }).catch(()=>{});
 }
 async function deleteAccount(){
   if(!confirm('계정을 삭제하면 프로필·글·사진·채팅·모임 참여 기록이 모두 지워지고 복구할 수 없어요. 계속할까요?')) return;
