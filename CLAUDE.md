@@ -14,7 +14,7 @@
   - **full = V1 Lab**(VC 시연, 계속 실험). 기준점 태그 `v1-full-2026-09-19`
   - 새 기능을 만들 때: 공개해도 되는지 대표에게 확인 전에는 `FULL`로 감쌀 것
 - 저장소의 edition.js 기본값은 meet(= GitHub Pages 웹 기본). 웹에서 full 보기: 주소 뒤 `?edition=full`(브라우저에 기억, `?edition=meet`로 복귀). 네이티브는 빌드가 넣은 값 고정
-- Codemagic 워크플로: `ios-public`(meet, 기존 Bundle ID, **수동 실행만** — App Store 제출용) · `ios-testflight`(full, 기존 Bundle ID, main 푸시 자동 — Lab 앱 준비 전 임시) · `ios-lab`(full, `kr.co.firmtech.knitneighbors.lab`, 이름 '뜨개동네 Lab', 복귀 주소 `knitneighborslab://auth` — 대표가 Bundle ID·App Store Connect 앱·Supabase Redirect URL 추가 후 triggering 주석 해제하고 ios-testflight 자동 빌드는 제거). 빌드 번호는 시각 기반(yymmddHHMM)
+- Codemagic 워크플로(2026-09-19 전환 완료): `ios-public`(meet, 기존 Bundle ID `kr.co.firmtech.knitneighbors` = App Store Connect 앱 **KOAP**, **수동 실행만** — App Store 제출용) · `ios-lab`(full, `kr.co.firmtech.knitneighbors.lab` = 앱 **뜨개동네 Lab**, main 푸시마다 자동, 복귀 주소 `knitneighborslab://auth` — Supabase Redirect URL 등록됨). 빌드 번호는 시각 기반(yymmddHHMM). KOAP에 예전에 올라간 full 빌드는 심사에 제출하지 말 것(반드시 ios-public 빌드를 고를 것)
 - 공개 후 원칙: DB 변경은 추가만(옛 앱 버전이 계속 동작해야 함), 기존 컬럼·함수 삭제 금지. 구버전 차단은 `app_config.min_version`
 - 공개 전 할 일: demo1~6 계정 데이터 삭제(데모 도안은 지기 소유로 옮겨 Lab 시연용으로 유지), APP_VERSION·MARKETING_VERSION 정리
 
@@ -26,7 +26,7 @@
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
 - DB 스키마 기록: `supabase_schema.sql` (섹션 0~30, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
-- iOS 빌드: Codemagic(`codemagic.yaml`, 워크플로 ios-testflight). main 푸시 → GitHub 웹훅(id 679395520) → 자동 빌드 → TestFlight(앱 이름 KOAP, 내부 테스터 그룹)
+- iOS 빌드: Codemagic(`codemagic.yaml`). main 푸시 → GitHub 웹훅(id 679395520) → `ios-lab` 자동 빌드 → TestFlight '뜨개동네 Lab'. 공개 앱(KOAP)은 `ios-public` 수동 실행. 자세한 내용은 위 '에디션' 절
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
 - 검증용 스테이징: `knitup/docs/knit.html`(+admin.html, icons/, kr-provinces.json) 복사 후 knitup 폴더의 launch.json `knitup-static`(127.0.0.1:8765)로 확인. Google Maps 키가 이 주소를 허용함. knitup 폴더에서는 git 명령 금지.
 
