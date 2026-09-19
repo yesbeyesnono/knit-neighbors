@@ -639,6 +639,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .tmlegend .k.done{background:var(--ink);border-color:var(--ink)}.tmlegend .k.ready{border-color:var(--ink)}
 .phw{position:relative;flex:none;line-height:0}.pvb{position:absolute;left:6px;bottom:6px;font-size:10.5px;line-height:1.2;font-weight:700;background:var(--ink);color:#fff;padding:3px 7px;border-radius:999px}
 .patlist .pvb{left:3px;bottom:3px;font-size:9px;padding:2px 5px}
+.placeres{display:flex;flex-direction:column;gap:4px;margin-top:6px}.placeres button{font:inherit;font-size:.88rem;text-align:left;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer}
+.placesel{display:flex;align-items:center;gap:6px;margin-top:6px;padding:9px 10px;border-radius:10px;background:var(--bg2);font-size:.88rem}.placesel a{flex:none;color:var(--ink2);font-size:.8rem}
 .reccard .rh{display:flex;align-items:baseline;gap:8px;padding-right:16px;margin-bottom:8px}
 .reccard .rh b{font-size:15px}.reccard .rh span{font-size:12px;color:var(--ink3)}
 .recrow{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-right:16px}
@@ -797,7 +799,10 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
           <label class="f" id="mTechWrap" hidden>배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label>
           <div class="f">종목<div class="seg" id="mCraft"></div></div>
           <div class="f">권장 뜨개 단계<div class="lv"><select id="mLvMin"></select><span>~</span><select id="mLvMax"></select></div><span class="hint">참여자에게 "내 단계에 맞아요 / 조금 높아요"로 보여요</span></div>
-          <label class="f">장소<input id="mPlace" maxlength="80" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label>
+          <label class="f">장소 이름<input id="mPlace" maxlength="80" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label>
+          <div class="f">장소 위치 <span class="hint" style="display:inline">지도에 이 위치로 모임 핀이 찍혀요</span>
+            <div style="display:flex;gap:8px"><input id="mAddr" maxlength="120" placeholder="주소나 장소 이름으로 검색 (예: 일산 호수공원)" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();searchPlace('m')}"><button type="button" class="btn o sm" style="flex:none" onclick="searchPlace('m')">검색</button></div>
+            <div id="mAddrRes" class="placeres"></div><div id="mAddrSel" class="placesel" hidden></div></div>
           <div class="g2"><label class="f">일시<input id="mTime" type="datetime-local"></label><label class="f">소요 시간<select id="mDur"><option value="60">1시간</option><option value="90">1시간 30분</option><option value="120" selected>2시간</option><option value="180">3시간</option><option value="240">반나절</option></select></label></div>
           <div class="g2"><label class="f">반복<select id="mRepeat"><option value="once">한 번</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option></select></label><label class="f">정원<input id="mCap" type="number" min="2" max="100" placeholder="비우면 제한 없음"></label></div>
           <div class="g2"><label class="f">참가비<input id="mFee" maxlength="40" placeholder="예: 무료 / 각자 음료 / 5,000원"></label><label class="f">준비물<input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘"></label></div>
@@ -1723,6 +1728,7 @@ async function renderActivity(){
 }
 async function openNotif(i){
   const n=actRows[i]; if(!n) return;
+  sb.from('notifications').delete().eq('id', n.id).eq('recipient_id', me.id).then(()=>refreshBadge());   // 확인한 알림은 활동에서 지운다
   if(n.kind==='notice' && n.shop_id){ const { data:shop } = await sb.from('shops').select('*').eq('owner_id', me.id).maybeSingle(); myShop = shop||myShop; return openShop(n.shop_id); }
   if(n.kind==='notice') return openSupportRoom();
   if(n.kind==='shop_post' && n.shop_id) return openShop(n.shop_id);
@@ -1836,14 +1842,15 @@ async function createGroup(){
 function openMeetupForm(){
   const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7)); d.setHours(14,0,0,0);
   const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  openSheet(`<b>모임 만들기</b><label class="f">제목<input id="mtTitle" maxlength="60" value="${esc($('#roomTitle').textContent)} 모임"></label><label class="f">장소<input id="mtPlace" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label><label class="f">시간<input id="mtTime" type="datetime-local" value="${local}"></label><label class="f"><span><input type="checkbox" id="mtPublic" style="width:auto;margin-right:6px">지도에 공개 (다른 뜨개인도 볼 수 있어요)</span></label><div class="card soft muted">첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</div><button class="btn" onclick="createMeetup()">만들기</button>`);
+  placePick.r=null;
+  openSheet(`<b>모임 만들기</b><label class="f">제목<input id="mtTitle" maxlength="60" value="${esc($('#roomTitle').textContent)} 모임"></label><label class="f">장소 이름<input id="mtPlace" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label><div class="f">장소 위치<div style="display:flex;gap:8px"><input id="rAddr" maxlength="120" placeholder="주소나 장소 이름으로 검색" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing)searchPlace('r')"><button type="button" class="btn o sm" style="flex:none" onclick="searchPlace('r')">검색</button></div><div id="rAddrRes" class="placeres"></div><div id="rAddrSel" class="placesel" hidden></div></div><label class="f">시간<input id="mtTime" type="datetime-local" value="${local}"></label><label class="f"><span><input type="checkbox" id="mtPublic" style="width:auto;margin-right:6px">지도에 공개 (다른 뜨개인도 볼 수 있어요)</span></label><div class="card soft muted">첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</div><button class="btn" onclick="createMeetup()">만들기</button>`);
 }
 async function createMeetup(){
-  const place=$('#mtPlace').value.trim(); if(!place) return toast('장소를 적어 주세요');
-  const c = myProfile?._c;
+  const place=$('#mtPlace').value.trim(); if(!place) return toast('장소 이름을 적어 주세요');
+  const c = placePick.r; if(!c) return toast('장소 위치를 검색해서 골라 주세요');
   if(!(myProfile?.cert_count>0)) return toast('모임을 열려면 작품 인증이 1회 이상 필요해요 (＋ › 작품 인증)');
   const when=$('#mtTime').value; if(!when || new Date(when) < new Date()) return toast('일시를 지금 이후로 정해 주세요');
-  const { error } = await sb.rpc('create_meetup', { p_title:$('#mtTitle').value.trim()||'모임', p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mtPublic').checked, p_body:null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:[], p_extra:{ room_id: roomId, kind:'free', craft:'both' } });
+  const { error } = await sb.rpc('create_meetup', { p_title:$('#mtTitle').value.trim()||'모임', p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mtPublic').checked, p_body:null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:[], p_extra:{ room_id: roomId, kind:'free', craft:'both', address: c.addr } });
   if(error) return toast(error.message.replace(/^.*?: /,''));
   toast('모임을 만들었어요'); closeSheet();
 }
@@ -2083,6 +2090,40 @@ async function leaveMeetup(id){
   const { error } = await sb.rpc('leave_meetup', { p_meetup_id:id }); if(error) return toast(error.message);
   await loadMyRooms(); toast('모임에서 나왔어요'); closeSheet(); if(view==='comm') loadFeed(); if(view==='map') loadPins(); if(view==='my') renderMy();
 }
+// ===== 장소 검색(모임 위치) — Google 지오코더, 실패 시 OpenStreetMap =====
+let placePick = { m:null, e:null };   // m=모임 만들기, e=기존 모임 장소 수정
+async function geocodePlace(q){
+  const out=[];
+  try{ if(window.google?.maps?.Geocoder){ const { results } = await Promise.race([ new google.maps.Geocoder().geocode({ address:q, region:'kr', language:'ko' }), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),5000)) ]);
+    (results||[]).slice(0,5).forEach(r=>out.push({ lat:r.geometry.location.lat(), lng:r.geometry.location.lng(), addr:(r.formatted_address||'').replace(/^대한민국\s*/,'') })); } }catch(e){}
+  for(const qq of [q, q.replace(/\s+/g,'')]){ if(out.length) break; try{ const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=kr&accept-language=ko&q='+encodeURIComponent(qq)); (await r.json()).forEach(j=>out.push({ lat:+j.lat, lng:+j.lon, addr:(j.display_name||'').split(', ').reverse().filter(x=>x!=='대한민국').join(' ') })); }catch(e){} }
+  return out.filter(x=>x.lat>32&&x.lat<40&&x.lng>123&&x.lng<133);
+}
+let placeRes=[];
+async function searchPlace(k){
+  const q=$('#'+k+'Addr').value.trim(); const box=$('#'+k+'AddrRes'); if(!q) return toast('주소나 장소 이름을 입력해 주세요');
+  box.innerHTML='<div class="muted" style="padding:6px 0">찾는 중…</div>';
+  placeRes = await geocodePlace(q);
+  box.innerHTML = placeRes.length ? placeRes.map((r,i)=>`<button type="button" onclick="pickPlace('${k}',${i})">${ico('location')} ${esc(r.addr)}</button>`).join('') : '<div class="muted" style="padding:6px 0">찾지 못했어요. 도로명 주소(예: 고양시 일산동구 호수로 595)로 다시 검색해 보세요</div>';
+}
+function pickPlace(k, i){
+  const r=placeRes[i]; if(!r) return; placePick[k]=r; $('#'+k+'AddrRes').innerHTML='';
+  const el=$('#'+k+'AddrSel'); el.hidden=false; el.innerHTML=`${ico('check')} <span style="flex:1;min-width:0">${esc(r.addr)}</span><a href="https://map.kakao.com/link/map/${encodeURIComponent(r.addr)},${r.lat},${r.lng}" target="_blank" rel="noopener">지도에서 확인</a>`;
+}
+function openMeetupLocEdit(id, place){
+  placePick.e=null;
+  openSheet(`<b>모임 장소 위치 수정</b><p class="muted" style="margin:0">지도의 모임 핀이 이 위치로 옮겨져요.</p>
+    <label class="f">장소 이름<input id="ePlace" maxlength="80" value="${esc(place||'')}"></label>
+    <div style="display:flex;gap:8px"><input id="eAddr" maxlength="120" placeholder="주소나 장소 이름으로 검색" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing)searchPlace('e')"><button type="button" class="btn o sm" style="flex:none" onclick="searchPlace('e')">검색</button></div>
+    <div id="eAddrRes" class="placeres"></div><div id="eAddrSel" class="placesel" hidden></div>
+    <button class="btn" onclick="saveMeetupLoc('${id}')">저장</button>`);
+}
+async function saveMeetupLoc(id){
+  const r=placePick.e; if(!r) return toast('검색해서 위치를 골라 주세요');
+  const { error } = await sb.rpc('set_meetup_location', { p_meetup:id, p_lat:r.lat, p_lng:r.lng, p_address:r.addr, p_place:$('#ePlace').value.trim() });
+  if(error) return toast(error.message);
+  toast('모임 장소를 옮겼어요'); if(MapAdapter.ready) loadPins(); openMeetup(id);
+}
 async function openMeetup(id){
   await loadTech();
   const { data:m } = await sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(id,nickname,avatar_url,dong_name,level_crochet,level_knit)').eq('id', id).single();
@@ -2095,7 +2136,7 @@ async function openMeetup(id){
     ${joined && !myReviewed ? `<button class="btn" onclick="closeSheet();openCompose('review','${m.id}')">후기 쓰기</button>` : ''}` : '';
   openSheet(`<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700">${ico('location')} 모임${m.is_public?'':' · 초대만'} · ${MKIND[m.kind]||'자유 뜨개'}</div>
     <b style="font-size:1.25rem">${esc(m.title)}</b>
-    <div>${esc(m.place_name)}</div><div class="muted">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}${m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''}</div>
+    <div>${esc(m.place_name)}${m.address?`<div class="muted" style="font-size:.88rem">${esc(m.address)}${(()=>{ const g=parseGeo(m.location); return g?` · <a href="https://map.kakao.com/link/map/${encodeURIComponent(m.place_name)},${g.lat},${g.lng}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">길찾기</a>`:''; })()}</div>`:''}${m.created_by===me.id&&!past?`<div><a href="#" onclick="openMeetupLocEdit('${m.id}', this.dataset.p);return false" data-p="${esc(m.place_name)}" style="font-size:.85rem;color:var(--ink2);text-decoration:underline">${m.address?'장소 위치 수정':'지도 핀을 모임 장소로 옮기기'}</a></div>`:''}</div><div class="muted">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}${m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''}</div>
     <div class="mcard" style="margin:0"><div class="mtags" style="margin:0">${meetupTags(m)}</div>${m.bring?`<div class="ml" style="margin-top:8px">준비물: ${esc(m.bring)}</div>`:''}</div>
     ${m.descr?`<div style="white-space:pre-wrap">${esc(m.descr)}</div>`:''}
     <div class="row" style="cursor:pointer" onclick="closeSheet();openProfile('${m.host?.id}')">${avatar(m.host||{})}<div><b>${esc(m.host?.nickname||'')}</b><div class="muted">주최 · ${esc(m.host?.dong_name||'')}</div></div></div>
@@ -2193,7 +2234,7 @@ async function openCompose(kind, meetupId){
   $('#sText').value=''; $('#sPv').innerHTML=''; $('#sPost').disabled=false;
   const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7)); d.setHours(14,0,0,0);
   $('#mTime').value = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  $('#mTitle').value=''; $('#mPlace').value=''; $('#mPublic').checked=true; $('#mCap').value=''; $('#mFee').value=''; $('#mBring').value=''; $('#mDur').value='120'; $('#mRepeat').value='once';
+  $('#mTitle').value=''; $('#mPlace').value=''; placePick.m=null; $('#mAddr').value=''; $('#mAddrRes').innerHTML=''; $('#mAddrSel').hidden=true; $('#mPublic').checked=true; $('#mCap').value=''; $('#mFee').value=''; $('#mBring').value=''; $('#mDur').value='120'; $('#mRepeat').value='once';
   if(!$('#mKind').children.length){
     seg('#mKind', MKIND); seg('#mCraft', MCRAFT);
     const lvOpts = lbl => `<option value="">${lbl}</option>` + [1,2,3,4,5].map(l=>`<option value="${l}">${l}단계 ${LVNAME[l]}</option>`).join('');
@@ -2255,16 +2296,17 @@ async function submitCompose(){
     if(composeKind==='meetup'){
       const title=$('#mTitle').value.trim(), place=$('#mPlace').value.trim(), when=$('#mTime').value;
       if(!title) throw new Error('모임 이름을 적어 주세요');
-      if(!place) throw new Error('장소를 적어 주세요');
+      if(!place) throw new Error('장소 이름을 적어 주세요');
+      if(!placePick.m) throw new Error('장소 위치를 검색해서 골라 주세요 (지도에 모임 핀이 찍힐 곳)');
       if(!when || new Date(when) < new Date()) throw new Error('일시를 지금 이후로 정해 주세요');
       const photos = await uploadPhotos(sPhotos);
-      const c = myProfile?._c;
+      const c = placePick.m;
       const lmin=$('#mLvMin').value, lmax=$('#mLvMax').value;
       if(lmin && lmax && +lmin > +lmax) throw new Error('권장 단계 범위를 확인해 주세요');
       const kind = segVal('#mKind')||'free';
       if(kind==='workshop' && !$('#mTech').value) throw new Error('배울 기법을 골라 주세요');
       const extra = { kind, craft: segVal('#mCraft')||'both', level_min: lmin?+lmin:null, level_max: lmax?+lmax:null, technique_id: kind==='workshop'?$('#mTech').value:null,
-        capacity: $('#mCap').value?+$('#mCap').value:null, fee: $('#mFee').value.trim()||null, bring: $('#mBring').value.trim()||null, duration_min:+$('#mDur').value, repeat:$('#mRepeat').value };
+        capacity: $('#mCap').value?+$('#mCap').value:null, fee: $('#mFee').value.trim()||null, bring: $('#mBring').value.trim()||null, duration_min:+$('#mDur').value, repeat:$('#mRepeat').value, address: placePick.m.addr };
       const { data:postId, error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mPublic').checked, p_body: $('#mDesc').value.trim()||null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:photos, p_extra: extra });
       if(error) throw new Error(error.message);
       await loadMyRooms();

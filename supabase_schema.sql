@@ -1013,3 +1013,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   app_config(key, value jsonb): anon·authenticated 읽기만. 'min_version' = {"ios","android","message"} → 네이티브 앱이 시작 때 확인, 낮으면 업데이트 안내 화면
 --   recommend_patterns: has_viewer 반환 추가
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 31. 모임 장소 위치 — 2026-09-20 (마이그레이션 meetup_address_location)
+--   meetups.address 추가. create_meetup: p_extra.address 저장, p_lat/p_lng = 모임 장소 좌표(앱이 주소·장소 검색으로 고른 값. 예전에는 주최자 프로필 위치를 넣었음)
+--   set_meetup_location(p_meetup, p_lat, p_lng, p_address, p_place): 주최자가 기존 모임의 핀 위치·주소·장소 이름 수정(국내 좌표 범위 검사)
+--   앱: 모임 만들기(＋ › 모임, 단체방 › 모임 만들기)에서 '장소 위치' 검색 필수 — Google Geocoder, 실패 시 Nominatim(띄어쓰기 제거 재시도)
+--        모임 상세에 주소·길찾기, 주최자에게 '장소 위치 수정'. 활동 알림은 누르면 삭제(notif_delete 정책 사용)
+-- ---------------------------------------------------------------
