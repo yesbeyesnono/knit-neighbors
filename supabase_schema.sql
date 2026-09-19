@@ -992,3 +992,16 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   앱: 글 카드의 외부 공유 버튼 자리에 리포스트 버튼(공유는 ··· 메뉴로), 남의 프로필 탭 = 글/리포스트/인증/(도안), 마이 = 글/리포스트/답글/인증/모임
 --        프로필 도안 탭 정렬: 최신·인기(찜)·쉬운 순(단계별 구분선)·가격 낮은 순. 데모 계정끼리 리포스트 18건 시드
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 29. knitup 도안 패키지(앱 안 뷰어) + 진도 — 2026-09-19 (마이그레이션 pattern_contents_viewer)
+--   patterns.has_viewer
+--   pattern_contents(pattern_id, pkg jsonb = knitup 에디터의 .knitup-pkg.json, app='knitup-pattern-package')
+--     RLS select: 작가 본인·관리자, 또는 공개된 무료(price=0) 도안. ★ 유료 도안은 구매 테이블(IAP) 도입 시 정책에 구매자 조건 추가
+--     쓰기는 set_pattern_pkg(p_id, p_pkg) 만(작가 본인 또는 관리자, 형식 검사, 3MB 이하, null이면 첨부 삭제)
+--   pattern_progress(profile_id, pattern_id, prog): 단별 진도, 본인 것만
+--   앱: 도안 상세 '도안 열기' → docs/viewer.html 을 sandbox(allow-scripts) + srcdoc iframe 으로 열고 postMessage 로 pkg·진도·닉네임(워터마크) 전달,
+--        뷰어 → 앱: kn-prog(진도 저장), kn-close. viewer.html 은 tools/build-viewer.js 가 knitup/docs/app_v9.html 의 VIEWER_SIZE_HTML 에서 생성
+--   데모: '동글동글 코스터 3종'(원형)·'첫 코바늘 수세미'(왕복) 에 패키지 첨부
+--   사업 방향(2026-09-19 대표 확정): 회사가 판매자, 작가에게는 3.3% 원천징수 후 정산(Apple 수수료 제외 → 플랫폼 15% → 작가). 가격은 티어 중 선택(IAP 티어 상품)
+-- ---------------------------------------------------------------

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="kn-x" content=""><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>뜨개동네 · 도안 뷰어</title>
+<!--
+  knitup View-only 뷰어 사이즈 변환 데모 (특허 ① 구성 9 실시예)
+  - 변환은 작가 제작 단계가 아니라 "열람 단계"에서 수행됨
+  - 열람자 게이지(바늘 선택 → HOOK_GAUGE 보간, 스와치 실측 → 보정 T) + 목표 치수 입력
+  - 영역 분류: 곡선(성형 증가) / 가변(직선 본판) / 불변(반복 단위 고무단)
+    ※ 본 데모는 규칙 기반 분류 — 서비스에서는 AI 모델이 임의 도안을 분류
+  - 코수·단수 재계산 → 도안 그래프 재생성 → View-only 렌더링(파일 없음)
+  - 실 소요량: Σ(기법별 코수 × λ) × 기준코 실길이 × 여유율 (STITCH_COEF, v8 유도 엔진 이식)
+  예시 도안: 코바늘 비니 (원본 기준 머리둘레 52cm · 깊이 19cm · 4.0mm 표준 게이지)
+-->
+<style>
+  :root{
+    --bg:#faf6f1; --card:#fff; --ink:#3d2f28; --sub:#8a7a6e; --line:#e8ddd2;
+    --accent:#c9614a; --accent-soft:#f6ddd5; --green:#4a8c6f; --green-soft:#dff0e8;
+    --blue:#4a8c9d; --blue-soft:#e2eef2; --gold:#d08a3e; --gold-soft:#f6ead8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--ink);
+       -webkit-user-select:none; user-select:none;}
+  header{max-width:1360px; margin:0 auto; padding:18px 24px 0;}
+  .brand{font-size:12px; letter-spacing:2px; color:var(--accent); font-weight:700;}
+  h1{font-size:21px; margin:2px 0 3px;}
+  .subtitle{color:var(--sub); font-size:12.5px;}
+  .badge{display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;}
+  .b-acc{background:var(--accent-soft); color:var(--accent);}
+  .b-dark{background:var(--ink); color:#fff;}
+  .wrap{max-width:1360px; margin:0 auto; padding:14px 24px 50px;}
+  .main{display:grid; grid-template-columns:1fr 350px; gap:14px; align-items:start; margin-top:14px;}
+  @media(max-width:1100px){.main{grid-template-columns:1fr;}}
+  /* 상단 실 소요량 스트립 */
+  .ystats{display:flex; gap:10px; flex-wrap:wrap;}
+  .yst{flex:1; min-width:150px; background:#faf6f1; border:1px solid var(--line); border-radius:10px; padding:8px 12px;}
+  .yst .yl{font-size:10.5px; color:var(--sub); font-weight:700;}
+  .yst .yv{font-size:17px; font-weight:800; margin-top:2px;}
+  .yst .yv .old{color:var(--sub); text-decoration:line-through; font-weight:400; font-size:12px; margin-right:6px;}
+  /* 실 정보 카드 */
+  .ygrid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;}
+  @media(max-width:1100px){.ygrid{grid-template-columns:1fr;}}
+  .ycard{border:1px solid var(--line); border-radius:10px; padding:10px 12px; background:#fff;}
+  .yhead{display:flex; align-items:center; gap:10px;}
+  .cchip{width:38px; height:38px; border-radius:9px; border:1px solid rgba(0,0,0,.12); flex-shrink:0;
+         box-shadow:inset 0 0 0 3px rgba(255,255,255,.35);}
+  .yname{font-size:13px; font-weight:800;}
+  .yname small{color:var(--sub); font-weight:400;}
+  .yrole{margin-left:auto; font-size:10.5px; font-weight:700; color:var(--accent); background:var(--accent-soft);
+         padding:3px 8px; border-radius:10px; white-space:nowrap;}
+  .yspec{display:flex; flex-wrap:wrap; gap:4px 12px; font-size:11px; color:var(--sub); margin:7px 0 6px;}
+  .yspec b{color:var(--ink);}
+  .yneed{display:flex; gap:8px; border-top:1px dashed var(--line); padding-top:7px; font-size:11.5px;}
+  .yneed div{flex:1;}
+  .yneed .l{font-size:10px; color:var(--sub); font-weight:700;}
+  .yneed .v{font-size:14px; font-weight:800;}
+  .yneed .v .old{color:var(--sub); text-decoration:line-through; font-weight:400; font-size:11px; margin-right:4px;}
+  .subs{margin-top:8px; border-top:1px dashed var(--line); padding-top:7px;}
+  .subs .t{font-size:10.5px; font-weight:800; color:var(--sub); margin-bottom:5px;}
+  .sub{display:flex; align-items:center; gap:7px; font-size:11px; padding:4px 6px; border-radius:8px; background:#faf6f1; margin-bottom:4px;}
+  .sub .m{margin-left:auto; font-weight:800; color:var(--green); background:var(--green-soft); padding:2px 7px; border-radius:9px; font-size:10.5px; white-space:nowrap;}
+  /* 차트 뷰포트: 휠 줌 + 그랩 패닝 */
+  #chartVp{position:relative; height:560px; overflow:hidden; cursor:grab; border:1px solid var(--line);
+           border-radius:12px; background:#fffdfb; touch-action:none;}
+  #chartVp.grabbing{cursor:grabbing;}
+  #chartVp .board{transform-origin:0 0; will-change:transform;}
+  .vzhint{position:absolute; right:10px; bottom:8px; z-index:7; font-size:10.5px; color:var(--sub);
+          background:rgba(255,255,255,.85); border:1px solid var(--line); border-radius:8px; padding:3px 8px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px;}
+  .card h2{font-size:13.5px; margin-bottom:10px;}
+  .card h2 small{color:var(--sub); font-weight:400; font-size:11px;}
+  .fld{margin-bottom:10px;}
+  .fld label{display:block; font-size:11.5px; color:var(--sub); font-weight:700; margin-bottom:4px;}
+  .fld input,.fld select{width:100%; padding:8px 10px; border:1.5px solid var(--line); border-radius:9px;
+        font-size:13px; font-family:inherit; background:#fff;}
+  .row2{display:flex; gap:8px;} .row2>.fld{flex:1;}
+  .presets{display:flex; gap:6px; margin-bottom:10px;}
+  .preset{flex:1; padding:7px 4px; font-size:11.5px; border:1.5px solid var(--line); background:#fff;
+          border-radius:9px; cursor:pointer; font-weight:700; color:var(--sub);}
+  .preset.on{border-color:var(--accent); color:var(--accent); background:var(--accent-soft);}
+  .go{width:100%; padding:12px; background:var(--accent); border:none; border-radius:11px; color:#fff;
+      font-size:14px; font-weight:800; cursor:pointer; font-family:inherit; margin-top:4px;}
+  .go:hover{filter:brightness(1.05);}
+  .hint{font-size:10.5px; color:var(--sub); line-height:1.55; margin-top:8px;}
+  .kv{display:flex; justify-content:space-between; font-size:12px; padding:4px 0; border-bottom:1px dashed var(--line);}
+  .kv b{font-size:12.5px;}
+  .kv .old{color:var(--sub); text-decoration:line-through; margin-right:6px; font-weight:400; font-size:11px;}
+  .acc-badge{margin-top:8px; padding:7px 10px; border-radius:9px; font-size:11px; font-weight:700; text-align:center;}
+  .regions .seg{display:flex; align-items:center; gap:8px; font-size:12px; padding:6px 8px; border-radius:9px; margin-bottom:6px;}
+  .regions .k{width:11px; height:11px; border-radius:4px; flex-shrink:0;}
+  .r-curve{background:var(--gold-soft);} .r-curve .k{background:var(--gold);}
+  .r-var{background:var(--blue-soft);} .r-var .k{background:var(--blue);}
+  .r-fix{background:var(--green-soft);} .r-fix .k{background:var(--green);}
+  /* ---- chat assistant ---- */
+  .chatlog{height:295px; overflow:auto; border:1px solid var(--line); border-radius:10px; padding:10px;
+           background:#fdfbf8; display:flex; flex-direction:column; gap:8px;}
+  .bb{max-width:90%; padding:8px 11px; border-radius:12px; font-size:12.5px; line-height:1.55; white-space:pre-wrap;}
+  .bb.a{background:#fff; border:1px solid var(--line); align-self:flex-start; border-bottom-left-radius:4px;}
+  .bb.u{background:var(--accent); color:#fff; align-self:flex-end; border-bottom-right-radius:4px;}
+  .bb.t{color:var(--sub); font-size:11px; background:none; border:none; align-self:flex-start; padding:0 4px;}
+  .chatin{display:flex; gap:6px; margin-top:8px;}
+  .chatin input{flex:1; padding:9px 11px; border:1.5px solid var(--line); border-radius:10px; font-size:12.5px; font-family:inherit;}
+  .chatin button{padding:9px 14px; background:var(--accent); color:#fff; border:none; border-radius:10px;
+                 font-weight:800; cursor:pointer; font-family:inherit;}
+  /* ---- viewer ---- */
+  .viewer{position:relative; overflow:hidden;}
+  .vhead{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;}
+  .vhead h2{font-size:15px; margin:0;}
+  .vsub{font-size:11px; color:var(--sub); margin-bottom:8px;}
+  .board{position:relative; margin:0 auto;}
+  .st{position:absolute; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-weight:700; border:1px solid var(--line); background:#fff; color:var(--sub);}
+  .st.dn{background:var(--green-soft); color:var(--green); border-color:#bfe0cf;}
+  .st.nx{background:var(--accent-soft); color:var(--accent); border-color:var(--accent);}
+  .ring-label{position:absolute; font-size:9px; color:#c9504a; font-weight:800;}
+  .wm{position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:6;}
+  .wm span{position:absolute; font-size:11px; color:rgba(61,47,40,.13); white-space:nowrap; transform:rotate(-24deg); font-weight:700;}
+  .chips{display:flex; flex-wrap:wrap; gap:4px; margin-top:10px;}
+  .chip{min-width:26px; height:24px; padding:0 4px; border-radius:7px; border:1px solid var(--line); background:#fff;
+        font-size:11px; font-weight:700; color:var(--sub); cursor:pointer; display:flex; align-items:center; justify-content:center;}
+  .chip.dn{background:var(--green); color:#fff; border-color:var(--green);}
+  .chip.nx{border-color:var(--accent); color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft);}
+  .instr-head{font-size:12px; font-weight:800; margin-top:14px; padding-top:12px; border-top:1.5px solid var(--line);}
+  .instr-head small{color:var(--sub); font-weight:400; font-size:10.5px;}
+  .instr-wrap{max-height:330px; overflow:auto; margin-top:6px; border:1px solid var(--line); border-radius:10px;}
+  table.instr{width:100%; border-collapse:collapse; font-size:12px;}
+  table.instr th{font-size:10.5px; color:var(--sub); text-align:left; padding:6px 8px; border-bottom:1.5px solid var(--line); position:sticky; top:0; background:#fff; z-index:2;}
+  table.instr td{padding:5px 8px; border-bottom:1px solid #f0e9e0; vertical-align:top;}
+  table.instr tbody tr{cursor:pointer;}
+  table.instr tbody tr:hover td{background:#faf6f1;}
+  table.instr tr.dn td{background:var(--green-soft);}
+  table.instr tr.dn td:first-child{color:var(--green); font-weight:800;}
+  table.instr tr.nx td{background:var(--accent-soft);}
+  table.instr tr.nx td:first-child{color:var(--accent); font-weight:800;}
+  .pmark{font-weight:800; white-space:nowrap;}
+  .pmark.d{color:var(--green);} .pmark.n{color:var(--accent);}
+  .rtag{display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:5px;}
+  .cnt{text-align:right; white-space:nowrap; color:var(--sub);}
+  .cnt b{color:var(--green);}
+  #toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(90px); background:var(--ink);
+         color:#fff; padding:11px 20px; border-radius:22px; font-size:13px; opacity:0; transition:all .35s; z-index:60;}
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .flow{font-size:10.5px; color:var(--sub); background:#f7f2ec; border-radius:9px; padding:8px 10px; margin-top:10px; line-height:1.6;}
+</style>
+<style id="kn-embed">
+  body{visibility:hidden;-webkit-text-size-adjust:100%}
+  body.kn-ready{visibility:visible}
+  header{padding:calc(env(safe-area-inset-top,0px) + 52px) 14px 0 !important}
+  .wrap{padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 40px) !important}
+  #btnPkg,#filePkg{display:none !important}
+  #chartVp{height:min(62vh,560px) !important;touch-action:none}
+  .vzhint{display:none}
+  .wrap > .card:first-child{display:none} /* 실 소요량 카드: 실 DB가 예시 데이터라 뜨개동네에서는 숨김 */
+  .main{margin-top:0 !important}
+  .main > div:last-child{display:none} /* AI 사이즈 변환 대화: 모자 전용 데모라 뜨개동네에서는 숨김(추후 연동) */
+  .main{grid-template-columns:1fr !important}
+  h1{font-size:20px !important;line-height:1.3}
+  #knBar{position:fixed;left:0;right:0;top:0;z-index:50;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid #e5e5e5;font-family:inherit}
+  #knBar button{border:0;background:none;font-size:15px;font-weight:700;padding:8px 10px;cursor:pointer;font-family:inherit;color:#000}
+  #knBar span{font-size:12px;color:#777;margin-left:auto;padding-right:6px}
+  @media(max-width:700px){ .ystats{grid-template-columns:1fr 1fr !important} table.instr{font-size:13px} }
+</style>
+</head>
+<body oncontextmenu="return false">
+<header>
+  <div class="brand">KNITUP · VIEW-ONLY VIEWER</div>
+  <h1><span id="pTitle">클래식 비니</span> <span class="badge b-acc" id="pLv">Lv.2 초급</span> <span class="badge b-dark">View-only · 파일 없음</span></h1>
+  <div class="subtitle" id="subT">by 아란 작가 · 원본 기준: 머리둘레 52cm · 깊이 19cm · 4.0mm(표준 게이지) — <b>열람 단계에서 내 치수로 자동 변환됩니다</b></div>
+  <div style="margin-top:8px">
+    <button id="btnPkg" style="padding:7px 14px; border:1.5px solid var(--accent); color:var(--accent); background:#fff; border-radius:10px; font-weight:800; font-size:12px; cursor:pointer; font-family:inherit">📂 작가 도안 패키지 열기 (에디터 v5 내보내기 연동)</button>
+    <input type="file" id="filePkg" accept=".json" style="display:none">
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ══════ 상단: 실 소요량 (기본 노출) ══════ -->
+  <div class="card">
+    <h2>🧶 실 정보 · 소요량 <small>— 소요량은 Σ(기법별 코수 × λ) × 기준코 실길이 × 여유율, 변환 시 자동 갱신 · 실 상세는 실 메타 DB 예시 데이터</small></h2>
+    <div class="ystats" id="yarn"></div>
+    <div class="ygrid" id="yarnCards"></div>
+    <div class="flow" id="yarnFlow"></div>
+  </div>
+
+  <div class="main">
+
+    <!-- ══════ 좌: View-only 도안 ══════ -->
+    <div class="card viewer">
+      <div class="vhead"><h2>원형 차트 (중심 → 바깥)</h2><span class="badge b-acc" id="vState">원본</span></div>
+      <div class="vsub" id="vMeta"></div>
+      <div id="chartVp">
+        <div class="board" id="board"></div>
+        <div class="wm" id="wm"></div>
+        <div class="vzhint">🖱 스크롤 = 확대·축소 · 드래그 = 이동 · 더블클릭 = 원위치</div>
+      </div>
+      <div style="font-size:11px; color:var(--sub); margin-top:8px">숫자 칩 또는 아래 지시문 행을 누르면 해당 단까지 진도가 저장됩니다 · <b style="color:var(--green)">완료</b> · <b style="color:var(--accent)">다음 단</b></div>
+      <div class="chips" id="chips"></div>
+      <div class="instr-head">📋 단별 지시문 (자동 생성) <small>— 진도와 연동: 행 클릭 = 해당 단까지 완료</small></div>
+      <div class="instr-wrap">
+        <table class="instr"><thead><tr><th>단</th><th>지시문</th><th style="text-align:right">콧수</th><th style="text-align:right">진도</th></tr></thead>
+        <tbody id="instrBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ══════ 우: 사이즈 어시스턴트 (대화형 입력) ══════ -->
+    <div>
+      <div class="card">
+        <h2>💬 AI 대화 <small>— 게이지·치수·사이즈 변환을 대화로</small></h2>
+        <div class="chatlog" id="chatlog"></div>
+        <div class="chatin">
+          <input id="chatMsg" placeholder="예: 목 부분이 어디야? / 눈을 파란색으로 / 아기용으로 줄여줘 / 보니 실로 뜨면?" autocomplete="off">
+          <button id="chatSend">전송</button>
+        </div>
+        <div class="hint">머리둘레가 확정되는 순간 자동 변환됩니다. 대화로 계속 수정할 수 있어요 — "조금 헐렁하게", "바늘 4.5로 바꿀래" 등.</div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h2>⚙️ AI 연결 <small>— 지금: Claude 직접 호출 · 배포 시: OpenRouter</small></h2>
+        <div class="fld"><label>제공자</label>
+          <select id="aiProv">
+            <option value="claude" selected>Claude API 직접 호출 (현재)</option>
+            <option value="openrouter">OpenRouter (배포용 — 가성비 모델)</option>
+            <option value="local">로컬 파서 (키 없이 데모)</option>
+          </select></div>
+        <div class="row2">
+          <div class="fld"><label>모델</label><input id="aiModel" value="claude-haiku-4-5"></div>
+          <div class="fld"><label>API 키</label><input id="aiKey" type="password" placeholder="sk-ant-… / sk-or-…"></div>
+        </div>
+        <div class="hint">키는 저장되지 않고 브라우저 메모리에서만 사용됩니다. 키가 없으면 자동으로 로컬 파서로 동작합니다. OpenRouter 선택 시 모델 예: anthropic/claude-haiku-4.5, google/gemini-2.5-flash 등 (동일 JSON 계약이라 교체만 하면 됨).</div>
+      </div>
+
+      <!-- 변환 파라미터 (어시스턴트가 채움) -->
+      <div style="display:none">
+        <input id="inC" value="52"><input id="inD" value="19"><input id="inHook" value="4.0">
+        <input id="inSw" value=""><input id="inSwR" value="">
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ═══ v8 유도 엔진 이식: 바늘→게이지 대응표(보간) + 기법 계수 ═══ */
+const HOOK_GAUGE = [
+  [2.0,28,32],[2.5,24,28],[3.0,21,24],[3.5,19,22],[4.0,17,20],
+  [4.5,15.5,18],[5.0,14,16.5],[5.5,13,15],[6.0,12,14],[7.0,10.5,12],
+];
+function hookToGauge(mm){
+  const t=HOOK_GAUGE;
+  if(mm<=t[0][0]) return {gx:t[0][1], gy:t[0][2]};
+  for(let k=1;k<t.length;k++){
+    if(mm<=t[k][0]){
+      const f=(mm-t[k-1][0])/(t[k][0]-t[k-1][0]);
+      return {gx:t[k-1][1]+(t[k][1]-t[k-1][1])*f, gy:t[k-1][2]+(t[k][2]-t[k-1][2])*f};
+    }
+  }
+  return {gx:t[t.length-1][1], gy:t[t.length-1][2]};
+}
+/* 기법 계수: l=코당 실 소비(sc=1) · h=단 높이(sc=1) */
+const SYMCH={chain:'○',slip:'·',sc:'×',hdc:'T',dc:'T̷',tr:'T̸',sc_inc:'V',inc:'V',sc_dec:'Λ',dc_dec:'Λ',
+  fpdc:'↑',bpdc:'↓',knit:'│',purl:'─',yo:'○',k2tog:'人',ssk:'入',magic_ring:'◎',cast_on:'▷',bind_off:'●',shell:'⌒',bobble:'⬯',popcorn:'⬮'};
+function symCh(t){ return SYMCH[t]||String(t||'·').charAt(0).toUpperCase(); }
+function cf(t){ return COEF[t]||{l:1.4,h:1.2}; }
+const COEF={ sc:{l:1,h:1,nm:'짧은뜨기',sym:'×'}, inc:{l:2,h:1,nm:'늘려뜨기',sym:'V'},
+             fpdc:{l:2.0,h:2,nm:'앞걸어뜨기',sym:'↑'}, bpdc:{l:2.0,h:2,nm:'뒤걸어뜨기',sym:'↓'},
+             slip:{l:.5,h:.4,nm:'빼뜨기',sym:'·'} };
+
+/* ═══ 실 메타 DB (예시 데이터 — 서비스에서는 국내 실 메타 DB 연동) ═══ */
+const YARN_DB={
+  main:{ role:'본체색 · 크라운+본판', color:'#d9c3a0', colorName:'14. 오트베이지',
+    brand:'낙양모사', name:'클래식 울 DK', comp:'울 80% · 나일론 20%',
+    unitG:50, unitM:120, hook:'코바늘 4.0~5.0mm', gauge:'17코×20단/10cm', price:6500, wash:'30℃ 울코스·손세탁',
+    subs:[ {brand:'바늘이야기', name:'소프트 메리노 DK', comp:'울 100%', unit:'50g·110m', price:7200, match:93},
+           {brand:'니팅포레', name:'울 블렌드 미디엄', comp:'울 70%·아크릴 30%', unit:'50g·125m', price:4900, match:88} ] },
+  rib:{ role:'배색 · 고무단', color:'#5f7a5a', colorName:'32. 세이지그린',
+    brand:'낙양모사', name:'클래식 울 DK', comp:'울 80% · 나일론 20%',
+    unitG:50, unitM:120, hook:'코바늘 4.0~5.0mm', gauge:'17코×20단/10cm', price:6500, wash:'30℃ 울코스·손세탁',
+    subs:[ {brand:'바늘이야기', name:'캐시 터치 DK', comp:'울 90%·캐시미어 10%', unit:'40g·105m', price:8900, match:90} ] }
+};
+
+/* ═══ 도안 그래프 생성기 — 영역(곡선·가변·불변)별 재계산 ═══ */
+const EASE=0.92;             /* 네거티브 이즈 */
+const BRIM_CM=4;             /* 불변 영역(고무단) 목표 높이 */
+function buildPattern(circ, depth, gx, gy){
+  const ux=10/gx, uy=10/gy;                       /* 코 폭·단 높이 (cm) */
+  let S=Math.round(circ*EASE*gx/10);              /* 목표 몸통 콧수 */
+  S=Math.max(36, Math.round(S/6)*6);              /* 증가 규칙(6의 배수) 정합 */
+  const rounds=[];
+  /* [곡선 영역] 크라운 성형: 매직링 6코 → 매단 +6, 늘림 위치 재배치 */
+  const incR=S/6-1;
+  for(let k=1;k<=incR+1;k++){
+    if(k===1) rounds.push({region:'curve', syms:{sc:6}, cnt:6, txt:'매직링에 짧은뜨기 6코'});
+    else rounds.push({region:'curve', syms:{sc:(k-2)*6, inc:6}, cnt:6*k,
+      txt:(k===2?'늘려뜨기 ×6':'(짧은뜨기 '+(k-2)+'코, 늘려뜨기) ×6')});
+  }
+  const crownH=(S*ux)/(2*Math.PI);                /* 크라운(원판) 반경 ≈ 높이 기여 */
+  /* [불변 영역] 고무단: 반복 단위(앞걸어1·뒤걸어1) — 반복 횟수만 조정 */
+  const brimR=Math.max(2, Math.round(BRIM_CM/( uy*COEF.fpdc.h )));
+  /* [가변 영역] 본판: 코수 유지, 단수 재계산 */
+  const bodyR=Math.max(2, Math.round((depth-crownH-BRIM_CM)/uy));
+  for(let i=0;i<bodyR;i++) rounds.push({region:'var', syms:{sc:S}, cnt:S, txt:'짧은뜨기 '+S+'코'});
+  for(let i=0;i<brimR;i++) rounds.push({region:'fix', syms:{fpdc:S/2, bpdc:S/2}, cnt:S,
+      txt:'(앞걸어뜨기, 뒤걸어뜨기) ×'+(S/2)});
+  return { rounds, S, incR:incR+1, bodyR, brimR, ux, uy, crownH,
+           width:circ, height:crownH+bodyR*uy+brimR*uy*COEF.fpdc.h };
+}
+/* 실 소요량 */
+function yarnCalc(p, gx, hasSwatch){
+  const ux=10/gx, L1=4.5*ux, alpha=hasSwatch?1.15:1.2;
+  const per={main:0, rib:0}, byType={};
+  p.rounds.forEach(r=>{ Object.keys(r.syms).forEach(t=>{
+    byType[t]=(byType[t]||0)+r.syms[t];
+    const cm=r.syms[t]*cf(t).l*L1*alpha;
+    if(r.region==='fix') per.rib+=cm; else per.main+=cm;
+  });});
+  const total=per.main+per.rib;
+  return { totalM:total/100, mainM:per.main/100, ribM:per.rib/100,
+           balls:Math.ceil((total/100)/120), byType, L1, alpha };
+}
+
+/* ═══ 상태 ═══ */
+const BASE={circ:52, depth:19, hook:4.0};        /* 작가 원본 기준 */
+let cur=null, prog=0, converted=false;
+const $=s=>document.querySelector(s);
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show');
+  clearTimeout(t._m); t._m=setTimeout(()=>t.classList.remove('show'),2400); }
+
+/* ═══ 렌더 ═══ */
+const RNAME={curve:['곡선 영역 · 크라운 성형','var(--gold)'], var:['가변 영역 · 본판','var(--blue)'], fix:['불변 영역 · 고무단','var(--green)']};
+function render(base){
+  const p=cur.p, rows=p.rounds.length;
+  $('#vState').textContent = converted? '변환본 (내 치수)' : '원본';
+  $('#vState').className='badge '+(converted?'b-dark':'b-acc');
+  $('#vMeta').innerHTML='몸통 <b>'+p.S+'코</b> · 총 <b>'+rows+'단</b> (성형 '+p.incR+' · 본판 '+p.bodyR+' · 고무단 '+p.brimR+')'
+    +' · 게이지 '+cur.gx.toFixed(1)+'코·'+cur.gy.toFixed(1)+'단/10cm'+(cur.T!==1?' · 손땀 보정 T='+cur.T.toFixed(2):'');
+  /* 자유 그래프 렌더 (작가 패키지) */
+  if(cur.free){
+    const g=cur.free, b=$('#board');
+    const xs=g.nodes.map(n=>n.x), ys=g.nodes.map(n=>n.y);
+    const minX=Math.min(...xs,0), maxX=Math.max(...xs,600), minY=Math.min(...ys,0), maxY=Math.max(...ys,400);
+    const size=560, sc=Math.min(size/(maxX-minX+60), size/(maxY-minY+60));
+    b.style.width=size+'px'; b.style.height=size+'px';
+    const px=n=>((n.x-minX+30)*sc), py=n=>((n.y-minY+30)*sc);
+    const byId={}; g.nodes.forEach(n=>byId[n.id]=n);
+    let h='<svg width="'+size+'" height="'+size+'" style="position:absolute; left:0; top:0">';
+    g.links.forEach(l=>{ const a=byId[l.from], c=byId[l.to]; if(!a||!c) return;
+      h+='<line x1="'+px(a)+'" y1="'+py(a)+'" x2="'+px(c)+'" y2="'+py(c)+'" stroke="'
+        +(l.rel==='into'?'#c9a227':'#e3ddd2')+'" stroke-width="'+(l.rel==='into'?1.6:1)+'"'
+        +(l.rel==='seq'?' stroke-dasharray="3 3"':'')+'/>'; });
+    h+='</svg>';
+    g.nodes.forEach(n=>{
+      const st=(n.row||1)<=prog?'dn':((n.row||1)===prog+1?'nx':'');
+      h+='<span class="st '+st+'" style="left:'+(px(n)-8)+'px; top:'+(py(n)-8)+'px; width:16px; height:16px; font-size:9px" title="'+(n.row||1)+'단">'+symCh(n.t)+'</span>';
+    });
+    b.innerHTML=h;
+  } else {
+  /* 원형 차트 */
+  const size=560, cx=size/2, b=$('#board');
+  b.style.width=size+'px'; b.style.height=size+'px';
+  let h='<div style="position:absolute; left:'+(cx-13)+'px; top:'+(cx-13)+'px; width:26px; height:26px; border-radius:50%; border:2px solid var(--accent); background:var(--accent-soft); display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--accent); font-weight:800" title="매직링">◎</div>';
+  p.rounds.forEach((r,i)=>{
+    const rr=i+1, rad=32+rr*((cx-46)/rows);
+    const st=rr<=prog?'dn':(rr===prog+1?'nx':'');
+    const n=Math.min(r.cnt, Math.max(8, Math.floor(rad/5)));   /* 표시 밀도 제한 */
+    const types=Object.keys(r.syms);
+    for(let k=0;k<n;k++){
+      const a=k/n*2*Math.PI-Math.PI/2;
+      const x=cx+rad*Math.cos(a), y=cx+rad*Math.sin(a);
+      let t; if(r.region==='fix') t=(k%2===0?'fpdc':'bpdc');
+      else if(types.includes('inc')) t=(k%Math.max(2,Math.round(n/6))===0?'inc':'sc');
+      else t='sc';
+      const sz=13;
+      h+='<span class="st '+st+'" style="left:'+(x-sz/2).toFixed(1)+'px; top:'+(y-sz/2).toFixed(1)+'px; width:'+sz+'px; height:'+sz+'px; font-size:8px" title="'+rr+'단 · '+r.cnt+'코">'+symCh(t)+'</span>';
+    }
+    if(rr===1||rr%5===0){ h+='<div class="ring-label" style="left:'+(cx+rad+3)+'px; top:'+(cx-6)+'px">'+rr+'</div>'; }
+  });
+  b.innerHTML=h;
+  }
+  /* 워터마크 (세션: 사용자·시각) */
+  const who=(window.KN_WHO||'뜨개동네'), now=new Date().toISOString().slice(0,16).replace('T',' ');
+  let wm='';
+  for(let i=0;i<8;i++) wm+='<span style="left:'+(i%2*44+4)+'%; top:'+(i*12.5+3)+'%">뜨개동네 · '+who+' · '+now+' · 무단 배포 추적 가능</span>';
+  $('#wm').innerHTML=wm;
+  /* 진도 칩 */
+  let ch=''; for(let r=1;r<=rows;r++){ const c=r<=prog?' dn':(r===prog+1?' nx':'');
+    ch+='<span class="chip'+c+'" onclick="setProg('+r+')">'+r+'</span>'; }
+  $('#chips').innerHTML=ch;
+  /* 실 소요량 */
+  const y=yarnCalc(p, cur.gx, cur.hasSw), yb=base? yarnCalc(base.p, base.gx, base.hasSw):null;
+  const won=n=>n.toLocaleString('ko-KR')+'원';
+  const need=(m,db)=>{ const balls=Math.ceil(m/db.unitM); return {balls, cost:balls*db.price}; };
+  const nm=need(y.mainM,YARN_DB.main), nr=need(y.ribM,YARN_DB.rib);
+  const bm=yb?need(yb.mainM,YARN_DB.main):null, br=yb?need(yb.ribM,YARN_DB.rib):null;
+  $('#yarn').innerHTML=[
+    ['총 소요량', yb? yb.totalM.toFixed(0)+'m':null, y.totalM.toFixed(0)+'m'],
+    ['총 볼 수', yb? (bm.balls+br.balls)+'볼':null, (nm.balls+nr.balls)+'볼'],
+    ['예상 실 구매 금액', yb? won(bm.cost+br.cost):null, won(nm.cost+nr.cost)],
+    ['색상 구성', null, '2색 (본체+배색)']
+  ].map(x=>'<div class="yst"><div class="yl">'+x[0]+'</div><div class="yv">'
+    +(x[1]&&x[1]!==x[2]?'<span class="old">'+x[1]+'</span>':'')+x[2]+'</div></div>').join('');
+  const ycard=(db,m,n,b)=>{
+    return '<div class="ycard">'
+      +'<div class="yhead"><span class="cchip" style="background:'+db.color+'" title="'+db.colorName+'"></span>'
+      +'<div><div class="yname">'+db.brand+' '+db.name+' <small>· '+db.colorName+'</small></div>'
+      +'<div style="font-size:11px; color:var(--sub)">'+db.comp+'</div></div>'
+      +'<span class="yrole">'+db.role+'</span></div>'
+      +'<div class="yspec"><span>규격 <b>'+db.unitG+'g · '+db.unitM+'m</b></span><span>권장 <b>'+db.hook+'</b></span>'
+      +'<span>게이지 <b>'+db.gauge+'</b></span><span>세탁 <b>'+db.wash+'</b></span><span>가격 <b>'+won(db.price)+'/볼</b></span></div>'
+      +'<div class="yneed">'
+      +'<div><div class="l">소요량</div><div class="v">'+(b&&b.m!==m.toFixed(0)+'m'?'<span class="old">'+b.m+'</span>':'')+m.toFixed(0)+'m</div></div>'
+      +'<div><div class="l">필요 볼 수</div><div class="v">'+(b&&b.n.balls!==n.balls?'<span class="old">'+b.n.balls+'볼</span>':'')+n.balls+'볼</div></div>'
+      +'<div><div class="l">예상 금액</div><div class="v">'+(b&&b.n.cost!==n.cost?'<span class="old">'+won(b.n.cost)+'</span>':'')+won(n.cost)+'</div></div></div>'
+      +'<div class="subs"><div class="t">🔁 유사 성상 대체 실 (얀 중립 추천 — 굵기·성분 매칭)</div>'
+      +db.subs.map(s=>'<div class="sub"><b>'+s.brand+' '+s.name+'</b><span style="color:var(--sub)">'+s.comp+' · '+s.unit+' · '+won(s.price)+'</span>'
+        +'<span class="m">유사도 '+s.match+'%</span></div>').join('')
+      +'</div></div>';
+  };
+  $('#yarnCards').innerHTML=
+    ycard(YARN_DB.main, y.mainM, nm, yb?{m:yb.mainM.toFixed(0)+'m', n:bm}:null)
+   +ycard(YARN_DB.rib,  y.ribM,  nr, yb?{m:yb.ribM.toFixed(0)+'m',  n:br}:null);
+  $('#yarnFlow').innerHTML='산출 근거: 기준코 실길이 L₁=4.5×코폭='+y.L1.toFixed(2)+'cm · 여유율 α='+y.alpha
+    +' · 기법별 λ (짧은뜨기 1 · 늘려뜨기 2 · 걸어뜨기 2) · 실 상세·가격·대체 실은 예시 데이터이며 서비스에서는 실 메타 DB(성상 표준화)와 연동됩니다';
+  /* 지시문 — 진도 연동: 행 클릭 = 해당 단까지 완료 */
+  $('#instrBody').innerHTML=p.rounds.map((r,i)=>{
+    const rr=i+1, cls=rr<=prog?'dn':(rr===prog+1?'nx':'');
+    const pm=rr<=prog?'<span class="pmark d">✓ 완료</span>':(rr===prog+1?'<span class="pmark n">▶ 다음 단</span>':'');
+    return '<tr class="'+cls+'" onclick="setProg('+rr+')" title="클릭 시 '+rr+'단까지 완료로 저장">'
+      +'<td>'+rr+'단</td>'
+      +'<td><span class="rtag" style="background:'+RNAME[r.region][1]+'"></span>'+r.txt+'</td>'
+      +'<td class="cnt">'+(i===0?'':'총 ')+r.cnt+'코 <b>✓</b></td>'
+      +'<td class="cnt">'+pm+'</td></tr>';
+  }).join('');
+}
+function setProg(r){ prog=(prog===r)?r-1:r; render(converted? baseState:null);
+  const nx=document.querySelector('table.instr tr.nx')||document.querySelector('table.instr tr.dn:last-child');
+  if(nx) nx.scrollIntoView({block:'nearest'});
+}
+
+/* ═══ 변환 실행 (열람 단계) ═══ */
+let baseState=null, pkgState=null;
+function pkgPattern(rounds, gx, gy){
+  const S=Math.max(...rounds.map(r=>r.cnt),1);
+  const ux=10/gx, uy=10/gy;
+  const incR=rounds.filter(r=>r.region==='curve').length;
+  const bodyR=rounds.filter(r=>r.region==='var').length;
+  const brimR=rounds.filter(r=>r.region==='fix').length;
+  return { rounds, S, incR, bodyR, brimR, ux, uy,
+    crownH:(S*ux)/(2*Math.PI), width:S*ux,
+    height:rounds.reduce((s,r)=>s+uy*(r.region==='fix'?2:1),0) };
+}
+function loadPackage(pkg){
+  try{
+    const chart=pkg.charts.find(c=>c.kind==='free'&&c.graph&&c.graph.nodes.length) || pkg.charts.slice().sort((a,b)=>b.rounds.length-a.rounds.length)[0];
+    const rounds=chart.rounds.map((r,i)=>({ region:r.region||'var', cnt:r.cnt, syms:r.syms||{},
+      txt:(chart.instr&&chart.instr[i+1]&&chart.instr[i+1].text)||'' }));
+    const g=hookToGauge(4.0);
+    pkgState={pkg, chart, rounds}; window.pkgState=pkgState;
+    baseState={p:pkgPattern(rounds,g.gx,g.gy), gx:g.gx, gy:g.gy, T:1, hasSw:false, ux:10/g.gx,
+      free:(chart.kind==='free'&&chart.graph)?chart.graph:null};
+    cur=baseState; converted=false; prog=0;
+    document.getElementById('pTitle').textContent=pkg.title||'작가 도안';
+    if(pkg.level) document.getElementById('pLv').textContent='Lv.'+pkg.level;
+    document.getElementById('subT').innerHTML='📦 작가 패키지 · '+(chart.part||'차트')
+      +(chart.kind==='free'?' · 자유 그래프':'')+' · 4.0mm 표준 게이지 기준 — <b>대화로 치수·게이지를 알려주면 반영합니다</b>';
+    render(null); vzReset();
+    bubble('a','작가 패키지 「'+(pkg.title||'도안')+'」를 불러왔어요. 바늘 호수나 스와치를 알려주시면 게이지를 반영해 치수·실 소요량을 다시 계산해 드릴게요.');
+    toast('패키지 로드 완료 — 에디터 제작 도안이 View-only로 열렸습니다');
+  }catch(e){ toast('패키지 형식을 읽지 못했습니다: '+e.message); }
+}
+document.getElementById('btnPkg').addEventListener('click', ()=>document.getElementById('filePkg').click());
+document.getElementById('filePkg').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{ loadPackage(JSON.parse(rd.result)); }catch(err){ toast('JSON 파싱 실패'); } };
+  rd.readAsText(f); e.target.value='';
+});
+function compute(circ, depth, hookMm, sw, swR){
+  const std=hookToGauge(hookMm);
+  const T=(sw&&sw>0)? sw/std.gx : 1.0;                 /* 손땀 보정 */
+  const gx=std.gx*T, gy=(swR&&swR>0)? swR : std.gy*T;
+  const p=buildPattern(circ, depth, gx, gy);
+  return {p, gx, gy, T, hasSw:!!(sw&&sw>0), ux:p.ux};
+}
+window.convert=convert;
+function convert(user){
+  const circ=+$('#inC').value, depth=+$('#inD').value;
+  const hook=+$('#inHook').value, sw=+$('#inSw').value||0, swR=+$('#inSwR').value||0;
+  if(pkgState){
+    const std=hookToGauge(hook||4.0);
+    const T=(sw&&sw>0)? sw/std.gx : 1.0;
+    const gx=std.gx*T, gy=(swR&&swR>0)? swR : std.gy*T;
+    cur={p:pkgPattern(pkgState.rounds, gx, gy), gx, gy, T, hasSw:!!(sw&&sw>0), ux:10/gx, free:baseState.free};
+    if(user){ converted=true;
+      toast('게이지 반영 재계산 완료 — 작가 원본 코수 구조는 유지, 완성 치수·실 소요량 갱신'); }
+    render(converted? baseState:null);
+    return;
+  }
+  cur=compute(circ, depth, hook, sw, swR);
+  if(user){ converted=true; prog=0;
+    toast('열람 단계 변환 완료 — 영역 분류 → 코수·단수 재계산 → 실 소요량 갱신 (파일 미생성)');
+  }
+  render(converted? baseState:null);
+}
+/* ═══ 사이즈 어시스턴트 — 대화형 입력 (제공자 추상화: claude 직접 → 배포 시 openrouter 교체) ═══ */
+const SYS='너는 knitup View-only 도안 뷰어의 사이즈 어시스턴트다. 열람 중인 도안은 코바늘 비니(원본: 머리둘레 52cm·깊이 19cm·4.0mm 기준)다.\n'
+ +'열람자와 짧은 한국어 대화로 다음 값을 수집한다: circ=머리둘레cm(필수, 40~66), depth=모자 깊이cm(선택), hook=코바늘mm(선택), sw=스와치 10cm당 코수(선택), swR=스와치 10cm당 단수(선택).\n'
+ +'대상만 말하면 표준값을 추정한다: 아기·키즈 48/17, 성인 여성 52/19, 성인 남성 56/20, 빅사이즈 60/21. \"헐렁하게\"는 둘레 +2cm, \"딱 맞게\"는 -1cm.\n'
+ +'반드시 아래 JSON 한 개만 출력한다(그 외 텍스트 금지):\n'
+ +'{\"reply\":\"사용자에게 보낼 1~3문장 한국어 답변\",\"params\":{\"circ\":수치|null,\"depth\":수치|null,\"hook\":수치|null,\"sw\":수치|null,\"swR\":수치|null},\"ready\":true|false}\n'
+ +'params에는 이번 턴에 새로 알게 됐거나 수정된 값만 넣는다. circ가 확정되면 ready=true. 질문은 한 번에 하나만.';
+let chat=[], P={circ:null,depth:null,hook:null,sw:null,swR:null};
+function depthFor(c){ return c<=48?17:(c<=52?19:(c<=56?20:21)); }
+function bubble(role,text){ const d=document.createElement('div'); d.className='bb '+role; d.textContent=text;
+  $('#chatlog').appendChild(d); $('#chatlog').scrollTop=1e9; return d; }
+function mergeParams(np){ if(!np) return;
+  ['circ','depth','hook','sw','swR'].forEach(k=>{ if(np[k]!=null&&isFinite(+np[k])) P[k]=+np[k]; }); }
+function applyParams(){
+  $('#inC').value=P.circ; $('#inD').value=(P.depth!=null?P.depth:depthFor(P.circ));
+  $('#inHook').value=(P.hook!=null?P.hook:4.0);
+  $('#inSw').value=(P.sw!=null?P.sw:''); $('#inSwR').value=(P.swR!=null?P.swR:'');
+  convert(true);
+}
+/* 로컬 파서 — 키 없이 데모 (배포 전 오프라인 폴백) */
+function localAssistant(msg){
+  const np={}; let m;
+  if(/키즈|아이|아동|어린이|아기/.test(msg)){ np.circ=48; np.depth=17; }
+  if(/여성|아내|엄마/.test(msg)){ np.circ=52; np.depth=19; }
+  if(/남성|남편|아빠/.test(msg)){ np.circ=56; np.depth=20; }
+  if(/빅사이즈|빅 |아주 크게/.test(msg)){ np.circ=60; np.depth=21; }
+  if(m=msg.match(/둘레\s*(?:는|가|를)?\s*(\d{2}(?:\.\d)?)/)) np.circ=+m[1];
+  else if(m=msg.match(/(\d{2}(?:\.\d)?)\s*(?:cm|센치|센티)/)){ if(+m[1]>=40&&+m[1]<=66) np.circ=+m[1]; }
+  if(m=msg.match(/깊이\s*(?:는|가|를)?\s*(\d{2}(?:\.\d)?)/)) np.depth=+m[1];
+  if(m=msg.match(/(\d(?:\.\d)?)\s*mm|바늘\s*(?:은|는|을)?\s*(\d(?:\.\d)?)/)) np.hook=+(m[1]||m[2]);
+  if(m=msg.match(/(\d{1,2}(?:\.\d)?)\s*코/)) np.sw=+m[1];
+  if(m=msg.match(/(\d{1,2}(?:\.\d)?)\s*단/)) np.swR=+m[1];
+  if(/헐렁|여유 ?있/.test(msg)&&(np.circ||P.circ)) np.circ=(np.circ||P.circ)+2;
+  if(/딱 ?맞|타이트/.test(msg)&&(np.circ||P.circ)) np.circ=(np.circ||P.circ)-1;
+  const circ=(np.circ!=null?np.circ:P.circ);
+  let reply, ready=false;
+  if(circ==null) reply='머리둘레(cm)를 알려주시면 바로 변환해 드릴게요. 대상(키즈·여성·남성)만 말씀하셔도 표준 치수로 잡아드립니다.';
+  else { ready=true;
+    reply='머리둘레 '+circ+'cm 기준으로 변환할게요.'
+      +((np.hook!=null||P.hook!=null)?' 바늘 '+(np.hook!=null?np.hook:P.hook)+'mm 게이지를 반영합니다.':' 바늘 호수를 알려주시면 게이지를 더 정확히 맞출 수 있어요.')
+      +((np.sw!=null||P.sw!=null)?' 스와치 보정도 적용했습니다.':''); }
+  return {reply, params:np, ready};
+}
+/* LLM 호출 — 같은 JSON 계약으로 제공자만 교체 */
+async function callLLM(){
+  const prov=$('#aiProv').value, model=$('#aiModel').value.trim(), key=$('#aiKey').value.trim();
+  if(prov==='local'||!key) return null;
+  const msgs=chat.map(m=>({role:m.role, content:m.content}));
+  const SYSX=SYS;
+  let url, hdr, body;
+  if(prov==='claude'){
+    url='https://api.anthropic.com/v1/messages';
+    hdr={'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01',
+         'anthropic-dangerous-direct-browser-access':'true'};
+    body={model:model, max_tokens:700, system:SYSX, messages:msgs};
+  } else {
+    url='https://openrouter.ai/api/v1/chat/completions';
+    hdr={'content-type':'application/json','authorization':'Bearer '+key};
+    body={model:model, messages:[{role:'system',content:SYSX}].concat(msgs)};
+  }
+  const r=await fetch(url,{method:'POST', headers:hdr, body:JSON.stringify(body)});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const j=await r.json();
+  const text=(prov==='claude')? ((j.content&&j.content[0]&&j.content[0].text)||'')
+                              : ((j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'');
+  return parseAssistant(text);
+}
+function parseAssistant(text){
+  const t=String(text).trim(), s=t.indexOf('{'), e=t.lastIndexOf('}');
+  if(s>-1&&e>s){ try{ const j=JSON.parse(t.slice(s,e+1));
+    return {reply:j.reply||'…', params:j.params||{}, ready:!!j.ready, action:j.action||null}; }catch(err){} }
+  return {reply:t||'…', params:{}, ready:false};
+}
+async function sendChat(msg){
+  msg=(msg!=null?msg:$('#chatMsg').value).trim(); if(!msg) return;
+  $('#chatMsg').value=''; bubble('u',msg); chat.push({role:'user',content:msg});
+  const tb=bubble('t','생각 중…');
+  let out=null;
+  try{ out=await callLLM(); }
+  catch(e){ toast('AI 호출 실패('+e.message+') — 로컬 파서로 처리합니다'); }
+  if(!out) out=localAssistant(msg);
+  tb.remove();
+  mergeParams(out.params);
+  bubble('a',out.reply); chat.push({role:'assistant',content:JSON.stringify(out)});
+  if(out.ready&&P.circ!=null&&!pkgState) applyParams();
+}
+$('#chatSend').addEventListener('click',()=>sendChat());
+$('#chatMsg').addEventListener('keydown',e=>{ if(e.key==='Enter') sendChat(); });
+
+/* ═══ 차트 줌·팬: 휠 = 확대·축소, 드래그 = 이동(그랩), 더블클릭 = 리셋 ═══ */
+const vp=document.getElementById('chartVp');
+let vz={s:1,x:0,y:0}, vdrag=null;
+function applyVz(){ $('#board').style.transform='translate('+vz.x+'px,'+vz.y+'px) scale('+vz.s+')'; }
+function vzReset(){ var s0=Math.min(1, vp.clientWidth/560); vz={s:s0, x:(vp.clientWidth-560*s0)/2, y:0}; applyVz(); }
+vp.addEventListener('wheel', e=>{
+  e.preventDefault();
+  const r=vp.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+  const ns=Math.min(3.5, Math.max(0.45, vz.s*(e.deltaY<0?1.12:1/1.12)));
+  vz.x=mx-(mx-vz.x)*(ns/vz.s); vz.y=my-(my-vz.y)*(ns/vz.s); vz.s=ns; applyVz();
+}, {passive:false});
+vp.addEventListener('mousedown', e=>{ vdrag={x:e.clientX,y:e.clientY,ox:vz.x,oy:vz.y}; vp.classList.add('grabbing'); e.preventDefault(); });
+window.addEventListener('mousemove', e=>{ if(!vdrag) return; vz.x=vdrag.ox+(e.clientX-vdrag.x); vz.y=vdrag.oy+(e.clientY-vdrag.y); applyVz(); });
+window.addEventListener('mouseup', ()=>{ vdrag=null; vp.classList.remove('grabbing'); });
+vp.addEventListener('dblclick', vzReset);
+
+/* 초기: 작가 원본 (기준 치수·표준 게이지) */
+baseState=compute(BASE.circ, BASE.depth, BASE.hook, 0, 0);
+cur=baseState; render(null); vzReset();
+bubble('a','안녕하세요! 이 도안을 내 치수로 바꿔 드릴게요. 누구를 위한 모자인가요? 머리둘레(cm)를 알려주시면 바로 변환합니다. 바늘 호수나 스와치(10cm 코·단)를 알려주시면 더 정확해져요.');
+
+/* ── knitup PWA 임베드 브리지: 부모가 postMessage로 도안 패키지 전달 ── */
+window.addEventListener('message', function(e){
+  var d=e.data;
+  if(d && d.type==='knitup-pkg' && d.pkg){
+    try{ loadPackage(d.pkg); }catch(err){ toast('패키지 로드 실패: '+err.message); }
+  }
+});
+</script>
+</script>
+
+<script>
+/* ── 뜨개동네 임베드: 닫기 바 · 진도 저장 브리지 · 터치 이동/확대 · 로컬 파서 고정 ── */
+(function(){
+  var bar=document.createElement('div'); bar.id='knBar';
+  bar.innerHTML='<button id="knClose">‹ 닫기</button><span id="knSaved"></span>';
+  document.body.appendChild(bar);
+  document.getElementById('knClose').onclick=function(){ parent.postMessage({type:'kn-close'},'*'); };
+  var brand=document.querySelector('.brand'); if(brand) brand.textContent='뜨개동네 · 도안 뷰어 (knitup)';
+  // AI 연결(API 키) 카드는 숨기고 키 없이 도는 로컬 파서만 사용
+  try{ var pv=document.getElementById('aiProv'); if(pv){ pv.value='local'; var c=pv.closest('.card'); if(c) c.style.display='none'; } }catch(e){}
+  // 진도: 바뀔 때마다 부모에 알림
+  var _setProg=window.setProg||setProg, lastSent=-1;
+  function report(){ try{ if(prog!==lastSent){ lastSent=prog; parent.postMessage({type:'kn-prog', prog:prog},'*'); var s=document.getElementById('knSaved'); if(s) s.textContent=prog?('진도 '+prog+'단 저장됨'):''; } }catch(e){} }
+  setProg=function(r){ _setProg(r); report(); }; window.setProg=setProg;
+  // 부모 → 패키지(+저장된 진도)
+  window.addEventListener('message', function(e){
+    var d=e.data; if(!d||d.type!=='knitup-pkg') return;
+    if(d.who){ window.KN_WHO=String(d.who).slice(0,30); try{ render(converted? baseState:null); }catch(err){} }
+    setTimeout(function(){
+      try{ if(d.prog>0){ prog=d.prog; lastSent=d.prog; render(converted? baseState:null); var s=document.getElementById('knSaved'); if(s) s.textContent='진도 '+prog+'단부터 이어서'; } }catch(err){}
+      document.body.classList.add('kn-ready');
+    }, 30);
+  });
+  setTimeout(function(){ document.body.classList.add('kn-ready'); }, 2500);
+  // 터치: 한 손가락 이동, 두 손가락 확대·축소
+  var vp=document.getElementById('chartVp'), t0=null;
+  function dist(a,b){ return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY); }
+  vp.addEventListener('touchstart', function(e){
+    if(e.touches.length===1) t0={m:'pan', x:e.touches[0].clientX, y:e.touches[0].clientY, ox:vz.x, oy:vz.y};
+    else if(e.touches.length===2){ var r=vp.getBoundingClientRect(); t0={m:'zoom', d:dist(e.touches[0],e.touches[1]), s:vz.s, ox:vz.x, oy:vz.y,
+      cx:(e.touches[0].clientX+e.touches[1].clientX)/2-r.left, cy:(e.touches[0].clientY+e.touches[1].clientY)/2-r.top}; }
+  }, {passive:true});
+  vp.addEventListener('touchmove', function(e){
+    if(!t0) return; e.preventDefault();
+    if(t0.m==='pan' && e.touches.length===1){ vz.x=t0.ox+(e.touches[0].clientX-t0.x); vz.y=t0.oy+(e.touches[0].clientY-t0.y); applyVz(); }
+    else if(t0.m==='zoom' && e.touches.length===2){ var ns=Math.min(3.5, Math.max(0.45, t0.s*dist(e.touches[0],e.touches[1])/t0.d));
+      vz.x=t0.cx-(t0.cx-t0.ox)*(ns/t0.s); vz.y=t0.cy-(t0.cy-t0.oy)*(ns/t0.s); vz.s=ns; applyVz(); }
+  }, {passive:false});
+  vp.addEventListener('touchend', function(){ t0=null; });
+})();
+</script>
+</body>
+</html>

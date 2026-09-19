@@ -534,6 +534,7 @@ async function openPatternForm(id){
     <textarea id="ptDescr" placeholder="소개 (완성 크기, 난이도 설명 등)" style="min-height:80px">${esc(x.descr||'')}</textarea>
     <div class="row"><input id="ptYarn" placeholder="실 굵기 (예: DK)" value="${esc(x.yarn_weight||'')}" style="flex:1"><input id="ptNeedle" placeholder="바늘 (예: 4mm)" value="${esc(x.needle_size||'')}" style="flex:1"></div>
     <input id="ptUrl" placeholder="판매·열람 링크 (https://…)" value="${esc(x.buy_url||'')}" style="width:100%;margin:6px 0">
+    <div class="row"><span class="muted">knitup 도안 패키지(.knitup-pkg.json) ${x.has_viewer?'· <b>첨부됨</b>':''}</span><input type="file" id="ptPkg" accept=".json,application/json">${x.has_viewer?`<label><input type="checkbox" id="ptPkgDel"> 첨부 지우기</label>`:''}</div>
     <input id="ptPhotos" placeholder="사진 URL (쉼표로 구분)" value="${esc((x.photos||[]).join(', '))}" style="width:100%;margin-bottom:6px">
     <div class="muted">쓰이는 기법 (눌러서 선택)</div><div id="ptTech" style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0"></div>
     <div class="row"><label><input type="checkbox" id="ptPub" ${x.is_published?'checked':''}> 공개</label><label><input type="checkbox" id="ptHidden" ${x.hidden?'checked':''}> 숨김(운영 조치)</label></div>
@@ -552,7 +553,11 @@ async function savePattern(id){
   if(!p.title) return toast('도안 이름을 입력하세요');
   if(url && !/^https?:\/\//i.test(url)) return toast('링크는 http(s)://로 시작해야 해요');
   if(id) p.id=id;
-  const {error}=await sb.rpc('admin_upsert_pattern',{p}); if(error) return toast(error.message); toast('저장했어요'); closePanel(); route();
+  const pf=$('#ptPkg').files[0]; let pkg=null;
+  if(pf){ try{ pkg=JSON.parse(await pf.text()); if(pkg.app!=='knitup-pattern-package') throw 0; }catch(e){ return toast('knitup 도안 패키지 형식이 아니에요'); } }
+  const {data:pid,error}=await sb.rpc('admin_upsert_pattern',{p}); if(error) return toast(error.message);
+  if(pkg || $('#ptPkgDel')?.checked){ const r2=await sb.rpc('set_pattern_pkg',{p_id:pid,p_pkg:pkg}); if(r2.error) return toast('패키지 첨부 실패: '+r2.error.message); }
+  toast('저장했어요'); closePanel(); route();
 }
 async function showClaimDoc(path){ const {data,error}=await sb.storage.from('shop-docs').createSignedUrl(path, 600); if(error) return toast(error.message); window.open(data.signedUrl,'_blank','noopener'); }
 async function decideClaim(id, ok, docPath){

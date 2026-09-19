@@ -14,7 +14,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~28, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~29, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`, 워크플로 ios-testflight). main 푸시 → GitHub 웹훅(id 679395520) → 자동 빌드 → TestFlight(앱 이름 KOAP, 내부 테스터 그룹)
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
@@ -36,6 +36,11 @@
 - 도안 추천: `recommend_patterns`(내 단계~+1, 새 기법 1~2개 우선). 피드 6번째 글 뒤·작품 인증 직후·내 단계 화면·설정 › 찜한 도안. 결제는 외부 링크만(앱 내 결제 없음). **등록된 도안이 없으면 카드가 안 보임** — 관리자 콘솔 › 도안에서 등록
 - 작가: 작품 인증 3개 이상 → 설정 › 작가 신청 → 콘솔 › 작가 신청 승인 → ＋ › 도안 / 설정 › 내 도안. 지도 작가 핀 색 #8a6d1a(2026-09-18 대표 확정), 인증 3개 기준 확정
 - **데모 도안 14개**(표지 그림 `docs/patterns/demo-*.svg`, 작가: demo2 코바늘요정·demo3 킨텍스뜨개·지기, 판매 링크 없음). 출시 전 삭제: `delete from patterns where photos[1] like '%/patterns/demo-%'` + `docs/patterns/demo-*.svg` 제거
+
+## 유료 도안·정산 방향 (2026-09-19 대표 확정)
+- 회사가 판매자(작가는 이용허락), 작가 정산 = 판매가 − Apple 수수료 − 플랫폼 15% → **3.3% 원천징수** 후 지급. 가격은 **티어 중 선택**(IAP 티어 상품). 순서: ① knitup 뷰어 연동(완료) → ② IAP 티어·구매 내역·환불 → ③ 작가 정산 정보·월 정산 → ④ 통신판매업·약관
+- knitup 뷰어: `docs/viewer.html` = `node tools/build-viewer.js` 로 `knitup/docs/app_v9.html`의 VIEWER_SIZE_HTML 에서 생성(직접 수정 금지, 빌드 스크립트를 고칠 것). 앱은 sandbox+srcdoc iframe 으로 열고 postMessage(knitup-pkg / kn-prog / kn-close). 실 소요량 카드·AI 사이즈 변환 대화는 예시 데이터·모자 전용이라 숨김
+- 작가는 도안 등록 폼에서 knitup 에디터의 `.knitup-pkg.json` 첨부 → `pattern_contents`. 무료 도안만 누구나 열람, 유료는 구매 기능 전까지 작가 본인·관리자만
 
 ## 남은 일
 - 대표: 2단계 인증(구글·Supabase·GitHub·Apple·Codemagic), 구글 클라이언트 시크릿 재발급, Play Console에 versionCode 2 .aab 업로드·데이터 보안 설문, App Store 테스트 정보 입력, 앱 아이콘(1024 PNG) 전달, 쎄비하우스 오너 계정·링크 입력
