@@ -8,8 +8,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{
-  --bg:#fff; --bg2:#f5f5f5; --ink:#000; --ink2:#555; --ink3:#999; --line:#e6e6e6;
-  --accent:#000; --accent-ink:#fff; --accent-soft:#f2f2f2;
+  --bg:#fff; --bg2:#f5f5f5; --ink:#3C4043; --ink2:#6A6E73; --ink3:#9AA0A6; --line:#e6e6e6;
+  --accent:#3C4043; --accent-ink:#fff; --accent-soft:#f2f2f2;
   --yarn:#C9922F; --yarn-soft:#F6EBD3; --moss:#5C7A4C; --moss-soft:#E6EDDF; --rose:#B5605A; --rose-soft:#F3E2E0;
 }
 *{box-sizing:border-box}
@@ -54,12 +54,12 @@ nav .badge{position:absolute;top:6px;right:calc(50% - 18px);background:#ff3040;c
 .btn.sm{padding:7px 14px;font-size:.85rem;width:auto;border-radius:999px}
 .btn:disabled{opacity:.5;cursor:default}
 .btn[hidden]{display:none}
-.g{background:#fff;color:#000;border:1px solid var(--line);border-radius:999px}
+.g{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:999px}
 .g img{width:18px;height:18px}
 input,select,textarea{font:inherit;width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none}
 /* iOS: 입력칸 글자가 16px보다 작으면 포커스 시 화면이 자동 확대됨 → 모바일에서는 모든 입력칸 16px 고정 */
 @media (max-width:767px){ input,select,textarea{font-size:16px!important} }
-input[type=checkbox],input[type=radio]{-webkit-appearance:auto;appearance:auto;width:22px;height:22px;min-width:22px;padding:0;margin:0;accent-color:#000;flex:none}
+input[type=checkbox],input[type=radio]{-webkit-appearance:auto;appearance:auto;width:22px;height:22px;min-width:22px;padding:0;margin:0;accent-color:var(--ink);flex:none}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
 input::placeholder,textarea::placeholder{color:#a3a3a3}
 textarea{resize:vertical;min-height:70px}
@@ -99,21 +99,21 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--
 .mapempty{position:absolute;left:50%;top:70px;transform:translateX(-50%);z-index:400;background:rgba(0,0,0,.75);color:#fff;font-size:13px;padding:6px 14px;border-radius:999px;white-space:nowrap;pointer-events:none}
 .locbtn{position:absolute;right:14px;bottom:110px;z-index:400;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:1.1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .upin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));font-family:inherit}
-.upin .lbl{background:#000;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;letter-spacing:-0.01em}
-.upin .face{width:42px;height:42px;border-radius:50%;background:#fff;border:2.5px solid #000;display:grid;place-items:center;font-weight:800;font-size:16px;color:#000;overflow:hidden}
+.upin .lbl{background:var(--ink);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;letter-spacing:-0.01em}
+.upin .face{width:42px;height:42px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--ink);overflow:hidden}
 .upin .face img{width:100%;height:100%;object-fit:cover}
-.upin .tail{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #000;margin-top:-2px}
-.upin.me .face{background:#000;color:#fff}
-.upin.me .lbl{background:#fff;color:#000;border:1.5px solid #000}
-.upin.meet .face{background:#000;color:#fff;border-radius:12px;font-size:11px;width:46px;height:34px}
-.upin.meet .lbl{background:#fff;color:#000;border:1.5px solid #000}
+.upin .tail{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid var(--ink);margin-top:-2px}
+.upin.me .face{background:var(--ink);color:#fff}
+.upin.me .lbl{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.upin.meet .face{background:var(--ink);color:#fff;border-radius:12px;font-size:11px;width:46px;height:34px}
+.upin.meet .lbl{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
 .upin.knit .face{border-color:#5C7A4C}
 .upin.knit .tail{border-top-color:#5C7A4C}
 .upin .facewrap{position:relative}
-.upin .hand{position:absolute;right:-9px;top:-9px;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid #000;display:grid;place-items:center;font-size:13px;line-height:1;animation:wave 1.6s ease-in-out infinite;transform-origin:70% 90%}
+.upin .hand{position:absolute;right:-9px;top:-9px;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid var(--ink);display:grid;place-items:center;font-size:13px;line-height:1;animation:wave 1.6s ease-in-out infinite;transform-origin:70% 90%}
 @keyframes wave{0%,100%{transform:rotate(0)}25%{transform:rotate(14deg)}75%{transform:rotate(-8deg)}}
-.wavebadge{display:inline-flex;align-items:center;gap:5px;background:#000;color:#fff;border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:600}
-.pbtns .btn.wave.on{background:#000;color:#fff;border-color:#000}
+.wavebadge{display:inline-flex;align-items:center;gap:5px;background:var(--ink);color:#fff;border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:600}
+.pbtns .btn.wave.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .leaflet-div-icon{background:none;border:0}
 /* sheet */
 .sheetwrap{position:absolute;inset:0;z-index:1100;display:none;align-items:flex-end;background:rgba(43,39,35,.35)}
@@ -274,7 +274,7 @@ details .seg{margin-top:8px;justify-content:center}
 .mitem .mdate.done{background:#e5e5e5;color:#777}
 .mitem .mtx{flex:1;min-width:0}
 .mitem .mtt{display:flex;align-items:center;gap:6px}.mitem .mtt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mitem .role{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:#000;color:#fff;flex:none}
+.mitem .role{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--ink);color:#fff;flex:none}
 .mitem .role.p{background:#f2f2f2;color:#333}
 .mitem .msub{font-size:13px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mitem .mstat{font-size:12px;font-weight:700;color:var(--ink);flex:none;padding:3px 9px;border-radius:999px;background:#f2f2f2}
@@ -375,7 +375,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .replyto{font-size:.78rem;color:var(--ink3);margin-bottom:2px}
 .fab{display:none}
 /* ===== 커뮤니티·글·채팅 화면 스타일 ===== */
-#app{--tbg:#fff;--tink:#000;--tmute:#999;--tline:#e6e6e6;--tred:#ff3040;
+#app{--tbg:#fff;--tink:#3C4043;--tmute:#9AA0A6;--tline:#e6e6e6;--tred:#ff3040;
   background:var(--tbg);color:var(--tink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:16px;line-height:1.35;letter-spacing:-0.01em;word-break:break-word}
 .top,.top,.top,.top{background:var(--tbg);border-bottom:0;padding:14px 16px 10px;gap:12px}
 .top h1,.top h1,.top h1,.top h1{font-family:inherit;font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;text-align:center;flex:1}
@@ -388,20 +388,20 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 #v-comm .top{position:static}
 #v-comm .subtabs{position:sticky;top:0;z-index:6;flex:none}
 /* 가게(파트너) 핀: 각진 상점 모양 + 새 소식 종 */
-.upin.shop .face{border-radius:10px;background:#fff;border:2.5px solid #000;width:44px;height:38px;font-size:10px;font-weight:800;letter-spacing:-.02em}
-.upin.shop .face svg{width:22px;height:22px;stroke:#000;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.upin.shop .lbl{background:#fff;color:#000;border:1.5px solid #000}
-.upin .bell{position:absolute;right:-10px;top:-10px;width:24px;height:24px;border-radius:50%;background:#ffd400;border:1.5px solid #000;display:grid;place-items:center;animation:ring 1.4s ease-in-out infinite;transform-origin:50% 10%}
-.upin .bell svg{width:14px;height:14px;stroke:#000;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.upin.shop .face{border-radius:10px;background:#fff;border:2.5px solid var(--ink);width:44px;height:38px;font-size:10px;font-weight:800;letter-spacing:-.02em}
+.upin.shop .face svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.upin.shop .lbl{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.upin .bell{position:absolute;right:-10px;top:-10px;width:24px;height:24px;border-radius:50%;background:#ffd400;border:1.5px solid var(--ink);display:grid;place-items:center;animation:ring 1.4s ease-in-out infinite;transform-origin:50% 10%}
+.upin .bell svg{width:14px;height:14px;stroke:var(--ink);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 @keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(18deg)}30%{transform:rotate(-14deg)}45%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(0)}}
 /* 가게 페이지 */
 .shophead{padding:14px 16px 6px}
 .shophead h2{margin:0;font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
-.shophead .kind{display:inline-block;font-size:.72rem;background:#000;color:#fff;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:3px}
+.shophead .kind{display:inline-block;font-size:.72rem;background:var(--ink);color:#fff;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:3px}
 .shopinfo{padding:4px 16px 10px;color:var(--ink2);font-size:.92rem;line-height:1.55}
 .shoplinks{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 12px}
 .shoplinks a,.shoplinks button{font:inherit;font-size:.85rem;border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
-.shoplinks button.on{background:#000;color:#fff;border-color:#000}
+.shoplinks button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .spost{padding:14px 16px;border-top:1px solid var(--line)}
 .spost .k{display:inline-block;font-size:.72rem;border-radius:999px;padding:2px 8px;background:#f0f0f0;color:#333;margin-right:6px}
 .spost .k.sale{background:#fde8ea;color:#c9303f}.spost .k.new{background:#e8f3e8;color:#2f6b3a}.spost .k.meetup,.spost .k.class{background:#e6f1fb;color:#185fa5}
@@ -410,8 +410,8 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .spost time{font-size:13px;color:var(--ink3)}
 .spost .ends{font-size:12px;color:#c9303f;margin-left:6px}
 .shopcard{margin:10px 16px 0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fafafa;display:flex;align-items:center;gap:12px;cursor:pointer}
-.shopcard .sq{width:44px;height:44px;border-radius:10px;border:2px solid #000;display:grid;place-items:center;background:#fff}
-.shopcard .sq svg{width:22px;height:22px;stroke:#000;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.shopcard .sq{width:44px;height:44px;border-radius:10px;border:2px solid var(--ink);display:grid;place-items:center;background:#fff}
+.shopcard .sq svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .pfields{display:flex;flex-direction:column;gap:10px;background:#eef3ff;border-radius:14px;padding:14px}
 .pfields .mtitle{font-weight:700;font-size:.95rem}
 .pfields label.f{font-size:.8rem;color:var(--ink2)}
@@ -460,6 +460,8 @@ body.icons .item.support .ava .ico{filter:invert(1);width:24px;height:24px}
 .ico>b{font-weight:inherit}
 body.icons .ico{width:1.15em;height:1.15em;vertical-align:-0.2em;background:center/contain no-repeat}
 body.icons .ico>b{display:none}
+body.icons .ico{opacity:.76}
+body.icons .wavebadge .ico,body.icons .filters button.on .ico,body.icons .pbtns .btn.wave.on .ico,body.icons .item.support .ava .ico{opacity:1}
 body.icons .ico[data-ico="wave"]{background-image:url(icons/wave.svg)}
 body.icons .wavebadge .ico[data-ico="wave"],body.icons .filters button.on .ico[data-ico="wave"],body.icons .pbtns .btn.wave.on .ico[data-ico="wave"]{background-image:url(icons/wave-white.svg)}
 body.icons .ico[data-ico="location"]{background-image:url(icons/location.svg)}
@@ -634,7 +636,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .tmlegend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);align-items:center}
 .tmlegend .k{display:inline-block;width:11px;height:11px;border-radius:4px;border:1.5px solid var(--line);margin-right:4px;vertical-align:-1px;background:#fff}
 .tmlegend .k.done{background:var(--ink);border-color:var(--ink)}.tmlegend .k.ready{border-color:var(--ink)}
-.phw{position:relative;flex:none;line-height:0}.pvb{position:absolute;left:6px;bottom:6px;font-size:10.5px;line-height:1.2;font-weight:700;background:#000;color:#fff;padding:3px 7px;border-radius:999px}
+.phw{position:relative;flex:none;line-height:0}.pvb{position:absolute;left:6px;bottom:6px;font-size:10.5px;line-height:1.2;font-weight:700;background:var(--ink);color:#fff;padding:3px 7px;border-radius:999px}
 .patlist .pvb{left:3px;bottom:3px;font-size:9px;padding:2px 5px}
 .reccard .rh{display:flex;align-items:baseline;gap:8px;padding-right:16px;margin-bottom:8px}
 .reccard .rh b{font-size:15px}.reccard .rh span{font-size:12px;color:var(--ink3)}
@@ -2410,7 +2412,7 @@ function renderSkills(){
   list.forEach(t=>(t.prereq||[]).forEach(q=>{ const a=pos[q], b=pos[t.id]; if(!a||!b) return;
     const x1=a.x+colW, y1=a.y+nodeH/2, x2=b.x, y2=b.y+nodeH/2, mx=(x1+x2)/2;
     const hot = skills.has(q)&&skills.has(t.id), warm = skills.has(q)&&ready(t);
-    svg += `<path d="M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" fill="none" stroke="${hot?'#111':warm?'#111':'#dcdcdc'}" stroke-width="${hot?2.2:1.4}" ${warm?'stroke-dasharray="4 4"':''}/>`; }));
+    svg += `<path d="M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" fill="none" stroke="${hot?'#3C4043':warm?'#3C4043':'#dcdcdc'}" stroke-width="${hot?2.2:1.4}" ${warm?'stroke-dasharray="4 4"':''}/>`; }));
   svg += '</svg>';
   let nodes='';
   for(let L=1; L<=5; L++){ const s2=st[L]||{done:0,total:0}; const dn=s2.total>0&&s2.done*2>=s2.total;
