@@ -8,13 +8,23 @@
 - **플랫폼 우선순위(2026-09-18 대표 지시)**: 지금은 아이폰(iOS·TestFlight) 위주로 진행. Android 빌드·Play 업로드는 iOS가 어느 정도 다듬어진 뒤 한 번에 진행 — 그 전에는 Android 빌드/업로드를 제안하거나 실행하지 않는다.
 - 패치는 파이썬 스크립트를 **파일로 저장해 실행**(Bash heredoc은 역슬래시·따옴표가 깨짐).
 
+## 에디션 — V1(full) / V2(meet) (2026-09-19 대표 확정)
+- **코드는 하나**, `docs/edition.js`의 `KN_EDITION`으로 나눈다. index.html의 `FULL` 상수로 분기. 브랜치를 가르지 말 것.
+  - **meet = V2 공개 앱**(App Store, 뉴스레터 구독자 대상, 만남 중심). full에서 뺀 것: ① '다음에 떠보면 좋아요' 추천 카드(피드·마이·작품 인증 후) ② 설정 › 찜한 도안 ③ 도안 등록 과정(＋ › 도안, 설정 › 내 도안, 프로필 도안 탭) ④ 내 뜨개 단계 아래 '내 단계에 맞는 도안'. **작가 신청·지도 작가 핀·작가 링크(프로필의 인스타그램 등)는 meet에도 있음**
+  - **full = V1 Lab**(VC 시연, 계속 실험). 기준점 태그 `v1-full-2026-09-19`
+  - 새 기능을 만들 때: 공개해도 되는지 대표에게 확인 전에는 `FULL`로 감쌀 것
+- 저장소의 edition.js 기본값은 meet(= GitHub Pages 웹 기본). 웹에서 full 보기: 주소 뒤 `?edition=full`(브라우저에 기억, `?edition=meet`로 복귀). 네이티브는 빌드가 넣은 값 고정
+- Codemagic 워크플로: `ios-public`(meet, 기존 Bundle ID, **수동 실행만** — App Store 제출용) · `ios-testflight`(full, 기존 Bundle ID, main 푸시 자동 — Lab 앱 준비 전 임시) · `ios-lab`(full, `kr.co.firmtech.knitneighbors.lab`, 이름 '뜨개동네 Lab', 복귀 주소 `knitneighborslab://auth` — 대표가 Bundle ID·App Store Connect 앱·Supabase Redirect URL 추가 후 triggering 주석 해제하고 ios-testflight 자동 빌드는 제거). 빌드 번호는 시각 기반(yymmddHHMM)
+- 공개 후 원칙: DB 변경은 추가만(옛 앱 버전이 계속 동작해야 함), 기존 컬럼·함수 삭제 금지. 구버전 차단은 `app_config.min_version`
+- 공개 전 할 일: demo1~6 계정 데이터 삭제(데모 도안은 지기 소유로 옮겨 Lab 시연용으로 유지), APP_VERSION·MARKETING_VERSION 정리
+
 ## 구조
 - 앱 본체: `docs/index.html` 단일 파일(HTML+CSS+JS). GitHub Pages(main /docs) → https://yesbeyesnono.github.io/knit-neighbors/
 - 관리자 콘솔: `docs/admin.html` → …/knit-neighbors/admin.html (관리자: knitup.official, yesbeyesnono, cocos.jay)
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~29, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~30, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`, 워크플로 ios-testflight). main 푸시 → GitHub 웹훅(id 679395520) → 자동 빌드 → TestFlight(앱 이름 KOAP, 내부 테스터 그룹)
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)

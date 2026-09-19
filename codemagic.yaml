@@ -5,22 +5,78 @@
 #   3) 앱 › Environment variables: 그룹 ios_creds 에 CERTIFICATE_PRIVATE_KEY(RSA 개인키 PEM, Secure 체크) 추가
 #      → 빌드 중 app-store-connect fetch-signing-files --create 가 배포 인증서·App Store 프로파일을 자동 생성
 #   4) App Store Connect에서 앱(kr.co.firmtech.knitneighbors) 먼저 생성
+#
+# 에디션 (docs/edition.js 를 빌드 때 덮어씀)
+#   ios-public     : 공개 앱(V2, 만남 중심 'meet')  · kr.co.firmtech.knitneighbors      · 수동 실행만 → App Store 제출용
+#   ios-testflight : 전체 기능('full', V1) 임시 빌드 · 같은 Bundle ID                     · main 푸시마다 자동 (Lab 앱이 준비되면 끈다)
+#   ios-lab        : 전체 기능('full', V1) Lab 앱    · kr.co.firmtech.knitneighbors.lab  · Bundle ID·앱 생성 후 자동 빌드로 전환
+definitions:
+  env: &env
+    groups:
+      - ios_creds
+    node: 22
+    xcode: latest
+  scripts:
+    - &sign
+      name: 서명 파일 준비(인증서·프로파일 자동 생성)
+      script: |
+        keychain initialize
+        app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+        keychain add-certificates
+        xcode-project use-profiles
+    - &buildno
+      name: 빌드 번호(시각 기반 — 워크플로가 달라도 항상 증가)
+      script: |
+        cd ios/App
+        agvtool new-version -all "$(date -u +%y%m%d%H%M)"
+    - &ipa
+      name: IPA 빌드
+      script: xcode-project build-ipa --project "$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
+  artifacts: &artifacts
+    - build/ios/ipa/*.ipa
+    - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+  publishing: &publishing
+    app_store_connect:
+      auth: integration
+      submit_to_testflight: false   # 외부 테스트 심사 자동 제출은 테스트 정보 입력 후 true로
+
 workflows:
-  ios-testflight:
-    name: iOS → TestFlight
+  ios-public:
+    name: iOS 공개 앱 (V2 · meet) — 수동 실행
     instance_type: mac_mini_m2
     max_build_duration: 60
     integrations:
       app_store_connect: firmtech_asc
     environment:
-      groups:
-        - ios_creds
+      <<: *env
       vars:
         BUNDLE_ID: "kr.co.firmtech.knitneighbors"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
-      node: 22
-      xcode: latest
+    scripts:
+      - name: 에디션 meet · 의존성 설치 · 웹 자산 동기화
+        script: |
+          echo "window.KN_EDITION = 'meet';" > docs/edition.js
+          npm ci
+          npx cap sync ios
+      - *sign
+      - *buildno
+      - *ipa
+    artifacts: *artifacts
+    publishing: *publishing
+
+  ios-testflight:
+    name: iOS 전체 기능 (V1 · full) — 임시, 기존 Bundle ID
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: firmtech_asc
+    environment:
+      <<: *env
+      vars:
+        BUNDLE_ID: "kr.co.firmtech.knitneighbors"
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
+        XCODE_SCHEME: "App"
     triggering:
       events:
         - push
@@ -29,26 +85,47 @@ workflows:
           include: true
       cancel_previous_builds: true
     scripts:
-      - name: 의존성 설치·웹 자산 동기화
+      - name: 에디션 full · 의존성 설치 · 웹 자산 동기화
         script: |
+          echo "window.KN_EDITION = 'full';" > docs/edition.js
           npm ci
           npx cap sync ios
-      - name: 서명 파일 준비(인증서·프로파일 자동 생성)
+      - *sign
+      - *buildno
+      - *ipa
+    artifacts: *artifacts
+    publishing: *publishing
+
+  ios-lab:
+    name: iOS Lab 앱 (V1 · full) — 별도 Bundle ID
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: firmtech_asc
+    environment:
+      <<: *env
+      vars:
+        BUNDLE_ID: "kr.co.firmtech.knitneighbors.lab"
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
+        XCODE_SCHEME: "App"
+    # Lab 앱(Bundle ID·App Store Connect 앱)이 만들어지면 아래 triggering 주석을 풀고 ios-testflight 의 triggering 을 지운다
+    # triggering:
+    #   events: [push]
+    #   branch_patterns:
+    #     - pattern: main
+    #       include: true
+    #   cancel_previous_builds: true
+    scripts:
+      - name: 에디션 full · Lab용 이름/Bundle ID/복귀 주소 · 웹 자산 동기화
         script: |
-          keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-          keychain add-certificates
-          xcode-project use-profiles
-      - name: 빌드 번호 증가
-        script: |
-          cd ios/App
-          agvtool new-version -all "$BUILD_NUMBER"
-      - name: IPA 빌드
-        script: xcode-project build-ipa --project "$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
-    artifacts:
-      - build/ios/ipa/*.ipa
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: false   # 외부 테스트 심사 자동 제출은 테스트 정보 입력 후 true로
+          printf "window.KN_EDITION = 'full';\nwindow.KN_SCHEME = 'knitneighborslab';\n" > docs/edition.js
+          npm ci
+          npx cap sync ios
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = kr.co.firmtech.knitneighbors;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" ios/App/App.xcodeproj/project.pbxproj
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 뜨개동네 Lab" ios/App/App/Info.plist
+          sed -i '' "s#<string>knitneighbors</string>#<string>knitneighborslab</string>#" ios/App/App/Info.plist
+      - *sign
+      - *buildno
+      - *ipa
+    artifacts: *artifacts
+    publishing: *publishing

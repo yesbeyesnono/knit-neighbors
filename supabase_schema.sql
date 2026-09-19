@@ -1005,3 +1005,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   데모: '동글동글 코스터 3종'(원형)·'첫 코바늘 수세미'(왕복) 에 패키지 첨부
 --   사업 방향(2026-09-19 대표 확정): 회사가 판매자, 작가에게는 3.3% 원천징수 후 정산(Apple 수수료 제외 → 플랫폼 15% → 작가). 가격은 티어 중 선택(IAP 티어 상품)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 30. 작가 외부 링크 + 앱 설정 — 2026-09-19 (마이그레이션 author_link_app_config, recommend_patterns_has_viewer)
+--   profiles.author_link(http(s), 300자): 클라이언트 직접 수정 불가 → set_author_link(p_link) (작가만, 금칙어 검사, 빈 값이면 삭제)
+--   admin_decide_author: 승인 시 신청서 link 를 author_link 로 복사(비어 있을 때만)
+--   app_config(key, value jsonb): anon·authenticated 읽기만. 'min_version' = {"ios","android","message"} → 네이티브 앱이 시작 때 확인, 낮으면 업데이트 안내 화면
+--   recommend_patterns: has_viewer 반환 추가
+-- ---------------------------------------------------------------
