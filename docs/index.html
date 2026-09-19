@@ -1928,7 +1928,7 @@ function bodyHtml(p){
 }
 const mentionMap = {};                        // key(글 id | 'detail') → {닉네임: id}
 let mentionFriends = null, mentionTimer = null;
-function mentionInputEl(key){ return key==='detail' ? $('#replyIn') : document.getElementById('rin-'+key); }
+function mentionInputEl(key){ return key==='detail' ? $('#replyIn') : vEl('rin-'+key); }
 function mentionToken(inp){ const v=inp.value.slice(0, inp.selectionStart??inp.value.length); const m=v.match(/(^|\s)@([^@]*)$/); return m ? {q:m[2], start:v.length-m[2].length-1} : null; }
 async function mentionCandidates(key, q){
   const set=new Map(); const add=p=>{ if(p&&p.id&&p.id!==me.id&&!set.has(p.id)) set.set(p.id,p); };
@@ -1942,7 +1942,7 @@ async function mentionCandidates(key, q){
   return list.slice(0,8);
 }
 function mentionInput(inp, key){
-  const pop=document.getElementById('mpop-'+key); if(!pop) return;
+  const pop=vEl('mpop-'+key); if(!pop) return;
   const t=mentionToken(inp); if(!t || t.q.length>20){ pop.hidden=true; return; }
   clearTimeout(mentionTimer);
   mentionTimer=setTimeout(async()=>{
@@ -1952,7 +1952,7 @@ function mentionInput(inp, key){
   }, 120);
 }
 function pickMention(key, id, nick){
-  const inp=mentionInputEl(key), pop=document.getElementById('mpop-'+key); if(!inp) return;
+  const inp=mentionInputEl(key), pop=vEl('mpop-'+key); if(!inp) return;
   const t=mentionToken(inp); const caret=inp.selectionStart??inp.value.length;
   const before = t ? inp.value.slice(0,t.start) : inp.value, after = t ? inp.value.slice(caret) : '';
   inp.value = before + '@'+nick+' ' + after; (mentionMap[key] ||= {})[nick]=id; if(pop) pop.hidden=true; inp.focus();
@@ -1965,7 +1965,7 @@ function renderFeed(){
 }
 // 글 + (펼친 경우) 답글 목록 + 답글 입력을 한 묶음으로. 접힌 상태에선 첫 답글 1개만 미리보기
 function postGroup(p, opts={}){
-  const open = expandedReplies.has(p.id);
+  const open = expandedReplies.has(p.id) && Array.isArray(p.replies);
   let html = postCard(p,{noLine:true, cls: open?'has-reply':'', replyTo:opts.replyTo});
   if(open){
     const rs = p.replies||[];
@@ -1992,29 +1992,30 @@ function replyCard(r){
 async function markSolved(rootId, replyId){
   const { error } = await sb.rpc('mark_solved', { p_post: rootId, p_reply: replyId||null });
   if(error) return toast('실패: '+error.message);
-  const p=findPost(rootId); if(p){ p.solved_reply_id = replyId||null; const grp=document.getElementById('pg-'+rootId); if(grp) grp.outerHTML=postGroup(p); }
+  const p=findPost(rootId); if(p){ p.solved_reply_id = replyId||null; const grp=vEl('pg-'+rootId); if(grp) grp.outerHTML=postGroup(p); }
   toast(replyId ? '해결로 표시했어요. 답글 쓴 분에게 알림이 가요' : '해결 표시를 취소했어요');
 }
+function vEl(id){ return document.querySelector('.view.on [id="'+id+'"]') || document.getElementById(id); }
 function findPost(id){ return [...feedRows, ...feedRows.flatMap(x=>x.replies||[]), curPost].filter(Boolean).find(x=>x.id===id); }
 async function toggleReplies(id){
-  const grp = document.getElementById('pg-'+id);
+  const grp = vEl('pg-'+id);
   const p = findPost(id);
   if(!grp || !p || p.parent_id){ return openPost(id); }   // 그룹 밖(글 상세 등)이면 상세로
-  if(expandedReplies.has(id)){ expandedReplies.delete(id); grp.outerHTML = postGroup(p); grp.scrollIntoView?.({block:'nearest'}); return; }
+  if(expandedReplies.has(id) && Array.isArray(p.replies)){ expandedReplies.delete(id); grp.outerHTML = postGroup(p); grp.scrollIntoView?.({block:'nearest'}); return; }
   if(!p.replies){ const { data } = await sb.from('posts').select('*, '+AUTHOR_SEL).eq('parent_id', id).order('created_at'); p.replies = data||[]; await loadLikes(p.replies); }
   expandedReplies.add(id);
   grp.outerHTML = postGroup(p);
-  setTimeout(()=>{ const g=document.getElementById('pg-'+id); const i=g?.querySelector('input'); if(g && (p.replies||[]).length===0) i?.focus(); }, 50);
+  setTimeout(()=>{ const g=vEl('pg-'+id); const i=g?.querySelector('input'); if(g && (p.replies||[]).length===0) i?.focus(); }, 50);
 }
 async function submitInlineReply(pid){
-  const inp=document.getElementById('rin-'+pid); const t=inp?.value.trim(); if(!t) return;
+  const inp=vEl('rin-'+pid); const t=inp?.value.trim(); if(!t) return;
   await loadBanned(); if(hasBanned(t)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
   const { data, error } = await sb.from('posts').insert({ author_id: me.id, parent_id: pid, body: t, mentions: mentionsFor(pid, t) }).select('*, '+AUTHOR_SEL).single();
   if(!error) delete mentionMap[pid];
   if(error) return toast('실패: '+error.message);
   await loadMentionNames([data]);
   const p=findPost(pid); if(p){ p.replies=[...(p.replies||[]), data]; p.reply_count=(p.reply_count||0)+1; if(!p.firstReply) p.firstReply=data; }
-  const grp=document.getElementById('pg-'+pid); if(grp && p){ grp.outerHTML=postGroup(p); }
+  const grp=vEl('pg-'+pid); if(grp && p){ grp.outerHTML=postGroup(p); }
 }
 const ICON = {
   heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.6S3.2 15.2 3.2 9.2a4.8 4.8 0 0 1 8.8-2.6 4.8 4.8 0 0 1 8.8 2.6c0 6-8.8 11.4-8.8 11.4Z"></path></svg>',
@@ -2337,7 +2338,7 @@ async function deletePost(id){
   const { error } = await sb.from('posts').delete().eq('id', id);
   if(error) return toast('실패: '+error.message);
   toast('삭제했어요');
-  if(p?.parent_id){ const par=findPost(p.parent_id); if(par){ par.replies=(par.replies||[]).filter(r=>r.id!==id); par.reply_count=Math.max(0,(par.reply_count||0)-1); const g=document.getElementById('pg-'+par.id); if(g){ g.outerHTML=postGroup(par); return; } } }
+  if(p?.parent_id){ const par=findPost(p.parent_id); if(par){ par.replies=(par.replies||[]).filter(r=>r.id!==id); par.reply_count=Math.max(0,(par.reply_count||0)-1); const g=vEl('pg-'+par.id); if(g){ g.outerHTML=postGroup(par); return; } } }
   if(view==='post' && curPost?.id===id) go('comm'); else if(view==='post') openPost(curPost.id); else if(view==='my') loadMyFeed(); else if(view==='profile') loadUserFeed(profId, profTab, $('#profFeed')); else loadFeed();
 }
 async function cancelMeetup(mid){
