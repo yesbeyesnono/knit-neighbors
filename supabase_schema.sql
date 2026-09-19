@@ -1031,3 +1031,12 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   (세 함수 모두 예전 시그니처를 같은 이름·기본값 인자로 대체 → 옛 앱 버전의 호출도 그대로 동작)
 --   앱: 참여/참여 취소/모임 취소 모두 확인 시트(요약·안내·한마디) 거친 뒤 실행
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 33. 작품 인증의 실·바늘 상세 — 2026-09-20 (마이그레이션 works_yarns_needles)
+--   works.yarns jsonb[] = {name, color, amount, unit(볼|g), ball_g, ball_m, weight, fiber} 최대 6 · works.needles jsonb[] = {type(코바늘|대바늘|줄바늘|레이스 바늘), size} 최대 4
+--   works.gauge, works.finished_size 추가, needle_size 는 text 로 확장. 기존 yarn_name/yarn_weight/needle_size 에는 첫 번째 실·바늘을 그대로 넣음(옛 데이터·통계 호환)
+--   create_work: 시그니처 그대로, p_yarn_meta 의 yarns/needles/gauge/size 를 검증해 저장(알려진 키만, 길이·숫자 검사)
+--   yarn_suggest(p_q): 회원들이 적은 실 이름 자동완성 + 가장 흔한 1볼 중량·길이·굵기·소재(집계값만 반환)
+--   앱: 굵기는 고르게 하지 않고 1볼 중량(g)·길이(m) → 100g당 길이로 추정(600↑레이스·극세 / 350↑합세 / 250↑중세 / 200↑합태 / 120↑병태 / 60↑극태 / 그 아래 초극태), 길이를 모르면 바늘 mm로 추정, 직접 고르기도 가능
+-- ---------------------------------------------------------------
