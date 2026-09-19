@@ -15,6 +15,7 @@
   - 새 기능을 만들 때: 공개해도 되는지 대표에게 확인 전에는 `FULL`로 감쌀 것
 - 저장소의 edition.js 기본값은 meet(= GitHub Pages 웹 기본). 웹에서 full 보기: 주소 뒤 `?edition=full`(브라우저에 기억, `?edition=meet`로 복귀). 네이티브는 빌드가 넣은 값 고정
 - Codemagic 워크플로(2026-09-19 전환 완료): `ios-public`(meet, 기존 Bundle ID `kr.co.firmtech.knitneighbors` = App Store Connect 앱 **KOAP**, **수동 실행만** — App Store 제출용) · `ios-lab`(full, `kr.co.firmtech.knitneighbors.lab` = 앱 **뜨개동네 Lab**, main 푸시마다 자동, 복귀 주소 `knitneighborslab://auth` — Supabase Redirect URL 등록됨). 빌드 번호는 시각 기반(yymmddHHMM). KOAP에 예전에 올라간 full 빌드는 심사에 제출하지 말 것(반드시 ios-public 빌드를 고를 것)
+- **작업·배포 흐름(2026-09-19 대표 지시)**: 앞으로는 주로 V2(공개 앱)를 개선한다. 수정 → main 푸시(→ Lab 자동 빌드로 먼저 확인 가능) → 대표가 **"V2 올려줘"**라고 하면 Claude가 `git tag v2-YYYYMMDD-N && git push origin <태그>` → `ios-public` 자동 빌드 → KOAP TestFlight. 대표가 말하기 전에는 v2 태그를 붙이지 않는다(공개 앱 배포 시점은 대표가 정함). 수정 보고 때 "V2에 반영되는 수정인지(공통) / Lab 전용(FULL)인지"를 한 줄로 밝힐 것. App Store 심사 제출 버튼은 대표가 누른다
 - 공개 후 원칙: DB 변경은 추가만(옛 앱 버전이 계속 동작해야 함), 기존 컬럼·함수 삭제 금지. 구버전 차단은 `app_config.min_version`
 - 공개 전 할 일: demo1~6 계정 데이터 삭제(데모 도안은 지기 소유로 옮겨 Lab 시연용으로 유지), APP_VERSION·MARKETING_VERSION 정리
 

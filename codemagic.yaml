@@ -7,7 +7,7 @@
 #   4) App Store Connect에서 앱(kr.co.firmtech.knitneighbors) 먼저 생성
 #
 # 에디션 (docs/edition.js 를 빌드 때 덮어씀)
-#   ios-public : 공개 앱 KOAP(V2, 만남 중심 'meet') · kr.co.firmtech.knitneighbors     · 수동 실행만 → App Store 제출용
+#   ios-public : 공개 앱 KOAP(V2, 만남 중심 'meet') · kr.co.firmtech.knitneighbors     · v2-* 태그 푸시(또는 수동 실행) → App Store 제출용
 #   ios-lab    : 뜨개동네 Lab(V1, 전체 기능 'full')  · kr.co.firmtech.knitneighbors.lab · main 푸시마다 자동 → TestFlight(VC 시연)
 definitions:
   env: &env
@@ -41,7 +41,7 @@ definitions:
 
 workflows:
   ios-public:
-    name: iOS 공개 앱 (V2 · meet) — 수동 실행
+    name: iOS 공개 앱 (V2 · meet) — v2-* 태그 또는 수동
     instance_type: mac_mini_m2
     max_build_duration: 60
     integrations:
@@ -52,6 +52,13 @@ workflows:
         BUNDLE_ID: "kr.co.firmtech.knitneighbors"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
+    triggering:            # v2-로 시작하는 태그를 푸시하면 자동 빌드 (예: v2-20260920-1). 브랜치 푸시로는 빌드되지 않음
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'v2-*'
+          include: true
+      cancel_previous_builds: true
     scripts:
       - name: 에디션 meet · 의존성 설치 · 웹 자산 동기화
         script: |
