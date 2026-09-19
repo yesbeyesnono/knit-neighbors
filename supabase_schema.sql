@@ -989,7 +989,7 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   post_reposts(post_id, profile_id): 저장 겸 프로필 공개. select 전체(authenticated), insert 본인·정지 아님·원글만·내 글 제외, delete 본인
 --   posts.repost_count (트리거 post_repost_apply: 카운트 + 알림 kind 'repost', 취소 시 알림 삭제). notifications_kind_check 에 'repost' 추가
 --   patterns.save_count (트리거 pattern_save_count) → 프로필 도안 탭 '인기' 정렬
---   앱: 글 카드의 외부 공유 버튼 자리에 리포스트 버튼(공유는 ··· 메뉴로), 남의 프로필 탭 = 글/리포스트/인증/(도안), 마이 = 글/리포스트/답글/인증/모임
+--   앱: 글 카드의 외부 공유 버튼 자리에 리포스트 버튼(공유는 ··· 메뉴로), 남의 프로필 탭 = 글/리포스트/인증/(도안), 마이 = 글/리포스트/인증/모임(답글 탭은 2026-09-20 제거)
 --        프로필 도안 탭 정렬: 최신·인기(찜)·쉬운 순(단계별 구분선)·가격 낮은 순. 데모 계정끼리 리포스트 18건 시드
 -- ---------------------------------------------------------------
 
