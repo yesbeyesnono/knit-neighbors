@@ -1609,7 +1609,7 @@ async function openProfile(id){
     <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${profTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button>${FULL&&p.is_author?`<button data-t="patterns" class="${profTab==='patterns'?'on':''}">도안</button>`:''}</div>
     <div class="feed" id="profFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#profTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; profTab=b.dataset.t; [...$('#profTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadUserFeed(profId, profTab, $('#profFeed')); };
-  show('profile');
+  show('profile'); bindTabSwipe('#v-profile', '#profTabs');
   loadUserFeed(id, profTab, $('#profFeed'));
 }
 function closeProfile(){ const b=profBack||'map'; profBack=null; if(b==='post' && curPost) return openPost(curPost.id); if(['map','comm','chats','my','friends'].includes(b)) go(b); else go('map'); }
@@ -1993,7 +1993,7 @@ function replyCard(r){
     <div class="rb">
       <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time>${solved?'<span class="chip m solvedchip">'+ico('check')+' 해결한 답글</span>':''}<button class="menu" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
       ${r.body?`<div class="txt">${bodyHtml(r)}</div>`:''}
-      <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button>${!mine&&a.id?`<button onclick="replyTo('${r.parent_id}','${a.id}',this.dataset.n)" data-n="${esc(a.nickname||'')}">답글</button>`:''}${rootMine&&!mine?`<button class="${solved?'on2':''}" onclick="markSolved('${r.parent_id}','${solved?'':r.id}')">${solved?'해결 취소':'해결됐어요'}</button>`:''}</div>
+      <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button>${!mine&&a.id?`<button onclick="replyTo('${r.parent_id}','${a.id}',this.dataset.n)" data-n="${esc(a.nickname||'')}">답글</button>`:''}</div>
     </div></div>`;
 }
 async function markSolved(rootId, replyId){
@@ -2156,7 +2156,6 @@ function postCard(p, opts={}){
       ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 답글</div>`:''}
       ${p.review_meetup?`<div class="rvtag" onclick="event.stopPropagation();openMeetup('${p.review_of}')">${ico('yarn')} 모임 후기 · ${esc(p.review_meetup.title)}</div>`:''}
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b><time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}','${a.id}')">···</button></div>
-      ${p.solved_reply_id?`<div class="solvedtag">${ico('check')} 해결됐어요</div>`:''}
       ${p.body?`<div class="txt">${bodyHtml(p)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`).join('')}</div>`:''}
       ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work):''}
@@ -2547,6 +2546,17 @@ async function setWave(on){
   toast(on ? '🙋 이웃에게 뜨개 친구를 찾는 중이라고 알렸어요 (14일)' : '표시를 내렸어요');
   if(MapAdapter.ready) loadPins();
 }
+// ===== 좌우로 쓸어 탭 전환 (마이페이지·프로필) =====
+function bindTabSwipe(viewSel, tabsSel){
+  const v=$(viewSel); if(!v || v.dataset.swipe) return; v.dataset.swipe='1';
+  let x0=null, y0=0, t0=0;
+  v.addEventListener('touchstart', e=>{ if(e.touches.length!==1 || e.target.closest('.recrow,.pgrid,.tmscroll,input,textarea,select')){ x0=null; return; } x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); }, {passive:true});
+  v.addEventListener('touchend', e=>{ if(x0===null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
+    if(Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.8 || Date.now()-t0>700) return;
+    const tabs=[...($(tabsSel)?.children||[])]; const i=tabs.findIndex(b=>b.classList.contains('on')); const n=i+(dx<0?1:-1);
+    if(i<0 || n<0 || n>=tabs.length) return; tabs[n].click(); tabs[n].scrollIntoView?.({inline:'nearest', block:'nearest'});
+    const f=$(viewSel+' .feed'); if(f){ f.style.transition='none'; f.style.opacity='0'; f.style.transform='translateX('+(dx<0?24:-24)+'px)'; requestAnimationFrame(()=>{ f.style.transition='opacity .18s, transform .18s'; f.style.opacity='1'; f.style.transform=''; }); } }, {passive:true});
+}
 async function renderMy(){
   const p=myProfile||{};
   if(myTab==='replies') myTab='posts';   // 마이의 답글 탭은 없앰(2026-09-20)
@@ -2559,7 +2569,7 @@ async function renderMy(){
     <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${myTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
-  loadMyFeed();
+  loadMyFeed(); bindTabSwipe('#v-my', '#myTabs');
   loadRecs().then(()=>{ const el=$('#myRecs'); if(el) el.innerHTML=recCard(0); });
 }
 async function renderMyFriends(){
