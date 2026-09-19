@@ -1714,8 +1714,8 @@ function watchFriends(){
 }
 async function refreshBadge(){ if(!me) return; const {count}=await sb.from('notifications').select('*',{count:'exact',head:true}).eq('recipient_id',me.id).is('read_at',null); ['badgeFriends','badgeAct'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.hidden=!count; el.textContent=count||''; } }); }
 // ===== 활동(알림) =====
-const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요', notice:'의 공지예요', shop_post:'의 가게에 새 소식이 올라왔어요', repost:'님이 회원님의 글을 리포스트했어요' };
-const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn'), shop_post:ico('location'), repost:ico('reply') };
+const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요', notice:'의 공지예요', shop_post:'의 가게에 새 소식이 올라왔어요', repost:'님이 회원님의 글을 리포스트했어요', meetup_leave:'님이 모임 참여를 취소했어요', meetup_cancel:'님이 모임을 취소했어요' };
+const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn'), shop_post:ico('location'), repost:ico('reply'), meetup_leave:ico('yarn'), meetup_cancel:ico('yarn') };
 let actRows = [];
 function openActivity(){ show('activity'); renderActivity(); }
 async function renderActivity(){
@@ -1733,7 +1733,8 @@ async function openNotif(i){
   if(n.kind==='notice') return openSupportRoom();
   if(n.kind==='shop_post' && n.shop_id) return openShop(n.shop_id);
   if(n.kind==='friend_request'||n.kind==='friend_accept') return openProfile(n.actor_id);
-  if(n.kind==='meetup_join') return openMeetup(n.meetup_id);
+  if(n.kind==='meetup_join' || n.kind==='meetup_leave') return openMeetup(n.meetup_id);
+  if(n.kind==='meetup_cancel') return go('chats');
   if(n.root_post_id||n.post_id){ await openPost(n.root_post_id||n.post_id); if((n.kind==='mention'||n.kind==='reply') && n.actor?.id) setTimeout(()=>prefillMention('detail', n.actor.id, n.actor.nickname), 100); }
 }
 
@@ -2080,15 +2081,45 @@ function meetupCard(m){
   const btn = past ? `<button class="btn o" onclick="event.stopPropagation();openMeetup('${m.id}')">${joined?'후기 쓰기 · ':''}후기 ${m.review_count||0}</button>` : joined ? `<button class="btn o" onclick="event.stopPropagation();openRoom('${m.room_id}')">참여 중 · 채팅</button>` : full ? '<span class="muted">마감</span>' : `<button class="btn" onclick="event.stopPropagation();joinMeetup('${m.id}')">참여하기</button>`;
   return `<div class="mcard" onclick="event.stopPropagation();openMeetup('${m.id}')"><div class="mh">${ico('location')} 모임${m.is_public?'':' · 초대만'}<span class="kind">${MKIND[m.kind]||'자유 뜨개'}</span></div><b>${esc(m.title)}</b><div class="ml">${esc(m.place_name)}</div><div class="ml">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}</div>${m.bring?`<div class="ml">준비물: ${esc(m.bring)}</div>`:''}<div class="mtags">${meetupTags(m)}</div><div class="mrow"><span>${past?'종료 · ':''}참여 ${m.participant_count||0}명</span>${btn}</div></div>`;
 }
+// ===== 모임 참여 · 참여 취소 · 모임 취소 — 누르면 바로 처리하지 않고 확인 단계를 거친다 =====
+// 참여: 요약 확인(+주최자에게 한마디) → 단체 채팅방 입장 + 채팅방에 "참여했어요" + 주최자 활동 알림
+// 참여 취소: 사유(선택) → 채팅방에 "참여를 취소했어요" + 주최자 활동 알림
+// 모임 취소(주최자): 사유(선택) → 참여자 전원 활동 알림 + 채팅방 안내
 async function joinMeetup(id){
-  const { data:roomId, error } = await sb.rpc('join_meetup', { p_meetup_id:id });
-  if(error) return toast(error.message.replace(/^.*?: /,''));
-  await loadMyRooms(); toast('참여했어요. 단체 채팅방이 열렸어요. 마이 › 모임에서 확인할 수 있어요'); closeSheet(); openRoom(roomId);
+  const { data:m } = await sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(nickname)').eq('id', id).single();
+  if(!m) return toast('모임을 찾을 수 없어요');
+  if(myRoomIds.has(m.room_id)) return openRoom(m.room_id);
+  const info=[fmtWhen(m.starts_at)+(m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''), m.place_name+(m.address?` (${m.address})`:''), m.fee?`참가비 ${m.fee}`:'', m.bring?`준비물 ${m.bring}`:'', `참여 ${m.participant_count||0}명${m.capacity?' / 정원 '+m.capacity+'명':''}`].filter(Boolean);
+  openSheet(`<b style="font-size:1.1rem">「${esc(m.title)}」에 참여할까요?</b>
+    <div class="card soft" style="font-size:.92rem;line-height:1.6">${info.map(x=>esc(x)).join('<br>')}</div>
+    <div class="muted" style="font-size:.85rem;line-height:1.55">참여하면 ① 모임 단체 채팅방에 들어가고 ② 주최자 <b style="color:var(--ink)">${esc(m.host?.nickname||'')}</b>님에게 참여 알림이 가요. 못 가게 되면 모임 화면에서 <b style="color:var(--ink)">참여 취소</b>를 눌러 알려 주세요.</div>
+    <label class="f">주최자에게 한마디 (선택)<input id="jmNote" maxlength="200" placeholder="예: 안녕하세요, 코바늘 초보인데 가도 될까요?"></label>
+    <button class="btn" id="jmGo" onclick="confirmJoinMeetup('${m.id}')">참여하기</button><button class="btn o" onclick="openMeetup('${m.id}')">다시 볼게요</button>`);
 }
-async function leaveMeetup(id){
-  if(!confirm('모임에서 나갈까요? 채팅방에서도 나가요.')) return;
-  const { error } = await sb.rpc('leave_meetup', { p_meetup_id:id }); if(error) return toast(error.message);
-  await loadMyRooms(); toast('모임에서 나왔어요'); closeSheet(); if(view==='comm') loadFeed(); if(view==='map') loadPins(); if(view==='my') renderMy();
+async function confirmJoinMeetup(id){
+  const note=$('#jmNote').value.trim(); await loadBanned(); if(hasBanned(note)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+  $('#jmGo').disabled=true;
+  const { data:roomId, error } = await sb.rpc('join_meetup', { p_meetup_id:id, p_note:note||null });
+  if(error){ const b=$('#jmGo'); if(b) b.disabled=false; return toast(error.message.replace(/^.*?: /,'')); }
+  await loadMyRooms(); toast('참여했어요 · 주최자에게 알렸어요. 마이 › 모임에서 확인할 수 있어요'); closeSheet(); openRoom(roomId);
+}
+function leaveMeetup(id){
+  openSheet(`<b style="font-size:1.1rem">모임 참여를 취소할까요?</b>
+    <div class="muted" style="font-size:.9rem;line-height:1.55">단체 채팅방에서도 나가고, 주최자에게 참여 취소 알림이 가요. 채팅방에는 "참여를 취소했어요"라고 남아요.</div>
+    <label class="f">주최자에게 남길 말 (선택)<input id="lmNote" maxlength="200" placeholder="예: 갑자기 일정이 생겼어요. 다음에 꼭 갈게요"></label>
+    <button class="btn r" id="lmGo" onclick="confirmLeaveMeetup('${id}')">참여 취소</button><button class="btn o" onclick="openMeetup('${id}')">계속 참여할게요</button>`);
+}
+async function confirmLeaveMeetup(id){
+  $('#lmGo').disabled=true;
+  const { error } = await sb.rpc('leave_meetup', { p_meetup_id:id, p_note:$('#lmNote').value.trim()||null });
+  if(error){ const b=$('#lmGo'); if(b) b.disabled=false; return toast(error.message.replace(/^.*?: /,'')); }
+  await loadMyRooms(); toast('참여를 취소했어요 · 주최자에게 알렸어요'); closeSheet(); if(view==='comm') loadFeed(); if(view==='map') loadPins(); if(view==='my') renderMy();
+}
+function askCancelMeetup(id, n){
+  openSheet(`<b style="font-size:1.1rem">모임을 취소할까요?</b>
+    <div class="muted" style="font-size:.9rem;line-height:1.55">지도 핀과 모임 안내 글이 사라지고, ${n>1?`참여자 ${n-1}명에게`:'참여자에게'} 취소 알림이 가요. 단체 채팅방은 남아 있어요.</div>
+    <label class="f">참여자에게 남길 말 (선택)<input id="cmNote" maxlength="200" placeholder="예: 장소 사정으로 취소해요. 다음 주에 다시 열게요"></label>
+    <button class="btn r" id="cmGo" onclick="cancelMeetup('${id}', $('#cmNote').value.trim())">모임 취소</button><button class="btn o" onclick="openMeetup('${id}')">취소하지 않을게요</button>`);
 }
 // ===== 장소 검색(모임 위치) — Google 지오코더, 실패 시 OpenStreetMap =====
 let placePick = { m:null, e:null };   // m=모임 만들기, e=기존 모임 장소 수정
@@ -2141,7 +2172,7 @@ async function openMeetup(id){
     ${m.descr?`<div style="white-space:pre-wrap">${esc(m.descr)}</div>`:''}
     <div class="row" style="cursor:pointer" onclick="closeSheet();openProfile('${m.host?.id}')">${avatar(m.host||{})}<div><b>${esc(m.host?.nickname||'')}</b><div class="muted">주최 · ${esc(m.host?.dong_name||'')}</div></div></div>
     <div class="muted">참여 ${m.participant_count||0}명</div>
-    ${past? reviewHtml + (joined?`<button class="btn o" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>`:'') : joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">모임 나가기</button>`:`<button class="btn r" onclick="if(confirm('모임을 취소할까요? 참여자에게 채팅으로 알려 주세요.'))cancelMeetup('${m.id}')">모임 취소 (주최자)</button>`}` : full ? '<button class="btn o" disabled>정원이 찼어요</button>' : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
+    ${past? reviewHtml + (joined?`<button class="btn o" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>`:'') : joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">참여 취소</button>`:`<button class="btn r" onclick="askCancelMeetup('${m.id}', ${m.participant_count||1})">모임 취소 (주최자)</button>`}` : full ? '<button class="btn o" disabled>정원이 찼어요</button>' : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
 }
 function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
 function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
@@ -2374,7 +2405,7 @@ async function submitPost(){
 }
 async function deletePost(id){
   const p=[...feedRows, ...feedRows.flatMap(x=>x.replies||[]), curPost, ...(curPost?.replies||[])].find(x=>x&&x.id===id);
-  if(p?.meetup_id && p.author_id===me.id){ if(!confirm('모임 안내 글이에요. 모임 자체를 취소할까요? (지도 핀·참여자 채팅방의 모임 정보도 함께 사라져요)')) return; return cancelMeetup(p.meetup_id); }
+  if(p?.meetup_id && p.author_id===me.id) return askCancelMeetup(p.meetup_id, p.meetup?.participant_count||1);   // 모임 안내 글 삭제 = 모임 취소
   if(!confirm('이 글을 삭제할까요? 답글도 함께 지워져요.')) return;
   const { error } = await sb.from('posts').delete().eq('id', id);
   if(error) return toast('실패: '+error.message);
@@ -2382,10 +2413,10 @@ async function deletePost(id){
   if(p?.parent_id){ const par=findPost(p.parent_id); if(par){ par.replies=(par.replies||[]).filter(r=>r.id!==id); par.reply_count=Math.max(0,(par.reply_count||0)-1); const g=vEl('pg-'+par.id); if(g){ g.outerHTML=postGroup(par); return; } } }
   if(view==='post' && curPost?.id===id) go('comm'); else if(view==='post') openPost(curPost.id); else if(view==='my') loadMyFeed(); else if(view==='profile') loadUserFeed(profId, profTab, $('#profFeed')); else loadFeed();
 }
-async function cancelMeetup(mid){
-  const { error } = await sb.rpc('cancel_meetup', { p_meetup_id: mid });
+async function cancelMeetup(mid, note){
+  const { error } = await sb.rpc('cancel_meetup', { p_meetup_id: mid, p_note: note||null });
   if(error) return toast(error.message.replace(/^.*?: /,''));
-  await loadMyRooms(); toast('모임을 취소했어요'); closeSheet();
+  await loadMyRooms(); toast('모임을 취소했어요 · 참여자에게 알렸어요'); closeSheet();
   if(view==='map') loadPins(); else if(view==='my') renderMy(); else if(view==='post') go('comm'); else loadFeed();
 }
 let postBack=null, roomBack=null;

@@ -1021,3 +1021,13 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   앱: 모임 만들기(＋ › 모임, 단체방 › 모임 만들기)에서 '장소 위치' 검색 필수 — Google Geocoder, 실패 시 Nominatim(띄어쓰기 제거 재시도)
 --        모임 상세에 주소·길찾기, 주최자에게 '장소 위치 수정'. 활동 알림은 누르면 삭제(notif_delete 정책 사용)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 32. 모임 참여·참여 취소·모임 취소 과정 — 2026-09-20 (마이그레이션 meetup_join_leave_flow)
+--   notifications.kind 에 'meetup_leave', 'meetup_cancel' 추가
+--   join_meetup(p_meetup_id, p_note default null): 정지·종료·정원·금칙어 검사 → room_members 추가 + 채팅방에 '🙋 모임에 참여했어요(+한마디)'. 주최자 알림은 기존 room_members 트리거(meetup_join)
+--   leave_meetup(p_meetup_id, p_note default null): 주최자는 불가(취소 이용) → 채팅방에 '👋 모임 참여를 취소했어요(+사유)' + 주최자에게 meetup_leave 알림
+--   cancel_meetup(p_meetup_id, p_note default null): 참여자 전원에게 meetup_cancel 알림(제목·사유) + 채팅방 '❌ … 취소됐어요'
+--   (세 함수 모두 예전 시그니처를 같은 이름·기본값 인자로 대체 → 옛 앱 버전의 호출도 그대로 동작)
+--   앱: 참여/참여 취소/모임 취소 모두 확인 시트(요약·안내·한마디) 거친 뒤 실행
+-- ---------------------------------------------------------------
