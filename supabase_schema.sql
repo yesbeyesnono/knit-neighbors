@@ -1108,3 +1108,15 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   (Edge Function place-search 는 카카오 검색용으로 만들었다가 2026-09-20 대표 지시로 폐기 — 앱은 호출하지 않음, 배포본은 빈 응답만. rate_hit 은 Phase 2·3 서버 함수에서 사용)
 --   참고: 작업지시서의 yarn_entries.amount_num 은 만들지 않음 — 기존 amount 가 이미 numeric 이라 1.5볼이 그대로 저장됨
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 41. 내 실함 (마이그레이션 yarn_stash) — 작업지시서 Phase 2 + 2026-09-20 대표 수정 지시
+--   yarn_stash(owner_id, catalog_id, raw_name, color, color_family(트리거), ball_g/m, fiber(s), weight, bought_balls, left_balls, band_photo, read_status pending|done|failed|manual, read_json, edited[] = 회원이 고친 항목)
+--     RLS: 본인 전부 + **관리자 열람**(지시서의 '본인만'에서 변경). 남은 볼은 본인이 직접 수정 가능(분실 등). 1인 500개
+--   yarn_stash_log(stash_id, work_id, delta) — 차감 내역(중복 방지·복원용) · 버킷 bands(비공개, <uid>/ 폴더만, 관리자 읽기)
+--   works.yarns[].stash_id → create_work 가 보존하고 저장 직후 stash_consume(work) 호출: 볼 단위 그대로, g 는 ÷1볼 중량, 남은 만큼만 차감
+--   works BEFORE DELETE 트리거 → stash_restore(work): 차감분 복원
+--   stash_apply_read(id, json, ok) [service_role 전용]: Edge Function read-band 결과 반영(edited 항목은 덮지 않음) → yarn_log_entry 로 실 사전 매칭 + yarn_entries.source='stash'
+--   stash_link_catalog(id): 직접 입력한 실도 실 사전에 연결
+--   Edge Function `read-band`(supabase/functions/read-band): AI_PROVIDER=anthropic|openrouter, ANTHROPIC_API_KEY / OPENROUTER_API_KEY, AI_MODEL_FAST. 키 없으면 read_status=failed(직접 입력 유도). 1인 하루 30장(rate_hit 'band')
+-- ---------------------------------------------------------------

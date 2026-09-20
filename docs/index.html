@@ -638,6 +638,10 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .cpin{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);z-index:2;pointer-events:none;color:var(--moss);filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
 .pickmap{position:relative;height:56vh;border-radius:14px;overflow:hidden;background:var(--bg2);margin:8px 0 12px}.pickmap .mm{position:absolute;inset:0}
 .placecard{display:flex;gap:10px;align-items:flex-start}.placecard .tx{flex:1;min-width:0}.placecard .tx span{display:block;font-size:.85rem;color:var(--ink2)}
+.ssum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 16px 14px}.ssum div{background:var(--bg2);border-radius:14px;padding:12px 8px;text-align:center}.ssum b{display:block;font-size:1.3rem}.ssum span{font-size:.78rem;color:var(--ink2)}
+.sthumb{flex:none;width:46px;height:46px;border-radius:10px;background:var(--bg2) center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;color:var(--ink3)}.sthumb i{position:absolute;right:-3px;bottom:-3px;width:16px;height:16px;border-radius:50%;border:2px solid #fff}.sthumb.lg{width:72px;height:72px}
+.sleft{flex:none;font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--moss-soft);color:var(--moss)}.sleft.end{background:var(--bg2);color:var(--ink3)}
+.sacard{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px}.sacard .tx{flex:1;min-width:0}.sacard .tx>span{display:block;font-size:.82rem;color:var(--ink2)}
 .mbadge{flex:none;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--moss-soft);color:var(--moss);margin-left:6px;vertical-align:middle}.mbadge.end{background:var(--bg2);color:var(--ink3)}
 .ava.meet{border-radius:12px;background:var(--moss-soft);color:var(--moss);display:flex;align-items:center;justify-content:center}
 .item .tx .when{display:block;font-size:.78rem;color:var(--moss);font-weight:500}
@@ -890,6 +894,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <p class="muted" style="font-size:.78rem;margin:10px 0 0">커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요. 첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</p></div>
   </section>
 
+  <!-- 내 실함 -->
+  <section class="view" id="v-stash">
+    <div class="top"><button class="back" onclick="closeStash()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>내 실함</h1></div>
+    <div id="stashBody"></div>
+  </section>
+
   <!-- 보조 화면(기법 고르기 · 실 고르기 · 색·사용량 · 장소 검색): 폼 위에 덮는 한 장 -->
   <div class="subpg" id="subpg" hidden>
     <div class="top"><button class="back" onclick="subBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="subTitle"></h1><button class="btn" id="subAct" hidden></button></div>
@@ -1135,7 +1145,7 @@ function parseGeo(hex){
 }
 
 // ============ 화면 전환 ============
-const NAV_OF = { friends:'chats', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
+const NAV_OF = { stash:'my', friends:'chats', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my','activity','shop'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
 document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(a && isNative){ e.preventDefault(); CAP.Plugins.Browser.open({ url: new URL(a.getAttribute('href'), 'https://yesbeyesnono.github.io/knit-neighbors/').href }); } });
@@ -2246,7 +2256,7 @@ function renderNeedleAdd(){
 function wnCommit(){ if(!wnDraft?.size) return toast('호수를 골라 주세요'); wNeedles.push({type:wnDraft.type, size:wnDraft.size}); closeSheet(); renderWNeedles(); wYarns.forEach(wyAutoWeight); renderWYarns(); }
 function wnDel(i){ wNeedles.splice(i,1); renderWNeedles(); }
 function wYarnPayload(){
-  const ys=wYarns.map(y=>({ name:(y.name||'').trim(), color:(y.color||'').trim(), amount:String(y.amount||'').trim(), unit:y.unit, ball_g:String(y.ball_g||'').trim(), ball_m:String(y.ball_m||'').trim(), weight:y.weight||'', fiber:y.fiber||'', rating:y.rating||'', rating_reason:y.rating_reason||'', fibers:parseMix(y.mix) })).filter(y=>y.name);
+  const ys=wYarns.map(y=>({ name:(y.name||'').trim(), color:(y.color||'').trim(), amount:String(y.amount||'').trim(), unit:y.unit, ball_g:String(y.ball_g||'').trim(), ball_m:String(y.ball_m||'').trim(), weight:y.weight||'', fiber:y.fiber||'', rating:y.rating||'', rating_reason:y.rating_reason||'', fibers:parseMix(y.mix), stash_id:y.stashId||undefined })).filter(y=>y.name);
   const ns=wNeedles.filter(n=>(n.size||'').trim()).map(n=>({ type:n.type, size:n.size.trim() }));
   const y0=ys[0], n0=ns[0];
   const needleTxt = n0 ? `${n0.type} ${n0.size}` : '';
@@ -2559,17 +2569,20 @@ async function submitCert(){
 // ----- 실 고르기 (datalist 대신 직접 그린 목록)
 let ypIdx=-1, ypTab='search', ypRows=[], ypTimer=null, ypSeq=0;
 function openYarnPick(idx){
-  if(idx<0 && wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요');
-  ypIdx=idx; ypTab='recent'; ypRows=[];
-  openSub('실 고르기', `<div style="position:relative;margin-top:8px"><span style="position:absolute;left:12px;top:13px;color:var(--ink3)">${SVG_SEARCH}</span><input id="ypQ" maxlength="60" placeholder="실 이름으로 찾기 (브랜드 + 제품명)" style="padding-left:38px" autocomplete="off" autocorrect="off" oninput="ypInput(this.value)"></div>
+  if(idx<0 && ypStashMode!=='manual' && wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요');
+  ypIdx=idx; ypTab='recent'; ypRows=[]; const manual = ypStashMode==='manual';
+  openSub(manual?'실 이름으로 추가':'실 고르기', `<div style="position:relative;margin-top:8px"><span style="position:absolute;left:12px;top:13px;color:var(--ink3)">${SVG_SEARCH}</span><input id="ypQ" maxlength="60" placeholder="실 이름으로 찾기 (브랜드 + 제품명)" style="padding-left:38px" autocomplete="off" autocorrect="off" oninput="ypInput(this.value)"></div>
     <div class="seg" id="ypTabs"></div><div class="plist" id="ypList"></div><div id="ypDirect"></div>`);
-  ypLoadTab('recent');
+  if(manual){ subOnBack=()=>{ ypStashMode=''; closeSub(); openStashAdd(); }; return ypLoadTab('recent'); }
+  ypStashMode=''; ypLoadTab('recent');
+  loadStash().then(rows=>{ if(rows.some(x=>+x.left_balls>0 && x.raw_name) && !($('#ypQ')?.value||'').trim() && $('#ypTabs')) ypLoadTab('stash'); else if($('#ypTabs')) ypTabsRender(); });
 }
-function ypTabsRender(){ $('#ypTabs').innerHTML=[['search','검색 결과'],['recent','최근 쓴 실'],['popular','이웃이 많이 쓴 실']].map(([k,l])=>`<button type="button" class="${ypTab===k?'on':''}" onclick="ypLoadTab('${k}')">${l}</button>`).join(''); }
+function ypTabsRender(){ const n=stashRows.filter(x=>+x.left_balls>0 && x.raw_name).length; $('#ypTabs').innerHTML=[...(ypStashMode==='manual'?[]:[['stash','내 실함'+(n?' '+n:'')]]),['search','검색 결과'],['recent','최근 쓴 실'],['popular','이웃이 많이 쓴 실']].map(([k,l])=>`<button type="button" class="${ypTab===k?'on':''}" onclick="ypLoadTab('${k}')">${l}</button>`).join(''); }
 function ypRender(emptyMsg){
   ypTabsRender();
-  $('#ypList').innerHTML = ypRows.length ? ypRows.map((r,i)=>`<button type="button" onclick="ypPick(${i})"><div><b>${esc(r.name)}${r.verified?'<span class="vtag">확인된 실</span>':''}</b><span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('') : `<div class="empty" style="padding:24px 0">${emptyMsg||''}</div>`;
+  $('#ypList').innerHTML = ypRows.length ? ypRows.map((r,i)=> r._stash ? `<button type="button" onclick="ypPick(${i})">${stashThumbHtml(r._stash)}<div style="flex:1;min-width:0"><b>${esc(r.name)}</b><span>${esc(stashSpec(r._stash))}</span></div><span class="sleft">${fmtBalls(r._stash.left_balls)}볼 남음</span></button>` : `<button type="button" onclick="ypPick(${i})"><div><b>${esc(r.name)}${r.verified?'<span class="vtag">확인된 실</span>':''}</b><span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('') : `<div class="empty" style="padding:24px 0">${emptyMsg||''}</div>`;
   const q=($('#ypQ')?.value||'').trim();
+  if(ypTab==='stash' && !q){ $('#ypDirect').innerHTML=`<p class="muted" style="font-size:.82rem;margin:12px 0">찍어 둔 실에서 고르면 이름·규격·색이 한 번에 들어가요.</p><button type="button" class="btn o" style="width:100%" onclick="ypStashMode='cert';openStashAdd()">${ico('camera')} 볼밴드 찍어서 바로 추가</button><button type="button" class="cfrow" onclick="ypLoadTab('search');$('#ypQ').focus()"><span>실함에 없는 실 직접 입력</span><span class="muted">›</span></button>`; return; }
   $('#ypDirect').innerHTML = q ? `<button type="button" class="cfrow" onclick="ypDirect()"><span>"${esc(q)}" 직접 입력하기</span><span class="muted">›</span></button>` : `<p class="muted" style="font-size:.82rem;margin-top:14px">찾는 실이 없으면 이름을 적고 「직접 입력하기」를 눌러 주세요.</p>`;
 }
 function ypInput(v){ clearTimeout(ypTimer); const q=v.trim(); if(!q){ return ypLoadTab('recent'); } ypTimer=setTimeout(()=>ypSearch(q), 250); }
@@ -2577,6 +2590,7 @@ async function ypSearch(q){ const seq=++ypSeq; ypTab='search'; const { data } = 
 async function ypLoadTab(k){
   const seq=++ypSeq; ypTab=k;
   if(k==='search'){ const q=($('#ypQ')?.value||'').trim(); if(q) return ypSearch(q); ypRows=[]; return ypRender('실 이름을 입력해 보세요'); }
+  if(k==='stash'){ ypRows=stashRows.filter(x=>+x.left_balls>0 && x.raw_name).map(x=>({ _stash:x, name:x.raw_name })); return ypRender('내 실함에 남은 실이 없어요'); }
   ypRows=[]; ypRender('불러오는 중…');
   let rows=[];
   if(k==='recent'){ const { data } = await sb.from('works').select('yarns').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(12); const seen=new Set(); (data||[]).forEach(w=>(w.yarns||[]).forEach(y=>{ if(y.name && !seen.has(y.name) && rows.length<10){ seen.add(y.name); rows.push({ id:null, name:y.name, ball_g:y.ball_g, ball_m:y.ball_m, weight:y.weight, fiber:y.fiber, fibers:y.fibers, verified:false, _recent:true }); } })); }
@@ -2585,6 +2599,7 @@ async function ypLoadTab(k){
 }
 async function ypPick(i){
   let r=ypRows[i]; if(!r) return;
+  if(r._stash) return ydOpen(await stashYarn(r._stash), ypIdx);
   if(r._recent){ const { data } = await sb.rpc('yarn_suggest', { p_q:r.name }); const hit=(data||[]).find(x=>x.name===r.name); if(hit) r=hit; }   // 최근 쓴 실도 사전에 있으면 색 목록을 쓴다
   ydOpen(await yarnFromDict(r), ypIdx);
 }
@@ -2600,7 +2615,7 @@ function ydRender(){
   const cols=(y.colors||[]).filter(c=>!ydFam || c.family===ydFam);
   const label=c=>(c.no?c.no+' ':'')+c.name;
   openSub(y.name, `
-    <div class="specband"><div><b>${y.fromDict?'실 사전에서 불러왔어요':'규격'}</b>${esc(ySpecLine(y)||'1볼 중량·길이를 적으면 굵기를 알려 드려요 (몰라도 괜찮아요)')}</div><button type="button" onclick="ydSpecOpen=!ydSpecOpen;ydRender()">${ydSpecOpen?'접기':'고치기'}</button></div>
+    <div class="specband"><div><b>${y.stashId?`내 실함 · ${fmtBalls(y.stashLeft)}볼 남음`:y.fromDict?'실 사전에서 불러왔어요':'규격'}</b>${esc(ySpecLine(y)||'1볼 중량·길이를 적으면 굵기를 알려 드려요 (몰라도 괜찮아요)')}</div><button type="button" onclick="ydSpecOpen=!ydSpecOpen;ydRender()">${ydSpecOpen?'접기':'고치기'}</button></div>
     ${ydSpecOpen?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
       <label class="f">실 이름<input maxlength="60" value="${esc(y.name)}" oninput="yd.name=this.value"></label>
       <label class="f">소재<select onchange="yd.fiber=this.value">${['',...FIBERS].map(f=>`<option value="${f}" ${y.fiber===f?'selected':''}>${f||'선택'}</option>`).join('')}</select></label>
@@ -2612,14 +2627,14 @@ function ydRender(){
     ${fams.length>1?`<div class="seg" style="margin-top:0"><button type="button" class="${ydFam?'':'on'}" onclick="ydFam='';ydRender()">전체</button>${fams.map(f=>`<button type="button" class="${ydFam===f?'on':''}" data-f="${esc(f)}" onclick="ydFam=this.dataset.f;ydRender()">${esc(f)}</button>`).join('')}</div>`:''}
     ${cols.length?`<div class="cgrid">${cols.map(c=>`<button type="button" class="${y.color===label(c)?'on':''}" data-l="${esc(label(c))}" data-f="${esc(c.family||'')}" onclick="ydColor(this.dataset.l,this.dataset.f)"><i style="background:${famBg(c.family)}"></i>${esc(label(c))}</button>`).join('')}</div>`:''}
     <input id="ydColorIn" maxlength="40" placeholder="${(y.colors||[]).length?'목록에 없는 색 직접 입력':'색 이름·번호 (예: 베이지 #2)'}" value="${esc((y.colors||[]).some(c=>label(c)===y.color)?'':y.color||'')}" oninput="yd.color=this.value;yd.colorFamily=''">
-    <div class="cfl">사용량</div>
+    <div class="cfl">${ypStashMode==='manual'?'몇 볼 샀나요?':'사용량'}</div>
     <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button type="button" onclick="ydStep(-1)">−</button><input id="ydAmt" inputmode="decimal" maxlength="7" value="${esc(y.amount)}" placeholder="0" onfocus="this.select()" oninput="yd.amount=this.value.replace(',', '.')"><button type="button" onclick="ydStep(1)">＋</button></div>
       <div class="seg" style="margin:0">${['볼','g'].map(u=>`<button type="button" class="${y.unit===u?'on':''}" onclick="ydUnit('${u}')">${u}</button>`).join('')}</div></div>
     <p class="muted" style="font-size:.78rem;margin:6px 0 0">숫자를 눌러 1.3처럼 직접 적을 수 있어요.</p>
     <div class="cfl">이 실 어땠나요? <span class="muted">선택</span></div>
     <div class="seg" style="margin-top:0">${[['1','또 쓸래요'],['0','보통'],['-1','비추']].map(([v,l])=>`<button type="button" class="${String(y.rating)===v?'on':''}" onclick="yd.rating=(String(yd.rating)==='${v}'?'':'${v}');ydRender()">${l}</button>`).join('')}</div>
     ${y.rating!==''&&y.rating!=null?`<div class="cfl">이유</div><div class="seg" style="margin-top:0">${Y_REASONS.map(r=>`<button type="button" class="${y.rating_reason===r?'on':''}" onclick="yd.rating_reason=(yd.rating_reason==='${r}'?'':'${r}');ydRender()">${r}</button>`).join('')}</div>`:''}
-  `, { label:'완료', fn:ydDone });
+  `, { label: ypStashMode==='manual'?'실함에 담기':'완료', fn:ydDone });
 }
 function ydColor(label, fam){ yd.color=label; yd.colorFamily=fam||''; ydRender(); }
 function ydUnit(u){ if(yd.unit===u) return; yd.unit=u; yd.amount = u==='g' ? '' : '1'; ydRender(); }
@@ -2629,8 +2644,130 @@ function ydDone(){
   y.amount=String(y.amount||'').trim(); if(y.amount && !/^\d{1,4}(\.\d{1,2})?$/.test(y.amount)) return toast('사용량은 1.5처럼 소수 둘째 자리까지 적을 수 있어요');
   for(const k of ['ball_g','ball_m']){ y[k]=String(y[k]||'').trim().replace(',', '.'); if(y[k] && !/^\d{1,5}(\.\d{1,2})?$/.test(y[k])) return toast('1볼 중량·길이는 숫자로 적어 주세요'); }
   wyAutoWeight(y);
+  if(ypStashMode==='manual'){ if(!(+y.amount>0) || y.unit!=='볼') return toast('산 볼 수를 적어 주세요'); return stashAddFromDict(y); }
+  if(y.stashId && y.unit==='볼' && +y.amount > y.stashLeft) toast(`실함에는 ${fmtBalls(y.stashLeft)}볼 남아 있어요 · 남은 만큼만 차감돼요`);
   if(ydIdx>=0) wYarns[ydIdx]=y; else wYarns.push(y);
   closeSub(); renderWYarns();
+}
+
+// ============ Phase 2: 내 실함 (볼밴드 찍어 보관 → 작품 인증에서 고르면 자동 차감) ============
+// 본인과 운영진만 볼 수 있다. 남은 볼은 본인이 언제든 고칠 수 있다(분실·나눔 등).
+let stashRows=[], stashFilter='all', stashThumb={}, stashPoll=null;
+const fmtBalls = n => { const v=Math.round((+n||0)*100)/100; return String(v); };
+async function loadStash(){
+  const { data, error } = await sb.from('yarn_stash').select('*').eq('owner_id', me.id).order('created_at',{ascending:false}).limit(500);
+  if(error){ toast('내 실함 조회 실패: '+error.message); return stashRows; }
+  stashRows=data||[];
+  const need=stashRows.filter(s=>s.band_photo && !stashThumb[s.band_photo]).map(s=>s.band_photo);
+  if(need.length){ const { data:urls } = await sb.storage.from('bands').createSignedUrls(need.slice(0,200), 3600); (urls||[]).forEach(u=>{ if(u.signedUrl) stashThumb[u.path]=u.signedUrl; }); }
+  return stashRows;
+}
+function stashSpec(s){ return [s.color, s.ball_g&&s.ball_m?`${fmtBalls(s.ball_g)}g · ${fmtBalls(s.ball_m)}m`:(s.ball_g?`${fmtBalls(s.ball_g)}g`:''), s.fibers?Object.entries(s.fibers).map(([k,v])=>k+' '+v).join(' '):(s.fiber||''), (s.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · '); }
+function stashThumbHtml(s){ const u=s.band_photo&&stashThumb[s.band_photo]; return `<div class="sthumb" style="${u?`background-image:url(${u})`:''}">${u?'':ico('yarn')}<i style="background:${famBg(s.color_family)}"></i></div>`; }
+function stashName(s){ return s.raw_name || (s.read_status==='pending'?'볼밴드 읽는 중…':s.read_status==='failed'?'이름을 적어 주세요':'이름 없는 실'); }
+async function openStash(){ show('stash'); $('#stashBody').innerHTML='<div class="empty">불러오는 중…</div>'; await loadStash(); renderStash(); stashWatch(); }
+function closeStash(){ clearTimeout(stashPoll); stashPoll=null; go('my'); }
+function stashWatch(){   // 읽는 중인 항목이 있으면 잠시 동안 새로 고친다
+  clearTimeout(stashPoll); let n=0;
+  const tick=async()=>{ if(view!=='stash' || !stashRows.some(s=>s.read_status==='pending') || ++n>15) return; await loadStash(); if(view==='stash') renderStash(); stashPoll=setTimeout(tick, 4000); };
+  if(stashRows.some(s=>s.read_status==='pending')) stashPoll=setTimeout(tick, 4000);
+}
+function renderStash(){
+  const has=stashRows.filter(s=>+s.left_balls>0), done=stashRows.filter(s=>!(+s.left_balls>0));
+  const list=(stashFilter==='left'?has:stashFilter==='done'?done:stashRows).slice().sort((a,b)=>(b.read_status==='pending')-(a.read_status==='pending'));
+  $('#stashBody').innerHTML=`<div class="ssum"><div><b>${stashRows.length}</b><span>보유 실</span></div><div><b>${fmtBalls(has.reduce((t,s)=>t+(+s.left_balls),0))}</b><span>남은 볼</span></div><div><b>${done.length}</b><span>다 쓴 실</span></div></div>
+    <div style="padding:0 16px"><button class="btn" style="width:100%" onclick="openStashAdd()">${ico('camera')} 볼밴드 찍어서 추가</button></div>
+    <div class="seg" style="padding:12px 16px 4px">${[['all','전체'],['left','남은 실'],['done','다 쓴 실']].map(([k,l])=>`<button type="button" class="${stashFilter===k?'on':''}" onclick="stashFilter='${k}';renderStash()">${l}</button>`).join('')}</div>
+    <div class="list">${list.map(s=>`<div class="item" onclick="openStashItem('${s.id}')">${stashThumbHtml(s)}<div class="tx"><b>${esc(stashName(s))}</b><span>${esc(s.read_status==='pending'?'잠시 뒤 이름·규격이 채워져요':stashSpec(s)||(s.read_status==='failed'?'볼밴드를 읽지 못했어요 · 눌러서 직접 적기':''))}</span></div><span class="sleft ${+s.left_balls>0?'':'end'}">${+s.left_balls>0?fmtBalls(s.left_balls)+'볼 남음':'다 씀'}</span></div>`).join('')||`<div class="empty">아직 담은 실이 없어요.<br>산 실의 볼밴드를 찍어 두면 작품 인증 때 한 번에 들어가요</div>`}</div>
+    <p class="muted" style="text-align:center;font-size:.8rem;padding:16px">내 실함은 나와 운영진만 볼 수 있어요</p>`;
+}
+// ----- 실 추가: 볼밴드를 연달아 찍고 볼 수만 적는다. 찍는 즉시 저장·읽기 시작
+let saDraft=[];   // {id, url, balls}
+function openStashAdd(){
+  saDraft=[]; renderStashAdd();
+}
+function renderStashAdd(){
+  openSub('실 추가', `<p class="muted" style="font-size:.85rem;margin:8px 0">볼밴드를 찍고 볼 수만 적으세요. 여러 개를 연달아 찍어도 돼요.</p>
+    <input id="saFile" type="file" accept="image/*" multiple hidden onchange="stashPickBands(this.files)">
+    <div id="saList">${saDraft.map((d,i)=>{ const s=stashRows.find(x=>x.id===d.id)||{}; const st=s.read_status;
+      return `<div class="sacard"><div class="sthumb lg" style="background-image:url(${d.url})"></div><div class="tx"><b>${st==='done'?'✓ 읽기 완료':st==='failed'?'읽지 못했어요':'읽는 중…'}</b><span>${esc(st==='done'?[s.raw_name, stashSpec(s)].filter(Boolean).join(' · '):st==='failed'?'저장한 뒤 실함에서 이름을 직접 적어 주세요':'볼 수만 먼저 적어 두세요 · 이름·규격은 자동으로 채워져요')}</span>
+        <div class="cfl" style="margin:8px 0 4px">몇 볼 샀나요?</div><div class="stepper"><button type="button" onclick="saStep(${i},-1)">−</button><input inputmode="decimal" maxlength="6" value="${fmtBalls(d.balls)}" onfocus="this.select()" oninput="saDraft[${i}].balls=this.value.replace(',', '.')"><button type="button" onclick="saStep(${i},1)">＋</button></div></div></div>`; }).join('')}</div>
+    <button type="button" class="btn o" style="width:100%;margin-top:10px" onclick="$('#saFile').click()">${ico('camera')} ${saDraft.length?'볼밴드 더 찍기':'볼밴드 찍기 · 앨범에서 고르기'}</button>
+    <button type="button" class="cfrow" onclick="stashAddManual()"><span>볼밴드가 없으면 실 이름을 직접 적어도 돼요</span><span class="muted">›</span></button>`,
+    saDraft.length ? { label:'저장', fn:stashAddSave } : null);
+  subOnBack=()=>{ closeSub(); if(view==='stash'){ loadStash().then(()=>{ renderStash(); stashWatch(); }); } };
+}
+function saStep(i,d){ const x=saDraft[i]; if(!x) return; x.balls=Math.max(0.5, Math.round(((parseFloat(x.balls)||0)+d*0.5)*100)/100); renderStashAdd(); }
+async function stashPickBands(files){
+  for(const f of [...files].slice(0,10)){
+    try{
+      const blob=await shrinkImage(f, 1280); const path=`${me.id}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;
+      const up=await sb.storage.from('bands').upload(path, blob, { contentType:'image/jpeg', upsert:false }); if(up.error) throw new Error(up.error.message);
+      const { data:row, error } = await sb.from('yarn_stash').insert({ band_photo:path, bought_balls:1, left_balls:1, read_status:'pending' }).select('*').single(); if(error) throw new Error(error.message);
+      stashRows.unshift(row); const url=URL.createObjectURL(blob); stashThumb[path]=url; saDraft.push({ id:row.id, url, balls:1 }); renderStashAdd();
+      sb.functions.invoke('read-band', { body:{ id:row.id } }).then(async()=>{ const { data:r2 } = await sb.from('yarn_stash').select('*').eq('id', row.id).maybeSingle(); if(r2){ const k=stashRows.findIndex(x=>x.id===r2.id); if(k>=0) stashRows[k]=r2; if(!$('#subpg').hidden && $('#saList')) renderStashAdd(); } }).catch(()=>{});
+    }catch(e){ toast('추가하지 못했어요: '+(e.message||'')); }
+  }
+}
+async function stashAddSave(){
+  for(const d of saDraft){ const b=parseFloat(d.balls); if(!(b>0) || b>999) return toast('볼 수를 확인해 주세요'); }
+  for(const d of saDraft){ const b=Math.round(parseFloat(d.balls)*100)/100; const { error } = await sb.from('yarn_stash').update({ bought_balls:b, left_balls:b }).eq('id', d.id); if(error) return toast(error.message); }
+  toast('내 실함에 담았어요'); closeSub(); if(ypStashMode==='cert'){ ypStashMode=''; return openYarnPick(ypIdx); } openStash();
+}
+function stashAddManual(){ ypStashMode='manual'; openYarnPick(-1); }
+// ----- 실함 항목 상세: 볼밴드 원본, 규격·남은 볼 수정, 삭제, 이 실로 뜬 작품
+let siRow=null;
+async function openStashItem(id){
+  const s=stashRows.find(x=>x.id===id); if(!s) return; siRow=JSON.parse(JSON.stringify(s));
+  const { data:logs } = await sb.from('yarn_stash_log').select('work_id,delta,created_at').eq('stash_id', id).order('created_at',{ascending:false}).limit(20);
+  let works=[]; const wids=(logs||[]).map(l=>l.work_id).filter(Boolean); if(wids.length){ const r=await sb.from('works').select('id,title').in('id', wids); works=r.data||[]; }
+  const u=s.band_photo&&stashThumb[s.band_photo];
+  openSub('실 정보', `${u?`<img src="${u}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--bg2);margin-top:8px" onclick="openPhoto(this.src)">`:''}
+    ${s.read_status==='failed'?'<p class="muted" style="font-size:.85rem">볼밴드를 읽지 못했어요. 아래에 직접 적어 주세요.</p>':s.read_status==='done'?'<p class="muted" style="font-size:.85rem">볼밴드에서 읽어 온 값이에요. 다르면 고쳐 주세요 — 고친 값이 우선이에요.</p>':''}
+    <label class="f" style="margin-top:8px">실 이름<input maxlength="60" value="${esc(s.raw_name||'')}" placeholder="브랜드 + 제품명" oninput="siSet('raw_name',this.value)"></label>
+    <label class="f" style="margin-top:10px">색 이름·번호<input maxlength="40" value="${esc(s.color||'')}" placeholder="예: 2 베이지" oninput="siSet('color',this.value)"></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px"><label class="f">1볼 중량 (g)<input inputmode="decimal" maxlength="6" value="${s.ball_g?fmtBalls(s.ball_g):''}" oninput="siSet('ball_g',this.value)"></label><label class="f">1볼 길이 (m)<input inputmode="decimal" maxlength="6" value="${s.ball_m?fmtBalls(s.ball_m):''}" oninput="siSet('ball_m',this.value)"></label></div>
+    <label class="f" style="margin-top:10px">혼용률<input maxlength="40" value="${esc(s.fibers?Object.entries(s.fibers).map(([k,v])=>k+' '+v).join(', '):'')}" placeholder="예: 울 80, 나일론 20" oninput="siSet('mix',this.value)"></label>
+    <div class="cfl">남은 볼 <span class="muted">잃어버렸거나 나눠 줬으면 직접 고쳐 주세요</span></div>
+    <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button type="button" onclick="siStep(-1)">−</button><input id="siLeft" inputmode="decimal" maxlength="6" value="${fmtBalls(s.left_balls)}" onfocus="this.select()" oninput="siRow.left_balls=this.value.replace(',', '.')"><button type="button" onclick="siStep(1)">＋</button></div><span class="muted">산 볼 ${fmtBalls(s.bought_balls)}</span></div>
+    ${works.length?`<div class="cfl">이 실로 뜬 내 작품</div>${works.map(w=>`<div class="muted" style="padding:3px 0">· ${esc(w.title||'')}</div>`).join('')}`:''}
+    <button type="button" class="btn r" style="width:100%;margin-top:22px" onclick="stashDelete('${s.id}')">실함에서 지우기</button>`, { label:'저장', fn:stashItemSave });
+}
+function siSet(k,v){ siRow[k]=v; (siRow._ed=siRow._ed||new Set()).add(k==='mix'?'fibers':k); }
+function siStep(d){ siRow.left_balls=Math.max(0, Math.round(((parseFloat(siRow.left_balls)||0)+d*0.5)*100)/100); $('#siLeft').value=fmtBalls(siRow.left_balls); }
+async function stashItemSave(){
+  const s=siRow, num=v=>{ const t=String(v??'').trim().replace(',', '.'); return t===''?null:(/^\d{1,5}(\.\d{1,2})?$/.test(t)&&+t>0?+t:NaN); };
+  const g=num(s.ball_g), m=num(s.ball_m), left=parseFloat(s.left_balls);
+  if(Number.isNaN(g)||Number.isNaN(m)) return toast('1볼 중량·길이는 숫자로 적어 주세요'); if(!(left>=0)||left>999) return toast('남은 볼을 확인해 주세요');
+  const edited=[...new Set([...(s.edited||[]), ...(s._ed||[])])];
+  const patch={ raw_name:(s.raw_name||'').trim().slice(0,60)||null, color:(s.color||'').trim().slice(0,40)||null, ball_g:g, ball_m:m, left_balls:Math.round(left*100)/100, edited };
+  if(s._ed?.has('fibers')) patch.fibers=parseMix(s.mix);
+  if(left>+s.bought_balls) patch.bought_balls=patch.left_balls;
+  if(patch.raw_name && s.read_status!=='done') patch.read_status='manual';
+  const y={ ball_g:patch.ball_g, ball_m:patch.ball_m }; const gw=yarnWeightGuess(y); if(gw) patch.weight=gw.name;
+  const { error } = await sb.from('yarn_stash').update(patch).eq('id', s.id); if(error) return toast(error.message);
+  if(patch.raw_name && !s.catalog_id) sb.rpc('stash_link_catalog', { p_id:s.id }).then(()=>{});
+  toast('저장했어요'); closeSub(); await loadStash(); if(view==='stash') renderStash();
+}
+async function stashDelete(id){
+  if(!confirm('이 실을 내 실함에서 지울까요? 볼밴드 사진도 같이 지워져요.')) return;
+  const s=stashRows.find(x=>x.id===id); const { error } = await sb.from('yarn_stash').delete().eq('id', id); if(error) return toast(error.message);
+  if(s?.band_photo) sb.storage.from('bands').remove([s.band_photo]).then(()=>{});
+  toast('지웠어요'); closeSub(); await loadStash(); if(view==='stash') renderStash();
+}
+// ----- 실 고르기와의 연결
+let ypStashMode='';   // 'manual' = 실함에 이름으로 직접 추가하는 중, 'cert' = 인증 도중 볼밴드 추가
+async function stashYarn(s){   // 실함의 실 → 인증 입력용 실
+  const y=wyBlank(); y.name=s.raw_name||''; y.color=s.color||''; y.colorFamily=s.color_family||''; y.catalogId=s.catalog_id||null; y.stashId=s.id; y.stashLeft=+s.left_balls; y.fromDict=true;
+  if(s.ball_g) y.ball_g=fmtBalls(s.ball_g); if(s.ball_m) y.ball_m=fmtBalls(s.ball_m); if(s.fiber) y.fiber=s.fiber; if(s.fibers) y.mix=Object.entries(s.fibers).map(([k,v])=>k+' '+v).join(', ');
+  wyAutoWeight(y); return y;
+}
+async function stashAddFromDict(y){   // 실 사전·직접 입력으로 고른 실을 실함에 담기
+  const g=parseFloat(y.ball_g)||null, m=parseFloat(y.ball_m)||null;
+  const { data:row, error } = await sb.from('yarn_stash').insert({ catalog_id:y.catalogId||null, raw_name:y.name.slice(0,60), color:(y.color||'').slice(0,40)||null, ball_g:g, ball_m:m, fiber:y.fiber||null, fibers:parseMix(y.mix), weight:y.weight||null, bought_balls:+y.amount||1, left_balls:+y.amount||1, read_status:'manual' }).select('id').single();
+  if(error) return toast(error.message);
+  if(!y.catalogId) sb.rpc('stash_link_catalog', { p_id:row.id }).then(()=>{});
+  toast('내 실함에 담았어요'); closeSub(); ypStashMode=''; openStash();
 }
 
 // ----- 모임 만들기 페이지
@@ -3040,6 +3177,7 @@ async function renderMy(){
   $('#myTitle').textContent = p.nickname||'마이'; if(!renderMy.scrollBound){ renderMy.scrollBound=true; $('#v-my').addEventListener('scroll', e=>$('#myTitle').classList.toggle('show', e.target.scrollTop>70)); } $('#myTitle').classList.toggle('show', $('#v-my').scrollTop>70);
   $('#myBody').innerHTML=`
     <div id="myRecs">${recCard(0)}</div>
+    <div class="shopcard" onclick="openStash()"><div class="sq">${ico('yarn')}</div><div style="flex:1;min-width:0"><b>내 실함</b><div class="muted">볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요</div></div><span style="color:var(--ink3)">›</span></div>
     ${myShop?`<div class="shopcard" onclick="openShop('${myShop.id}')"><div class="sq">${SHOP_SVG}</div><div style="flex:1;min-width:0"><b>${esc(myShop.name)}</b><div class="muted">내 가게 · 소식 올리기 · 팔로워 보기</div></div><span style="color:var(--ink3)">›</span></div>`:''}
     <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${myTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;

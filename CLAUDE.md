@@ -25,7 +25,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~40, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~41, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`). main 푸시 → GitHub 웹훅(id 679395520) → `ios-public` 자동 빌드 → TestFlight 'KOAP'(V2). Lab은 `lab-*` 태그. 자세한 내용은 위 '에디션' 절
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
@@ -35,7 +35,8 @@
 - Phase 1(완료): ＋ → 선택 팝업(`openPlusSheet`) · 작품 인증 새 페이지 `v-cert`(`openCert`/`submitCert`, 필수 3가지: 사진·이름·기법, 작품 종류는 칩·선택) · 모임 만들기 새 페이지 `v-meetform`(`openMeetForm`/`submitMeet`) · 보조 화면 `#subpg`(`openSub`: 기법 고르기·실 고르기·색/사용량·장소 검색) · 채팅 목록/방의 모임 표식과 [모임 정보] 시트. `v-compose`는 글·모임 후기·가게 소식 전용. `openCompose('work'|'meetup')`은 새 페이지로 넘김. 채팅방에서 모임 만들기는 삭제(대표 확정)
 - 실 입력: `<datalist>` 금지(iOS WebView 불안정) → `openYarnPick`(yarn_suggest 직접 그린 목록 · 최근 쓴 실 · 이웃이 많이 쓴 실 · 직접 입력) → `ydOpen`(색상칩 5열 = 색 계열 대표색 `FAMHEX`, 사용량 0.5볼/10g 단위 + 직접 입력). 저장 형식은 그대로(works.yarns, amount 는 numeric)
 - 장소 검색: `openPlaceSearch(k)` 입력 즉시(300ms) → `geocodePlace()`(Google 지오코더 → OSM). 현재 위치에서 찾기·지도에서 핀 찍기. **카카오(검색·지도)는 반영하지 않는다(2026-09-20 대표 지시)** — 작업지시서의 카카오 로컬 검색·`KAKAO_REST_KEY`는 폐기. 모임 위치 수정도 같은 검색. **권장 단계는 시안의 'Lv.' 대신 기존 'N단계' 표기 유지**(Lv.는 활동 레벨이라 헷갈림)
-- Phase 2(내 실함·볼밴드 AI 읽기) · Phase 3(지기 AI·텔레그램)은 대표 확인 후 진행. 필요한 시크릿: ANTHROPIC_API_KEY, TG_BOT_TOKEN, TG_WEBHOOK_SECRET, TG_ADMIN_CHAT_ID
+- Phase 2(완료): **내 실함** — 마이 › 내 실함(`openStash`, `v-stash`). 볼밴드를 찍는 즉시 저장(`yarn_stash`, 비공개 버킷 `bands`) + Edge Function `read-band`가 AI로 읽어 이름·색·규격 제안(회원이 고친 값 우선). 실 고르기의 '내 실함' 탭에서 고르면 `works.yarns[].stash_id`로 저장돼 자동 차감, 인증 삭제 시 복원. **대표 지시로 지시서와 다른 점: 운영진도 열람(콘솔 › 회원 실함), 남은 볼은 본인이 직접 수정 가능**. AI 공급자는 시크릿으로 전환: `AI_PROVIDER`(anthropic|openrouter) · `ANTHROPIC_API_KEY`/`OPENROUTER_API_KEY` · `AI_MODEL_FAST` — 나중에 OpenRouter의 싼 모델로 바꿀 수 있게 만들었음. 키가 없으면 읽기만 꺼짐
+- Phase 3(지기 AI·텔레그램)은 대표 확인 후 진행. 필요한 시크릿: ANTHROPIC_API_KEY, TG_BOT_TOKEN, TG_WEBHOOK_SECRET, TG_ADMIN_CHAT_ID
 
 ## 백엔드 (Supabase)
 - 프로젝트 `thfcrodfaitzrzlrxyir` (Pro, 서울). publishable key는 index.html/admin.html에 있음.

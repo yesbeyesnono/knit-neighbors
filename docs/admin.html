@@ -101,6 +101,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#ai-yarn" data-v="ai-yarn">실·바늘 통계</a>
     <a href="#events" data-v="events">이벤트 (레벨 초대·체험단)</a>
     <a href="#yarns" data-v="yarns">실 사전 (표준화)</a>
+    <a href="#stash" data-v="stash">회원 실함</a>
     <a href="#export" data-v="export">내보내기</a>
     <div class="grp">시스템</div>
     <a href="#logs" data-v="logs">관리자 로그</a>
@@ -562,6 +563,19 @@ async function decideEventApp(app, st, ev){ const {error}=await sb.rpc('admin_de
 async function eventLottery(ev){ if(!confirm('남은 자리만큼 신청자 중에서 무작위로 선정할까요? 선정된 회원에게 바로 알림이 가요.')) return; const {data,error}=await sb.rpc('admin_event_lottery',{p_event:ev}); if(error) return toast(error.message); toast(data+'명을 선정했어요'); openEventForm(ev); }
 async function markShipped(app, ev){ if(!confirm('발송 처리할까요? 30일 뒤 배송지가 자동 삭제돼요.')) return; const {error}=await sb.rpc('admin_event_mark_shipped',{p_app:app}); if(error) return toast(error.message); toast('발송 처리했어요'); openEventForm(ev); }
 function downloadEventShip(){ const rows=(window.EV_APPS||[]).filter(x=>x.ship_addr); if(!rows.length) return toast('입력된 배송지가 없어요'); download('event-shipping.csv', csv(rows, ['nickname','ship_name','ship_phone','ship_zip','ship_addr','ship_memo','shipped_at'])); }
+// ===== 회원 실함 =====
+// 회원이 볼밴드를 찍어 보관한 실(yarn_stash). 2026-09-20 대표 지시로 운영진도 열람(수정은 회원 본인만). 개인정보처리방침에 기재됨
+VIEWS.stash = async()=>{
+  const {data,error}=await sb.from('yarn_stash').select('*, owner:profiles!yarn_stash_owner_id_fkey(id,nickname)').order('created_at',{ascending:false}).limit(1000);
+  if(error){ $('#main').innerHTML='<h1>회원 실함</h1><p class="muted">'+esc(error.message)+'</p>'; return; }
+  const rows=data||[]; const owners=new Set(rows.map(r=>r.owner_id)); const left=rows.reduce((t,r)=>t+(+r.left_balls||0),0);
+  const st={pending:'읽는 중',done:'AI 읽음',failed:'읽기 실패',manual:'직접 입력'};
+  $('#main').innerHTML=`<h1>회원 실함 <small>${owners.size}명 · 실 ${rows.length}개 · 남은 볼 ${Math.round(left*10)/10}</small></h1>
+  <table><tr><th>회원</th><th>실</th><th>색</th><th>규격</th><th>산 볼</th><th>남은 볼</th><th>읽기</th><th>볼밴드</th><th>담은 날</th></tr>
+  ${rows.map(r=>`<tr><td><b>${esc(r.owner?.nickname||'')}</b></td><td>${esc(r.raw_name||'')}${r.catalog_id?'':' <span class="chip r">사전 미연결</span>'}</td><td>${esc(r.color||'')}<div class="muted">${esc(r.color_family||'')}</div></td><td>${r.ball_g||'–'}g · ${r.ball_m||'–'}m<div class="muted">${esc(r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '):(r.fiber||''))}</div></td><td>${+r.bought_balls}</td><td><b>${+r.left_balls}</b></td><td><span class="chip ${r.read_status==='done'?'g':r.read_status==='failed'?'r':''}">${st[r.read_status]||''}</span></td><td>${r.band_photo?`<a href="#" data-p="${esc(r.band_photo)}" onclick="showBand(this.dataset.p);return false">사진</a>`:''}</td><td class="muted">${fmtd(r.created_at)}</td></tr>`).join('')||'<tr><td colspan="9" class="muted">아직 없어요</td></tr>'}</table>
+  <p class="muted">읽기 실패가 많으면 Supabase › Edge Functions › Secrets 의 AI 키(ANTHROPIC_API_KEY 또는 OPENROUTER_API_KEY)를 확인하세요.</p>`;
+};
+async function showBand(path){ const {data,error}=await sb.storage.from('bands').createSignedUrl(path, 600); if(error) return toast(error.message); window.open(data.signedUrl,'_blank','noopener'); }
 // ===== 실 사전(표준화) =====
 // 회원이 작품 인증에 적은 실 이름은 yarn_entries(원문)로 쌓이고, 이름이 같은(정규화 키가 같은) 것끼리 yarn_catalog 한 줄로 묶인다.
 // 여기서 할 일: ① 같은 실인데 따로 잡힌 후보를 합치기 ② 브랜드·제품명·규격을 확인해 '확정' ③ 호환 실 확인
