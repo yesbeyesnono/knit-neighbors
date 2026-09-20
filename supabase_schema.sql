@@ -1040,3 +1040,19 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   yarn_suggest(p_q): 회원들이 적은 실 이름 자동완성 + 가장 흔한 1볼 중량·길이·굵기·소재(집계값만 반환)
 --   앱: 굵기는 고르게 하지 않고 1볼 중량(g)·길이(m) → 100g당 길이로 추정(600↑레이스·극세 / 350↑합세 / 250↑중세 / 200↑합태 / 120↑병태 / 60↑극태 / 그 아래 초극태), 길이를 모르면 바늘 mm로 추정, 직접 고르기도 가능
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 34. 실 빅데이터·표준화 — 2026-09-20 (마이그레이션 yarn_catalog_entries, yarn_catalog_functions)
+--   목표: 회원이 적는 실 정보를 전부 쌓고(원문), 같은 실끼리 묶어(표준 사전), 나중에 "이 실 대신 쓸 수 있는 다른 브랜드 실"을 자동 추천
+--   yarn_norm(text): 소문자·공백/기호 제거·'3합/4ply/40g' 꼬리 제거 → 매칭 키
+--   yarn_catalog(brand, product, aliases[], norm_keys[], ball_g, ball_m, m_per_100g(생성 컬럼), weight_class, fiber_main, fibers{소재:%}, status auto|verified, merged_into, uses)
+--     RLS: authenticated 읽기만. 쓰기는 함수로만
+--   yarn_entries(catalog_id, work_id(set null), raw_name, norm_name, color, amount, unit, ball_g, ball_m, weight, fiber, fibers, rating(-1/0/1), rating_reason,
+--                needles, gauge, techniques, craft, item_type, maker_level): **회원 식별자 없음** — 작품·계정이 지워져도 남는 익명 로그. 관리자만 조회
+--   works.item_type(작품 종류, 앱에서 필수) 추가. works.yarns 원소에 rating/rating_reason/fibers 추가
+--   yarn_log_entry(...): create_work 가 실마다 호출 — 키로 사전 매칭(합쳐진 실이면 대표 실로), 없으면 후보(auto) 생성, 로그 1건, 후보 상태면 규격·굵기·소재를 회원 입력 최빈값으로 갱신. 직접 호출 불가
+--   yarn_suggest(q): 사전(별칭 포함)에서 자동완성 — 표준 이름·규격·혼용률·확정 여부
+--   yarn_similar(p_catalog | p_name, limit): 호환 실 = 100g당 길이 ±15%, 같은 소재 우선, 차이%·사용 수·만족도 수 반환 (앱에서는 아직 FULL 전용 화면)
+--   admin_yarn_update(jsonb)(브랜드·제품명·별칭·규격·확정) / admin_yarn_merge(from, into)(같은 실 합치기: 로그·별칭 이동) — admin_logs yarn_update/yarn_merge
+--   관리자 콘솔 › 실 사전(표준화): 새 실 후보/확정 목록, 합치기, 호환 실·회원 입력 원문 보기
+-- ---------------------------------------------------------------

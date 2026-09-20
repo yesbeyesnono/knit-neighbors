@@ -99,6 +99,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#ai-path" data-v="ai-path">학습 경로</a>
     <a href="#ai-qa" data-v="ai-qa">질문·해결 답글</a>
     <a href="#ai-yarn" data-v="ai-yarn">실·바늘 통계</a>
+    <a href="#yarns" data-v="yarns">실 사전 (표준화)</a>
     <a href="#export" data-v="export">내보내기</a>
     <div class="grp">시스템</div>
     <a href="#logs" data-v="logs">관리자 로그</a>
@@ -512,6 +513,49 @@ VIEWS.authors = async()=>{
 };
 async function decideAuthor(id, ok){ let reason=null; if(!ok){ reason=prompt('반려 사유 (신청자에게 전달돼요)'); if(reason===null) return; } else if(!confirm('작가로 승인할까요?')) return; const {error}=await sb.rpc('admin_decide_author',{p_id:id,p_approve:ok,p_reason:reason}); if(error) return toast(error.message); toast(ok?'승인했어요':'반려했어요'); route(); }
 async function setAuthor(id, on){ if(!confirm(on?'작가로 지정할까요?':'작가 자격을 해제할까요? 등록한 도안은 남아 있어요(필요하면 도안 메뉴에서 숨김).')) return; const {error}=await sb.rpc('admin_set_author',{p_profile:id,p_on:on}); if(error) return toast(error.message); toast('처리했어요'); route(); }
+// ===== 실 사전(표준화) =====
+// 회원이 작품 인증에 적은 실 이름은 yarn_entries(원문)로 쌓이고, 이름이 같은(정규화 키가 같은) 것끼리 yarn_catalog 한 줄로 묶인다.
+// 여기서 할 일: ① 같은 실인데 따로 잡힌 후보를 합치기 ② 브랜드·제품명·규격을 확인해 '확정' ③ 호환 실 확인
+let YARNS=[];
+VIEWS.yarns = async()=>{
+  const {data}=await sb.from('yarn_catalog').select('*').is('merged_into', null).order('status').order('uses',{ascending:false}).limit(1000);
+  YARNS=data||[];
+  const cand=YARNS.filter(y=>y.status==='auto'), ok=YARNS.filter(y=>y.status==='verified');
+  const row=y=>`<tr class="clk" onclick="openYarnForm('${y.id}')"><td><b>${esc((y.brand?y.brand+' ':'')+y.product)}</b><div class="muted">${esc((y.aliases||[]).filter(a=>a!==y.product).slice(0,4).join(' · '))}</div></td><td>${y.ball_g||'–'}g · ${y.ball_m||'–'}m</td><td>${y.m_per_100g?y.m_per_100g+'m':'<span class="chip r">규격 없음</span>'}</td><td>${esc(y.weight_class||'')}</td><td>${esc(y.fibers?Object.entries(y.fibers).map(([k,v])=>k+' '+v).join(', '):(y.fiber_main||''))}</td><td>${y.uses}</td></tr>`;
+  $('#main').innerHTML=`<h1>실 사전 <small>회원 입력을 표준 실로 묶는 곳 · 확정 ${ok.length} · 후보 ${cand.length}</small></h1>
+  <div class="row"><button class="p" onclick="openYarnForm()">실 직접 추가</button><input id="yQ" placeholder="이름으로 찾기" oninput="filterYarns(this.value)" style="flex:1;max-width:320px"></div>
+  <h2>새 실 후보 <small class="muted">회원 입력으로 자동 생성됨 — 같은 실이면 합치고, 맞으면 확정</small></h2>
+  <table id="yCand"><tr><th>이름 · 별칭</th><th>1볼</th><th>100g당</th><th>굵기</th><th>소재</th><th>사용</th></tr>${cand.map(row).join('')||'<tr><td colspan="6" class="muted">없음</td></tr>'}</table>
+  <h2>확정된 실</h2>
+  <table id="yOk"><tr><th>이름 · 별칭</th><th>1볼</th><th>100g당</th><th>굵기</th><th>소재</th><th>사용</th></tr>${ok.map(row).join('')||'<tr><td colspan="6" class="muted">없음</td></tr>'}</table>
+  <p class="muted">규격(1볼 중량·길이)이 있어야 호환 실 추천에 쓰입니다. 후보 상태에서는 회원 입력의 최빈값이 자동으로 들어가고, 확정하면 값이 고정됩니다.</p>`;
+};
+function filterYarns(q){ q=q.trim().toLowerCase(); document.querySelectorAll('#yCand tr.clk, #yOk tr.clk').forEach(tr=>{ tr.style.display = !q || tr.textContent.toLowerCase().includes(q) ? '' : 'none'; }); }
+async function openYarnForm(id){
+  const y = id ? YARNS.find(v=>v.id===id) : {aliases:[],status:'verified'};
+  let entries=[], sim=[];
+  if(id){ const r=await sb.from('yarn_entries').select('raw_name,color,ball_g,ball_m,weight,fiber,rating,rating_reason,needles,item_type,created_at').eq('catalog_id',id).order('created_at',{ascending:false}).limit(30); entries=r.data||[];
+    const r2=await sb.rpc('yarn_similar',{p_catalog:id,p_limit:6}); sim=r2.data||[]; }
+  const W=['레이스·극세','합세(Fingering)','중세(Sport)','합태(DK)','병태(Worsted)','극태(Bulky)','초극태'];
+  openPanel(`<h2 style="margin-top:0">${id?'실 정보':'실 추가'}</h2>
+    <div class="row"><input id="yBrand" placeholder="브랜드 (예: 낙양모사)" value="${esc(y.brand||'')}" style="flex:1"><input id="yProduct" placeholder="제품명 (예: 꽁뜨)" value="${esc(y.product||'')}" style="flex:1"></div>
+    <input id="yAliases" placeholder="별칭 (쉼표로 구분 — 회원들이 적는 다른 표기)" value="${esc((y.aliases||[]).join(', '))}" style="width:100%;margin:6px 0">
+    <div class="row"><input id="yG" type="number" placeholder="1볼 중량 g" value="${y.ball_g??''}" style="width:130px"><input id="yM" type="number" placeholder="1볼 길이 m" value="${y.ball_m??''}" style="width:130px"><select id="yW"><option value="">굵기</option>${W.map(w=>`<option ${y.weight_class===w?'selected':''}>${w}</option>`).join('')}</select></div>
+    <div class="row"><input id="yFiber" placeholder="주 소재 (예: 면)" value="${esc(y.fiber_main||'')}" style="width:160px"><input id="yMix" placeholder="혼용률 (예: 울 80, 나일론 20)" value="${esc(y.fibers?Object.entries(y.fibers).map(([k,v])=>k+' '+v).join(', '):'')}" style="flex:1"></div>
+    <div class="row"><button class="p" onclick="saveYarn('${id||''}','verified')">확정으로 저장</button>${id?`<button onclick="saveYarn('${id}','auto')">후보로 두고 저장</button>`:''}</div>
+    ${id?`<h2>같은 실로 합치기</h2><div class="row"><input id="yMergeQ" placeholder="합칠 대상(남길 실) 이름 검색" style="flex:1" oninput="yarnMergePick(this.value,'${id}')"></div><div id="yMergeRes" class="muted">이 실의 기록·별칭을 고른 실로 옮깁니다.</div>
+    <h2>호환 실 <small class="muted">100g당 길이 ±15%</small></h2>${sim.map(r=>`<div>${esc(r.name)} <span class="muted">${r.m_per_100g}m/100g · 차이 ${r.diff_pct}%${r.same_fiber?' · 같은 소재':''} · 사용 ${r.uses}</span></div>`).join('')||'<div class="muted">규격이 비슷한 실이 아직 없어요</div>'}
+    <h2>회원 입력 원문 ${entries.length}</h2>${entries.map(e=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><b>${esc(e.raw_name)}</b> <span class="muted">${[e.color, e.ball_g&&e.ball_m?`${e.ball_g}g·${e.ball_m}m`:'', e.weight, e.fiber, e.item_type, (e.needles||[]).map(n=>n.size).join('/'), e.rating===1?'또 쓸래요':e.rating===-1?'비추':'', e.rating_reason, fmt(e.created_at)].filter(Boolean).map(esc).join(' · ')}</span></div>`).join('')||'<div class="muted">없음</div>'}`:''}`);
+}
+function yarnMergePick(q, fromId){ q=q.trim().toLowerCase(); const list=!q?[]:YARNS.filter(v=>v.id!==fromId && ((v.brand||'')+' '+v.product+' '+(v.aliases||[]).join(' ')).toLowerCase().includes(q)).slice(0,8);
+  $('#yMergeRes').innerHTML = list.map(v=>`<button onclick="mergeYarn('${fromId}','${v.id}',this.textContent)">${esc((v.brand?v.brand+' ':'')+v.product)}</button>`).join(' ') || '<span class="muted">없음</span>'; }
+async function mergeYarn(from, into, name){ if(!confirm('이 실을 「'+name+'」(으)로 합칠까요? 기록과 별칭이 모두 옮겨집니다.')) return; const {error}=await sb.rpc('admin_yarn_merge',{p_from:from,p_into:into}); if(error) return toast(error.message); toast('합쳤어요'); closePanel(); route(); }
+async function saveYarn(id, status){
+  const mix={}; $('#yMix').value.split(/[,/·]+/).forEach(x=>{ const m=/^\s*([^\d%]+?)\s*(\d{1,3})\s*%?\s*$/.exec(x); if(m) mix[m[1].trim()]=+m[2]; });
+  const p={ brand:$('#yBrand').value.trim(), product:$('#yProduct').value.trim(), aliases:$('#yAliases').value.split(',').map(v=>v.trim()).filter(Boolean), ball_g:$('#yG').value, ball_m:$('#yM').value, weight_class:$('#yW').value, fiber_main:$('#yFiber').value.trim(), fibers:Object.keys(mix).length?mix:null, status };
+  if(!p.product) return toast('제품명을 입력하세요'); if(!p.aliases.length) p.aliases=[p.product]; if(id) p.id=id;
+  const {error}=await sb.rpc('admin_yarn_update',{p}); if(error) return toast(error.message); toast('저장했어요'); closePanel(); route();
+}
 // ===== 도안 =====
 let PTECH=[], ptSel=new Set();
 const CRAFT_KO={crochet:'코바늘',knitting:'대바늘'};
@@ -570,7 +614,7 @@ async function decideClaim(id, ok, docPath){
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

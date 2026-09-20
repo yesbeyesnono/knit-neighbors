@@ -25,7 +25,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~33, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~34, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`). main 푸시 → GitHub 웹훅(id 679395520) → `ios-public` 자동 빌드 → TestFlight 'KOAP'(V2). Lab은 `lab-*` 태그. 자세한 내용은 위 '에디션' 절
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
@@ -47,6 +47,12 @@
 - 도안 추천: `recommend_patterns`(내 단계~+1, 새 기법 1~2개 우선). 피드 6번째 글 뒤·작품 인증 직후·내 단계 화면·설정 › 찜한 도안. 결제는 외부 링크만(앱 내 결제 없음). **등록된 도안이 없으면 카드가 안 보임** — 관리자 콘솔 › 도안에서 등록
 - 작가: 작품 인증 3개 이상 → 설정 › 작가 신청 → 콘솔 › 작가 신청 승인 → ＋ › 도안 / 설정 › 내 도안. 지도 작가 핀 색 #8a6d1a(2026-09-18 대표 확정), 인증 3개 기준 확정
 - **데모 도안 14개**(표지 그림 `docs/patterns/demo-*.svg`, 작가: demo2 코바늘요정·demo3 킨텍스뜨개·지기, 판매 링크 없음). 출시 전 삭제: `delete from patterns where photos[1] like '%/patterns/demo-%'` + `docs/patterns/demo-*.svg` 제거
+
+## 실 빅데이터·표준화 (2026-09-20 대표 지시)
+- 목표: 회원이 작품 인증에 적는 실 정보를 **전부 원문으로 쌓고**(yarn_entries, 익명) **표준 실 사전**(yarn_catalog)으로 묶어, 나중에 "낙양모사 꽁뜨로 만든 도안 → 호환되는 다른 브랜드 실 자동 추천"까지 간다
+- 수집은 V2 공개 앱에서도 한다(작품 종류 필수, 실 카드: 이름·색·사용량·1볼 중량/길이·소재·혼용률·만족도). 굵기는 100g당 길이로 자동 추정. **추천 화면은 아직 Lab(FULL) 전용**(작품 카드 › 실 이름 › 대신 쓸 수 있는 실)
+- 운영: 관리자 콘솔 › 실 사전(표준화)에서 새 실 후보를 합치고(별칭) 브랜드·규격을 확정. 규격(1볼 g·m)이 있어야 호환 추천에 쓰임. 가격·판매처는 아직 수집 안 함(추후 파트너 가게 연동)
+- 다음 단계 후보: 도안(patterns)에 표준 실 연결 → 도안 상세에서 호환 실 자동 표시, 색 번호 표준화, 실 상세 페이지
 
 ## 유료 도안·정산 방향 (2026-09-19 대표 확정)
 - 회사가 판매자(작가는 이용허락), 작가 정산 = 판매가 − Apple 수수료 − 플랫폼 15% → **3.3% 원천징수** 후 지급. 가격은 **티어 중 선택**(IAP 티어 상품). 순서: ① knitup 뷰어 연동(완료) → ② IAP 티어·구매 내역·환불 → ③ 작가 정산 정보·월 정산 → ④ 통신판매업·약관

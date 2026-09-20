@@ -778,7 +778,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
             <div class="tchips" id="wCustomChips"></div>
             <span class="hint" style="font-size:.78rem;color:var(--ink3)">기본 목록은 60종이에요. 여기 적어 주신 기법은 모아서 목록에 추가할게요.</span>
           </div>
-          <div class="mtitle" style="font-size:.85rem;color:var(--ink2)">실·바늘 <span class="muted">(선택)</span></div>
+          <label class="f">작품 종류<select id="wItem"><option value="">선택</option><option>소품·키링</option><option>인형</option><option>가방·파우치</option><option>모자</option><option>목도리·숄</option><option>의류</option><option>블랭킷·쿠션</option><option>수세미·코스터</option><option>기타</option></select></label>
+          <div class="mtitle" style="font-size:.85rem;color:var(--ink2)">실·바늘 <span class="muted">(선택 · 적어 주신 정보는 실 사전과 추천을 만드는 데 쓰여요)</span></div>
           <div id="wYarnsBox"></div>
           <div class="yadd"><button type="button" onclick="wyAdd(true)">＋ 같은 실, 다른 색</button><button type="button" onclick="wyAdd(false)">＋ 실 추가</button></div>
           <div id="wNeedlesBox"></div>
@@ -2067,9 +2068,10 @@ const NEEDLES = {
 };
 NEEDLES['줄바늘'] = ['2.0mm','2.5mm','3.0mm','3.5mm','4.0mm','4.5mm','5.0mm','5.5mm','6.0mm','7mm','8mm','9mm','10mm','12mm'];
 let wYarns=[], wNeedles=[], yarnSug={}, yarnSugTimer=null;
-function wyBlank(){ return { name:'', color:'', amount:'', unit:'볼', ball_g:'', ball_m:'', weight:'', weightManual:false, fiber:'' }; }
+function wyBlank(){ return { name:'', color:'', amount:'', unit:'볼', ball_g:'', ball_m:'', weight:'', weightManual:false, fiber:'', rating:'', rating_reason:'', mix:'' }; }
+function parseMix(t){ const o={}; (t||'').split(/[,/·]+/).forEach(x=>{ const m=/^\s*([^\d%]+?)\s*(\d{1,3})\s*%?\s*$/.exec(x); if(m && +m[2]<=100) o[m[1].trim().slice(0,12)]=+m[2]; }); return Object.keys(o).length?o:null; }
 function wDefaultNeedleType(){ const ids=[...wTechSel]; const k=ids.filter(x=>x[0]==='K').length, c=ids.filter(x=>x[0]==='C').length; if(k>c) return '대바늘'; if(c>k) return '코바늘'; return (myProfile?.craft==='knit')?'대바늘':'코바늘'; }
-function wyReset(){ wYarns=[wyBlank()]; wNeedles=[{type:wDefaultNeedleType(), size:'', custom:false}]; renderWYarns(); renderWNeedles(); const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=''; if(z) z.value=''; const m=$('#wMore'); if(m) m.hidden=true; }
+function wyReset(){ const it=$('#wItem'); if(it) it.value=''; wYarns=[wyBlank()]; wNeedles=[{type:wDefaultNeedleType(), size:'', custom:false}]; renderWYarns(); renderWNeedles(); const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=''; if(z) z.value=''; const m=$('#wMore'); if(m) m.hidden=true; }
 function needleMm(sz){ const m=/([0-9.]+)\s*mm/.exec(sz||''); return m?+m[1]:null; }
 function yarnWeightGuess(y){
   const g=+y.ball_g, m=+y.ball_m;
@@ -2099,17 +2101,20 @@ function renderWYarns(){
     <div class="row3"><label>1볼 중량 (g)<input inputmode="decimal" maxlength="6" placeholder="예: 40" value="${esc(y.ball_g)}" oninput="wySet(${i},'ball_g',this.value);wyHintAll()"></label>
       <label>1볼 길이 (m)<input inputmode="decimal" maxlength="6" placeholder="예: 110" value="${esc(y.ball_m)}" oninput="wySet(${i},'ball_m',this.value);wyHintAll()"></label>
       <label>굵기<select id="wyw-${i}" onchange="wyWeightManual(${i},this.value)"><option value="">자동</option>${YW_NAMES.map(n=>`<option ${y.weight===n?'selected':''}>${n}</option>`).join('')}</select></label></div>
-    <div class="yhint" id="wyh-${i}"></div></div>`).join('');
+    <div class="yhint" id="wyh-${i}"></div>
+    <div class="row3"><label>이 실 어땠나요?<select onchange="wySet(${i},'rating',this.value)"><option value="">선택</option><option value="1" ${y.rating==='1'?'selected':''}>또 쓸래요</option><option value="0" ${y.rating==='0'?'selected':''}>보통</option><option value="-1" ${y.rating==='-1'?'selected':''}>비추</option></select></label>
+      <label>이유<select onchange="wySet(${i},'rating_reason',this.value)"><option value="">선택</option>${['부드러움','갈라짐','보풀','색감','가성비','뜨기 편함','뻣뻣함'].map(f=>`<option ${y.rating_reason===f?'selected':''}>${f}</option>`).join('')}</select></label>
+      <label>혼용률<input maxlength="40" placeholder="예: 울 80, 나일론 20" value="${esc(y.mix||'')}" oninput="wySet(${i},'mix',this.value)"></label></div></div>`).join('');
   wyHintAll();
 }
 function wyHintAll(){ wYarns.forEach((_,i)=>wyHint(i)); }
 function wySet(i,k,v){ if(!wYarns[i]) return; wYarns[i][k]=v; if(k==='name') yarnSuggest(v); }
 function wyWeightManual(i,v){ const y=wYarns[i]; y.weightManual=!!v; y.weight=v; wyHint(i); }
-function wyAdd(sameYarn){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]||wyBlank(); const y=wyBlank(); if(sameYarn){ Object.assign(y,{name:last.name, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit}); } wYarns.push(y); renderWYarns(); }
+function wyAdd(sameYarn){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]||wyBlank(); const y=wyBlank(); if(sameYarn){ Object.assign(y,{name:last.name, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix}); } wYarns.push(y); renderWYarns(); }
 function wyDel(i){ wYarns.splice(i,1); if(!wYarns.length) wYarns=[wyBlank()]; renderWYarns(); }
-function yarnSuggest(q){ clearTimeout(yarnSugTimer); q=(q||'').trim(); if(q.length<1) return; yarnSugTimer=setTimeout(async()=>{ const { data } = await sb.rpc('yarn_suggest', { p_q:q }); (data||[]).forEach(r=>yarnSug[r.name]=r); const dl=$('#yarnDL'); if(dl) dl.innerHTML=(data||[]).map(r=>`<option value="${esc(r.name)}">${r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:''}</option>`).join(''); }, 250); }
+function yarnSuggest(q){ clearTimeout(yarnSugTimer); q=(q||'').trim(); if(q.length<1) return; yarnSugTimer=setTimeout(async()=>{ const { data } = await sb.rpc('yarn_suggest', { p_q:q }); (data||[]).forEach(r=>yarnSug[r.name]=r); const dl=$('#yarnDL'); if(dl) dl.innerHTML=(data||[]).map(r=>`<option value="${esc(r.name)}">${[r.verified?'확인된 실':'', r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.weight||''].filter(Boolean).join(' · ')}</option>`).join(''); }, 250); }
 function wyPickName(i){ const y=wYarns[i], r=yarnSug[(y.name||'').trim()]; if(!r) return; let ch=false;   // 다른 회원이 적어 둔 규격으로 빈칸 채우기
-  if(!y.ball_g && r.ball_g){ y.ball_g=String(r.ball_g); ch=true; } if(!y.ball_m && r.ball_m){ y.ball_m=String(r.ball_m); ch=true; } if(!y.fiber && r.fiber){ y.fiber=r.fiber; ch=true; }
+  if(!y.ball_g && r.ball_g){ y.ball_g=String(r.ball_g); ch=true; } if(!y.ball_m && r.ball_m){ y.ball_m=String(r.ball_m); ch=true; } if(!y.fiber && r.fiber){ y.fiber=r.fiber; ch=true; } if(!y.mix && r.fibers){ y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '); ch=true; }
   if(ch){ renderWYarns(); toast('다른 분이 적어 둔 실 규격을 채웠어요. 다르면 고쳐 주세요'); } }
 function renderWNeedles(){
   const box=$('#wNeedlesBox'); if(!box) return;
@@ -2122,20 +2127,26 @@ function wnSize(i,v){ const n=wNeedles[i]; if(v==='__custom'){ n.custom=true; n.
 function wnAdd(){ if(wNeedles.length>=4) return toast('바늘은 4개까지 적을 수 있어요'); wNeedles.push({type:wNeedles[wNeedles.length-1]?.type||wDefaultNeedleType(), size:'', custom:false}); renderWNeedles(); }
 function wnDel(i){ wNeedles.splice(i,1); renderWNeedles(); wyHintAll(); }
 function wYarnPayload(){
-  const ys=wYarns.map(y=>({ name:(y.name||'').trim(), color:(y.color||'').trim(), amount:String(y.amount||'').trim(), unit:y.unit, ball_g:String(y.ball_g||'').trim(), ball_m:String(y.ball_m||'').trim(), weight:y.weight||'', fiber:y.fiber||'' })).filter(y=>y.name);
+  const ys=wYarns.map(y=>({ name:(y.name||'').trim(), color:(y.color||'').trim(), amount:String(y.amount||'').trim(), unit:y.unit, ball_g:String(y.ball_g||'').trim(), ball_m:String(y.ball_m||'').trim(), weight:y.weight||'', fiber:y.fiber||'', rating:y.rating||'', rating_reason:y.rating_reason||'', fibers:parseMix(y.mix) })).filter(y=>y.name);
   const ns=wNeedles.filter(n=>(n.size||'').trim()).map(n=>({ type:n.type, size:n.size.trim() }));
   const y0=ys[0], n0=ns[0];
   const needleTxt = n0 ? `${n0.type} ${n0.size}` : '';
   const line = [ y0 ? y0.name+(y0.color?`(${y0.color})`:'')+(ys.length>1?` 외 ${ys.length-1}종`:'') : '', y0?.weight||'', needleTxt+(ns.length>1?` 외 ${ns.length-1}`:'') ].filter(Boolean).join(' · ');
-  return { line: line||null, meta:{ name:y0?.name||null, weight:y0?.weight||null, needle:needleTxt||null, yarns:ys, needles:ns, gauge:$('#wGauge').value.trim()||null, size:$('#wSize').value.trim()||null } };
+  return { line: line||null, meta:{ name:y0?.name||null, weight:y0?.weight||null, needle:needleTxt||null, yarns:ys, needles:ns, gauge:$('#wGauge').value.trim()||null, size:$('#wSize').value.trim()||null, item_type:$('#wItem').value||null } };
 }
 function workCard(w){
   if(!w) return '';
   return `<div class="wcard"><div class="wh">${ico('cert')} 작품 인증</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}${workYarnDetail(w)}<div class="tchips">${(w.techniques||[]).map(id=>`<span>${esc(techName(id))}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="custom">${esc(t)}</span>`).join('')}</div></div>`;
 }
+async function openYarnSimilar(name){
+  const { data, error } = await sb.rpc('yarn_similar', { p_name:name, p_limit:8 });
+  if(error) return toast(error.message);
+  openSheet(`<b style="font-size:1.05rem">「${esc(name)}」 대신 쓸 수 있는 실</b><p class="muted" style="margin:0;font-size:.85rem">100g당 길이가 15% 안쪽으로 비슷한 실이에요. 같은 소재가 먼저 나와요. 게이지는 꼭 스와치로 확인해 주세요.</p>
+    <div class="patlist">${(data||[]).length?data.map(r=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><b>${esc(r.name)}</b>${r.same_fiber?' <span class="chip">같은 소재</span>':''}<div class="muted" style="font-size:.85rem">${[r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', `100g당 ${r.m_per_100g}m (차이 ${r.diff_pct}%)`, r.weight||'', r.fiber||'', `사용 ${r.uses}회`, r.liked?`또 쓸래요 ${r.liked}`:''].filter(Boolean).join(' · ')}</div></div>`).join(''):'<div class="empty">아직 비교할 만큼 실 정보가 모이지 않았어요</div>'}</div>`);
+}
 function workYarnDetail(w){
   const ys=w.yarns||[], ns=w.needles||[]; if(ys.length<2 && ns.length<2 && !w.gauge && !w.finished_size && !(ys[0]&&(ys[0].amount||ys[0].ball_g))) return '';
-  const yl=ys.map(y=>`<div>· ${esc(y.name)}${y.color?` <span class="muted">${esc(y.color)}</span>`:''}${y.amount?` · ${y.amount}${esc(y.unit||'')}`:''}${y.ball_g&&y.ball_m?` <span class="muted">(${y.ball_g}g·${y.ball_m}m)</span>`:''}${y.weight?` · ${esc(y.weight)}`:''}</div>`).join('');
+  const yl=ys.map(y=>`<div>· ${FULL?`<a href="#" data-n="${esc(y.name)}" onclick="event.stopPropagation();openYarnSimilar(this.dataset.n);return false" style="color:inherit;text-decoration:underline">${esc(y.name)}</a>`:esc(y.name)}${y.color?` <span class="muted">${esc(y.color)}</span>`:''}${y.amount?` · ${y.amount}${esc(y.unit||'')}`:''}${y.ball_g&&y.ball_m?` <span class="muted">(${y.ball_g}g·${y.ball_m}m)</span>`:''}${y.weight?` · ${esc(y.weight)}`:''}</div>`).join('');
   const nl=ns.length?`<div>· 바늘 ${ns.map(n=>esc((n.type?n.type+' ':'')+n.size)).join(', ')}</div>`:'';
   const ex=[w.gauge&&`게이지 ${esc(w.gauge)}`, w.finished_size&&`완성 ${esc(w.finished_size)}`].filter(Boolean).join(' · ');
   return `<details class="wyd" onclick="event.stopPropagation()"><summary>실·바늘 자세히</summary><div class="ml" style="line-height:1.6">${yl}${nl}${ex?`<div>· ${ex}</div>`:''}</div></details>`;
@@ -2454,6 +2465,7 @@ async function submitCompose(){
       const title=$('#wTitle').value.trim(); if(!title) throw new Error('작품 이름을 적어 주세요');
       commitWCustom();
       if(!wTechSel.size && !wCustom.length) throw new Error('사용한 기법을 하나 이상 골라 주세요');
+      if(!$('#wItem').value) throw new Error('작품 종류를 골라 주세요');
       if(!sPhotos.length) throw new Error('작품 사진을 1장 이상 올려 주세요');
       const photos = await uploadPhotos(sPhotos);
       const yp = wYarnPayload();
