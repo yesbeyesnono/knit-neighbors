@@ -34,8 +34,8 @@
 ## 작업지시서 2026-09-20 (`resources/mockups/` — 시안 13장, 앱에 포함하지 말 것)
 - Phase 1(완료): ＋ → 선택 팝업(`openPlusSheet`) · 작품 인증 새 페이지 `v-cert`(`openCert`/`submitCert`, 필수 3가지: 사진·이름·기법, 작품 종류는 칩·선택) · 모임 만들기 새 페이지 `v-meetform`(`openMeetForm`/`submitMeet`) · 보조 화면 `#subpg`(`openSub`: 기법 고르기·실 고르기·색/사용량·장소 검색) · 채팅 목록/방의 모임 표식과 [모임 정보] 시트. `v-compose`는 글·모임 후기·가게 소식 전용. `openCompose('work'|'meetup')`은 새 페이지로 넘김. 채팅방에서 모임 만들기는 삭제(대표 확정)
 - 실 입력: `<datalist>` 금지(iOS WebView 불안정) → `openYarnPick`(yarn_suggest 직접 그린 목록 · 최근 쓴 실 · 이웃이 많이 쓴 실 · 직접 입력) → `ydOpen`(색상칩 5열 = 색 계열 대표색 `FAMHEX`, 사용량 0.5볼/10g 단위 + 직접 입력). 저장 형식은 그대로(works.yarns, amount 는 numeric)
-- 장소 검색: `openPlaceSearch(k)` 입력 즉시(300ms) → Edge Function `place-search`(카카오 로컬, 시크릿 `KAKAO_REST_KEY`) → 키 없거나 실패 시 `geocodePlace()`. 현재 위치 근처·지도에서 핀 찍기. 모임 위치 수정도 같은 검색. **권장 단계는 시안의 'Lv.' 대신 기존 'N단계' 표기 유지**(Lv.는 활동 레벨이라 헷갈림)
-- Phase 2(내 실함·볼밴드 AI 읽기) · Phase 3(지기 AI·텔레그램)은 대표 확인 후 진행. 필요한 시크릿: ANTHROPIC_API_KEY, KAKAO_REST_KEY, TG_BOT_TOKEN, TG_WEBHOOK_SECRET, TG_ADMIN_CHAT_ID
+- 장소 검색: `openPlaceSearch(k)` 입력 즉시(300ms) → `geocodePlace()`(Google 지오코더 → OSM). 현재 위치에서 찾기·지도에서 핀 찍기. **카카오(검색·지도)는 반영하지 않는다(2026-09-20 대표 지시)** — 작업지시서의 카카오 로컬 검색·`KAKAO_REST_KEY`는 폐기. 모임 위치 수정도 같은 검색. **권장 단계는 시안의 'Lv.' 대신 기존 'N단계' 표기 유지**(Lv.는 활동 레벨이라 헷갈림)
+- Phase 2(내 실함·볼밴드 AI 읽기) · Phase 3(지기 AI·텔레그램)은 대표 확인 후 진행. 필요한 시크릿: ANTHROPIC_API_KEY, TG_BOT_TOKEN, TG_WEBHOOK_SECRET, TG_ADMIN_CHAT_ID
 
 ## 백엔드 (Supabase)
 - 프로젝트 `thfcrodfaitzrzlrxyir` (Pro, 서울). publishable key는 index.html/admin.html에 있음.

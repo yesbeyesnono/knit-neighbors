@@ -1105,6 +1105,6 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 -- ---------------------------------------------------------------
 -- 40. 서버 함수 호출 제한 (마이그레이션 api_rate_limit) — 2026-09-20 작업지시서 Phase 1
 --   api_rate(profile_id, key, win, n): RLS + grant 없음. rate_hit(p_key, p_limit, p_window_sec=60) → boolean (authenticated)
---   Edge Function `place-search`(supabase/functions/place-search): 카카오 로컬 키워드 검색. 시크릿 KAKAO_REST_KEY 없으면 {fallback:true} → 앱이 geocodePlace() 사용. verify_jwt + 1인 분당 40회
+--   (Edge Function place-search 는 카카오 검색용으로 만들었다가 2026-09-20 대표 지시로 폐기 — 앱은 호출하지 않음, 배포본은 빈 응답만. rate_hit 은 Phase 2·3 서버 함수에서 사용)
 --   참고: 작업지시서의 yarn_entries.amount_num 은 만들지 않음 — 기존 amount 가 이미 numeric 이라 1.5볼이 그대로 저장됨
 -- ---------------------------------------------------------------

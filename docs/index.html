@@ -1983,7 +1983,7 @@ function openMeetInfo(){
     <div class="mirow">${SVG_CAL}<div>${esc(fmtWhen(m.starts_at))}${m.duration_min?' · '+durTxt(m.duration_min):''}<span>${MREPEAT[m.repeat]||'한 번'}</span></div></div>
     <div class="mirow">${ico('location')}<div>${esc(m.place_name)}${m.address?`<span>${esc(m.address)}</span>`:''}</div></div>
     <div class="mirow">${ico('group')}<div>${m.participant_count||0}명 참여${m.capacity?` · 정원 ${m.capacity}명`:''}${m.fee||m.bring?`<span>${esc([m.fee?'참가비 '+m.fee:'', m.bring?'준비물 '+m.bring:''].filter(Boolean).join(' · '))}</span>`:''}</div></div>
-    <div style="display:flex;gap:8px">${g?`<a class="btn o" style="flex:1;text-align:center;text-decoration:none" href="https://map.kakao.com/link/to/${encodeURIComponent(m.place_name)},${g.lat},${g.lng}" target="_blank" rel="noopener">길찾기</a>`:''}<button class="btn o" style="flex:1" onclick="openRoomMembers()">참여자 보기</button></div>
+    <div style="display:flex;gap:8px">${g?`<a class="btn o" style="flex:1;text-align:center;text-decoration:none" href="https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}" target="_blank" rel="noopener">길찾기</a>`:''}<button class="btn o" style="flex:1" onclick="openRoomMembers()">참여자 보기</button></div>
     <button class="btn" onclick="openMeetup('${m.id}')">모임 상세 전체 보기</button>
     ${end?'':host?`<button class="btn r" onclick="askCancelMeetup('${m.id}', ${m.participant_count||1})">모임 취소 (주최자)</button>`:`<button class="btn o" onclick="leaveMeetup('${m.id}')">참여 취소</button>`}`);
 }
@@ -2683,43 +2683,37 @@ async function submitMeet(){
   }catch(e){ toast(e.message); b.disabled=false; }
 }
 
-// ----- 모임 장소 검색: 입력 즉시 결과. 카카오 로컬(Edge Function place-search) → 안 되면 기존 geocodePlace()
-let plKey='m', plRows=[], plTimer=null, plSeq=0, plKakao=true, plMap=null;
+// ----- 모임 장소 검색: 입력 즉시 결과(Google 지오코더 → OpenStreetMap). 카카오는 쓰지 않는다(2026-09-20 대표 지시)
+let plKey='m', plRows=[], plTimer=null, plSeq=0, plMap=null;
 function openPlaceSearch(k){
   plKey=k; plRows=[];
   openSub('모임 장소', `<div style="position:relative;margin-top:8px"><span style="position:absolute;left:12px;top:13px;color:var(--ink3)">${SVG_SEARCH}</span><input id="plQ" maxlength="60" placeholder="장소 이름이나 주소" style="padding-left:38px" autocomplete="off" autocorrect="off" oninput="plInput(this.value)"></div>
     <p class="muted" style="font-size:.82rem;margin:8px 0 0">입력하는 대로 바로 찾아요. 가게 이름·역 이름·도로명 모두 돼요.</p>
     <div class="plist" id="plList"></div>
     <div class="plist" style="margin-top:8px;border-top:8px solid var(--bg2);margin-left:-16px;margin-right:-16px;padding:0 16px">
-      <button type="button" onclick="plNearby()"><div class="pi">${ico('signal')}</div><div><b>현재 위치 근처에서 찾기</b><span>내 주변 카페·공방·공원</span></div></button>
+      <button type="button" onclick="plNearby()"><div class="pi">${ico('signal')}</div><div><b>현재 위치에서 찾기</b><span>지도를 내 위치로 열어 핀을 맞춰요</span></div></button>
       <button type="button" onclick="plPinMode()"><div class="pi">${ico('location')}</div><div><b>지도에서 직접 핀 찍기</b><span>검색에 안 나오는 곳일 때</span></div></button></div>`);
   if(k==='e') subOnBack=()=>{ closeSub(); renderMeetupLocEdit(); };
   setTimeout(()=>$('#plQ')?.focus(), 80);
 }
 function plInput(v){ clearTimeout(plTimer); const q=v.trim(); if(q.length<2){ plRows=[]; $('#plList').innerHTML=''; return; } plTimer=setTimeout(()=>plSearch(q), 300); }
-async function placeQuery(q, opt={}){
-  if(plKakao){
-    try{ const { data, error } = await sb.functions.invoke('place-search', { body:{ q, lat:opt.lat, lng:opt.lng, sort:opt.sort } });
-      if(!error && data && !data.fallback) return data.results||[];
-      if(data?.fallback) plKakao=false;   // 서버에 키가 없음 → 이번 세션은 기존 방식으로
-    }catch(e){}
-  }
+async function placeQuery(q){
   const rs = await geocodePlace(q);
   return rs.map(r=>({ name:q, category:'', addr:(r.addr||'').replace(/^\d{5}\s+/,''), lat:r.lat, lng:r.lng }));
 }
-async function plSearch(q, opt){
+async function plSearch(q){
   const seq=++plSeq; const box=$('#plList'); if(!box) return; if(!plRows.length) box.innerHTML='<div class="muted" style="padding:14px 0">찾는 중…</div>';
-  const c=myProfile?._c; const rows = await placeQuery(q, opt||{ lat:c?.lat, lng:c?.lng });
+  const rows = await placeQuery(q);
   if(seq!==plSeq || !$('#plList')) return; plRows=rows;
   $('#plList').innerHTML = rows.length ? rows.map((r,i)=>`<button type="button" onclick="plChoose(${i})"><div class="pi">${ico('location')}</div><div><b>${esc(r.name)}${r.category?` <span class="muted" style="display:inline;font-weight:400">${esc(r.category)}</span>`:''}</b><span>${esc(r.addr)}</span></div></button>`).join('') : '<div class="muted" style="padding:14px 0">찾지 못했어요. 다른 이름이나 도로명 주소로 찾아보거나, 아래 「지도에서 직접 핀 찍기」를 써 보세요</div>';
 }
-function plNearby(){
+function plNearby(){   // 현재 위치로 지도를 열어 핀을 맞춘다
   if(!navigator.geolocation) return toast('이 기기는 위치를 지원하지 않아요');
   toast('현재 위치를 확인하는 중…');
-  navigator.geolocation.getCurrentPosition(pos=>{ const q=($('#plQ')?.value||'').trim()||'카페'; if(!plKakao) toast('지금은 이름·주소 검색만 돼요'); plSearch(q, { lat:pos.coords.latitude, lng:pos.coords.longitude, sort:'distance' }); }, ()=>toast('위치 권한을 허용해 주세요'), { enableHighAccuracy:true, timeout:8000 });
+  navigator.geolocation.getCurrentPosition(pos=>plPinMode({ lat:pos.coords.latitude, lng:pos.coords.longitude }), ()=>toast('위치 권한을 허용해 주세요'), { enableHighAccuracy:true, timeout:8000 });
 }
-async function plPinMode(){
-  const c = placePick[plKey] || myProfile?._c || {lat:37.5665,lng:126.9780};
+async function plPinMode(at){
+  const c = at || placePick[plKey] || myProfile?._c || {lat:37.5665,lng:126.9780};
   openSub('지도에서 위치 정하기', `<p class="muted" style="font-size:.85rem;margin:8px 0 0">지도를 움직여 핀을 모임 장소에 맞춰 주세요.</p><div class="pickmap"><div class="mm" id="plMapEl"></div><div class="cpin">${SVG_PIN}</div></div><button class="btn" style="width:100%" onclick="plPinDone()">이 위치로 정하기</button>`);
   subOnBack=()=>openPlaceSearch(plKey);
   plMap = await miniMap($('#plMapEl'), c, true);
