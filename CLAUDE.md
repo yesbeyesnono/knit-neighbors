@@ -25,7 +25,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~37, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~39, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`). main 푸시 → GitHub 웹훅(id 679395520) → `ios-public` 자동 빌드 → TestFlight 'KOAP'(V2). Lab은 `lab-*` 태그. 자세한 내용은 위 '에디션' 절
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
@@ -47,6 +47,12 @@
 - 도안 추천: `recommend_patterns`(내 단계~+1, 새 기법 1~2개 우선). 피드 6번째 글 뒤·작품 인증 직후·내 단계 화면·설정 › 찜한 도안. 결제는 외부 링크만(앱 내 결제 없음). **등록된 도안이 없으면 카드가 안 보임** — 관리자 콘솔 › 도안에서 등록
 - 작가: 작품 인증 3개 이상 → 설정 › 작가 신청 → 콘솔 › 작가 신청 승인 → ＋ › 도안 / 설정 › 내 도안. 지도 작가 핀 색 #8a6d1a(2026-09-18 대표 확정), 인증 3개 기준 확정
 - **데모 도안 14개**(표지 그림 `docs/patterns/demo-*.svg`, 작가: demo2 코바늘요정·demo3 킨텍스뜨개·지기, 판매 링크 없음). 출시 전 삭제: `delete from patterns where photos[1] like '%/patterns/demo-%'` + `docs/patterns/demo-*.svg` 제거
+
+## 레벨·이벤트 (2026-09-20 대표 확정)
+- **레벨(Lv.N)** = 작품 인증을 올린 날 수(`profiles.act_level`, 하루 1개만 인정, 서버 계산). '뜨개 단계'(실력)와 별개인 활동량. 닉네임 옆 `lvBadge()`로 표시(글·프로필·설정)
+- **이벤트**: 관리자 콘솔 › 이벤트에서 등록(초대 모임 / 샘플 체험단 / 일반, 최소 레벨, 인원, 선정 방식: 직접(기본)·선착순·추첨, 인증 마감, 배송지 여부, 연결할 실). 처음 '공개'로 저장하면 레벨 되는 회원에게 알림 1회. 앱: 커뮤니티 맨 위 이벤트 줄 → 신청 → 선정 알림 → 배송지 입력 → ＋ › 작품 인증의 '이벤트 인증'으로 연결 → 완료. 레벨 부족이면 "인증 N번 더"로 안내. V2(meet)에도 있음
+- 샘플 체험단 인증에는 **「샘플 제공」 표시가 자동**(표시광고법 — 빼지 말 것). 배송지는 선정자만 입력·운영진만 열람·발송 30일 뒤 자동 삭제(개인정보처리방침에 기재). 파트너 가게가 직접 발송하려면 제3자 제공 동의가 필요 → 지금은 회사가 발송
+- 선정 참고: 신청자 목록에 지난 이벤트 '완료/선정' 수 표시(인증 안 한 회원은 다음 선정에서 후순위)
 
 ## 실 빅데이터·표준화 (2026-09-20 대표 지시)
 - 목표: 회원이 작품 인증에 적는 실 정보를 **전부 원문으로 쌓고**(yarn_entries, 익명) **표준 실 사전**(yarn_catalog)으로 묶어, 나중에 "낙양모사 꽁뜨로 만든 도안 → 호환되는 다른 브랜드 실 자동 추천"까지 간다

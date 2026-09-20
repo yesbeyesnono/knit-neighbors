@@ -1088,3 +1088,16 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     반환에 texture, use_tags, shared_uses, fiber_sim, score, verdict('거의 같은 느낌' / '비슷한 느낌' / '재질은 맞아요 · 굵기 확인 필요' …) 추가
 --   다음 단계: 회원 작품 종류(yarn_entries.item_type)·만족도가 쌓이면 use_tags 를 실제 사용 데이터로 보정
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 38. 활동 레벨(Lv.) — 2026-09-20 대표 지시 (마이그레이션 activity_level)
+--   profiles.act_level = 작품 인증을 올린 **날 수**(한국 시간, 하루 1개만 인정 — 몰아 올리기 방지). works_apply_cert 트리거가 cert_count 와 함께 유지.
+--   서버 계산값: UPDATE grant 없음(위조 불가). 인증을 지우면 내려감. '뜨개 단계'(level_crochet/knit = 실력)와는 별개로 '활동량'
+-- 39. 이벤트 (마이그레이션 events)
+--   events(kind: invite 초대 모임 / sample 샘플 체험단 / general, min_level, capacity, select_mode: admin 직접·first 선착순·lottery 추첨, apply_from~until, cert_due, needs_shipping, catalog_id=연결 실, status draft/open/closed, announced_at)
+--   event_applications(status applied/selected/rejected/cancelled/done, level_at, work_id) · event_shipping(선정자만 입력, 본인·관리자만 열람, 발송 30일 뒤 admin_event_apps 호출 때 자동 삭제)
+--   works.event_id / works.sponsored(샘플 체험단 인증 = '샘플 제공' 표시, 표시광고법) · notifications.event_id + kind event_open/event_selected/event_rejected
+--   회원 RPC: apply_event(레벨·기간·정지 검사, 선착순은 즉시 선정) · cancel_event_application · set_event_shipping(선정자만, 발송 전까지 수정) · link_work_event(p_post, p_event: 작품 인증 직후 앱이 호출 → sponsored 표시 + 신청 done)
+--   관리자 RPC: admin_upsert_event(처음 open 될 때 act_level >= min_level 회원 전원에게 event_open 알림 1회) · admin_decide_event_app · admin_event_lottery · admin_event_mark_shipped · admin_event_apps(지난 이벤트 선정/완료 수 포함)
+--   테이블은 전부 RLS + 쓰기 grant 없음(함수로만 변경)
+-- ---------------------------------------------------------------

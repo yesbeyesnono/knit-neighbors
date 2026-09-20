@@ -99,6 +99,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#ai-path" data-v="ai-path">학습 경로</a>
     <a href="#ai-qa" data-v="ai-qa">질문·해결 답글</a>
     <a href="#ai-yarn" data-v="ai-yarn">실·바늘 통계</a>
+    <a href="#events" data-v="events">이벤트 (레벨 초대·체험단)</a>
     <a href="#yarns" data-v="yarns">실 사전 (표준화)</a>
     <a href="#export" data-v="export">내보내기</a>
     <div class="grp">시스템</div>
@@ -297,7 +298,7 @@ async function openUserPanel(id){
   if(!p) return toast('사용자를 찾을 수 없어요');
   const isAdm=!!(adm&&adm.length);
   openPanel(`<h2 style="margin-top:0">${esc(p.nickname)} ${p.suspended_at?'<span class="chip r">정지 중</span>':''} ${isAdm?'<span class="chip">관리자</span>':''}</h2>
-    <div class="muted">${esc(p.dong_name||'동네 미설정')} · ${lv(p)||'단계 없음'} · 가입 ${fmtd(p.created_at)} · 인증 ${p.cert_count||0} · MBTI ${esc(p.mbti||'-')}</div>
+    <div class="muted">${esc(p.dong_name||'동네 미설정')} · ${lv(p)||'단계 없음'} · 가입 ${fmtd(p.created_at)} · 인증 ${p.cert_count||0} · Lv.${p.act_level||0} · MBTI ${esc(p.mbti||'-')}</div>
     <p style="white-space:pre-wrap">${esc(p.bio||'')}${p.now_making?'\n지금 뜨는 것: '+esc(p.now_making):''}${p.stuck_on?'\n막히는 부분: '+esc(p.stuck_on):''}</p>
     <div class="row"><button onclick="suspendUser('${id}',${!p.suspended_at})">${p.suspended_at?'정지 해제':'정지'}</button><button onclick="broadcastTo('${id}','${esc(p.nickname)}')">이 사용자에게 알림</button><button onclick="setAdmin('${id}',${!isAdm})">${isAdm?'관리자 해제':'관리자로 지정'}</button></div>
     <h2>기법 (${(p.skills||[]).length}) · 인증된 기법 (${(p.verified_skills||[]).length})</h2><div>${(p.skills||[]).map(t=>`<span class="chip ${(p.verified_skills||[]).includes(t)?'y':''}">${esc(TECH[t]?.name_ko||t)}</span>`).join('')||'<span class="muted">없음</span>'}</div>
@@ -513,6 +514,54 @@ VIEWS.authors = async()=>{
 };
 async function decideAuthor(id, ok){ let reason=null; if(!ok){ reason=prompt('반려 사유 (신청자에게 전달돼요)'); if(reason===null) return; } else if(!confirm('작가로 승인할까요?')) return; const {error}=await sb.rpc('admin_decide_author',{p_id:id,p_approve:ok,p_reason:reason}); if(error) return toast(error.message); toast(ok?'승인했어요':'반려했어요'); route(); }
 async function setAuthor(id, on){ if(!confirm(on?'작가로 지정할까요?':'작가 자격을 해제할까요? 등록한 도안은 남아 있어요(필요하면 도안 메뉴에서 숨김).')) return; const {error}=await sb.rpc('admin_set_author',{p_profile:id,p_on:on}); if(error) return toast(error.message); toast('처리했어요'); route(); }
+// ===== 이벤트 =====
+// 레벨(Lv. = 작품 인증을 올린 날 수) 조건으로 신청을 받는다. 흐름: 등록(공개 시 레벨 되는 회원에게 알림) → 신청 → 선정(직접/선착순/추첨) → 배송지 → 이벤트 인증(샘플 체험단이면 '샘플 제공' 표시) → 완료
+const EV_KIND={invite:'초대 모임',sample:'샘플 체험단',general:'일반'}, EV_MODE={admin:'직접 선정',first:'선착순',lottery:'추첨'}, EV_ST={applied:'신청',selected:'선정',rejected:'미선정',cancelled:'취소',done:'인증 완료'};
+const dtl=t=>{ if(!t) return ''; const d=new Date(t); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16); };
+VIEWS.events = async()=>{
+  const {data}=await sb.from('events').select('*, apps:event_applications(status)').order('created_at',{ascending:false}).limit(200);
+  const cnt=(e,st)=>(e.apps||[]).filter(x=>st.includes(x.status)).length;
+  $('#main').innerHTML=`<h1>이벤트 <small>레벨 조건으로 초대·체험단 모집</small></h1>
+  <div class="row"><button class="p" onclick="openEventForm()">이벤트 추가</button></div>
+  <table><tr><th>이벤트</th><th>종류</th><th>조건</th><th>신청 기간</th><th>신청</th><th>선정</th><th>인증 완료</th><th>상태</th></tr>
+  ${(data||[]).map(e=>`<tr class="clk" onclick="openEventForm('${e.id}')"><td><b>${esc(e.title)}</b></td><td>${EV_KIND[e.kind]}</td><td>Lv.${e.min_level}+ · ${e.capacity||'무제한'}명 · ${EV_MODE[e.select_mode]}</td><td class="muted">${fmtd(e.apply_from)} ~ ${fmtd(e.apply_until)}${e.cert_due?`<br>인증 마감 ${e.cert_due}`:''}</td><td>${cnt(e,['applied','selected','done','rejected'])}</td><td>${cnt(e,['selected','done'])}</td><td>${cnt(e,['done'])}</td><td>${e.status==='open'?'<span class="chip g">공개</span>':e.status==='closed'?'<span class="chip">종료</span>':'<span class="chip r">준비 중</span>'}</td></tr>`).join('')||'<tr><td colspan="8" class="muted">아직 이벤트가 없어요</td></tr>'}</table>
+  <p class="muted">'공개'로 처음 저장하는 순간, 최소 레벨 이상인 회원 모두에게 앱 알림이 한 번 가요. 배송지는 선정된 회원만 입력하고 발송 처리 30일 뒤 자동 삭제돼요.</p>`;
+};
+async function openEventForm(id){
+  let e={kind:'sample',min_level:3,select_mode:'admin',status:'draft',needs_shipping:true}, apps=[], yarn=null;
+  if(id){ const r=await sb.from('events').select('*').eq('id',id).single(); e=r.data||e; const r2=await sb.rpc('admin_event_apps',{p_event:id}); if(r2.error) toast(r2.error.message); apps=r2.data||[]; if(e.catalog_id){ const y=await sb.from('yarn_catalog').select('id,brand,product').eq('id',e.catalog_id).maybeSingle(); yarn=y.data; } }
+  const sel=(k,o,v)=>`<select id="${k}">${Object.entries(o).map(([x,l])=>`<option value="${x}" ${v===x?'selected':''}>${l}</option>`).join('')}</select>`;
+  const picked=apps.filter(x=>['selected','done'].includes(x.status)).length;
+  openPanel(`<h2 style="margin-top:0">${id?'이벤트 수정':'이벤트 추가'}</h2>
+    <input id="evTitle" maxlength="60" placeholder="이벤트 이름 (예: 새 실 ○○ 먼저 떠보기)" value="${esc(e.title||'')}" style="width:100%;margin-bottom:6px">
+    <textarea id="evBody" placeholder="설명 (무엇을 받는지, 무엇을 해야 하는지, 발표일)" style="min-height:90px">${esc(e.body||'')}</textarea>
+    <input id="evPhoto" placeholder="사진 URL (선택)" value="${esc(e.photo||'')}" style="width:100%;margin:6px 0">
+    <div class="row"><span class="muted" style="width:90px">종류·선정</span>${sel('evKind',EV_KIND,e.kind)}${sel('evMode',EV_MODE,e.select_mode)}</div>
+    <div class="row"><span class="muted" style="width:90px">최소 레벨</span><input id="evLv" type="number" min="0" value="${e.min_level??0}" style="width:80px"><span class="muted">모집 인원</span><input id="evCap" type="number" min="1" value="${e.capacity||''}" placeholder="무제한" style="width:90px"></div>
+    <div class="row"><span class="muted" style="width:90px">신청 기간</span><input id="evFrom" type="datetime-local" value="${dtl(e.apply_from||new Date())}"><span>~</span><input id="evUntil" type="datetime-local" value="${dtl(e.apply_until)}"></div>
+    <div class="row"><span class="muted" style="width:90px">인증 마감</span><input id="evDue" type="date" value="${e.cert_due||''}"><label><input type="checkbox" id="evShip" ${e.needs_shipping?'checked':''}> 배송지 받기</label></div>
+    <div class="row"><span class="muted" style="width:90px">연결할 실</span><input id="evYarnQ" placeholder="실 사전에서 검색" oninput="evYarnSearch(this.value)" style="flex:1"><input type="hidden" id="evYarn" value="${e.catalog_id||''}"><span id="evYarnName"><b>${yarn?esc((yarn.brand?yarn.brand+' ':'')+yarn.product):''}</b>${yarn?` <a href="#" onclick="$('#evYarn').value='';$('#evYarnName').innerHTML='';return false">지우기</a>`:''}</span></div>
+    <div id="evYarnList" class="muted"></div>
+    <div class="row"><span class="muted" style="width:90px">상태</span>${sel('evStatus',{draft:'준비 중(회원에게 안 보임)',open:'공개',closed:'종료'},e.status)}</div>
+    <div class="row"><button class="p" onclick="saveEvent('${id||''}')">저장</button>${e.announced_at?`<span class="muted">공개 알림 발송됨 ${fmt(e.announced_at)}</span>`:'<span class="muted">공개로 저장하면 레벨 되는 회원에게 알림이 가요</span>'}</div>
+    ${id?`<h2>신청자 ${apps.length}명 <small class="muted">선정 ${picked}${e.capacity?' / '+e.capacity:''}</small></h2>
+    <div class="row">${e.select_mode==='lottery'?`<button onclick="eventLottery('${id}')">남은 자리 추첨</button>`:''}<button onclick="downloadEventShip('${id}')">배송지 CSV</button></div>
+    <table><tr><th>회원</th><th>레벨·단계</th><th>지난 이벤트</th><th>한마디</th><th>상태</th><th>배송</th><th></th></tr>
+    ${apps.map(x=>`<tr><td><b>${esc(x.nickname)}</b><div class="muted">${fmt(x.created_at)}</div></td><td>Lv.${x.act_level} · 코 ${x.level_crochet||0} / 대 ${x.level_knit||0}</td><td>${x.past_selected||x.past_done?`완료 ${x.past_done} / 선정 ${Math.max(x.past_selected,x.past_done)}`:'<span class="muted">처음</span>'}</td><td class="muted">${esc(x.note||'')}</td><td><span class="chip ${x.status==='done'||x.status==='selected'?'g':x.status==='rejected'||x.status==='cancelled'?'r':''}">${EV_ST[x.status]}</span></td><td class="muted">${x.ship_addr?`${esc(x.ship_name)} · ${esc(x.ship_phone)}<br>${esc((x.ship_zip?'('+x.ship_zip+') ':'')+x.ship_addr)}${x.ship_memo?'<br>'+esc(x.ship_memo):''}${x.shipped_at?'<br><b>발송 '+fmtd(x.shipped_at)+'</b>':''}`:(x.status==='selected'&&e.needs_shipping?'미입력':'')}</td><td>${x.status==='applied'?`<button class="p" onclick="decideEventApp('${x.app_id}','selected','${id}')">선정</button> <button onclick="decideEventApp('${x.app_id}','rejected','${id}')">미선정</button>`:x.status==='selected'?`${x.ship_addr&&!x.shipped_at?`<button class="p" onclick="markShipped('${x.app_id}','${id}')">발송 처리</button> `:''}<button onclick="decideEventApp('${x.app_id}','applied','${id}')">선정 취소</button>`:x.status==='rejected'?`<button onclick="decideEventApp('${x.app_id}','applied','${id}')">되돌리기</button>`:''}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">아직 신청자가 없어요</td></tr>'}</table>`:''}`);
+  window.EV_APPS=apps;
+}
+let evYarnT=null;
+function evYarnSearch(q){ clearTimeout(evYarnT); q=q.trim(); if(!q){ $('#evYarnList').innerHTML=''; return; } evYarnT=setTimeout(async()=>{ const {data}=await sb.from('yarn_catalog').select('id,brand,product').is('merged_into',null).ilike('product','%'+q+'%').limit(8); $('#evYarnList').innerHTML=(data||[]).map(y=>`<a href="#" data-id="${y.id}" data-n="${esc((y.brand?y.brand+' ':'')+y.product)}" onclick="$('#evYarn').value=this.dataset.id;$('#evYarnName').innerHTML='<b>'+this.dataset.n+'</b>';$('#evYarnList').innerHTML='';return false" style="margin-right:10px">${esc((y.brand?y.brand+' ':'')+y.product)}</a>`).join('')||'검색 결과 없음'; },250); }
+async function saveEvent(id){
+  const title=$('#evTitle').value.trim(); if(!title) return toast('이벤트 이름을 입력하세요'); if(!$('#evUntil').value) return toast('신청 마감 시각을 입력하세요');
+  const status=$('#evStatus').value; if(status==='open' && !confirm('공개로 저장할까요? 처음 공개하는 경우 최소 레벨 이상 회원 모두에게 알림이 가요.')) return;
+  const p={id:id||null,title,body:$('#evBody').value.trim(),photo:$('#evPhoto').value.trim(),kind:$('#evKind').value,select_mode:$('#evMode').value,min_level:$('#evLv').value||'0',capacity:$('#evCap').value||'',apply_from:$('#evFrom').value?new Date($('#evFrom').value).toISOString():'',apply_until:new Date($('#evUntil').value).toISOString(),cert_due:$('#evDue').value||'',needs_shipping:$('#evShip').checked,catalog_id:$('#evYarn').value||'',status};
+  const {error}=await sb.rpc('admin_upsert_event',{p}); if(error) return toast(error.message); toast('저장했어요'); closePanel(); route();
+}
+async function decideEventApp(app, st, ev){ const {error}=await sb.rpc('admin_decide_event_app',{p_app:app,p_status:st}); if(error) return toast(error.message); toast(st==='selected'?'선정했어요. 회원에게 알림이 갔어요':st==='rejected'?'미선정 처리했어요. 회원에게 알림이 갔어요':'되돌렸어요'); openEventForm(ev); }
+async function eventLottery(ev){ if(!confirm('남은 자리만큼 신청자 중에서 무작위로 선정할까요? 선정된 회원에게 바로 알림이 가요.')) return; const {data,error}=await sb.rpc('admin_event_lottery',{p_event:ev}); if(error) return toast(error.message); toast(data+'명을 선정했어요'); openEventForm(ev); }
+async function markShipped(app, ev){ if(!confirm('발송 처리할까요? 30일 뒤 배송지가 자동 삭제돼요.')) return; const {error}=await sb.rpc('admin_event_mark_shipped',{p_app:app}); if(error) return toast(error.message); toast('발송 처리했어요'); openEventForm(ev); }
+function downloadEventShip(){ const rows=(window.EV_APPS||[]).filter(x=>x.ship_addr); if(!rows.length) return toast('입력된 배송지가 없어요'); download('event-shipping.csv', csv(rows, ['nickname','ship_name','ship_phone','ship_zip','ship_addr','ship_memo','shipped_at'])); }
 // ===== 실 사전(표준화) =====
 // 회원이 작품 인증에 적은 실 이름은 yarn_entries(원문)로 쌓이고, 이름이 같은(정규화 키가 같은) 것끼리 yarn_catalog 한 줄로 묶인다.
 // 여기서 할 일: ① 같은 실인데 따로 잡힌 후보를 합치기 ② 브랜드·제품명·규격을 확인해 '확정' ③ 호환 실 확인
@@ -622,7 +671,7 @@ async function decideClaim(id, ok, docPath){
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식',event_upsert:'이벤트 저장',event_app_selected:'이벤트 선정',event_app_rejected:'이벤트 미선정',event_app_applied:'이벤트 선정 되돌림',event_shipped:'이벤트 발송 처리'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{
