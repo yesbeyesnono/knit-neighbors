@@ -82,6 +82,11 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
   <aside>
     <div class="brand">뜨개동네 관리자<small id="who"></small></div>
     <div class="grp">현황</div>
+    <a href="#today" data-v="today">오늘 (지기 AI) <span class="n" id="nMod" hidden></span></a>
+    <a href="#rules" data-v="rules">규칙</a>
+    <a href="#modlog" data-v="modlog">기록 · 되돌리기</a>
+    <a href="#techcand" data-v="techcand">기법 후보</a>
+    <a href="#badwords" data-v="badwords">욕설 사전</a>
     <a href="#dash" data-v="dash">대시보드</a>
     <a href="#dong" data-v="dong">동네 분포</a>
     <a href="#content" data-v="content">글·모임·인증</a>
@@ -148,7 +153,7 @@ async function refreshBadges(){
   const sup=await supportRooms(); const un=sup.filter(r=>r.unanswered).length; $('#nSup').hidden=!un; $('#nSup').textContent=un;
 }
 const VIEWS={};
-function route(){ const v=(location.hash||'#dash').slice(1); document.querySelectorAll('aside a').forEach(a=>a.classList.toggle('on',a.dataset.v===v)); closePanel(); $('#main').innerHTML='<div class="muted">불러오는 중…</div>'; (VIEWS[v]||VIEWS.dash)().catch(e=>{ $('#main').innerHTML='<div class="muted">오류: '+esc(e.message)+'</div>'; }); }
+function route(){ const [v,arg]=(location.hash||'#today').slice(1).split(':'); document.querySelectorAll('aside a').forEach(a=>a.classList.toggle('on',a.dataset.v===v)); closePanel(); $('#main').innerHTML='<div class="muted">불러오는 중…</div>'; sb.from('mod_items').select('id',{count:'exact',head:true}).eq('status','open').then(({count})=>{ const n=$('#nMod'); if(n){ n.hidden=!count; n.textContent=count||''; } }); (VIEWS[v]||VIEWS.today)(arg).catch(e=>{ $('#main').innerHTML='<div class="muted">오류: '+esc(e.message)+'</div>'; }); }
 function openPanel(html){ $('#panelBody').innerHTML=html; $('#panel').classList.add('on'); $('#scrim').classList.add('on'); }
 function closePanel(){ $('#panel').classList.remove('on'); $('#scrim').classList.remove('on'); }
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && $('#panel').classList.contains('on') && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)) closePanel(); else if(e.key==='Escape' && $('#panel').classList.contains('on')){ document.activeElement.blur(); } });
@@ -515,6 +520,138 @@ VIEWS.authors = async()=>{
 };
 async function decideAuthor(id, ok){ let reason=null; if(!ok){ reason=prompt('반려 사유 (신청자에게 전달돼요)'); if(reason===null) return; } else if(!confirm('작가로 승인할까요?')) return; const {error}=await sb.rpc('admin_decide_author',{p_id:id,p_approve:ok,p_reason:reason}); if(error) return toast(error.message); toast(ok?'승인했어요':'반려했어요'); route(); }
 async function setAuthor(id, on){ if(!confirm(on?'작가로 지정할까요?':'작가 자격을 해제할까요? 등록한 도안은 남아 있어요(필요하면 도안 메뉴에서 숨김).')) return; const {error}=await sb.rpc('admin_set_author',{p_profile:id,p_on:on}); if(error) return toast(error.message); toast('처리했어요'); route(); }
+// ===== 지기 AI (작업지시서 Phase 3): 오늘 · 건별 처리 · 규칙 · 기록 · 기법 후보 · 욕설 사전 =====
+// 텔레그램과 같은 mod_items·같은 도구(jigi_tool)를 쓴다. 콘솔에서의 클릭 = 대표 승인(admin_jigi_tool).
+const MK={abuse:'비방·욕설',spam:'광고 의심',scam:'사기 의심',app_complaint:'앱 불만',risk:'위험',report:'신고',tech_candidate:'기법 후보',yarn_review:'실 이름 검토',other:'기타'}, MSEV={urgent:'긴급',today:'오늘',info:'참고'};
+const jigi=async(route,body={})=>{ const {data,error}=await sb.functions.invoke('jigi',{body:{route,...body}}); if(error) throw new Error(error.message); return data; };
+const jtool=async(name,args)=>{ const {data,error}=await sb.rpc('admin_jigi_tool',{p_name:name,p_args:args}); if(error) throw new Error(error.message); if(data?.error) throw new Error(data.error); return data; };
+async function jsteps(item, steps){ for(const [i,s] of steps.entries()) await jtool(s[0], {...s[1], item_id:item.id, resolve:i===steps.length-1 && s[0]!=='dismiss_item'}); }
+const WARN_TXT=n=>`${n||'회원'}님, 다른 이웃을 향한 표현 때문에 글이 가려졌어요. 뜨개동네는 서로 존중하는 말만 허용해요. 다시 반복되면 글쓰기가 제한될 수 있어요.`;
+let MOD_ITEMS=[];
+function modButtons(it){
+  const pid=it.target_type==='post'?it.target_id:null, b=[];
+  if(pid && ['abuse','report','risk'].includes(it.kind)){ b.push(['경고 보내고 숨김','warn','p']); b.push(['숨김 해제','ok','']); }
+  else if(pid && ['spam','scam'].includes(it.kind)){ b.push(['제안대로 처리 (숨김+7일 제한)','spam','p']); b.push(['문제 없음','ok','']); }
+  else if(pid && it.kind==='app_complaint'){ b.push(['답글 보내기','reply','p']); b.push(['확인함','seen','']); }
+  else if(it.kind==='tech_candidate'){ b.push(['후보 보기','tech','p']); b.push(['나중에','seen','']); }
+  else if(it.kind==='yarn_review'){ b.push(['실 사전 열기','yarn','p']); b.push(['확인함','seen','']); }
+  else b.push(['확인함','seen','']);
+  return b.map(([l,a,c])=>`<button class="${c}" onclick="modAct(${it.id},'${a}')">${l}</button>`).join(' ')+` <button onclick="openModItem(${it.id})">자세히</button>`;
+}
+async function modAct(id, act){
+  const it=MOD_ITEMS.find(x=>x.id===id)||(await sb.from('mod_items').select('*').eq('id',id).single()).data; if(!it) return; const pid=it.target_id;
+  try{
+    if(act==='warn'){ const t=prompt('작성자에게 보낼 경고 문구 (숨김은 유지돼요)', it.ai_suggestion?.warning_text||WARN_TXT(it.evidence?.nickname)); if(t===null) return; await jsteps(it,[['hide_temp',{post_id:pid}],['send_warning',{user_id:it.author_id,text:t}],['notify_reporter',{post_id:pid}]]); }
+    else if(act==='ok'){ if(!confirm('숨김을 풀고 문제 없음으로 닫을까요?')) return; await jsteps(it,[['unhide',{post_id:pid}],['dismiss_item',{note:'문제 없음'}]]); }
+    else if(act==='spam'){ if(!confirm('글을 숨기고 작성자의 글쓰기를 7일 제한할까요?')) return; await jsteps(it,[['hide_temp',{post_id:pid}],['restrict_posting',{user_id:it.author_id,days:7}]]); }
+    else if(act==='restrict'){ if(!confirm('작성자의 글쓰기를 7일 제한할까요?')) return; await jtool('restrict_posting',{user_id:it.author_id,days:7,item_id:it.id}); }
+    else if(act==='keep'){ await jsteps(it,[['hide_temp',{post_id:pid}]]); }
+    else if(act==='notify'){ const t=prompt('신고자에게 보낼 결과 알림', '신고해 주신 내용을 확인하고 조치했어요. 알려 주셔서 고마워요.'); if(t===null) return; await jtool('notify_reporter',{post_id:pid,text:t,item_id:it.id}); }
+    else if(act==='reply'){ const t=prompt('지기 이름으로 달 답글', it.ai_suggestion?.reply_draft||''); if(!t) return; await jsteps(it,[['reply_as_jigi',{post_id:pid,text:t}]]); }
+    else if(act==='seen'){ await jtool('dismiss_item',{item_id:it.id,note:'확인'}); }
+    else if(act==='tech'){ location.hash='#techcand'; return; }
+    else if(act==='yarn'){ location.hash='#yarns'; return; }
+    toast('처리했어요 · 기록에서 되돌릴 수 있어요'); closePanel(); if(location.hash.startsWith('#today')||!location.hash) VIEWS.today(); refreshBadges&&refreshBadges();
+  }catch(e){ toast('실패: '+e.message); }
+}
+function modCard(it,i){
+  return `<div class="card" style="margin-bottom:10px;${it.severity==='urgent'?'border-color:#c9303f':''}"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b style="font-size:1.05rem">${i+1}</b><span class="chip ${it.severity==='urgent'?'r':it.severity==='today'?'g':''}">${MSEV[it.severity]}</span><span class="chip">${MK[it.kind]||it.kind}</span>${it.auto_action?`<span class="chip">${esc(it.auto_action)}</span>`:''}<span class="muted" style="margin-left:auto">${fmt(it.created_at)}</span></div>
+    <div style="margin:6px 0"><b>${esc(it.summary)}</b></div>${it.evidence?.text?`<div class="muted" style="border-left:3px solid var(--line);padding-left:8px;margin:6px 0;white-space:pre-wrap">"${esc(it.evidence.text.slice(0,240))}"</div>`:''}
+    ${it.ai_suggestion?.reason?`<div style="font-size:13px;margin:6px 0"><b>AI 제안</b> · ${esc(it.ai_suggestion.reason)}${it.ai_suggestion.action?` → ${esc(it.ai_suggestion.action)}`:''}</div>`:''}<div class="row" style="flex-wrap:wrap">${modButtons(it)}</div></div>`;
+}
+VIEWS.today = async(arg)=>{
+  const [{data:items},{data:brs},{count:autoN}] = await Promise.all([
+    sb.from('mod_items').select('*').eq('status','open').order('created_at'),
+    sb.from('ai_briefings').select('*').order('date',{ascending:false}).limit(1),
+    sb.from('mod_items').select('id',{count:'exact',head:true}).eq('status','auto_done').gte('created_at', new Date(Date.now()-3*864e5).toISOString()) ]);
+  const ord={urgent:0,today:1,info:2}; MOD_ITEMS=(items||[]).sort((a,b)=>ord[a.severity]-ord[b.severity]||new Date(a.created_at)-new Date(b.created_at));
+  const br=brs?.[0]; const c=s=>MOD_ITEMS.filter(x=>x.severity===s).length;
+  $('#main').innerHTML=`<h1>오늘 <small>${new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'})} · 지기 AI</small></h1>
+  <div class="card" style="margin-bottom:12px"><b style="font-size:1.1rem">오늘 처리할 일 ${MOD_ITEMS.length}건</b>
+    <div class="muted" style="margin:4px 0">${br?esc(`${br.date} 브리핑 — 어제 새 글 ${br.body?.stats?.posts??0}개·답글 ${br.body?.stats?.replies??0}개·가입 ${br.body?.stats?.signups??0}명·인증 ${br.body?.stats?.works??0}개${(br.body?.notable||[]).length?' · 특이: '+br.body.notable.join(', '):''}`):'아직 브리핑이 없어요 (매일 오전 8시)'}</div>
+    <div><span class="chip r">긴급 ${c('urgent')}</span> <span class="chip g">오늘 ${c('today')}</span> <span class="chip">참고 ${c('info')}</span> <span class="chip">자동 처리 ${autoN||0}</span> <span id="jigiStatus" class="muted"></span></div></div>
+  ${MOD_ITEMS.map(modCard).join('')||'<div class="card muted">이상 없음 — 처리할 일이 없어요.</div>'}
+  <p><a href="#modlog">AI가 자동 처리한 ${autoN||0}건 보기 (되돌리기 가능) ›</a></p>
+  <div class="card"><b>지기 AI에게 묻기</b><div id="jChat-today" style="margin:8px 0;max-height:320px;overflow:auto"></div><div class="row"><input id="jIn-today" placeholder="예: 이번 주 불만 요약해 줘 · 1번 제안대로 해 · 규칙 보여 줘" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing)jigiAsk('today')"><button class="p" onclick="jigiAsk('today')">보내기</button><button onclick="jigiRun('scan')">지금 검사</button><button onclick="jigiRun('brief')">브리핑 다시 만들기</button></div></div>`;
+  jigi('status').then(s=>{ $('#jigiStatus').textContent=`AI ${s.ai?('켜짐('+s.provider+')'):'꺼짐 — 키 없음'} · 텔레그램 ${s.telegram&&s.webhook_secret?'연결됨':'미연결'}`; }).catch(()=>{ $('#jigiStatus').textContent='지기 AI 서버 함수에 연결하지 못했어요'; });
+  if(arg) openModItem(+arg);
+};
+async function jigiRun(r){ try{ const d=await jigi(r); toast(r==='scan'?`검사 완료 — 새 건 ${d.items||0}`:'브리핑을 만들었어요'); VIEWS.today(); }catch(e){ toast(e.message); } }
+async function jigiAsk(ch){
+  const inp=$('#jIn-'+CSS.escape(ch)), box=$('#jChat-'+CSS.escape(ch)); const t=inp.value.trim(); if(!t) return; inp.value='';
+  box.insertAdjacentHTML('beforeend', `<div style="text-align:right;margin:6px 0"><span class="chip" style="font-size:13px;padding:6px 10px">${esc(t)}</span></div><div class="muted" id="jWait">생각하는 중…</div>`); box.scrollTop=box.scrollHeight;
+  try{ const r=await jigi('chat',{channel:ch,text:t}); $('#jWait')?.remove();
+    box.insertAdjacentHTML('beforeend', `<div style="margin:6px 0;white-space:pre-wrap">${esc(r.reply||'')}</div>${(r.pend||[]).map(p=>`<div class="row"><button class="p" onclick="jigiConfirm('${p.token}',this)">${esc(p.label)}</button><span class="muted">눌러야 실행돼요</span></div>`).join('')}`);
+  }catch(e){ $('#jWait')?.remove(); box.insertAdjacentHTML('beforeend', `<div class="muted">오류: ${esc(e.message)}</div>`); }
+  box.scrollTop=box.scrollHeight;
+}
+async function jigiConfirm(token, btn){ if(!confirm('적용할까요?')) return; btn.disabled=true; try{ const r=await jigi('confirm',{token}); toast(r.ok?'적용했어요':r.msg); btn.insertAdjacentHTML('afterend', `<span class="muted" style="white-space:pre-wrap"> ${esc(r.msg||'')}</span>`); }catch(e){ toast(e.message); btn.disabled=false; } }
+async function openModItem(id){
+  const {data:it}=await sb.from('mod_items').select('*').eq('id',id).maybeSingle(); if(!it) return toast('건을 찾을 수 없어요');
+  if(!MOD_ITEMS.some(x=>x.id===id)) MOD_ITEMS.push(it);
+  let thread=[], user=null, acts=[];
+  try{ if(it.target_type==='post') thread=await jtool('get_post_thread',{post_id:it.target_id}); }catch(e){}
+  try{ if(it.author_id) user=await jtool('get_user_summary',{user_id:it.author_id}); }catch(e){}
+  acts=(await sb.from('mod_actions').select('*').eq('item_id',id).order('id')).data||[];
+  const ch='item:'+id;
+  openPanel(`<h2 style="margin-top:0">${MK[it.kind]||it.kind} <span class="chip ${it.severity==='urgent'?'r':''}">${MSEV[it.severity]}</span> <span class="chip">${({open:'처리 대기',auto_done:'자동 처리됨',done:'처리함',dismissed:'문제 없음'})[it.status]}</span></h2>
+    <div><b>${esc(it.summary)}</b></div>${it.auto_action?`<div class="muted">${esc(it.auto_action)}</div>`:''}
+    ${it.evidence?.text?`<div style="border-left:3px solid var(--line);padding-left:8px;margin:8px 0;white-space:pre-wrap">"${esc(it.evidence.text)}"</div>`:''}
+    <div class="muted">${esc(Object.entries(it.evidence||{}).filter(([k,v])=>!['text','nickname'].includes(k)&&v!=null&&v!=='').map(([k,v])=>k+': '+(typeof v==='object'?JSON.stringify(v):v)).join(' · '))}</div>
+    ${thread.length?`<details style="margin:8px 0"><summary>원글과 앞뒤 대화 보기 (${thread.length})</summary>${thread.map(p=>`<div style="padding:6px 0;border-bottom:1px solid var(--line);${p.is_target?'background:#fff6f6':''}"><b>${esc(p.author||'')}</b> <span class="muted">${fmt(p.created_at)}${p.hidden?' · 숨김':''}</span><div style="white-space:pre-wrap">${esc(p.body||'')}</div></div>`).join('')}</details>`:''}
+    ${user&&!user.error?`<div class="card" style="margin:8px 0"><b>${esc(user.nickname||'')}</b> <a href="#" onclick="openUserPanel('${it.author_id}');return false">회원 보기</a><div class="muted">가입 ${user.joined_days}일 · 작품 인증 ${user.cert_count}개 · Lv.${user.act_level} · 최근 7일 글 ${user.posts_7d}개<br>과거 신고 ${user.reports_received}건 · 경고 ${user.warnings}건 · 검토 이력 ${user.past_items}건${user.post_restricted_until?' · 글쓰기 제한 중':''}</div></div>`:''}
+    ${it.ai_suggestion?.reason?`<div style="margin:8px 0"><b>AI 제안</b> · ${esc(it.ai_suggestion.reason)}${it.ai_suggestion.action?` → ${esc(it.ai_suggestion.action)}`:''}</div>`:''}
+    <div class="row" style="flex-wrap:wrap">${it.status==='open'||it.status==='auto_done'?modButtons(it).replace(/<button onclick="openModItem[^<]*<\/button>/,''):''}${it.target_type==='post'?` <button onclick="modAct(${id},'keep')">숨김 유지로 닫기</button> <button onclick="modAct(${id},'restrict')">7일 제한</button> <button onclick="modAct(${id},'notify')">신고자에게 결과 알림</button>`:''}</div>
+    ${acts.length?`<h2>기록</h2>${acts.map(a=>`<div class="muted">${fmt(a.created_at)} · ${a.actor==='ai'?'AI':'대표'} · ${esc(a.action)}${a.reverted_at?' (되돌림)':` <a href="#" onclick="modRevert(${a.id});return false">되돌리기</a>`}</div>`).join('')}`:''}
+    <h2>지기 AI와 대화</h2><div id="jChat-${ch}" style="max-height:260px;overflow:auto"></div>
+    <div class="row"><input id="jIn-${ch}" placeholder="예: 이 사람 전에도 이런 적 있어? · 경고 문구 써 줘" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing)jigiAsk('${ch}')"><button class="p" onclick="jigiAsk('${ch}')">보내기</button></div>
+    <p class="muted">대화에서 AI가 조치를 제안하면 [네, 적용] 버튼이 나오고, 눌러야 실행돼요. 영구 정지·삭제는 '사용자'·'글' 메뉴에서 직접 하세요.</p>`);
+  const first=`이 건(item_id ${id}) 상황을 두세 줄로 설명해 줘.`; if(it.status==='open' && window.__jigiAI) { $('#jIn-'+CSS.escape(ch)).value=first; }
+}
+async function modRevert(actionId){ if(!confirm('이 조치를 되돌릴까요?')) return; try{ await jtool('revert_action',{action_id:actionId}); toast('되돌렸어요'); closePanel(); route(); }catch(e){ toast('되돌릴 수 없어요: '+e.message); } }
+VIEWS.rules = async()=>{
+  const {data}=await sb.from('ai_rules').select('*').order('id');
+  $('#main').innerHTML=`<h1>규칙 <small>대표가 지기 AI에게 맡긴 자동 처리</small></h1>
+  <table><tr><th>#</th><th>규칙</th><th>조건</th><th>조치</th><th>단계</th><th>상태</th><th></th></tr>
+  ${(data||[]).map(r=>`<tr><td>${r.id}</td><td><b>${esc(r.title)}</b><div class="muted">${esc(r.rule_text)}</div></td><td class="muted">${esc(JSON.stringify(r.condition))}</td><td>${esc(r.action)}</td><td><select onchange="ruleSet(${r.id},{level:+this.value})">${[[0,'보고만'],[1,'제안+클릭'],[2,'자동 후 보고']].map(([v,l])=>`<option value="${v}" ${r.level===v?'selected':''}>${l}</option>`).join('')}</select></td><td><label><input type="checkbox" ${r.enabled?'checked':''} onchange="ruleSet(${r.id},{enabled:this.checked})"> 켜짐</label></td><td><button onclick="ruleDel(${r.id})">삭제</button></td></tr>`).join('')||'<tr><td colspan="7" class="muted">아직 규칙이 없어요. 텔레그램이나 「오늘」의 대화에서 "앞으로 이런 광고는 알아서 처리해"라고 말하면 AI가 규칙 문장으로 되읽고 저장 버튼을 보여 줘요.</td></tr>'}</table>
+  <h2>직접 추가</h2><div class="row" style="flex-wrap:wrap"><input id="rTitle" placeholder="이름 (예: 신규 계정 링크 도배)" style="flex:1;min-width:200px"><select id="rKind"><option value="spam">광고 의심</option><option value="abuse">비방·욕설</option><option value="scam">사기 의심</option></select><input id="rDays" type="number" min="0" placeholder="가입 N일 이내" style="width:120px"><input id="rLink" type="number" min="0" placeholder="같은 링크 N회↑" style="width:130px"><select id="rAct"><option value="hide_temp">글 숨김</option><option value="hide_temp+restrict7">글 숨김 + 7일 제한</option><option value="report_only">보고만</option></select><button class="p" onclick="ruleAdd()">저장</button></div>
+  <p class="muted">AI 단독 조치는 임시 숨김까지예요. '7일 제한'이 들어간 규칙은 대표가 저장한 위임으로 간주해 자동 적용돼요. 영구 정지·삭제는 규칙으로 만들 수 없어요.</p>`;
+};
+async function ruleSet(id, o){ try{ await jtool('set_rule_enabled',{rule_id:id,...o}); toast('바꿨어요'); }catch(e){ toast(e.message); } }
+async function ruleDel(id){ if(!confirm('규칙을 삭제할까요?')) return; try{ await jtool('delete_rule',{rule_id:id}); route(); }catch(e){ toast(e.message); } }
+async function ruleAdd(){ const title=$('#rTitle').value.trim(); if(!title) return toast('이름을 적어 주세요'); const c={kind:$('#rKind').value}; if($('#rDays').value) c.max_account_days=+$('#rDays').value; if($('#rLink').value) c.min_same_link=+$('#rLink').value; const act=$('#rAct').value;
+  const text=`${MK[c.kind]}${c.max_account_days!=null?` + 가입 ${c.max_account_days}일 이내`:''}${c.min_same_link!=null?` + 같은 링크 ${c.min_same_link}회 이상`:''} → ${({'hide_temp':'글 숨김','hide_temp+restrict7':'글 숨김 + 7일 제한','report_only':'보고만'})[act]}, 처리 후 보고`;
+  if(!confirm('이 규칙을 저장할까요?\n'+text)) return; try{ await jtool('save_rule',{title,rule_text:text,condition:c,action:act,level:2}); route(); }catch(e){ toast(e.message); } }
+VIEWS.modlog = async()=>{
+  const {data}=await sb.from('mod_actions').select('*, item:mod_items(summary,kind)').order('id',{ascending:false}).limit(300);
+  $('#main').innerHTML=`<h1>기록 <small>지기 AI·대표의 모든 조치 · 되돌리기</small></h1><table><tr><th>시각</th><th>누가</th><th>조치</th><th>건</th><th>대상</th><th></th></tr>
+  ${(data||[]).map(a=>`<tr><td class="muted">${fmt(a.created_at)}</td><td>${a.actor==='ai'?'<span class="chip">AI</span>':'<span class="chip g">대표</span>'}</td><td>${esc(a.action)}</td><td>${a.item?`<a href="#today:${a.item_id}">${esc(a.item.summary)}</a>`:''}</td><td class="muted">${esc((a.target||'').slice(0,13))}</td><td>${a.reverted_at?'<span class="muted">되돌림</span>':a.action.startsWith('revert:')?'':`<button onclick="modRevert(${a.id})">되돌리기</button>`}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">아직 없어요</td></tr>'}</table>`;
+};
+let TECHS_ALL=[];
+VIEWS.techcand = async()=>{
+  if(!TECHS_ALL.length) TECHS_ALL=(await sb.from('techniques').select('id,craft,name_ko,level').order('sort')).data||[];
+  const {data}=await sb.from('technique_candidates').select('*').order('n_users',{ascending:false}).limit(300);
+  const open=(data||[]).filter(c=>c.status==='open'), rest=(data||[]).filter(c=>c.status!=='open'); const V={alias:'기존 기법의 다른 표기',new:'사전에 없는 새 기법',not_technique:'기법 아님',unknown:'모르겠음'};
+  const photos={}; const wids=[...new Set(open.flatMap(c=>c.sample_work_ids||[]))].slice(0,200); if(wids.length){ const r=await sb.from('works').select('id,photo_url').in('id',wids); (r.data||[]).forEach(w=>photos[w.id]=w.photo_url); }
+  $('#main').innerHTML=`<h1>기법 후보 <small>회원이 직접 입력한 기법 · 대기 ${open.length}</small></h1>
+  ${open.map(c=>`<div class="card" style="margin-bottom:10px"><b style="font-size:1.05rem">${esc(c.label)}</b> <span class="muted">입력 ${c.n_inputs}회 · ${c.n_users}명</span><div class="muted">표기: ${esc((c.raw_variants||[]).join(' · '))}</div>
+    <div style="display:flex;gap:6px;margin:6px 0">${(c.sample_work_ids||[]).slice(0,3).map(w=>photos[w]?`<img src="${esc(photos[w])}" style="width:72px;height:72px;object-fit:cover;border-radius:8px">`:'').join('')}</div>
+    ${c.ai_verdict?`<div style="font-size:13px"><b>AI 판정</b> · ${V[c.ai_verdict]}${c.alias_of?` (${esc(TECHS_ALL.find(t=>t.id===c.alias_of)?.name_ko||c.alias_of)})`:''} · 확신 ${Math.round((c.confidence||0)*100)}%<div class="muted">${esc(c.reason||'')}</div></div>`:'<div class="muted">AI 판정 전</div>'}
+    <div class="row" style="flex-wrap:wrap"><select id="tc-${c.id}"><option value="">기존 기법 고르기</option>${TECHS_ALL.map(t=>`<option value="${t.id}" ${c.alias_of===t.id?'selected':''}>${t.craft==='crochet'?'코':'대'} ${t.level}단계 · ${esc(t.name_ko)}</option>`).join('')}</select><button class="p" onclick="techLink(${c.id})">별칭으로 연결</button><button onclick="techExclude(${c.id})">제외</button></div></div>`).join('')||'<div class="card muted">대기 중인 후보가 없어요</div>'}
+  <p class="muted">신규 기법 등록(ID·단계 부여)은 기법 사전(knitup 사전 v1.3)과 맞춰야 해서 항상 대표가 직접 결정해요 — 여기서는 후보로 모아 두기만 해요.</p>
+  ${rest.length?`<h2>처리됨</h2><div class="muted">${rest.slice(0,40).map(c=>`${esc(c.label)} → ${c.status==='linked'?esc(TECHS_ALL.find(t=>t.id===c.alias_of)?.name_ko||''):'제외'}`).join(' · ')}</div>`:''}`;
+};
+async function techLink(id){ const t=$('#tc-'+id).value; if(!t) return toast('기존 기법을 골라 주세요'); try{ await jtool('link_technique_alias',{candidate_id:id,technique_id:t}); toast('연결했어요'); route(); }catch(e){ toast(e.message); } }
+async function techExclude(id){ try{ await jtool('exclude_candidate',{candidate_id:id}); route(); }catch(e){ toast(e.message); } }
+VIEWS.badwords = async()=>{
+  const {data}=await sb.from('bad_words').select('*').order('word');
+  $('#main').innerHTML=`<h1>욕설 사전 <small>지기 AI 1단계 감지용 · 일치하면 임시 숨김 + 즉시 알림</small></h1>
+  <div class="row"><input id="bwWord" maxlength="30" placeholder="단어"><select id="bwCat"><option value="abuse">비방·욕설</option><option value="spam">광고</option><option value="scam">사기</option></select><button class="p" onclick="bwAdd()">추가</button></div>
+  <div>${(data||[]).map(w=>`<span class="chip" style="font-size:13px;padding:5px 10px;margin:3px">${esc(w.word)} <a href="#" data-w="${esc(w.word)}" onclick="bwDel(this.dataset.w);return false" style="color:var(--red);text-decoration:none;margin-left:4px">✕</a></span>`).join('')}</div>
+  <p class="muted">'금칙어'는 글을 아예 못 올리게 막는 목록이고, 이 사전은 올라온 글을 AI가 가려내는 목록이에요. 변형 표기를 넓게 넣어도 글쓰기를 막지 않아요.</p>`;
+};
+async function bwAdd(){ const w=$('#bwWord').value.trim(); if(!w) return; const {error}=await sb.rpc('admin_bad_word',{p_word:w,p_category:$('#bwCat').value,p_add:true}); if(error) return toast(error.message); route(); }
+async function bwDel(w){ const {error}=await sb.rpc('admin_bad_word',{p_word:w,p_category:null,p_add:false}); if(error) return toast(error.message); route(); }
 // ===== 이벤트 =====
 // 레벨(Lv. = 작품 인증을 올린 날 수) 조건으로 신청을 받는다. 흐름: 등록(공개 시 레벨 되는 회원에게 알림) → 신청 → 선정(직접/선착순/추첨) → 배송지 → 이벤트 인증(샘플 체험단이면 '샘플 제공' 표시) → 완료
 const EV_KIND={invite:'초대 모임',sample:'샘플 체험단',general:'일반'}, EV_MODE={admin:'직접 선정',first:'선착순',lottery:'추첨'}, EV_ST={applied:'신청',selected:'선정',rejected:'미선정',cancelled:'취소',done:'인증 완료'};
@@ -685,7 +822,7 @@ async function decideClaim(id, ok, docPath){
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식',event_upsert:'이벤트 저장',event_app_selected:'이벤트 선정',event_app_rejected:'이벤트 미선정',event_app_applied:'이벤트 선정 되돌림',event_shipped:'이벤트 발송 처리'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식',event_upsert:'이벤트 저장',event_app_selected:'이벤트 선정',event_app_rejected:'이벤트 미선정',event_app_applied:'이벤트 선정 되돌림',event_shipped:'이벤트 발송 처리',add_bad_word:'욕설 사전 추가',remove_bad_word:'욕설 사전 삭제'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

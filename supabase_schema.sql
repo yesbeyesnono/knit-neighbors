@@ -1120,3 +1120,19 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   stash_link_catalog(id): 직접 입력한 실도 실 사전에 연결
 --   Edge Function `read-band`(supabase/functions/read-band): AI_PROVIDER=anthropic|openrouter, ANTHROPIC_API_KEY / OPENROUTER_API_KEY, AI_MODEL_FAST. 키 없으면 read_status=failed(직접 입력 유도). 1인 하루 30장(rate_hit 'band')
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 42~44. 지기 AI (마이그레이션 jigi_ai_tables / jigi_ai_tools / jigi_ai_hooks / jigi_on_change_fix) — 작업지시서 Phase 3
+--   테이블(전부 RLS, 관리자 열람만, 변경은 함수로만): bad_words(1단계 감지 사전 — banned_words 는 '글쓰기 차단', 이것은 '감지') · mod_items(검토 대기열) · mod_actions(모든 조치 before/after, 되돌리기)
+--     · ai_rules(위임 규칙 level 0 보고만/1 제안/2 자동) · ai_briefings · feedback_groups · technique_aliases · technique_candidates · mod_pending(버튼 1회용 토큰) · jigi_chat(대화 기억 30일) · jigi_config(hook_secret)
+--   추가 컬럼: posts.hidden_by_mod / mod_scanned_at, meetups.mod_scanned_at, post_reports.mod_seen, reports.mod_seen, works.tech_scanned_at, profiles.post_restricted_until(posts_before_insert 가 검사)
+--   jigi_tool(name, args, actor 'ai'|'admin', approved): **AI 가 쓸 수 있는 행동의 전부**. service_role 전용.
+--     읽기: get_item, list_open_items, get_post_thread, get_user_summary(연락처·배송지 없음), get_stats, list_feedback_groups, list_technique_candidates, list_rules, list_auto_actions
+--     단독 가능: hide_temp, add_to_feedback_group
+--     승인 필요(approved=true): unhide, send_warning, restrict_posting(≤30일), dismiss_item, reply_as_jigi, notify_reporter, link_technique_alias, exclude_candidate, save_rule, delete_rule, set_rule_enabled, revert_action
+--     없음(불가): 영구 정지, 계정·글 삭제, 개인정보 조회·내보내기, 이벤트 당첨 확정, 결제
+--   admin_jigi_tool(name, args): 콘솔용(is_admin → actor admin, approved) · admin_bad_word
+--   호출: pg_net + pg_cron. jigi_call(route) → Edge Function `jigi` (헤더 x-jigi-secret = jigi_config.hook_secret). 트리거(posts/post_reports/reports/meetups insert → scan, 실패해도 원래 동작을 막지 않음)
+--     크론: jigi-scan */10분 · jigi-brief 23:00 UTC(08:00 KST) · jigi-tech 19:30 UTC · jigi-yarn 20:00 UTC · jigi-clean
+--   Edge Function `jigi`(supabase/functions/jigi, verify_jwt=false, 경로별 자체 인증): route scan|brief|tech|yarn(훅 비밀값 또는 관리자) · ?fn=tg(텔레그램 웹훅: secret 헤더 + chat_id 일치) · status|chat|buttons|confirm(관리자 JWT)
+-- ---------------------------------------------------------------
