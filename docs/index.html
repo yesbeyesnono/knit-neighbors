@@ -2094,7 +2094,7 @@ function renderWYarns(){
   box.innerHTML = wYarns.map((y,i)=>`<div class="ycard">
     <div class="yh">실 ${wYarns.length>1?i+1:''}${wYarns.length>1?`<button type="button" onclick="wyDel(${i})">지우기</button>`:''}</div>
     <div class="row2"><label>실 이름<input list="yarnDL" maxlength="60" placeholder="브랜드 + 제품명 (예: 하마나카 아메리)" value="${esc(y.name)}" oninput="wySet(${i},'name',this.value)" onchange="wyPickName(${i})"></label>
-      <label>색 이름·번호<input maxlength="40" placeholder="예: 베이지 #2" value="${esc(y.color)}" oninput="wySet(${i},'color',this.value)"></label></div>
+      <label>색 이름·번호<input list="ycDL-${i}" maxlength="40" placeholder="${(y.colors||[]).length?'목록에서 고르거나 직접 입력':'예: 베이지 #2'}" value="${esc(y.color)}" oninput="wySet(${i},'color',this.value)"><datalist id="ycDL-${i}">${(y.colors||[]).map(c=>`<option value="${esc((c.no?c.no+' ':'')+c.name)}">`).join('')}</datalist></label></div>
     <div class="row3"><label>사용량<input inputmode="decimal" maxlength="7" placeholder="예: 2" value="${esc(y.amount)}" oninput="wySet(${i},'amount',this.value)"></label>
       <label>단위<select onchange="wySet(${i},'unit',this.value)"><option ${y.unit==='볼'?'selected':''}>볼</option><option ${y.unit==='g'?'selected':''}>g</option></select></label>
       <label>소재<select onchange="wySet(${i},'fiber',this.value)"><option value="">선택</option>${FIBERS.map(f=>`<option ${y.fiber===f?'selected':''}>${f}</option>`).join('')}</select></label></div>
@@ -2110,12 +2110,13 @@ function renderWYarns(){
 function wyHintAll(){ wYarns.forEach((_,i)=>wyHint(i)); }
 function wySet(i,k,v){ if(!wYarns[i]) return; wYarns[i][k]=v; if(k==='name') yarnSuggest(v); }
 function wyWeightManual(i,v){ const y=wYarns[i]; y.weightManual=!!v; y.weight=v; wyHint(i); }
-function wyAdd(sameYarn){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]||wyBlank(); const y=wyBlank(); if(sameYarn){ Object.assign(y,{name:last.name, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix}); } wYarns.push(y); renderWYarns(); }
+function wyAdd(sameYarn){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]||wyBlank(); const y=wyBlank(); if(sameYarn){ Object.assign(y,{name:last.name, catalogId:last.catalogId, colors:last.colors, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix}); } wYarns.push(y); renderWYarns(); }
 function wyDel(i){ wYarns.splice(i,1); if(!wYarns.length) wYarns=[wyBlank()]; renderWYarns(); }
 function yarnSuggest(q){ clearTimeout(yarnSugTimer); q=(q||'').trim(); if(q.length<1) return; yarnSugTimer=setTimeout(async()=>{ const { data } = await sb.rpc('yarn_suggest', { p_q:q }); (data||[]).forEach(r=>yarnSug[r.name]=r); const dl=$('#yarnDL'); if(dl) dl.innerHTML=(data||[]).map(r=>`<option value="${esc(r.name)}">${[r.verified?'확인된 실':'', r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.weight||''].filter(Boolean).join(' · ')}</option>`).join(''); }, 250); }
-function wyPickName(i){ const y=wYarns[i], r=yarnSug[(y.name||'').trim()]; if(!r) return; let ch=false;   // 다른 회원이 적어 둔 규격으로 빈칸 채우기
+async function wyPickName(i){ const y=wYarns[i], r=yarnSug[(y.name||'').trim()]; if(!r) return; let ch=false;
+  if(r.id && y.catalogId!==r.id){ y.catalogId=r.id; const { data:cs } = await sb.from('yarn_colors').select('no,name').eq('catalog_id', r.id).order('no').limit(80); y.colors=cs||[]; if(y.colors.length) ch=true; }   // 사전에 등록된 이 실의 색 목록   // 다른 회원이 적어 둔 규격으로 빈칸 채우기
   if(!y.ball_g && r.ball_g){ y.ball_g=String(r.ball_g); ch=true; } if(!y.ball_m && r.ball_m){ y.ball_m=String(r.ball_m); ch=true; } if(!y.fiber && r.fiber){ y.fiber=r.fiber; ch=true; } if(!y.mix && r.fibers){ y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '); ch=true; }
-  if(ch){ renderWYarns(); toast('다른 분이 적어 둔 실 규격을 채웠어요. 다르면 고쳐 주세요'); } }
+  if(ch){ renderWYarns(); toast('실 사전의 규격·색 목록을 불러왔어요. 다르면 고쳐 주세요'); } }
 function renderWNeedles(){
   const box=$('#wNeedlesBox'); if(!box) return;
   box.innerHTML = wNeedles.map((n,i)=>`<div class="ycard"><div class="yh">바늘 ${wNeedles.length>1?i+1:''}${wNeedles.length>1?`<button type="button" onclick="wnDel(${i})">지우기</button>`:''}</div>

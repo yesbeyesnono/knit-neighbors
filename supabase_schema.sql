@@ -1056,3 +1056,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_yarn_update(jsonb)(브랜드·제품명·별칭·규격·확정) / admin_yarn_merge(from, into)(같은 실 합치기: 로그·별칭 이동) — admin_logs yarn_update/yarn_merge
 --   관리자 콘솔 › 실 사전(표준화): 새 실 후보/확정 목록, 합치기, 호환 실·회원 입력 원문 보기
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 35. 실 색상 표준화 — 2026-09-20 (마이그레이션 yarn_colors_lexicon, yarn_color_family_logging)
+--   yarn_catalog 에 shop, source_url, season(여름|겨울|사계절), needle_knit, needle_crochet, gauge, put_up, product_en 추가
+--   yarn_colors(catalog_id, no, name, family): 실별 색 목록(쇼핑몰 표기 그대로). authenticated 읽기만
+--   color_lexicon(token, family, canonical_ko): 한글·영어 색 낱말 → 표준 색 계열 17종
+--     (화이트·아이보리 / 베이지·크림 / 브라운 / 그레이 / 블랙 / 레드 / 와인·버건디 / 핑크 / 오렌지 / 옐로·머스터드 / 그린 / 카키·올리브 / 민트·청록 / 블루·스카이 / 네이비 / 퍼플·라벤더 / 멀티·믹스)
+--   color_norm(text), color_family(text): 이름 안에서 **가장 오른쪽에 끝나는 낱말**을 기준색으로 판정("그레이베이지"→베이지, "Dusty Rose"→핑크, "곤색"·"Navy Blue"→네이비)
+--   yarn_entries.color_family, yarn_colors.family 는 트리거로 자동 채움 → 회원이 어떻게 적어도 색 계열 단위로 집계·매칭 가능
+--   앱: 사전의 실을 고르면 그 실의 색 목록이 색 입력칸 자동완성으로 뜸(직접 입력도 가능)
+-- ---------------------------------------------------------------

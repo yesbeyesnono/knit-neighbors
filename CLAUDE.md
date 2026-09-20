@@ -25,7 +25,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~34, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~35, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`). main 푸시 → GitHub 웹훅(id 679395520) → `ios-public` 자동 빌드 → TestFlight 'KOAP'(V2). Lab은 `lab-*` 태그. 자세한 내용은 위 '에디션' 절
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
