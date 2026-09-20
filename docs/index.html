@@ -870,6 +870,9 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <div class="cfl">모임 유형</div><div class="seg" id="mKind"></div>
       <label class="f" id="mTechWrap" hidden style="margin-top:10px">배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label>
       <div class="cfl">종목</div><div class="seg" id="mCraft"></div></div>
+    <div class="cfsec"><div class="cfh">대표 사진 <span>선택 · 1~4장 · 이번에 함께 뜰 작품을 보여 주세요</span></div>
+      <div class="cfphotos" id="mfPhotos"></div><input id="mFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
+      <p class="muted" style="font-size:.78rem;margin:8px 0 0">첫 번째 사진이 모임 글의 대표 이미지로 보여요.</p></div>
     <div class="cfsec"><div class="cfh">언제 <em>필수</em></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">날짜<input id="mDate" type="date"></label><label class="f">시작 시간<input id="mClock" type="time" step="600"></label></div>
       <div class="cfl">소요 시간</div><div class="seg" id="mDurSeg"></div>
@@ -2459,7 +2462,7 @@ async function pickPhotos(files, which){
     catch(e){ toast(e.message||'사진을 불러오지 못했어요'); }
   }
   renderPv(which);
-  const inp = which==='s' ? $('#sFile') : $('#cFile'); if(inp) inp.value=''; if(which==='s' && $('#wFile')) $('#wFile').value='';
+  const inp = which==='s' ? $('#sFile') : $('#cFile'); if(inp) inp.value=''; if(which==='s'){ if($('#wFile')) $('#wFile').value=''; if($('#mFile')) $('#mFile').value=''; }
 }
 function renderPv(which){
   if(which==='s') renderCertPhotos();
@@ -2506,7 +2509,12 @@ async function openCert(){
   show('cert'); $('#v-cert').scrollTop=0;
   loadTech().then(renderCertTech);
 }
+function renderMeetPhotos(){
+  const box=$('#mfPhotos'); if(!box) return;
+  box.innerHTML = sPhotos.map((p,i)=>`<div style="background-image:url(${p.url})">${i===0?'<span style="position:absolute;left:4px;bottom:4px;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--ink);color:#fff">대표</span>':''}<b onclick="sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" onclick="$('#mFile').click()">${ico('camera')}<br>${sPhotos.length?'추가':'사진'}</button>`:'');
+}
 function renderCertPhotos(){
+  renderMeetPhotos();
   const box=$('#cfPhotos'); if(!box) return;
   box.innerHTML = sPhotos.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" onclick="$('#wFile').click()">${ico('camera')}<br>${sPhotos.length?'추가':'사진'}</button>`:'');
   certCheck();
@@ -2632,7 +2640,7 @@ function mCapStep(d){ mCap=Math.max(0, Math.min(100, mCap+d)); if(mCap===1) mCap
 async function openMeetForm(){
   if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
   if(!((myProfile?.cert_count||0)>0)) return openMeetGate();
-  closeSub(); composeKind='meetup';
+  closeSub(); composeKind='meetup'; sPhotos=[]; renderMeetPhotos();
   if(!['compose','cert','meetform'].includes(view)) composeBack=view;
   if(!$('#mKind').children.length){
     seg('#mKind', MKIND); seg('#mCraft', MCRAFT); seg('#mDurSeg', M_DUR); seg('#mRepeatSeg', M_REP); seg('#mFeeSeg', M_FEE);
@@ -2676,9 +2684,10 @@ async function submitMeet(){
     const feeK=segVal('#mFeeSeg'); const fee = feeK==='custom' ? ($('#mFee').value.trim()||null) : (M_FEE[feeK]||null);
     const extra = { kind, craft: segVal('#mCraft')||'both', level_min: lmin?+lmin:null, level_max: lmax?+lmax:null, technique_id: kind==='workshop'?$('#mTech').value:null,
       capacity: mCap>=2?mCap:null, fee, bring: $('#mBring').value.trim()||null, duration_min:+(segVal('#mDurSeg')||120), repeat:segVal('#mRepeatSeg')||'once', address: c.addr||null };
-    const { error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:when.toISOString(), p_is_public:$('#mPublic').checked, p_body: $('#mDesc').value.trim()||null, p_lat:c.lat, p_lng:c.lng, p_photos:[], p_extra: extra });
+    const photos = await uploadPhotos(sPhotos);
+    const { error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:when.toISOString(), p_is_public:$('#mPublic').checked, p_body: $('#mDesc').value.trim()||null, p_lat:c.lat, p_lng:c.lng, p_photos:photos, p_extra: extra });
     if(error) throw new Error(error.message.replace(/^.*?: /,''));
-    await loadMyRooms(); toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
+    sPhotos=[]; await loadMyRooms(); toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
     composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
   }catch(e){ toast(e.message); b.disabled=false; }
 }
