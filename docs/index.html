@@ -601,6 +601,49 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .upin.author .tail{border-top-color:#8a6d1a}
 .upin.author .lbl{background:#8a6d1a}
 .authlink{display:flex;align-items:center;gap:6px;margin:10px 16px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none;font-size:.9rem;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.authlink span{margin-left:auto;color:var(--ink3)}
+/* ===== Phase 1 (2026-09-20 시안): ＋ 팝업 · 작품 인증/모임 새 페이지 · 보조 화면 · 모임 채팅 ===== */
+.plusrow{display:flex;align-items:center;gap:14px;width:100%;padding:14px 4px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.plusrow:last-of-type{border-bottom:0}.plusrow .pi{flex:none;width:42px;height:42px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center}
+.plusrow b{display:block;font-size:1rem}.plusrow span{display:block;font-size:.82rem;color:var(--ink2)}.plusrow .lock{color:var(--yarn);font-weight:600}
+.cfreq{display:flex;gap:8px;align-items:center;padding:6px 16px 12px;font-size:.8rem;color:var(--ink2)}
+.cfreq i{font-style:normal;display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink3)}
+.cfreq i.ok{background:var(--moss-soft);border-color:var(--moss-soft);color:var(--moss);font-weight:600}
+.cfsec{padding:16px;border-top:8px solid var(--bg2)}
+.cfsec input:not([type=checkbox]):not([type=hidden]),.cfsec textarea,.cfsec select,.subbody input:not([type=checkbox]),.subbody select{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.cfh{font-weight:700;font-size:1rem;margin-bottom:10px}.cfh em{font-style:normal;font-size:.72rem;font-weight:600;color:var(--moss);background:var(--moss-soft);padding:2px 7px;border-radius:999px;margin-left:6px;vertical-align:middle}.cfh span{font-weight:400;font-size:.8rem;color:var(--ink3);margin-left:6px}
+.cfl{font-size:.82rem;color:var(--ink2);font-weight:500;margin:14px 0 6px}
+.cfphotos{display:flex;gap:8px}.cfphotos>div,.cfphotos>button{flex:none;width:78px;height:78px;border-radius:12px;border:1px dashed var(--line);background:var(--bg2) center/cover no-repeat;position:relative;font:inherit;color:var(--ink3);font-size:.78rem;cursor:pointer}
+.cfphotos>div{border-style:solid}.cfphotos>div b{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer}
+#cfTechChips{display:flex;flex-wrap:wrap;gap:6px}#cfTechChips span{font-size:.85rem;padding:6px 12px;border-radius:999px;background:var(--ink);color:#fff}#cfTechChips span.custom{background:var(--accent-soft);color:var(--ink)}
+.cfrow{display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 2px;border:0;border-top:1px solid var(--line);background:none;font:inherit;color:inherit;cursor:pointer;margin-top:8px}
+.ysum{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;cursor:pointer}
+.ysum .dot{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line)}.ysum .tx{flex:1;min-width:0}.ysum .tx b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ysum .tx span{display:block;font-size:.82rem;color:var(--ink2)}
+.ysum button{flex:none;border:0;background:none;color:var(--ink3);font:inherit;padding:6px;cursor:pointer}
+.stepper{display:inline-flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stepper button{width:48px;height:46px;border:0;background:var(--bg2);font:inherit;font-size:1.3rem;color:var(--ink);cursor:pointer}
+.stepper b,.stepper input{width:84px!important;text-align:center;font-size:1.15rem;font-weight:700;border:0!important;border-radius:0!important;padding:0!important;height:46px;background:#fff}
+.subpg{position:absolute;inset:0;z-index:900;background:var(--bg);display:flex;flex-direction:column}
+.subbody{flex:1;overflow-y:auto;padding:4px 16px 28px}
+.subbody .seg{margin:10px 0}
+.plist{display:flex;flex-direction:column}
+.plist>button{display:flex;align-items:center;gap:12px;width:100%;padding:13px 2px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.plist>button .pi{flex:none;width:36px;height:36px;border-radius:10px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center}
+.plist>button b{display:block}.plist>button span{display:block;font-size:.82rem;color:var(--ink2)}
+.vtag{display:inline-block;font-size:.68rem;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--moss-soft);color:var(--moss);margin-left:6px;vertical-align:middle}
+.specband{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--moss-soft);font-size:.85rem;margin:8px 0 4px}.specband div{flex:1;min-width:0}.specband b{display:block;color:var(--moss);font-size:.78rem}.specband button{flex:none;border:0;background:none;font:inherit;text-decoration:underline;color:var(--ink2);cursor:pointer}
+.cgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px 6px;margin:8px 0}
+.cgrid button{border:0;background:none;font:inherit;font-size:.7rem;color:var(--ink2);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:0;line-height:1.2;word-break:break-all}
+.cgrid button i{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:block}.cgrid button.on i{outline:2.5px solid var(--ink);outline-offset:2px}.cgrid button.on{color:var(--ink);font-weight:600}
+.minimap{height:130px;border-radius:14px;overflow:hidden;background:var(--bg2);position:relative;margin-bottom:10px}.minimap .mm{position:absolute;inset:0}
+.cpin{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);z-index:2;pointer-events:none;color:var(--moss);filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+.pickmap{position:relative;height:56vh;border-radius:14px;overflow:hidden;background:var(--bg2);margin:8px 0 12px}.pickmap .mm{position:absolute;inset:0}
+.placecard{display:flex;gap:10px;align-items:flex-start}.placecard .tx{flex:1;min-width:0}.placecard .tx span{display:block;font-size:.85rem;color:var(--ink2)}
+.mbadge{flex:none;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--moss-soft);color:var(--moss);margin-left:6px;vertical-align:middle}.mbadge.end{background:var(--bg2);color:var(--ink3)}
+.ava.meet{border-radius:12px;background:var(--moss-soft);color:var(--moss);display:flex;align-items:center;justify-content:center}
+.item .tx .when{display:block;font-size:.78rem;color:var(--moss);font-weight:500}
+.roomstrip{padding:8px 16px;font-size:.82rem;color:var(--moss);background:var(--moss-soft);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-room #roomTitle{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mirow{display:flex;gap:10px;align-items:flex-start;padding:4px 0}.mirow>i{flex:none;margin-top:2px;color:var(--ink3)}.mirow span{display:block;font-size:.85rem;color:var(--ink2)}
 .evstrip{display:flex;gap:10px;overflow-x:auto;padding:10px 16px 2px;scrollbar-width:none}.evstrip::-webkit-scrollbar{display:none}.evstrip:empty{display:none}
 .evcard{flex:0 0 auto;width:min(78vw,300px);border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg,#fff);cursor:pointer}
 .evcard .ek{font-size:.72rem;font-weight:700;color:var(--ink2,#6A6E73)}.evcard b{display:block;margin:3px 0 4px;font-size:.98rem}.evcard .em{font-size:.8rem;color:var(--ink2,#6A6E73)}.evcard .es{margin-top:6px;font-size:.8rem;font-weight:600}
@@ -757,7 +800,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 채팅방 -->
   <section class="view" id="v-room">
-    <div class="top"><button class="back" onclick="leaveRoom()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="roomTitle"></h1><button class="btn sm o" id="meetBtn" onclick="openMeetupForm()" hidden><i class="ico" data-ico="location"><b>📍</b></i> 모임</button></div>
+    <div class="top"><button class="back" onclick="leaveRoom()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="roomTitle"></h1><span class="mbadge" id="roomBadge" hidden>모임</span><span style="flex:1"></span><button class="btn sm o" id="meetInfoBtn" onclick="openMeetInfo()" hidden><i class="ico" data-ico="location"><b>📍</b></i> 모임 정보</button></div>
+    <div class="roomstrip" id="roomStrip" onclick="openMeetInfo()" hidden></div>
     <div class="msgs" id="msgs"></div>
     <div class="compose kk"><button type="button" class="kkplus" title="사진 보내기" onclick="$('#chatFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><input id="chatFile" type="file" accept="image/*" hidden onchange="sendChatPhoto(this.files[0]);this.value=''"><div class="kkbox"><input id="msgIn" placeholder="메시지 입력" maxlength="1000" onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)sendMsg()"><button type="button" class="kksend" title="보내기" onclick="sendMsg()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
   </section>
@@ -768,69 +812,17 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
     <div class="body" id="skillsBody"></div>
   </section>
 
-  <!-- 새 글 / 모임 만들기 (전체 화면) -->
+  <!-- 새 글 · 모임 후기 · 가게 소식 (전체 화면) -->
   <section class="view" id="v-compose">
     <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1 id="composeTitle">새 글</h1><button class="btn" id="sPost" onclick="submitCompose()">게시</button></div>
     <div class="body">
-      <div class="kind" id="composeKind"><button data-k="post" class="on">글</button><button data-k="work">작품 인증</button><button data-k="meetup">모임</button><button data-k="shop" hidden id="kShop">가게 소식</button><button data-k="pattern" hidden id="kPattern">도안</button></div>
       <div class="row2"><div id="sAva"></div><div style="flex:1;min-width:0"><div class="cname" id="sName"></div>
-        <div class="wfields" id="wfields" hidden>
-          <div class="mtitle"><i class="ico" data-ico="cert"><b>🏅</b></i> 작품 인증</div>
-          <div class="hint" style="font-size:.8rem;color:var(--ink2)">완성한 작품 사진과 사용한 기법을 올리면 내 기법 체크에 <b>인증</b> 표시가 붙고, 모임을 열 수 있어요.</div>
-          <label class="f">작품 이름<input id="wTitle" maxlength="60" placeholder="예: 그래니 스퀘어 가디건"></label>
-          <div class="f">사용한 기법 <span class="picked" id="wPicked">0개 선택</span>
-            <div class="tsel"><div class="tabs" id="wCraftTabs"><button type="button" data-c="crochet" class="on">코바늘</button><button type="button" data-c="knitting">대바늘</button></div><div id="wTechList"></div></div>
-          </div>
-          <div class="f">목록에 없는 기법 <span class="muted">(직접 입력, 쉼표로 구분)</span>
-            <input id="wCustom" maxlength="200" placeholder="예: 브리오슈 2색, 튀니지안 심플 스티치">
-            <div class="tchips" id="wCustomChips"></div>
-            <span class="hint" style="font-size:.78rem;color:var(--ink3)">기본 목록은 60종이에요. 여기 적어 주신 기법은 모아서 목록에 추가할게요.</span>
-          </div>
-          <label class="f" id="wEventRow" hidden>이벤트 인증<select id="wEvent" onchange="wEventPicked()"></select><span class="hint" style="font-size:.78rem;color:var(--ink3)">선정된 이벤트의 작품이면 골라 주세요. 샘플을 받아 뜬 작품에는 「샘플 제공」 표시가 붙어요.</span></label>
-          <label class="f">작품 종류<select id="wItem"><option value="">선택</option><option>소품·키링</option><option>인형</option><option>가방·파우치</option><option>모자</option><option>목도리·숄</option><option>의류</option><option>블랭킷·쿠션</option><option>수세미·코스터</option><option>기타</option></select></label>
-          <div class="mtitle" style="font-size:.85rem;color:var(--ink2)">실·바늘 <span class="muted">(선택 · 적어 주신 정보는 실 사전과 추천을 만드는 데 쓰여요)</span></div>
-          <div id="wYarnsBox"></div>
-          <div class="yadd"><button type="button" onclick="wyAdd(true)">＋ 같은 실, 다른 색</button><button type="button" onclick="wyAdd(false)">＋ 실 추가</button></div>
-          <div id="wNeedlesBox"></div>
-          <div class="yadd"><button type="button" onclick="wnAdd()">＋ 바늘 추가</button><button type="button" id="wMoreBtn" onclick="$('#wMore').hidden=!$('#wMore').hidden">게이지·완성 크기 적기</button></div>
-          <div id="wMore" hidden>
-            <div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <label class="f">게이지 <span class="muted">(10cm)</span><input id="wGauge" maxlength="60" placeholder="예: 20코 24단"></label>
-              <label class="f">완성 크기<input id="wSize" maxlength="60" placeholder="예: 지름 11cm"></label>
-            </div>
-          </div>
-          <datalist id="yarnDL"></datalist>
-          <label class="f">한 줄 소감 <span class="muted">(선택)</span><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px;background:#fff"></textarea></label>
-          <div class="hint" style="font-size:.8rem;color:var(--ink2)">사진은 아래 <i class="ico" data-ico="camera"><b>📷</b></i> 로 1~4장 (필수)</div>
-        </div>
         <div class="rvbanner" id="rvbanner" hidden><span class="muted" style="font-size:12px"><i class="ico" data-ico="yarn"><b>🧶</b></i> 모임 후기</span><b id="rvTitle"></b><span class="muted" id="rvSub"></span></div>
-        <div class="gate" id="mgate" hidden>
-          <b><i class="ico" data-ico="cert"><b>🏅</b></i> 모임을 열려면 작품 인증이 필요해요</b>
-          <div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div>
-          <button class="btn" type="button" onclick="setComposeKind('work')">작품 인증하러 가기</button>
-        </div>
         <div class="pfields" id="pfields" hidden>
           <div class="mtitle" id="pShopName">가게 소식</div>
           <div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">종류<select id="pKind"><option value="notice">소식</option><option value="sale">할인</option><option value="new">신상</option><option value="meetup">모임</option><option value="class">클래스</option></select></label><label class="f">마감일 <span class="muted">(선택)</span><input id="pEnds" type="date"></label></div>
           <label class="f">제목<input id="pTitle" maxlength="60" placeholder="예: 가을 신상 실 입고 · 10% 할인"></label>
           <span class="hint" style="font-size:.78rem;color:var(--ink3)">팔로워에게 알림이 가고, 근처 이웃의 지도 핀에 종이 울려요. 사진은 아래 카메라로.</span>
-        </div>
-        <div class="mfields" id="mfields" hidden>
-          <div class="mtitle"><i class="ico" data-ico="location"><b>📍</b></i> 모임 정보</div>
-          <label class="f">모임 이름<input id="mTitle" maxlength="60" placeholder="예: 토요 뜨개 모임"></label>
-          <div class="f">모임 유형<div class="seg" id="mKind"></div></div>
-          <label class="f" id="mTechWrap" hidden>배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label>
-          <div class="f">종목<div class="seg" id="mCraft"></div></div>
-          <div class="f">권장 뜨개 단계<div class="lv"><select id="mLvMin"></select><span>~</span><select id="mLvMax"></select></div><span class="hint">참여자에게 "내 단계에 맞아요 / 조금 높아요"로 보여요</span></div>
-          <label class="f">장소 이름<input id="mPlace" maxlength="80" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label>
-          <div class="f">장소 위치 <span class="hint" style="display:inline">지도에 이 위치로 모임 핀이 찍혀요</span>
-            <div style="display:flex;gap:8px"><input id="mAddr" maxlength="120" placeholder="주소나 장소 이름으로 검색 (예: 일산 호수공원)" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();searchPlace('m')}"><button type="button" class="btn o sm" style="flex:none" onclick="searchPlace('m')">검색</button></div>
-            <div id="mAddrRes" class="placeres"></div><div id="mAddrSel" class="placesel" hidden></div></div>
-          <div class="g2"><label class="f">일시<input id="mTime" type="datetime-local"></label><label class="f">소요 시간<select id="mDur"><option value="60">1시간</option><option value="90">1시간 30분</option><option value="120" selected>2시간</option><option value="180">3시간</option><option value="240">반나절</option></select></label></div>
-          <div class="g2"><label class="f">반복<select id="mRepeat"><option value="once">한 번</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option></select></label><label class="f">정원<input id="mCap" type="number" min="2" max="100" placeholder="비우면 제한 없음"></label></div>
-          <div class="g2"><label class="f">참가비<input id="mFee" maxlength="40" placeholder="예: 무료 / 각자 음료 / 5,000원"></label><label class="f">준비물<input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘"></label></div>
-          <label class="f">모임 소개 <span class="muted">(선택)</span><textarea id="mDesc" maxlength="300" placeholder="예: 초보 환영, 실·바늘 지참. 각자 뜨면서 수다" style="min-height:64px;background:#fff"></textarea></label>
-          <div class="sw"><span>지도에 공개 (동네 뜨개인 누구나 참여)</span><input type="checkbox" id="mPublic" checked></div>
         </div>
         <textarea id="sText" maxlength="500" placeholder="새로운 소식이 있나요?" rows="3" oninput="autoGrow(this)"></textarea>
         <div class="pv" id="sPv"></div></div></div>
@@ -841,6 +833,65 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       </div>
     </div>
   </section>
+
+
+  <!-- 작품 인증 (새 페이지) -->
+  <section class="view" id="v-cert">
+    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>작품 인증</h1><button class="btn" id="certPost" onclick="submitCert()" disabled>게시</button></div>
+    <div class="cfreq" id="cfReq"></div>
+    <div class="cfsec"><div class="cfh">사진 <em>필수</em><span>1~4장</span></div>
+      <div class="cfphotos" id="cfPhotos"></div><input id="wFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')"></div>
+    <div class="cfsec"><div class="cfh">작품 <em>필수</em></div>
+      <input id="wTitle" maxlength="60" placeholder="작품 이름 (예: 그래니 스퀘어 가디건)" oninput="certCheck()">
+      <div class="cfl">작품 종류</div><div class="seg" id="wItemChips"></div><input type="hidden" id="wItem">
+      <label class="f" id="wEventRow" hidden style="margin-top:12px">이벤트 인증<select id="wEvent" onchange="wEventPicked()"></select><span class="hint" style="font-size:.78rem;color:var(--ink3)">선정된 이벤트의 작품이면 골라 주세요. 샘플을 받아 뜬 작품에는 「샘플 제공」 표시가 붙어요.</span></label></div>
+    <div class="cfsec"><div class="cfh">사용한 기법 <em>필수</em></div>
+      <div class="tchips" id="cfTechChips"></div>
+      <button type="button" class="cfrow" onclick="openTechSub()"><span>기법 고르기</span><span class="muted" id="wPicked">0개 선택 ›</span></button></div>
+    <div class="cfsec"><div class="cfh">실 <span>선택 · 실 사전에서 고르면 규격이 자동으로 채워져요</span></div>
+      <div id="wYarnsBox"></div>
+      <div class="yadd"><button type="button" onclick="openYarnPick(-1)">＋ 실 추가</button><button type="button" id="wySameBtn" onclick="wyAddSame()">＋ 같은 실, 다른 색</button></div></div>
+    <div class="cfsec"><div class="cfh">바늘 <span>선택</span></div>
+      <div class="seg" id="wNeedlesBox"></div></div>
+    <div class="cfsec">
+      <button type="button" class="cfrow" onclick="$('#wMore').hidden=!$('#wMore').hidden"><span>게이지·완성 크기 적기</span><span class="muted">선택 ›</span></button>
+      <div id="wMore" hidden style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+        <label class="f">게이지 <span class="muted">(10cm)</span><input id="wGauge" maxlength="60" placeholder="예: 20코 24단"></label>
+        <label class="f">완성 크기<input id="wSize" maxlength="60" placeholder="예: 지름 11cm"></label></div>
+      <div class="cfl">한 줄 소감 (선택)</div><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px"></textarea>
+      <p class="muted" style="font-size:.78rem;margin:10px 0 0">적어 주신 실·바늘 정보는 실 사전과 추천을 만드는 데 쓰여요. 커뮤니티 "작품" 탭에 올라가요.</p></div>
+  </section>
+
+  <!-- 모임 만들기 (새 페이지) -->
+  <section class="view" id="v-meetform">
+    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>모임 만들기</h1><button class="btn" id="meetPost" onclick="submitMeet()">게시</button></div>
+    <div class="cfsec"><div class="cfh">어떤 모임인가요 <em>필수</em></div>
+      <input id="mTitle" maxlength="60" placeholder="모임 이름 (예: 토요 뜨개 모임)">
+      <div class="cfl">모임 유형</div><div class="seg" id="mKind"></div>
+      <label class="f" id="mTechWrap" hidden style="margin-top:10px">배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label>
+      <div class="cfl">종목</div><div class="seg" id="mCraft"></div></div>
+    <div class="cfsec"><div class="cfh">언제 <em>필수</em></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">날짜<input id="mDate" type="date"></label><label class="f">시작 시간<input id="mClock" type="time" step="600"></label></div>
+      <div class="cfl">소요 시간</div><div class="seg" id="mDurSeg"></div>
+      <div class="cfl">반복</div><div class="seg" id="mRepeatSeg"></div></div>
+    <div class="cfsec"><div class="cfh">어디서 <em>필수</em></div>
+      <div id="mPlaceBox"></div>
+      <input id="mPlaceDetail" maxlength="40" placeholder="상세 위치 (선택) — 예: 2층 창가, 노래하는 분수대 앞" style="margin-top:10px"></div>
+    <div class="cfsec"><div class="cfh">누구와</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">권장 단계 (부터)<select id="mLvMin"></select></label><label class="f">권장 단계 (까지)<select id="mLvMax"></select></label></div>
+      <div class="cfl">정원 <span class="muted">0이면 제한 없음</span></div><div class="stepper"><button type="button" onclick="mCapStep(-1)">−</button><b id="mCapVal">0</b><button type="button" onclick="mCapStep(1)">＋</button></div>
+      <div class="cfl">참가비</div><div class="seg" id="mFeeSeg"></div><input id="mFee" maxlength="40" placeholder="예: 5,000원" hidden style="margin-top:8px">
+      <div class="cfl">준비물 (선택)</div><input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘"></div>
+    <div class="cfsec"><div class="cfl" style="margin-top:0">모임 소개 (선택)</div><textarea id="mDesc" maxlength="300" placeholder="예: 초보 환영, 실·바늘 지참. 각자 뜨면서 수다" style="min-height:64px"></textarea>
+      <div class="sw" style="margin-top:12px"><span>지도에 공개 <span class="muted">동네 뜨개인 누구나 참여</span></span><input type="checkbox" id="mPublic" checked></div>
+      <p class="muted" style="font-size:.78rem;margin:10px 0 0">커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요. 첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</p></div>
+  </section>
+
+  <!-- 보조 화면(기법 고르기 · 실 고르기 · 색·사용량 · 장소 검색): 폼 위에 덮는 한 장 -->
+  <div class="subpg" id="subpg" hidden>
+    <div class="top"><button class="back" onclick="subBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="subTitle"></h1><button class="btn" id="subAct" hidden></button></div>
+    <div class="subbody" id="subBody"></div>
+  </div>
 
   <!-- 다른 사람 프로필 (Threads 프로필 페이지) -->
   <!-- 가게(파트너) 페이지 -->
@@ -1085,7 +1136,7 @@ const NAV_OF = { friends:'chats', skills:'my', activity:'my', post:'comm', profi
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my','activity','shop'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
 document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(a && isNative){ e.preventDefault(); CAP.Plugins.Browser.open({ url: new URL(a.getAttribute('href'), 'https://yesbeyesnono.github.io/knit-neighbors/').href }); } });
-$('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openCompose('post'); return; } go(b.dataset.v); };
+$('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openPlusSheet(); return; } go(b.dataset.v); };
 
 // ============ 온보딩 ============
 seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
@@ -1810,11 +1861,11 @@ async function fillWEvent(){
   sel.innerHTML='<option value="">연결 안 함</option>'+list.map(x=>`<option value="${x.ev.id}">${esc(x.ev.title)}</option>`).join(''); row.hidden=false;
   if(pre && fillWEvent.map[pre]){ sel.value=pre; wEventPicked(); }
 }
-async function wEventPicked(){   // 이벤트에 실 사전의 실이 연결돼 있으면 첫 실 칸을 채워 준다
-  const ev=(fillWEvent.map||{})[$('#wEvent').value]; if(!ev?.catalog_id || (wYarns[0]?.name||'').trim()) return;
+async function wEventPicked(){   // 이벤트에 실 사전의 실이 연결돼 있으면 실 카드를 하나 만들어 준다
+  const ev=(fillWEvent.map||{})[$('#wEvent').value]; if(!ev?.catalog_id || wYarns.length) return;
   const { data:c } = await sb.from('yarn_catalog').select('product').eq('id', ev.catalog_id).maybeSingle(); if(!c) return;
   const { data } = await sb.rpc('yarn_suggest', { p_q:c.product }); const r=(data||[]).find(x=>x.id===ev.catalog_id); if(!r) return;
-  yarnSug[r.name]=r; wYarns[0].name=r.name; renderWYarns(); wyPickName(0);
+  wYarns=[await yarnFromDict(r)]; renderWYarns();
 }
 
 // ============ 채팅 ============
@@ -1830,14 +1881,15 @@ async function fetchRooms(){
   await loadMyRooms(); if(!myRoomIds.size) return [];
   const { data, error } = await sb.from('rooms').select('id,kind,title,created_at, room_members(profile_id, profiles(id,nickname,avatar_url)), messages(body,photo_url,place,created_at,sender_id)').in('id',[...myRoomIds]).order('created_at',{foreignTable:'messages',ascending:false}).limit(1,{foreignTable:'messages'});
   if(error){ toast('채팅 조회 실패: '+error.message); return []; }
-  return (data||[]).map(r=>{ r.others=r.room_members.map(m=>m.profiles).filter(p=>p&&p.id!==me.id); r.name=r.kind==='direct'?(r.others[0]?.nickname||'(나간 사용자)'):(r.title||r.others.map(p=>p.nickname).join(', ')); r.last=r.messages?.[0]; return r; })
+  const { data:mts } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,duration_min,repeat').in('room_id',[...myRoomIds]); const mtBy={}; (mts||[]).forEach(m=>{ const o=mtBy[m.room_id]; if(!o || new Date(m.starts_at)>new Date(o.starts_at)) mtBy[m.room_id]=m; });
+  return (data||[]).map(r=>{ r.meetup=mtBy[r.id]||null; r.others=r.room_members.map(m=>m.profiles).filter(p=>p&&p.id!==me.id); r.name=r.kind==='direct'?(r.others[0]?.nickname||'(나간 사용자)'):(r.title||r.others.map(p=>p.nickname).join(', ')); r.last=r.messages?.[0]; return r; })
     .sort((a,b)=>new Date(b.last?.created_at||b.created_at)-new Date(a.last?.created_at||a.created_at));
 }
 async function renderChats(){
   const rooms = await fetchRooms();
   const sup = rooms.find(isSupportRoom); const rest = rooms.filter(r=>r!==sup);
   const supRow = me.id===SUPPORT_ID ? '' : `<div class="item support" onclick="${sup?`openRoom('${sup.id}')`:'openSupportRoom()'}"><div class="ava">${ico('yarn')}</div><div class="tx"><b>뜨개동네 지기<span class="tag">운영진</span></b><span>${esc(sup?.last?.body||'궁금한 점·불편한 점을 편하게 남겨 주세요')}</span></div><span class="muted">${sup?.last?ago(sup.last.created_at):''}</span></div>`;
-  $('#chatsBody').innerHTML = `<div class="pfriends" id="pfriends" style="padding-bottom:10px;border-bottom:1px solid var(--line)" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>` + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b><span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
+  $('#chatsBody').innerHTML = `<div class="pfriends" id="pfriends" style="padding-bottom:10px;border-bottom:1px solid var(--line)" onclick="go('friends')"><span class="muted">친구 불러오는 중…</span></div>` + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):r.meetup?'<div class="ava meet">'+ico('location')+'</div>':'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)}${r.meetup?(meetEnded(r.meetup)?'<span class="mbadge end">모임 종료</span>':'<span class="mbadge">모임</span>'):''} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b>${r.meetup&&!meetEnded(r.meetup)?`<span class="when">${esc(fmtWhen(r.meetup.starts_at)+' · '+r.meetup.place_name)}</span>`:''}<span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
   renderMyFriends();
 }
 async function openDirectRoom(otherId){
@@ -1855,7 +1907,8 @@ async function openRoom(id){
   if(!r) return toast('방을 열 수 없어요');
   roomInfo=r; const others=r.room_members.map(m=>m.profiles).filter(p=>p&&p.id!==me.id);
   $('#roomTitle').textContent = r.kind==='direct'?(others[0]?.nickname||'채팅'):(r.title||others.map(p=>p.nickname).join(', '));
-  $('#meetBtn').hidden = r.kind!=='group';
+  roomMeetup=null; $('#roomBadge').hidden=true; $('#meetInfoBtn').hidden=true; $('#roomStrip').hidden=true;
+  if(r.kind==='group') sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(id,nickname)').eq('room_id', id).order('starts_at',{ascending:false}).limit(1).then(({data})=>{ if(roomId!==id || !data?.[0]) return; roomMeetup=data[0]; const end=meetEnded(roomMeetup); const b=$('#roomBadge'); b.hidden=false; b.textContent=end?'모임 종료':'모임'; b.classList.toggle('end', end); $('#meetInfoBtn').hidden=false; const st=$('#roomStrip'); st.hidden=end; st.innerHTML=`${ico('location')} ${esc(fmtWhen(roomMeetup.starts_at))} · ${esc(roomMeetup.place_name)} · ${roomMeetup.participant_count||r.room_members.length}명`; });
   show('room');
   const { data:msgs } = await sb.from('messages').select('*').eq('room_id',id).order('created_at').limit(200);
   $('#msgs').innerHTML = (isSupportRoom(r) && me.id!==SUPPORT_ID) ? `<div class="notice"><b>뜨개동네 지기 · 운영진</b>${SUPPORT_NOTICE}</div>` : ''; (msgs||[]).forEach(appendMsg); scrollMsgs();
@@ -1918,21 +1971,25 @@ async function createGroup(){
   if(r2.error) return toast('초대 실패: '+r2.error.message);
   toast('단체방을 만들었어요'); openRoom(room.id);
 }
-// 모임 (단체방에서)
-function openMeetupForm(){
-  const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7)); d.setHours(14,0,0,0);
-  const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  placePick.r=null;
-  openSheet(`<b>모임 만들기</b><label class="f">제목<input id="mtTitle" maxlength="60" value="${esc($('#roomTitle').textContent)} 모임"></label><label class="f">장소 이름<input id="mtPlace" placeholder="예: 카페 코바늘 (역삼역 3번 출구)"></label><div class="f">장소 위치<div style="display:flex;gap:8px"><input id="rAddr" maxlength="120" placeholder="주소나 장소 이름으로 검색" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing)searchPlace('r')"><button type="button" class="btn o sm" style="flex:none" onclick="searchPlace('r')">검색</button></div><div id="rAddrRes" class="placeres"></div><div id="rAddrSel" class="placesel" hidden></div></div><label class="f">시간<input id="mtTime" type="datetime-local" value="${local}"></label><label class="f"><span><input type="checkbox" id="mtPublic" style="width:auto;margin-right:6px">지도에 공개 (다른 뜨개인도 볼 수 있어요)</span></label><div class="card soft muted">첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</div><button class="btn" onclick="createMeetup()">만들기</button>`);
+// 모임 채팅방: 모임 정보 시트 (방에서 모임을 새로 만드는 기능은 2026-09-20 대표 지시로 삭제 — DB 함수는 남아 있음)
+let roomMeetup=null;
+function meetEnded(m){ if(!m) return false; if(m.repeat && m.repeat!=='once') return false; return new Date(m.starts_at).getTime() + (m.duration_min||120)*60000 < Date.now(); }
+function durTxt(min){ if(!min) return ''; return min>=240?'반나절':min%60?`${Math.floor(min/60)}시간 ${min%60}분`:`${min/60}시간`; }
+function openMeetInfo(){
+  const m=roomMeetup; if(!m) return; const g=parseGeo(m.location), end=meetEnded(m), host=m.created_by===me.id;
+  const lv = m.level_min||m.level_max ? `${m.level_min||1}~${m.level_max||5}단계` : '';
+  openSheet(`<div><span class="mbadge" style="margin-left:0">${end?'모임 종료':'모임'}</span> <span class="chip">${esc(MKIND[m.kind]||'자유 뜨개')}</span>${lv?` <span class="chip">${lv}</span>`:''}</div>
+    <b style="font-size:1.2rem">${esc(m.title)}</b><div class="muted" style="margin-top:-6px">주최 ${esc(m.host?.nickname||'')}</div>
+    <div class="mirow">${SVG_CAL}<div>${esc(fmtWhen(m.starts_at))}${m.duration_min?' · '+durTxt(m.duration_min):''}<span>${MREPEAT[m.repeat]||'한 번'}</span></div></div>
+    <div class="mirow">${ico('location')}<div>${esc(m.place_name)}${m.address?`<span>${esc(m.address)}</span>`:''}</div></div>
+    <div class="mirow">${ico('group')}<div>${m.participant_count||0}명 참여${m.capacity?` · 정원 ${m.capacity}명`:''}${m.fee||m.bring?`<span>${esc([m.fee?'참가비 '+m.fee:'', m.bring?'준비물 '+m.bring:''].filter(Boolean).join(' · '))}</span>`:''}</div></div>
+    <div style="display:flex;gap:8px">${g?`<a class="btn o" style="flex:1;text-align:center;text-decoration:none" href="https://map.kakao.com/link/to/${encodeURIComponent(m.place_name)},${g.lat},${g.lng}" target="_blank" rel="noopener">길찾기</a>`:''}<button class="btn o" style="flex:1" onclick="openRoomMembers()">참여자 보기</button></div>
+    <button class="btn" onclick="openMeetup('${m.id}')">모임 상세 전체 보기</button>
+    ${end?'':host?`<button class="btn r" onclick="askCancelMeetup('${m.id}', ${m.participant_count||1})">모임 취소 (주최자)</button>`:`<button class="btn o" onclick="leaveMeetup('${m.id}')">참여 취소</button>`}`);
 }
-async function createMeetup(){
-  const place=$('#mtPlace').value.trim(); if(!place) return toast('장소 이름을 적어 주세요');
-  const c = placePick.r; if(!c) return toast('장소 위치를 검색해서 골라 주세요');
-  if(!(myProfile?.cert_count>0)) return toast('모임을 열려면 작품 인증이 1회 이상 필요해요 (＋ › 작품 인증)');
-  const when=$('#mtTime').value; if(!when || new Date(when) < new Date()) return toast('일시를 지금 이후로 정해 주세요');
-  const { error } = await sb.rpc('create_meetup', { p_title:$('#mtTitle').value.trim()||'모임', p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mtPublic').checked, p_body:null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:[], p_extra:{ room_id: roomId, kind:'free', craft:'both', address: c.addr } });
-  if(error) return toast(error.message.replace(/^.*?: /,''));
-  toast('모임을 만들었어요'); closeSheet();
+function openRoomMembers(){
+  const ms=(roomInfo?.room_members||[]).map(x=>x.profiles).filter(Boolean);
+  openSheet(`<b style="font-size:1.05rem">참여자 ${ms.length}명</b><div class="list">${ms.map(p=>`<div class="item" style="padding:10px 0" onclick="closeSheet();openProfile('${p.id}')">${avatar(p)}<div class="tx"><b>${esc(p.nickname||'')}${roomMeetup?.created_by===p.id?'<span class="mbadge">주최</span>':''}</b></div></div>`).join('')}</div>`);
 }
 
 // ============ 커뮤니티 (Threads 스타일) ============
@@ -2136,7 +2193,7 @@ let wYarns=[], wNeedles=[], yarnSug={}, yarnSugTimer=null;
 function wyBlank(){ return { name:'', color:'', amount:'', unit:'볼', ball_g:'', ball_m:'', weight:'', weightManual:false, fiber:'', rating:'', rating_reason:'', mix:'' }; }
 function parseMix(t){ const o={}; (t||'').split(/[,/·]+/).forEach(x=>{ const m=/^\s*([^\d%]+?)\s*(\d{1,3})\s*%?\s*$/.exec(x); if(m && +m[2]<=100) o[m[1].trim().slice(0,12)]=+m[2]; }); return Object.keys(o).length?o:null; }
 function wDefaultNeedleType(){ const ids=[...wTechSel]; const k=ids.filter(x=>x[0]==='K').length, c=ids.filter(x=>x[0]==='C').length; if(k>c) return '대바늘'; if(c>k) return '코바늘'; return (myProfile?.craft==='knit')?'대바늘':'코바늘'; }
-function wyReset(){ fillWEvent(); const it=$('#wItem'); if(it) it.value=''; wYarns=[wyBlank()]; wNeedles=[{type:wDefaultNeedleType(), size:'', custom:false}]; renderWYarns(); renderWNeedles(); const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=''; if(z) z.value=''; const m=$('#wMore'); if(m) m.hidden=true; }
+function wyReset(){ fillWEvent(); wItemSet(''); wYarns=[]; wNeedles=[]; renderWYarns(); renderWNeedles(); const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=''; if(z) z.value=''; const m=$('#wMore'); if(m) m.hidden=true; }
 function needleMm(sz){ const m=/([0-9.]+)\s*mm/.exec(sz||''); return m?+m[1]:null; }
 function yarnWeightGuess(y){
   const g=+y.ball_g, m=+y.ball_m;
@@ -2147,51 +2204,44 @@ function yarnWeightGuess(y){
     return { name, why:`바늘 ${n.mm}mm 기준` }; }
   return null;
 }
-function wyHint(i){
-  const y=wYarns[i]; const el=document.getElementById('wyh-'+i); if(!el) return;
-  const gsel=document.getElementById('wyw-'+i);
-  if(y.weightManual){ el.innerHTML = y.weight?`굵기 <b>${esc(y.weight)}</b> (직접 고름)`:''; return; }
-  const g=yarnWeightGuess(y); y.weight = g?g.name:''; if(gsel) gsel.value=y.weight;
-  el.innerHTML = g ? `${esc(g.why)} → <b>${esc(g.name)} 정도</b>` : '1볼 중량·길이를 적으면 굵기를 알려 드려요 (볼밴드에 적혀 있어요). 몰라도 괜찮아요';
-}
+// 색 계열(color_lexicon 17종) 대표색 — 실마다 hex 가 없어서 색상칩은 계열 대표색으로 그린다
+const FAMHEX = {'화이트·아이보리':'#F7F3EA','베이지·크림':'#E3D2B4','브라운':'#8A5A3B','블랙':'#2B2B2B','그레이':'#9A9DA1','레드':'#C0392B','와인·버건디':'#7B2D3A','핑크':'#E8A0B4','오렌지':'#E58A3C','옐로·머스터드':'#D9A520','그린':'#4F8A4B','카키·올리브':'#7A7A45','민트·청록':'#58B7A8','블루·스카이':'#5C9BD6','네이비':'#27365E','퍼플·라벤더':'#9077B8','멀티·믹스':'linear-gradient(135deg,#E8A0B4,#D9A520,#58B7A8,#5C9BD6)'};
+function famBg(f){ return FAMHEX[f] || 'var(--bg2)'; }
+function ySpecLine(y){ return [y.ball_g&&y.ball_m?`${y.ball_g}g · ${y.ball_m}m`:(y.ball_g?`${y.ball_g}g`:''), y.mix||y.fiber||'', (y.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · '); }
+function yAmtTxt(y){ return y.amount!=='' && y.amount!=null ? `${y.amount}${y.unit||'볼'}` : ''; }
+function wyAutoWeight(y){ if(!y.weightManual){ const g=yarnWeightGuess(y); y.weight=g?g.name:''; } }
+function wyHintAll(){ wYarns.forEach(wyAutoWeight); renderWYarns(); }
 function renderWYarns(){
   const box=$('#wYarnsBox'); if(!box) return;
-  box.innerHTML = wYarns.map((y,i)=>`<div class="ycard">
-    <div class="yh">실 ${wYarns.length>1?i+1:''}${wYarns.length>1?`<button type="button" onclick="wyDel(${i})">지우기</button>`:''}</div>
-    <div class="row2"><label>실 이름<input list="yarnDL" maxlength="60" placeholder="브랜드 + 제품명 (예: 하마나카 아메리)" value="${esc(y.name)}" oninput="wySet(${i},'name',this.value)" onchange="wyPickName(${i})"></label>
-      <label>색 이름·번호<input list="ycDL-${i}" maxlength="40" placeholder="${(y.colors||[]).length?'목록에서 고르거나 직접 입력':'예: 베이지 #2'}" value="${esc(y.color)}" oninput="wySet(${i},'color',this.value)"><datalist id="ycDL-${i}">${(y.colors||[]).map(c=>`<option value="${esc((c.no?c.no+' ':'')+c.name)}">`).join('')}</datalist></label></div>
-    <div class="row3"><label>사용량<input inputmode="decimal" maxlength="7" placeholder="예: 2" value="${esc(y.amount)}" oninput="wySet(${i},'amount',this.value)"></label>
-      <label>단위<select onchange="wySet(${i},'unit',this.value)"><option ${y.unit==='볼'?'selected':''}>볼</option><option ${y.unit==='g'?'selected':''}>g</option></select></label>
-      <label>소재<select onchange="wySet(${i},'fiber',this.value)"><option value="">선택</option>${FIBERS.map(f=>`<option ${y.fiber===f?'selected':''}>${f}</option>`).join('')}</select></label></div>
-    <div class="row3"><label>1볼 중량 (g)<input inputmode="decimal" maxlength="6" placeholder="예: 40" value="${esc(y.ball_g)}" oninput="wySet(${i},'ball_g',this.value);wyHintAll()"></label>
-      <label>1볼 길이 (m)<input inputmode="decimal" maxlength="6" placeholder="예: 110" value="${esc(y.ball_m)}" oninput="wySet(${i},'ball_m',this.value);wyHintAll()"></label>
-      <label>굵기<select id="wyw-${i}" onchange="wyWeightManual(${i},this.value)"><option value="">자동</option>${YW_NAMES.map(n=>`<option ${y.weight===n?'selected':''}>${n}</option>`).join('')}</select></label></div>
-    <div class="yhint" id="wyh-${i}"></div>
-    <div class="row3"><label>이 실 어땠나요?<select onchange="wySet(${i},'rating',this.value)"><option value="">선택</option><option value="1" ${y.rating==='1'?'selected':''}>또 쓸래요</option><option value="0" ${y.rating==='0'?'selected':''}>보통</option><option value="-1" ${y.rating==='-1'?'selected':''}>비추</option></select></label>
-      <label>이유<select onchange="wySet(${i},'rating_reason',this.value)"><option value="">선택</option>${['부드러움','갈라짐','보풀','색감','가성비','뜨기 편함','뻣뻣함'].map(f=>`<option ${y.rating_reason===f?'selected':''}>${f}</option>`).join('')}</select></label>
-      <label>혼용률<input maxlength="40" placeholder="예: 울 80, 나일론 20" value="${esc(y.mix||'')}" oninput="wySet(${i},'mix',this.value)"></label></div></div>`).join('');
-  wyHintAll();
+  box.innerHTML = wYarns.map((y,i)=>`<div class="ysum" onclick="openYarnDetail(${i})"><div class="dot" style="background:${famBg(y.colorFamily)}"></div><div class="tx"><b>${esc(y.name)}</b><span>${esc([y.color, yAmtTxt(y)].filter(Boolean).join(' · ')||'색·사용량을 적어 보세요')}</span>${ySpecLine(y)?`<span>${esc(ySpecLine(y))}</span>`:''}</div><button type="button" title="지우기" onclick="event.stopPropagation();wyDel(${i})">${ico('close')}</button></div>`).join('');
+  const sb2=$('#wySameBtn'); if(sb2) sb2.hidden=!wYarns.length;
 }
-function wyHintAll(){ wYarns.forEach((_,i)=>wyHint(i)); }
-function wySet(i,k,v){ if(!wYarns[i]) return; wYarns[i][k]=v; if(k==='name') yarnSuggest(v); }
-function wyWeightManual(i,v){ const y=wYarns[i]; y.weightManual=!!v; y.weight=v; wyHint(i); }
-function wyAdd(sameYarn){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]||wyBlank(); const y=wyBlank(); if(sameYarn){ Object.assign(y,{name:last.name, catalogId:last.catalogId, colors:last.colors, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix}); } wYarns.push(y); renderWYarns(); }
-function wyDel(i){ wYarns.splice(i,1); if(!wYarns.length) wYarns=[wyBlank()]; renderWYarns(); }
-function yarnSuggest(q){ clearTimeout(yarnSugTimer); q=(q||'').trim(); if(q.length<1) return; yarnSugTimer=setTimeout(async()=>{ const { data } = await sb.rpc('yarn_suggest', { p_q:q }); (data||[]).forEach(r=>yarnSug[r.name]=r); const dl=$('#yarnDL'); if(dl) dl.innerHTML=(data||[]).map(r=>`<option value="${esc(r.name)}">${[r.verified?'확인된 실':'', r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.weight||''].filter(Boolean).join(' · ')}</option>`).join(''); }, 250); }
-async function wyPickName(i){ const y=wYarns[i], r=yarnSug[(y.name||'').trim()]; if(!r) return; let ch=false;
-  if(r.id && y.catalogId!==r.id){ y.catalogId=r.id; const { data:cs } = await sb.from('yarn_colors').select('no,name').eq('catalog_id', r.id).order('no').limit(80); y.colors=cs||[]; if(y.colors.length) ch=true; }   // 사전에 등록된 이 실의 색 목록   // 다른 회원이 적어 둔 규격으로 빈칸 채우기
-  if(!y.ball_g && r.ball_g){ y.ball_g=String(r.ball_g); ch=true; } if(!y.ball_m && r.ball_m){ y.ball_m=String(r.ball_m); ch=true; } if(!y.fiber && r.fiber){ y.fiber=r.fiber; ch=true; } if(!y.mix && r.fibers){ y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '); ch=true; }
-  if(ch){ renderWYarns(); toast('실 사전의 규격·색 목록을 불러왔어요. 다르면 고쳐 주세요'); } }
+function wyDel(i){ wYarns.splice(i,1); renderWYarns(); }
+function wyAddSame(){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]; if(!last) return openYarnPick(-1); const y=Object.assign(wyBlank(), {name:last.name, catalogId:last.catalogId, colors:last.colors, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix, fromDict:last.fromDict}); ydOpen(y, -1); }
+// 실 사전 한 줄(yarn_suggest 결과) → 입력용 실 객체. 색 목록도 같이 불러온다
+async function yarnFromDict(r){
+  const y=wyBlank(); y.name=r.name; y.catalogId=r.id||null; y.fromDict=!!r.id;
+  if(r.ball_g) y.ball_g=String(r.ball_g); if(r.ball_m) y.ball_m=String(r.ball_m); if(r.fiber) y.fiber=r.fiber; if(r.fibers) y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', ');
+  if(r.id){ const { data:cs } = await sb.from('yarn_colors').select('no,name,family').eq('catalog_id', r.id).order('id').limit(120); y.colors=cs||[]; }
+  wyAutoWeight(y); return y;
+}
 function renderWNeedles(){
   const box=$('#wNeedlesBox'); if(!box) return;
-  box.innerHTML = wNeedles.map((n,i)=>`<div class="ycard"><div class="yh">바늘 ${wNeedles.length>1?i+1:''}${wNeedles.length>1?`<button type="button" onclick="wnDel(${i})">지우기</button>`:''}</div>
-    <div class="row2"><label>종류<select onchange="wnSet(${i},'type',this.value)">${Object.keys(NEEDLES).map(t=>`<option ${n.type===t?'selected':''}>${t}</option>`).join('')}</select></label>
-      <label>호수${n.custom?`<input maxlength="30" placeholder="예: 4.0mm" value="${esc(n.size)}" oninput="wnSet(${i},'size',this.value,true)">`:`<select onchange="wnSize(${i},this.value)"><option value="">선택</option>${(NEEDLES[n.type]||[]).map(z=>`<option ${n.size===z?'selected':''}>${z}</option>`).join('')}<option value="__custom">직접 입력…</option></select>`}</label></div></div>`).join('');
+  box.innerHTML = wNeedles.map((n,i)=>`<button type="button" class="on" onclick="wnDel(${i})">${esc(n.type+' '+n.size)} ✕</button>`).join('') + `<button type="button" onclick="openNeedleAdd()">＋ 바늘 추가</button>`;
 }
-function wnSet(i,k,v,quiet){ const n=wNeedles[i]; if(!n) return; n[k]=v; if(k==='type'){ n.size=''; n.custom=false; } if(!quiet) renderWNeedles(); wyHintAll(); }
-function wnSize(i,v){ const n=wNeedles[i]; if(v==='__custom'){ n.custom=true; n.size=''; renderWNeedles(); return; } n.size=v; wyHintAll(); }
-function wnAdd(){ if(wNeedles.length>=4) return toast('바늘은 4개까지 적을 수 있어요'); wNeedles.push({type:wNeedles[wNeedles.length-1]?.type||wDefaultNeedleType(), size:'', custom:false}); renderWNeedles(); }
-function wnDel(i){ wNeedles.splice(i,1); renderWNeedles(); wyHintAll(); }
+let wnDraft=null;
+function openNeedleAdd(){
+  if(wNeedles.length>=4) return toast('바늘은 4개까지 적을 수 있어요');
+  wnDraft={ type: wNeedles[wNeedles.length-1]?.type||wDefaultNeedleType(), size:'' }; renderNeedleAdd();
+}
+function renderNeedleAdd(){
+  const n=wnDraft;
+  openSheet(`<b style="font-size:1.05rem">바늘 추가</b><div class="seg">${Object.keys(NEEDLES).map(t=>`<button type="button" class="${n.type===t?'on':''}" onclick="wnDraft.type=this.textContent;wnDraft.size='';renderNeedleAdd()">${t}</button>`).join('')}</div>
+    <div class="seg" style="max-height:38vh;overflow-y:auto">${(NEEDLES[n.type]||[]).map(z=>`<button type="button" class="${n.size===z?'on':''}" onclick="wnDraft.size=this.textContent;wnCommit()">${z}</button>`).join('')}</div>
+    <div style="display:flex;gap:8px"><input id="wnCustom" maxlength="30" placeholder="목록에 없으면 직접 입력 (예: 4.0mm)" style="flex:1"><button type="button" class="btn sm" onclick="wnDraft.size=$('#wnCustom').value.trim();wnCommit()">추가</button></div>`);
+}
+function wnCommit(){ if(!wnDraft?.size) return toast('호수를 골라 주세요'); wNeedles.push({type:wnDraft.type, size:wnDraft.size}); closeSheet(); renderWNeedles(); wYarns.forEach(wyAutoWeight); renderWYarns(); }
+function wnDel(i){ wNeedles.splice(i,1); renderWNeedles(); }
 function wYarnPayload(){
   const ys=wYarns.map(y=>({ name:(y.name||'').trim(), color:(y.color||'').trim(), amount:String(y.amount||'').trim(), unit:y.unit, ball_g:String(y.ball_g||'').trim(), ball_m:String(y.ball_m||'').trim(), weight:y.weight||'', fiber:y.fiber||'', rating:y.rating||'', rating_reason:y.rating_reason||'', fibers:parseMix(y.mix) })).filter(y=>y.name);
   const ns=wNeedles.filter(n=>(n.size||'').trim()).map(n=>({ type:n.type, size:n.size.trim() }));
@@ -2301,27 +2351,19 @@ async function geocodePlace(q){
   for(const qq of [q, q.replace(/\s+/g,'')]){ if(out.length) break; try{ const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=kr&accept-language=ko&q='+encodeURIComponent(qq)); (await r.json()).forEach(j=>out.push({ lat:+j.lat, lng:+j.lon, addr:(j.display_name||'').split(', ').reverse().filter(x=>x!=='대한민국').join(' ') })); }catch(e){} }
   return out.filter(x=>x.lat>32&&x.lat<40&&x.lng>123&&x.lng<133);
 }
-let placeRes=[];
-async function searchPlace(k){
-  const q=$('#'+k+'Addr').value.trim(); const box=$('#'+k+'AddrRes'); if(!q) return toast('주소나 장소 이름을 입력해 주세요');
-  box.innerHTML='<div class="muted" style="padding:6px 0">찾는 중…</div>';
-  placeRes = await geocodePlace(q);
-  box.innerHTML = placeRes.length ? placeRes.map((r,i)=>`<button type="button" onclick="pickPlace('${k}',${i})">${ico('location')} ${esc(r.addr)}</button>`).join('') : '<div class="muted" style="padding:6px 0">찾지 못했어요. 도로명 주소(예: 고양시 일산동구 호수로 595)로 다시 검색해 보세요</div>';
-}
-function pickPlace(k, i){
-  const r=placeRes[i]; if(!r) return; placePick[k]=r; $('#'+k+'AddrRes').innerHTML='';
-  const el=$('#'+k+'AddrSel'); el.hidden=false; el.innerHTML=`${ico('check')} <span style="flex:1;min-width:0">${esc(r.addr)}</span><a href="https://map.kakao.com/link/map/${encodeURIComponent(r.addr)},${r.lat},${r.lng}" target="_blank" rel="noopener">지도에서 확인</a>`;
-}
 function openMeetupLocEdit(id, place){
-  placePick.e=null;
+  placePick.e=null; openMeetupLocEdit.id=id; openMeetupLocEdit.place=place||'';
+  renderMeetupLocEdit();
+}
+function renderMeetupLocEdit(){
+  const r=placePick.e;
   openSheet(`<b>모임 장소 위치 수정</b><p class="muted" style="margin:0">지도의 모임 핀이 이 위치로 옮겨져요.</p>
-    <label class="f">장소 이름<input id="ePlace" maxlength="80" value="${esc(place||'')}"></label>
-    <div style="display:flex;gap:8px"><input id="eAddr" maxlength="120" placeholder="주소나 장소 이름으로 검색" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing)searchPlace('e')"><button type="button" class="btn o sm" style="flex:none" onclick="searchPlace('e')">검색</button></div>
-    <div id="eAddrRes" class="placeres"></div><div id="eAddrSel" class="placesel" hidden></div>
-    <button class="btn" onclick="saveMeetupLoc('${id}')">저장</button>`);
+    ${r?`<div class="placecard"><div class="tx"><b>${esc(r.name||r.addr)}</b><span>${esc(r.addr)}</span></div></div><label class="f">장소 이름<input id="ePlace" maxlength="80" value="${esc(r.name||openMeetupLocEdit.place)}"></label>`:''}
+    <button class="btn o" onclick="closeSheet();openPlaceSearch('e')">${r?'다른 장소 찾기':'장소 찾기'}</button>
+    ${r?`<button class="btn" onclick="saveMeetupLoc('${openMeetupLocEdit.id}')">저장</button>`:''}`);
 }
 async function saveMeetupLoc(id){
-  const r=placePick.e; if(!r) return toast('검색해서 위치를 골라 주세요');
+  const r=placePick.e; if(!r) return toast('장소를 찾아서 골라 주세요');
   const { error } = await sb.rpc('set_meetup_location', { p_meetup:id, p_lat:r.lat, p_lng:r.lng, p_address:r.addr, p_place:$('#ePlace').value.trim() });
   if(error) return toast(error.message);
   toast('모임 장소를 옮겼어요'); if(MapAdapter.ready) loadPins(); openMeetup(id);
@@ -2417,40 +2459,300 @@ async function pickPhotos(files, which){
     catch(e){ toast(e.message||'사진을 불러오지 못했어요'); }
   }
   renderPv(which);
-  const inp = which==='s' ? $('#sFile') : $('#cFile'); if(inp) inp.value='';
+  const inp = which==='s' ? $('#sFile') : $('#cFile'); if(inp) inp.value=''; if(which==='s' && $('#wFile')) $('#wFile').value='';
 }
 function renderPv(which){
+  if(which==='s') renderCertPhotos();
   const arr = which==='s' ? sPhotos : cPhotos, el = which==='s' ? $('#sPv') : $('#cPv'); if(!el) return;
   el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">${ico('close')}</b></div>`).join('');
 }
+// ============ Phase 1 (2026-09-20 시안): ＋ 선택 팝업 · 작품 인증 페이지 · 모임 만들기 페이지 · 보조 화면 ============
+const SVG_CAL = '<i class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></i>';
+const SVG_PEN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
+const SVG_SEARCH = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>';
+const SVG_PIN = '<svg viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
+
+// ----- ＋ 선택 팝업
+function openPlusSheet(){
+  const certified=(myProfile?.cert_count||0)>0;
+  const row=(fn, icon, title, sub, extra='')=>`<button type="button" class="plusrow" onclick="${fn}"><div class="pi">${icon}</div><div><b>${title}</b><span>${sub}</span>${extra}</div></button>`;
+  openSheet(`<b style="font-size:1.05rem">무엇을 올릴까요?</b><div>
+    ${row("closeSheet();openCompose('post')", SVG_PEN, '글', '동네 이웃에게 소식·질문 남기기')}
+    ${row("closeSheet();openCert()", ico('cert'), '작품 인증', '완성작 사진과 기법·실 기록 · 활동 레벨이 올라요')}
+    ${row("closeSheet();openMeetForm()", ico('location'), '모임 만들기', '장소·일시를 정해 이웃 모으기', certified?'':'<span class="lock">작품 인증 1개부터 열 수 있어요</span>')}
+    ${myShop?row("closeSheet();openCompose('shop')", ico('signal'), '가게 소식', esc(myShop.name)+' 팔로워에게 알리기'):''}
+    ${FULL && myProfile?.is_author?row("closeSheet();openPatternForm()", ico('ruler'), '도안', '내 도안 등록하기'):''}
+  </div><button class="btn o" onclick="closeSheet()">닫기</button>`);
+}
+function openMeetGate(){
+  openSheet(`<b>${ico('cert')} 모임을 열려면 작품 인증이 필요해요</b><div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div><button class="btn" type="button" onclick="closeSheet();openCert()">작품 인증하러 가기</button>`);
+}
+
+// ----- 보조 화면(한 장 덮기)
+let subOnBack=null;
+function openSub(title, html, act){ $('#subTitle').textContent=title; $('#subBody').innerHTML=html; const b=$('#subAct'); b.hidden=!act; if(act){ b.textContent=act.label; b.onclick=act.fn; } $('#subpg').hidden=false; $('#subBody').scrollTop=0; }
+function closeSub(){ $('#subpg').hidden=true; $('#subBody').innerHTML=''; subOnBack=null; }
+function subBack(){ const f=subOnBack; subOnBack=null; if(f) return f(); closeSub(); }
+
+// ----- 작품 인증 페이지
+const W_ITEMS=['소품·키링','인형','가방·파우치','모자','목도리·숄','의류','블랭킷·쿠션','수세미·코스터','기타'];
+function wItemSet(v){ const h=$('#wItem'); if(h) h.value=v||''; const box=$('#wItemChips'); if(box) box.innerHTML=W_ITEMS.map(x=>`<button type="button" class="${x===v?'on':''}" onclick="wItemSet(this.textContent)">${x}</button>`).join(''); }
+async function openCert(){
+  if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
+  closeSub(); sPhotos=[]; composeKind='work';
+  if(!['compose','cert','meetform'].includes(view)) composeBack=view;
+  $('#wTitle').value=''; $('#wNote').value=''; wCustom=[]; wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
+  wyReset(); renderCertPhotos(); renderCertTech(); certCheck();
+  show('cert'); $('#v-cert').scrollTop=0;
+  loadTech().then(renderCertTech);
+}
+function renderCertPhotos(){
+  const box=$('#cfPhotos'); if(!box) return;
+  box.innerHTML = sPhotos.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" onclick="$('#wFile').click()">${ico('camera')}<br>${sPhotos.length?'추가':'사진'}</button>`:'');
+  certCheck();
+}
+function renderCertTech(){
+  const box=$('#cfTechChips'); if(!box) return;
+  box.innerHTML = [...wTechSel].map(id=>`<span>${esc(techName(id))}</span>`).join('') + wCustom.map(t=>`<span class="custom">${esc(t)}</span>`).join('');
+  const n=wTechSel.size+wCustom.length; $('#wPicked').textContent = `${n}개 선택 ›`; certCheck();
+}
+function certCheck(){
+  const ok=[sPhotos.length>0, !!$('#wTitle')?.value.trim(), (wTechSel.size+wCustom.length)>0];
+  const el=$('#cfReq'); if(el) el.innerHTML='필수 3가지 '+['사진','작품 이름','기법'].map((t,i)=>`<i class="${ok[i]?'ok':''}">${ok[i]?'✓ ':''}${t}</i>`).join('');
+  const b=$('#certPost'); if(b && !certCheck.busy) b.disabled=!ok.every(Boolean);
+}
+function openTechSub(){
+  openSub('기법 고르기', `<div class="tsel" style="margin-top:8px"><div class="tabs" id="wCraftTabs"></div><div id="wTechList"></div></div>
+    <div class="cfl">목록에 없는 기법 <span class="muted">(직접 입력, 쉼표로 구분)</span></div>
+    <input id="wCustom" maxlength="200" placeholder="예: 브리오슈 2색, 튀니지안 심플 스티치"><div class="tchips" id="wCustomChips" style="margin-top:8px"></div>
+    <p class="muted" style="font-size:.78rem">기본 목록은 60종이에요. 여기 적어 주신 기법은 모아서 목록에 추가할게요.</p>`, { label:'완료', fn:()=>{ commitWCustom(); closeSub(); renderCertTech(); } });
+  subOnBack=()=>{ commitWCustom(); closeSub(); renderCertTech(); };
+  renderWTech(); renderWCustom();
+}
+async function submitCert(){
+  const b=$('#certPost'); certCheck.busy=true; b.disabled=true;
+  try{
+    const title=$('#wTitle').value.trim(); if(!title) throw new Error('작품 이름을 적어 주세요');
+    if(!wTechSel.size && !wCustom.length) throw new Error('사용한 기법을 하나 이상 골라 주세요');
+    if(!sPhotos.length) throw new Error('작품 사진을 1장 이상 올려 주세요');
+    await loadBanned(); if(hasBanned(title) || hasBanned($('#wNote').value) || wCustom.some(hasBanned)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+    const photos = await uploadPhotos(sPhotos);
+    const yp = wYarnPayload();
+    const evId = $('#wEvent')?.value||'';
+    const { data:newPost, error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn: yp.line, p_note: $('#wNote').value.trim()||null, p_custom: wCustom, p_yarn_meta: yp.meta });
+    if(error) throw new Error(error.message);
+    let evDone=false; if(evId && newPost){ const r2 = await sb.rpc('link_work_event', { p_post:newPost, p_event:evId }); if(r2.error) toast('이벤트 연결 실패: '+r2.error.message); else evDone=true; }
+    await loadMe(); sPhotos=[]; toast(evDone?'이벤트 인증까지 완료했어요!':`작품 인증 완료! Lv.${myProfile?.act_level||1}`); setTimeout(showRecsAfterWork, 600);
+    composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
+  }catch(e){ toast(e.message); }
+  certCheck.busy=false; certCheck();
+}
+
+// ----- 실 고르기 (datalist 대신 직접 그린 목록)
+let ypIdx=-1, ypTab='search', ypRows=[], ypTimer=null, ypSeq=0;
+function openYarnPick(idx){
+  if(idx<0 && wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요');
+  ypIdx=idx; ypTab='recent'; ypRows=[];
+  openSub('실 고르기', `<div style="position:relative;margin-top:8px"><span style="position:absolute;left:12px;top:13px;color:var(--ink3)">${SVG_SEARCH}</span><input id="ypQ" maxlength="60" placeholder="실 이름으로 찾기 (브랜드 + 제품명)" style="padding-left:38px" autocomplete="off" autocorrect="off" oninput="ypInput(this.value)"></div>
+    <div class="seg" id="ypTabs"></div><div class="plist" id="ypList"></div><div id="ypDirect"></div>`);
+  ypLoadTab('recent');
+}
+function ypTabsRender(){ $('#ypTabs').innerHTML=[['search','검색 결과'],['recent','최근 쓴 실'],['popular','이웃이 많이 쓴 실']].map(([k,l])=>`<button type="button" class="${ypTab===k?'on':''}" onclick="ypLoadTab('${k}')">${l}</button>`).join(''); }
+function ypRender(emptyMsg){
+  ypTabsRender();
+  $('#ypList').innerHTML = ypRows.length ? ypRows.map((r,i)=>`<button type="button" onclick="ypPick(${i})"><div><b>${esc(r.name)}${r.verified?'<span class="vtag">확인된 실</span>':''}</b><span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('') : `<div class="empty" style="padding:24px 0">${emptyMsg||''}</div>`;
+  const q=($('#ypQ')?.value||'').trim();
+  $('#ypDirect').innerHTML = q ? `<button type="button" class="cfrow" onclick="ypDirect()"><span>"${esc(q)}" 직접 입력하기</span><span class="muted">›</span></button>` : `<p class="muted" style="font-size:.82rem;margin-top:14px">찾는 실이 없으면 이름을 적고 「직접 입력하기」를 눌러 주세요.</p>`;
+}
+function ypInput(v){ clearTimeout(ypTimer); const q=v.trim(); if(!q){ return ypLoadTab('recent'); } ypTimer=setTimeout(()=>ypSearch(q), 250); }
+async function ypSearch(q){ const seq=++ypSeq; ypTab='search'; const { data } = await sb.rpc('yarn_suggest', { p_q:q }); if(seq!==ypSeq) return; ypRows=data||[]; ypRender('실 사전에 아직 없는 실이에요'); }
+async function ypLoadTab(k){
+  const seq=++ypSeq; ypTab=k;
+  if(k==='search'){ const q=($('#ypQ')?.value||'').trim(); if(q) return ypSearch(q); ypRows=[]; return ypRender('실 이름을 입력해 보세요'); }
+  ypRows=[]; ypRender('불러오는 중…');
+  let rows=[];
+  if(k==='recent'){ const { data } = await sb.from('works').select('yarns').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(12); const seen=new Set(); (data||[]).forEach(w=>(w.yarns||[]).forEach(y=>{ if(y.name && !seen.has(y.name) && rows.length<10){ seen.add(y.name); rows.push({ id:null, name:y.name, ball_g:y.ball_g, ball_m:y.ball_m, weight:y.weight, fiber:y.fiber, fibers:y.fibers, verified:false, _recent:true }); } })); }
+  else { const { data } = await sb.from('yarn_catalog').select('id,brand,product,ball_g,ball_m,weight_class,fiber_main,fibers,status,uses').is('merged_into',null).gt('uses',0).order('uses',{ascending:false}).limit(12); rows=(data||[]).map(c=>({ id:c.id, name:(c.brand?c.brand+' ':'')+c.product, ball_g:c.ball_g, ball_m:c.ball_m, weight:c.weight_class, fiber:c.fiber_main, fibers:c.fibers, verified:c.status==='verified' })); }
+  if(seq!==ypSeq) return; ypRows=rows; ypRender(k==='recent'?'아직 인증에 적은 실이 없어요. 위에서 실 이름으로 찾아보세요':'아직 모인 기록이 없어요');
+}
+async function ypPick(i){
+  let r=ypRows[i]; if(!r) return;
+  if(r._recent){ const { data } = await sb.rpc('yarn_suggest', { p_q:r.name }); const hit=(data||[]).find(x=>x.name===r.name); if(hit) r=hit; }   // 최근 쓴 실도 사전에 있으면 색 목록을 쓴다
+  ydOpen(await yarnFromDict(r), ypIdx);
+}
+function ypDirect(){ const q=($('#ypQ')?.value||'').trim(); if(!q) return; const y=wyBlank(); y.name=q.slice(0,60); ydOpen(y, ypIdx, true); }
+
+// ----- 색·사용량
+let yd=null, ydIdx=-1, ydFam='', ydSpecOpen=false;
+const Y_REASONS=['부드러움','색감','가성비','뜨기 편함','갈라짐','보풀','뻣뻣함'];
+function openYarnDetail(i){ const y=wYarns[i]; if(!y) return; ydOpen(JSON.parse(JSON.stringify(y)), i); }
+function ydOpen(y, idx, specOpen){ yd=y; ydIdx=idx; ydFam=''; ydSpecOpen=!!specOpen || !(y.ball_g||y.ball_m||y.fiber||y.mix); if(yd.amount===''||yd.amount==null){ yd.amount = yd.unit==='g'?'':'1'; } ydRender(); subOnBack = idx>=0 ? null : ()=>openYarnPick(idx); }
+function ydRender(){
+  const y=yd; const fams=[...new Set((y.colors||[]).map(c=>c.family).filter(Boolean))];
+  const cols=(y.colors||[]).filter(c=>!ydFam || c.family===ydFam);
+  const label=c=>(c.no?c.no+' ':'')+c.name;
+  openSub(y.name, `
+    <div class="specband"><div><b>${y.fromDict?'실 사전에서 불러왔어요':'규격'}</b>${esc(ySpecLine(y)||'1볼 중량·길이를 적으면 굵기를 알려 드려요 (몰라도 괜찮아요)')}</div><button type="button" onclick="ydSpecOpen=!ydSpecOpen;ydRender()">${ydSpecOpen?'접기':'고치기'}</button></div>
+    ${ydSpecOpen?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+      <label class="f">실 이름<input maxlength="60" value="${esc(y.name)}" oninput="yd.name=this.value"></label>
+      <label class="f">소재<select onchange="yd.fiber=this.value">${['',...FIBERS].map(f=>`<option value="${f}" ${y.fiber===f?'selected':''}>${f||'선택'}</option>`).join('')}</select></label>
+      <label class="f">1볼 중량 (g)<input inputmode="decimal" maxlength="6" placeholder="예: 40" value="${esc(y.ball_g)}" oninput="yd.ball_g=this.value;wyAutoWeight(yd)"></label>
+      <label class="f">1볼 길이 (m)<input inputmode="decimal" maxlength="6" placeholder="예: 110" value="${esc(y.ball_m)}" oninput="yd.ball_m=this.value;wyAutoWeight(yd)"></label>
+      <label class="f">혼용률<input maxlength="40" placeholder="예: 울 80, 나일론 20" value="${esc(y.mix||'')}" oninput="yd.mix=this.value"></label>
+      <label class="f">굵기<select onchange="yd.weightManual=!!this.value;yd.weight=this.value;if(!this.value)wyAutoWeight(yd)"><option value="">자동</option>${YW_NAMES.map(n=>`<option ${y.weightManual&&y.weight===n?'selected':''}>${n}</option>`).join('')}</select></label></div>`:''}
+    <div class="cfl">색</div>
+    ${fams.length>1?`<div class="seg" style="margin-top:0"><button type="button" class="${ydFam?'':'on'}" onclick="ydFam='';ydRender()">전체</button>${fams.map(f=>`<button type="button" class="${ydFam===f?'on':''}" data-f="${esc(f)}" onclick="ydFam=this.dataset.f;ydRender()">${esc(f)}</button>`).join('')}</div>`:''}
+    ${cols.length?`<div class="cgrid">${cols.map(c=>`<button type="button" class="${y.color===label(c)?'on':''}" data-l="${esc(label(c))}" data-f="${esc(c.family||'')}" onclick="ydColor(this.dataset.l,this.dataset.f)"><i style="background:${famBg(c.family)}"></i>${esc(label(c))}</button>`).join('')}</div>`:''}
+    <input id="ydColorIn" maxlength="40" placeholder="${(y.colors||[]).length?'목록에 없는 색 직접 입력':'색 이름·번호 (예: 베이지 #2)'}" value="${esc((y.colors||[]).some(c=>label(c)===y.color)?'':y.color||'')}" oninput="yd.color=this.value;yd.colorFamily=''">
+    <div class="cfl">사용량</div>
+    <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button type="button" onclick="ydStep(-1)">−</button><input id="ydAmt" inputmode="decimal" maxlength="7" value="${esc(y.amount)}" placeholder="0" onfocus="this.select()" oninput="yd.amount=this.value.replace(',', '.')"><button type="button" onclick="ydStep(1)">＋</button></div>
+      <div class="seg" style="margin:0">${['볼','g'].map(u=>`<button type="button" class="${y.unit===u?'on':''}" onclick="ydUnit('${u}')">${u}</button>`).join('')}</div></div>
+    <p class="muted" style="font-size:.78rem;margin:6px 0 0">숫자를 눌러 1.3처럼 직접 적을 수 있어요.</p>
+    <div class="cfl">이 실 어땠나요? <span class="muted">선택</span></div>
+    <div class="seg" style="margin-top:0">${[['1','또 쓸래요'],['0','보통'],['-1','비추']].map(([v,l])=>`<button type="button" class="${String(y.rating)===v?'on':''}" onclick="yd.rating=(String(yd.rating)==='${v}'?'':'${v}');ydRender()">${l}</button>`).join('')}</div>
+    ${y.rating!==''&&y.rating!=null?`<div class="cfl">이유</div><div class="seg" style="margin-top:0">${Y_REASONS.map(r=>`<button type="button" class="${y.rating_reason===r?'on':''}" onclick="yd.rating_reason=(yd.rating_reason==='${r}'?'':'${r}');ydRender()">${r}</button>`).join('')}</div>`:''}
+  `, { label:'완료', fn:ydDone });
+}
+function ydColor(label, fam){ yd.color=label; yd.colorFamily=fam||''; ydRender(); }
+function ydUnit(u){ if(yd.unit===u) return; yd.unit=u; yd.amount = u==='g' ? '' : '1'; ydRender(); }
+function ydStep(d){ const step = yd.unit==='g'?10:0.5; let v=parseFloat(yd.amount)||0; v=Math.max(0, Math.round((v+d*step)*100)/100); yd.amount = v?String(v):''; const el=$('#ydAmt'); if(el) el.value=yd.amount; }
+function ydDone(){
+  const y=yd; y.name=(y.name||'').trim(); if(!y.name) return toast('실 이름을 적어 주세요');
+  y.amount=String(y.amount||'').trim(); if(y.amount && !/^\d{1,4}(\.\d{1,2})?$/.test(y.amount)) return toast('사용량은 1.5처럼 소수 둘째 자리까지 적을 수 있어요');
+  for(const k of ['ball_g','ball_m']){ y[k]=String(y[k]||'').trim().replace(',', '.'); if(y[k] && !/^\d{1,5}(\.\d{1,2})?$/.test(y[k])) return toast('1볼 중량·길이는 숫자로 적어 주세요'); }
+  wyAutoWeight(y);
+  if(ydIdx>=0) wYarns[ydIdx]=y; else wYarns.push(y);
+  closeSub(); renderWYarns();
+}
+
+// ----- 모임 만들기 페이지
+const M_DUR={60:'1시간',90:'1시간 30분',120:'2시간',180:'3시간',240:'반나절'}, M_REP={once:'한 번',weekly:'매주',biweekly:'격주',monthly:'매월'}, M_FEE={free:'무료',drink:'각자 음료',custom:'직접 입력'};
+let mCap=0;
+function mCapStep(d){ mCap=Math.max(0, Math.min(100, mCap+d)); if(mCap===1) mCap = d>0?2:0; $('#mCapVal').textContent=mCap; }
+async function openMeetForm(){
+  if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
+  if(!((myProfile?.cert_count||0)>0)) return openMeetGate();
+  closeSub(); composeKind='meetup';
+  if(!['compose','cert','meetform'].includes(view)) composeBack=view;
+  if(!$('#mKind').children.length){
+    seg('#mKind', MKIND); seg('#mCraft', MCRAFT); seg('#mDurSeg', M_DUR); seg('#mRepeatSeg', M_REP); seg('#mFeeSeg', M_FEE);
+    const lvOpts = `<option value="">제한 없음</option>` + [1,2,3,4,5].map(l=>`<option value="${l}">${l}단계 ${LVNAME[l]}</option>`).join('');
+    $('#mLvMin').innerHTML = lvOpts; $('#mLvMax').innerHTML = lvOpts;
+    $('#mKind').addEventListener('click', ()=>{ $('#mTechWrap').hidden = segVal('#mKind')!=='workshop'; });
+    $('#mFeeSeg').addEventListener('click', ()=>{ const c=segVal('#mFeeSeg')==='custom'; $('#mFee').hidden=!c; if(c) $('#mFee').focus(); });
+    loadTech().then(()=>{ const grp = c => TECH.filter(t=>t.craft===c).map(t=>`<option value="${t.id}">${t.level}단계 · ${esc(t.name_ko)}</option>`).join(''); $('#mTech').innerHTML = `<optgroup label="코바늘">${grp('crochet')}</optgroup><optgroup label="대바늘">${grp('knitting')}</optgroup>`; });
+  }
+  const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7));
+  const pad=n=>String(n).padStart(2,'0'); $('#mDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#mDate').min=(t=>`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`)(new Date()); $('#mClock').value='14:00';
+  segSet('#mKind','free'); segSet('#mCraft','both'); segSet('#mDurSeg','120'); segSet('#mRepeatSeg','once'); segSet('#mFeeSeg','free');
+  $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value=''; $('#mFee').hidden=true; $('#mFee').value=''; $('#mBring').value=''; $('#mTitle').value=''; $('#mDesc').value=''; $('#mPlaceDetail').value=''; $('#mPublic').checked=true; $('#meetPost').disabled=false;
+  mCap=0; $('#mCapVal').textContent='0'; placePick.m=null; renderMeetPlace();
+  show('meetform'); $('#v-meetform').scrollTop=0;
+}
+function renderMeetPlace(){
+  const box=$('#mPlaceBox'); if(!box) return; const r=placePick.m;
+  if(!r){ box.innerHTML=`<button type="button" class="cfrow" style="border-top:0;margin-top:0;border:1px solid var(--line);border-radius:12px;padding:13px 12px" onclick="openPlaceSearch('m')"><span style="display:flex;gap:8px;align-items:center;color:var(--ink2)">${SVG_SEARCH} 장소 찾기</span><span class="muted">›</span></button>`; return; }
+  box.innerHTML=`<div class="minimap"><div class="mm" id="mMini"></div><div class="cpin">${SVG_PIN}</div></div>
+    <div class="placecard"><div class="tx"><input id="mPlace" maxlength="80" value="${esc(r.name||'')}" placeholder="장소 이름 (예: 카페 코바늘)" style="font-weight:700"><span style="margin-top:6px">${esc(r.addr||'')}</span></div><button type="button" class="btn sm o" style="flex:none" onclick="openPlaceSearch('m')">바꾸기</button></div>`;
+  miniMap($('#mMini'), r);
+}
+async function miniMap(el, c, interactive){
+  try{ await loadGoogleMaps(); if(!el.isConnected) return null; return new google.maps.Map(el, { center:{lat:c.lat,lng:c.lng}, zoom:interactive?16:16, disableDefaultUI:true, clickableIcons:false, gestureHandling:interactive?'greedy':'none', keyboardShortcuts:false }); }
+  catch(e){ el.innerHTML='<div class="muted" style="padding:16px;font-size:.85rem">지도를 불러오지 못했어요. 주소를 확인해 주세요.</div>'; return null; }
+}
+async function submitMeet(){
+  const b=$('#meetPost'); b.disabled=true;
+  try{
+    const title=$('#mTitle').value.trim(), date=$('#mDate').value, clock=$('#mClock').value, c=placePick.m;
+    if(!title) throw new Error('모임 이름을 적어 주세요');
+    if(!date || !clock) throw new Error('날짜와 시작 시간을 정해 주세요');
+    const when=new Date(`${date}T${clock}`); if(isNaN(when) || when < new Date()) throw new Error('일시를 지금 이후로 정해 주세요');
+    if(!c) throw new Error('모임 장소를 찾아서 골라 주세요');
+    const pname=($('#mPlace')?.value||'').trim(); if(!pname) throw new Error('장소 이름을 적어 주세요');
+    const detail=$('#mPlaceDetail').value.trim(); const place=(pname+(detail?` · ${detail}`:'')).slice(0,80);
+    await loadBanned(); if(hasBanned(title) || hasBanned($('#mDesc').value) || hasBanned(place)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+    const lmin=$('#mLvMin').value, lmax=$('#mLvMax').value; if(lmin && lmax && +lmin > +lmax) throw new Error('권장 단계 범위를 확인해 주세요');
+    const kind = segVal('#mKind')||'free'; if(kind==='workshop' && !$('#mTech').value) throw new Error('배울 기법을 골라 주세요');
+    const feeK=segVal('#mFeeSeg'); const fee = feeK==='custom' ? ($('#mFee').value.trim()||null) : (M_FEE[feeK]||null);
+    const extra = { kind, craft: segVal('#mCraft')||'both', level_min: lmin?+lmin:null, level_max: lmax?+lmax:null, technique_id: kind==='workshop'?$('#mTech').value:null,
+      capacity: mCap>=2?mCap:null, fee, bring: $('#mBring').value.trim()||null, duration_min:+(segVal('#mDurSeg')||120), repeat:segVal('#mRepeatSeg')||'once', address: c.addr||null };
+    const { error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:when.toISOString(), p_is_public:$('#mPublic').checked, p_body: $('#mDesc').value.trim()||null, p_lat:c.lat, p_lng:c.lng, p_photos:[], p_extra: extra });
+    if(error) throw new Error(error.message.replace(/^.*?: /,''));
+    await loadMyRooms(); toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
+    composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
+  }catch(e){ toast(e.message); b.disabled=false; }
+}
+
+// ----- 모임 장소 검색: 입력 즉시 결과. 카카오 로컬(Edge Function place-search) → 안 되면 기존 geocodePlace()
+let plKey='m', plRows=[], plTimer=null, plSeq=0, plKakao=true, plMap=null;
+function openPlaceSearch(k){
+  plKey=k; plRows=[];
+  openSub('모임 장소', `<div style="position:relative;margin-top:8px"><span style="position:absolute;left:12px;top:13px;color:var(--ink3)">${SVG_SEARCH}</span><input id="plQ" maxlength="60" placeholder="장소 이름이나 주소" style="padding-left:38px" autocomplete="off" autocorrect="off" oninput="plInput(this.value)"></div>
+    <p class="muted" style="font-size:.82rem;margin:8px 0 0">입력하는 대로 바로 찾아요. 가게 이름·역 이름·도로명 모두 돼요.</p>
+    <div class="plist" id="plList"></div>
+    <div class="plist" style="margin-top:8px;border-top:8px solid var(--bg2);margin-left:-16px;margin-right:-16px;padding:0 16px">
+      <button type="button" onclick="plNearby()"><div class="pi">${ico('signal')}</div><div><b>현재 위치 근처에서 찾기</b><span>내 주변 카페·공방·공원</span></div></button>
+      <button type="button" onclick="plPinMode()"><div class="pi">${ico('location')}</div><div><b>지도에서 직접 핀 찍기</b><span>검색에 안 나오는 곳일 때</span></div></button></div>`);
+  if(k==='e') subOnBack=()=>{ closeSub(); renderMeetupLocEdit(); };
+  setTimeout(()=>$('#plQ')?.focus(), 80);
+}
+function plInput(v){ clearTimeout(plTimer); const q=v.trim(); if(q.length<2){ plRows=[]; $('#plList').innerHTML=''; return; } plTimer=setTimeout(()=>plSearch(q), 300); }
+async function placeQuery(q, opt={}){
+  if(plKakao){
+    try{ const { data, error } = await sb.functions.invoke('place-search', { body:{ q, lat:opt.lat, lng:opt.lng, sort:opt.sort } });
+      if(!error && data && !data.fallback) return data.results||[];
+      if(data?.fallback) plKakao=false;   // 서버에 키가 없음 → 이번 세션은 기존 방식으로
+    }catch(e){}
+  }
+  const rs = await geocodePlace(q);
+  return rs.map(r=>({ name:q, category:'', addr:(r.addr||'').replace(/^\d{5}\s+/,''), lat:r.lat, lng:r.lng }));
+}
+async function plSearch(q, opt){
+  const seq=++plSeq; const box=$('#plList'); if(!box) return; if(!plRows.length) box.innerHTML='<div class="muted" style="padding:14px 0">찾는 중…</div>';
+  const c=myProfile?._c; const rows = await placeQuery(q, opt||{ lat:c?.lat, lng:c?.lng });
+  if(seq!==plSeq || !$('#plList')) return; plRows=rows;
+  $('#plList').innerHTML = rows.length ? rows.map((r,i)=>`<button type="button" onclick="plChoose(${i})"><div class="pi">${ico('location')}</div><div><b>${esc(r.name)}${r.category?` <span class="muted" style="display:inline;font-weight:400">${esc(r.category)}</span>`:''}</b><span>${esc(r.addr)}</span></div></button>`).join('') : '<div class="muted" style="padding:14px 0">찾지 못했어요. 다른 이름이나 도로명 주소로 찾아보거나, 아래 「지도에서 직접 핀 찍기」를 써 보세요</div>';
+}
+function plNearby(){
+  if(!navigator.geolocation) return toast('이 기기는 위치를 지원하지 않아요');
+  toast('현재 위치를 확인하는 중…');
+  navigator.geolocation.getCurrentPosition(pos=>{ const q=($('#plQ')?.value||'').trim()||'카페'; if(!plKakao) toast('지금은 이름·주소 검색만 돼요'); plSearch(q, { lat:pos.coords.latitude, lng:pos.coords.longitude, sort:'distance' }); }, ()=>toast('위치 권한을 허용해 주세요'), { enableHighAccuracy:true, timeout:8000 });
+}
+async function plPinMode(){
+  const c = placePick[plKey] || myProfile?._c || {lat:37.5665,lng:126.9780};
+  openSub('지도에서 위치 정하기', `<p class="muted" style="font-size:.85rem;margin:8px 0 0">지도를 움직여 핀을 모임 장소에 맞춰 주세요.</p><div class="pickmap"><div class="mm" id="plMapEl"></div><div class="cpin">${SVG_PIN}</div></div><button class="btn" style="width:100%" onclick="plPinDone()">이 위치로 정하기</button>`);
+  subOnBack=()=>openPlaceSearch(plKey);
+  plMap = await miniMap($('#plMapEl'), c, true);
+}
+async function plPinDone(){
+  if(!plMap) return toast('지도를 불러오지 못했어요');
+  const ct=plMap.getCenter(); const lat=ct.lat(), lng=ct.lng(); let addr='';
+  try{ const { results } = await new google.maps.Geocoder().geocode({ location:{lat,lng}, language:'ko' }); addr=(results?.[0]?.formatted_address||'').replace(/^대한민국\s*/,''); }catch(e){}
+  plSet({ name:'', category:'', addr, lat, lng });
+}
+function plChoose(i){ const r=plRows[i]; if(r) plSet(r); }
+function plSet(r){
+  placePick[plKey]={ lat:r.lat, lng:r.lng, addr:r.addr, name:r.name }; plMap=null; closeSub();
+  if(plKey==='m') renderMeetPlace(); else renderMeetupLocEdit();
+}
+
 // ＋ 버튼: 어디서든 새 글 작성 시트
 let composeBack=null, composeKind='post', wTechSel=new Set(), wCraft='crochet', wCustom=[];
 function renderWCustom(){ const el=$('#wCustomChips'); if(!el) return; el.innerHTML = wCustom.map((t,i)=>`<span>${esc(t)} <b style="cursor:pointer" onclick="wCustom.splice(${i},1);renderWCustom()">${ico('close')}</b></span>`).join(''); }
-function commitWCustom(){ const v=$('#wCustom').value; if(!v.trim()) return; v.split(/[,，\n]/).map(x=>x.trim()).filter(Boolean).forEach(x=>{ if(!wCustom.includes(x) && wCustom.length<20) wCustom.push(x); }); $('#wCustom').value=''; renderWCustom(); }
+function commitWCustom(){ const ci=$('#wCustom'); if(!ci) return; const v=ci.value; if(!v.trim()) return; v.split(/[,，\n]/).map(x=>x.trim()).filter(Boolean).forEach(x=>{ if(!wCustom.includes(x) && wCustom.length<20) wCustom.push(x); }); ci.value=''; renderWCustom(); }
 let reviewMeetup=null;
 async function openCompose(kind, meetupId){
+  if(kind==='work') return openCert();
+  if(kind==='meetup') return openMeetForm();
   sPhotos=[]; composeKind = kind||'post'; reviewMeetup=null;
   if(kind==='review' && meetupId){ const { data:m } = await sb.from('meetups').select('id,title,place_name,starts_at').eq('id', meetupId).single(); reviewMeetup=m; }
-  if(view!=='compose') composeBack = view;
+  if(!['compose','cert','meetform'].includes(view)) composeBack = view;
   $('#sAva').innerHTML = avatar(myProfile||{}); $('#sName').textContent = myProfile?.nickname||'';
   $('#sText').value=''; $('#sPv').innerHTML=''; $('#sPost').disabled=false;
-  const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7)); d.setHours(14,0,0,0);
-  $('#mTime').value = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  $('#mTitle').value=''; $('#mPlace').value=''; placePick.m=null; $('#mAddr').value=''; $('#mAddrRes').innerHTML=''; $('#mAddrSel').hidden=true; $('#mPublic').checked=true; $('#mCap').value=''; $('#mFee').value=''; $('#mBring').value=''; $('#mDur').value='120'; $('#mRepeat').value='once';
-  if(!$('#mKind').children.length){
-    seg('#mKind', MKIND); seg('#mCraft', MCRAFT);
-    const lvOpts = lbl => `<option value="">${lbl}</option>` + [1,2,3,4,5].map(l=>`<option value="${l}">${l}단계 ${LVNAME[l]}</option>`).join('');
-    $('#mLvMin').innerHTML = lvOpts('제한 없음'); $('#mLvMax').innerHTML = lvOpts('제한 없음');
-    $('#mKind').addEventListener('click', ()=>{ $('#mTechWrap').hidden = segVal('#mKind')!=='workshop'; });
-    loadTech().then(()=>{ const grp = c => TECH.filter(t=>t.craft===c).map(t=>`<option value="${t.id}">${t.level}단계 · ${esc(t.name_ko)}</option>`).join(''); $('#mTech').innerHTML = `<optgroup label="코바늘">${grp('crochet')}</optgroup><optgroup label="대바늘">${grp('knitting')}</optgroup>`; });
-  }
-  segSet('#mKind','free'); segSet('#mCraft','both'); $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value='';
-  $('#kShop').hidden = !myShop; $('#kPattern').hidden = !(FULL && myProfile?.is_author); if(myShop) $('#pShopName').textContent = myShop.name+' 소식'; $('#pTitle').value=''; $('#pEnds').value=''; $('#pKind').value='notice';
-  $('#wTitle').value=''; $('#wNote').value=''; $('#mDesc').value=''; $('#wCustom').value=''; wCustom=[]; renderWCustom(); wTechSel=new Set(); wyReset(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
-  loadTech().then(renderWTech);
+  if(myShop) $('#pShopName').textContent = myShop.name+' 소식'; $('#pTitle').value=''; $('#pEnds').value=''; $('#pKind').value='notice';
   setComposeKind(composeKind);
   show('compose');
-  setTimeout(()=>$(composeKind==='meetup'?'#mTitle':'#sText')?.focus(), 80);
+  setTimeout(()=>$('#sText')?.focus(), 80);
 }
 // 저작권 만료 작품(작가 사망 1962년 이전)에서 고른 구절, 직역. 하루 단위로 순환
 const QUOTES = [
@@ -2462,22 +2764,16 @@ const QUOTES = [
 ];
 function quoteHtml(){ const d=Math.floor(Date.now()/864e5); const [q,src]=QUOTES[d%QUOTES.length]; return `<span class="q">${esc(q)}</span><span class="src">— ${esc(src)}</span>`; }
 function setComposeKind(k){
-  composeKind=k; [...$('#composeKind').children].forEach(b=>b.classList.toggle('on', b.dataset.k===k));
-  const certified = (myProfile?.cert_count||0) > 0;
-  $('#composeKind').hidden = (k==='review');
+  if(k==='work') return openCert(); if(k==='meetup') return openMeetForm();
+  composeKind=k;
   $('#rvbanner').hidden = (k!=='review');
   if(k==='review' && reviewMeetup){ $('#rvTitle').textContent=reviewMeetup.title; $('#rvSub').textContent=`${reviewMeetup.place_name} · ${fmtWhen(reviewMeetup.starts_at)}`; }
-  $('#mfields').hidden = !(k==='meetup' && certified);
-  $('#mgate').hidden = !(k==='meetup' && !certified);
-  $('#wfields').hidden = k!=='work';
   $('#pfields').hidden = k!=='shop';
-  $('#sText').hidden = !(k==='post' || k==='review' || k==='shop');
   $('#v-compose').classList.toggle('meet', k!=='post');
-  $('#composeTitle').textContent = k==='meetup' ? '모임 만들기' : k==='work' ? '작품 인증' : k==='review' ? '모임 후기' : k==='shop' ? '가게 소식' : '새 글';
-  $('#sText').placeholder = k==='shop' ? '소식 내용 (예: 이번 주 토요일까지 전 상품 10% 할인, 2층 클래스 모집)' : k==='meetup' ? '모임 소개를 적어 주세요 (예: 초보 환영, 실·바늘 지참)' : k==='work' ? '한 줄 소감 (예: 눈 위치 세 번 옮겼어요)' : k==='review' ? '어땠어요? 배운 것, 분위기, 다음에 갈 사람에게 팁' : '새로운 소식이 있나요?';
-  $('#sPost').textContent = k==='meetup' ? '만들기' : k==='work' ? '인증' : k==='shop' ? '올리기' : '게시';
-  $('#sPost').disabled = (k==='meetup' && !certified);
-  $('#sHint').innerHTML = k==='shop' ? '팔로워 알림 + 근처 지도 핀에 종 표시' : k==='meetup' ? '커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요' : k==='work' ? '사진 1~4장 필수 · 커뮤니티 "작품" 탭에 올라가요' : k==='review' ? '사진과 함께 올리면 다음 참여자에게 도움이 돼요' : quoteHtml();
+  $('#composeTitle').textContent = k==='review' ? '모임 후기' : k==='shop' ? '가게 소식' : '새 글';
+  $('#sText').placeholder = k==='shop' ? '소식 내용 (예: 이번 주 토요일까지 전 상품 10% 할인, 2층 클래스 모집)' : k==='review' ? '어땠어요? 배운 것, 분위기, 다음에 갈 사람에게 팁' : '새로운 소식이 있나요?';
+  $('#sPost').textContent = k==='shop' ? '올리기' : '게시';
+  $('#sHint').innerHTML = k==='shop' ? '팔로워 알림 + 근처 지도 핀에 종 표시' : k==='review' ? '사진과 함께 올리면 다음 참여자에게 도움이 돼요' : quoteHtml();
 }
 function renderWTech(){
   $('#wCraftTabs').innerHTML = `<button data-c="crochet" class="${wCraft==='crochet'?'on':''}">코바늘</button><button data-c="knitting" class="${wCraft==='knitting'?'on':''}">대바늘</button>`;
@@ -2485,34 +2781,16 @@ function renderWTech(){
   const ver = new Set(myProfile?.verified_skills||[]);
   const ci=$('#wCustom'); if(ci && !ci._bound){ ci._bound=true; ci.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===','){ e.preventDefault(); commitWCustom(); } }); ci.addEventListener('blur', commitWCustom); }
   $('#wTechList').innerHTML = [1,2,3,4,5].map(l=>{ const ts=TECH.filter(t=>t.craft===wCraft&&t.level===l); return `<div class="lvgrp"><div class="lvh">${l}단계 ${LVNAME[l]}</div><div class="techs">${ts.map(t=>`<button type="button" class="tech ${wTechSel.has(t.id)?'on':''}" onclick="toggleWTech('${t.id}')">${wTechSel.has(t.id)?ico('check')+' ':''}${esc(t.name_ko)}${ver.has(t.id)?'<span class="vbadge">인증</span>':''}</button>`).join('')}</div></div>`; }).join('');
-  $('#wPicked').textContent = `${wTechSel.size}개 선택`;
+  renderCertTech();
 }
 function toggleWTech(id){ if(wTechSel.has(id)) wTechSel.delete(id); else wTechSel.add(id); renderWTech(); }
-$('#composeKind').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.k==='pattern') return openPatternForm(); setComposeKind(b.dataset.k); };
 function closeCompose(){ const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
 async function submitCompose(){
   const body = $('#sText').value.trim();
   $('#sPost').disabled = true;
   try{
-    await loadBanned(); if(hasBanned(body) || hasBanned($('#wNote').value) || hasBanned($('#mDesc').value) || hasBanned($('#mTitle').value)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
-    if(composeKind==='meetup'){
-      const title=$('#mTitle').value.trim(), place=$('#mPlace').value.trim(), when=$('#mTime').value;
-      if(!title) throw new Error('모임 이름을 적어 주세요');
-      if(!place) throw new Error('장소 이름을 적어 주세요');
-      if(!placePick.m) throw new Error('장소 위치를 검색해서 골라 주세요 (지도에 모임 핀이 찍힐 곳)');
-      if(!when || new Date(when) < new Date()) throw new Error('일시를 지금 이후로 정해 주세요');
-      const photos = await uploadPhotos(sPhotos);
-      const c = placePick.m;
-      const lmin=$('#mLvMin').value, lmax=$('#mLvMax').value;
-      if(lmin && lmax && +lmin > +lmax) throw new Error('권장 단계 범위를 확인해 주세요');
-      const kind = segVal('#mKind')||'free';
-      if(kind==='workshop' && !$('#mTech').value) throw new Error('배울 기법을 골라 주세요');
-      const extra = { kind, craft: segVal('#mCraft')||'both', level_min: lmin?+lmin:null, level_max: lmax?+lmax:null, technique_id: kind==='workshop'?$('#mTech').value:null,
-        capacity: $('#mCap').value?+$('#mCap').value:null, fee: $('#mFee').value.trim()||null, bring: $('#mBring').value.trim()||null, duration_min:+$('#mDur').value, repeat:$('#mRepeat').value, address: placePick.m.addr };
-      const { data:postId, error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:new Date(when).toISOString(), p_is_public:$('#mPublic').checked, p_body: $('#mDesc').value.trim()||null, p_lat:c?.lat??null, p_lng:c?.lng??null, p_photos:photos, p_extra: extra });
-      if(error) throw new Error(error.message);
-      await loadMyRooms();
-      sPhotos=[]; toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
+    await loadBanned(); if(hasBanned(body) || hasBanned($('#pTitle').value)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+    if(composeKind==='meetup' || composeKind==='work'){ throw new Error('화면을 다시 열어 주세요');
     } else if(composeKind==='review'){
       if(!reviewMeetup) throw new Error('모임 정보를 찾을 수 없어요');
       if(!body && !sPhotos.length) throw new Error('후기 내용이나 사진을 넣어 주세요');
@@ -2528,19 +2806,6 @@ async function submitCompose(){
       const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind: $('#pKind').value, title, body: body||null, photos, ends_at: ends });
       if(error) throw new Error(error.message);
       sPhotos=[]; toast('소식을 올렸어요'); composeBack=null; return openShop(myShop.id);
-    } else if(composeKind==='work'){
-      const title=$('#wTitle').value.trim(); if(!title) throw new Error('작품 이름을 적어 주세요');
-      commitWCustom();
-      if(!wTechSel.size && !wCustom.length) throw new Error('사용한 기법을 하나 이상 골라 주세요');
-      if(!$('#wItem').value) throw new Error('작품 종류를 골라 주세요');
-      if(!sPhotos.length) throw new Error('작품 사진을 1장 이상 올려 주세요');
-      const photos = await uploadPhotos(sPhotos);
-      const yp = wYarnPayload();
-      const evId = $('#wEvent')?.value||'';
-      const { data:newPost, error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn: yp.line, p_note: $('#wNote').value.trim()||null, p_custom: wCustom, p_yarn_meta: yp.meta });
-      if(error) throw new Error(error.message);
-      let evDone=false; if(evId && newPost){ const r2 = await sb.rpc('link_work_event', { p_post:newPost, p_event:evId }); if(r2.error) toast('이벤트 연결 실패: '+r2.error.message); else evDone=true; }
-      await loadMe(); sPhotos=[]; toast(evDone?'이벤트 인증까지 완료했어요!':`작품 인증 완료! Lv.${myProfile?.act_level||1}`); setTimeout(showRecsAfterWork, 600);
     } else {
       if(!body && !sPhotos.length) throw new Error('내용이나 사진을 넣어 주세요');
       const photos = await uploadPhotos(sPhotos);

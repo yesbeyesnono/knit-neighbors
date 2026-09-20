@@ -1101,3 +1101,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   관리자 RPC: admin_upsert_event(처음 open 될 때 act_level >= min_level 회원 전원에게 event_open 알림 1회) · admin_decide_event_app · admin_event_lottery · admin_event_mark_shipped · admin_event_apps(지난 이벤트 선정/완료 수 포함)
 --   테이블은 전부 RLS + 쓰기 grant 없음(함수로만 변경)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 40. 서버 함수 호출 제한 (마이그레이션 api_rate_limit) — 2026-09-20 작업지시서 Phase 1
+--   api_rate(profile_id, key, win, n): RLS + grant 없음. rate_hit(p_key, p_limit, p_window_sec=60) → boolean (authenticated)
+--   Edge Function `place-search`(supabase/functions/place-search): 카카오 로컬 키워드 검색. 시크릿 KAKAO_REST_KEY 없으면 {fallback:true} → 앱이 geocodePlace() 사용. verify_jwt + 1인 분당 40회
+--   참고: 작업지시서의 yarn_entries.amount_num 은 만들지 않음 — 기존 amount 가 이미 numeric 이라 1.5볼이 그대로 저장됨
+-- ---------------------------------------------------------------
