@@ -2142,8 +2142,8 @@ function workCard(w){
 async function openYarnSimilar(name){
   const { data, error } = await sb.rpc('yarn_similar', { p_name:name, p_limit:8 });
   if(error) return toast(error.message);
-  openSheet(`<b style="font-size:1.05rem">「${esc(name)}」 대신 쓸 수 있는 실</b><p class="muted" style="margin:0;font-size:.85rem">100g당 길이가 15% 안쪽으로 비슷한 실이에요. 같은 소재가 먼저 나와요. 게이지는 꼭 스와치로 확인해 주세요.</p>
-    <div class="patlist">${(data||[]).length?data.map(r=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><b>${esc(r.name)}</b>${r.same_fiber?' <span class="chip">같은 소재</span>':''}<div class="muted" style="font-size:.85rem">${[r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', `100g당 ${r.m_per_100g}m (차이 ${r.diff_pct}%)`, r.weight||'', r.fiber||'', `사용 ${r.uses}회`, r.liked?`또 쓸래요 ${r.liked}`:''].filter(Boolean).join(' · ')}</div></div>`).join(''):'<div class="empty">아직 비교할 만큼 실 정보가 모이지 않았어요</div>'}</div>`);
+  openSheet(`<b style="font-size:1.05rem">「${esc(name)}」 대신 쓸 수 있는 실</b><p class="muted" style="margin:0;font-size:.85rem">촉감·구조가 같고, 같은 종류의 작품에 쓰는 실만 보여 줘요. 그 안에서 소재가 비슷한 순서예요. 굵기가 다르면 스와치로 확인해 주세요.</p>
+    <div class="patlist">${(data||[]).length?data.map(r=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><b>${esc(r.name)}</b> <span class="chip">${esc(r.verdict)}</span><div class="muted" style="font-size:.85rem">${[r.texture, (r.shared_uses||[]).join('·'), `소재 유사 ${Math.round(r.fiber_sim*100)}%`, r.diff_pct==null?'굵기 정보 없음':`굵기 차이 ${r.diff_pct}%`, r.ball_g&&r.ball_m?`${r.ball_g}g·${r.ball_m}m`:'', r.liked?`또 쓸래요 ${r.liked}`:''].filter(Boolean).map(esc).join(' · ')}</div></div>`).join(''):'<div class="empty">촉감과 용도가 같은 실이 아직 사전에 없어요</div>'}</div>`);
 }
 function workYarnDetail(w){
   const ys=w.yarns||[], ns=w.needles||[]; if(ys.length<2 && ns.length<2 && !w.gauge && !w.finished_size && !(ys[0]&&(ys[0].amount||ys[0].ball_g))) return '';
