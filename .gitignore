@@ -16,3 +16,6 @@ android/app/src/main/assets/capacitor.plugins.json
 *.jks
 android/keys/
 android/keystore.properties
+
+# 책에서 잘라 온 원본 기호 이미지(검수용) — 저장소에 올리지 않는다
+resources/symbols/ref/

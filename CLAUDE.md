@@ -45,6 +45,13 @@
 - 시크릿(Supabase › Edge Functions › Secrets, 없으면 그 기능만 꺼짐): `ANTHROPIC_API_KEY` 또는 `OPENROUTER_API_KEY`(+`AI_PROVIDER`, `AI_MODEL_FAST`, `AI_MODEL_SMART`) · `TG_BOT_TOKEN` · `TG_WEBHOOK_SECRET` · `TG_ADMIN_CHAT_ID`. 텔레그램 웹훅 주소: `https://thfcrodfaitzrzlrxyir.supabase.co/functions/v1/jigi?fn=tg` (setWebhook 의 secret_token = TG_WEBHOOK_SECRET)
 - Edge Function 소스는 `supabase/functions/`(jigi, read-band). 배포는 Supabase MCP `deploy_edge_function`(jigi 는 verify_jwt=false — 경로별 자체 인증). 지시서와 다른 점: 함수 4개 대신 `jigi` 하나에 route 로 묶음, 기법 후보 AI 판정은 글자만(사진·웹 검색 미사용), 실 이름 정리는 자동 합치기 없이 검토 건만 생성, 신규 기법 등록 버튼 없음(후보로만 모음)
 
+## 코바늘 기호 94종 · 명칭 통일 (2026-09-21 진행 중)
+- 출처: 대표의 `코바늘기호 - 손짱제작` 엑셀 → knitup 폴더 `knitup_코바늘기호_마스터_v2.xlsx`(94종: 日本語·한국어·English·사전 ID, 2026-09-02 정리) · 기법사전 v1.3
+- **한국어 명칭은 엑셀(한국 관행)로 통일 — 대표 확정**: 中長編み=긴뜨기 · 長編み=한길 긴뜨기 · 長々編み=두길 긴뜨기 · 세길 · 네길. 지금 앱/DB는 아직 옛 이름(C12 중간긴뜨기·C13 긴뜨기·C18 두길긴뜨기) — 바꿀 때 옛 이름은 별칭으로 남길 것(`technique_aliases`)
+- **기법표가 커지지 않게**: 기호 94개 ≠ 기법 94개. 기법표(내 뜨개 단계)는 기법 단위만, 높이·코 수·'코 아래에서' 변형은 ID 신설 없이 그 기법의 변형 기호(75종이 기존 ID에 연결). 새 기법 후보 5묶음(세길·네길 / Y·역Y·X·삼각 / 칠보 / 되돌아 짧은뜨기류 / 변형 구슬)은 단계·선행 정한 뒤 추가
+- 1단계(완료): `python tools/gen-crochet-symbols.py` → `resources/symbols/crochet_symbols_v1.2.json`(94종 SVG, v1.1 라이브러리와 같은 규격) + 검수 시트 `resources/symbols/review.html`. 책 그림을 베끼지 않고 JIS 규칙(사선 수=감는 횟수, 밑이 떨어짐=코 아래에서)으로 부품 조합 생성. 원본 기호 이미지(`resources/symbols/ref/`)는 책에서 온 것이라 **저장소에 올리지 않음**(gitignore)
+- 다음: 대표 검수 → 사전 v1.4·라이브러리 v1.2 확정 → 앱 반영(명칭 변경, 새 기법, 기법을 누르면 변형 기호 펼쳐 보기, 94종 명칭을 기법 후보 AI 별칭으로)
+
 ## 백엔드 (Supabase)
 - 프로젝트 `thfcrodfaitzrzlrxyir` (Pro, 서울). publishable key는 index.html/admin.html에 있음.
 - 로그인: Google OAuth + Apple(Services ID kr.co.firmtech.knitneighbors.web, 시크릿 만료 **2027-03-13**, `tools/apple-secret.js`로 재발급). 네이티브는 PKCE + `knitneighbors://auth`.
