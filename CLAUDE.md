@@ -88,6 +88,11 @@
 - knitup 뷰어: `docs/viewer.html` = `node tools/build-viewer.js` 로 `knitup/docs/app_v9.html`의 VIEWER_SIZE_HTML 에서 생성(직접 수정 금지, 빌드 스크립트를 고칠 것). 앱은 sandbox+srcdoc iframe 으로 열고 postMessage(knitup-pkg / kn-prog / kn-close). 실 소요량 카드·AI 사이즈 변환 대화는 예시 데이터·모자 전용이라 숨김
 - 작가는 도안 등록 폼에서 knitup 에디터의 `.knitup-pkg.json` 첨부 → `pattern_contents`. 무료 도안만 누구나 열람, 유료는 구매 기능 전까지 작가 본인·관리자만
 
+## App Store 신청 준비 (2026-09-21~)
+- 입력 시트: `resources/store/appstore_입력시트.md`(이름·부제·설명·키워드·홍보 문구·URL·스크린샷 구성·연령 등급 답, 글자 수 검증함). 지원 URL = `docs/support.html`
+- **iPhone 전용**으로 변경(`TARGETED_DEVICE_FAMILY = 1`) — iPad 스크린샷·레이아웃 심사를 피함. 출시 뒤에는 iPad 지원을 뺄 수 없으니 넣을 때 신중히
+- 남은 것: 심사용 계정+이메일 로그인 입구, 이벤트 화면 'Apple과 무관' 문구(5.3), 내 실함 AI 처리 고지, 버전 1.0.0, 개인정보 라벨 표, 심사 메모(영문), 최종 아이콘·스크린샷(대표)
+
 ## 남은 일
 - 대표: 2단계 인증(구글·Supabase·GitHub·Apple·Codemagic), 구글 클라이언트 시크릿 재발급, Play Console에 versionCode 2 .aab 업로드·데이터 보안 설문, App Store 테스트 정보 입력, 앱 아이콘(1024 PNG) 전달, 쎄비하우스 오너 계정·링크 입력
 - 개발 후보: 이상 접근 감지·사고 대응 문서, PITR 백업, 스토어 스크린샷·설명, 공유 링크, 고유 아이디(@handle), '지금 이 근처' 임시 위치, 관리자 PNG 내보내기
