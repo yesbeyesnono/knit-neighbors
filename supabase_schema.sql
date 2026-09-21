@@ -1136,3 +1136,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     크론: jigi-scan */10분 · jigi-brief 23:00 UTC(08:00 KST) · jigi-tech 19:30 UTC · jigi-yarn 20:00 UTC · jigi-clean
 --   Edge Function `jigi`(supabase/functions/jigi, verify_jwt=false, 경로별 자체 인증): route scan|brief|tech|yarn(훅 비밀값 또는 관리자) · ?fn=tg(텔레그램 웹훅: secret 헤더 + chat_id 일치) · status|chat|buttons|confirm(관리자 JWT)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 45. 지기 예약 알림 + 텔레그램 웹훅 지킴이 (마이그레이션 jigi_reminders) — 2026-09-21
+--   jigi_reminders(due_at, text, sent_at): 관리자 열람만. 시간이 되면 Edge Function `jigi-remind` 가 대표 텔레그램으로 보냄(크론 jigi-remind 5분마다, 보낼 것이 있을 때만 호출)
+--   크론 jigi-guard(매시 7분): 텔레그램 getWebhookInfo 로 웹훅 주소가 우리 주소인지 확인, 바뀌었으면 되돌리고 보안 알림(봇 토큰 도용 대비)
+--   알림 추가: insert into jigi_reminders(due_at, text) values ('2026-09-22 09:30+09', '...');
+-- ---------------------------------------------------------------
