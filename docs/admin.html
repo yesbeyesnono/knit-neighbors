@@ -70,6 +70,9 @@ textarea{width:100%;min-height:90px}
 #toast.on{opacity:1}
 pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow:auto;white-space:pre-wrap}
 /* 모바일(대표가 폰에서 확인·처리): 상단 바 + 서랍 메뉴, 표는 가로 스크롤, 패널은 전체 폭, 버튼은 손가락 크기 */
+/* 공지 */
+.bcgrid{display:grid;grid-template-columns:1fr 1.25fr;gap:12px;margin-bottom:16px;align-items:start}.bcgrid details{border-top:1px solid var(--line);padding:6px 0}.bcgrid summary{cursor:pointer;padding:4px 0}.bcgrid table{border:0;border-radius:0;font-size:12.5px}.bcgrid td{padding:5px 6px;border-bottom:0}
+@media(max-width:900px){.bcgrid{grid-template-columns:1fr}}
 /* 오늘 */
 .hero3{display:grid;grid-template-columns:1.1fr 1.3fr 1fr;gap:12px;margin-bottom:12px}.hero3 .card{display:flex;flex-direction:column;gap:6px}.hero3 .big{font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
 .hero3 .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.hero3 .kp div{background:var(--soft);border-radius:10px;padding:8px 6px;text-align:center}.hero3 .kp b{display:block;font-size:18px}.hero3 .kp span{font-size:11px;color:var(--ink3)}
@@ -445,13 +448,125 @@ VIEWS.banned = async()=>{
 async function addBanned(){ const w=$('#bw').value.trim(); if(!w) return; const {error}=await sb.rpc('admin_banned_word',{p_word:w,p_add:true}); if(error) return toast(error.message); toast('추가했어요'); route(); }
 async function rmBanned(w){ const {error}=await sb.rpc('admin_banned_word',{p_word:w,p_add:false}); if(error) return toast(error.message); toast('삭제했어요'); route(); }
 // ===== 공지·알림 =====
-VIEWS.broadcast = async()=>{
-  $('#main').innerHTML=`<h1>공지·알림 보내기</h1><div class="card" style="max-width:640px">
-    <div class="muted">온보딩을 마친 모든 사용자의 <b>활동(🔔)</b> 목록에 "뜨개동네 지기 공지"로 표시돼요. 마이 탭에 빨간 배지가 뜹니다. 누르면 지기 채팅방이 열려 답을 남길 수 있어요.</div>
-    <textarea id="bcBody" maxlength="200" placeholder="예: 이번 주말 킨텍스 모임이 열려요. 지도 › 모임 탭에서 확인해 보세요"></textarea>
-    <div class="row"><button class="p" onclick="sendBroadcast()">전체에게 보내기</button><span class="muted">특정 사용자에게는 사용자 › 상세 › "이 사용자에게 알림"</span></div></div>`;
+// ===== 공지·알림 보내기 — 정밀 타겟팅 (supabase_schema.sql 51) =====
+// 조건 스펙: 폼·저장된 그룹·AI 변환·서버(_bc_ids)가 같은 키를 쓴다. 값이 비면 키를 지운다(=조건 없음)
+let OPT={}, BCF={}, BCX={}, BCL={limit_n:null, random:false}, bcTimer=null, bcCount=null;
+const BC_TRI=[['','무관'],['true','예'],['false','아니오']];
+const BC_FIELDS=[
+  {g:'지역', k:'dong', t:'multi', l:'동네', opt:()=>OPT.dongs.map(d=>[d.name,`${d.name} (${d.n})`])},
+  {g:'지역', k:'dong_like', t:'text', l:'지역 이름 포함(시·구)', ph:'예: 고양시'},
+  {g:'지역', k:'radius', t:'radius', l:'좌표 반경(km)'},
+  {g:'종목·실력', k:'craft', t:'select', l:'종목', opt:[['','무관'],['crochet','코바늘(둘 다 포함)'],['knit','대바늘(둘 다 포함)'],['both','둘 다 하는 사람']]},
+  {g:'종목·실력', k:'lv_crochet', t:'range', l:'코바늘 단계', max:5}, {g:'종목·실력', k:'lv_knit', t:'range', l:'대바늘 단계', max:5},
+  {g:'종목·실력', k:'skills_has', t:'multi', l:'할 수 있는 기법 (모두)', opt:()=>OPT.techniques.map(t=>[t.id,`${t.craft==='crochet'?'코':'대'}${t.level} ${t.name}`])},
+  {g:'종목·실력', k:'skills_any', t:'multi', l:'할 수 있는 기법 (하나라도)', opt:'skills_has'},
+  {g:'종목·실력', k:'skills_missing', t:'multi', l:'아직 못 하는 기법', opt:'skills_has'},
+  {g:'종목·실력', k:'verified_has', t:'multi', l:'인증된 기법', opt:'skills_has'},
+  {g:'활동', k:'act_level', t:'range', l:'활동 레벨 Lv', max:99}, {g:'활동', k:'seen_within', t:'num', l:'최근 접속 N일 이내'}, {g:'활동', k:'seen_over', t:'num', l:'N일 이상 미접속 (휴면)'},
+  {g:'활동', k:'joined_within', t:'num', l:'가입 N일 이내 (신규)'}, {g:'활동', k:'joined_over', t:'num', l:'가입 N일 이상'},
+  {g:'활동', k:'onboarded', t:'select', l:'온보딩', opt:[['','완료한 사람만'],['no','미완료만'],['any','모두']]}, {g:'활동', k:'no_activity', t:'bool', l:'글·인증 0건'}, {g:'활동', k:'active_within', t:'num', l:'최근 N일 안에 글·인증'},
+  {g:'역할·상태', k:'supporter', t:'select', l:'서포터', opt:[['','무관'],['active','활동 중'],['completed','종료'],['any','전체'],['none','아님']]},
+  {g:'역할·상태', k:'supporter_tier', t:'multi', l:'서포터 등급', opt:[['basic','기본'],['excellent','우수'],['mvp','MVP'],['none','미달']]},
+  {g:'역할·상태', k:'waitlist', t:'bool', l:'2기 대기자'}, {g:'역할·상태', k:'author', t:'select', l:'작가', opt:BC_TRI}, {g:'역할·상태', k:'shop_owner', t:'select', l:'가게 오너', opt:BC_TRI},
+  {g:'역할·상태', k:'shop_follow', t:'select', l:'가게 팔로워', opt:()=>[['','—'],...OPT.shops.map(s=>[s.id,s.name])]}, {g:'역할·상태', k:'waving', t:'bool', l:'친구 찾는 이웃 (손 든 사람)'},
+  {g:'역할·상태', k:'meetup_member', t:'select', l:'모임 참여자', opt:()=>[['','—'],...OPT.meetups.map(m=>[m.id,`${m.title} (${fmtd(m.starts_at)})`])]},
+  {g:'역할·상태', k:'event', t:'event', l:'이벤트'}, {g:'역할·상태', k:'has_ticket', t:'bool', l:'지기에게 문의한 사람'}, {g:'역할·상태', k:'feedback', t:'bool', l:'버그 제보·제안한 사람'},
+  {g:'관심', k:'yarn', t:'text', l:'인증에 적은 실 (이름·브랜드)', ph:'예: 꽁뜨'}, {g:'관심', k:'item_type', t:'select', l:'작품 종류', opt:()=>[['','—'],...OPT.item_types.map(x=>[x,x])]},
+  {g:'관심', k:'stash_yarn', t:'text', l:'실함에 있는 실'}, {g:'관심', k:'nickname', t:'text', l:'닉네임 포함'} ];
+const BC_XFIELDS=[ {g:'제외', k:'notified_within', t:'num', l:'최근 N일 안에 공지 받은 사람'}, {g:'제외', k:'event_applied', t:'select', l:'이미 신청한 이벤트', opt:()=>[['','—'],...OPT.events.map(e=>[e.id,e.title])]},
+  ...['dong','dong_like','craft','skills_any','supporter','author','shop_owner','shop_follow','meetup_member','seen_over','joined_within','nickname'].map(k=>({...BC_FIELDS.find(f=>f.k===k), g:'제외'})) ];
+const BC_LINKS={meetup:'모임',event:'이벤트',shop:'가게 (클래스 포함)',post:'글',pattern:'도안',view:'앱 화면'};
+const BC_VIEWS=[['map','지도'],['comm','커뮤니티'],['events','이벤트 줄'],['chats','채팅'],['my','마이'],['skills','내 뜨개 단계'],['supporters','1기 서포터즈'],['stash','내 실함'],['support','지기에게 말하기'],['shopclaim','우리 가게 등록 신청']];
+const bcOpt=f=>{ const o=typeof f.opt==='string'?BC_FIELDS.find(x=>x.k===f.opt).opt:f.opt; return typeof o==='function'?o():o; };
+function bcCtl(f, side){
+  const st=side==='f'?BCF:BCX; const v=st[f.k]; const d=`data-k="${f.k}" data-side="${side}"`;
+  if(f.t==='text') return `<input ${d} type="text" value="${esc(v||'')}" placeholder="${esc(f.ph||'')}" oninput="bcSet(this)">`;
+  if(f.t==='num') return `<input ${d} type="number" min="0" value="${v??''}" placeholder="일" style="width:90px" oninput="bcSet(this)">`;
+  if(f.t==='bool') return `<label><input ${d} type="checkbox" ${v?'checked':''} onchange="bcSet(this)"> 해당</label>`;
+  if(f.t==='select') return `<select ${d} onchange="bcSet(this)">${bcOpt(f).map(([k,l])=>`<option value="${esc(k)}" ${String(v??'')===String(k)?'selected':''}>${esc(l)}</option>`).join('')}</select>`;
+  if(f.t==='multi'){ const sel=new Set(v||[]); return `<select ${d} multiple size="${Math.min(6,Math.max(3,bcOpt(f).length))}" onchange="bcSet(this)" style="min-width:200px">${bcOpt(f).map(([k,l])=>`<option value="${esc(k)}" ${sel.has(k)?'selected':''}>${esc(l)}</option>`).join('')}</select><div class="muted">Ctrl/⌘ 눌러 여러 개</div>`; }
+  if(f.t==='range') return `<span class="row" style="margin:0"><input ${d} data-i="0" type="number" min="0" max="${f.max}" value="${v?.[0]??''}" placeholder="이상" style="width:70px" oninput="bcSet(this)"> ~ <input ${d} data-i="1" type="number" min="0" max="${f.max}" value="${v?.[1]??''}" placeholder="이하" style="width:70px" oninput="bcSet(this)"></span>`;
+  if(f.t==='radius') return `<span class="row" style="margin:0"><input ${d} data-i="lat" type="number" step="0.0001" value="${v?.lat??''}" placeholder="위도" style="width:110px" oninput="bcSet(this)"><input ${d} data-i="lng" type="number" step="0.0001" value="${v?.lng??''}" placeholder="경도" style="width:110px" oninput="bcSet(this)"><input ${d} data-i="km" type="number" step="0.5" min="0.2" value="${v?.km??''}" placeholder="km" style="width:70px" oninput="bcSet(this)"><button type="button" onclick="bcPickShopCoord()">가게 좌표</button><button type="button" onclick="bcPickMeetupCoord()">모임 좌표</button></span>`;
+  if(f.t==='event') return `<span class="row" style="margin:0"><select ${d} data-i="id" onchange="bcSet(this)"><option value="">—</option>${OPT.events.map(e=>`<option value="${e.id}" ${v?.id===e.id?'selected':''}>${esc(e.title)}</option>`).join('')}</select><select ${d} data-i="status" onchange="bcSet(this)">${[['any','신청자 전체'],['applied','선정 대기'],['selected','선정됨'],['not_certified','선정됐지만 미인증'],['done','인증 완료'],['rejected','미선정']].map(([k,l])=>`<option value="${k}" ${(v?.status||'any')===k?'selected':''}>${l}</option>`).join('')}</select></span>`;
+  return '';
+}
+function bcSet(el){
+  const st=el.dataset.side==='f'?BCF:BCX, k=el.dataset.k, f=[...BC_FIELDS,...BC_XFIELDS].find(x=>x.k===k); let v;
+  if(f.t==='text'){ v=el.value.trim()||null; }
+  else if(f.t==='num'){ v=el.value===''?null:+el.value; }
+  else if(f.t==='bool'){ v=el.checked?true:null; }
+  else if(f.t==='select'){ v=el.value===''?null:(el.value==='true'?true:el.value==='false'?false:el.value); }
+  else if(f.t==='multi'){ v=[...el.selectedOptions].map(o=>o.value); if(!v.length) v=null; }
+  else if(f.t==='range'){ const cur=st[k]||[null,null]; cur[+el.dataset.i]=el.value===''?null:+el.value; v=(cur[0]==null&&cur[1]==null)?null:[cur[0]??0, cur[1]??f.max]; }
+  else if(f.t==='radius'){ const cur=st[k]||{}; cur[el.dataset.i]=el.value===''?null:+el.value; v=(cur.lat!=null&&cur.lng!=null)?{lat:cur.lat,lng:cur.lng,km:cur.km||3}:(cur.lat!=null||cur.lng!=null||cur.km!=null?cur:null); if(v && (v.lat==null||v.lng==null)){ st[k]=v; return; } }
+  else if(f.t==='event'){ const cur=st[k]||{}; cur[el.dataset.i]=el.value||null; v=cur.id?{id:cur.id,status:cur.status||'any'}:null; }
+  if(v==null) delete st[k]; else st[k]=v;
+  bcPreview(); bcSummary();
+}
+function bcGroups(fields, side){ const gs=[...new Set(fields.map(f=>f.g))]; return gs.map(g=>`<details ${side==='f'&&g==='지역'?'open':''}><summary><b>${g}</b> <span class="muted" id="bcg-${side}-${g}"></span></summary><table style="margin:6px 0 10px"><tbody>${fields.filter(f=>f.g===g).map(f=>`<tr><td style="width:190px;color:var(--ink2)">${f.l}</td><td>${bcCtl(f, side)}</td></tr>`).join('')}</tbody></table></details>`).join(''); }
+function bcSummary(){
+  const lab=(fields,side,st)=>{ [...new Set(fields.map(f=>f.g))].forEach(g=>{ const n=fields.filter(f=>f.g===g && st[f.k]!=null).length; const el=$(`#bcg-${side}-${g}`); if(el) el.textContent=n?`${n}개 설정`:''; }); };
+  lab(BC_FIELDS,'f',BCF); lab(BC_XFIELDS,'x',BCX);
+  const parts=[...BC_FIELDS.filter(f=>BCF[f.k]!=null).map(f=>f.l), ...BC_XFIELDS.filter(f=>BCX[f.k]!=null).map(f=>'제외: '+f.l)]; if(BCL.limit_n) parts.push(`상한 ${BCL.limit_n}명${BCL.random?' 무작위':''}`);
+  const el=$('#bcSum'); if(el) el.textContent=parts.length?parts.join(' · '):'조건 없음 — 온보딩 마친 전체';
+}
+function bcRenderForm(){ $('#bcFilter').innerHTML=bcGroups(BC_FIELDS,'f'); $('#bcExclude').innerHTML=bcGroups(BC_XFIELDS,'x'); $('#bcLimit').value=BCL.limit_n||''; $('#bcRandom').checked=!!BCL.random; bcSummary(); bcPreview(); }
+function bcApply(obj){ BCF={...(obj.filter||{})}; BCX={...(obj.exclude||{})}; BCL={limit_n:obj.limit_n||null, random:!!obj.random}; bcRenderForm(); }
+function bcPayload(){ return { filter:BCF, exclude:BCX, limit_n:BCL.limit_n||null, random:!!BCL.random }; }
+function bcPreview(){ clearTimeout(bcTimer); bcTimer=setTimeout(async()=>{ const el=$('#bcPrev'); if(!el) return; el.innerHTML='<span class="muted">세는 중…</span>'; const {data,error}=await sb.rpc('admin_broadcast_preview',{p:bcPayload()}); if(error){ el.innerHTML='<span class="chip r">'+esc(error.message)+'</span>'; return; } bcCount=data.count; el.innerHTML=`<b style="font-size:20px">${data.count}</b>명 <span class="muted">(나 제외)</span> ${(data.sample||[]).map(s=>`<span class="chip">${esc(s.nickname)} · ${esc(s.dong||'')}${s.lv?' · '+s.lv+'단계':''}</span>`).join('')}`; const b=$('#bcSend'); if(b) b.textContent=`${data.count}명에게 보내기`; }, 350); }
+function bcLinkIds(){ const t=$('#bcLinkType').value; const s=$('#bcLinkId'); if(!s) return; const list = t==='meetup'?OPT.meetups.map(m=>[m.id,m.title]) : t==='event'?OPT.events.map(e=>[e.id,e.title]) : t==='shop'?OPT.shops.map(x=>[x.id,x.name]) : t==='post'?OPT.posts.map(p=>[p.id,p.title]) : t==='pattern'?OPT.patterns.map(p=>[p.id,p.title]) : t==='view'?BC_VIEWS : []; s.innerHTML=list.map(([k,l])=>`<option value="${esc(k)}">${esc(l)}</option>`).join(''); s.hidden=!list.length; }
+function bcLink(){ const t=$('#bcLinkType').value; if(!t) return null; const id=$('#bcLinkId').value; return t==='view'?{type:'view',view:id}:{type:t,id}; }
+function bcPickShopCoord(){ const s=OPT.shops[0]; if(!s) return toast('가게가 없어요'); const name=prompt('가게 이름 (일부)'); if(!name) return; const sh=OPT.shops.find(x=>x.name.includes(name)); if(!sh) return toast('못 찾았어요'); sb.from('shops').select('location').eq('id',sh.id).single().then(({data})=>{ const c=data?.location?parseGeo(data.location):null; if(!c) return toast('좌표가 없는 가게예요'); BCF.radius={lat:+c.lat.toFixed(5),lng:+c.lng.toFixed(5),km:BCF.radius?.km||3}; bcRenderForm(); }); }
+function bcPickMeetupCoord(){ const name=prompt('모임 이름 (일부)'); if(!name) return; const m=OPT.meetups.find(x=>x.title.includes(name)); if(!m) return toast('못 찾았어요'); sb.from('meetups').select('location').eq('id',m.id).single().then(({data})=>{ const c=data?.location?parseGeo(data.location):null; if(!c) return toast('좌표가 없어요'); BCF.radius={lat:+c.lat.toFixed(5),lng:+c.lng.toFixed(5),km:BCF.radius?.km||3}; bcRenderForm(); }); }
+VIEWS.broadcast = async(arg)=>{
+  const [{data:opt},{data:hist}] = await Promise.all([sb.rpc('admin_bc_options'), sb.rpc('admin_broadcast_history',{p_limit:50})]);
+  OPT={dongs:[],techniques:[],shops:[],events:[],meetups:[],posts:[],patterns:[],segments:[],item_types:[],...(opt||{})};
+  const ST={scheduled:'예약',sending:'보내는 중',sent:'발송됨',cancelled:'취소',test:'테스트',failed:'실패'};
+  const summ=b=>{ const f=b.filter||{}, x=b.exclude||{}; const n=Object.keys(f).length+Object.keys(x).length; return n?`${[...BC_FIELDS.filter(q=>f[q.k]!=null).map(q=>q.l),...BC_XFIELDS.filter(q=>x[q.k]!=null).map(q=>'제외:'+q.l)].join(' · ')}${b.limit_n?` · 상한 ${b.limit_n}`:''}`:'전체'; };
+  $('#main').innerHTML=`<h1>공지·알림 보내기 <small>대상을 정해 🔔 활동 알림이나 지기 채팅으로 · 미리보기 → 테스트 → 발송</small></h1>
+  <div class="bcgrid">
+    <div class="card"><b>메시지</b>
+      <textarea id="bcBody" maxlength="300" style="margin-top:8px;min-height:110px" placeholder="예: 이번 주말 킨텍스 모임이 열려요. 지도 › 모임 탭에서 확인해 보세요"></textarea>
+      <div class="row"><span class="muted">AI 다듬기:</span><button onclick="bcPolish('basic')">존댓말 정리</button><button onclick="bcPolish('new')">신규 환영 톤</button><button onclick="bcPolish('dormant')">휴면 깨우기 톤</button><button onclick="bcPolish('short')">짧게</button></div>
+      <div class="row"><span class="muted" style="width:70px">누르면 이동</span><select id="bcLinkType" onchange="bcLinkIds()"><option value="">지기 채팅방 (기본)</option>${Object.entries(BC_LINKS).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><select id="bcLinkId" hidden style="flex:1"></select></div>
+      <div class="row"><span class="muted" style="width:70px">채널</span><label><input type="checkbox" id="bcChNotify" checked> 🔔 활동 알림</label><label><input type="checkbox" id="bcChChat"> 지기 채팅 메시지 (답장 가능)</label></div>
+      <div class="row"><span class="muted" style="width:70px">예약</span><input id="bcAt" type="datetime-local"><select id="bcRepeat"><option value="none">한 번</option><option value="weekly">매주</option><option value="monthly">매월</option></select><span class="muted">비우면 바로 발송</span></div>
+      <div class="row" style="margin-top:12px"><button onclick="bcSend(true)">나에게 테스트</button><button class="p" id="bcSend" onclick="bcSend(false)">보내기</button><span class="muted" id="bcSum"></span></div>
+    </div>
+    <div class="card"><b>대상</b>
+      <div class="row" style="margin-top:8px"><input id="bcNL" placeholder="말로 정하기 — 예: 일산 코바늘 2단계 이상, 2주 안 들어온 사람" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing)bcFromText()"><button onclick="bcFromText()">조건으로 바꾸기</button></div>
+      <div class="row"><span class="muted">저장된 그룹</span><select id="bcSeg" onchange="bcLoadSeg()"><option value="">—</option>${OPT.segments.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><button onclick="bcSaveSeg()">현재 조건 저장</button><button onclick="bcApply({})">조건 지우기</button></div>
+      <div id="bcPrev" style="margin:8px 0;min-height:28px"></div>
+      <div id="bcFilter"></div>
+      <div id="bcExclude" style="margin-top:8px"></div>
+      <details style="margin-top:8px"><summary><b>인원 상한·무작위</b></summary><div class="row"><input id="bcLimit" type="number" min="1" placeholder="최대 인원" style="width:110px" oninput="BCL.limit_n=+this.value||null;bcPreview();bcSummary()"><label><input type="checkbox" id="bcRandom" onchange="BCL.random=this.checked;bcPreview();bcSummary()"> 무작위로 뽑기 (A/B 테스트)</label></div></details>
+    </div>
+  </div>
+  <h2>발송 기록 <small class="muted">열람 = 활동 탭에서 봄 · 클릭 = 눌러서 이동</small></h2>
+  <table><tr><th>시각</th><th>상태</th><th>내용</th><th>채널·이동</th><th>대상 조건</th><th>대상/발송</th><th>열람/클릭</th><th></th></tr>
+  ${(hist||[]).map(b=>`<tr><td class="muted">${fmt(b.schedule_at||b.created_at)}${b.repeat!=='none'?`<br><span class="chip">${b.repeat==='weekly'?'매주':'매월'}</span>`:''}</td><td><span class="chip ${b.status==='sent'?'g':b.status==='failed'?'r':''}">${ST[b.status]||b.status}</span>${b.last_error?`<div class="muted">${esc(b.last_error)}</div>`:''}</td><td style="white-space:pre-wrap;max-width:320px">${esc(b.body)}</td><td class="muted">${(b.channels||[]).map(c=>c==='chat'?'채팅':'알림').join('+')}${b.link?'<br>→ '+(BC_LINKS[b.link.type]||b.link.type):''}</td><td class="muted" style="max-width:260px">${esc(summ(b))}</td><td>${b.target_count??'-'} / ${b.sent_count??'-'}</td><td>${b.read_count??0} / ${b.clicked_count??0}</td><td>${b.status==='scheduled'?`<button onclick="bcCancel(${b.id})">예약 취소</button> `:''}<button onclick='bcReuse(${JSON.stringify({body:b.body,filter:b.filter,exclude:b.exclude,limit_n:b.limit_n,random:b.random_pick,link:b.link,channels:b.channels}).replace(/'/g,"&#39;")})'>다시 쓰기</button></td></tr>`).join('')||'<tr><td colspan="8" class="muted">아직 보낸 공지가 없어요</td></tr>'}</table>`;
+  BCF={}; BCX={}; BCL={limit_n:null,random:false}; bcRenderForm();
 };
-async function sendBroadcast(){ const b=$('#bcBody').value.trim(); if(!b) return toast('내용을 입력하세요'); if(!confirm('모든 사용자에게 보낼까요?\n\n'+b)) return; const {data,error}=await sb.rpc('admin_broadcast',{p_body:b}); if(error) return toast(error.message); toast(data+'명에게 보냈어요'); $('#bcBody').value=''; }
+function bcReuse(o){ bcApply(o); $('#bcBody').value=o.body||''; if(o.link){ $('#bcLinkType').value=o.link.type; bcLinkIds(); $('#bcLinkId').value=o.link.type==='view'?o.link.view:o.link.id; } $('#bcChNotify').checked=(o.channels||['notify']).includes('notify'); $('#bcChChat').checked=(o.channels||[]).includes('chat'); window.scrollTo(0,0); }
+async function bcSend(test){
+  const body=$('#bcBody').value.trim(); if(!body) return toast('내용을 입력하세요');
+  const channels=[...($('#bcChNotify').checked?['notify']:[]), ...($('#bcChChat').checked?['chat']:[])]; if(!channels.length) return toast('채널을 하나 이상 고르세요');
+  const at=$('#bcAt').value?new Date($('#bcAt').value).toISOString():null; const repeat=$('#bcRepeat').value;
+  if(repeat!=='none' && !at) return toast('반복 발송은 예약 시각이 필요해요');
+  const p={ body, channels, link:bcLink(), ...bcPayload(), schedule_at:at, repeat, test:!!test };
+  if(!test){ if(bcCount===0) return toast('대상이 0명이에요'); if(!confirm(`${at?fmt(at)+'에 예약':'지금'} · ${bcCount??'?'}명에게 보낼까요?\n\n${body}\n\n조건: ${$('#bcSum').textContent}`)) return; }
+  const {data,error}=await sb.rpc('admin_broadcast_send',{p}); if(error) return toast(error.message);
+  toast(test?'나에게 테스트로 보냈어요 — 앱 활동 탭에서 확인':data.scheduled?`${fmt(data.at)}에 예약했어요`:`${data.sent}명에게 보냈어요`); if(!test){ $('#bcBody').value=''; route(); }
+}
+async function bcCancel(id){ if(!confirm('예약을 취소할까요?')) return; const {error}=await sb.rpc('admin_broadcast_cancel',{p_id:id}); if(error) return toast(error.message); toast('취소했어요'); route(); }
+async function bcSaveSeg(){ const name=prompt('대상 그룹 이름'); if(!name) return; const {error}=await sb.from('broadcast_segments').upsert({name:name.trim(), filter:BCF, exclude:BCX, limit_n:BCL.limit_n||null, random_pick:!!BCL.random},{onConflict:'name'}); if(error) return toast(error.message); toast('저장했어요'); const {data:opt}=await sb.rpc('admin_bc_options'); OPT.segments=opt?.segments||[]; $('#bcSeg').innerHTML='<option value="">—</option>'+OPT.segments.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join(''); }
+function bcLoadSeg(){ const s=OPT.segments.find(x=>String(x.id)===$('#bcSeg').value); if(s) bcApply({filter:s.filter, exclude:s.exclude, limit_n:s.limit_n, random:s.random_pick}); }
+async function bcFromText(){
+  const text=$('#bcNL').value.trim(); if(!text) return; toast('지기 AI가 조건으로 바꾸는 중…');
+  try{ const r=await jigi('segment',{ text, options:{ dongs:OPT.dongs.map(d=>d.name), techniques:OPT.techniques.map(t=>({id:t.id,name:t.name,craft:t.craft})), shops:OPT.shops, events:OPT.events.map(e=>({id:e.id,title:e.title})), meetups:OPT.meetups.map(m=>({id:m.id,title:m.title})), item_types:OPT.item_types } });
+    if(r?.error) return toast(r.error); bcApply(r); toast(r.note||'조건을 채웠어요 — 아래에서 확인·수정하세요'); }catch(e){ toast(e.message); }
+}
+async function bcPolish(variant){ const text=$('#bcBody').value.trim(); if(!text) return toast('먼저 내용을 적어 주세요'); try{ const r=await jigi('bc_polish',{text, variant}); if(r?.text){ $('#bcBody').value=r.text; toast('다듬었어요'); } else toast(r?.error||'AI 키가 없어요'); }catch(e){ toast(e.message); } }
 async function broadcastTo(id, nick){ const b=prompt(nick+'님에게 보낼 알림 내용'); if(!b) return; const {error}=await sb.rpc('admin_broadcast',{p_body:b,p_user:id}); if(error) return toast(error.message); toast('보냈어요'); }
 // ===== 글·모임·인증 =====
 let contentTab='posts';
@@ -957,7 +1072,7 @@ async function decideClaim(id, ok, docPath){
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식',event_upsert:'이벤트 저장',event_app_selected:'이벤트 선정',event_app_rejected:'이벤트 미선정',event_app_applied:'이벤트 선정 되돌림',event_shipped:'이벤트 발송 처리',feedback_accept:'버그 제보 채택',feedback_reject:'버그 제보 반려',survey_upsert:'설문 저장',cohort_set:'서포터 모집 설정',support_answer:'문의 답변',kb_upsert:'지식 창고 저장',kb_delete:'지식 창고 삭제',kb_candidate_approve:'지식 후보 승인',kb_candidate_reject:'지식 후보 거절',add_bad_word:'욕설 사전 추가',remove_bad_word:'욕설 사전 삭제'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식',event_upsert:'이벤트 저장',event_app_selected:'이벤트 선정',event_app_rejected:'이벤트 미선정',event_app_applied:'이벤트 선정 되돌림',event_shipped:'이벤트 발송 처리',broadcast_schedule:'공지 예약',broadcast_cancel:'공지 예약 취소',feedback_accept:'버그 제보 채택',feedback_reject:'버그 제보 반려',survey_upsert:'설문 저장',cohort_set:'서포터 모집 설정',support_answer:'문의 답변',kb_upsert:'지식 창고 저장',kb_delete:'지식 창고 삭제',kb_candidate_approve:'지식 후보 승인',kb_candidate_reject:'지식 후보 거절',add_bad_word:'욕설 사전 추가',remove_bad_word:'욕설 사전 삭제'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

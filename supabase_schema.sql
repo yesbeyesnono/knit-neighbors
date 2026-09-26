@@ -1191,3 +1191,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     → referred_by + referrals(manual, pending). 친구가 프로필 완성 + 가입 다음 날 이후 로그인(auth.users.last_sign_in_at)했으면 즉시 confirmed + 20점, 아니면 기존 check_in 확정. 인정 건은 mod_items auto_done 기록
 --   finalize_supporters(): 종료 알림을 등급별(미달/기본/우수)로 — 점수·보상·배송지 안내(대표가 지기 채팅으로 문의)·"점수는 기록으로 남고 더 쌓이지 않음" · MVP 확정 시 별도 알림. 보상은 1회(잡지 정기 발송 없음)
 -- ---------------------------------------------------------------
+
+-- 51. 공지·알림 정밀 타겟팅 (마이그레이션 broadcast_targeting + _fix_alias·_preview_fix_alias, 2026-09-26 대표 지시 "옵션 모두 반영")
+--   broadcasts(body·channels notify|chat·link 딥링크·filter/exclude jsonb·limit_n/random_pick·schedule_at/repeat none|weekly|monthly·status scheduled|sending|sent|cancelled|test|failed·target/sent_count)
+--   broadcast_segments(이름 붙인 조건) · notifications + broadcast_id / link jsonb / clicked_at(앱이 눌러 이동할 때 기록, 컬럼 UPDATE grant)
+--   _bc_ids(f): 조건 한 묶음(AND). 키: dong[]·dong_like·radius{lat,lng,km}·craft·lv_crochet/lv_knit[min,max]·skills_has/any/missing·verified_has·act_level·seen_within/over(auth.users.last_sign_in_at)
+--     joined_within/over·onboarded(no|any)·no_activity·active_within·supporter(active|completed|any|none)·supporter_tier[]·waitlist·author·shop_owner·shop_follow·waving·meetup_member·event{id,status}·has_ticket·feedback·yarn·item_type·stash_yarn·nickname·ids[]
+--   _bc_targets(filter, exclude, limit, random): filter.groups[] 면 OR 합집합 − exclude(같은 키 + notified_within·event_applied) − 나 → 상한·무작위
+--   admin_broadcast_preview(p) 인원+샘플 · admin_broadcast_send(p) 즉시/예약/테스트(나에게만) · _bc_deliver(id) 알림(+딥링크, 옛 앱용 meetup/event/shop/post_id 병행)·지기 채팅 메시지, 반복이면 다음 회차 행 생성
+--   broadcast_run_due() 크론 broadcast-run-due(5분) · admin_broadcast_cancel · admin_broadcast_history(열람·클릭 수) · admin_bc_options(동네·기법·가게·이벤트·모임·글·도안·세그먼트·작품 종류)
+--   jigi route 'segment'(자연어 → 조건 JSON, 콘솔이 폼에 채워 대표가 확인) · 'bc_polish'(존댓말/신규/휴면/짧게). 앱: notifications.link → openLink() (meetup·event·shop·post·pattern·view)
+-- ---------------------------------------------------------------

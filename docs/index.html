@@ -2027,9 +2027,19 @@ async function renderActivity(){
     : '<div class="empty">아직 활동이 없어요<br>글을 쓰거나 이웃에게 먼저 인사해 보세요</div>';
   if(actRows.some(n=>!n.read_at)){ await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',me.id).is('read_at',null); refreshBadge(); }
 }
+// 공지 딥링크(콘솔 › 공지·알림 보내기): {type:'meetup'|'event'|'shop'|'post'|'pattern'|'view', id|view}
+async function openLink(l){
+  try{
+    if(l.type==='meetup') return openMeetup(l.id); if(l.type==='event') return openEvent(l.id); if(l.type==='shop'||l.type==='class') return openShop(l.id); if(l.type==='post') return openPost(l.id);
+    if(l.type==='pattern') return typeof openPattern==='function' ? openPattern(l.id) : go('comm');
+    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(['map','comm','chats','my'].includes(v)) return go(v); }
+  }catch(e){}
+  return openSupportRoom();
+}
 async function openNotif(i){
   const n=actRows[i]; if(!n) return;
   sb.from('notifications').delete().eq('id', n.id).eq('recipient_id', me.id).then(()=>refreshBadge());   // 확인한 알림은 활동에서 지운다
+  if(n.link && typeof n.link==='object'){ sb.from('notifications').update({ clicked_at:new Date().toISOString() }).eq('id', n.id).then(()=>{}); return openLink(n.link); }
   if(n.event_id) return openEvent(n.event_id);
   if(n.kind==='supporter') return openSupporters();
   if(n.kind==='notice' && n.shop_id){ const { data:shop } = await sb.from('shops').select('*').eq('owner_id', me.id).maybeSingle(); myShop = shop||myShop; return openShop(n.shop_id); }
