@@ -641,6 +641,16 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .sthumb{flex:none;width:46px;height:46px;border-radius:10px;background:var(--bg2) center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;color:var(--ink3)}.sthumb i{position:absolute;right:-3px;bottom:-3px;width:16px;height:16px;border-radius:50%;border:2px solid #fff}.sthumb.lg{width:72px;height:72px}
 .sleft{flex:none;font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--moss-soft);color:var(--moss)}.sleft.end{background:var(--bg2);color:var(--ink3)}
 .sacard{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px}.sacard .tx{flex:1;min-width:0}.sacard .tx>span{display:block;font-size:.82rem;color:var(--ink2)}
+.tbtn{background:none;border:0;font:inherit;color:var(--ink2);padding:0;cursor:pointer}
+#v-meetform .top .btn.sm{width:auto;padding:8px 16px}
+.mhero{width:180px;height:200px;border-radius:22px;margin:4px auto 0;position:relative;box-shadow:0 10px 26px rgba(63,79,34,.18);transform:rotate(-2deg);background:var(--chip) center/cover no-repeat;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mhero .cam{width:54px;height:54px;border-radius:50%;background:var(--olive);color:#fff;display:grid;place-items:center}.mhero .cam svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.mhero .mhint{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:.72rem;color:var(--olive);font-weight:600}.mhero.has .mhint{display:none}.mhero.has .cam{background:rgba(63,79,34,.55)}
+#v-meetform .cfphotos:empty{display:none}
+.pubpill{align-self:center;font:inherit;font-size:.82rem;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--ink2);cursor:pointer}.pubpill svg{width:14px;height:14px;vertical-align:-2px;stroke:var(--acc);fill:none;stroke-width:2;margin-right:3px}
+.fld{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:1rem}.fld input{border:0;padding:4px 0;font-weight:700;font-size:1rem;background:transparent}.fld .r{margin-left:auto;color:var(--ink3);flex:none}.fld .r svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fld.place{cursor:pointer}.fld.place b{display:block}.fld.place small{display:block;color:var(--ink2);font-size:.8rem;font-weight:400}.fld.place .r{color:var(--acc)}
+.more{display:flex;gap:8px;flex-wrap:wrap}.more button{font:inherit;font-weight:500;font-size:.85rem;padding:7px 12px;border-radius:999px;background:var(--chip);color:var(--olive);border:0;cursor:pointer}.more button.set{font-weight:600}
 .mbadge{flex:none;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--moss-soft);color:var(--moss);margin-left:6px;vertical-align:middle}.mbadge.end{background:var(--bg2);color:var(--ink3)}
 .ava.meet{border-radius:12px;background:var(--moss-soft);color:var(--moss);display:flex;align-items:center;justify-content:center}
 .item .tx .when{display:block;font-size:.78rem;color:var(--moss);font-weight:500}
@@ -865,32 +875,31 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <p class="muted" style="font-size:.78rem;margin:10px 0 0">적어 주신 실·바늘 정보는 실 사전과 추천을 만드는 데 쓰여요. 커뮤니티 "작품" 탭에 올라가요.</p></div>
   </section>
 
-  <!-- 모임 만들기 (새 페이지) -->
+  <!-- 모임 만들기 (새 페이지) — 2026-09-26 시안: 대표 사진 + 카드 3개 + 칩(누르면 설정 시트) -->
   <section class="view" id="v-meetform">
-    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>모임 만들기</h1><button class="btn" id="meetPost" onclick="submitMeet()">게시</button></div>
-    <div class="cfsec"><div class="cfh">어떤 모임인가요 <em>필수</em></div>
-      <input id="mTitle" maxlength="60" placeholder="모임 이름 (예: 토요 뜨개 모임)">
-      <div class="cfl">모임 유형</div><div class="seg" id="mKind"></div>
-      <label class="f" id="mTechWrap" hidden style="margin-top:10px">배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label>
-      <div class="cfl">종목</div><div class="seg" id="mCraft"></div></div>
-    <div class="cfsec"><div class="cfh">대표 사진 <span>선택 · 1~4장 · 이번에 함께 뜰 작품을 보여 주세요</span></div>
-      <div class="cfphotos" id="mfPhotos"></div><input id="mFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
-      <p class="muted" style="font-size:.78rem;margin:8px 0 0">첫 번째 사진이 모임 글의 대표 이미지로 보여요.</p></div>
-    <div class="cfsec"><div class="cfh">언제 <em>필수</em></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">날짜<input id="mDate" type="date"></label><label class="f">시작 시간<input id="mClock" type="time" step="600"></label></div>
-      <div class="cfl">소요 시간</div><div class="seg" id="mDurSeg"></div>
-      <div class="cfl">반복</div><div class="seg" id="mRepeatSeg"></div></div>
-    <div class="cfsec"><div class="cfh">어디서 <em>필수</em></div>
+    <div class="top"><button class="tbtn" onclick="closeCompose()">취소</button><h1>모임 만들기</h1><button class="btn sm" id="meetPost" onclick="submitMeet()">게시</button></div>
+    <div class="body" style="gap:10px">
+      <div class="mhero" id="mHero" onclick="$('#mFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint" id="mHeroHint">대표 사진 · 이번에 함께 뜰 작품</span></div>
+      <div class="cfphotos" id="mfPhotos" style="justify-content:center"></div><input id="mFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
+      <button type="button" class="pubpill" id="mPubPill" onclick="toggleMeetPublic()"></button><input type="checkbox" id="mPublic" checked hidden>
+      <div class="fld"><input id="mTitle" maxlength="60" placeholder="모임 이름 (예: 토요일 오후 코바늘 모임)"><span class="r"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></span></div>
       <div id="mPlaceBox"></div>
-      <input id="mPlaceDetail" maxlength="40" placeholder="상세 위치 (선택) — 예: 2층 창가, 노래하는 분수대 앞" style="margin-top:10px"></div>
-    <div class="cfsec"><div class="cfh">누구와</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">권장 단계 (부터)<select id="mLvMin"></select></label><label class="f">권장 단계 (까지)<select id="mLvMax"></select></label></div>
-      <div class="cfl">정원 <span class="muted">0이면 제한 없음</span></div><div class="stepper"><button type="button" onclick="mCapStep(-1)">−</button><b id="mCapVal">0</b><button type="button" onclick="mCapStep(1)">＋</button></div>
-      <div class="cfl">참가비</div><div class="seg" id="mFeeSeg"></div><input id="mFee" maxlength="40" placeholder="예: 5,000원" hidden style="margin-top:8px">
-      <div class="cfl">준비물 (선택)</div><input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘"></div>
-    <div class="cfsec"><div class="cfl" style="margin-top:0">모임 소개 (선택)</div><textarea id="mDesc" maxlength="300" placeholder="예: 초보 환영, 실·바늘 지참. 각자 뜨면서 수다" style="min-height:64px"></textarea>
-      <div class="sw" style="margin-top:12px"><span>지도에 공개 <span class="muted">동네 뜨개인 누구나 참여</span></span><input type="checkbox" id="mPublic" checked></div>
-      <p class="muted" style="font-size:.78rem;margin:10px 0 0">커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요. 첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</p></div>
+      <div class="fld" style="display:block"><div class="cfl" style="margin:0 0 6px">언제</div><div style="display:flex;gap:8px"><input id="mDate" type="date" style="flex:1.3"><input id="mClock" type="time" step="600" style="flex:1"></div></div>
+      <div class="more" id="mChips"></div>
+      <p class="muted" style="font-size:.78rem;margin:2px 0 0">커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요. 유형·소요 시간·정원 등은 칩을 눌러 고쳐요. 첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</p>
+    </div>
+    <!-- 설정 시트로 옮겨 쓰는 입력 블록(평소엔 숨김). id·이벤트는 Phase 1 그대로 -->
+    <div id="mHold" hidden>
+      <div id="mBlk-kind"><div class="cfl" style="margin-top:0">모임 유형</div><div class="seg" id="mKind"></div><label class="f" id="mTechWrap" hidden style="margin-top:10px">배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label></div>
+      <div id="mBlk-craft"><div class="cfl" style="margin-top:0">종목</div><div class="seg" id="mCraft"></div></div>
+      <div id="mBlk-lv"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">권장 단계 (부터)<select id="mLvMin"></select></label><label class="f">권장 단계 (까지)<select id="mLvMax"></select></label></div><p class="muted" style="font-size:.8rem">참여자에게 "내 단계에 맞아요 / 조금 높아요"로 보여요</p></div>
+      <div id="mBlk-cap"><div class="muted" style="margin-bottom:12px">0이면 제한 없음</div><div style="display:flex;justify-content:center"><div class="stepper"><button type="button" onclick="mCapStep(-1)">−</button><b id="mCapVal">0</b><button type="button" onclick="mCapStep(1)">＋</button></div></div></div>
+      <div id="mBlk-dur"><div class="cfl" style="margin-top:0">소요 시간</div><div class="seg" id="mDurSeg"></div><div class="cfl">반복</div><div class="seg" id="mRepeatSeg"></div></div>
+      <div id="mBlk-fee"><div class="seg" id="mFeeSeg"></div><input id="mFee" maxlength="40" placeholder="예: 5,000원" hidden style="margin-top:8px"></div>
+      <div id="mBlk-bring"><input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘"></div>
+      <div id="mBlk-desc"><textarea id="mDesc" maxlength="300" placeholder="예: 초보 환영, 실·바늘 지참. 각자 뜨면서 수다" style="min-height:90px"></textarea></div>
+      <div id="mBlk-detail"><input id="mPlaceDetail" maxlength="40" placeholder="예: 2층 창가, 노래하는 분수대 앞"></div>
+    </div>
   </section>
 
   <!-- 내 실함 -->
@@ -1066,8 +1075,8 @@ function avatar(p, lg){ const ini=(p?.nickname||'?').slice(0,1); return `<div cl
 function ago(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분 전'; if(d<86400)return Math.floor(d/3600)+'시간 전'; return Math.floor(d/86400)+'일 전'; }
 function hhmm(t){ return new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}); }
 function chips(p){ return [p.craft&&`<span class="chip y">${CRAFT[p.craft]}</span>`, p.experience&&`<span class="chip">${EXP[p.experience]}</span>`, p.mbti&&`<span class="chip">${esc(p.mbti)}</span>`].filter(Boolean).join(' '); }
-function openSheet(html){ $('#sheet').innerHTML='<div class="hd"></div>'+html; $('#sheetwrap').classList.add('on'); }
-function closeSheet(){ $('#sheetwrap').classList.remove('on'); }
+function openSheet(html){ if(typeof restoreMeetOpt==='function') restoreMeetOpt(); $('#sheet').innerHTML='<div class="hd"></div>'+html; $('#sheetwrap').classList.add('on'); }
+function closeSheet(){ $('#sheetwrap').classList.remove('on'); if(typeof restoreMeetOpt==='function') restoreMeetOpt(); }
 // 시트 내려쓸기로 닫기: 시트가 맨 위까지 스크롤된 상태에서 아래로 끌면 따라 내려오고, 충분히 내리면 닫힘
 (function(){
   const sh=$('#sheet'); let y0=null, x0=0, dy=0, drag=false;
@@ -2522,8 +2531,10 @@ async function openCert(){
   loadTech().then(renderCertTech);
 }
 function renderMeetPhotos(){
+  const hero=$('#mHero'); if(!hero) return; const p0=sPhotos[0];
+  hero.classList.toggle('has', !!p0); hero.style.backgroundImage = p0?`url(${p0.url})`:'';
   const box=$('#mfPhotos'); if(!box) return;
-  box.innerHTML = sPhotos.map((p,i)=>`<div style="background-image:url(${p.url})">${i===0?'<span style="position:absolute;left:4px;bottom:4px;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--sel);color:#fff">대표</span>':''}<b onclick="sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" onclick="$('#mFile').click()">${ico('camera')}<br>${sPhotos.length?'추가':'사진'}</button>`:'');
+  box.innerHTML = sPhotos.length ? sPhotos.map((p,i)=>`<div style="background-image:url(${p.url});width:56px;height:56px">${i===0?'<span style="position:absolute;left:3px;bottom:3px;font-size:.6rem;font-weight:700;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff">대표</span>':''}<b onclick="event.stopPropagation();sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" style="width:56px;height:56px;font-size:.7rem" onclick="$('#mFile').click()">${ico('camera')}<br>추가</button>`:'') : '';
 }
 function renderCertPhotos(){
   renderMeetPhotos();
@@ -2776,6 +2787,19 @@ async function stashAddFromDict(y){   // 실 사전·직접 입력으로 고른 
 const M_DUR={60:'1시간',90:'1시간 30분',120:'2시간',180:'3시간',240:'반나절'}, M_REP={once:'한 번',weekly:'매주',biweekly:'격주',monthly:'매월'}, M_FEE={free:'무료',drink:'각자 음료',custom:'직접 입력'};
 let mCap=0;
 function mCapStep(d){ mCap=Math.max(0, Math.min(100, mCap+d)); if(mCap===1) mCap = d>0?2:0; $('#mCapVal').textContent=mCap; }
+// 칩 → 설정 시트: 숨겨 둔 입력 블록(#mHold)을 시트로 옮겼다가 닫을 때 되돌린다(이벤트·id 유지)
+const M_OPT={kind:'모임 유형',craft:'종목',lv:'권장 단계',cap:'정원',dur:'소요 시간·반복',fee:'참가비',bring:'준비물',desc:'모임 소개',detail:'상세 위치'};
+let meetOpt=null;
+function restoreMeetOpt(){ if(!meetOpt) return; const b=document.getElementById('mBlk-'+meetOpt); if(b) $('#mHold').appendChild(b); meetOpt=null; if(view==='meetform') renderMeetChips(); }
+function openMeetOpt(k){ restoreMeetOpt(); openSheet(`<b style="font-size:1.05rem">${M_OPT[k]||''}</b><div id="mSlot"></div><button class="btn" onclick="closeSheet()">완료</button>`); meetOpt=k; $('#mSlot').appendChild(document.getElementById('mBlk-'+k)); const f=$('#mSlot').querySelector('input:not([hidden]),textarea'); if(f && k!=='cap') setTimeout(()=>f.focus(),150); }
+function renderMeetChips(){
+  const box=$('#mChips'); if(!box) return;
+  const lmin=$('#mLvMin').value, lmax=$('#mLvMax').value, feeK=segVal('#mFeeSeg'), fee=feeK==='custom'?($('#mFee').value.trim()||'참가비'):(M_FEE[feeK]||'참가비');
+  const chips=[['kind', MKIND[segVal('#mKind')]||'유형', true],['craft', MCRAFT[segVal('#mCraft')]||'종목', true],['lv', lmin||lmax?`${lmin||1}~${lmax||5}단계`:'단계 무관', !!(lmin||lmax)],['cap', mCap?`정원 ${mCap}`:'정원 없음', !!mCap],['fee', fee, true],['dur', `${M_DUR[segVal('#mDurSeg')]||'2시간'} · ${M_REP[segVal('#mRepeatSeg')]||'한 번'}`, true],['bring', $('#mBring').value.trim()?'준비물 ✓':'＋ 준비물', !!$('#mBring').value.trim()],['desc', $('#mDesc').value.trim()?'소개 ✓':'＋ 소개', !!$('#mDesc').value.trim()],['detail', $('#mPlaceDetail').value.trim()?'상세 위치 ✓':'＋ 상세 위치', !!$('#mPlaceDetail').value.trim()]];
+  box.innerHTML = chips.map(([k,l,set])=>`<button type="button" class="${set?'set':''}" onclick="openMeetOpt('${k}')">${esc(l)}</button>`).join('');
+}
+function renderMeetPub(){ const on=$('#mPublic').checked; $('#mPubPill').innerHTML = `<svg viewBox="0 0 24 24">${on?'<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0"/>':'<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'}</svg>${on?'공개 · 우리 동네 이웃이 볼 수 있어요':'비공개 · 초대한 사람만 볼 수 있어요'} ›`; }
+function toggleMeetPublic(){ const c=$('#mPublic'); c.checked=!c.checked; renderMeetPub(); }
 async function openMeetForm(){
   if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
   if(!((myProfile?.cert_count||0)>0)) return openMeetGate();
@@ -2793,14 +2817,14 @@ async function openMeetForm(){
   const pad=n=>String(n).padStart(2,'0'); $('#mDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#mDate').min=(t=>`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`)(new Date()); $('#mClock').value='14:00';
   segSet('#mKind','free'); segSet('#mCraft','both'); segSet('#mDurSeg','120'); segSet('#mRepeatSeg','once'); segSet('#mFeeSeg','free');
   $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value=''; $('#mFee').hidden=true; $('#mFee').value=''; $('#mBring').value=''; $('#mTitle').value=''; $('#mDesc').value=''; $('#mPlaceDetail').value=''; $('#mPublic').checked=true; $('#meetPost').disabled=false;
-  mCap=0; $('#mCapVal').textContent='0'; placePick.m=null; renderMeetPlace();
+  mCap=0; $('#mCapVal').textContent='0'; placePick.m=null; renderMeetPlace(); renderMeetPub(); renderMeetChips();
   show('meetform'); $('#v-meetform').scrollTop=0;
 }
 function renderMeetPlace(){
   const box=$('#mPlaceBox'); if(!box) return; const r=placePick.m;
-  if(!r){ box.innerHTML=`<button type="button" class="cfrow" style="border-top:0;margin-top:0;border:1px solid var(--line);border-radius:12px;padding:13px 12px" onclick="openPlaceSearch('m')"><span style="display:flex;gap:8px;align-items:center;color:var(--ink2)">${SVG_SEARCH} 장소 찾기</span><span class="muted">›</span></button>`; return; }
-  box.innerHTML=`<div class="minimap"><div class="mm" id="mMini"></div><div class="cpin">${SVG_PIN}</div></div>
-    <div class="placecard"><div class="tx"><input id="mPlace" maxlength="80" value="${esc(r.name||'')}" placeholder="장소 이름 (예: 카페 코바늘)" style="font-weight:700"><span style="margin-top:6px">${esc(r.addr||'')}</span></div><button type="button" class="btn sm o" style="flex:none" onclick="openPlaceSearch('m')">바꾸기</button></div>`;
+  if(!r){ box.innerHTML=`<div class="fld place" onclick="openPlaceSearch('m')"><span style="color:var(--ink3)">장소 찾기</span><span class="r">${SVG_PIN.replace('width="34" height="34"','width="20" height="20"')}</span></div>`; return; }
+  box.innerHTML=`<div class="fld place"><div style="flex:1;min-width:0"><input id="mPlace" maxlength="80" value="${esc(r.name||'')}" placeholder="장소 이름 (예: 카페 코바늘)" style="width:100%"><small>${esc(r.addr||'')}</small></div><button type="button" class="btn sm o" style="flex:none" onclick="openPlaceSearch('m')">바꾸기</button></div>
+    <div class="minimap" style="margin:0"><div class="mm" id="mMini"></div><div class="cpin">${SVG_PIN}</div></div>`;
   miniMap($('#mMini'), r);
 }
 async function miniMap(el, c, interactive){
