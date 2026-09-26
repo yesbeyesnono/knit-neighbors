@@ -1156,3 +1156,12 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_kb / admin_kb_candidate / admin_support_stats / kb_bump
 --   주의(2026-09-26 사고): support_seen 기본값 false 로 기존 메시지가 전부 '새 메시지'로 잡혀 실제 회원 2명 방에 AI 인사가 갔음 → 즉시 삭제하고 기존 메시지 전부 support_seen=true 로 보정. 같은 종류의 '처리 표시' 컬럼을 추가할 때는 **기존 행을 처리됨으로 채우고 시작할 것**
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 47. 1기 서포터즈 (마이그레이션 supporters_v1 / _fix_refcode / _cheer_seg) — knitup/docs/supporters_spec.md, 2026-09-26 대표: 운영 DB 추가 적용·작품 인증은 올린 시점에 10점
+--   supporter_cohorts(1기, capacity 100, is_open) · supporters(user_id, started_at, ends_at=+60d, status, tier, ref_code) · point_events(kind, points, ref_table/ref_id UNIQUE, kst_date, segment) · referrals · feedback_reports · surveys/survey_responses · supporter_notices · supporter_waitlist
+--   profiles.referred_by / supporter_badge · messages.card(지기 안내 카드) · notifications.kind 'supporter'
+--   함수: join_supporters(정원 잠금, FULL) · award_points(서버 전용: 상태·기간·KST 하루 한도·중복) · revoke_points(삭제 차감 kind '_revoke') · check_in(출석 + 초대 확인: 프로필 완성 + 가입 다음 KST 날 재접속) · get_supporter_status · set_referrer(코드/닉네임, 최초 1회, 자기·기존 계정 차단) · join_waitlist · report_feedback · submit_survey · join_supporter_room · finalize_supporters(매일 00:10 KST: tier·뱃지·MVP·D-7 응원) · supporter_stats · admin_feedback_decide / admin_survey_upsert / admin_cohort_set
+--   트리거: posts insert/delete(글 3·댓글 1, 본인 글 댓글 제외) · works insert/delete(10). 구간: 0~29일차=1, 30~59=2, 60일차부터 적립 없음
+--   테스트: supabase/tests/supporters_test.sql (롤백 DO 블록 5개, 전부 통과) · 보고: docs/supporters_report.md
+-- ---------------------------------------------------------------
