@@ -105,6 +105,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#ai-path" data-v="ai-path">학습 경로</a>
     <a href="#ai-qa" data-v="ai-qa">질문·해결 답글</a>
     <a href="#ai-yarn" data-v="ai-yarn">실·바늘 통계</a>
+    <a href="#supporters" data-v="supporters">1기 서포터즈</a>
     <a href="#events" data-v="events">이벤트 (레벨 초대·체험단)</a>
     <a href="#yarns" data-v="yarns">실 사전 (표준화)</a>
     <a href="#stash" data-v="stash">회원 실함</a>
@@ -700,6 +701,49 @@ VIEWS.badwords = async()=>{
 };
 async function bwAdd(){ const w=$('#bwWord').value.trim(); if(!w) return; const {error}=await sb.rpc('admin_bad_word',{p_word:w,p_category:$('#bwCat').value,p_add:true}); if(error) return toast(error.message); route(); }
 async function bwDel(w){ const {error}=await sb.rpc('admin_bad_word',{p_word:w,p_category:null,p_add:false}); if(error) return toast(error.message); route(); }
+// ===== 1기 서포터즈 (supporters_spec.md) — 점수는 DB 함수가 계산, 콘솔은 보기·채택·설문 관리 =====
+const SUP_TIER={basic:'기본',excellent:'우수',mvp:'MVP',none:'미달'};
+VIEWS.supporters = async()=>{
+  const [{data:st},{data:sups},{data:fb},{data:svs},{count:wl}] = await Promise.all([
+    sb.rpc('supporter_stats'),
+    sb.from('supporters').select('*, who:profiles!supporters_user_id_fkey(id,nickname,dong_name)').order('started_at',{ascending:false}).limit(300),
+    sb.from('feedback_reports').select('*, who:profiles!feedback_reports_user_id_fkey(nickname)').order('id',{ascending:false}).limit(100),
+    sb.from('surveys').select('*, survey_responses(id)').order('round'),
+    sb.from('supporter_waitlist').select('id',{count:'exact',head:true}) ]);
+  const S=st||{}; const ids=(sups||[]).map(s=>s.id);
+  const {data:pts}=ids.length?await sb.from('point_events').select('supporter_id,segment,points').in('supporter_id',ids):{data:[]};
+  const agg={}; (pts||[]).forEach(e=>{ const o=agg[e.supporter_id]=agg[e.supporter_id]||{1:0,2:0}; o[e.segment]+=e.points; });
+  const day=s=>Math.floor((Date.now()-new Date(s.started_at))/864e5)+1;
+  $('#main').innerHTML=`<h1>1기 서포터즈 <small>${esc(S.cohort||'')} · 신청 ${S.joined||0}/${S.capacity||0} · 활동 중 ${S.active||0} · ${S.is_open?'<span class="chip g">모집 중</span>':'<span class="chip r">마감</span>'}</small></h1>
+  <div class="cards" style="margin-bottom:12px"><div class="card"><div class="l">오늘 신규</div><div class="v">${S.new_today||0}</div></div><div class="card"><div class="l">오늘 적립 합계</div><div class="v">${S.points_today||0}</div></div><div class="card"><div class="l">미처리 버그 제보</div><div class="v">${S.open_feedback||0}</div></div><div class="card"><div class="l">2기 알림 대기</div><div class="v">${wl||0}</div></div></div>
+  <div class="row"><button onclick="cohortSet(${!S.is_open})">${S.is_open?'모집 마감하기':'모집 다시 열기'}</button><input id="cohortCap" type="number" min="1" value="${S.capacity||100}" style="width:90px"><button onclick="cohortSet(${!!S.is_open}, +$('#cohortCap').value)">정원 저장</button><span class="muted">종료 판정·뱃지·MVP는 매일 00:10에 자동. 실물 보상은 아래 명단을 보고 직접 발송.</span></div>
+  <h2>버그 제보 ${(fb||[]).filter(f=>f.status==='open').length}건 대기</h2>
+  <table><tr><th>#</th><th>회원</th><th>내용</th><th>상태</th><th></th></tr>${(fb||[]).map(f=>`<tr><td>${f.id}<div class="muted">${fmt(f.created_at)}</div></td><td>${esc(f.who?.nickname||'')}</td><td style="white-space:pre-wrap">${esc(f.body)}</td><td><span class="chip ${f.status==='accepted'?'g':f.status==='rejected'?'r':''}">${({open:'대기',accepted:'채택',rejected:'반려'})[f.status]}</span></td><td>${f.status==='open'?`<button class="p" onclick="fbDecide(${f.id},true)">채택 (+10)</button> <button onclick="fbDecide(${f.id},false)">반려</button>`:''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>
+  <h2>설문 (격주 4회)</h2>
+  <table><tr><th>회차</th><th>제목</th><th>기간</th><th>응답</th><th></th></tr>${(svs||[]).map(v=>`<tr><td>${v.round}</td><td>${esc(v.title)}</td><td class="muted">${fmtd(v.opens_at)} ~ ${fmtd(v.closes_at)}</td><td>${(v.survey_responses||[]).length}</td><td><button onclick="openSurveyForm(${v.id})">수정</button> <button onclick="downloadSurvey(${v.id})">응답 CSV</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">아직 없어요 — 회차별로 만들어 두면 기간 안에 회원이 답할 수 있어요</td></tr>'}</table>
+  <div class="row"><button class="p" onclick="openSurveyForm()">설문 추가</button></div>
+  <h2>서포터 명단 ${(sups||[]).length}</h2>
+  <table><tr><th>회원</th><th>시작</th><th>일차</th><th>1구간</th><th>2구간</th><th>누적</th><th>상태</th><th>초대코드</th></tr>${(sups||[]).map(s=>{ const o=agg[s.id]||{1:0,2:0}; return `<tr><td><b>${esc(s.who?.nickname||'')}</b><div class="muted">${esc(s.who?.dong_name||'')}</div></td><td class="muted">${fmtd(s.started_at)}</td><td>${Math.min(day(s),60)}</td><td class="${o[1]>=100?'':'muted'}">${o[1]}</td><td class="${o[2]>=100?'':'muted'}">${o[2]}</td><td><b>${o[1]+o[2]}</b></td><td>${s.status==='active'?'<span class="chip g">활동</span>':`<span class="chip">${SUP_TIER[s.tier]||s.status}</span>`}</td><td class="muted">${s.ref_code}</td></tr>`; }).join('')||'<tr><td colspan="8" class="muted">아직 없어요</td></tr>'}</table>`;
+};
+async function cohortSet(open, cap){ const {error}=await sb.rpc('admin_cohort_set',{p_open:open,p_capacity:cap||null}); if(error) return toast(error.message); toast('저장했어요'); route(); }
+async function fbDecide(id, ok){ const note=ok?null:prompt('반려 사유 (선택, 회원에게는 안 보여요)'); if(!ok && note===null) return; const {data,error}=await sb.rpc('admin_feedback_decide',{p_id:id,p_accept:ok,p_note:note}); if(error) return toast(error.message); toast(ok?`채택했어요 (+${data||0}점)`:'반려했어요'); route(); }
+async function openSurveyForm(id){
+  let v={round:1,title:'',questions:[]}; if(id){ const r=await sb.from('surveys').select('*').eq('id',id).single(); v=r.data||v; }
+  const dtl=t=>{ if(!t) return ''; const d=new Date(t); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16); };
+  openPanel(`<h2 style="margin-top:0">${id?'설문 수정':'설문 추가'}</h2>
+    <div class="row"><span class="muted" style="width:90px">회차</span><select id="svRound">${[1,2,3,4].map(r=>`<option value="${r}" ${v.round===r?'selected':''}>${r}회차</option>`).join('')}</select><input id="svTitle" placeholder="제목 (예: 첫 2주 어떠셨어요?)" value="${esc(v.title||'')}" style="flex:1"></div>
+    <div class="row"><span class="muted" style="width:90px">기간</span><input id="svFrom" type="datetime-local" value="${dtl(v.opens_at||new Date())}"><span>~</span><input id="svTo" type="datetime-local" value="${dtl(v.closes_at||new Date(Date.now()+14*864e5))}"></div>
+    <div class="muted" style="margin:8px 0 4px">질문 — 한 줄에 하나. 객관식은 「질문 | 보기1 / 보기2 / 보기3」 처럼 적으세요</div>
+    <textarea id="svQ" style="min-height:160px">${esc((v.questions||[]).map(q=>q.options&&q.options.length?`${q.q} | ${q.options.join(' / ')}`:(q.q||'')).join('\n'))}</textarea>
+    <div class="row"><button class="p" onclick="saveSurvey('${id||''}')">저장</button></div>`);
+}
+async function saveSurvey(id){
+  const qs=$('#svQ').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{ const [q,o]=l.split('|'); return { q:q.trim(), options:o?o.split('/').map(x=>x.trim()).filter(Boolean):[] }; });
+  if(!qs.length) return toast('질문을 하나 이상 적어 주세요');
+  const p={id:id||null,round:+$('#svRound').value,title:$('#svTitle').value.trim(),opens_at:new Date($('#svFrom').value).toISOString(),closes_at:new Date($('#svTo').value).toISOString(),questions:qs};
+  const {error}=await sb.rpc('admin_survey_upsert',{p}); if(error) return toast(error.message); toast('저장했어요'); closePanel(); route();
+}
+async function downloadSurvey(id){ const {data}=await sb.from('survey_responses').select('user_id,answers,created_at, who:profiles!survey_responses_user_id_fkey(nickname)').eq('survey_id',id); const rows=(data||[]).map(r=>({nickname:r.who?.nickname, created_at:r.created_at, ...r.answers})); if(!rows.length) return toast('응답이 없어요'); const cols=[...new Set(rows.flatMap(r=>Object.keys(r)))]; download(`survey-${id}.csv`, csv(rows, cols)); }
 // ===== 이벤트 =====
 // 레벨(Lv. = 작품 인증을 올린 날 수) 조건으로 신청을 받는다. 흐름: 등록(공개 시 레벨 되는 회원에게 알림) → 신청 → 선정(직접/선착순/추첨) → 배송지 → 이벤트 인증(샘플 체험단이면 '샘플 제공' 표시) → 완료
 const EV_KIND={invite:'초대 모임',sample:'샘플 체험단',general:'일반'}, EV_MODE={admin:'직접 선정',first:'선착순',lottery:'추첨'}, EV_ST={applied:'신청',selected:'선정',rejected:'미선정',cancelled:'취소',done:'인증 완료'};
@@ -870,7 +914,7 @@ async function decideClaim(id, ok, docPath){
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식',event_upsert:'이벤트 저장',event_app_selected:'이벤트 선정',event_app_rejected:'이벤트 미선정',event_app_applied:'이벤트 선정 되돌림',event_shipped:'이벤트 발송 처리',support_answer:'문의 답변',kb_upsert:'지식 창고 저장',kb_delete:'지식 창고 삭제',kb_candidate_approve:'지식 후보 승인',kb_candidate_reject:'지식 후보 거절',add_bad_word:'욕설 사전 추가',remove_bad_word:'욕설 사전 삭제'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식',event_upsert:'이벤트 저장',event_app_selected:'이벤트 선정',event_app_rejected:'이벤트 미선정',event_app_applied:'이벤트 선정 되돌림',event_shipped:'이벤트 발송 처리',feedback_accept:'버그 제보 채택',feedback_reject:'버그 제보 반려',survey_upsert:'설문 저장',cohort_set:'서포터 모집 설정',support_answer:'문의 답변',kb_upsert:'지식 창고 저장',kb_delete:'지식 창고 삭제',kb_candidate_approve:'지식 후보 승인',kb_candidate_reject:'지식 후보 거절',add_bad_word:'욕설 사전 추가',remove_bad_word:'욕설 사전 삭제'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

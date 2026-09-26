@@ -671,6 +671,15 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .obsw{margin-left:auto;position:relative;width:48px;height:28px;flex:none}.obsw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}.obsw i{position:absolute;inset:0;border-radius:999px;background:#D8DACF;transition:background .15s}.obsw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}.obsw input:checked+i{background:var(--acc)}.obsw input:checked+i::after{left:23px}
 .obfoot{display:none;align-items:center;gap:12px;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg)}.obfoot.on{display:flex}.obfoot .btn{width:auto;flex:none;padding:12px 26px;margin:0}
 .ring{width:44px;height:44px;border-radius:50%;border:4px solid var(--acc);display:grid;place-items:center;color:var(--olive);font-weight:800;flex:none}.ring.wait{border-color:var(--line);color:var(--ink3)}
+/* 서포터즈 */
+.betabar{font-size:.78rem;padding:5px 16px;background:var(--chip);color:var(--olive);text-align:center;flex:none}.betabar span{cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.supcard{display:flex;flex-direction:column}.suprule{margin-top:10px;font-size:.88rem}.suprule ul{margin:4px 0 0;padding-left:18px}.suprule li{margin:2px 0}
+.supsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.supsum div{background:var(--bg2);border-radius:14px;padding:12px 8px;text-align:center}.supsum b{display:block;font-size:1.2rem}.supsum span{font-size:.78rem;color:var(--ink2)}
+.supbar{margin:8px 0}.supbar .h{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:5px}.supbar .h span{color:var(--ink2)}.supbar .tr{height:10px;border-radius:5px;background:var(--bg2);overflow:hidden}.supbar .tr i{display:block;height:100%;background:var(--line);border-radius:5px}.supbar.on .tr i{background:var(--acc)}.supbar.on .h b{color:var(--olive)}
+.supacts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.supacts .btn{padding:11px 8px;font-size:.88rem}
+.suph{font-size:.95rem;margin:14px 0 6px}.suplist div{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.9rem}.suplist div span{flex:1}.suplist b{color:var(--olive)}.suplist b.neg{color:var(--rose)}.suplist time{font-size:.75rem;color:var(--ink3)}
+.bub .card-btns{display:flex;flex-direction:column;gap:6px;margin-top:8px}.bub .card-btns button{font:inherit;font-size:.88rem;padding:9px;border-radius:10px;border:0;background:var(--btn);color:var(--btn-ink);font-weight:600;cursor:pointer}.bub .card-btns button.o{background:var(--chip);color:var(--olive)}
+.supbadge{display:inline-block;font-size:.66rem;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--yarn-soft);color:#8a6d1a;vertical-align:middle;margin-left:4px}
 .evstrip{display:flex;gap:10px;overflow-x:auto;padding:10px 16px 2px;scrollbar-width:none}.evstrip::-webkit-scrollbar{display:none}.evstrip:empty{display:none}
 .evcard{flex:0 0 auto;width:min(78vw,300px);border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg,#fff);cursor:pointer}
 .evcard .ek{font-size:.72rem;font-weight:700;color:var(--acc)}.evcard b{display:block;margin:3px 0 4px;font-size:.98rem}.evcard .em{font-size:.8rem;color:var(--ink2,#6A6E73)}.evcard .es{margin-top:6px;font-size:.8rem;font-weight:600}
@@ -743,6 +752,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 <body>
 <div id="app">
   <div class="toast" id="toast"></div>
+  <div class="betabar" id="betaBar" hidden></div>
 
   <!-- 로그인 -->
   <section class="view login" id="v-login">
@@ -779,6 +789,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <div class="f">만나기 좋은 시간<div class="seg" id="f_avail"></div></div>
       <label class="f"><span>소개 <span class="muted">(선택, 300자)</span></span><textarea id="f_bio" maxlength="300" placeholder="예: 퇴근 후 코바늘. 가디건 완성이 목표. 같이 뜨실 분 환영"></textarea></label>
       <label class="f"><span>MBTI <span class="muted">(선택)</span></span><input id="f_mbti" maxlength="4" placeholder="ENFP" style="text-transform:uppercase"></label>
+      <label class="f" id="refWrap"><span>추천인 닉네임 <span class="muted">(선택)</span></span><input id="f_ref" maxlength="20" placeholder="초대해준 친구의 닉네임을 적어주세요"></label>
       <label class="f" id="agreeWrap"><span style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:.9rem;line-height:1.45"><input type="checkbox" id="f_agree" style="width:auto;margin-top:3px"><span>(필수) <a href="terms.html" target="_blank">이용약관</a>·<a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a>·<a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의해요</span></span></label>
       <button class="btn obnext" onclick="obGo(4)">다음</button>
       <button class="btn" id="obSave" onclick="saveProfile()">저장</button>
@@ -932,6 +943,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <div id="mBlk-desc"><textarea id="mDesc" maxlength="300" placeholder="예: 초보 환영, 실·바늘 지참. 각자 뜨면서 수다" style="min-height:90px"></textarea></div>
       <div id="mBlk-detail"><input id="mPlaceDetail" maxlength="40" placeholder="예: 2층 창가, 노래하는 분수대 앞"></div>
     </div>
+  </section>
+
+  <!-- 1기 서포터즈 -->
+  <section class="view" id="v-supporters">
+    <div class="top"><button class="back" onclick="closeSupporters()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>1기 서포터즈</h1><button class="btn sm o" onclick="openSheet(SUP_INTRO+'<button class=\'btn o\' onclick=\'closeSheet()\'>닫기</button>')">규칙</button></div>
+    <div class="body" id="supBody"></div>
   </section>
 
   <!-- 내 실함 -->
@@ -1181,6 +1198,7 @@ async function loadMe(){
   myProfile = data;
   const { data:shop } = await sb.from('shops').select('*').eq('owner_id', me.id).maybeSingle(); myShop = shop||null;
   if(myProfile?.location){ const c = parseGeo(myProfile.location); if(c) myProfile._c = c; }
+  if(!loadMe.checked && myProfile?.onboarded_at){ loadMe.checked=true; supCheckIn(); } else renderBeta();
 }
 // PostGIS geography → EWKB hex 파싱 (SRID 4326 point)
 function parseGeo(hex){
@@ -1188,7 +1206,7 @@ function parseGeo(hex){
 }
 
 // ============ 화면 전환 ============
-const NAV_OF = { stash:'my', friends:'chats', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
+const NAV_OF = { supporters:'my', stash:'my', friends:'chats', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my','activity','shop'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
 document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(a && isNative){ e.preventDefault(); CAP.Plugins.Browser.open({ url: new URL(a.getAttribute('href'), 'https://yesbeyesnono.github.io/knit-neighbors/').href }); } });
@@ -1225,7 +1243,7 @@ function renderObReady(){
   $('#obRing').className='ring'+(done?'':' wait'); $('#obRing').textContent = done?'✓':'3'; $('#obFootT').textContent = done?'4단계 중 4단계':'4단계 중 3단계'; $('#obFootS').textContent = done?'모두 준비됐어요':'내 뜨개 단계만 남았어요'; $('#obStart').disabled=!done;
 }
 function obSkills(){ obReturn=true; openSlides(()=>openSkills()); }
-function obStart(){ if(!(myProfile?.skills||[]).length) return toast('내 뜨개 단계를 먼저 체크해 주세요'); obReturn=false; go('map'); }
+function obStart(){ if(!(myProfile?.skills||[]).length) return toast('내 뜨개 단계를 먼저 체크해 주세요'); obReturn=false; go('map'); supCheckIn().then(maybeSupporterPrompt); }
 async function pickAvatar(file){
   if(!file) return; try{
     const blob=await shrinkImage(file, 640); const path=`${me.id}/${Date.now()}.jpg`;
@@ -1291,7 +1309,7 @@ function openOnboard(edit, step){
   $('#obOval').style.backgroundImage = p.avatar_url?`url(${p.avatar_url})`:'';
   segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
   $('#f_bio').value=p.bio||''; $('#f_mbti').value=p.mbti||'';
-  if(!edit) $('#f_agree').checked = !!p.terms_agreed_at;
+  if(!edit) $('#f_agree').checked = !!p.terms_agreed_at; $('#refWrap').hidden = !!edit || !!p.referred_by; $('#f_ref').value='';
   show('onboard');
   if(edit){ document.querySelectorAll('#v-onboard .obs').forEach(el=>el.classList.remove('on')); $('#obFoot').classList.remove('on'); renderDong(); if(!loc.dong_name) detectLocation(); }
   else obShow(step || (p.dong_name && p.nickname && p.terms_agreed_at ? 4 : 1));
@@ -1310,6 +1328,7 @@ async function saveProfile(){
   // 위치: 새로 잡은 GPS만 흐려서 저장 (원본은 서버에 남지 않음). 직접 입력만 했으면 기존 좌표 유지
   if(loc.lat && loc.verified){ const r = await sb.rpc('set_fuzzy_location', { p_lat:loc.lat, p_lng:loc.lng }); if(r.error) toast('위치 저장 실패: '+r.error.message); }
   await loadMe(); toast('저장했어요'); watchFriends(); loadMyRooms();
+  if(!edit) applyReferrer();
   if(edit) go('my');
   return true;
 }
@@ -1885,15 +1904,15 @@ function watchFriends(){
 }
 async function refreshBadge(){ if(!me) return; const {count}=await sb.from('notifications').select('*',{count:'exact',head:true}).eq('recipient_id',me.id).is('read_at',null); ['badgeFriends','badgeAct'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.hidden=!count; el.textContent=count||''; } }); }
 // ===== 활동(알림) =====
-const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요', notice:'의 공지예요', shop_post:'의 가게에 새 소식이 올라왔어요', repost:'님이 회원님의 글을 리포스트했어요', meetup_leave:'님이 모임 참여를 취소했어요', meetup_cancel:'님이 모임을 취소했어요', event_open:' · 새 이벤트가 열렸어요', event_selected:'에 선정됐어요! 눌러서 확인해 주세요', event_rejected:' · 이번에는 함께하지 못했어요. 다음 이벤트에서 만나요' };
-const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn'), shop_post:ico('location'), repost:ico('reply'), meetup_leave:ico('yarn'), meetup_cancel:ico('yarn'), event_open:ico('party'), event_selected:ico('party'), event_rejected:ico('yarn') };
+const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요', notice:'의 공지예요', shop_post:'의 가게에 새 소식이 올라왔어요', repost:'님이 회원님의 글을 리포스트했어요', meetup_leave:'님이 모임 참여를 취소했어요', meetup_cancel:'님이 모임을 취소했어요', event_open:' · 새 이벤트가 열렸어요', event_selected:'에 선정됐어요! 눌러서 확인해 주세요', event_rejected:' · 이번에는 함께하지 못했어요. 다음 이벤트에서 만나요', supporter:' · ' };
+const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn'), shop_post:ico('location'), repost:ico('reply'), meetup_leave:ico('yarn'), meetup_cancel:ico('yarn'), event_open:ico('party'), event_selected:ico('party'), event_rejected:ico('yarn'), supporter:ico('party') };
 let actRows = [];
 function openActivity(){ show('activity'); renderActivity(); }
 async function renderActivity(){
   const { data, error } = await sb.from('notifications').select('*, actor:profiles!notifications_actor_id_fkey(id,nickname,avatar_url), shop:shops(name)').eq('recipient_id', me.id).order('created_at',{ascending:false}).limit(100);
   if(error){ $('#actBody').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
   actRows = data||[];
-  $('#actBody').innerHTML = actRows.length ? actRows.map((n,i)=>{ const a=n.actor||{nickname:(n.kind||'').startsWith('event_')?'뜨개동네 이벤트':'(탈퇴한 사용자)'}; const who = n.kind==='shop_post' && n.shop ? {nickname:n.shop.name} : a; const txt = n.kind==='shop_post' && n.shop ? '에 새 소식이 올라왔어요' : (NTF_TEXT[n.kind]||''); return `<div class="ntf ${n.read_at?'':'unread'}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${n.kind==='shop_post'?`<div class="ava">${SHOP_SVG}</div>`:avatar(a)}<div class="tx"><b>${esc(who.nickname)}</b>${txt}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}</div><time>${agoShort(n.created_at)}</time></div>`; }).join('')
+  $('#actBody').innerHTML = actRows.length ? actRows.map((n,i)=>{ const a=n.kind==='supporter'?{nickname:'서포터즈'}:(n.actor||{nickname:(n.kind||'').startsWith('event_')?'뜨개동네 이벤트':'(탈퇴한 사용자)'}); const who = n.kind==='shop_post' && n.shop ? {nickname:n.shop.name} : a; const txt = n.kind==='shop_post' && n.shop ? '에 새 소식이 올라왔어요' : (NTF_TEXT[n.kind]||''); return `<div class="ntf ${n.read_at?'':'unread'}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${n.kind==='shop_post'?`<div class="ava">${SHOP_SVG}</div>`:avatar(a)}<div class="tx"><b>${esc(who.nickname)}</b>${txt}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}</div><time>${agoShort(n.created_at)}</time></div>`; }).join('')
     : '<div class="empty">아직 활동이 없어요<br>글을 쓰거나 이웃에게 먼저 인사해 보세요</div>';
   if(actRows.some(n=>!n.read_at)){ await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',me.id).is('read_at',null); refreshBadge(); }
 }
@@ -1901,6 +1920,7 @@ async function openNotif(i){
   const n=actRows[i]; if(!n) return;
   sb.from('notifications').delete().eq('id', n.id).eq('recipient_id', me.id).then(()=>refreshBadge());   // 확인한 알림은 활동에서 지운다
   if(n.event_id) return openEvent(n.event_id);
+  if(n.kind==='supporter') return openSupporters();
   if(n.kind==='notice' && n.shop_id){ const { data:shop } = await sb.from('shops').select('*').eq('owner_id', me.id).maybeSingle(); myShop = shop||myShop; return openShop(n.shop_id); }
   if(n.kind==='notice') return openSupportRoom();
   if(n.kind==='shop_post' && n.shop_id) return openShop(n.shop_id);
@@ -1965,6 +1985,96 @@ async function wEventPicked(){   // 이벤트에 실 사전의 실이 연결돼 
   wYarns=[await yarnFromDict(r)]; renderWYarns();
 }
 
+// ============ 1기 서포터즈 (supporters_spec.md) — 점수는 전부 서버(DB)에서 계산, 앱은 보여 주기만 ============
+let supStatus=null;
+const SUP_KIND={attendance:'출석',work_verified:'작품 인증',post:'게시글',comment:'댓글',survey:'설문',bug_accepted:'버그 제보 채택',referral:'친구 초대'};
+const SUP_TIER={basic:'기본',excellent:'우수',mvp:'MVP',none:'미달'};
+function supKindLabel(k){ return k.endsWith('_revoke') ? SUP_KIND[k.replace('_revoke','')]+' 취소' : (SUP_KIND[k]||k); }
+async function supCheckIn(){   // 앱 실행(로그인) 시 1회: 출석 + 초대 확인
+  if(!me) return; try{ const { data } = await sb.rpc('check_in'); supStatus=data||null; }catch(e){}
+  renderBeta();
+}
+function renderBeta(){
+  const bar=$('#betaBar'); if(!bar) return; bar.hidden=!me || !myProfile?.onboarded_at;
+  const s=supStatus||{};
+  bar.innerHTML = `<b>베타 운영 중</b>` + (s.supporter ? ` · <span onclick="openSupporters()">1기 서포터 활동 중 · ${s.segment||1}구간 ${s['seg'+(s.segment||1)]||0}점 ›</span>`
+    : s.is_open ? ` · <span onclick="openSupporterIntro()">1기 서포터 모집 중 · 잔여 ${s.remaining??'-'}명 ›</span>`
+    : ` · <span onclick="openSupporterIntro()">${s.waitlisted?'2기 알림 신청 완료':'1기 모집 마감 · 2기 알림 신청 ›'}</span>`);
+}
+const SUP_INTRO = `<div class="supcard"><b style="font-size:1.1rem">뜨개동네 1기 서포터즈</b>
+  <p class="muted" style="margin:6px 0 0">오늘부터 60일 동안 함께 앱을 키워 주세요. 30일씩 두 구간이고, 구간마다 100점이 목표예요.</p>
+  <div class="suprule"><b>점수 모으기</b><ul><li>출석 1점 (하루 1번)</li><li>작품 인증 10점 (하루 1개)</li><li>글 3점 (하루 1개) · 댓글 1점 (하루 2개, 내 글 댓글은 제외)</li><li>격주 설문 10점 (60일 동안 4회)</li><li>버그 제보 채택 10점 · 친구 초대 20점 (제한 없음)</li></ul></div>
+  <div class="suprule"><b>보상 (60일 뒤)</b><ul><li>기본: 두 구간 모두 100점 → 1기 서포터 뱃지 + 니트업 매거진</li><li>우수: 기본 + 누적 300점 → 레벨업 쿠션 추가</li><li>MVP: 우수 중 상위 5명 → 실 키트 추가</li></ul></div></div>`;
+async function openSupporterIntro(){
+  if(!me || !myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
+  if(!supStatus){ const { data } = await sb.rpc('get_supporter_status'); supStatus=data; }
+  const s=supStatus||{};
+  if(s.supporter) return openSupporters();
+  if(!s.is_open) return openSheet(`${SUP_INTRO}<div class="empty" style="padding:10px 0">1기 모집이 마감됐어요. 2기 소식을 받아보시겠어요?</div>${s.waitlisted?'<button class="btn o" disabled>알림 신청 완료</button>':'<button class="btn" onclick="joinWaitlist()">2기 알림 신청</button>'}`);
+  openSheet(`${SUP_INTRO}<p class="muted" style="margin:0;font-size:.85rem">정원 100명 · 잔여 ${s.remaining??'-'}명 · 신청 즉시 시작돼요.</p><button class="btn" onclick="joinSupporters()">시작하기</button><button class="btn o" onclick="closeSheet()">다음에 할게요</button>`);
+}
+async function joinSupporters(){
+  const { data, error } = await sb.rpc('join_supporters'); if(error) return toast(error.message);
+  if(data?.error==='FULL'){ supStatus={...(supStatus||{}), is_open:false}; renderBeta(); return openSupporterIntro(); }
+  supStatus=data; renderBeta(); closeSheet(); toast('1기 서포터가 됐어요! 오늘 출석 1점부터 시작해요'); openSupporters();
+}
+async function joinWaitlist(){ const { error } = await sb.rpc('join_waitlist'); if(error) return toast(error.message); supStatus={...(supStatus||{}), waitlisted:true}; renderBeta(); closeSheet(); toast('2기 모집이 열리면 알려 드릴게요'); }
+// 모집 팝업: 가입 후 첫 활동 직후 1회만
+function maybeSupporterPrompt(){
+  try{ const k='kn_sup_prompt_'+(me?.id||''); if(!me || localStorage.getItem(k)) return; const s=supStatus||{}; if(s.supporter || !s.is_open) return; localStorage.setItem(k,'1');
+    setTimeout(()=>openSheet(`<b style="font-size:1.05rem">1기 서포터즈에 초대해요</b><p class="muted" style="margin:0">뜨개동네를 함께 키워 주실 100분을 모셔요. 60일 동안 활동하고 뱃지·매거진을 받아 가세요.</p><button class="btn" onclick="closeSheet();openSupportRoom().then(()=>setTimeout(()=>sendMsg('서포터즈 할래요'),400))">지기에게 물어보기</button><button class="btn o" onclick="closeSheet();openSupporterIntro()">바로 신청 내용 보기</button><div class="oblink" onclick="closeSheet()">다음에</div>`), 600); }catch(e){}
+}
+async function openSupporters(){
+  const { data, error } = await sb.rpc('get_supporter_status'); if(error) return toast(error.message); supStatus=data; renderBeta();
+  const s=data||{}; if(!s.supporter) return openSupporterIntro();
+  if(!['supporters'].includes(view)) supBack=view;
+  const seg=s.segment||0, s1=s.seg1||0, s2=s.seg2||0, today=s.today||{};
+  const bar=(label,pts,active,dl)=>`<div class="supbar ${active?'on':''}"><div class="h"><b>${label}</b><span>${pts}/100점${dl!=null&&active?` · D-${dl}`:''}</span></div><div class="tr"><i style="width:${Math.min(100,pts)}%"></i></div></div>`;
+  const left=(k,cap)=>`${SUP_KIND[k]} ${Math.min(today[k]||0,cap)}/${cap}`;
+  $('#supBody').innerHTML=`
+    <div class="supsum"><div><b>${s.total}</b><span>누적 점수</span></div><div><b>${s.day}일차</b><span>60일 중</span></div><div><b>${s.status==='active'?(seg?seg+'구간':'종료 대기'):SUP_TIER[s.tier]||'종료'}</b><span>${s.status==='active'?'진행 중':'결과'}</span></div></div>
+    ${bar('1구간 (1~30일)', s1, seg===1, s.seg_days_left)}${bar('2구간 (31~60일)', s2, seg===2, s.seg_days_left)}
+    <p class="muted" style="margin:6px 0 0;font-size:.82rem">오늘 한도: ${left('attendance',1)} · ${left('post',3)} · ${left('comment',2)} · ${left('work_verified',10)} · 지금 기준 예상 등급 <b>${SUP_TIER[s.expected_tier]||''}</b></p>
+    <div class="supacts"><button class="btn" onclick="supInvite()">${ico('handshake')} 친구 초대하기</button><button class="btn o" onclick="openBugReport()">${ico('report')} 버그 제보</button><button class="btn o" onclick="openSurvey()">${ico('review')} 이번 회차 설문</button><button class="btn o" onclick="supRoom()">${ico('group')} 서포터 채팅방</button></div>
+    <div class="card soft" style="font-size:.85rem"><b>친구 초대 안내</b><ol style="margin:6px 0 0;padding-left:18px"><li>[친구 초대하기]로 카카오톡 링크를 보내 주세요.</li><li>친구가 링크로 가입하면 자동으로 연결돼요.</li><li>링크 없이 가입했다면 추천인 칸에 <b>${esc(myProfile?.nickname||'')}</b>을 적어 달라고 해 주세요.</li><li>친구가 프로필을 완성하고 다음 날 다시 들어오면 20점이 적립돼요!</li></ol><div class="muted" style="margin-top:6px">내 초대 코드: <b>${esc(s.ref_code||'')}</b></div></div>
+    <h3 class="suph">최근 적립</h3><div class="suplist">${(s.recent||[]).map(e=>`<div><span>${esc(supKindLabel(e.kind))}</span><b class="${e.points<0?'neg':''}">${e.points>0?'+':''}${e.points}</b><time>${agoShort(e.at)}</time></div>`).join('')||'<div class="muted">아직 적립이 없어요. 오늘 출석부터!</div>'}</div>`;
+  show('supporters');
+}
+let supBack='my';
+function closeSupporters(){ go(['my','comm','map','chats'].includes(supBack)?supBack:'my'); }
+async function supInvite(){
+  const code=supStatus?.ref_code; if(!code) return; const url=`https://yesbeyesnono.github.io/knit-neighbors/?ref=${code}`;
+  const text=`뜨개동네에서 같이 떠요! 우리 동네 뜨개 이웃을 찾는 앱이에요. 이 링크로 가입하면 저와 연결돼요 🧶 ${url}`;
+  try{ if(navigator.share) await navigator.share({ title:'뜨개동네 초대', text, url }); else { await navigator.clipboard.writeText(text); toast('초대 문구를 복사했어요. 카카오톡에 붙여 보내 주세요'); } }catch(e){}
+}
+function openBugReport(){
+  openSheet(`<b style="font-size:1.05rem">버그 제보</b><p class="muted" style="margin:0;font-size:.85rem">어떤 화면에서, 무엇을 했을 때, 어떻게 이상했는지 적어 주세요. 대표가 확인해 채택하면 10점이에요.</p><textarea id="bugBody" maxlength="2000" style="min-height:120px" placeholder="예: 모임 만들기에서 장소 찾기를 누르면 목록이 안 나와요 (아이폰 15)"></textarea><button class="btn" onclick="sendBugReport()">보내기</button>`);
+}
+async function sendBugReport(){ const t=$('#bugBody').value.trim(); if(t.length<5) return toast('조금 더 자세히 적어 주세요'); const { error } = await sb.rpc('report_feedback', { p_body:t }); if(error) return toast(error.message); closeSheet(); toast('제보를 보냈어요. 채택되면 알려 드릴게요'); }
+async function openSurvey(){
+  const now=new Date().toISOString();
+  const [{ data:svs },{ data:mine }] = await Promise.all([ sb.from('surveys').select('*').lte('opens_at', now).gte('closes_at', now).order('round'), sb.from('survey_responses').select('survey_id').eq('user_id', me.id) ]);
+  const done=new Set((mine||[]).map(r=>r.survey_id)); const sv=(svs||[]).find(x=>!done.has(x.id));
+  if(!sv) return openSheet(`<b>이번 회차 설문</b><div class="empty" style="padding:14px 0">${(svs||[]).length?'이번 회차 설문은 이미 답하셨어요. 고마워요!':'지금 열린 설문이 없어요. 설문은 격주로 열려요.'}</div>`);
+  const qs=Array.isArray(sv.questions)?sv.questions:[];
+  openSub(`${sv.round}회차 설문${sv.title?' · '+sv.title:''}`, `<p class="muted" style="font-size:.85rem;margin:8px 0">답하면 10점이 적립돼요. 솔직한 의견이 가장 도움이 돼요.</p>${qs.map((q,i)=>`<div class="cfl">${i+1}. ${esc(q.q||q.text||String(q))}</div>${(q.options&&q.options.length)?`<div class="seg" id="sq-${i}">${q.options.map(o=>`<button type="button" data-k="${esc(o)}">${esc(o)}</button>`).join('')}</div>`:`<textarea id="sq-${i}" maxlength="500" style="min-height:70px"></textarea>`}`).join('')}`, { label:'제출', fn:()=>submitSurvey(sv.id, qs) });
+  qs.forEach((q,i)=>{ if(q.options&&q.options.length){ const el=$('#sq-'+i); el.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; [...el.children].forEach(c=>c.classList.toggle('on',c===b)); }; } });
+}
+async function submitSurvey(id, qs){
+  const answers={}; for(const [i,q] of qs.entries()){ const el=$('#sq-'+i); const v=(q.options&&q.options.length)?(el.querySelector('.on')?.dataset.k||''):(el?.value||'').trim(); if(!v) return toast(`${i+1}번에 답해 주세요`); answers['q'+(i+1)]=v; }
+  const { data, error } = await sb.rpc('submit_survey', { p_survey:id, p_answers:answers }); if(error) return toast(error.message.replace(/^.*?: /,''));
+  closeSub(); toast(data>0?`설문 고마워요! +${data}점`:'설문을 보냈어요'); openSupporters();
+}
+async function supRoom(){ const { data, error } = await sb.rpc('join_supporter_room'); if(error) return toast(error.message.replace(/^.*?: /,'')); await loadMyRooms(); openRoom(data); }
+// 추천인: 링크(?ref=CODE)는 접속 때 기억해 뒀다가 가입 저장 뒤 기록. 링크 없으면 가입 화면의 닉네임 칸
+(()=>{ try{ const r=new URLSearchParams(location.search).get('ref'); if(r) localStorage.setItem('kn_ref', r.toUpperCase().slice(0,12)); }catch(e){} })();
+async function applyReferrer(){
+  try{ const code=localStorage.getItem('kn_ref')||''; const nick=($('#f_ref')?.value||'').trim(); if(!code && !nick) return;
+    const { data } = await sb.rpc('set_referrer', { p_code:code||null, p_nickname:code?null:nick });
+    if(data?.ok){ toast(`${data.inviter}님과 연결됐어요`); localStorage.removeItem('kn_ref'); }
+    else if(data?.error==='NOT_FOUND') toast('추천인을 찾지 못했어요. 닉네임을 확인해 주세요'); }catch(e){}
+}
+
 // ============ 채팅 ============
 const SUPPORT_ID = 'e120eb67-b254-4008-92d8-08c95c821e9e';   // 뜨개동네 지기(운영진) 계정
 const SUPPORT_NOTICE = '뜨개동네를 만드는 사람들에게 바로 닿는 창구예요. 궁금한 점, 불편한 점, 바라는 기능을 편하게 남겨 주세요. 먼저 <b>지기 AI</b>가 몇 가지 여쭤보고 대표에게 정확히 전달해요. 답변은 보통 하루 안에 이 채팅으로 드려요.';
@@ -2017,6 +2127,7 @@ function nameOf(uid){ const m=roomInfo?.room_members.find(m=>m.profile_id===uid)
 function appendMsg(m){
   const mine=m.sender_id===me.id; const el=document.createElement('div'); el.className='bub'+(mine?' me':'');
   let body = m.body?esc(m.body):''; if(m.place) body += `<div>${ico('location')} ${esc(m.place.name)}${m.place.address?`<div class="muted">${esc(m.place.address)}</div>`:''}</div>`; if(m.photo_url){ body+=`<img class="chatph" alt="" onclick="openPhoto(this.src)">`; if(!m.body) el.classList.add('ph'); }
+  if(m.card?.type==='supporters') body += `<div class="card-btns"><button onclick="joinSupporters()">시작하기</button><button class="o" onclick="openSupporterIntro()">자세히 보기</button></div>`; else if(m.card?.type==='supporters_full') body += `<div class="card-btns"><button onclick="joinWaitlist()">2기 알림 신청</button></div>`;
   el.innerHTML = `${!mine&&roomInfo?.kind==='group'?`<span class="who">${esc(nameOf(m.sender_id))}</span>`:''}${!mine&&m.sender_id===SUPPORT_ID?`<span class="who">${m.by_ai?'지기 AI':'뜨개동네 지기'}</span>`:''}${body}<time>${hhmm(m.created_at)}</time>`;
   if(m.photo_url){ const img=el.querySelector('img.chatph'); resolveChatPhoto(img, m.photo_url).then(()=>{ img.onload=scrollMsgs; }); }
   $('#msgs').appendChild(el);
@@ -2092,7 +2203,7 @@ function openRoomMembers(){
 // ============ 커뮤니티 (Threads 스타일) ============
 let commFilter='rank', feedRows=[], feedCursor=null, feedOffset=0, likedSet=new Set(), repostSet=new Set(), curPost=null, cPhotos=[], expandedReplies=new Set();
 const FEED_PAGE = 30;
-const AUTHOR_SEL = 'author:profiles!posts_author_id_fkey(id,nickname,avatar_url,dong_name,craft,level_crochet,level_knit,act_level)';
+const AUTHOR_SEL = 'author:profiles!posts_author_id_fkey(id,nickname,avatar_url,dong_name,craft,level_crochet,level_knit,act_level,supporter_badge)';
 function autoGrow(t){ t.style.height='auto'; t.style.height=Math.min(160, t.scrollHeight)+'px'; }
 function updateCnt(){ const n=$('#cText').value.length; $('#cCnt').textContent = n>400 ? n+'/500' : ''; }
 $('#commTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; commFilter=b.dataset.f; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadFeed(); };
@@ -2484,7 +2595,7 @@ async function openMeetup(id){
     <div class="muted">참여 ${m.participant_count||0}명</div>
     ${past? reviewHtml + (joined?`<button class="btn o" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>`:'') : joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">참여 취소</button>`:`<button class="btn r" onclick="askCancelMeetup('${m.id}', ${m.participant_count||1})">모임 취소 (주최자)</button>`}` : full ? '<button class="btn o" disabled>정원이 찼어요</button>' : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
 }
-function lvBadge(a){ return a&&a.act_level>0?`<span class="lvb" title="활동 레벨 · 작품 인증을 올린 날마다 +1">Lv.${a.act_level}</span>`:''; }
+function lvBadge(a){ return (a&&a.act_level>0?`<span class="lvb" title="활동 레벨 · 작품 인증을 올린 날마다 +1">Lv.${a.act_level}</span>`:'') + (a&&a.supporter_badge?`<span class="supbadge">${esc(a.supporter_badge)}</span>`:''); }
 function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
 function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
 function postCard(p, opts={}){
@@ -3050,7 +3161,7 @@ async function submitCompose(){
       const photos = await uploadPhotos(sPhotos);
       const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos });
       if(error) throw new Error(error.message);
-      sPhotos=[]; toast('게시했어요');
+      sPhotos=[]; toast('게시했어요'); maybeSupporterPrompt();
     }
     composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
   }catch(e){ toast(e.message); $('#sPost').disabled=false; }
@@ -3336,6 +3447,7 @@ function openSettings(){
     </div>`}
     <div class="sgrp">도움</div>
     <div class="slist">
+      <button class="srow" onclick="closeSheet();openSupporters()"><span>${ico('party')} 1기 서포터즈 <span class="muted">${supStatus?.supporter?`${supStatus.segment||''}구간 ${supStatus['seg'+(supStatus.segment||1)]||0}점 · 누적 ${supStatus.total||0}`:(supStatus?.is_open?'모집 중':'')}</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openSupportRoom()"><span>${ico('yarn')} 뜨개동네 지기에게 말하기 <span class="authbadge" style="background:var(--sel)">운영진</span><br><span class="muted" id="supHint">궁금한 점·불편한 점·바라는 기능을 채팅으로 남겨 주세요</span></span><span class="car">›</span></button>
       <a class="srow" href="mailto:knitup.official@gmail.com"><span>이메일 문의</span><span class="car">›</span></a>
     </div>

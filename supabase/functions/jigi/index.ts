@@ -80,6 +80,7 @@ async function runPending(token: string, confirmed: boolean): Promise<{ ok: bool
   if (!claimed?.length) return { ok: false, msg: "이미 처리했어요." };
   const out: string[] = [];
   for (const [i, s] of (p.steps as J[]).entries()) {
+    if (s.name === "feedback_decide") { const { data: pts, error } = await db.rpc("admin_feedback_decide", { p_id: s.args.id, p_accept: !!s.args.accept, p_note: null }); out.push(error ? "✗ " + error.message : s.args.accept ? `✓ 채택 (+${pts ?? 0}점)` : "✓ 반려"); continue; }
     if (s.name === "support_send") { const { data: mid, error } = await db.rpc("support_deliver", { p_ticket: s.args.ticket, p_text: s.args.text, p_close: !!s.args.close }); out.push(error ? "✗ 전달 실패 " + error.message : mid ? "✓ 회원에게 전달했어요" : "✓ 처리 완료"); continue; }
     const r = await tool(s.name, { ...s.args, item_id: p.item_id ?? s.args?.item_id, resolve: i === p.steps.length - 1 && s.name !== "dismiss_item" && !!p.item_id }, "admin", true);
     out.push(r?.ok ? "✓ " + s.name : "✗ " + s.name + " " + (r?.error ?? ""));
@@ -188,9 +189,12 @@ async function brief() {
   const head = items.length ? `좋은 아침이에요. 오늘 처리할 일 ${items.length}건, 예상 ${minutes}분.` : "좋은 아침이에요. 오늘은 이상 없음 — 처리할 일이 없어요.";
   const lines = items.slice(0, 10).map((it, i) => `${i + 1}. [${SEV[it.severity]}] ${KIND[it.kind] ?? it.kind} — ${it.summary}`);
   const tail = `어제 새 글 ${s1?.posts ?? 0}개·답글 ${s1?.replies ?? 0}개·가입 ${s1?.signups ?? 0}명·모임 ${s1?.meetups ?? 0}개·인증 ${s1?.works ?? 0}개. 자동 처리 ${s1?.auto_done ?? 0}건.${notable.length ? "\n특이: " + notable.join(", ") : ""}`;
-  const body = { head, counts: { urgent: cnt("urgent"), today: cnt("today"), info: cnt("info"), auto: s1?.auto_done ?? 0 }, stats: s1, notable, item_ids: items.map((i) => i.id), minutes };
+  let supLine = "";
+  try { const { data: ss } = await db.rpc("supporter_stats"); const { data: fin } = await db.from("supporters").select("tier, who:profiles!supporters_user_id_fkey(nickname)").gte("finalized_at", new Date(Date.now() - 864e5).toISOString());
+    if (ss) supLine = `\n서포터즈: 신규 ${ss.new_today}명 · 활동 ${ss.active}/${ss.joined}명 · 잔여 정원 ${Math.max((ss.capacity ?? 0) - (ss.joined ?? 0), 0)}${ss.is_open ? "" : " (마감)"} · 오늘 적립 ${ss.points_today}점 · 미처리 제보 ${ss.open_feedback}건` + ((fin ?? []).length ? `\n어제 종료: ${(fin ?? []).map((x: J) => `${x.who?.nickname ?? ""} ${({ basic: "기본", excellent: "우수", mvp: "MVP", none: "미달" } as J)[x.tier] ?? x.tier}`).join(", ")} → 실물 보상 발송 확인` : ""); } catch (_e) { supLine = ""; }
+  const body = { head, counts: { urgent: cnt("urgent"), today: cnt("today"), info: cnt("info"), auto: s1?.auto_done ?? 0 }, stats: s1, notable, item_ids: items.map((i) => i.id), minutes, supporters: supLine };
   const date = new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10);
-  const sent = await tgSend([head, ...lines, "", tail].join("\n"), items.length ? [[{ text: "1번부터 하나씩 처리", callback_data: "n:0" }], [{ text: "자동 처리 내역", callback_data: "auto" }]] : [[{ text: "자동 처리 내역", callback_data: "auto" }]]);
+  const sent = await tgSend([head, ...lines, "", tail + supLine].join("\n"), items.length ? [[{ text: "1번부터 하나씩 처리", callback_data: "n:0" }], [{ text: "자동 처리 내역", callback_data: "auto" }]] : [[{ text: "자동 처리 내역", callback_data: "auto" }]]);
   await db.from("ai_briefings").upsert({ date, body, sent_at: sent ? new Date().toISOString() : null });
   return { items: items.length, sent: !!sent };
 }
@@ -322,8 +326,8 @@ const SUP_SYS = (kb: J[]) => `당신은 뜨개 이웃 앱 '뜨개동네'의 1차
 분류별 꼭 확인할 것: ${kb.filter((k) => k.kind === "check").map((k) => `[${k.q}] ${k.a.replace(/\n/g, ", ")}`).join(" / ") || "(없음)"}
 승인된 FAQ: ${kb.filter((k) => k.kind === "faq").map((k) => `#${k.id} Q: ${k.q} → A: ${k.a}`).join("\n") || "(없음)"}
 분류 목록: ${SUP_CATS.join(", ")}
-반드시 JSON 하나만 출력: {"reply":"회원에게 보낼 말","action":"ask|faq|escalate|note|resolved|reopen|chat","faq_id":숫자|null,"category":"분류","urgency":"urgent|today|info","summary":"대표가 판단할 수 있게 회원이 겪는 일·원하는 것을 빠짐없이(3~6문장, 요약이 아니라 정확한 전달)","detail":{"screen":"","when":"","symptom":"","device":""},"recommend":{"draft":"escalate/note 일 때: 대표가 그대로 보내도 되는 답변 초안(존댓말, 확정되지 않은 약속은 넣지 않음)","reason":"이 답을 추천하는 이유와 판단 근거","check":"대표가 답하기 전에 확인하면 좋은 것(서버 로그·해당 화면·정책 등). 없으면 빈 문자열"},"confidence":0~1}
-action 뜻: ask=더 물어봄, faq=FAQ로 직접 답변(faq_id 필수), escalate=파악이 끝나 대표에게 전달, note=이미 전달된 건에 회원이 내용을 덧붙임(함께 전달), resolved/reopen=대표 답변 뒤 회원 반응, chat=인사·잡담이라 티켓 불필요.`;
+반드시 JSON 하나만 출력: {"reply":"회원에게 보낼 말","action":"ask|faq|escalate|note|resolved|reopen|chat|supporters","faq_id":숫자|null,"category":"분류","urgency":"urgent|today|info","summary":"대표가 판단할 수 있게 회원이 겪는 일·원하는 것을 빠짐없이(3~6문장, 요약이 아니라 정확한 전달)","detail":{"screen":"","when":"","symptom":"","device":""},"recommend":{"draft":"escalate/note 일 때: 대표가 그대로 보내도 되는 답변 초안(존댓말, 확정되지 않은 약속은 넣지 않음)","reason":"이 답을 추천하는 이유와 판단 근거","check":"대표가 답하기 전에 확인하면 좋은 것(서버 로그·해당 화면·정책 등). 없으면 빈 문자열"},"confidence":0~1}
+action 뜻: supporters=회원이 "서포터즈 할래요/신청/참여하고 싶어요" 같은 참여 의사를 보일 때(안내 카드는 앱이 띄우므로 reply 는 한 문장 환영 인사만), ask=더 물어봄, faq=FAQ로 직접 답변(faq_id 필수), escalate=파악이 끝나 대표에게 전달, note=이미 전달된 건에 회원이 내용을 덧붙임(함께 전달), resolved/reopen=대표 답변 뒤 회원 반응, chat=인사·잡담이라 티켓 불필요.`;
 
 async function supportScan() {
   // 지기 채팅방 중 회원 메시지가 새로 온 방
@@ -354,6 +358,14 @@ async function supportScan() {
     let act = String(out.action ?? "ask");
     if (act === "faq") { const f = kb.find((k) => k.kind === "faq" && k.id === +out.faq_id); if (f) { reply = f.a + "\n\n(더 궁금한 점이 있으면 편하게 남겨 주세요.)"; await db.rpc("kb_bump", { p_id: f.id }).catch?.(() => {}); await db.from("support_events").insert({ ticket_id: ticket?.id ?? null, actor: "ai", kind: "faq", body: `#${f.id} ${f.q}` }); } else act = "ask"; }
     if (ticket && ticket.turns >= 3 && act === "ask") act = "escalate";   // 질문은 2~3번까지
+    if (act === "supporters") {   // 서포터즈 안내 카드: 등록은 카드 버튼 → join_supporters() (AI는 의도 인식만)
+      const { data: st } = await db.rpc("supporter_stats"); const open = !!st?.is_open && (st?.joined ?? 0) < (st?.capacity ?? 100);
+      const { data: mine } = member ? await db.from("supporters").select("id").eq("user_id", member).eq("status", "active").limit(1) : { data: [] };
+      if (mine?.length) await sendSup(roomId, "이미 1기 서포터로 활동 중이세요! 마이 › 설정 › 1기 서포터즈에서 점수와 남은 날을 볼 수 있어요.", true);
+      else if (open) await sendSup(roomId, `${reply.replace(/\n+/g, " ").slice(0, 200)}\n\n1기 서포터즈 안내예요.\n· 기간: 오늘부터 60일 (30일씩 2구간)\n· 할 일: 구간마다 100점 — 출석 1점(하루 1번), 작품 인증 10점(하루 1개), 글 3점(하루 1개), 댓글 1점(하루 2개), 격주 설문 10점, 버그 제보 채택 10점, 친구 초대 20점\n· 보상(60일 뒤): 기본=뱃지+니트업 매거진, 우수(누적 300점)=+레벨업 쿠션, MVP(상위 5명)=+실 키트\n잔여 ${Math.max((st?.capacity ?? 100) - (st?.joined ?? 0), 0)}명`, true, { type: "supporters" });
+      else await sendSup(roomId, "1기 서포터즈 모집이 마감됐어요. 2기 소식을 받아보시겠어요?", true, { type: "supporters_full" });
+      handled++; continue;
+    }
     await sendSup(roomId, reply, true);
     if (act === "ask") { if (ticket) await db.from("support_tickets").update({ turns: ticket.turns + 1, category: cat, summary: out.summary || ticket.summary, detail: out.detail ?? ticket.detail, updated_at: new Date().toISOString() }).eq("id", ticket.id); else await db.from("support_tickets").insert({ room_id: roomId, profile_id: member, status: "open", category: cat, urgency: urg, summary: String(out.summary ?? "").slice(0, 400), detail: out.detail ?? {}, turns: 1 }); }
     else if (act === "escalate" || act === "note" || urg === "urgent") await ensureTicket(roomId, member, ticket, { category: cat, urgency: urg, summary: String(out.summary ?? "").slice(0, 400), detail: { ...(out.detail ?? {}), recommend: out.recommend ?? null } }, thread, act === "note");
@@ -363,8 +375,8 @@ async function supportScan() {
   }
   return { rooms: rooms.length, handled };
 }
-async function sendSup(roomId: string, text: string, byAi: boolean) {
-  await db.from("messages").insert({ room_id: roomId, sender_id: SUPPORT_ID, body: text.slice(0, 1000), by_ai: byAi, support_seen: true });
+async function sendSup(roomId: string, text: string, byAi: boolean, card: J = null) {
+  await db.from("messages").insert({ room_id: roomId, sender_id: SUPPORT_ID, body: text.slice(0, 1000), by_ai: byAi, support_seen: true, card });
   await db.from("room_members").update({ last_read_at: new Date().toISOString() }).eq("room_id", roomId).eq("profile_id", SUPPORT_ID);
 }
 // 티켓을 '대표 대기'로 올리고 텔레그램·콘솔에 알린다 (추가 내용이면 같은 티켓에 덧붙임)
@@ -424,6 +436,17 @@ JSON 배열만 출력: [{"kind":"faq|term|check","category":"분류","q":"...","
   return { tickets: ts.length, candidates: made };
 }
 
+// ---------- 서포터즈: 버그 제보 알림 ----------
+async function feedbackNotify() {
+  const { data: rows } = await db.from("feedback_reports").select("id,user_id,body,created_at, who:profiles!feedback_reports_user_id_fkey(nickname)").eq("status", "open").is("tg_message_id", null).order("id").limit(20); let n = 0;
+  for (const f of rows ?? []) {
+    const ok = await pending(null, `버그 제보 #${f.id} 채택`, [{ name: "feedback_decide", args: { id: f.id, accept: true } }]);
+    const no = await pending(null, `버그 제보 #${f.id} 반려`, [{ name: "feedback_decide", args: { id: f.id, accept: false } }]);
+    const m = await tgSend(`🐞 버그 제보 #${f.id} — ${(f.who as J)?.nickname ?? "회원"}\n\n${mask(f.body)}\n\n채택하면 제보자에게 10점이 적립돼요.`, [[{ text: "채택 (+10점)", callback_data: "p:" + ok }, { text: "반려", callback_data: "p:" + no }], [{ text: "콘솔에서 보기", url: `${CONSOLE}#supporters` }]]);
+    if (m?.message_id) { await db.from("feedback_reports").update({ tg_message_id: m.message_id }).eq("id", f.id); n++; } else break;
+  }
+  return { notified: n };
+}
 // ---------- 라우터 ----------
 async function isAdmin(req: Request) { const auth = req.headers.get("Authorization") ?? ""; if (!auth) return false; const c = createClient(URL_, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } }); const { data } = await c.rpc("is_admin"); return data === true; }
 Deno.serve(async (req: Request) => {
@@ -432,11 +455,11 @@ Deno.serve(async (req: Request) => {
     const body = await req.json().catch(() => ({}));
     if (new URL(req.url).searchParams.get("fn") === "tg" || body.update_id) return await tgHook(req, body);
     const route = String(body.route ?? "");
-    if (["scan", "brief", "tech", "yarn", "support", "support_followup", "support_learn"].includes(route)) {
+    if (["scan", "brief", "tech", "yarn", "support", "support_followup", "support_learn", "feedback"].includes(route)) {
       const { data: cfg } = await db.from("jigi_config").select("value").eq("key", "hook_secret").single();
       const viaHook = !!cfg?.value && req.headers.get("x-jigi-secret") === cfg.value;
       if (!viaHook && !(await isAdmin(req))) return json({ error: "forbidden" }, 403);
-      return json(await ({ scan, brief, tech, yarn, support: supportScan, support_followup: supportFollowup, support_learn: supportLearn } as J)[route]());
+      return json(await ({ scan, brief, tech, yarn, support: supportScan, support_followup: supportFollowup, support_learn: supportLearn, feedback: feedbackNotify } as J)[route]());
     }
     if (!(await isAdmin(req))) return json({ error: "forbidden" }, 403);
     if (route === "status") return json({ ai: !!provider(), provider: provider()?.kind ?? null, telegram: !!env("TG_BOT_TOKEN") && !!env("TG_ADMIN_CHAT_ID"), webhook_secret: !!env("TG_WEBHOOK_SECRET") });
