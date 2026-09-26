@@ -241,6 +241,7 @@ async function agent(channel: string, text: string): Promise<{ reply: string; pe
 }
 async function quick(text: string): Promise<string | null> {   // AI 없이도 되는 명령
   const t = text.trim();
+  if (/^(문의|상담)/.test(t)) { const { data: ts } = await db.from("support_tickets").select("id,category,summary,status, who:profiles!support_tickets_profile_id_fkey(nickname)").in("status", ["waiting_admin", "open"]).order("id"); return (ts ?? []).length ? "대기 중인 문의 — 한 건씩 「#번호: 답변」으로 답해 주세요\n" + (ts ?? []).map((x: J) => `#${x.id} ${x.who?.nickname ?? "회원"} · ${x.category}${x.status === "open" ? " (AI 파악 중)" : ""}\n  ${x.summary}`).join("\n") : "대기 중인 문의가 없어요."; }
   if (/^(목록|할 ?일)/.test(t)) { const it = (await tool("list_open_items", {})) as J[]; return it.length ? it.slice(0, 15).map((x, i) => `${i + 1}. [${SEV[x.severity]}] ${KIND[x.kind]} — ${x.summary}`).join("\n") : "처리할 일이 없어요."; }
   if (/^규칙/.test(t)) { const rs = (await tool("list_rules", {})) as J[]; return rs.length ? rs.map((r) => `#${r.id} ${r.enabled ? "" : "(꺼짐) "}${r.rule_text} → ${r.action}`).join("\n") : "저장된 규칙이 없어요."; }
   if (/^자동/.test(t)) { const a = (await tool("list_auto_actions", {})) as J[]; return a.length ? a.map((x) => `#${x.id} ${x.action} ${x.reverted ? "(되돌림)" : ""}`).join("\n") : "최근 자동 처리 내역이 없어요."; }
@@ -262,6 +263,7 @@ async function tgHook(req: Request, u: J) {
   }
   const text = String(u.message?.text ?? "").slice(0, 1500); if (!text) return json({ ok: true });
   if (u.message?.reply_to_message?.message_id) { if (await supportTgReply(u.message.reply_to_message.message_id, text)) return json({ ok: true }); }
+  { const m = text.match(/^#?\s*(\d+)\s*(?:번)?\s*[:：]\s*([\s\S]+)$/); if (m) { if (await supportTgReply(+m[1], m[2].trim(), true)) return json({ ok: true }); await tgSend(`문의 #${m[1]}을 찾지 못했어요. '문의'라고 보내면 대기 중인 문의 번호를 볼 수 있어요.`); return json({ ok: true }); } }
   const q = await quick(text); if (q) { await tgSend(q); return json({ ok: true }); }
   try { const r = await agent("tg", text); await tgSend(r.reply, r.pend.length ? r.pend.map((p) => [{ text: p.label, callback_data: "p:" + p.token }, { text: "취소", callback_data: "x" }]) : undefined); } catch (e) { await tgSend("지금은 답하기 어려워요(" + String((e as Error).message).slice(0, 40) + "). 버튼과 '목록' 명령은 돼요."); }
   return json({ ok: true });
@@ -378,17 +380,18 @@ async function ensureTicket(roomId: string, member: string | null, ticket: J, in
   const { data: open } = await db.from("mod_items").select("id").eq("kind", "support").eq("target_id", String(t.id)).eq("status", "open").limit(1);
   if (!open?.length) await createItem({ kind: "support", target_type: "user", target_id: String(t.id), author_id: member, severity: info.urgency, summary: `문의 #${t.id} · ${info.category} — ${pr?.nickname ?? ""}: ${info.summary}`.slice(0, 300), evidence: { text: memberLines.slice(0, 500), ticket_id: t.id, room_id: roomId, detail: info.detail ?? {} }, ai_suggestion: { reason: "지기 AI가 파악을 마치고 전달했어요", action: "콘솔 › 지기 문의함에서 답변" } });
   const dt = info.detail ?? {}; const dl = ["screen", "when", "symptom", "device"].filter((k) => dt[k]).map((k) => `${({ screen: "화면", when: "시점", symptom: "증상", device: "기기" } as J)[k]}: ${dt[k]}`).join(" · ");
-  const m = await tgSend(`${info.urgency === "urgent" ? "🚨 긴급 " : ""}문의 #${t.id} · ${info.category}${append ? " (추가 내용)" : ""}\n${pr?.nickname ?? "회원"}: ${info.summary}\n${dl ? dl + "\n" : ""}${memberLines}\n\n이 메시지에 '답장'으로 답변을 적으면 회원에게 지기 이름으로 전달돼요.`, [[{ text: "처리 완료(답변 없이 닫기)", callback_data: "sd:" + t.id }], [{ text: "콘솔에서 답변", url: `${CONSOLE}#support:${t.id}` }]]);
+  const m = await tgSend(`${info.urgency === "urgent" ? "🚨 긴급 " : ""}문의 #${t.id} — ${pr?.nickname ?? "회원"} · ${info.category}${append ? " (내용 추가됨)" : ""}\n\n[AI 요약] ${info.summary}${dl ? "\n" + dl : ""}\n\n[회원이 쓴 글]\n${memberLines}\n\n답변: 이 카드에 '답장'하거나 「#${t.id}: 답변 내용」처럼 보내면 이 회원에게만 지기 이름으로 전달돼요.`, [[{ text: "처리 완료(답변 없이 닫기)", callback_data: "sd:" + t.id }], [{ text: "콘솔에서 답변", url: `${CONSOLE}#support:${t.id}` }]]);
   if (m?.message_id) await db.from("support_tickets").update({ tg_message_id: m.message_id }).eq("id", t.id);
 }
 // 텔레그램에서 티켓 알림에 '답장' → 회원에게 전달 (AI가 존댓말로 다듬은 초안과 원문 중 선택)
-async function supportTgReply(replyToId: number, text: string) {
-  const { data: t } = await db.from("support_tickets").select("*").eq("tg_message_id", replyToId).maybeSingle(); if (!t) return false;
+async function supportTgReply(replyToId: number, text: string, byTicketId = false) {
+  const { data: t } = await db.from("support_tickets").select("*").eq(byTicketId ? "id" : "tg_message_id", replyToId).maybeSingle(); if (!t) return false;
+  const { data: who } = t.profile_id ? await db.from("profiles").select("nickname").eq("id", t.profile_id).maybeSingle() : { data: null }; const tag = `문의 #${t.id} (${who?.nickname ?? "회원"})`;
   let polished = "";
   if (provider()) { try { polished = (await ai("운영자가 회원에게 보낼 답변 원문을 받습니다. 뜻은 그대로 두고, 공손한 존댓말 두세 문장으로 다듬어 답변 문장만 출력하세요. 새로운 약속이나 내용을 덧붙이지 마세요. 첫 줄은 '지기예요.'로 시작합니다.", [{ role: "user", text: `<자료>${text.slice(0, 1200)}</자료>` }], [], false, 500)).text.trim().slice(0, 1000); } catch (_e) { polished = ""; } }
   const tokRaw = await pending(null, `문의 #${t.id} 답변(원문)`, [{ name: "support_send", args: { ticket: t.id, text } }]);
-  if (polished && polished !== text) { const tokPol = await pending(null, `문의 #${t.id} 답변(다듬은 글)`, [{ name: "support_send", args: { ticket: t.id, text: polished } }]); await tgSend(`다듬은 답변:\n${polished}\n\n어느 쪽으로 보낼까요?`, [[{ text: "다듬은 글로 보내기", callback_data: "p:" + tokPol }], [{ text: "원문 그대로 보내기", callback_data: "p:" + tokRaw }], [{ text: "취소", callback_data: "x" }]]); }
-  else await tgSend(`이대로 보낼까요?\n${text}`, [[{ text: "보내기", callback_data: "p:" + tokRaw }, { text: "취소", callback_data: "x" }]]);
+  if (polished && polished !== text) { const tokPol = await pending(null, `문의 #${t.id} 답변(다듬은 글)`, [{ name: "support_send", args: { ticket: t.id, text: polished } }]); await tgSend(`${tag}에게 보낼 답변 — 다듬은 글:\n${polished}\n\n어느 쪽으로 보낼까요?`, [[{ text: "다듬은 글로 보내기", callback_data: "p:" + tokPol }], [{ text: "원문 그대로 보내기", callback_data: "p:" + tokRaw }], [{ text: "취소", callback_data: "x" }]]); }
+  else await tgSend(`${tag}에게 이대로 보낼까요?\n${text}`, [[{ text: "보내기", callback_data: "p:" + tokRaw }, { text: "취소", callback_data: "x" }]]);
   return true;
 }
 // 답변 다음 날 "해결되셨나요?" 한 번
