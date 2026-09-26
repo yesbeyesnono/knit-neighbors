@@ -2036,7 +2036,7 @@ async function openSupporters(){
     <div class="supsum"><div><b>${s.total}</b><span>누적 점수</span></div><div><b>${s.day}일차</b><span>60일 중</span></div><div><b>${s.status==='active'?(seg?seg+'구간':'종료 대기'):SUP_TIER[s.tier]||'종료'}</b><span>${s.status==='active'?'진행 중':'결과'}</span></div></div>
     ${bar('1구간 (1~30일)', s1, seg===1, s.seg_days_left)}${bar('2구간 (31~60일)', s2, seg===2, s.seg_days_left)}
     <p class="muted" style="margin:6px 0 0;font-size:.82rem">오늘 한도: ${left('attendance',1)} · ${left('post',3)} · ${left('comment',2)} · ${left('work_verified',10)} · 지금 기준 예상 등급 <b>${SUP_TIER[s.expected_tier]||''}</b></p>
-    <div class="supacts"><button class="btn" onclick="supInvite()">${ico('handshake')} 친구 초대하기</button><button class="btn o" onclick="openBugReport()">${ico('report')} 버그 제보</button><button class="btn o" onclick="openSurvey()">${ico('review')} 이번 회차 설문</button><button class="btn o" onclick="supRoom()">${ico('group')} 서포터 채팅방</button></div>
+    <div class="supacts"><button class="btn" onclick="supInvite()">${ico('handshake')} 친구 초대하기</button><button class="btn o" onclick="openBugReport()">${ico('report')} 버그 제보 · 제안</button><button class="btn o" onclick="openSurvey()">${ico('review')} 이번 회차 설문</button><button class="btn o" onclick="supRoom()">${ico('group')} 서포터 채팅방</button></div>
     <div class="card soft" style="font-size:.85rem"><b>친구 초대 안내</b><ol style="margin:6px 0 0;padding-left:18px"><li>[친구 초대하기]로 카카오톡 링크를 보내 주세요.</li><li>친구가 링크로 가입하면 자동으로 연결돼요.</li><li>링크 없이 가입했다면 추천인 칸에 <b>${esc(myProfile?.nickname||'')}</b>을 적어 달라고 해 주세요.</li><li>친구가 프로필을 완성하고 다음 날 다시 들어오면 20점이 적립돼요!</li></ol><div class="muted" style="margin-top:6px">내 초대 코드: <b>${esc(s.ref_code||'')}</b></div></div>
     <h3 class="suph">최근 적립</h3><div class="suplist">${(s.recent||[]).map(e=>`<div><span>${esc(supKindLabel(e.kind))}</span><b class="${e.points<0?'neg':''}">${e.points>0?'+':''}${e.points}</b><time>${agoShort(e.at)}</time></div>`).join('')||'<div class="muted">아직 적립이 없어요. 오늘 출석부터!</div>'}</div>`;
   show('supporters');
@@ -2048,10 +2048,32 @@ async function supInvite(){
   const text=`뜨개동네에서 같이 떠요! 우리 동네 뜨개 이웃을 찾는 앱이에요. 이 링크로 가입하면 저와 연결돼요 🧶 ${url}`;
   try{ if(navigator.share) await navigator.share({ title:'뜨개동네 초대', text, url }); else { await navigator.clipboard.writeText(text); toast('초대 문구를 복사했어요. 카카오톡에 붙여 보내 주세요'); } }catch(e){}
 }
+let fbFiles=[], fbKind='bug';
 function openBugReport(){
-  openSheet(`<b style="font-size:1.05rem">버그 제보</b><p class="muted" style="margin:0;font-size:.85rem">어떤 화면에서, 무엇을 했을 때, 어떻게 이상했는지 적어 주세요. 대표가 확인해 채택하면 10점이에요.</p><textarea id="bugBody" maxlength="2000" style="min-height:120px" placeholder="예: 모임 만들기에서 장소 찾기를 누르면 목록이 안 나와요 (아이폰 15)"></textarea><button class="btn" onclick="sendBugReport()">보내기</button>`);
+  fbFiles=[]; fbKind='bug';
+  openSheet(`<b style="font-size:1.05rem">버그 제보 · 제안하기</b>
+    <div class="seg" id="fbKind"><button type="button" class="on" onclick="fbSetKind('bug',this)">버그 제보</button><button type="button" onclick="fbSetKind('idea',this)">제안하기</button></div>
+    <p class="muted" id="fbHint" style="margin:0;font-size:.85rem">어떤 화면에서, 무엇을 했을 때, 어떻게 이상했는지 적어 주세요. 대표가 확인해 채택하면 10점이에요.</p>
+    <textarea id="bugBody" maxlength="2000" style="min-height:110px" placeholder="예: 모임 만들기에서 장소 찾기를 누르면 목록이 안 나와요 (아이폰 15)"></textarea>
+    <div class="cfphotos" id="fbList"></div><input id="fbFile" type="file" accept="image/*,application/pdf" multiple hidden onchange="fbPick(this.files);this.value=''">
+    <button class="btn o" type="button" onclick="$('#fbFile').click()">${ico('camera')} 사진·PDF 첨부 <span class="muted">(5개까지)</span></button>
+    <button class="btn" onclick="sendBugReport()">보내기</button>`);
 }
-async function sendBugReport(){ const t=$('#bugBody').value.trim(); if(t.length<5) return toast('조금 더 자세히 적어 주세요'); const { error } = await sb.rpc('report_feedback', { p_body:t }); if(error) return toast(error.message); closeSheet(); toast('제보를 보냈어요. 채택되면 알려 드릴게요'); }
+function fbSetKind(k, b){ fbKind=k; [...$('#fbKind').children].forEach(x=>x.classList.toggle('on',x===b)); $('#fbHint').textContent = k==='idea' ? '이런 기능이 있으면 좋겠다, 이건 이렇게 바꾸면 좋겠다 — 편하게 적어 주세요. 채택되면 10점이에요.' : '어떤 화면에서, 무엇을 했을 때, 어떻게 이상했는지 적어 주세요. 대표가 확인해 채택하면 10점이에요.'; $('#bugBody').placeholder = k==='idea' ? '예: 모임 날짜가 지나면 자동으로 후기 쓰기 알림이 오면 좋겠어요' : '예: 모임 만들기에서 장소 찾기를 누르면 목록이 안 나와요 (아이폰 15)'; }
+async function fbPick(files){
+  for(const f of [...files]){ if(fbFiles.length>=5){ toast('첨부는 5개까지예요'); break; }
+    if(f.type==='application/pdf'){ if(f.size>10*1024*1024){ toast(f.name+' — 10MB를 넘어요'); continue; } fbFiles.push({ blob:f, name:f.name, type:'application/pdf' }); }
+    else { try{ const blob=await shrinkImage(f, 1600); fbFiles.push({ blob, name:f.name, type:'image/jpeg', url:URL.createObjectURL(blob) }); }catch(e){ toast(e.message||'사진을 불러오지 못했어요'); } } }
+  fbRender();
+}
+function fbRender(){ const el=$('#fbList'); if(!el) return; el.innerHTML = fbFiles.map((f,i)=>`<div style="${f.url?`background-image:url(${f.url})`:''};font-size:.7rem;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden">${f.url?'':'PDF<br>'+esc(f.name.slice(0,12))}<b onclick="fbFiles.splice(${i},1);fbRender()">${ico('close')}</b></div>`).join(''); }
+async function sendBugReport(){
+  const t=$('#bugBody').value.trim(); if(t.length<5) return toast('조금 더 자세히 적어 주세요');
+  const paths=[]; if(fbFiles.length) toast('첨부 올리는 중…');
+  for(const [i,f] of fbFiles.entries()){ const path=`${me.id}/${Date.now()}-${i}.${f.type==='application/pdf'?'pdf':'jpg'}`; const up=await sb.storage.from('feedback').upload(path, f.blob, { contentType:f.type, upsert:false }); if(up.error) return toast('첨부 실패: '+up.error.message); paths.push(path); }
+  const { error } = await sb.rpc('report_feedback', { p_body:t, p_screenshot:null, p_kind:fbKind, p_attachments:paths }); if(error) return toast(error.message);
+  closeSheet(); toast(fbKind==='idea'?'제안을 보냈어요. 채택되면 알려 드릴게요':'제보를 보냈어요. 채택되면 알려 드릴게요');
+}
 async function openSurvey(){
   const now=new Date().toISOString();
   const [{ data:svs },{ data:mine }] = await Promise.all([ sb.from('surveys').select('*').lte('opens_at', now).gte('closes_at', now).order('round'), sb.from('survey_responses').select('survey_id').eq('user_id', me.id) ]);

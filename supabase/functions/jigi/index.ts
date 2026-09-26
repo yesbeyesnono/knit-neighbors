@@ -438,11 +438,12 @@ JSON 배열만 출력: [{"kind":"faq|term|check","category":"분류","q":"...","
 
 // ---------- 서포터즈: 버그 제보 알림 ----------
 async function feedbackNotify() {
-  const { data: rows } = await db.from("feedback_reports").select("id,user_id,body,created_at, who:profiles!feedback_reports_user_id_fkey(nickname)").eq("status", "open").is("tg_message_id", null).order("id").limit(20); let n = 0;
+  const { data: rows } = await db.from("feedback_reports").select("id,user_id,body,kind,attachments,created_at, who:profiles!feedback_reports_user_id_fkey(nickname)").eq("status", "open").is("tg_message_id", null).order("id").limit(20); let n = 0;
   for (const f of rows ?? []) {
     const ok = await pending(null, `버그 제보 #${f.id} 채택`, [{ name: "feedback_decide", args: { id: f.id, accept: true } }]);
     const no = await pending(null, `버그 제보 #${f.id} 반려`, [{ name: "feedback_decide", args: { id: f.id, accept: false } }]);
-    const m = await tgSend(`🐞 버그 제보 #${f.id} — ${(f.who as J)?.nickname ?? "회원"}\n\n${mask(f.body)}\n\n채택하면 제보자에게 10점이 적립돼요.`, [[{ text: "채택 (+10점)", callback_data: "p:" + ok }, { text: "반려", callback_data: "p:" + no }], [{ text: "콘솔에서 보기", url: `${CONSOLE}#supporters` }]]);
+    const nAtt = Array.isArray(f.attachments) ? f.attachments.length : 0;
+    const m = await tgSend(`${f.kind === "idea" ? "💡 제안" : "🐞 버그 제보"} #${f.id} — ${(f.who as J)?.nickname ?? "회원"}\n\n${mask(f.body)}${nAtt ? `\n\n첨부 ${nAtt}개 — 콘솔 › 1기 서포터즈에서 열어 보세요.` : ""}\n\n채택하면 ${f.kind === "idea" ? "제안한" : "제보한"} 회원에게 10점이 적립돼요.`, [[{ text: "채택 (+10점)", callback_data: "p:" + ok }, { text: "반려", callback_data: "p:" + no }], [{ text: "콘솔에서 보기", url: `${CONSOLE}#supporters` }]]);
     if (m?.message_id) { await db.from("feedback_reports").update({ tg_message_id: m.message_id }).eq("id", f.id); n++; } else break;
   }
   return { notified: n };
