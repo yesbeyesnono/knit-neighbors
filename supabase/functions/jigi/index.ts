@@ -336,6 +336,7 @@ async function supportScan() {
     const { data: msgs } = await db.from("messages").select("id,sender_id,body,photo_url,by_ai,created_at").eq("room_id", roomId).order("id", { ascending: false }).limit(14);
     const thread = (msgs ?? []).reverse();
     await db.from("messages").update({ support_seen: true }).eq("room_id", roomId).eq("support_seen", false);   // 먼저 선점(중복 응답 방지)
+    if (!thread.length || thread[thread.length - 1].sender_id === SUPPORT_ID) continue;   // 마지막이 지기/AI 메시지면 회원이 아직 답하지 않은 것 — 다시 묻지 않는다
     const { data: tk } = await db.from("support_tickets").select("*").eq("room_id", roomId).in("status", ["open", "waiting_admin", "answered"]).order("id", { ascending: false }).limit(1);
     const ticket = tk?.[0] ?? null;
     if (!provider()) { await sendSup(roomId, "지기 AI예요. 남겨 주신 내용은 대표님께 전달드릴게요. 보통 하루 안에 이 채팅으로 답해 드려요.", true); await ensureTicket(roomId, member, ticket, { category: "기타", urgency: "today", summary: (thread.filter((m) => m.sender_id !== SUPPORT_ID).slice(-1)[0]?.body ?? "").slice(0, 200), detail: {} }, thread); handled++; continue; }
