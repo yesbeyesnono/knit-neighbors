@@ -322,7 +322,7 @@ const SUP_SYS = (kb: J[]) => `당신은 뜨개 이웃 앱 '뜨개동네'의 1차
 분류별 꼭 확인할 것: ${kb.filter((k) => k.kind === "check").map((k) => `[${k.q}] ${k.a.replace(/\n/g, ", ")}`).join(" / ") || "(없음)"}
 승인된 FAQ: ${kb.filter((k) => k.kind === "faq").map((k) => `#${k.id} Q: ${k.q} → A: ${k.a}`).join("\n") || "(없음)"}
 분류 목록: ${SUP_CATS.join(", ")}
-반드시 JSON 하나만 출력: {"reply":"회원에게 보낼 말","action":"ask|faq|escalate|note|resolved|reopen|chat","faq_id":숫자|null,"category":"분류","urgency":"urgent|today|info","summary":"대표에게 보일 한두 문장 요약(회원이 겪는 일·원하는 것)","detail":{"screen":"","when":"","symptom":"","device":""},"confidence":0~1}
+반드시 JSON 하나만 출력: {"reply":"회원에게 보낼 말","action":"ask|faq|escalate|note|resolved|reopen|chat","faq_id":숫자|null,"category":"분류","urgency":"urgent|today|info","summary":"대표가 판단할 수 있게 회원이 겪는 일·원하는 것을 빠짐없이(3~6문장, 요약이 아니라 정확한 전달)","detail":{"screen":"","when":"","symptom":"","device":""},"recommend":{"draft":"escalate/note 일 때: 대표가 그대로 보내도 되는 답변 초안(존댓말, 확정되지 않은 약속은 넣지 않음)","reason":"이 답을 추천하는 이유와 판단 근거","check":"대표가 답하기 전에 확인하면 좋은 것(서버 로그·해당 화면·정책 등). 없으면 빈 문자열"},"confidence":0~1}
 action 뜻: ask=더 물어봄, faq=FAQ로 직접 답변(faq_id 필수), escalate=파악이 끝나 대표에게 전달, note=이미 전달된 건에 회원이 내용을 덧붙임(함께 전달), resolved/reopen=대표 답변 뒤 회원 반응, chat=인사·잡담이라 티켓 불필요.`;
 
 async function supportScan() {
@@ -335,7 +335,7 @@ async function supportScan() {
     const { data: mem } = await db.from("room_members").select("profile_id").eq("room_id", roomId);
     if (!(mem ?? []).some((m) => m.profile_id === SUPPORT_ID)) { await db.from("messages").update({ support_seen: true }).eq("room_id", roomId); continue; }
     const member = (mem ?? []).find((m) => m.profile_id !== SUPPORT_ID)?.profile_id ?? null;
-    const { data: msgs } = await db.from("messages").select("id,sender_id,body,photo_url,by_ai,created_at").eq("room_id", roomId).order("id", { ascending: false }).limit(14);
+    const { data: msgs } = await db.from("messages").select("id,sender_id,body,photo_url,by_ai,created_at").eq("room_id", roomId).order("id", { ascending: false }).limit(30);
     const thread = (msgs ?? []).reverse();
     await db.from("messages").update({ support_seen: true }).eq("room_id", roomId).eq("support_seen", false);   // 먼저 선점(중복 응답 방지)
     if (!thread.length || thread[thread.length - 1].sender_id === SUPPORT_ID) continue;   // 마지막이 지기/AI 메시지면 회원이 아직 답하지 않은 것 — 다시 묻지 않는다
@@ -356,7 +356,7 @@ async function supportScan() {
     if (ticket && ticket.turns >= 3 && act === "ask") act = "escalate";   // 질문은 2~3번까지
     await sendSup(roomId, reply, true);
     if (act === "ask") { if (ticket) await db.from("support_tickets").update({ turns: ticket.turns + 1, category: cat, summary: out.summary || ticket.summary, detail: out.detail ?? ticket.detail, updated_at: new Date().toISOString() }).eq("id", ticket.id); else await db.from("support_tickets").insert({ room_id: roomId, profile_id: member, status: "open", category: cat, urgency: urg, summary: String(out.summary ?? "").slice(0, 400), detail: out.detail ?? {}, turns: 1 }); }
-    else if (act === "escalate" || act === "note" || urg === "urgent") await ensureTicket(roomId, member, ticket, { category: cat, urgency: urg, summary: String(out.summary ?? "").slice(0, 400), detail: out.detail ?? {} }, thread, act === "note");
+    else if (act === "escalate" || act === "note" || urg === "urgent") await ensureTicket(roomId, member, ticket, { category: cat, urgency: urg, summary: String(out.summary ?? "").slice(0, 400), detail: { ...(out.detail ?? {}), recommend: out.recommend ?? null } }, thread, act === "note");
     else if (act === "resolved" && ticket) { await db.from("support_tickets").update({ status: "closed", closed_at: new Date().toISOString(), resolution: "회원 확인", followup_at: null, updated_at: new Date().toISOString() }).eq("id", ticket.id); await db.from("support_events").insert({ ticket_id: ticket.id, actor: "member", kind: "resolved", body: null }); }
     else if (act === "reopen" && ticket) { await db.from("support_events").insert({ ticket_id: ticket.id, actor: "member", kind: "reopen", body: null }); await ensureTicket(roomId, member, { ...ticket, status: "open" }, { category: cat, urgency: urg, summary: String(out.summary ?? ticket.summary).slice(0, 400), detail: out.detail ?? ticket.detail }, thread, true); }
     handled++;
@@ -370,7 +370,8 @@ async function sendSup(roomId: string, text: string, byAi: boolean) {
 // 티켓을 '대표 대기'로 올리고 텔레그램·콘솔에 알린다 (추가 내용이면 같은 티켓에 덧붙임)
 async function ensureTicket(roomId: string, member: string | null, ticket: J, info: J, thread: J[], append = false) {
   const now = new Date().toISOString();
-  const memberLines = thread.filter((m) => m.sender_id !== SUPPORT_ID).slice(-4).map((m) => `"${mask(m.body ?? "(사진)")}"`).join("\n");
+  // 회원이 쓴 글은 줄이지 않고 전부(이메일·전화만 가림). 지기/AI 말은 짧게 표시해 흐름을 알 수 있게
+  const memberLines = thread.map((m) => m.sender_id === SUPPORT_ID ? `  (${m.by_ai ? "지기 AI" : "대표"}: ${(m.body ?? "").slice(0, 80)}${(m.body ?? "").length > 80 ? "…" : ""})` : `회원: ${(m.body ?? "(사진)").replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, "[이메일]").replace(/01[016789][-\s.]?\d{3,4}[-\s.]?\d{4}/g, "[전화번호]")}`).join("\n").slice(-2200);
   let t = ticket;
   if (t && t.status !== "closed") { const { data } = await db.from("support_tickets").update({ status: "waiting_admin", category: info.category, urgency: info.urgency, summary: append && t.summary ? `${t.summary} / 추가: ${info.summary}`.slice(0, 400) : info.summary, detail: { ...(t.detail ?? {}), ...(info.detail ?? {}) }, updated_at: now }).eq("id", t.id).select("*").single(); t = data ?? t; }
   else { const { data } = await db.from("support_tickets").insert({ room_id: roomId, profile_id: member, status: "waiting_admin", category: info.category, urgency: info.urgency, summary: info.summary, detail: info.detail ?? {}, turns: 0 }).select("*").single(); t = data; }
@@ -378,9 +379,13 @@ async function ensureTicket(roomId: string, member: string | null, ticket: J, in
   await db.from("support_events").insert({ ticket_id: t.id, actor: "ai", kind: append ? "note" : "escalate", body: info.summary });
   const { data: pr } = member ? await db.from("profiles").select("nickname").eq("id", member).maybeSingle() : { data: null };
   const { data: open } = await db.from("mod_items").select("id").eq("kind", "support").eq("target_id", String(t.id)).eq("status", "open").limit(1);
-  if (!open?.length) await createItem({ kind: "support", target_type: "user", target_id: String(t.id), author_id: member, severity: info.urgency, summary: `문의 #${t.id} · ${info.category} — ${pr?.nickname ?? ""}: ${info.summary}`.slice(0, 300), evidence: { text: memberLines.slice(0, 500), ticket_id: t.id, room_id: roomId, detail: info.detail ?? {} }, ai_suggestion: { reason: "지기 AI가 파악을 마치고 전달했어요", action: "콘솔 › 지기 문의함에서 답변" } });
+  if (!open?.length) await createItem({ kind: "support", target_type: "user", target_id: String(t.id), author_id: member, severity: info.urgency, summary: `문의 #${t.id} · ${info.category} — ${pr?.nickname ?? ""}: ${info.summary}`.slice(0, 300), evidence: { text: memberLines.slice(0, 1500), ticket_id: t.id, room_id: roomId, detail: info.detail ?? {} }, ai_suggestion: { reason: info.detail?.recommend?.reason || "지기 AI가 파악을 마치고 전달했어요", action: "콘솔 › 지기 문의함에서 답변", reply_draft: info.detail?.recommend?.draft || null } });
   const dt = info.detail ?? {}; const dl = ["screen", "when", "symptom", "device"].filter((k) => dt[k]).map((k) => `${({ screen: "화면", when: "시점", symptom: "증상", device: "기기" } as J)[k]}: ${dt[k]}`).join(" · ");
-  const m = await tgSend(`${info.urgency === "urgent" ? "🚨 긴급 " : ""}문의 #${t.id} — ${pr?.nickname ?? "회원"} · ${info.category}${append ? " (내용 추가됨)" : ""}\n\n[AI 요약] ${info.summary}${dl ? "\n" + dl : ""}\n\n[회원이 쓴 글]\n${memberLines}\n\n답변: 이 카드에 '답장'하거나 「#${t.id}: 답변 내용」처럼 보내면 이 회원에게만 지기 이름으로 전달돼요.`, [[{ text: "처리 완료(답변 없이 닫기)", callback_data: "sd:" + t.id }], [{ text: "콘솔에서 답변", url: `${CONSOLE}#support:${t.id}` }]]);
+  const rc = info.detail?.recommend ?? {}; const rows: J[][] = [];
+  if (rc.draft) { const tok = await pending(null, `문의 #${t.id} 추천안 그대로 보내기`, [{ name: "support_send", args: { ticket: t.id, text: String(rc.draft).slice(0, 1000) } }], true); rows.push([{ text: "추천안 그대로 보내기", callback_data: "p:" + tok }]); }
+  rows.push([{ text: "처리 완료(답변 없이 닫기)", callback_data: "sd:" + t.id }], [{ text: "콘솔에서 보기·답변", url: `${CONSOLE}#support:${t.id}` }]);
+  const card = `${info.urgency === "urgent" ? "🚨 긴급 " : ""}문의 #${t.id} — ${pr?.nickname ?? "회원"} · ${info.category}${append ? " (내용 추가됨)" : ""}\n\n[대화 전문]\n${memberLines}\n\n[AI가 파악한 내용]\n${info.summary}${dl ? "\n" + dl : ""}${rc.draft ? `\n\n[AI 추천 답변안]\n${rc.draft}` : ""}${rc.reason ? `\n\n[추천 이유]\n${rc.reason}` : ""}${rc.check ? `\n\n[답하기 전에 확인]\n${rc.check}` : ""}\n\n답변: 이 카드에 '답장'하거나 「#${t.id}: 답변 내용」으로 보내면 이 회원에게만 지기 이름으로 전달돼요.`;
+  const m = await tgSend(card.length > 3900 ? card.slice(0, 3850) + "\n…(콘솔에서 전체 보기)" : card, rows);
   if (m?.message_id) await db.from("support_tickets").update({ tg_message_id: m.message_id }).eq("id", t.id);
 }
 // 텔레그램에서 티켓 알림에 '답장' → 회원에게 전달 (AI가 존댓말로 다듬은 초안과 원문 중 선택)
