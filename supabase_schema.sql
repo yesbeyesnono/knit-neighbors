@@ -1165,3 +1165,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   트리거: posts insert/delete(글 3·댓글 1, 본인 글 댓글 제외) · works insert/delete(10). 구간: 0~29일차=1, 30~59=2, 60일차부터 적립 없음
 --   테스트: supabase/tests/supporters_test.sql (롤백 DO 블록 5개, 전부 통과) · 보고: docs/supporters_report.md
 -- ---------------------------------------------------------------
+
+-- 48. 모임 배울 기법 여러 개 + 서포터 방 지기 AI + 서포터 초대 알림 (마이그레이션 meetup_multi_tech_supporter_room_welcome / supporter_invite_notice, 2026-09-26)
+--   meetups.technique_ids text[] (create_meetup 이 p_extra.technique_ids 를 techniques.sort 순으로 최대 10개 저장, 첫 번째는 technique_id 에도 — 옛 앱 호환)
+--   join_supporter_room(): 방 생성 시 '방의 약속' 안내(AI가 매일 정리해 대표에게 전한다고 고지) + 새 멤버 입장 시 지기 AI 환영 1회(by_ai, support_seen=true 라 상담 스캔 대상 아님)
+--   크론 supporters-room-report(12:00 UTC = 21:00 KST) → jigi_call('supporters_room'): 지난 24시간 방 대화를 AI가 '누가 무엇을 원하는지' 빠짐없이 정리해 텔레그램으로. 개인정보 마스킹
+--   supporter_invite_notice(): 비서포터·모집 중·온보딩 완료 + (글·작품·채팅 있음 또는 가입 다음 날 재접속) 이면 kind 'supporter' 알림 1회("1기 서포터즈 모집 중 …"). check_in 과 앱(첫 게시 뒤)이 호출. 설정 메뉴의 서포터즈 줄은 서포터에게만
+-- ---------------------------------------------------------------

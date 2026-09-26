@@ -620,7 +620,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .ysum button{flex:none;border:0;background:none;color:var(--ink3);font:inherit;padding:6px;cursor:pointer}
 .stepper{display:inline-flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .stepper button{width:48px;height:46px;border:0;background:var(--bg2);font:inherit;font-size:1.3rem;color:var(--ink);cursor:pointer}
-.stepper b,.stepper input{width:84px!important;text-align:center;font-size:1.15rem;font-weight:700;border:0!important;border-radius:0!important;padding:0!important;height:46px;background:#fff}
+.stepper b,.stepper input{width:84px!important;text-align:center;font-size:1.15rem;font-weight:700;border:0!important;border-radius:0!important;padding:0!important;height:46px;line-height:46px;background:#fff}.stepper b{display:flex;align-items:center;justify-content:center}
 .subpg{position:absolute;inset:0;z-index:900;background:var(--bg);display:flex;flex-direction:column}
 .subbody{flex:1;overflow-y:auto;padding:4px 16px 28px}
 .subbody .seg{margin:10px 0}
@@ -913,7 +913,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
     <div class="cfsec">
       <button type="button" class="cfrow" onclick="$('#wMore').hidden=!$('#wMore').hidden"><span>게이지·완성 크기 적기</span><span class="muted">선택 ›</span></button>
       <div id="wMore" hidden style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-        <label class="f">게이지 <span class="muted">(10cm)</span><input id="wGauge" maxlength="60" placeholder="예: 20코 24단"></label>
+        <label class="f">게이지<input id="wGauge" maxlength="60" placeholder="예: 20코 24단 (10cm)"></label>
         <label class="f">완성 크기<input id="wSize" maxlength="60" placeholder="예: 지름 11cm"></label></div>
       <div class="cfl">한 줄 소감 (선택)</div><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px"></textarea>
       <p class="muted" style="font-size:.78rem;margin:10px 0 0">적어 주신 실·바늘 정보는 실 사전과 추천을 만드는 데 쓰여요. 커뮤니티 "작품" 탭에 올라가요.</p></div>
@@ -934,7 +934,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
     </div>
     <!-- 설정 시트로 옮겨 쓰는 입력 블록(평소엔 숨김). id·이벤트는 Phase 1 그대로 -->
     <div id="mHold" hidden>
-      <div id="mBlk-kind"><div class="cfl" style="margin-top:0">모임 유형</div><div class="seg" id="mKind"></div><label class="f" id="mTechWrap" hidden style="margin-top:10px">배울 기법<select id="mTech"></select><span class="hint">참여자가 이 기법을 배운 뒤 자기 단계에 체크할 수 있어요</span></label></div>
+      <div id="mBlk-kind"><div class="cfl" style="margin-top:0">모임 유형</div><div class="seg" id="mKind"></div><div id="mTechWrap" hidden style="margin-top:10px"><button type="button" class="cfrow" onclick="openMTechSub()"><span>배울 기법 <span class="muted">(여러 개 가능)</span></span><span class="muted" id="mTechPicked">0개 선택 ›</span></button><div class="tchips" id="mTechChips"></div><p class="muted" style="font-size:.78rem;margin:6px 0 0">기법 맵에서 고르면 참여자에게도 같은 그림으로 보여요 — 먼저 알아야 하는 기법까지 함께.</p></div></div>
       <div id="mBlk-craft"><div class="cfl" style="margin-top:0">종목</div><div class="seg" id="mCraft"></div></div>
       <div id="mBlk-lv"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">권장 단계 (부터)<select id="mLvMin"></select></label><label class="f">권장 단계 (까지)<select id="mLvMax"></select></label></div><p class="muted" style="font-size:.8rem">참여자에게 "내 단계에 맞아요 / 조금 높아요"로 보여요</p></div>
       <div id="mBlk-cap"><div class="muted" style="margin-bottom:12px">0이면 제한 없음</div><div style="display:flex;justify-content:center"><div class="stepper"><button type="button" onclick="mCapStep(-1)">−</button><b id="mCapVal">0</b><button type="button" onclick="mCapStep(1)">＋</button></div></div></div>
@@ -2022,6 +2022,7 @@ async function joinSupporters(){
 async function joinWaitlist(){ const { error } = await sb.rpc('join_waitlist'); if(error) return toast(error.message); supStatus={...(supStatus||{}), waitlisted:true}; renderBeta(); closeSheet(); toast('2기 모집이 열리면 알려 드릴게요'); }
 // 모집 팝업: 가입 후 첫 활동 직후 1회만
 function maybeSupporterPrompt(){
+  try{ if(me && !(supStatus||{}).supporter) sb.rpc('supporter_invite_notice').then(r=>{ if(r.data && view==='activity') renderActivity(); }); }catch(e){}
   try{ const k='kn_sup_prompt_'+(me?.id||''); if(!me || localStorage.getItem(k)) return; const s=supStatus||{}; if(s.supporter || !s.is_open) return; localStorage.setItem(k,'1');
     setTimeout(()=>openSheet(`<b style="font-size:1.05rem">1기 서포터즈에 초대해요</b><p class="muted" style="margin:0">뜨개동네를 함께 키워 주실 100분을 모셔요. 60일 동안 활동하고 뱃지·매거진을 받아 가세요.</p><button class="btn" onclick="closeSheet();openSupportRoom().then(()=>setTimeout(()=>sendMsg('서포터즈 할래요'),400))">지기에게 물어보기</button><button class="btn o" onclick="closeSheet();openSupporterIntro()">바로 신청 내용 보기</button><div class="oblink" onclick="closeSheet()">다음에</div>`), 600); }catch(e){}
 }
@@ -2501,7 +2502,7 @@ function workYarnDetail(w){
 async function attachMeetups(rows){
   const ids=[...new Set((rows||[]).map(r=>r.meetup_id).filter(Boolean))]; if(!ids.length) return;
   await loadTech();
-  const { data } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by,kind,craft,level_min,level_max,technique_id,capacity,fee,bring,duration_min,repeat,review_count').in('id', ids);
+  const { data } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,is_public,participant_count,descr,created_by,kind,craft,technique_ids,level_min,level_max,technique_id,capacity,fee,bring,duration_min,repeat,review_count').in('id', ids);
   const byId={}; (data||[]).forEach(m=>byId[m.id]=m); rows.forEach(r=>{ if(r.meetup_id) r.meetup = byId[r.meetup_id]||null; });
 }
 function fmtWhen(iso){ const d=new Date(iso); const day=['일','월','화','수','목','금','토'][d.getDay()]; const h=d.getHours(), m=d.getMinutes(); return `${d.getMonth()+1}월 ${d.getDate()}일 (${day}) ${h<12?'오전':'오후'} ${h%12||12}:${String(m).padStart(2,'0')}`; }
@@ -2520,7 +2521,7 @@ function meetupTags(m){
   const fit=levelFit(m); const full = m.capacity && (m.participant_count||0) >= m.capacity;
   return [ `<span class="${fit.cls}">${fit.txt}</span>`,
     m.craft&&m.craft!=='both'?`<span>${MCRAFT[m.craft]}</span>`:'',
-    m.kind==='workshop'&&m.technique_id?`<span>배우기: ${esc(techName(m.technique_id))}</span>`:'',
+    m.kind==='workshop'&&(m.technique_ids?.length||m.technique_id)?(ids=>`<span style="text-decoration:underline;text-underline-offset:2px;cursor:pointer" onclick="event.stopPropagation();openTechView(${esc(JSON.stringify(ids))})">배우기: ${esc(ids.map(techName).join(', '))} ›</span>`)(m.technique_ids?.length?m.technique_ids:[m.technique_id]):'',
     m.repeat&&m.repeat!=='once'?`<span>${MREPEAT[m.repeat]}</span>`:'',
     m.duration_min?`<span>${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간'+(m.duration_min%60?' '+m.duration_min%60+'분':''):m.duration_min+'분'}</span>`:'',
     m.fee?`<span>${esc(m.fee)}</span>`:'<span>무료</span>',
@@ -2763,9 +2764,9 @@ function openTechSub(){
   openSub('기법 고르기', `<div class="tsel" style="margin-top:8px"><div class="tabs" id="wCraftTabs"></div><div id="wTechList"></div></div>
     <div class="cfl">목록에 없는 기법 <span class="muted">(직접 입력, 쉼표로 구분)</span></div>
     <input id="wCustom" maxlength="200" placeholder="예: 브리오슈 2색, 튀니지안 심플 스티치"><div class="tchips" id="wCustomChips" style="margin-top:8px"></div>
-    <p class="muted" style="font-size:.78rem">기본 목록은 60종이에요. 여기 적어 주신 기법은 모아서 목록에 추가할게요.</p>`, { label:'완료', fn:()=>{ commitWCustom(); closeSub(); renderCertTech(); } });
+    <p class="muted" style="font-size:.78rem">기법을 누르면 골라져요(여러 개). 기본 목록은 60종이에요. 여기 적어 주신 기법은 모아서 목록에 추가할게요.</p>`, { label:'완료', fn:()=>{ commitWCustom(); closeSub(); renderCertTech(); } });
   subOnBack=()=>{ commitWCustom(); closeSub(); renderCertTech(); };
-  renderWTech(); renderWCustom();
+  loadTech().then(()=>{ renderWTech(); renderWCustom(); });
 }
 async function submitCert(){
   const b=$('#certPost'); certCheck.busy=true; b.disabled=true;
@@ -2992,7 +2993,31 @@ async function stashAddFromDict(y){   // 실 사전·직접 입력으로 고른 
 
 // ----- 모임 만들기 페이지
 const M_DUR={60:'1시간',90:'1시간 30분',120:'2시간',180:'3시간',240:'반나절'}, M_REP={once:'한 번',weekly:'매주',biweekly:'격주',monthly:'매월'}, M_FEE={free:'무료',drink:'각자 음료',custom:'직접 입력'};
-let mCap=0;
+let mCap=0, mTechSel=new Set(), mTechCraft='crochet';
+function renderMTech(){ const el=$('#mTechChips'); if(!el) return; el.innerHTML=[...mTechSel].map(id=>`<span class="tech on">${esc(techName(id))}<b onclick="mTechSel.delete('${id}');renderMTech()" style="cursor:pointer;margin-left:2px">×</b></span>`).join(''); const p=$('#mTechPicked'); if(p) p.textContent=`${mTechSel.size}개 선택 ›`; renderMeetChips(); }
+function openMTechSub(){
+  closeSheet(); const c=segVal('#mCraft'); mTechCraft = c==='knit'?'knitting':c==='crochet'?'crochet':myCrafts()[0];
+  loadTech().then(()=>{
+    openSub('배울 기법 고르기', `<div class="tabs" id="mCraftTabs" style="margin-top:8px"></div><div id="mTechBoard"></div><p class="muted" style="font-size:.78rem">기법을 누르면 골라져요(여러 개). 점선으로 이어진 기법은 먼저 알아야 하는 기법이에요 — 참여자에게도 같은 그림으로 보여 줘요.</p>`, { label:'완료', fn:()=>{ closeSub(); renderMTech(); } });
+    subOnBack=()=>{ closeSub(); renderMTech(); };
+    renderMTechBoard();
+  });
+}
+function renderMTechBoard(){
+  $('#mCraftTabs').innerHTML = `<button data-c="crochet" class="${mTechCraft==='crochet'?'on':''}">코바늘</button><button data-c="knitting" class="${mTechCraft==='knitting'?'on':''}">대바늘</button>`;
+  $('#mCraftTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; mTechCraft=b.dataset.c; renderMTechBoard(); };
+  const old=$('#tmPick'); const keep = old && old.dataset.craft===mTechCraft ? old.scrollLeft : null;
+  const b=techPickBoard(mTechCraft, mTechSel, 'toggleMTech'); $('#mTechBoard').innerHTML=b.html; $('#tmPick').scrollLeft = keep!==null ? keep : b.scroll;
+}
+function toggleMTech(id){ if(mTechSel.has(id)) mTechSel.delete(id); else mTechSel.add(id); renderMTechBoard(); }
+// 모임 글·상세의 '배우기' → 같은 맵으로 보기(읽기 전용): 이 모임에서 배우는 기법 + 먼저 알아야 하는 기법
+async function openTechView(ids){
+  ids=(ids||[]).filter(Boolean); if(!ids.length) return; await loadTech(); closeSheet();
+  const sel=new Set(ids); const crafts=[...new Set(ids.map(id=>TECH.find(t=>t.id===id)?.craft).filter(Boolean))]; let craft=crafts[0]||'crochet';
+  const draw=()=>{ const b=techPickBoard(craft, sel, null, true); $('#tvBoard').innerHTML=(crafts.length>1?`<div class="tabs"><button class="${craft==='crochet'?'on':''}" onclick="event.preventDefault()" data-c="crochet">코바늘</button><button class="${craft==='knitting'?'on':''}" data-c="knitting">대바늘</button></div>`:'')+b.html; $('#tmPick').scrollLeft=b.scroll; const tb=$('#tvBoard .tabs'); if(tb) tb.onclick=e=>{ const x=e.target.closest('button'); if(x){ craft=x.dataset.c; draw(); } }; };
+  openSub('배울 기법', `<div id="tvBoard" style="margin-top:8px"></div><div class="card soft muted">진한 칸이 이 모임에서 배우는 기법, 점선으로 이어진 칸은 그 전에 알아 두면 좋은 기법이에요. 내 단계는 마이 › 설정 › 내 뜨개 단계에서 볼 수 있어요.</div>`);
+  draw();
+}
 function mCapStep(d){ mCap=Math.max(0, Math.min(100, mCap+d)); if(mCap===1) mCap = d>0?2:0; $('#mCapVal').textContent=mCap; }
 // 칩 → 설정 시트: 숨겨 둔 입력 블록(#mHold)을 시트로 옮겼다가 닫을 때 되돌린다(이벤트·id 유지)
 const M_OPT={kind:'모임 유형',craft:'종목',lv:'권장 단계',cap:'정원',dur:'소요 시간·반복',fee:'참가비',bring:'준비물',desc:'모임 소개',detail:'상세 위치'};
@@ -3002,7 +3027,7 @@ function openMeetOpt(k){ restoreMeetOpt(); openSheet(`<b style="font-size:1.05re
 function renderMeetChips(){
   const box=$('#mChips'); if(!box) return;
   const lmin=$('#mLvMin').value, lmax=$('#mLvMax').value, feeK=segVal('#mFeeSeg'), fee=feeK==='custom'?($('#mFee').value.trim()||'참가비'):(M_FEE[feeK]||'참가비');
-  const chips=[['kind', MKIND[segVal('#mKind')]||'유형', true],['craft', MCRAFT[segVal('#mCraft')]||'종목', true],['lv', lmin||lmax?`${lmin||1}~${lmax||5}단계`:'단계 무관', !!(lmin||lmax)],['cap', mCap?`정원 ${mCap}`:'정원 없음', !!mCap],['fee', fee, true],['dur', `${M_DUR[segVal('#mDurSeg')]||'2시간'} · ${M_REP[segVal('#mRepeatSeg')]||'한 번'}`, true],['bring', $('#mBring').value.trim()?'준비물 ✓':'＋ 준비물', !!$('#mBring').value.trim()],['desc', $('#mDesc').value.trim()?'소개 ✓':'＋ 소개', !!$('#mDesc').value.trim()],['detail', $('#mPlaceDetail').value.trim()?'상세 위치 ✓':'＋ 상세 위치', !!$('#mPlaceDetail').value.trim()]];
+  const chips=[['craft', MCRAFT[segVal('#mCraft')]||'종목', true],['kind', (MKIND[segVal('#mKind')]||'유형')+(segVal('#mKind')==='workshop'&&mTechSel.size?` · ${mTechSel.size}개`:''), true],['lv', lmin||lmax?`${lmin||1}~${lmax||5}단계`:'단계 무관', !!(lmin||lmax)],['cap', mCap?`정원 ${mCap}`:'정원 없음', !!mCap],['fee', fee, true],['dur', `${M_DUR[segVal('#mDurSeg')]||'2시간'} · ${M_REP[segVal('#mRepeatSeg')]||'한 번'}`, true],['bring', $('#mBring').value.trim()?'준비물 ✓':'＋ 준비물', !!$('#mBring').value.trim()],['desc', $('#mDesc').value.trim()?'소개 ✓':'＋ 소개', !!$('#mDesc').value.trim()],['detail', $('#mPlaceDetail').value.trim()?'상세 위치 ✓':'＋ 상세 위치', !!$('#mPlaceDetail').value.trim()]];
   box.innerHTML = chips.map(([k,l,set])=>`<button type="button" class="${set?'set':''}" onclick="openMeetOpt('${k}')">${esc(l)}</button>`).join('');
 }
 function renderMeetPub(){ const on=$('#mPublic').checked; $('#mPubPill').innerHTML = `<svg viewBox="0 0 24 24">${on?'<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0"/>':'<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'}</svg>${on?'공개 · 우리 동네 이웃이 볼 수 있어요':'비공개 · 초대한 사람만 볼 수 있어요'} ›`; }
@@ -3018,13 +3043,13 @@ async function openMeetForm(){
     $('#mLvMin').innerHTML = lvOpts; $('#mLvMax').innerHTML = lvOpts;
     $('#mKind').addEventListener('click', ()=>{ $('#mTechWrap').hidden = segVal('#mKind')!=='workshop'; });
     $('#mFeeSeg').addEventListener('click', ()=>{ const c=segVal('#mFeeSeg')==='custom'; $('#mFee').hidden=!c; if(c) $('#mFee').focus(); });
-    loadTech().then(()=>{ const grp = c => TECH.filter(t=>t.craft===c).map(t=>`<option value="${t.id}">${t.level}단계 · ${esc(t.name_ko)}</option>`).join(''); $('#mTech').innerHTML = `<optgroup label="코바늘">${grp('crochet')}</optgroup><optgroup label="대바늘">${grp('knitting')}</optgroup>`; });
+    loadTech();
   }
   const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7));
   const pad=n=>String(n).padStart(2,'0'); $('#mDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#mDate').min=(t=>`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`)(new Date()); $('#mClock').value='14:00';
   segSet('#mKind','free'); segSet('#mCraft','both'); segSet('#mDurSeg','120'); segSet('#mRepeatSeg','once'); segSet('#mFeeSeg','free');
   $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value=''; $('#mFee').hidden=true; $('#mFee').value=''; $('#mBring').value=''; $('#mTitle').value=''; $('#mDesc').value=''; $('#mPlaceDetail').value=''; $('#mPublic').checked=true; $('#meetPost').disabled=false;
-  mCap=0; $('#mCapVal').textContent='0'; placePick.m=null; renderMeetPlace(); renderMeetPub(); renderMeetChips();
+  mCap=0; $('#mCapVal').textContent='0'; placePick.m=null; mTechSel=new Set(); renderMTech(); renderMeetPlace(); renderMeetPub(); renderMeetChips();
   show('meetform'); $('#v-meetform').scrollTop=0;
 }
 function renderMeetPlace(){
@@ -3050,9 +3075,9 @@ async function submitMeet(){
     const detail=$('#mPlaceDetail').value.trim(); const place=(pname+(detail?` · ${detail}`:'')).slice(0,80);
     await loadBanned(); if(hasBanned(title) || hasBanned($('#mDesc').value) || hasBanned(place)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const lmin=$('#mLvMin').value, lmax=$('#mLvMax').value; if(lmin && lmax && +lmin > +lmax) throw new Error('권장 단계 범위를 확인해 주세요');
-    const kind = segVal('#mKind')||'free'; if(kind==='workshop' && !$('#mTech').value) throw new Error('배울 기법을 골라 주세요');
+    const kind = segVal('#mKind')||'free'; if(kind==='workshop' && !mTechSel.size) throw new Error('배울 기법을 골라 주세요');
     const feeK=segVal('#mFeeSeg'); const fee = feeK==='custom' ? ($('#mFee').value.trim()||null) : (M_FEE[feeK]||null);
-    const extra = { kind, craft: segVal('#mCraft')||'both', level_min: lmin?+lmin:null, level_max: lmax?+lmax:null, technique_id: kind==='workshop'?$('#mTech').value:null,
+    const extra = { kind, craft: segVal('#mCraft')||'both', level_min: lmin?+lmin:null, level_max: lmax?+lmax:null, technique_id: kind==='workshop'?[...mTechSel][0]:null, technique_ids: kind==='workshop'?[...mTechSel]:[],
       capacity: mCap>=2?mCap:null, fee, bring: $('#mBring').value.trim()||null, duration_min:+(segVal('#mDurSeg')||120), repeat:segVal('#mRepeatSeg')||'once', address: c.addr||null };
     const photos = await uploadPhotos(sPhotos);
     const { error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:when.toISOString(), p_is_public:$('#mPublic').checked, p_body: $('#mDesc').value.trim()||null, p_lat:c.lat, p_lng:c.lng, p_photos:photos, p_extra: extra });
@@ -3153,7 +3178,8 @@ function renderWTech(){
   $('#wCraftTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; wCraft=b.dataset.c; renderWTech(); };
   const ver = new Set(myProfile?.verified_skills||[]);
   const ci=$('#wCustom'); if(ci && !ci._bound){ ci._bound=true; ci.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===','){ e.preventDefault(); commitWCustom(); } }); ci.addEventListener('blur', commitWCustom); }
-  $('#wTechList').innerHTML = [1,2,3,4,5].map(l=>{ const ts=TECH.filter(t=>t.craft===wCraft&&t.level===l); return `<div class="lvgrp"><div class="lvh">${l}단계 ${LVNAME[l]}</div><div class="techs">${ts.map(t=>`<button type="button" class="tech ${wTechSel.has(t.id)?'on':''}" onclick="toggleWTech('${t.id}')">${wTechSel.has(t.id)?ico('check')+' ':''}${esc(t.name_ko)}${ver.has(t.id)?'<span class="vbadge">인증</span>':''}</button>`).join('')}</div></div>`; }).join('');
+  const old=$('#tmPick'); const keep = old && old.dataset.craft===wCraft ? old.scrollLeft : null;
+  const b=techPickBoard(wCraft, wTechSel, 'toggleWTech'); $('#wTechList').innerHTML=b.html; $('#tmPick').scrollLeft = keep!==null ? keep : b.scroll;
   renderCertTech();
 }
 function toggleWTech(id){ if(wTechSel.has(id)) wTechSel.delete(id); else wTechSel.add(id); renderWTech(); }
@@ -3294,32 +3320,16 @@ function symSvg(id, sz){ const d=SYMLIB[TECH_DRAW[id]]; if(!d) return ''; const 
 function renderSkills(){
   const craft = skillCraft, st = lvStats(craft, skills), lv = lvOf(craft, skills);
   const next = lv<5 ? (st[lv+1] ? Math.max(0, Math.ceil(st[lv+1].total/2) - st[lv+1].done) : 0) : 0;
-  // 기법 맵(knitup 방식): 단계별 세로 열을 왼쪽→오른쪽으로 놓고, 선행 기법을 곡선으로 잇는다
-  const list = techOf(craft), colW=142, gapX=44, rowH=54, headH=40, nodeH=44;
-  const cols={}; list.forEach(t=>{ (cols[t.level] ||= []).push(t); });
-  const maxN = Math.max(1, ...Object.values(cols).map(a=>a.length));
-  const H = headH + maxN*rowH + 8, W = 5*(colW+gapX) - gapX;
-  const pos={};
-  for(let L=1; L<=5; L++){ const arr=cols[L]||[]; const y0=headH+(maxN-arr.length)*rowH/2; arr.forEach((t,i)=>{ pos[t.id]={x:(L-1)*(colW+gapX), y:y0+i*rowH}; }); }
-  const ready = t => !skills.has(t.id) && (t.prereq||[]).every(q=>skills.has(q));
-  let svg = `<svg class="tmedges" width="${W}" height="${H}">`;
-  list.forEach(t=>(t.prereq||[]).forEach(q=>{ const a=pos[q], b=pos[t.id]; if(!a||!b) return;
-    const x1=a.x+colW, y1=a.y+nodeH/2, x2=b.x, y2=b.y+nodeH/2, mx=(x1+x2)/2;
-    const hot = skills.has(q)&&skills.has(t.id), warm = skills.has(q)&&ready(t);
-    svg += `<path d="M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" fill="none" stroke="${hot?'#3C4043':warm?'#3C4043':'#dcdcdc'}" stroke-width="${hot?2.2:1.4}" ${warm?'stroke-dasharray="4 4"':''}/>`; }));
-  svg += '</svg>';
-  let nodes='';
-  for(let L=1; L<=5; L++){ const s2=st[L]||{done:0,total:0}; const dn=s2.total>0&&s2.done*2>=s2.total;
-    nodes += `<div class="tmhead ${dn?'done':''}" style="left:${(L-1)*(colW+gapX)}px;width:${colW}px">${L}단계 ${LVNAME[L]} <span>${s2.done}/${s2.total}</span></div>`; }
-  list.forEach(t=>{ const q=pos[t.id]; const cls = skills.has(t.id)?'done':(ready(t)?'ready':'far');
-    nodes += `<button type="button" class="tmnode ${cls}" style="left:${q.x}px;top:${q.y}px;width:${colW}px;height:${nodeH}px" onclick="toggleTech('${t.id}')" title="${esc(t.descr||'')}">${symSvg(t.id,22)?`<span class="sy">${symSvg(t.id,22)}</span>`:''}<span class="nm">${esc(t.name_ko)}</span>${(myProfile?.verified_skills||[]).includes(t.id)?'<span class="vb">인증</span>':''}<span class="ck">${skills.has(t.id)?ico('check'):''}</span></button>`; });
+  const has=skills, ready = t => !has.has(t.id) && (t.prereq||[]).every(q=>has.has(q));
+  const bd = techBoard(craft, t=>has.has(t.id)?'done':ready(t)?'ready':'far', 'toggleTech', new Set(myProfile?.verified_skills||[]));
+  const colW=bd.colW, gapX=bd.gapX;
   const old=$('#tmScroll'); const keep = old && old.dataset.craft===craft ? old.scrollLeft : null;
   $('#skillsBody').innerHTML = `
     <div class="tabs"><button class="${craft==='crochet'?'on':''}" onclick="switchCraft('crochet')">코바늘</button><button class="${craft==='knitting'?'on':''}" onclick="switchCraft('knitting')">대바늘</button></div>
     <div class="lvhead"><div class="lvbig">${lv||'–'}<small>단계</small></div><div style="flex:1"><b>${craft==='crochet'?'코바늘':'대바늘'} ${lv?LVNAME[lv]:'아직 단계 없음'}</b><div class="muted">${lv?LVDESC[lv]:'할 수 있는 기법을 눌러 보세요'}${lv<5&&next?` · ${lv+1}단계까지 ${next}개 남음`:''}</div>
       <div class="lvbar">${[1,2,3,4,5].map(l=>`<i class="${l<=lv?'done':''}"><b style="width:${st[l]?Math.round(st[l].done/st[l].total*100):0}%"></b></i>`).join('')}</div></div></div>
     <div class="tmlegend"><span><i class="k done"></i>할 수 있어요</span><span><i class="k ready"></i>다음에 배울 차례</span><span><i class="k"></i>아직</span><span style="margin-left:auto">옆으로 밀어 보세요 →</span></div>
-    <div class="tmscroll" id="tmScroll" data-craft="${craft}"><div class="tmboard" style="width:${W}px;height:${H}px">${svg}${nodes}</div></div>
+    <div class="tmscroll" id="tmScroll" data-craft="${craft}">${bd.html}</div>
     <div class="card soft muted">기법을 누르면 체크돼요. 위 단계 기법을 누르면 선으로 이어진 아래 기법이 함께 체크돼요. 한 단계 기법의 절반 이상을 체크하면 그 단계로 표시돼요. <b>인증</b>은 작품 인증으로 증명된 기법이에요.</div>
     ${recs.filter(r=>r.craft===craft).length?`<div><b>내 단계에 맞는 도안</b><div class="patlist">${recs.filter(r=>r.craft===craft).slice(0,4).map(patItem).join('')}</div></div>`:''}
     <button class="btn" onclick="finishSkills()">저장하고 나가기</button>`;
@@ -3327,6 +3337,36 @@ function renderSkills(){
   sc.scrollLeft = keep!==null ? keep : Math.max(0, (Math.min(5, Math.max(1, lv+1))-1)*(colW+gapX) - 24);
 }
 function switchCraft(c){ skillCraft=c; openLv=null; renderSkills(); }
+// 기법 맵(knitup 방식): 단계별 세로 열을 왼쪽→오른쪽으로 놓고, 선행 기법을 곡선으로 잇는다. cls(t) → 'done'|'ready'|'far'. 내 뜨개 단계·작품 인증·모임 기법 고르기·모임 기법 보기가 함께 쓴다
+function techBoard(craft, cls, onClick, ver){
+  const list = techOf(craft), colW=142, gapX=44, rowH=54, headH=40, nodeH=44; ver = ver||new Set();
+  const cols={}; list.forEach(t=>{ (cols[t.level] ||= []).push(t); });
+  const maxN = Math.max(1, ...Object.values(cols).map(a=>a.length));
+  const H = headH + maxN*rowH + 8, W = 5*(colW+gapX) - gapX;
+  const pos={}, st={};
+  for(let L=1; L<=5; L++){ const arr=cols[L]||[]; const y0=headH+(maxN-arr.length)*rowH/2; arr.forEach((t,i)=>{ pos[t.id]={x:(L-1)*(colW+gapX), y:y0+i*rowH}; }); st[L]={done:arr.filter(t=>cls(t)==='done').length,total:arr.length}; }
+  const byId={}; list.forEach(t=>byId[t.id]=t);
+  let svg = `<svg class="tmedges" width="${W}" height="${H}">`;
+  list.forEach(t=>(t.prereq||[]).forEach(q=>{ const a=pos[q], b=pos[t.id]; if(!a||!b) return;
+    const x1=a.x+colW, y1=a.y+nodeH/2, x2=b.x, y2=b.y+nodeH/2, mx=(x1+x2)/2;
+    const cq=byId[q]?cls(byId[q]):'far', ct=cls(t); const hot = cq==='done'&&ct==='done', warm = !hot && cq!=='far' && ct!=='far';
+    svg += `<path d="M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" fill="none" stroke="${hot||warm?'#3C4043':'#dcdcdc'}" stroke-width="${hot?2.2:1.4}" ${warm?'stroke-dasharray="4 4"':''}/>`; }));
+  svg += '</svg>';
+  let nodes='';
+  for(let L=1; L<=5; L++){ const s2=st[L]; const dn=s2.total>0&&s2.done*2>=s2.total;
+    nodes += `<div class="tmhead ${dn?'done':''}" style="left:${(L-1)*(colW+gapX)}px;width:${colW}px">${L}단계 ${LVNAME[L]} <span>${s2.done}/${s2.total}</span></div>`; }
+  list.forEach(t=>{ const q=pos[t.id], c=cls(t);
+    nodes += `<button type="button" class="tmnode ${c}" style="left:${q.x}px;top:${q.y}px;width:${colW}px;height:${nodeH}px" ${onClick?`onclick="${onClick}('${t.id}')"`:'tabindex="-1"'} title="${esc(t.descr||'')}">${symSvg(t.id,22)?`<span class="sy">${symSvg(t.id,22)}</span>`:''}<span class="nm">${esc(t.name_ko)}</span>${ver.has(t.id)?'<span class="vb">인증</span>':''}<span class="ck">${c==='done'?ico('check'):''}</span></button>`; });
+  return { html:`<div class="tmboard" style="width:${W}px;height:${H}px">${svg}${nodes}</div>`, W, H, colW, gapX, st };
+}
+// 고르기용 맵: 고른 기법=done, 그 선행 기법(아직 안 고른 것)=ready(점선). readonly 면 누르기 없음
+function techPickBoard(craft, sel, onClick, readonly){
+  const pre=new Set(); sel.forEach(id=>prereqClosure(id, pre)); sel.forEach(id=>pre.delete(id));
+  const bd = techBoard(craft, t=>sel.has(t.id)?'done':pre.has(t.id)?'ready':'far', readonly?null:onClick, new Set(myProfile?.verified_skills||[]));
+  const lvs=[...sel].map(id=>TECH.find(t=>t.id===id)).filter(t=>t&&t.craft===craft).map(t=>t.level);
+  const focus = lvs.length ? Math.min(...lvs) : Math.min(5, Math.max(1, lvOf(craft, new Set(myProfile?.skills||[]))||1));
+  return { html:`<div class="tmlegend"><span><i class="k done"></i>${readonly?'이 모임에서 배워요':'골랐어요'}</span><span><i class="k ready"></i>먼저 알아야 해요</span><span style="margin-left:auto">옆으로 밀어 보세요 →</span></div><div class="tmscroll" id="tmPick" data-craft="${craft}">${bd.html}</div>`, scroll: Math.max(0, (focus-1)*(bd.colW+bd.gapX) - 24) };
+}
 function toggleLv(l){ openLv = openLv===l?null:l; document.querySelectorAll('.lvsec').forEach(el=>el.classList.toggle('open', +el.dataset.lv===openLv)); }
 function toggleTech(id){
   if(skills.has(id)){ skills.delete(id); dependents(id).forEach(d=>skills.delete(d)); }
@@ -3470,7 +3510,7 @@ function openSettings(){
     </div>`}
     <div class="sgrp">도움</div>
     <div class="slist">
-      <button class="srow" onclick="closeSheet();openSupporters()"><span>${ico('party')} 1기 서포터즈 <span class="muted">${supStatus?.supporter?`${supStatus.segment||''}구간 ${supStatus['seg'+(supStatus.segment||1)]||0}점 · 누적 ${supStatus.total||0}`:(supStatus?.is_open?'모집 중':'')}</span></span><span class="car">›</span></button>
+      ${supStatus?.supporter?`<button class="srow" onclick="closeSheet();openSupporters()"><span>${ico('party')} 1기 서포터즈 <span class="muted">${supStatus.segment||''}구간 ${supStatus['seg'+(supStatus.segment||1)]||0}점 · 누적 ${supStatus.total||0}</span></span><span class="car">›</span></button>`:''}
       <button class="srow" onclick="closeSheet();openSupportRoom()"><span>${ico('yarn')} 뜨개동네 지기에게 말하기 <span class="authbadge" style="background:var(--sel)">운영진</span><br><span class="muted" id="supHint">궁금한 점·불편한 점·바라는 기능을 채팅으로 남겨 주세요</span></span><span class="car">›</span></button>
       <a class="srow" href="mailto:knitup.official@gmail.com"><span>이메일 문의</span><span class="car">›</span></a>
     </div>
