@@ -1172,3 +1172,16 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   크론 supporters-room-report(12:00 UTC = 21:00 KST) → jigi_call('supporters_room'): 지난 24시간 방 대화를 AI가 '누가 무엇을 원하는지' 빠짐없이 정리해 텔레그램으로. 개인정보 마스킹
 --   supporter_invite_notice(): 비서포터·모집 중·온보딩 완료 + (글·작품·채팅 있음 또는 가입 다음 날 재접속) 이면 kind 'supporter' 알림 1회("1기 서포터즈 모집 중 …"). check_in 과 앱(첫 게시 뒤)이 호출. 설정 메뉴의 서포터즈 줄은 서포터에게만
 -- ---------------------------------------------------------------
+
+-- 49. 가게 셀프 서비스 · 신청서 AI 확인 · 클래스 양식 (마이그레이션 shop_self_service_ai_claim, 2026-09-26 대표 지시)
+--   shop_claims + email(필수)·links·lat/lng(앱에서 주소 검색 → 좌표)·ai_check/ai_status(match|mismatch|unreadable|skipped)·tg_message_id
+--   _decide_shop_claim(내부 공통): 승인 시 links·좌표를 shops 로 옮기고 좌표가 있으면 is_active=true(바로 공개), 알림·admin_logs(detail.via console|ai|telegram)·mod_items 닫기
+--     admin_decide_shop_claim = 콘솔(is_admin) · ai_decide_shop_claim(service_role 전용) = 지기 AI 자동 승인('ai') / 텔레그램 버튼('telegram', mod_pending heavy)
+--   트리거 jigi_shop_claim(insert) → jigi_call('shop_claim') → Edge jigi.shopClaims(): 비공개 버킷 shop-docs 서류를 AI(vision)로 읽어 사업자번호(숫자 일치)·상호(정규화 포함)·주소(앞 토큰 2개) 비교
+--     셋 다 일치 → 자동 승인 + 서류 삭제 + mod_items auto_done + 텔레그램 알림 / 아니면 mod_items(kind shop_claim, today) + 텔레그램 [승인][반려] · scan() 때마다 재시도
+--   shops: authenticated UPDATE 는 컬럼 단위(name,kind,descr,address,phone,hours,links,logo_url,location) — 오너가 앱 '내 가게 관리'에서 수정, is_active·owner_id 는 콘솔/승인만
+--   storage 'shops'(공개, 3MB): <shop_id>/logo-*.jpg, 오너만 쓰기 · shop_posts.extra jsonb: kind 'class' 양식(v1: tag, craft, level, techniques[], work, type oneday|course, starts_at, duration_min, sessions, cycle,
+--     min, max, fee, material incl|extra|none, material_fee, provide, bring, place shop|other|online, place_text, place_hint, descr, target, curriculum[], teacher, apply link|phone|insta|visit, apply_to, refund, note)
+--     양식 근거: 솜씨당·탈잉·프립·네이버 예약 등록 항목 조사(2026-09-26) — 환불 규정 사전 표시, 재료비 금액 별도 표기, 최소 인원 미달 시 전액 환불 문구 자동
+--   mod_items kind 'shop_claim' / target_type 'shop_claim' 추가. 콘솔 오늘: '기다리는 신청·문의'(가게·작가·제보·문의·이벤트) 묶음 표시
+-- ---------------------------------------------------------------

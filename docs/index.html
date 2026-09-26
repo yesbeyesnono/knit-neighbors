@@ -648,6 +648,9 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .mhero .cam{width:54px;height:54px;border-radius:50%;background:var(--olive);color:#fff;display:grid;place-items:center}.mhero .cam svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .mhero .mhint{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:.72rem;color:var(--olive);font-weight:600}.mhero.has .mhint{display:none}.mhero.has .cam{background:rgba(63,79,34,.55)}
 #v-meetform .cfphotos:empty{display:none}
+#v-classform .cfphotos:empty{display:none}.cfl .req{display:inline-block;font-size:.7rem;background:var(--chip);color:var(--olive);border-radius:999px;padding:1px 7px;margin-left:4px;font-weight:600;vertical-align:1px}#v-classform .top .btn.sm{width:auto;padding:8px 16px}#v-classform .body{gap:10px}
+.ccard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}.ccard .cfl:first-child{margin-top:0}.ccard .cfl{margin:12px 0 6px}.ccard input,.ccard textarea,.ccard select{width:100%}.ccard .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.clsbox{margin:8px 0 4px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg2)}.clsbox .r{display:flex;gap:8px;font-size:.9rem;margin:4px 0}.clsbox .r span:first-child{flex:none;width:64px;color:var(--ink2)}.clsbox .r span:last-child{flex:1;white-space:pre-wrap}.clsbox .btnrow{display:flex;gap:8px;margin-top:10px}.clsbox .btnrow a,.clsbox .btnrow button{flex:1;text-align:center;font:inherit;font-size:.9rem;font-weight:600;padding:10px;border-radius:12px;border:0;background:var(--btn);color:var(--btn-ink);text-decoration:none;cursor:pointer}
 .pubpill{align-self:center;font:inherit;font-size:.82rem;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--ink2);cursor:pointer}.pubpill svg{width:14px;height:14px;vertical-align:-2px;stroke:var(--acc);fill:none;stroke-width:2;margin-right:3px}
 .fld{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:1rem}.fld input{border:0;padding:4px 0;font-weight:700;font-size:1rem;background:transparent}.fld .r{margin-left:auto;color:var(--ink3);flex:none}.fld .r svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .fld.place{cursor:pointer}.fld.place b{display:block}.fld.place small{display:block;color:var(--ink2);font-size:.8rem;font-weight:400}.fld.place .r{color:var(--acc)}
@@ -878,7 +881,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
         <div class="rvbanner" id="rvbanner" hidden><span class="muted" style="font-size:12px"><i class="ico" data-ico="yarn"><b>🧶</b></i> 모임 후기</span><b id="rvTitle"></b><span class="muted" id="rvSub"></span></div>
         <div class="pfields" id="pfields" hidden>
           <div class="mtitle" id="pShopName">가게 소식</div>
-          <div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">종류<select id="pKind"><option value="notice">소식</option><option value="sale">할인</option><option value="new">신상</option><option value="meetup">모임</option><option value="class">클래스</option></select></label><label class="f">마감일 <span class="muted">(선택)</span><input id="pEnds" type="date"></label></div>
+          <div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">종류<select id="pKind" onchange="if(this.value==='class'){ this.value='notice'; openClassForm(); }"><option value="notice">소식</option><option value="sale">할인</option><option value="new">신상</option><option value="meetup">모임</option><option value="class">클래스 열기 (양식으로)</option></select></label><label class="f">마감일 <span class="muted">(선택)</span><input id="pEnds" type="date"></label></div>
           <label class="f">제목<input id="pTitle" maxlength="60" placeholder="예: 가을 신상 실 입고 · 10% 할인"></label>
           <span class="hint" style="font-size:.78rem;color:var(--ink3)">팔로워에게 알림이 가고, 근처 이웃의 지도 핀에 종이 울려요. 사진은 아래 카메라로.</span>
         </div>
@@ -957,6 +960,50 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
   <section class="view" id="v-stash">
     <div class="top"><button class="back" onclick="closeStash()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>내 실함</h1></div>
     <div id="stashBody"></div>
+  </section>
+
+  <!-- 가게 클래스 열기 (새 페이지, 2026-09-26) — 솜씨당·탈잉·프립·네이버 예약 등록 양식을 조사해 뜨개 가게에 맞게 추린 항목 -->
+  <section class="view" id="v-classform">
+    <div class="top"><button class="tbtn" onclick="closeCompose()">취소</button><h1>클래스 열기</h1><button class="btn sm" id="classPost" onclick="submitClass()">게시</button></div>
+    <div class="body">
+      <div class="mhero" id="cHero" onclick="$('#cFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">대표 사진 · 완성작이 잘 보이게</span></div>
+      <div class="cfphotos" id="cfPhotos" style="justify-content:center"></div><input id="cFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
+      <div class="ccard"><div class="cfl">기본 <span class="req">필수</span></div>
+        <input id="cTitle" maxlength="60" placeholder="클래스명 (예: 코바늘 그래니 스퀘어 파우치 원데이)">
+        <input id="cTag" maxlength="80" placeholder="한 줄 소개 (예: 2시간이면 완성! 초보도 OK)" style="margin-top:8px">
+        <div class="cfl">종목</div><div class="seg" id="cCraft"></div>
+        <div class="cfl">난이도 <span class="muted">뜨개 단계 기준</span></div><div class="seg" id="cLevel"></div>
+        <div class="cfl">배울 기법 <span class="muted">기법 맵에서 여러 개</span></div>
+        <button type="button" class="cfrow" style="border-top:0;padding-top:0" onclick="openCTechSub()"><span>기법 고르기</span><span class="muted" id="cTechPicked">0개 선택 ›</span></button><div class="tchips" id="cTechChips"></div>
+        <div class="cfl">완성작</div><input id="cWork" maxlength="120" placeholder="무엇을 만드나요? 크기·개수 (예: 파우치 1개, 15×12cm)">
+      </div>
+      <div class="ccard"><div class="cfl">일정 <span class="req">필수</span></div>
+        <div class="seg" id="cType"></div>
+        <div class="g2" style="margin-top:8px"><input id="cDate" type="date"><input id="cClock" type="time" step="600"></div>
+        <div class="cfl">회당 소요 시간</div><div class="seg" id="cDur"></div>
+        <div id="cRepeatWrap" hidden><div class="cfl">총 회차 · 주기</div><div class="g2"><input id="cSessions" type="number" min="2" max="20" placeholder="총 회차 (예: 4)"><select id="cCycle"><option value="weekly">매주 같은 요일</option><option value="biweekly">격주</option><option value="custom">일정은 소개에 적을게요</option></select></div></div>
+        <div class="cfl">모집 마감 <span class="muted">재료 준비를 위해 · 기본 시작 하루 전</span></div><input id="cEnds" type="date">
+      </div>
+      <div class="ccard"><div class="cfl">인원·비용 <span class="req">필수</span></div>
+        <div class="g2"><input id="cMin" type="number" min="1" max="50" placeholder="최소 인원 (기본 1)"><input id="cMax" type="number" min="1" max="50" placeholder="최대 인원"></div>
+        <div class="cfl">수강료 <span class="muted">원 · 0이면 무료</span></div><input id="cFee" type="number" min="0" step="1000" inputmode="numeric" placeholder="예: 45000">
+        <div class="cfl">재료비</div><div class="seg" id="cMat"></div><input id="cMatFee" type="number" min="0" step="1000" inputmode="numeric" placeholder="재료비 금액 (원)" hidden style="margin-top:8px">
+        <div class="cfl">제공·대여 <span class="muted">(선택)</span></div><input id="cProvide" maxlength="120" placeholder="예: 실·바늘 제공, 가위·마커 대여, 음료 포함">
+        <div class="cfl">준비물 <span class="muted">(선택)</span></div><input id="cBring" maxlength="120" placeholder="예: 없음 / 5호 코바늘 지참">
+      </div>
+      <div class="ccard"><div class="cfl">장소</div><div class="seg" id="cPlace"></div><input id="cPlaceTxt" maxlength="120" placeholder="장소 이름·주소 또는 온라인 방식(줌 등)" hidden style="margin-top:8px"><input id="cPlaceHint" maxlength="120" placeholder="찾아오는 길·주차 (선택)" style="margin-top:8px"></div>
+      <div class="ccard"><div class="cfl">소개 <span class="muted">(선택이지만 신청에 큰 도움이 돼요)</span></div>
+        <textarea id="cDescr" maxlength="1000" placeholder="클래스 소개 · 이런 점이 좋아요" style="min-height:90px"></textarea>
+        <div class="cfl">이런 분께 추천</div><input id="cFor" maxlength="120" placeholder="예: 사슬뜨기·짧은뜨기를 해 본 초보, 선물 만들고 싶은 분">
+        <div class="cfl">커리큘럼 <span class="muted">한 줄에 한 단계</span></div><textarea id="cCurri" maxlength="600" placeholder="1. 실·바늘 잡는 법, 기초코&#10;2. 그래니 스퀘어 뜨기&#10;3. 연결하고 마무리" style="min-height:80px"></textarea>
+        <div class="cfl">강사 소개 <span class="muted">(선택)</span></div><input id="cTeacher" maxlength="200" placeholder="예: 공방 운영 5년, 인스타 @…">
+      </div>
+      <div class="ccard"><div class="cfl">신청 방법 <span class="req">필수</span></div><div class="seg" id="cApply"></div><input id="cApplyTo" maxlength="200" placeholder="신청 링크 또는 전화·인스타 아이디" style="margin-top:8px">
+        <div class="cfl">취소·환불 규정 <span class="req">필수</span> <span class="muted">결제 전에 보여야 효력이 있어요</span></div><div class="seg" id="cRefund"></div><textarea id="cRefundTxt" maxlength="400" style="min-height:70px;margin-top:8px"></textarea>
+        <div class="cfl">유의사항 <span class="muted">(선택)</span></div><textarea id="cNote" maxlength="400" placeholder="예: 10분 전 도착, 아동 동반 불가, 사진 촬영 안내" style="min-height:60px"></textarea>
+        <p class="muted" style="font-size:.78rem;margin:8px 0 0">결제·예약은 가게가 직접 받아요(앱은 소개만). 최소 인원이 안 차서 취소되면 전액 환불 문구가 자동으로 붙어요. 수강료 외 비용은 금액까지 적어 주세요.</p>
+      </div>
+    </div>
   </section>
 
   <!-- 보조 화면(기법 고르기 · 실 고르기 · 색·사용량 · 장소 검색): 폼 위에 덮는 한 장 -->
@@ -1526,10 +1573,10 @@ async function openShop(id){
   $('#shopBody').innerHTML = `
     <div class="shophead">${sh.logo_url?`<img class="logo" src="${esc(sh.logo_url)}" alt="">`:''}<h2>${esc(sh.name)}<span class="kind">${SHOP_KIND[sh.kind]||'가게'}</span></h2></div>
     <div class="shopinfo">${sh.descr?esc(sh.descr)+'<br>':''}${sh.address?ico('location')+' '+esc(sh.address)+'<br>':''}${sh.hours?'⏰ '+esc(sh.hours)+'<br>':''}${sh.phone?'☎ '+esc(sh.phone):''}</div>
-    <div class="shoplinks"><button class="${following?'on':''}" onclick="toggleFollowShop('${sh.id}',${!following})">${following?'팔로우 중':'팔로우'}</button>${L}${c?`<a href="https://map.kakao.com/link/map/${encodeURIComponent(sh.name)},${c.lat},${c.lng}" target="_blank" rel="noopener">길찾기</a>`:''}${mine?`<button onclick="openCompose('shop')">소식 올리기</button><button onclick="openShopEdit()">가게 관리</button>`:''}</div>
+    <div class="shoplinks"><button class="${following?'on':''}" onclick="toggleFollowShop('${sh.id}',${!following})">${following?'팔로우 중':'팔로우'}</button>${L}${c?`<a href="https://map.kakao.com/link/map/${encodeURIComponent(sh.name)},${c.lat},${c.lng}" target="_blank" rel="noopener">길찾기</a>`:''}${mine?`<button onclick="openCompose('shop')">소식 올리기</button><button onclick="openClassForm()">클래스 열기</button><button onclick="openShopEdit()">가게 관리</button>`:''}</div>
     ${mine&&!sh.is_active?`<div class="muted" style="padding:0 16px 8px;font-size:.8rem">아직 지도에 공개되기 전이에요. ${sh.location?'지기가 확인하는 중이에요.':'가게 관리에서 주소를 검색해 위치를 정하면 공개할 수 있어요.'}</div>`:''}
     ${!sh.owner_id&&!myShop?`<div class="muted" style="padding:0 16px 8px;font-size:.8rem">이 가게 사장님이신가요? <a href="#" onclick="openShopClaim('${sh.id}', curShop.name);return false" style="color:inherit;text-decoration:underline">이 가게 주인이에요</a></div>`:''}
-    ${(posts||[]).length ? (posts||[]).map(p=>`<div class="spost" id="sp-${p.id}"><span class="k ${p.kind}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`).join('') : '<div class="empty">아직 올라온 소식이 없어요</div>'}
+    ${(posts||[]).length ? (posts||[]).map(p=>`<div class="spost" id="sp-${p.id}"><span class="k ${p.kind}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`).join('') : '<div class="empty">아직 올라온 소식이 없어요</div>'}
     <div class="muted" style="padding:16px;font-size:.8rem">가게 소식은 가게가 직접 올려요. 뜨개동네는 판매·예약에 관여하지 않아요. 문제가 있으면 설정 › 지기에게 알려 주세요.</div>`;
   show('shop');
   $('#v-shop').scrollTop=0;
@@ -2757,7 +2804,7 @@ async function pickPhotos(files, which){
   const inp = which==='s' ? $('#sFile') : $('#cFile'); if(inp) inp.value=''; if(which==='s'){ if($('#wFile')) $('#wFile').value=''; if($('#mFile')) $('#mFile').value=''; }
 }
 function renderPv(which){
-  if(which==='s') renderCertPhotos();
+  if(which==='s'){ renderCertPhotos(); renderClassPhotos(); }
   const arr = which==='s' ? sPhotos : cPhotos, el = which==='s' ? $('#sPv') : $('#cPv'); if(!el) return;
   el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">${ico('close')}</b></div>`).join('');
 }
@@ -2775,7 +2822,7 @@ function openPlusSheet(){
     ${row("closeSheet();openCompose('post')", SVG_PEN, '글', '동네 이웃에게 소식·질문 남기기')}
     ${row("closeSheet();openCert()", ico('cert'), '작품 인증', '완성작 사진과 기법·실 기록 · 활동 레벨이 올라요')}
     ${row("closeSheet();openMeetForm()", ico('location'), '모임 만들기', '장소·일시를 정해 이웃 모으기', certified?'':'<span class="lock">작품 인증 1개부터 열 수 있어요</span>')}
-    ${myShop?row("closeSheet();openCompose('shop')", ico('signal'), '가게 소식', esc(myShop.name)+' 팔로워에게 알리기'):''}
+    ${myShop?row("closeSheet();openCompose('shop')", ico('signal'), '가게 소식', esc(myShop.name)+' 팔로워에게 알리기')+row("closeSheet();openClassForm()", ico('cert'), '클래스 열기', '일정·인원·비용·환불 규정까지 양식으로'):''}
     ${FULL && myProfile?.is_author?row("closeSheet();openPatternForm()", ico('ruler'), '도안', '내 도안 등록하기'):''}
   </div><button class="btn o" onclick="closeSheet()">닫기</button>`);
 }
@@ -2848,6 +2895,96 @@ async function submitCert(){
     composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
   }catch(e){ toast(e.message); }
   certCheck.busy=false; certCheck();
+}
+
+// ===== 가게 클래스 열기 (shop_posts kind 'class' + extra) =====
+const C_CRAFT={crochet:'코바늘',knit:'대바늘',other:'기타'}, C_TYPE={oneday:'원데이',course:'정규 (여러 회차)'}, C_MAT={incl:'수강료에 포함',extra:'별도',none:'재료비 없음'}, C_PLACE={shop:'우리 가게',other:'다른 장소',online:'온라인'};
+const C_APPLY={link:'링크로 신청',phone:'전화',insta:'인스타그램 DM',visit:'가게에 직접'};
+const C_REFUND={d3:'3일 전까지 100% · 이후 재료비 제외 · 당일 불가',d1:'1일 전까지 100% · 당일 불가',custom:'직접 입력'};
+const C_REFUND_TXT={d3:'수업 3일 전까지 취소하면 전액 환불돼요. 그 이후에는 재료비를 제외하고 환불되고, 수업 당일에는 환불이 어려워요.',d1:'수업 1일 전까지 취소하면 전액 환불돼요. 수업 당일에는 환불이 어려워요.',custom:''};
+let cTechSel=new Set(), cTechCraft='crochet';
+function renderClassPhotos(){
+  const hero=$('#cHero'); if(!hero || view!=='classform') return; const p0=sPhotos[0];
+  hero.classList.toggle('has', !!p0); hero.style.backgroundImage = p0?`url(${p0.url})`:'';
+  const box=$('#cfPhotos'); if(!box) return;
+  box.innerHTML = sPhotos.length ? sPhotos.map((p,i)=>`<div style="background-image:url(${p.url});width:56px;height:56px">${i===0?'<span style="position:absolute;left:3px;bottom:3px;font-size:.6rem;font-weight:700;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff">대표</span>':''}<b onclick="event.stopPropagation();sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" style="width:56px;height:56px;font-size:.7rem" onclick="$('#cFile').click()">${ico('camera')}<br>추가</button>`:'') : '';
+}
+async function openClassForm(){
+  if(!myShop) return toast('가게 계정만 클래스를 열 수 있어요');
+  if(!myShop.is_active) return toast('가게가 지도에 공개된 뒤 클래스를 열 수 있어요');
+  closeSub(); closeSheet(); composeKind='class'; sPhotos=[]; cTechSel=new Set();
+  if(!['compose','cert','meetform','classform'].includes(view)) composeBack=view;
+  if(!$('#cCraft').children.length){
+    seg('#cCraft', C_CRAFT); seg('#cLevel', {1:'1단계 입문',2:'2단계 초급',3:'3단계 중급',4:'4단계 상급',5:'5단계 전문'}); seg('#cType', C_TYPE); seg('#cDur', M_DUR); seg('#cMat', C_MAT); seg('#cPlace', C_PLACE); seg('#cApply', C_APPLY); seg('#cRefund', C_REFUND);
+    $('#cType').addEventListener('click', ()=>{ $('#cRepeatWrap').hidden = segVal('#cType')!=='course'; });
+    $('#cMat').addEventListener('click', ()=>{ $('#cMatFee').hidden = segVal('#cMat')!=='extra'; });
+    $('#cPlace').addEventListener('click', ()=>{ $('#cPlaceTxt').hidden = segVal('#cPlace')==='shop'; });
+    $('#cRefund').addEventListener('click', ()=>{ const k=segVal('#cRefund'); if(k && k!=='custom') $('#cRefundTxt').value=C_REFUND_TXT[k]; if(k==='custom') $('#cRefundTxt').focus(); });
+    $('#cDate').addEventListener('change', ()=>{ if($('#cDate').value && !$('#cEnds').dataset.touched){ const d=new Date($('#cDate').value); d.setDate(d.getDate()-1); $('#cEnds').value=d.toISOString().slice(0,10); } });
+    $('#cEnds').addEventListener('input', ()=>{ $('#cEnds').dataset.touched='1'; });
+    loadTech();
+  }
+  ['cTitle','cTag','cWork','cSessions','cMin','cMax','cFee','cMatFee','cProvide','cBring','cPlaceTxt','cPlaceHint','cDescr','cFor','cCurri','cTeacher','cApplyTo','cNote'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
+  const craft = myProfile?.craft==='knit'?'knit':myProfile?.craft==='both'?'crochet':'crochet';
+  segSet('#cCraft', craft); segSet('#cLevel','1'); segSet('#cType','oneday'); segSet('#cDur','120'); segSet('#cMat','incl'); segSet('#cPlace','shop'); segSet('#cApply','link'); segSet('#cRefund','d3');
+  $('#cRepeatWrap').hidden=true; $('#cMatFee').hidden=true; $('#cPlaceTxt').hidden=true; $('#cRefundTxt').value=C_REFUND_TXT.d3; delete $('#cEnds').dataset.touched;
+  const d=new Date(); d.setDate(d.getDate()+7); const pad=n=>String(n).padStart(2,'0'); $('#cDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#cDate').min=(t=>`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`)(new Date()); $('#cClock').value='14:00'; d.setDate(d.getDate()-1); $('#cEnds').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  $('#cMin').value='1'; $('#classPost').disabled=false; renderCTech(); renderClassPhotos();
+  show('classform'); $('#v-classform .body').scrollTop=0;
+}
+function renderCTech(){ const el=$('#cTechChips'); if(!el) return; el.innerHTML=[...cTechSel].map(id=>`<span class="tech on">${esc(techName(id))}<b onclick="cTechSel.delete('${id}');renderCTech()" style="cursor:pointer;margin-left:2px">×</b></span>`).join(''); const p=$('#cTechPicked'); if(p) p.textContent=`${cTechSel.size}개 선택 ›`; }
+function openCTechSub(){
+  const c=segVal('#cCraft'); cTechCraft = c==='knit'?'knitting':'crochet';
+  loadTech().then(()=>{ openSub('배울 기법 고르기', `<div class="tabs" id="cCraftTabs" style="margin-top:8px"></div><div id="cTechBoard"></div><p class="muted" style="font-size:.78rem">기법을 누르면 골라져요(여러 개). 점선으로 이어진 기법은 먼저 알아야 하는 기법이에요 — 수강생에게도 같은 그림으로 보여 줘요.</p>`, { label:'완료', fn:()=>{ closeSub(); renderCTech(); } }); subOnBack=()=>{ closeSub(); renderCTech(); }; renderCTechBoard(); });
+}
+function renderCTechBoard(){
+  $('#cCraftTabs').innerHTML = `<button data-c="crochet" class="${cTechCraft==='crochet'?'on':''}">코바늘</button><button data-c="knitting" class="${cTechCraft==='knitting'?'on':''}">대바늘</button>`;
+  $('#cCraftTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; cTechCraft=b.dataset.c; renderCTechBoard(); };
+  const old=$('#tmPick'); const keep = old && old.dataset.craft===cTechCraft ? old.scrollLeft : null;
+  const b=techPickBoard(cTechCraft, cTechSel, 'toggleCTech'); $('#cTechBoard').innerHTML=b.html; $('#tmPick').scrollLeft = keep!==null ? keep : b.scroll;
+}
+function toggleCTech(id){ if(cTechSel.has(id)) cTechSel.delete(id); else cTechSel.add(id); renderCTechBoard(); }
+async function submitClass(){
+  const b=$('#classPost'); b.disabled=true;
+  try{
+    if(!myShop) throw new Error('가게 계정만 올릴 수 있어요');
+    const v=id=>$('#'+id).value.trim();
+    const title=v('cTitle'); if(!title) throw new Error('클래스명을 적어 주세요');
+    if(!sPhotos.length) throw new Error('대표 사진을 1장 이상 올려 주세요');
+    const work=v('cWork'); if(!work) throw new Error('무엇을 만드는지 적어 주세요');
+    const date=v('cDate'), clock=v('cClock'); if(!date||!clock) throw new Error('날짜와 시간을 정해 주세요');
+    const startsAt=new Date(`${date}T${clock}:00`); if(isNaN(startsAt)||startsAt<new Date()) throw new Error('시작 일시를 지금 이후로 정해 주세요');
+    const type=segVal('#cType')||'oneday'; const sessions=type==='course'?+v('cSessions')||0:1; if(type==='course' && sessions<2) throw new Error('정규 클래스는 총 회차를 2 이상으로 적어 주세요');
+    const min=Math.max(1,+v('cMin')||1), max=+v('cMax')||0; if(!max) throw new Error('최대 인원을 적어 주세요'); if(max<min) throw new Error('최대 인원이 최소 인원보다 작아요');
+    if(v('cFee')==='') throw new Error('수강료를 적어 주세요 (무료면 0)'); const fee=Math.max(0,+v('cFee')||0);
+    const mat=segVal('#cMat')||'incl'; const matFee=mat==='extra'?+v('cMatFee')||0:0; if(mat==='extra' && !matFee) throw new Error('재료비가 별도면 금액을 적어 주세요');
+    const place=segVal('#cPlace')||'shop'; const placeTxt=place==='shop'?(myShop.address||myShop.name):v('cPlaceTxt'); if(place!=='shop' && !placeTxt) throw new Error('장소를 적어 주세요');
+    const apply=segVal('#cApply')||'link'; const applyTo=v('cApplyTo'); if(apply!=='visit' && !applyTo) throw new Error('신청 링크나 연락처를 적어 주세요'); if(apply==='link' && !/^https?:\/\/\S+$/i.test(applyTo)) throw new Error('신청 링크는 https:// 로 시작해야 해요');
+    const refund=v('cRefundTxt'); if(!refund) throw new Error('취소·환불 규정을 적어 주세요');
+    const ends = v('cEnds') ? new Date(v('cEnds')+'T23:59:59') : null; if(ends && ends>startsAt) throw new Error('모집 마감은 시작 전이어야 해요');
+    await loadBanned(); if([title,v('cTag'),v('cDescr'),v('cNote')].some(hasBanned)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+    const photos = await uploadPhotos(sPhotos);
+    const extra = { v:1, tag:v('cTag')||null, craft:segVal('#cCraft')||'crochet', level:+(segVal('#cLevel')||1), techniques:[...cTechSel], work, type, starts_at:startsAt.toISOString(), duration_min:+(segVal('#cDur')||120), sessions, cycle:type==='course'?v('cCycle'):null,
+      min, max, fee, material:mat, material_fee:matFee, provide:v('cProvide')||null, bring:v('cBring')||null, place, place_text:placeTxt||null, place_hint:v('cPlaceHint')||null,
+      descr:v('cDescr')||null, target:v('cFor')||null, curriculum:v('cCurri').split('\n').map(x=>x.trim()).filter(Boolean), teacher:v('cTeacher')||null, apply, apply_to:applyTo||null, refund, note:v('cNote')||null };
+    const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind:'class', title, body: extra.tag, photos, ends_at: ends?ends.toISOString():null, extra });
+    if(error) throw new Error(error.message);
+    sPhotos=[]; toast('클래스를 열었어요. 팔로워에게 알림이 갔어요'); composeBack=null; return openShop(myShop.id);
+  }catch(e){ toast(e.message); }
+  b.disabled=false;
+}
+const won = n => (n||0).toLocaleString('ko-KR')+'원';
+function classBox(p){
+  const x=p.extra||{}; const d=x.starts_at?new Date(x.starts_at):null; const wd=['일','월','화','수','목','금','토'];
+  const when = d ? `${d.getMonth()+1}/${d.getDate()}(${wd[d.getDay()]}) ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : '';
+  const sched = `${when} · ${M_DUR[x.duration_min]||x.duration_min+'분'}${x.type==='course'?` · 총 ${x.sessions}회${x.cycle==='weekly'?' 매주':x.cycle==='biweekly'?' 격주':''}`:''}`;
+  const cost = `${x.fee?won(x.fee):'무료'}${x.material==='extra'?` + 재료비 ${won(x.material_fee)} 별도`:x.material==='incl'?' (재료비 포함)':''}`;
+  const techs=(x.techniques||[]); const techTxt=techs.length?`<span style="text-decoration:underline;text-underline-offset:2px;cursor:pointer" onclick="openTechView(${esc(JSON.stringify(techs))})">${esc(techs.map(techName).join(', '))} ›</span>`:'';
+  const row=(l,v)=>v?`<div class="r"><span>${l}</span><span>${v}</span></div>`:'';
+  const applyBtn = x.apply==='link'&&x.apply_to?`<a href="${esc(x.apply_to)}" target="_blank" rel="noopener">신청하기</a>`:x.apply==='phone'&&x.apply_to?`<a href="tel:${esc(x.apply_to.replace(/[^\d+]/g,''))}">전화로 신청 ${esc(x.apply_to)}</a>`:x.apply==='insta'&&x.apply_to?`<a href="https://instagram.com/${esc(x.apply_to.replace(/^@/,''))}" target="_blank" rel="noopener">인스타 DM으로 신청</a>`:`<button type="button" onclick="toast('가게에 직접 신청해 주세요')">가게에 직접 신청</button>`;
+  return `<div class="clsbox">${row('일정', esc(sched))}${row('난이도', `${x.level}단계 ${LVNAME[x.level]||''} · ${C_CRAFT[x.craft]||''}`)}${row('배우기', techTxt)}${row('완성작', esc(x.work||''))}${row('인원', `최소 ${x.min}명 · 최대 ${x.max}명`)}${row('비용', esc(cost))}${row('제공', esc(x.provide||''))}${row('준비물', esc(x.bring||''))}${row('장소', esc((x.place==='online'?'온라인 · ':'')+(x.place_text||''))+(x.place_hint?`<br><span class="muted">${esc(x.place_hint)}</span>`:''))}${row('추천', esc(x.target||''))}${(x.curriculum||[]).length?row('커리큘럼', x.curriculum.map(esc).join('<br>')):''}${row('강사', esc(x.teacher||''))}${x.descr?`<div class="txt" style="margin:8px 0 2px;white-space:pre-wrap;font-size:.9rem">${esc(x.descr)}</div>`:''}
+    <div style="margin-top:8px;font-size:.8rem;color:var(--ink2)"><b>취소·환불</b> ${esc(x.refund||'')}${x.min>1?` 최소 인원(${x.min}명)이 안 차서 취소되면 전액 환불돼요.`:''}${x.note?`<br><b>유의</b> ${esc(x.note)}`:''}<br>결제·예약은 가게가 직접 받아요. 뜨개동네는 소개만 해요.</div>
+    <div class="btnrow">${applyBtn}</div></div>`;
 }
 
 // ----- 실 고르기 (datalist 대신 직접 그린 목록)
@@ -3099,7 +3236,7 @@ async function openMeetForm(){
   if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
   if(!((myProfile?.cert_count||0)>0)) return openMeetGate();
   closeSub(); composeKind='meetup'; sPhotos=[]; renderMeetPhotos();
-  if(!['compose','cert','meetform'].includes(view)) composeBack=view;
+  if(!['compose','cert','meetform','classform'].includes(view)) composeBack=view;
   if(!$('#mKind').children.length){
     seg('#mKind', MKIND); seg('#mCraft', MCRAFT); seg('#mDurSeg', M_DUR); seg('#mRepeatSeg', M_REP); seg('#mFeeSeg', M_FEE);
     const lvOpts = `<option value="">제한 없음</option>` + [1,2,3,4,5].map(l=>`<option value="${l}">${l}단계 ${LVNAME[l]}</option>`).join('');
@@ -3207,7 +3344,7 @@ async function openCompose(kind, meetupId){
   if(kind==='meetup') return openMeetForm();
   sPhotos=[]; composeKind = kind||'post'; reviewMeetup=null;
   if(kind==='review' && meetupId){ const { data:m } = await sb.from('meetups').select('id,title,place_name,starts_at').eq('id', meetupId).single(); reviewMeetup=m; }
-  if(!['compose','cert','meetform'].includes(view)) composeBack = view;
+  if(!['compose','cert','meetform','classform'].includes(view)) composeBack = view;
   $('#sAva').innerHTML = avatar(myProfile||{}); $('#sName').textContent = myProfile?.nickname||'';
   $('#sText').value=''; $('#sPv').innerHTML=''; $('#sPost').disabled=false;
   if(myShop) $('#pShopName').textContent = myShop.name+' 소식'; $('#pTitle').value=''; $('#pEnds').value=''; $('#pKind').value='notice';
@@ -3246,7 +3383,7 @@ function renderWTech(){
   renderCertTech();
 }
 function toggleWTech(id){ if(wTechSel.has(id)) wTechSel.delete(id); else wTechSel.add(id); renderWTech(); }
-function closeCompose(){ const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
+function closeCompose(){ if(view==='classform' && ($('#cTitle').value.trim()||sPhotos.length) && !confirm('작성 중인 클래스를 버릴까요?')) return; const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
 async function submitCompose(){
   const body = $('#sText').value.trim();
   $('#sPost').disabled = true;
