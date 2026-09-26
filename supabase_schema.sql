@@ -1154,4 +1154,5 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   대표 답변: admin_support_answer(콘솔) / support_deliver(service_role, 텔레그램 답장 → AI가 존댓말로 다듬은 초안·원문 중 선택 → mod_pending 'support_send' 단계)
 --   크론: jigi-support-sweep 10분(놓친 메시지) · jigi-support-followup 10:00 KST("해결되셨나요?", 3일 무응답 종료) · jigi-support-learn 월 07:00 KST(후보 제안)
 --   admin_kb / admin_kb_candidate / admin_support_stats / kb_bump
+--   주의(2026-09-26 사고): support_seen 기본값 false 로 기존 메시지가 전부 '새 메시지'로 잡혀 실제 회원 2명 방에 AI 인사가 갔음 → 즉시 삭제하고 기존 메시지 전부 support_seen=true 로 보정. 같은 종류의 '처리 표시' 컬럼을 추가할 때는 **기존 행을 처리됨으로 채우고 시작할 것**
 -- ---------------------------------------------------------------
