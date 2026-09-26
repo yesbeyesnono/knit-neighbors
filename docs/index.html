@@ -380,12 +380,13 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
   background:var(--tbg);color:var(--tink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:16px;line-height:1.35;letter-spacing:-0.01em;word-break:break-word}
 .top,.top,.top,.top{background:var(--tbg);border-bottom:0;padding:14px 16px 10px;gap:12px}
 .top h1,.top h1,.top h1,.top h1{font-family:inherit;font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;text-align:center;flex:1}
-.top h1,.top h1{text-align:left;font-size:1.05rem;font-weight:700}
+.top .back + h1{text-align:left;font-size:1.05rem;font-weight:700}   /* 뒤로가기가 있는 화면만 왼쪽 정렬, 탭 화면(커뮤니티·채팅·마이)은 가운데 굵게 */
 .top .back,.top .back{color:var(--tink);font-size:1.5rem}
 .top .btn,.top .btn,.top .btn,.top .btn{background:transparent;border:0;color:var(--tink);font-weight:600;font-size:.9rem;padding:4px 0;width:auto}
 .subtabs::-webkit-scrollbar{display:none}
 /* 커뮤니티: 제목은 스크롤로 올라가고 카테고리 탭이 상단에 고정(스크롤·키보드 후 탭이 제목 밑에 숨던 문제) */
 #v-comm .top{position:static}
+#v-supporters .body{padding:12px 16px 24px;gap:12px}
 #v-comm .subtabs{position:sticky;top:0;z-index:6;flex:none;background:var(--chip);box-shadow:0 0 0 6px var(--bg)}
 /* 가게(파트너) 핀: 각진 상점 모양 + 새 소식 종 */
 .upin.shop .face{border-radius:10px;background:#fff;border:2.5px solid var(--sel);width:44px;height:38px;font-size:10px;font-weight:800;letter-spacing:-.02em}
