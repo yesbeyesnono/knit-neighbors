@@ -5,7 +5,7 @@
 - 수정 후에는 Claude가 직접 **커밋**한다(이 저장소 한정). 커밋 메시지 끝에 Co-Authored-By 줄.
 - **푸시는 묶어서(2026-09-20 대표 확정)**: main 푸시 = KOAP TestFlight 빌드 1회. Apple은 앱당 하루 업로드 횟수를 제한한다(2026-09-19 하루 십수 회 푸시 → `iris-code 90382 Upload limit reached`로 업로드 거절, 24시간 뒤 해제). 그래서 수정마다 푸시하지 말고 **커밋만 해 두고**, 보고 끝에 "푸시는 아직 안 했습니다 — 계속 말씀하시거나 '올려줘' 하세요"라고 알린다. 대표가 **"올려줘"**라고 하거나 작업 묶음이 끝났을 때 한 번만 푸시. 하루 푸시는 몇 번 이내로.
 - 실제 사용자 데이터는 건드리지 않는다. 테스트는 demo1~6@knit.local(비번 knit1234)만 사용하고 테스트 흔적은 지운다.
-- 색상·디자인 큰 변경은 대표가 목업으로 확정한 뒤에만. (2026-09-17 가을·올리브 팔레트 시도 → "눈이 아프다"로 전부 되돌림. 2026-09-19 종이·캔버스 질감+가을색 시안 4차례 → "너무 과하다"로 폐기. 현재: 흑백 Threads 톤에서 **검정만 그래파이트 회색 `--ink:#3C4043`**(보조 #6A6E73·#9AA0A6)로 바꾼 상태. 색은 CSS 변수 `--ink/--accent/--tink`로만 바꿀 것, Apple 로그인 버튼은 검정 유지)
+- 색상·디자인 큰 변경은 대표가 목업으로 확정한 뒤에만. (2026-09-17 가을·올리브 팔레트 → "눈이 아프다"로 되돌림. 2026-09-19 종이·캔버스 질감 → "너무 과하다"로 폐기.) **현재(2026-09-26 대표 확정, 피스타치오)**: 바탕 흰색, 글자는 그래파이트 `--ink:#3C4043` 유지, 메인 버튼 `--btn:#BFCF90`(글자 `--btn-ink:#3F4F22`), 강조 `--acc:#9AAE62`, 칩 `--chip:#EDF2DD`, 선택 상태·하단 탭 `--sel/--olive:#3F4F22`, 선 `--line:#E4E6D9`. 색은 이 CSS 변수로만 바꿀 것. Apple 로그인 버튼은 검정 유지. **되돌리기**: 웹 주소 뒤 `?theme=graphite`(브라우저에 기억, `?theme=pistachio`로 복귀) 또는 태그 `design-before-pistachio`로 git revert. 시안 원본: 대표 Mozi 캡처 + 스크래치 `mock/`(저장소 밖). 도구: Superdesign은 계정·크레딧 문제로 안 씀 — 시안은 Claude가 HTML로 그려 headless Chrome(창 780×1688 + body zoom 2, 최소 창폭 때문)으로 PNG 렌더
 - **플랫폼 우선순위(2026-09-18 대표 지시)**: 지금은 아이폰(iOS·TestFlight) 위주로 진행. Android 빌드·Play 업로드는 iOS가 어느 정도 다듬어진 뒤 한 번에 진행 — 그 전에는 Android 빌드/업로드를 제안하거나 실행하지 않는다.
 - 패치는 파이썬 스크립트를 **파일로 저장해 실행**(Bash heredoc은 역슬래시·따옴표가 깨짐).
 
@@ -32,6 +32,7 @@
 - 검증용 스테이징: `knitup/docs/knit.html`(+admin.html, icons/, kr-provinces.json) 복사 후 knitup 폴더의 launch.json `knitup-static`(127.0.0.1:8765)로 확인. Google Maps 키가 이 주소를 허용함. knitup 폴더에서는 git 명령 금지.
 
 ## 작업지시서 2026-09-20 (`resources/mockups/` — 시안 13장, 앱에 포함하지 말 것)
+- **디자인 개편(2026-09-26 대표 확정, 팔레트·온보딩·탭·모임 폼 각각 별도 커밋 — 부분 되돌리기 가능)**: ① 온보딩 4단계 `#v-onboard .obs[data-s]`(`openOnboard(edit, step)`, `obShow`, `obGo`): 프로필 사진(`pickAvatar` → 버킷 avatars) → 동네 카드(`renderDong`) → 닉네임·경력·시간·소개·MBTI·약관(여기서 `saveProfile()` 저장) → 준비됐어요(`renderObReady`: 지도 핀 공개 스위치 = is_visible, **내 뜨개 단계 필수** — `obSkills()` → 슬라이드 → 기법 체크 → `obReturn`으로 4단계 복귀, skills 있어야 시작하기). 프로필 편집은 `#v-onboard.edit`로 한 장. 알림 스위치는 푸시가 없어 뺌 ② 탭 `.subtabs` 알약형 균등(커뮤니티·마이·프로필) ③ 모임 만들기: 대표 사진 `#mHero`, 카드 입력, 나머지는 칩(`renderMeetChips`) → `openMeetOpt(k)`가 `#mHold`의 입력 블록을 시트로 옮겼다가 `restoreMeetOpt()`로 되돌림(id·이벤트 유지 — openSheet/closeSheet가 호출)
 - Phase 1(완료): ＋ → 선택 팝업(`openPlusSheet`) · 작품 인증 새 페이지 `v-cert`(`openCert`/`submitCert`, 필수 3가지: 사진·이름·기법, 작품 종류는 칩·선택) · 모임 만들기 새 페이지 `v-meetform`(`openMeetForm`/`submitMeet`) · 보조 화면 `#subpg`(`openSub`: 기법 고르기·실 고르기·색/사용량·장소 검색) · 채팅 목록/방의 모임 표식과 [모임 정보] 시트. `v-compose`는 글·모임 후기·가게 소식 전용. `openCompose('work'|'meetup')`은 새 페이지로 넘김. 채팅방에서 모임 만들기는 삭제(대표 확정)
 - 실 입력: `<datalist>` 금지(iOS WebView 불안정) → `openYarnPick`(yarn_suggest 직접 그린 목록 · 최근 쓴 실 · 이웃이 많이 쓴 실 · 직접 입력) → `ydOpen`(색상칩 5열 = 색 계열 대표색 `FAMHEX`, 사용량 0.5볼/10g 단위 + 직접 입력). 저장 형식은 그대로(works.yarns, amount 는 numeric)
 - 장소 검색: `openPlaceSearch(k)` 입력 즉시(300ms) → `geocodePlace()`(Google 지오코더 → OSM). 현재 위치에서 찾기·지도에서 핀 찍기. **카카오(검색·지도)는 반영하지 않는다(2026-09-20 대표 지시)** — 작업지시서의 카카오 로컬 검색·`KAKAO_REST_KEY`는 폐기. 모임 위치 수정도 같은 검색. **권장 단계는 시안의 'Lv.' 대신 기존 'N단계' 표기 유지**(Lv.는 활동 레벨이라 헷갈림)
