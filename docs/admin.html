@@ -504,16 +504,18 @@ VIEWS.shops = async()=>{
   const {data:claims}=await sb.from('shop_claims').select('*, who:profiles!shop_claims_profile_id_fkey(nickname), shop:shops(name)').order('created_at',{ascending:false}).limit(100);
   const pend=(claims||[]).filter(c=>c.status==='pending'), done=(claims||[]).filter(c=>c.status!=='pending');
   $('#main').innerHTML=`<h1>가게 등록 신청 <small>대기 ${pend.length}건</small></h1>
-  <table><tr><th>신청일</th><th>상호</th><th>종류</th><th>주소·연락처</th><th>사업자번호</th><th>신청 계정</th><th>메모</th><th></th></tr>
-  ${pend.map(c=>`<tr><td class="muted">${fmt(c.created_at)}</td><td><b>${esc(c.name)}</b>${c.shop?'<br><span class="chip">기존 가게 오너 신청</span>':''}</td><td>${SHOP_KIND[c.kind]||c.kind}</td><td class="muted">${esc(c.address||'')}<br>${esc(c.phone||'')}</td><td>${esc(c.biz_no||'')}</td><td>${esc(c.who?.nickname||'')}</td><td class="muted">${esc(c.note||'')}</td><td>${c.doc_path?`<button onclick="showClaimDoc('${esc(c.doc_path)}')">서류</button> `:''}<button class="p" onclick="decideClaim('${c.id}',true,'${esc(c.doc_path||'')}')">승인</button> <button onclick="decideClaim('${c.id}',false,'${esc(c.doc_path||'')}')">반려</button></td></tr>`).join('')||'<tr><td colspan="8" class="muted">대기 중인 신청이 없어요</td></tr>'}</table>
-  ${done.length?`<p class="muted">처리됨: ${done.slice(0,10).map(c=>`${esc(c.name)} ${c.status==='approved'?'승인':'반려'}`).join(' · ')}</p>`:''}
-  <p class="muted">승인하면 가게가 '숨김' 상태로 만들어지고(기존 가게면 오너만 연결) 서류 사진은 삭제돼요. 이어서 열리는 수정 창에서 좌표를 찾고 '앱에 공개'를 켜 주세요.</p>
+  <table><tr><th>신청일</th><th>상호</th><th>종류</th><th>주소·연락처</th><th>사업자번호</th><th>신청 계정·이메일</th><th>링크·메모</th><th>AI 확인</th><th></th></tr>
+  ${pend.map(c=>`<tr><td class="muted">${fmt(c.created_at)}</td><td><b>${esc(c.name)}</b>${c.shop?'<br><span class="chip">기존 가게 오너 신청</span>':''}</td><td>${SHOP_KIND[c.kind]||c.kind}</td><td class="muted">${esc(c.address||'')} ${c.lat?'<span class="chip g">좌표</span>':'<span class="chip r">좌표 없음</span>'}<br>${esc(c.phone||'')}</td><td>${esc(c.biz_no||'')}</td><td>${esc(c.who?.nickname||'')}<br><span class="muted">${esc(c.email||'이메일 없음')}</span></td><td class="muted">${Object.entries(c.links||{}).map(([k,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${k}</a>`).join(' · ')}${c.note?'<br>'+esc(c.note):''}</td><td>${claimAi(c)}</td><td>${c.doc_path?`<button onclick="showClaimDoc('${esc(c.doc_path)}')">서류</button> `:''}<button class="p" onclick="decideClaim('${c.id}',true,'${esc(c.doc_path||'')}')">승인</button> <button onclick="decideClaim('${c.id}',false,'${esc(c.doc_path||'')}')">반려</button></td></tr>`).join('')||'<tr><td colspan="9" class="muted">대기 중인 신청이 없어요</td></tr>'}</table>
+  ${done.length?`<p class="muted">처리됨: ${done.slice(0,10).map(c=>`${esc(c.name)} ${c.status==='approved'?'승인':'반려'}${c.decided_by==='e120eb67-b254-4008-92d8-08c95c821e9e'&&c.status==='approved'?'(AI)':''}`).join(' · ')}</p>`:''}
+  <p class="muted">신청이 들어오면 지기 AI가 사업자등록증을 읽어 사업자번호·상호·주소가 신청 내용과 맞는지 확인해요. 셋 다 맞으면 자동 승인(좌표가 있으면 바로 공개), 아니면 여기와 텔레그램에 확인 요청이 와요. 승인 뒤 오너가 앱의 '내 가게 관리'에서 사진·소개·링크·주소를 직접 고쳐요. 서류 사진은 처리 뒤 삭제돼요.</p>
   <h1>파트너 가게 <small>공방·실 판매소 등이 소식을 올리는 계정</small></h1>
   <div class="row"><button class="p" onclick="openShopForm()">가게 추가</button></div>
   <table><tr><th>가게</th><th>종류</th><th>주소</th><th>오너 계정</th><th>소식</th><th>팔로워</th><th>상태</th></tr>
   ${(shops||[]).map(x=>`<tr class="clk" onclick="openShopForm('${x.id}')"><td><b>${esc(x.name)}</b></td><td>${SHOP_KIND[x.kind]||x.kind}</td><td class="muted">${esc(x.address||'')}${x.location?'':' <span class="chip r">좌표 없음</span>'}</td><td>${x.owner?esc(x.owner.nickname):'<span class="muted">미지정</span>'}</td><td>${(x.shop_posts||[]).length}</td><td>${(x.shop_follows||[]).length}</td><td>${x.is_active?'<span class="chip g">공개</span>':'<span class="chip">숨김</span>'}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">없음</td></tr>'}</table>
   <p class="muted">오너 계정을 지정하면 그 계정의 앱 ＋ 버튼에 "가게 소식" 탭이 생겨 직접 올릴 수 있어요. 오너 없이도 여기서 대신 올릴 수 있습니다.</p>`;
 };
+const CL_AI={match:'일치',mismatch:'불일치',unreadable:'판독 실패',skipped:'AI 없음'};
+function claimAi(c){ if(!c.ai_status) return '<span class="muted">확인 전</span>'; const k=c.ai_check?.checks||{}; const ai=c.ai_check?.ai||{}; return `<span class="chip ${c.ai_status==='match'?'g':c.ai_status==='mismatch'?'r':''}">${CL_AI[c.ai_status]}</span>${c.ai_status==='match'||c.ai_status==='mismatch'?`<div class="muted" style="font-size:12px">${[['biz_no','사업자번호'],['name','상호'],['address','주소']].map(([f,l])=>`${k[f]?'✓':'✗'} ${l}`).join(' · ')}<br>서류: ${esc(ai.name||'-')} / ${esc(ai.biz_no||'-')} / ${esc((ai.address||'-').slice(0,40))}</div>`:''}`; }
 async function openShopForm(id){
   let x={kind:'yarn',links:{},radius_m:5000,is_active:true}; let posts=[];
   if(id){ const r=await sb.from('shops').select('*, owner:profiles!shops_owner_id_fkey(nickname)').eq('id',id).single(); x=r.data||x; if(x.location){ const c=parseGeo(x.location); if(c){ x.lat=c.lat; x.lng=c.lng; } } const pr=await sb.from('shop_posts').select('*').eq('shop_id',id).order('created_at',{ascending:false}); posts=pr.data||[]; }
@@ -569,7 +571,7 @@ async function decideAuthor(id, ok){ let reason=null; if(!ok){ reason=prompt('�
 async function setAuthor(id, on){ if(!confirm(on?'작가로 지정할까요?':'작가 자격을 해제할까요? 등록한 도안은 남아 있어요(필요하면 도안 메뉴에서 숨김).')) return; const {error}=await sb.rpc('admin_set_author',{p_profile:id,p_on:on}); if(error) return toast(error.message); toast('처리했어요'); route(); }
 // ===== 지기 AI (작업지시서 Phase 3): 오늘 · 건별 처리 · 규칙 · 기록 · 기법 후보 · 욕설 사전 =====
 // 텔레그램과 같은 mod_items·같은 도구(jigi_tool)를 쓴다. 콘솔에서의 클릭 = 대표 승인(admin_jigi_tool).
-const MK={abuse:'비방·욕설',spam:'광고 의심',scam:'사기 의심',app_complaint:'앱 불만',risk:'위험',report:'신고',tech_candidate:'기법 후보',yarn_review:'실 이름 검토',support:'문의',other:'기타'}, MSEV={urgent:'긴급',today:'오늘',info:'참고'};
+const MK={abuse:'비방·욕설',spam:'광고 의심',scam:'사기 의심',app_complaint:'앱 불만',risk:'위험',report:'신고',tech_candidate:'기법 후보',yarn_review:'실 이름 검토',support:'문의',shop_claim:'가게 신청',other:'기타'}, MSEV={urgent:'긴급',today:'오늘',info:'참고'};
 const jigi=async(route,body={})=>{ const {data,error}=await sb.functions.invoke('jigi',{body:{route,...body}}); if(error) throw new Error(error.message); return data; };
 const jtool=async(name,args)=>{ const {data,error}=await sb.rpc('admin_jigi_tool',{p_name:name,p_args:args}); if(error) throw new Error(error.message); if(data?.error) throw new Error(data.error); return data; };
 async function jsteps(item, steps){ for(const [i,s] of steps.entries()) await jtool(s[0], {...s[1], item_id:item.id, resolve:i===steps.length-1 && s[0]!=='dismiss_item'}); }
@@ -583,6 +585,7 @@ function modButtons(it){
   else if(it.kind==='tech_candidate'){ b.push(['후보 보기','tech','p']); b.push(['나중에','seen','']); }
   else if(it.kind==='yarn_review'){ b.push(['실 사전 열기','yarn','p']); b.push(['확인함','seen','']); }
   else if(it.kind==='support'){ b.push(['문의함에서 답변','support','p']); }
+  else if(it.kind==='shop_claim'){ b.push(['가게 신청 처리','shops','p']); b.push(['확인함','seen','']); }
   else b.push(['확인함','seen','']);
   return b.map(([l,a,c])=>`<button class="${c}" onclick="modAct(${it.id},'${a}')">${l}</button>`).join(' ')+` <button onclick="openModItem(${it.id})">자세히</button>`;
 }
@@ -600,6 +603,7 @@ async function modAct(id, act){
     else if(act==='tech'){ location.hash='#techcand'; return; }
     else if(act==='yarn'){ location.hash='#yarns'; return; }
     else if(act==='support'){ location.hash='#support:'+(it.evidence?.ticket_id||it.target_id); return; }
+    else if(act==='shops'){ location.hash='#shops'; return; }
     toast('처리했어요 · 기록에서 되돌릴 수 있어요'); closePanel(); if(location.hash.startsWith('#today')||!location.hash) VIEWS.today(); refreshBadges&&refreshBadges();
   }catch(e){ toast('실패: '+e.message); }
 }
@@ -609,16 +613,23 @@ function modCard(it,i){
     ${it.ai_suggestion?.reason?`<div style="font-size:13px;margin:6px 0"><b>AI 제안</b> · ${esc(it.ai_suggestion.reason)}${it.ai_suggestion.action?` → ${esc(it.ai_suggestion.action)}`:''}</div>`:''}<div class="row" style="flex-wrap:wrap">${modButtons(it)}</div></div>`;
 }
 VIEWS.today = async(arg)=>{
-  const [{data:items},{data:brs},{count:autoN}] = await Promise.all([
+  const [{data:items},{data:brs},{count:autoN},{count:qShop},{count:qAuthor},{count:qFb},{count:qTk},{count:qEvt}] = await Promise.all([
     sb.from('mod_items').select('*').eq('status','open').order('created_at'),
     sb.from('ai_briefings').select('*').order('date',{ascending:false}).limit(1),
-    sb.from('mod_items').select('id',{count:'exact',head:true}).eq('status','auto_done').gte('created_at', new Date(Date.now()-3*864e5).toISOString()) ]);
+    sb.from('mod_items').select('id',{count:'exact',head:true}).eq('status','auto_done').gte('created_at', new Date(Date.now()-3*864e5).toISOString()),
+    sb.from('shop_claims').select('id',{count:'exact',head:true}).eq('status','pending'),
+    sb.from('author_applications').select('id',{count:'exact',head:true}).eq('status','pending'),
+    sb.from('feedback_reports').select('id',{count:'exact',head:true}).eq('status','open'),
+    sb.from('support_tickets').select('id',{count:'exact',head:true}).in('status',['open','waiting_admin']),
+    sb.from('event_applications').select('id',{count:'exact',head:true}).eq('status','applied') ]);
+  const queue=[['가게 등록 신청',qShop,'#shops'],['작가 신청',qAuthor,'#authors'],['버그 제보·제안',qFb,'#supporters'],['지기 문의(답변 대기)',qTk,'#support'],['이벤트 신청(선정 대기)',qEvt,'#events']].filter(x=>x[1]>0);
   const ord={urgent:0,today:1,info:2}; MOD_ITEMS=(items||[]).sort((a,b)=>ord[a.severity]-ord[b.severity]||new Date(a.created_at)-new Date(b.created_at));
   const br=brs?.[0]; const c=s=>MOD_ITEMS.filter(x=>x.severity===s).length;
   $('#main').innerHTML=`<h1>오늘 <small>${new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'})} · 지기 AI</small></h1>
   <div class="card" style="margin-bottom:12px"><b style="font-size:1.1rem">오늘 처리할 일 ${MOD_ITEMS.length}건</b>
     <div class="muted" style="margin:4px 0">${br?esc(`${br.date} 브리핑 — 어제 새 글 ${br.body?.stats?.posts??0}개·답글 ${br.body?.stats?.replies??0}개·가입 ${br.body?.stats?.signups??0}명·인증 ${br.body?.stats?.works??0}개${(br.body?.notable||[]).length?' · 특이: '+br.body.notable.join(', '):''}`):'아직 브리핑이 없어요 (매일 오전 8시)'}</div>
     <div><span class="chip r">긴급 ${c('urgent')}</span> <span class="chip g">오늘 ${c('today')}</span> <span class="chip">참고 ${c('info')}</span> <span class="chip">자동 처리 ${autoN||0}</span> <span id="jigiStatus" class="muted"></span></div></div>
+  ${queue.length?`<div class="card" style="margin-bottom:12px"><b>기다리는 신청·문의</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${queue.map(([l,n,h])=>`<a href="${h}" class="chip g" style="text-decoration:none">${l} ${n}건 ›</a>`).join('')}</div></div>`:''}
   ${MOD_ITEMS.map(modCard).join('')||'<div class="card muted">이상 없음 — 처리할 일이 없어요.</div>'}
   <p><a href="#modlog">AI가 자동 처리한 ${autoN||0}건 보기 (되돌리기 가능) ›</a></p>
   <div class="card"><b>지기 AI에게 묻기</b><div id="jChat-today" style="margin:8px 0;max-height:320px;overflow:auto"></div><div class="row"><input id="jIn-today" placeholder="예: 이번 주 불만 요약해 줘 · 1번 제안대로 해 · 규칙 보여 줘" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing)jigiAsk('today')"><button class="p" onclick="jigiAsk('today')">보내기</button><button onclick="jigiRun('scan')">지금 검사</button><button onclick="jigiRun('brief')">브리핑 다시 만들기</button></div></div>`;

@@ -396,7 +396,8 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .upin .bell svg{width:14px;height:14px;stroke:var(--ink);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 @keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(18deg)}30%{transform:rotate(-14deg)}45%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(0)}}
 /* 가게 페이지 */
-.shophead{padding:14px 16px 6px}
+.shophead{padding:14px 16px 6px;display:flex;align-items:center;gap:12px}.shophead .logo{width:58px;height:58px;border-radius:16px;object-fit:cover;flex:none;border:1px solid var(--line)}
+.selogo{width:84px;height:84px;border-radius:20px;background:var(--bg2) center/cover no-repeat;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink3);font-size:.78rem}
 .shophead h2{margin:0;font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
 .shophead .kind{display:inline-block;font-size:.72rem;background:var(--sel);color:#fff;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:3px}
 .shopinfo{padding:4px 16px 10px;color:var(--ink2);font-size:.92rem;line-height:1.55}
@@ -1523,9 +1524,10 @@ async function openShop(id){
   const c = sh.location ? parseGeo(sh.location) : null;
   $('#shopTitle').textContent = sh.name;
   $('#shopBody').innerHTML = `
-    <div class="shophead"><h2>${esc(sh.name)}<span class="kind">${SHOP_KIND[sh.kind]||'가게'}</span></h2></div>
+    <div class="shophead">${sh.logo_url?`<img class="logo" src="${esc(sh.logo_url)}" alt="">`:''}<h2>${esc(sh.name)}<span class="kind">${SHOP_KIND[sh.kind]||'가게'}</span></h2></div>
     <div class="shopinfo">${sh.descr?esc(sh.descr)+'<br>':''}${sh.address?ico('location')+' '+esc(sh.address)+'<br>':''}${sh.hours?'⏰ '+esc(sh.hours)+'<br>':''}${sh.phone?'☎ '+esc(sh.phone):''}</div>
-    <div class="shoplinks"><button class="${following?'on':''}" onclick="toggleFollowShop('${sh.id}',${!following})">${following?'팔로우 중':'팔로우'}</button>${L}${c?`<a href="https://map.kakao.com/link/map/${encodeURIComponent(sh.name)},${c.lat},${c.lng}" target="_blank" rel="noopener">길찾기</a>`:''}${mine?`<button onclick="openCompose('shop')">소식 올리기</button>`:''}</div>
+    <div class="shoplinks"><button class="${following?'on':''}" onclick="toggleFollowShop('${sh.id}',${!following})">${following?'팔로우 중':'팔로우'}</button>${L}${c?`<a href="https://map.kakao.com/link/map/${encodeURIComponent(sh.name)},${c.lat},${c.lng}" target="_blank" rel="noopener">길찾기</a>`:''}${mine?`<button onclick="openCompose('shop')">소식 올리기</button><button onclick="openShopEdit()">가게 관리</button>`:''}</div>
+    ${mine&&!sh.is_active?`<div class="muted" style="padding:0 16px 8px;font-size:.8rem">아직 지도에 공개되기 전이에요. ${sh.location?'지기가 확인하는 중이에요.':'가게 관리에서 주소를 검색해 위치를 정하면 공개할 수 있어요.'}</div>`:''}
     ${!sh.owner_id&&!myShop?`<div class="muted" style="padding:0 16px 8px;font-size:.8rem">이 가게 사장님이신가요? <a href="#" onclick="openShopClaim('${sh.id}', curShop.name);return false" style="color:inherit;text-decoration:underline">이 가게 주인이에요</a></div>`:''}
     ${(posts||[]).length ? (posts||[]).map(p=>`<div class="spost" id="sp-${p.id}"><span class="k ${p.kind}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`).join('') : '<div class="empty">아직 올라온 소식이 없어요</div>'}
     <div class="muted" style="padding:16px;font-size:.8rem">가게 소식은 가게가 직접 올려요. 뜨개동네는 판매·예약에 관여하지 않아요. 문제가 있으면 설정 › 지기에게 알려 주세요.</div>`;
@@ -1727,39 +1729,100 @@ async function showRecsAfterWork(){
 }
 // ===== 가게 등록 신청 =====
 let claimDoc=null;
+let clRows=[], clPick=null, clTimer=null;
 async function openShopClaim(shopId, shopName){
   const { data:rows } = await sb.from('shop_claims').select('*').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(1);
   const c = (rows||[])[0];
-  if(c && c.status==='pending') return openSheet(`<b>가게 등록 신청</b><p class="muted" style="margin:0">「${esc(c.name)}」 신청을 확인하고 있어요. 보통 1~3일 안에 활동 알림으로 결과를 알려 드려요.</p><button class="btn o" onclick="cancelShopClaim('${c.id}')">신청 취소</button>`);
-  claimDoc=null;
+  if(c && c.status==='pending') return openSheet(`<b>가게 등록 신청</b><p class="muted" style="margin:0">「${esc(c.name)}」 신청을 확인하고 있어요. 지기 AI가 서류를 읽어 신청 내용과 맞으면 바로 승인되고, 아니면 대표가 하루 안에 확인해요. 결과는 활동 알림으로 알려 드려요.</p><button class="btn o" onclick="cancelShopClaim('${c.id}')">신청 취소</button>`);
+  claimDoc=null; clPick=null; clRows=[];
   openSheet(`<b>${shopId?'이 가게 주인이에요':'우리 가게 등록 신청'}</b>
-    <p class="muted" style="margin:0">공방·실가게·뜨개 카페를 지도에 네모 핀으로 올리고 소식을 직접 전할 수 있어요. 지금 로그인한 계정이 가게 관리자가 돼요.${c&&c.status==='rejected'?`<br>지난 신청은 반려됐어요${c.reject_reason?': '+esc(c.reject_reason):''}`:''}</p>
-    <label class="f">상호<input id="clName" maxlength="60" value="${esc(shopName||'')}" ${shopId?'readonly':''} placeholder="예: 포근 뜨개공방"></label>
+    <p class="muted" style="margin:0">공방·실가게·뜨개 카페를 지도에 네모 핀으로 올리고 소식·클래스를 직접 올릴 수 있어요. 지금 로그인한 계정이 가게 관리자가 돼요.${c&&c.status==='rejected'?`<br>지난 신청은 반려됐어요${c.reject_reason?': '+esc(c.reject_reason):''}`:''}</p>
+    <label class="f">상호 <span class="muted">사업자등록증과 같게</span><input id="clName" maxlength="60" value="${esc(shopName||'')}" ${shopId?'readonly':''} placeholder="예: 포근 뜨개공방"></label>
     <label class="f">종류<select id="clKind">${Object.entries(SHOP_KIND).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></label>
-    <label class="f">주소<input id="clAddr" maxlength="200" placeholder="도로명 주소"></label>
+    <label class="f">주소 <span class="muted">입력하면 바로 찾아요</span><input id="clAddr" maxlength="200" placeholder="도로명 주소 (사업자등록증의 소재지)" autocomplete="off" oninput="clAddrInput(this.value)"></label>
+    <div class="plist" id="clAddrList"></div><div class="muted" id="clAddrMsg" style="font-size:.78rem"></div>
+    <label class="f">이메일<input id="clEmail" type="email" maxlength="120" value="${esc(me?.email||'')}" placeholder="처리 결과·확인 연락을 받을 이메일"></label>
     <label class="f">연락처<input id="clPhone" maxlength="30" inputmode="tel" placeholder="가게 전화 또는 담당자 연락처"></label>
     <label class="f">사업자등록번호<input id="clBiz" maxlength="20" inputmode="numeric" placeholder="000-00-00000"></label>
     <label class="f">사업자등록증 사진<input id="clDoc" type="file" accept="image/*" onchange="claimDoc=this.files[0]||null"></label>
-    <textarea id="clNote" maxlength="500" placeholder="전하고 싶은 말 (선택) · 인스타그램·스토어 주소 등"></textarea>
-    <p class="muted" style="margin:0;font-size:.8rem">사업자등록증은 본인 확인에만 쓰고, 운영진만 볼 수 있으며 확인 후 삭제해요.</p>
+    <label class="f">인스타그램 <span class="muted">(선택)</span><input id="clInsta" maxlength="200" inputmode="url" placeholder="https://instagram.com/…"></label>
+    <label class="f">스토어·예약 링크 <span class="muted">(선택)</span><input id="clStore" maxlength="200" inputmode="url" placeholder="스마트스토어·네이버 예약 등"></label>
+    <label class="f">홈페이지 <span class="muted">(선택)</span><input id="clWeb" maxlength="200" inputmode="url" placeholder="https://…"></label>
+    <textarea id="clNote" maxlength="500" placeholder="전하고 싶은 말 (선택)"></textarea>
+    <p class="muted" style="margin:0;font-size:.8rem">사업자등록증은 본인 확인에만 써요. 지기 AI가 상호·사업자번호·주소가 신청 내용과 맞는지 읽어 보고, 맞으면 바로 승인돼요. 서류 사진은 확인 뒤 삭제해요.</p>
     <button class="btn" id="clSend" onclick="sendShopClaim('${shopId||''}')">신청하기</button>`);
 }
+function clAddrInput(v){
+  clearTimeout(clTimer); clPick=null; const m=$('#clAddrMsg'); if(m) m.textContent=''; const q=v.trim();
+  if(q.length<2){ clRows=[]; $('#clAddrList').innerHTML=''; return; }
+  clTimer=setTimeout(async()=>{ let rows=[]; try{ rows=await placeQuery(q); }catch(e){} const el=$('#clAddrList'); if(!el || $('#clAddr')?.value.trim()!==q) return; clRows=rows.slice(0,5);
+    el.innerHTML = clRows.length ? clRows.map((r,i)=>`<button type="button" onclick="clAddrPick(${i})"><div class="pi">${ico('location')}</div><div><b>${esc(r.addr||r.name)}</b></div></button>`).join('') : '<div class="muted" style="padding:6px 0;font-size:.82rem">찾지 못했어요 — 주소를 그대로 적어 주셔도 돼요 (좌표는 지기가 넣어요)</div>'; }, 350);
+}
+function clAddrPick(i){ const r=clRows[i]; if(!r) return; clPick={lat:r.lat,lng:r.lng}; $('#clAddr').value=r.addr||r.name; $('#clAddrList').innerHTML=''; $('#clAddrMsg').textContent='지도 위치까지 정해졌어요 ✓ 승인되면 바로 지도에 보여요'; }
+const urlOk = u => !u || /^https?:\/\/\S+$/i.test(u);
 async function sendShopClaim(shopId){
-  const name=$('#clName').value.trim(), address=$('#clAddr').value.trim(), phone=$('#clPhone').value.trim(), biz=$('#clBiz').value.trim();
+  const name=$('#clName').value.trim(), address=$('#clAddr').value.trim(), phone=$('#clPhone').value.trim(), biz=$('#clBiz').value.trim(), email=$('#clEmail').value.trim();
   if(!name) return toast('상호를 입력해 주세요');
   if(!shopId && !address) return toast('주소를 입력해 주세요');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast('이메일을 확인해 주세요');
   if(!phone) return toast('연락처를 입력해 주세요');
+  if(!biz) return toast('사업자등록번호를 입력해 주세요');
   if(!claimDoc) return toast('사업자등록증 사진을 올려 주세요');
+  const links={}; for(const [k,id] of [['instagram','#clInsta'],['store','#clStore'],['web','#clWeb']]){ const v=$(id).value.trim(); if(!urlOk(v)) return toast('링크는 https:// 로 시작해야 해요'); if(v) links[k]=v; }
   $('#clSend').disabled=true;
   try{
     const blob = await shrinkImage(claimDoc, 2000);
     const path = `${me.id}/${Date.now()}.jpg`;
     const up = await sb.storage.from('shop-docs').upload(path, blob, { contentType:'image/jpeg', upsert:false });
     if(up.error) throw new Error('사진 업로드 실패: '+up.error.message);
-    const { error } = await sb.from('shop_claims').insert({ profile_id: me.id, shop_id: shopId||null, name, kind: $('#clKind').value, address: address||null, phone, biz_no: biz||null, doc_path: path, note: $('#clNote').value.trim()||null });
+    const { error } = await sb.from('shop_claims').insert({ profile_id: me.id, shop_id: shopId||null, name, kind: $('#clKind').value, address: address||null, phone, biz_no: biz, doc_path: path, note: $('#clNote').value.trim()||null, email, links, lat: clPick?.lat??null, lng: clPick?.lng??null });
     if(error){ await sb.storage.from('shop-docs').remove([path]); throw new Error(error.code==='23505'?'이미 확인 중인 신청이 있어요':error.message); }
-    claimDoc=null; closeSheet(); toast('신청했어요. 확인 후 활동 알림으로 알려 드릴게요');
+    claimDoc=null; closeSheet(); toast('신청했어요. 서류가 맞으면 바로 승인되고, 활동 알림으로 알려 드릴게요');
   }catch(e){ toast(e.message); const b=$('#clSend'); if(b) b.disabled=false; }
+}
+// ---- 내 가게 관리(오너): 로고·소개·영업시간·연락처·링크·주소(검색→좌표). 공개 여부·오너는 콘솔/AI 승인만
+let seRows=[], sePick=null, seTimer=null;
+async function openShopEdit(){
+  if(!myShop) return toast('가게 계정만 쓸 수 있어요');
+  const { data:sh } = await sb.from('shops').select('*').eq('id', myShop.id).single(); if(sh) myShop=sh; const x=myShop, L=x.links||{}; sePick=null; seRows=[];
+  openSheet(`<b style="font-size:1.05rem">내 가게 관리</b>
+    <div style="display:flex;align-items:center;gap:14px"><div class="selogo" id="seLogo" style="${x.logo_url?`background-image:url(${esc(x.logo_url)})`:''}">${x.logo_url?'':'로고·대표 사진'}</div><div><button type="button" class="btn o sm" style="width:auto;padding:8px 14px" onclick="$('#seFile').click()">사진 바꾸기</button><input id="seFile" type="file" accept="image/*" hidden onchange="seLogoPick(this.files[0]);this.value=''"><div class="muted" style="font-size:.78rem;margin-top:6px">가게 화면과 지도 카드에 보여요</div></div></div>
+    <label class="f">상호<input id="seName" maxlength="60" value="${esc(x.name||'')}"></label>
+    <label class="f">종류<select id="seKind">${Object.entries(SHOP_KIND).map(([k,l])=>`<option value="${k}" ${x.kind===k?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="f">소개<textarea id="seDescr" maxlength="500" style="min-height:80px" placeholder="어떤 가게인지, 무엇을 파는지, 클래스가 있는지">${esc(x.descr||'')}</textarea></label>
+    <label class="f">주소 <span class="muted">바꾸려면 다시 검색</span><input id="seAddr" maxlength="200" value="${esc(x.address||'')}" autocomplete="off" oninput="seAddrInput(this.value)"></label>
+    <div class="plist" id="seAddrList"></div><div class="muted" id="seAddrMsg" style="font-size:.78rem">${x.location?'지도 위치 있음 ✓':'지도 위치가 아직 없어요 — 주소를 검색해서 골라 주세요'}</div>
+    <label class="f">영업시간<input id="seHours" maxlength="80" value="${esc(x.hours||'')}" placeholder="예: 11:00~19:00, 월 휴무"></label>
+    <label class="f">전화<input id="sePhone" maxlength="30" inputmode="tel" value="${esc(x.phone||'')}"></label>
+    <label class="f">인스타그램<input id="lkI" maxlength="200" inputmode="url" value="${esc(L.instagram||'')}" placeholder="https://instagram.com/…"></label>
+    <label class="f">스토어·예약 링크<input id="lkS" maxlength="200" inputmode="url" value="${esc(L.store||'')}" placeholder="스마트스토어·네이버 예약 등"></label>
+    <label class="f">홈페이지<input id="lkW" maxlength="200" inputmode="url" value="${esc(L.web||'')}"></label>
+    <label class="f">네이버 지도·플레이스<input id="lkN" maxlength="200" inputmode="url" value="${esc(L.naver||'')}"></label>
+    <label class="f">카카오 채널<input id="lkK" maxlength="200" inputmode="url" value="${esc(L.kakao||'')}"></label>
+    <p class="muted" style="margin:0;font-size:.8rem">지도 공개 상태: <b>${x.is_active?'공개':'숨김'}</b>${x.is_active?'':' · 위치가 정해지면 지기가 확인하고 공개해요'}</p>
+    <button class="btn" id="seSave" onclick="saveShopEdit()">저장</button>`);
+}
+function seAddrInput(v){
+  clearTimeout(seTimer); sePick=null; const q=v.trim(); if(q.length<2){ seRows=[]; $('#seAddrList').innerHTML=''; return; }
+  seTimer=setTimeout(async()=>{ let rows=[]; try{ rows=await placeQuery(q); }catch(e){} const el=$('#seAddrList'); if(!el || $('#seAddr')?.value.trim()!==q) return; seRows=rows.slice(0,5);
+    el.innerHTML = seRows.length ? seRows.map((r,i)=>`<button type="button" onclick="seAddrPick(${i})"><div class="pi">${ico('location')}</div><div><b>${esc(r.addr||r.name)}</b></div></button>`).join('') : '<div class="muted" style="padding:6px 0;font-size:.82rem">찾지 못했어요</div>'; }, 350);
+}
+function seAddrPick(i){ const r=seRows[i]; if(!r) return; sePick={lat:r.lat,lng:r.lng}; $('#seAddr').value=r.addr||r.name; $('#seAddrList').innerHTML=''; $('#seAddrMsg').textContent='지도 위치가 새로 정해졌어요 ✓'; }
+async function seLogoPick(file){
+  if(!file || !myShop) return; toast('올리는 중…');
+  try{ const blob=await shrinkImage(file, 800); const path=`${myShop.id}/logo-${Date.now()}.jpg`; const up=await sb.storage.from('shops').upload(path, blob, { contentType:'image/jpeg', upsert:false }); if(up.error) throw new Error(up.error.message);
+    const url=sb.storage.from('shops').getPublicUrl(path).data.publicUrl; const { error }=await sb.from('shops').update({ logo_url:url }).eq('id', myShop.id); if(error) throw new Error(error.message);
+    myShop.logo_url=url; const el=$('#seLogo'); if(el){ el.style.backgroundImage=`url(${url})`; el.textContent=''; } toast('사진을 바꿨어요'); }catch(e){ toast('실패: '+e.message); }
+}
+async function saveShopEdit(){
+  const name=$('#seName').value.trim(); if(!name) return toast('상호를 입력해 주세요');
+  const links={}; for(const [k,id] of [['instagram','#lkI'],['store','#lkS'],['web','#lkW'],['naver','#lkN'],['kakao','#lkK']]){ const v=$(id).value.trim(); if(!urlOk(v)) return toast('링크는 https:// 로 시작해야 해요'); if(v) links[k]=v; }
+  const p={ name, kind:$('#seKind').value, descr:$('#seDescr').value.trim()||null, address:$('#seAddr').value.trim()||null, hours:$('#seHours').value.trim()||null, phone:$('#sePhone').value.trim()||null, links };
+  if(sePick) p.location=`SRID=4326;POINT(${sePick.lng} ${sePick.lat})`;
+  $('#seSave').disabled=true;
+  const { error } = await sb.from('shops').update(p).eq('id', myShop.id);
+  if(error){ $('#seSave').disabled=false; return toast('저장 실패: '+error.message); }
+  await loadMe(); closeSheet(); toast('저장했어요'); if(view==='shop') openShop(myShop.id); if(MapAdapter.ready) loadPins();
 }
 async function cancelShopClaim(id){
   if(!confirm('신청을 취소할까요?')) return;
@@ -3504,10 +3567,12 @@ function openSettings(){
       <button class="srow" onclick="relocateNow()"><span>현위치로 동네 다시 설정<br><span class="muted">지금 ${esc(p.dong_name||'미설정')} · 가입한 위치로 고정돼 있어요</span></span><span class="car">›</span></button>
       <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 200m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
     </div>
-    ${myShop?'':`<div class="sgrp">가게·공방</div>
+    <div class="sgrp">가게·공방</div>
     <div class="slist">
-      <button class="srow" onclick="openShopClaim()"><span>우리 가게 등록 신청<br><span class="muted">공방·실가게·뜨개 카페 사장님이라면</span></span><span class="car">›</span></button>
-    </div>`}
+      ${myShop?`<button class="srow" onclick="closeSheet();openShopEdit()"><span>내 가게 관리<br><span class="muted">${esc(myShop.name)} · 사진·소개·링크·주소${myShop.is_active?'':' · 아직 숨김'}</span></span><span class="car">›</span></button>
+      <button class="srow" onclick="closeSheet();openShop(myShop.id)"><span>내 가게 보기<br><span class="muted">소식·클래스 올리기 · 팔로워</span></span><span class="car">›</span></button>`
+      :`<button class="srow" onclick="openShopClaim()"><span>우리 가게 등록 신청<br><span class="muted">공방·실가게·뜨개 카페 사장님이라면</span></span><span class="car">›</span></button>`}
+    </div>
     <div class="sgrp">도움</div>
     <div class="slist">
       ${supStatus?.supporter?`<button class="srow" onclick="closeSheet();openSupporters()"><span>${ico('party')} 1기 서포터즈 <span class="muted">${supStatus.segment||''}구간 ${supStatus['seg'+(supStatus.segment||1)]||0}점 · 누적 ${supStatus.total||0}</span></span><span class="car">›</span></button>`:''}
