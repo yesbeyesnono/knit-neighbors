@@ -69,7 +69,24 @@ textarea{width:100%;min-height:90px}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#111;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:99}
 #toast.on{opacity:1}
 pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow:auto;white-space:pre-wrap}
-@media(max-width:760px){#app{grid-template-columns:1fr}aside{position:static;height:auto;display:flex;flex-wrap:wrap;gap:2px;padding:8px}aside .brand,aside .grp{width:100%}aside a{padding:6px 10px;border-radius:8px}main{padding:14px}}
+/* 모바일(대표가 폰에서 확인·처리): 상단 바 + 서랍 메뉴, 표는 가로 스크롤, 패널은 전체 폭, 버튼은 손가락 크기 */
+#mtop{display:none;position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;align-items:center;gap:10px}
+#mtop b{font-size:15px;flex:1}#mtop button{width:40px;height:36px;font-size:18px;padding:0}#mtop .n{background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px}
+#drawerScrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:45}
+@media(max-width:760px){
+  #app{grid-template-columns:1fr}#mtop{display:flex}
+  aside{position:fixed;top:0;left:0;bottom:0;width:min(280px,84vw);height:100vh;z-index:46;transform:translateX(-102%);transition:transform .2s;box-shadow:4px 0 24px rgba(0,0,0,.12)}
+  aside.open{transform:none}#drawerScrim.on{display:block}
+  aside a{padding:11px 16px;font-size:14.5px}
+  main{padding:12px 12px 80px}h1{font-size:18px;flex-wrap:wrap}h1 small{width:100%}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}table td,table th{white-space:nowrap}td[style*="pre-wrap"]{white-space:pre-wrap;min-width:220px}
+  .panel{width:100%;padding:16px 14px 40px}.panel .x{top:8px;right:10px}
+  .cards{grid-template-columns:repeat(2,1fr)}.card .v{font-size:19px}
+  button{padding:9px 13px;font-size:13.5px}input,select,textarea{font-size:16px}
+  .row>input,.row>select{flex:1 1 140px;min-width:0}.row>textarea{width:100%}
+  .info{padding:14px}.info .big{font-size:32px}#dongMap{height:360px}
+  .hbar{grid-template-columns:90px 1fr 36px}
+}
 </style></head>
 <body>
 <div id="gate">
@@ -79,6 +96,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
   <div style="margin-top:10px"><button onclick="logout()" id="gateOut" style="display:none">다른 계정으로</button></div>
 </div>
 <div id="app">
+  <div id="mtop"><button type="button" onclick="drawer(true)" aria-label="메뉴">☰</button><b id="mtopTitle">뜨개동네 관리자</b><span class="n" id="nModTop" hidden></span></div>
   <aside>
     <div class="brand">뜨개동네 관리자<small id="who"></small></div>
     <div class="grp">현황</div>
@@ -118,6 +136,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
   <main id="main"></main>
 </div>
 <div id="scrim" onclick="closePanel()"></div>
+<div id="drawerScrim" onclick="drawer(false)"></div>
 <div class="panel" id="panel"><button class="x" onclick="closePanel()">✕</button><div id="panelBody"></div></div>
 <div id="toast"></div>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -155,7 +174,9 @@ async function refreshBadges(){
   const {count:un}=await sb.from('support_tickets').select('id',{count:'exact',head:true}).in('status',['open','waiting_admin']); $('#nSup').hidden=!un; $('#nSup').textContent=un||'';
 }
 const VIEWS={};
-function route(){ const [v,arg]=(location.hash||'#today').slice(1).split(':'); document.querySelectorAll('aside a').forEach(a=>a.classList.toggle('on',a.dataset.v===v)); closePanel(); $('#main').innerHTML='<div class="muted">불러오는 중…</div>'; sb.from('mod_items').select('id',{count:'exact',head:true}).eq('status','open').then(({count})=>{ const n=$('#nMod'); if(n){ n.hidden=!count; n.textContent=count||''; } }); (VIEWS[v]||VIEWS.today)(arg).catch(e=>{ $('#main').innerHTML='<div class="muted">오류: '+esc(e.message)+'</div>'; }); }
+function route(){ const [v,arg]=(location.hash||'#today').slice(1).split(':'); document.querySelectorAll('aside a').forEach(a=>{ a.classList.toggle('on',a.dataset.v===v); if(a.dataset.v===v){ const t=$('#mtopTitle'); if(t) t.textContent=a.textContent.replace(/\s*\d+\s*$/,'').trim(); } }); closePanel(); window.scrollTo(0,0); $('#main').innerHTML='<div class="muted">불러오는 중…</div>'; sb.from('mod_items').select('id',{count:'exact',head:true}).eq('status','open').then(({count})=>{ const n=$('#nMod'); if(n){ n.hidden=!count; n.textContent=count||''; } const n2=$('#nModTop'); if(n2){ n2.hidden=!count; n2.textContent=count?count+'건':''; } }); (VIEWS[v]||VIEWS.today)(arg).catch(e=>{ $('#main').innerHTML='<div class="muted">오류: '+esc(e.message)+'</div>'; }); }
+function drawer(on){ document.querySelector('aside').classList.toggle('open', on); $('#drawerScrim').classList.toggle('on', on); }
+document.addEventListener('click', e=>{ const l=e.target.closest('aside a'); if(l) drawer(false); });
 function openPanel(html){ $('#panelBody').innerHTML=html; $('#panel').classList.add('on'); $('#scrim').classList.add('on'); }
 function closePanel(){ $('#panel').classList.remove('on'); $('#scrim').classList.remove('on'); }
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && $('#panel').classList.contains('on') && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)) closePanel(); else if(e.key==='Escape' && $('#panel').classList.contains('on')){ document.activeElement.blur(); } });

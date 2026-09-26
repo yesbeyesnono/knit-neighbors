@@ -332,8 +332,8 @@ const SUP_SYS = (kb: J[]) => `당신은 뜨개 이웃 앱 '뜨개동네'의 1차
 분류별 꼭 확인할 것: ${kb.filter((k) => k.kind === "check").map((k) => `[${k.q}] ${k.a.replace(/\n/g, ", ")}`).join(" / ") || "(없음)"}
 승인된 FAQ: ${kb.filter((k) => k.kind === "faq").map((k) => `#${k.id} Q: ${k.q} → A: ${k.a}`).join("\n") || "(없음)"}
 분류 목록: ${SUP_CATS.join(", ")}
-반드시 JSON 하나만 출력: {"reply":"회원에게 보낼 말","action":"ask|faq|escalate|note|resolved|reopen|chat|supporters","faq_id":숫자|null,"category":"분류","urgency":"urgent|today|info","summary":"대표가 판단할 수 있게 회원이 겪는 일·원하는 것을 빠짐없이(3~6문장, 요약이 아니라 정확한 전달)","detail":{"screen":"","when":"","symptom":"","device":""},"recommend":{"draft":"escalate/note 일 때: 대표가 그대로 보내도 되는 답변 초안(존댓말, 확정되지 않은 약속은 넣지 않음)","reason":"이 답을 추천하는 이유와 판단 근거","check":"대표가 답하기 전에 확인하면 좋은 것(서버 로그·해당 화면·정책 등). 없으면 빈 문자열"},"confidence":0~1}
-action 뜻: supporters=회원이 "서포터즈 할래요/신청/참여하고 싶어요" 같은 참여 의사를 보일 때(안내 카드는 앱이 띄우므로 reply 는 한 문장 환영 인사만), ask=더 물어봄, faq=FAQ로 직접 답변(faq_id 필수), escalate=파악이 끝나 대표에게 전달, note=이미 전달된 건에 회원이 내용을 덧붙임(함께 전달), resolved/reopen=대표 답변 뒤 회원 반응, chat=인사·잡담이라 티켓 불필요.`;
+반드시 JSON 하나만 출력: {"reply":"회원에게 보낼 말","action":"ask|faq|escalate|note|resolved|reopen|chat|supporters|referral","friend_nickname":"referral 일 때 친구 닉네임(없으면 null)","faq_id":숫자|null,"category":"분류","urgency":"urgent|today|info","summary":"대표가 판단할 수 있게 회원이 겪는 일·원하는 것을 빠짐없이(3~6문장, 요약이 아니라 정확한 전달)","detail":{"screen":"","when":"","symptom":"","device":""},"recommend":{"draft":"escalate/note 일 때: 대표가 그대로 보내도 되는 답변 초안(존댓말, 확정되지 않은 약속은 넣지 않음)","reason":"이 답을 추천하는 이유와 판단 근거","check":"대표가 답하기 전에 확인하면 좋은 것(서버 로그·해당 화면·정책 등). 없으면 빈 문자열"},"confidence":0~1}
+action 뜻: referral=서포터가 "친구 ○○을 초대해서 가입했어요 / 확인해 주세요"처럼 친구 초대 가입을 알릴 때(friend_nickname 에 닉네임을 정확히 옮겨 적고, 닉네임이 없으면 action=ask 로 닉네임을 물음. 확인 결과는 앱이 붙이므로 reply 는 "확인해 볼게요" 정도 한 문장), supporters=회원이 "서포터즈 할래요/신청/참여하고 싶어요" 같은 참여 의사를 보일 때(안내 카드는 앱이 띄우므로 reply 는 한 문장 환영 인사만), ask=더 물어봄, faq=FAQ로 직접 답변(faq_id 필수), escalate=파악이 끝나 대표에게 전달, note=이미 전달된 건에 회원이 내용을 덧붙임(함께 전달), resolved/reopen=대표 답변 뒤 회원 반응, chat=인사·잡담이라 티켓 불필요.`;
 
 async function supportScan() {
   // 지기 채팅방 중 회원 메시지가 새로 온 방
@@ -364,6 +364,20 @@ async function supportScan() {
     let act = String(out.action ?? "ask");
     if (act === "faq") { const f = kb.find((k) => k.kind === "faq" && k.id === +out.faq_id); if (f) { reply = f.a + "\n\n(더 궁금한 점이 있으면 편하게 남겨 주세요.)"; await db.rpc("kb_bump", { p_id: f.id }).catch?.(() => {}); await db.from("support_events").insert({ ticket_id: ticket?.id ?? null, actor: "ai", kind: "faq", body: `#${f.id} ${f.q}` }); } else act = "ask"; }
     if (ticket && ticket.turns >= 3 && act === "ask") act = "escalate";   // 질문은 2~3번까지
+    if (act === "referral") {   // 친구 초대 인정: DB 함수가 가입 여부·조건을 확인하고 점수까지 처리(AI는 닉네임만 읽는다)
+      const nick = String(out.friend_nickname ?? "").trim();
+      const { data: r, error } = member && nick ? await db.rpc("claim_referral", { p_inviter: member, p_nickname: nick }) : { data: null, error: null };
+      const E: J = { NOT_SUPPORTER: "친구 초대 점수는 1기 서포터만 받을 수 있어요. 마이 › 설정 › 1기 서포터즈에서 신청할 수 있어요.", NO_NICKNAME: "가입한 친구의 닉네임을 정확히 알려 주세요.", NOT_FOUND: `'${nick}' 닉네임을 찾지 못했어요. 친구 프로필에 보이는 닉네임을 그대로 알려 주세요.`, AMBIGUOUS: `'${nick}' 닉네임을 쓰는 회원이 여러 명이에요. 친구에게 프로필 편집에서 닉네임을 조금 바꾸게 한 뒤 다시 알려 주세요.`, SELF: "본인 닉네임은 초대로 인정되지 않아요.", ALREADY_MINE: `'${nick}'님은 이미 회원님의 초대로 기록돼 있어요.`, ALREADY: `'${nick}'님은 이미 다른 분의 초대로 기록돼 있어서 중복으로 인정할 수 없어요.`, NOT_NEW: `'${nick}'님은 회원님이 서포터를 시작하기 전에 가입한 회원이라 초대로 인정되지 않아요.` };
+      let text: string;
+      if (!nick) text = E.NO_NICKNAME;
+      else if (error || !r) text = "확인 중에 문제가 생겼어요. 잠시 뒤 다시 말씀해 주시거나 대표님께 전달드릴게요.";
+      else if (r.error) text = E[r.error] ?? "확인하지 못했어요.";
+      else if (r.status === "confirmed") text = `확인했어요! '${r.invitee}'님이 회원님 초대로 가입한 것으로 기록했고, 친구 초대 ${r.points || 20}점이 적립됐어요. 고마워요.`;
+      else text = `'${r.invitee}'님 가입을 확인해 초대로 기록했어요. ${r.onboarded ? "친구가 다음 날 다시 앱에 들어오면" : "친구가 프로필을 완성하고 다음 날 다시 앱에 들어오면"} 20점이 자동으로 적립돼요.`;
+      await sendSup(roomId, text, true);
+      if (r?.ok) await createItem({ kind: "other", severity: "info", target_type: "user", target_id: member, author_id: member, summary: `친구 초대 인정(채팅): ${pr?.nickname ?? "서포터"} → ${r.invitee} (${r.status === "confirmed" ? "즉시 20점" : "다음 날 확정"})`, evidence: { invitee: r.invitee, status: r.status }, status: "auto_done", auto_action: "claim_referral", resolved_at: new Date().toISOString(), resolved_by: "ai" });
+      handled++; continue;
+    }
     if (act === "supporters") {   // 서포터즈 안내 카드: 등록은 카드 버튼 → join_supporters() (AI는 의도 인식만)
       const { data: st } = await db.rpc("supporter_stats"); const open = !!st?.is_open && (st?.joined ?? 0) < (st?.capacity ?? 100);
       const { data: mine } = member ? await db.from("supporters").select("id").eq("user_id", member).eq("status", "active").limit(1) : { data: [] };

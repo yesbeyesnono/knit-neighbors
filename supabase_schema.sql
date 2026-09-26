@@ -1185,3 +1185,9 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     양식 근거: 솜씨당·탈잉·프립·네이버 예약 등록 항목 조사(2026-09-26) — 환불 규정 사전 표시, 재료비 금액 별도 표기, 최소 인원 미달 시 전액 환불 문구 자동
 --   mod_items kind 'shop_claim' / target_type 'shop_claim' 추가. 콘솔 오늘: '기다리는 신청·문의'(가게·작가·제보·문의·이벤트) 묶음 표시
 -- ---------------------------------------------------------------
+
+-- 50. 서포터 친구 초대 채팅 인정 · 60일 종료 메시지 (마이그레이션 supporter_referral_claim_end_message, 2026-09-26 대표 지시: 카톡 링크로는 구글/애플 로그인이 어려워 링크 없이도 인정)
+--   claim_referral(p_inviter, p_nickname) service_role 전용: 지기 채팅 "친구 ○○ 초대해서 가입했어요" → jigi support action 'referral' 이 호출. 활동 서포터·닉네임 1명·본인 아님·추천인 없음·서포터 시작 3일 전 이후 가입
+--     → referred_by + referrals(manual, pending). 친구가 프로필 완성 + 가입 다음 날 이후 로그인(auth.users.last_sign_in_at)했으면 즉시 confirmed + 20점, 아니면 기존 check_in 확정. 인정 건은 mod_items auto_done 기록
+--   finalize_supporters(): 종료 알림을 등급별(미달/기본/우수)로 — 점수·보상·배송지 안내(대표가 지기 채팅으로 문의)·"점수는 기록으로 남고 더 쌓이지 않음" · MVP 확정 시 별도 알림. 보상은 1회(잡지 정기 발송 없음)
+-- ---------------------------------------------------------------

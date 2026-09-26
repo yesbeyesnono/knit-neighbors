@@ -2114,7 +2114,7 @@ function renderBeta(){
 }
 const SUP_INTRO = `<div class="supcard"><b style="font-size:1.1rem">뜨개동네 1기 서포터즈</b>
   <p class="muted" style="margin:6px 0 0">오늘부터 60일 동안 함께 앱을 키워 주세요. 30일씩 두 구간이고, 구간마다 100점이 목표예요.</p>
-  <div class="suprule"><b>점수 모으기</b><ul><li>출석 1점 (하루 1번)</li><li>작품 인증 10점 (하루 1개)</li><li>글 3점 (하루 1개) · 댓글 1점 (하루 2개, 내 글 댓글은 제외)</li><li>격주 설문 10점 (60일 동안 4회)</li><li>버그 제보 채택 10점 · 친구 초대 20점 (제한 없음)</li></ul></div>
+  <div class="suprule"><b>점수 모으기</b><ul><li>출석 1점 (하루 1번)</li><li>작품 인증 10점 (하루 1개)</li><li>글 3점 (하루 1개) · 댓글 1점 (하루 2개, 내 글 댓글은 제외)</li><li>격주 설문 10점 (60일 동안 4회)</li><li>버그 제보 채택 10점 · 친구 초대 20점 (제한 없음 — 친구가 가입하면 지기에게 닉네임을 알려 주세요)</li></ul></div>
   <div class="suprule"><b>보상 (60일 뒤)</b><ul><li>기본: 두 구간 모두 100점 → 1기 서포터 뱃지 + 니트업 매거진</li><li>우수: 기본 + 누적 300점 → 레벨업 쿠션 추가</li><li>MVP: 우수 중 상위 5명 → 실 키트 추가</li></ul></div></div>`;
 async function openSupporterIntro(){
   if(!me || !myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
@@ -2148,12 +2148,13 @@ async function openSupporters(){
     ${bar('1구간 (1~30일)', s1, seg===1, s.seg_days_left)}${bar('2구간 (31~60일)', s2, seg===2, s.seg_days_left)}
     <p class="muted" style="margin:6px 0 0;font-size:.82rem">오늘 한도: ${left('attendance',1)} · ${left('post',3)} · ${left('comment',2)} · ${left('work_verified',10)} · 지금 기준 예상 등급 <b>${SUP_TIER[s.expected_tier]||''}</b></p>
     <div class="supacts"><button class="btn" onclick="supInvite()">${ico('handshake')} 친구 초대하기</button><button class="btn o" onclick="openBugReport()">${ico('report')} 버그 제보 · 제안</button><button class="btn o" onclick="openSurvey()">${ico('review')} 이번 회차 설문</button><button class="btn o" onclick="supRoom()">${ico('group')} 서포터 채팅방</button></div>
-    <div class="card soft" style="font-size:.85rem"><b>친구 초대 안내</b><ol style="margin:6px 0 0;padding-left:18px"><li>[친구 초대하기]로 카카오톡 링크를 보내 주세요.</li><li>친구가 링크로 가입하면 자동으로 연결돼요.</li><li>링크 없이 가입했다면 추천인 칸에 <b>${esc(myProfile?.nickname||'')}</b>을 적어 달라고 해 주세요.</li><li>친구가 프로필을 완성하고 다음 날 다시 들어오면 20점이 적립돼요!</li></ol><div class="muted" style="margin-top:6px">내 초대 코드: <b>${esc(s.ref_code||'')}</b></div></div>
+    <div class="card soft" style="font-size:.85rem"><b>친구 초대 안내 (20점, 제한 없음)</b><ol style="margin:6px 0 0;padding-left:18px"><li>친구에게 앱을 소개하고 가입하게 해 주세요. 링크는 보내도 되고 안 보내도 돼요 — 카톡 링크로는 로그인이 잘 안 될 수 있으니 <b>앱스토어에서 '뜨개동네'를 받아 가입</b>하라고 알려 주세요.</li><li>친구가 가입해 프로필을 만들면, 아래 [지기에게 가입 알리기]로 친구 닉네임을 알려 주세요. 지기 AI가 가입을 확인해요.</li><li>친구가 다음 날 다시 앱에 들어오면 20점이 적립돼요. (이미 들어왔다면 바로 적립)</li></ol><button class="btn o" style="margin-top:8px" onclick="supTellReferral()">${ico('yarn')} 지기에게 가입 알리기</button><div class="muted" style="margin-top:6px">링크로 가입하거나 추천인 칸에 <b>${esc(myProfile?.nickname||'')}</b>을 적어도 연결돼요 · 내 초대 코드 <b>${esc(s.ref_code||'')}</b></div></div>
     <h3 class="suph">최근 적립</h3><div class="suplist">${(s.recent||[]).map(e=>`<div><span>${esc(supKindLabel(e.kind))}</span><b class="${e.points<0?'neg':''}">${e.points>0?'+':''}${e.points}</b><time>${agoShort(e.at)}</time></div>`).join('')||'<div class="muted">아직 적립이 없어요. 오늘 출석부터!</div>'}</div>`;
   show('supporters');
 }
 let supBack='my';
 function closeSupporters(){ go(['my','comm','map','chats'].includes(supBack)?supBack:'my'); }
+function supTellReferral(){ const n=prompt('가입한 친구의 닉네임을 정확히 적어 주세요'); if(!n||!n.trim()) return; const msg=`친구 '${n.trim()}'을(를) 초대해서 가입했어요. 확인해 주세요`; openSupportRoom().then(()=>setTimeout(()=>sendMsg(msg),400)); }
 async function supInvite(){
   const code=supStatus?.ref_code; if(!code) return; const url=`https://yesbeyesnono.github.io/knit-neighbors/?ref=${code}`;
   const text=`뜨개동네에서 같이 떠요! 우리 동네 뜨개 이웃을 찾는 앱이에요. 이 링크로 가입하면 저와 연결돼요 🧶 ${url}`;
@@ -2267,10 +2268,10 @@ function appendMsg(m){
   $('#msgs').appendChild(el);
 }
 function scrollMsgs(){ const v=$('#v-room'); v.scrollTop=v.scrollHeight; }
-async function sendMsg(){
-  const t=$('#msgIn').value.trim(); if(!t||!roomId)return;
+async function sendMsg(txt){   // txt 를 주면 입력창 대신 그 글을 보낸다(서포터즈 신청·친구 초대 알리기)
+  const t=(typeof txt==='string'?txt:$('#msgIn').value).trim(); if(!t||!roomId)return;
   await loadBanned(); if(hasBanned(t)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
-  $('#msgIn').value='';
+  if(typeof txt!=='string') $('#msgIn').value='';
   const { error } = await sb.from('messages').insert({room_id:roomId,sender_id:me.id,body:t});
   if(error){ toast('전송 실패: '+error.message); $('#msgIn').value=t; }
 }
