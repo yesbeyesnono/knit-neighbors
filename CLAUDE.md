@@ -21,7 +21,7 @@
 
 ## 구조
 - 앱 본체: `docs/index.html` 단일 파일(HTML+CSS+JS). GitHub Pages(main /docs) → https://yesbeyesnono.github.io/knit-neighbors/
-- 관리자 콘솔: `docs/admin.html` → …/knit-neighbors/admin.html (관리자: knitup.official, yesbeyesnono, cocos.jay)
+- 관리자 콘솔: `docs/admin.html` → …/knit-neighbors/admin.html (관리자: knitup.official, yesbeyesnono, cocos.jay). 760px 이하는 모바일 레이아웃(상단 바 ☰ → 서랍 메뉴 `drawer()`, 표 가로 스크롤, 패널 전체 폭)
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
@@ -87,6 +87,7 @@
 - 점수는 **DB 함수·트리거만** 계산(`award_points`, 클라이언트 경로 없음). 규칙·구간·등급·초대 조건은 supabase_schema.sql 47. 대표 결정: 작품 인증은 올린 시점에 10점(승인 단계 없음), 마이그레이션은 운영 DB에 추가만
 - 앱: `supCheckIn()`(로그인 시 출석+초대 확인) · 상단 `#betaBar` · `openSupporterIntro`/`joinSupporters` · `v-supporters`(`openSupporters`) · 초대 링크 `?ref=코드`→localStorage `kn_ref`→가입 저장 뒤 `applyReferrer()` · 온보딩 3단계 `#f_ref` 추천인 닉네임 · 팝업 1회 `maybeSupporterPrompt`(localStorage) · 지기 카드 `messages.card`
 - 지기 AI: action `supporters` → 안내 카드(등록은 버튼 → `join_supporters`) · 텔레그램: 버그 제보 [채택]/[반려](`feedback_decide` 단계) · 브리핑에 `supporter_stats` · 콘솔 › 1기 서포터즈
+- **친구 초대 인정(2026-09-26 대표 지시)**: 카톡 링크로는 구글/애플 로그인이 어려워 링크 없이도 인정 — 서포터가 지기 채팅에 "친구 ○○ 초대해서 가입했어요"(서포터 화면 [지기에게 가입 알리기] 버튼)라고 하면 jigi support action `referral` → `claim_referral()`이 가입·조건 확인 후 referred_by 기록, 친구가 다음 날 재접속했으면 즉시 20점. 60일 종료 알림은 등급별 문구(보상·배송지는 대표가 지기 채팅으로 문의), 점수는 기록만 남고 더 안 쌓임, 보상은 1회(잡지 정기 발송 없음). schema 50
 - 테스트: `supabase/tests/supporters_test.sql` (롤백 블록, demo1~6) · 보고서 docs/supporters_report.md · 조사 docs/supporters_recon.md
 
 ## 실 빅데이터·표준화 (2026-09-20 대표 지시)
