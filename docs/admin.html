@@ -2,55 +2,55 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>뜨개동네 관리자</title>
 <style>
-:root{--ink:#111;--ink2:#444;--ink3:#8a8a8a;--line:#e6e6e6;--bg:#fff;--bg2:#f6f6f6;--red:#c9303f;--green:#2f6b3a;--amber:#8a6d1a}
+:root{--ink:#3C4043;--ink2:#5f6368;--ink3:#8f948a;--line:#E4E6D9;--bg:#fff;--bg2:#F6F7F2;--red:#c9303f;--green:#2f6b3a;--amber:#8a6d1a;--olive:#3F4F22;--acc:#9AAE62;--chip:#EDF2DD;--soft:#FAFBF6}
 *{box-sizing:border-box}html,body{margin:0;height:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:14px;color:var(--ink);background:var(--bg2);word-break:keep-all}
 a{color:inherit}
 #gate{max-width:420px;margin:80px auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;text-align:center}
-#app{display:none;grid-template-columns:200px 1fr;min-height:100vh}
-aside{background:#fff;border-right:1px solid var(--line);padding:14px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
-aside .brand{padding:6px 16px 14px;font-weight:800;font-size:15px}
+#app{display:none;grid-template-columns:224px 1fr;min-height:100vh}
+aside{background:#fff;border-right:1px solid var(--line);padding:14px 0;position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin}
+aside .brand{padding:8px 18px 16px;font-weight:800;font-size:16px;letter-spacing:-.01em}aside .brand::before{content:'';display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--acc);margin-right:8px;vertical-align:1px}
 aside .brand small{display:block;color:var(--ink3);font-weight:400;font-size:11px;margin-top:2px}
-aside .grp{padding:10px 16px 4px;font-size:11px;color:var(--ink3)}
-aside a{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;text-decoration:none;color:var(--ink2);font-size:13.5px}
-aside a.on{background:#111;color:#fff}
+aside .grp{padding:14px 18px 4px;font-size:11px;color:var(--ink3);letter-spacing:.06em}
+aside a{display:flex;align-items:center;justify-content:space-between;margin:1px 10px;padding:8px 10px;border-radius:10px;text-decoration:none;color:var(--ink2);font-size:13.5px}
+aside a:hover{background:var(--soft)}aside a.on{background:var(--olive);color:#fff}
 aside a .n{background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:0 7px;min-width:18px;text-align:center}
-aside a.on .n{background:#fff;color:#111}
-main{padding:22px 26px 60px;min-width:0}
-h1{font-size:20px;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+aside a.on .n{background:#fff;color:var(--olive)}
+main{padding:26px 34px 80px;min-width:0;max-width:1180px}
+h1{font-size:22px;font-weight:800;letter-spacing:-.01em;margin:0 0 16px;display:flex;align-items:center;gap:10px}
 h1 small{font-size:12px;color:var(--ink3);font-weight:400}
 h2{font-size:15px;margin:22px 0 8px}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-.card .l{font-size:12px;color:var(--ink3)}.card .v{font-size:22px;font-weight:700;margin-top:2px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 1px 2px rgba(60,64,67,.04)}
+.card .l{font-size:12px;color:var(--ink3)}.card .v{font-size:24px;font-weight:800;margin-top:2px;letter-spacing:-.01em}
 .card .s{font-size:12px;color:var(--ink2)}
-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:13px}
 th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-th{background:var(--bg2);font-weight:600;color:var(--ink2);font-size:12px}
+th{background:var(--soft);font-weight:600;color:var(--ink2);font-size:12px}
 tr:last-child td{border-bottom:0}
-tr.clk{cursor:pointer}tr.clk:hover td{background:#fafafa}
+tr.clk{cursor:pointer}tr.clk:hover td{background:var(--soft)}
 .muted{color:var(--ink3);font-size:12px}
-.chip{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:#f0f0f0;color:#333;margin-right:4px}
+.chip{display:inline-block;font-size:11px;padding:2px 9px;border-radius:999px;background:var(--chip);color:var(--olive);margin-right:4px}
 .chip.r{background:#fde8ea;color:var(--red)}.chip.g{background:#e8f3e8;color:var(--green)}.chip.y{background:#fbf6e6;color:var(--amber)}
-button{font:inherit;font-size:12.5px;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
-button.p{background:#111;color:#fff;border-color:#111}button.r{color:var(--red);border-color:#f2c9ce}
+button{font:inherit;font-size:12.5px;padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}button:hover{background:var(--soft)}
+button.p{background:var(--olive);color:#fff;border-color:var(--olive)}button.p:hover{background:#31401a}button.r{color:var(--red);border-color:#f2c9ce}
 button:disabled{opacity:.4;cursor:default}
-input,select,textarea{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+input,select,textarea{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(154,174,98,.18)}
 textarea{width:100%;min-height:90px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
-.tabs{display:flex;gap:6px;margin:0 0 12px}.tabs button.on{background:#111;color:#fff;border-color:#111}
+.tabs{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}.tabs button.on{background:var(--olive);color:#fff;border-color:var(--olive)}
 .panel{position:fixed;top:0;right:0;width:min(560px,100%);height:100vh;background:#fff;border-left:1px solid var(--line);box-shadow:-10px 0 30px rgba(0,0,0,.08);padding:20px 22px;overflow-y:auto;display:none;z-index:50}
 .panel.on{display:block}.panel .x{position:fixed;top:12px;right:18px;z-index:60;width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 #scrim{position:fixed;inset:0;background:rgba(0,0,0,.12);z-index:49;display:none}#scrim.on{display:block}
 .ph{display:flex;gap:6px;flex-wrap:wrap}.ph img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 .bar{display:flex;align-items:flex-end;gap:2px;height:80px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px}
-.bar i{flex:1;background:#111;border-radius:2px 2px 0 0;min-height:1px;position:relative}
-.bar i:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.bar i{flex:1;background:var(--olive);border-radius:2px 2px 0 0;min-height:1px;position:relative}
+.bar i:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--olive);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;white-space:nowrap}
 .hbar{display:grid;grid-template-columns:120px 1fr 40px;gap:8px;align-items:center;font-size:12.5px;padding:3px 0}
-.hbar b{height:12px;background:#111;border-radius:3px;display:block}
+.hbar b{height:12px;background:var(--olive);border-radius:3px;display:block}
 .hbar .w{background:var(--bg2);border-radius:3px}
 .msg{padding:6px 10px;border-radius:12px;background:var(--bg2);margin:4px 0;max-width:80%;font-size:13px}
-.msg.sup{background:#111;color:#fff;margin-left:auto}
+.msg.sup{background:var(--olive);color:#fff;margin-left:auto}
 .msg time{display:block;font-size:10px;opacity:.6;margin-top:2px}
 .info{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}
 .info svg{width:100%;height:auto;display:block}
@@ -59,17 +59,25 @@ textarea{width:100%;min-height:90px}
 .info .kpi{background:var(--bg2);border-radius:12px;padding:10px 12px}.info .kpi .l{font-size:11px;color:var(--ink3)}.info .kpi .v{font-size:20px;font-weight:700}
 .info h3{font-size:13px;margin:14px 0 6px;color:var(--ink2)}
 .info .rk{display:grid;grid-template-columns:54px 1fr 34px;gap:8px;align-items:center;font-size:12.5px;padding:2px 0}
-.info .rk .w{background:var(--bg2);border-radius:3px}.info .rk b{display:block;height:10px;border-radius:3px;background:#111}
+.info .rk .w{background:var(--bg2);border-radius:3px}.info .rk b{display:block;height:10px;border-radius:3px;background:var(--olive)}
 @media(max-width:900px){.info{grid-template-columns:1fr}}
 #dongMap{height:520px;border:1px solid var(--line);border-radius:12px;background:#eee;z-index:1}
-.leaflet-tooltip.dlabel{background:#111;color:#fff;border:0;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;box-shadow:none;white-space:nowrap}
+.leaflet-tooltip.dlabel{background:var(--olive);color:#fff;border:0;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;box-shadow:none;white-space:nowrap}
 .leaflet-tooltip.dlabel::before{display:none}
 .legend{display:flex;gap:14px;align-items:center;margin:8px 2px;font-size:12px;color:var(--ink2)}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px}
-#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#111;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:99}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--olive);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:99}
 #toast.on{opacity:1}
 pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow:auto;white-space:pre-wrap}
 /* 모바일(대표가 폰에서 확인·처리): 상단 바 + 서랍 메뉴, 표는 가로 스크롤, 패널은 전체 폭, 버튼은 손가락 크기 */
+/* 오늘 */
+.hero3{display:grid;grid-template-columns:1.1fr 1.3fr 1fr;gap:12px;margin-bottom:12px}.hero3 .card{display:flex;flex-direction:column;gap:6px}.hero3 .big{font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.hero3 .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.hero3 .kp div{background:var(--soft);border-radius:10px;padding:8px 6px;text-align:center}.hero3 .kp b{display:block;font-size:18px}.hero3 .kp span{font-size:11px;color:var(--ink3)}
+.qlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin-top:8px}.qlist a{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:#fff}.qlist a:hover{background:var(--soft)}.qlist a b{font-size:20px;color:var(--olive);min-width:28px}.qlist a span{flex:1;font-size:13px}.qlist a i{color:var(--ink3);font-style:normal}
+.empty{padding:28px 16px;text-align:center;color:var(--ink2)}.empty .ok{width:44px;height:44px;border-radius:50%;background:var(--chip);color:var(--olive);display:inline-flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:8px}
+.chatbox{display:flex;gap:8px;align-items:center;margin-top:8px}.chatbox input{flex:1}
+.st{display:flex;align-items:center;gap:8px;font-size:13px}.st i{width:9px;height:9px;border-radius:50%;display:inline-block;background:#ccc}.st i.on{background:var(--green)}.st i.off{background:var(--red)}
+@media(max-width:900px){.hero3{grid-template-columns:1fr}}
 #mtop{display:none;position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;align-items:center;gap:10px}
 #mtop b{font-size:15px;flex:1}#mtop button{width:40px;height:36px;font-size:18px;padding:0}#mtop .n{background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px}
 #drawerScrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:45}
@@ -646,15 +654,17 @@ VIEWS.today = async(arg)=>{
   const queue=[['가게 등록 신청',qShop,'#shops'],['작가 신청',qAuthor,'#authors'],['버그 제보·제안',qFb,'#supporters'],['지기 문의(답변 대기)',qTk,'#support'],['이벤트 신청(선정 대기)',qEvt,'#events']].filter(x=>x[1]>0);
   const ord={urgent:0,today:1,info:2}; MOD_ITEMS=(items||[]).sort((a,b)=>ord[a.severity]-ord[b.severity]||new Date(a.created_at)-new Date(b.created_at));
   const br=brs?.[0]; const c=s=>MOD_ITEMS.filter(x=>x.severity===s).length;
-  $('#main').innerHTML=`<h1>오늘 <small>${new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'})} · 지기 AI</small></h1>
-  <div class="card" style="margin-bottom:12px"><b style="font-size:1.1rem">오늘 처리할 일 ${MOD_ITEMS.length}건</b>
-    <div class="muted" style="margin:4px 0">${br?esc(`${br.date} 브리핑 — 어제 새 글 ${br.body?.stats?.posts??0}개·답글 ${br.body?.stats?.replies??0}개·가입 ${br.body?.stats?.signups??0}명·인증 ${br.body?.stats?.works??0}개${(br.body?.notable||[]).length?' · 특이: '+br.body.notable.join(', '):''}`):'아직 브리핑이 없어요 (매일 오전 8시)'}</div>
-    <div><span class="chip r">긴급 ${c('urgent')}</span> <span class="chip g">오늘 ${c('today')}</span> <span class="chip">참고 ${c('info')}</span> <span class="chip">자동 처리 ${autoN||0}</span> <span id="jigiStatus" class="muted"></span></div></div>
-  ${queue.length?`<div class="card" style="margin-bottom:12px"><b>기다리는 신청·문의</b><div class="row" style="margin-top:6px;flex-wrap:wrap">${queue.map(([l,n,h])=>`<a href="${h}" class="chip g" style="text-decoration:none">${l} ${n}건 ›</a>`).join('')}</div></div>`:''}
-  ${MOD_ITEMS.map(modCard).join('')||'<div class="card muted">이상 없음 — 처리할 일이 없어요.</div>'}
-  <p><a href="#modlog">AI가 자동 처리한 ${autoN||0}건 보기 (되돌리기 가능) ›</a></p>
-  <div class="card"><b>지기 AI에게 묻기</b><div id="jChat-today" style="margin:8px 0;max-height:320px;overflow:auto"></div><div class="row"><input id="jIn-today" placeholder="예: 이번 주 불만 요약해 줘 · 1번 제안대로 해 · 규칙 보여 줘" style="flex:1" onkeydown="if(event.key==='Enter'&&!event.isComposing)jigiAsk('today')"><button class="p" onclick="jigiAsk('today')">보내기</button><button onclick="jigiRun('scan')">지금 검사</button><button onclick="jigiRun('brief')">브리핑 다시 만들기</button></div></div>`;
-  jigi('status').then(s=>{ $('#jigiStatus').textContent=`AI ${s.ai?('켜짐('+s.provider+')'):'꺼짐 — 키 없음'} · 텔레그램 ${s.telegram&&s.webhook_secret?'연결됨':'미연결'}`; }).catch(()=>{ $('#jigiStatus').textContent='지기 AI 서버 함수에 연결하지 못했어요'; });
+  const st=br?.body?.stats||{}; const totalQ=queue.reduce((t,x)=>t+x[1],0);
+  $('#main').innerHTML=`<h1>오늘 <small>${new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'})} · 지기 AI가 먼저 보고 대표가 결정해요</small></h1>
+  <div class="hero3">
+    <div class="card"><div class="l">오늘 처리할 일</div><div class="big">${MOD_ITEMS.length+totalQ}<small style="font-size:16px;font-weight:600;color:var(--ink3)"> 건</small></div><div><span class="chip r">긴급 ${c('urgent')}</span><span class="chip g">오늘 ${c('today')}</span><span class="chip">참고 ${c('info')}</span><span class="chip">신청·문의 ${totalQ}</span></div><a href="#modlog" class="muted" style="margin-top:auto">최근 3일 AI 자동 처리 ${autoN||0}건 · 되돌리기 ›</a></div>
+    <div class="card"><div class="l">어제 ${br?`· ${esc(br.date)} 브리핑`:''}</div>${br?`<div class="kp"><div><b>${st.posts??0}</b><span>새 글</span></div><div><b>${st.replies??0}</b><span>답글</span></div><div><b>${st.signups??0}</b><span>가입</span></div><div><b>${st.works??0}</b><span>작품 인증</span></div></div><div class="muted">${(br.body?.notable||[]).length?'특이: '+esc(br.body.notable.join(', ')):'특이 사항 없음'}${br.body?.supporters?esc(br.body.supporters):''}</div>`:'<div class="muted">아직 브리핑이 없어요 — 매일 오전 8시에 만들어져요.</div>'}</div>
+    <div class="card"><div class="l">지기 AI 상태</div><div id="jigiStatus" class="st"><i></i>확인 중…</div><div id="jigiTg" class="st"><i></i>텔레그램</div><div class="row" style="margin-top:auto"><button onclick="jigiRun('scan')">지금 검사</button><button onclick="jigiRun('brief')">브리핑 다시 만들기</button></div></div>
+  </div>
+  ${queue.length?`<div class="card" style="margin-bottom:12px"><b>기다리는 신청·문의</b><div class="qlist">${queue.map(([l,n,h])=>`<a href="${h}"><b>${n}</b><span>${l}</span><i>›</i></a>`).join('')}</div></div>`:''}
+  ${MOD_ITEMS.length?`<h2 style="margin-top:6px">검토할 글·신고 ${MOD_ITEMS.length}건</h2>`+MOD_ITEMS.map(modCard).join(''):`<div class="card empty"><div class="ok">✓</div><div><b>검토할 글·신고가 없어요</b></div><div class="muted" style="margin-top:4px">새 글·답글·신고·모임은 지기 AI가 먼저 읽고, 확인이 필요한 것만 여기에 올려요.</div></div>`}
+  <div class="card" style="margin-top:12px"><b>지기 AI에게 묻기</b><div class="muted" style="margin-top:2px">예: 이번 주 불만 요약해 줘 · 1번 제안대로 해 · 규칙 보여 줘 · 자동 처리 내역</div><div id="jChat-today" style="margin:8px 0;max-height:320px;overflow:auto"></div><div class="chatbox"><input id="jIn-today" placeholder="지기 AI에게 물어보거나 지시하기" onkeydown="if(event.key==='Enter'&&!event.isComposing)jigiAsk('today')"><button class="p" onclick="jigiAsk('today')">보내기</button></div></div>`;
+  jigi('status').then(s=>{ const ok=!!s.ai, tg=!!(s.telegram&&s.webhook_secret); $('#jigiStatus').innerHTML=`<i class="${ok?'on':'off'}"></i>AI ${ok?'켜짐 · '+esc(s.provider||''):'꺼짐 — 키 없음'}`; $('#jigiTg').innerHTML=`<i class="${tg?'on':'off'}"></i>텔레그램 ${tg?'연결됨':'미연결'}`; }).catch(()=>{ $('#jigiStatus').innerHTML='<i class="off"></i>지기 AI 서버 함수에 연결하지 못했어요'; });
   if(arg) openModItem(+arg);
 };
 async function jigiRun(r){ try{ const d=await jigi(r); toast(r==='scan'?`검사 완료 — 새 건 ${d.items||0}`:'브리핑을 만들었어요'); VIEWS.today(); }catch(e){ toast(e.message); } }
