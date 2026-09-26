@@ -94,6 +94,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#reports" data-v="reports">신고함 <span class="n" id="nRep" hidden></span></a>
     <a href="#users" data-v="users">사용자</a>
     <a href="#support" data-v="support">지기 문의함 <span class="n" id="nSup" hidden></span></a>
+    <a href="#kb" data-v="kb">지식 창고 (상담 학습)</a>
     <a href="#banned" data-v="banned">금칙어</a>
     <a href="#broadcast" data-v="broadcast">공지·알림 보내기</a>
     <a href="#shops" data-v="shops">파트너 가게</a>
@@ -150,7 +151,7 @@ window.addEventListener('hashchange', route);
 async function refreshBadges(){
   const [{count:a},{count:b}] = await Promise.all([sb.from('post_reports').select('*',{count:'exact',head:true}).is('reviewed_at',null), sb.from('reports').select('*',{count:'exact',head:true}).is('reviewed_at',null)]);
   const n=(a||0)+(b||0); $('#nRep').hidden=!n; $('#nRep').textContent=n;
-  const sup=await supportRooms(); const un=sup.filter(r=>r.unanswered).length; $('#nSup').hidden=!un; $('#nSup').textContent=un;
+  const {count:un}=await sb.from('support_tickets').select('id',{count:'exact',head:true}).in('status',['open','waiting_admin']); $('#nSup').hidden=!un; $('#nSup').textContent=un||'';
 }
 const VIEWS={};
 function route(){ const [v,arg]=(location.hash||'#today').slice(1).split(':'); document.querySelectorAll('aside a').forEach(a=>a.classList.toggle('on',a.dataset.v===v)); closePanel(); $('#main').innerHTML='<div class="muted">불러오는 중…</div>'; sb.from('mod_items').select('id',{count:'exact',head:true}).eq('status','open').then(({count})=>{ const n=$('#nMod'); if(n){ n.hidden=!count; n.textContent=count||''; } }); (VIEWS[v]||VIEWS.today)(arg).catch(e=>{ $('#main').innerHTML='<div class="muted">오류: '+esc(e.message)+'</div>'; }); }
@@ -319,13 +320,57 @@ async function supportRooms(){
   const { data } = await sb.from('room_members').select('room_id, room:rooms(id,kind,created_at, room_members(profile_id, profiles(id,nickname,dong_name)), messages(id,body,photo_url,sender_id,created_at))').eq('profile_id',SUPPORT_ID).order('created_at',{foreignTable:'room.messages',ascending:false}).limit(1,{foreignTable:'room.messages'});
   return (data||[]).map(x=>x.room).filter(r=>r&&r.kind==='direct').map(r=>{ r.user=(r.room_members||[]).map(m=>m.profiles).find(p=>p&&p.id!==SUPPORT_ID); r.last=r.messages?.[0]; r.unanswered=!!(r.last && r.last.sender_id!==SUPPORT_ID); return r; }).filter(r=>r.last).sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
 }
-VIEWS.support = async()=>{
-  const rooms=await supportRooms();
-  $('#main').innerHTML=`<h1>지기 문의함 <small>미답변 ${rooms.filter(r=>r.unanswered).length} · 행을 누르면 대화를 보고 바로 답장할 수 있어요</small></h1>
-  <table><tr><th>사용자</th><th>마지막 메시지</th><th style="width:120px">시각</th><th style="width:90px">상태</th></tr>
-  ${rooms.map(r=>`<tr class="clk" onclick="openRoomPanel('${r.id}')"><td><b>${esc(r.user?.nickname||'(탈퇴)')}</b><div class="muted">${esc(r.user?.dong_name||'')}</div></td><td>${r.last.sender_id===SUPPORT_ID?'<span class="muted">지기: </span>':''}${esc(r.last.body||(r.last.photo_url?'(사진)':''))}</td><td class="muted">${fmt(r.last.created_at)}</td><td>${r.unanswered?'<span class="chip r">미답변</span>':'<span class="chip g">답변함</span>'}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">아직 문의가 없어요</td></tr>'}</table>
-  <p class="muted">앱 웹 버전: <a href="https://yesbeyesnono.github.io/knit-neighbors/" target="_blank">yesbeyesnono.github.io/knit-neighbors</a> — 지기 계정으로 로그인하면 채팅 탭에서 답장할 수 있어요.</p>`;
+VIEWS.support = async(arg)=>{
+  const [{data:tks},{data:st},rooms] = await Promise.all([
+    sb.from('support_tickets').select('*, who:profiles!support_tickets_profile_id_fkey(id,nickname,dong_name)').order('created_at',{ascending:false}).limit(200),
+    sb.rpc('admin_support_stats',{p_days:30}), supportRooms() ]);
+  const T=tks||[]; const wait=T.filter(t=>t.status==='waiting_admin'), open=T.filter(t=>t.status==='open'), ans=T.filter(t=>t.status==='answered'), done=T.filter(t=>t.status==='closed');
+  const S={open:'AI가 파악 중',waiting_admin:'답변 대기',answered:'답변함 · 확인 대기',closed:'종료'}, U={urgent:'긴급',today:'오늘',info:'참고'};
+  const row=t=>`<tr class="clk" onclick="openTicket(${t.id})"><td>#${t.id}<div class="muted">${fmt(t.created_at)}</div></td><td><b>${esc(t.who?.nickname||'(탈퇴)')}</b><div class="muted">${esc(t.who?.dong_name||'')}</div></td><td><span class="chip">${esc(t.category)}</span>${t.urgency==='urgent'?' <span class="chip r">긴급</span>':''}</td><td>${esc(t.summary)}</td><td><span class="chip ${t.status==='waiting_admin'?'r':t.status==='closed'?'':'g'}">${S[t.status]}</span></td></tr>`;
+  const stat=st||{}; const cats=Object.entries(stat.by_category||{});
+  $('#main').innerHTML=`<h1>지기 문의함 <small>지기 AI가 먼저 응대하고 정리한 문의 · 답변 대기 ${wait.length}</small></h1>
+  <div class="cards" style="margin-bottom:12px"><div class="card"><div class="l">30일 문의</div><div class="v">${stat.total??0}</div></div><div class="card"><div class="l">평균 답변 시간</div><div class="v">${stat.avg_answer_hours!=null?stat.avg_answer_hours+'h':'–'}</div></div><div class="card"><div class="l">FAQ 직접 답변</div><div class="v">${stat.faq_direct??0}</div></div><div class="card"><div class="l">재문의</div><div class="v">${stat.reopened??0}</div></div></div>
+  ${cats.length?`<p class="muted">분류별(30일): ${cats.map(([k,v])=>`${esc(k)} ${v}`).join(' · ')}</p>`:''}
+  <table><tr><th>#</th><th>회원</th><th>분류</th><th>요약</th><th>상태</th></tr>${[...wait,...open,...ans].map(row).join('')||'<tr><td colspan="5" class="muted">처리할 문의가 없어요</td></tr>'}</table>
+  ${done.length?`<h2>종료 ${done.length}</h2><table>${done.slice(0,30).map(row).join('')}</table>`:''}
+  <h2>대화방 전체 <small class="muted">티켓 없이 직접 답장할 때</small></h2>
+  <table><tr><th>사용자</th><th>마지막 메시지</th><th style="width:120px">시각</th></tr>
+  ${rooms.map(r=>`<tr class="clk" onclick="openRoomPanel('${r.id}')"><td><b>${esc(r.user?.nickname||'(탈퇴)')}</b></td><td>${r.last.sender_id===SUPPORT_ID?'<span class="muted">지기: </span>':''}${esc(r.last.body||(r.last.photo_url?'(사진)':''))}</td><td class="muted">${fmt(r.last.created_at)}</td></tr>`).join('')||'<tr><td colspan="3" class="muted">없음</td></tr>'}</table>`;
+  if(arg) openTicket(+arg);
 };
+async function openTicket(id){
+  const {data:t}=await sb.from('support_tickets').select('*, who:profiles!support_tickets_profile_id_fkey(id,nickname,dong_name,act_level)').eq('id',id).maybeSingle(); if(!t) return toast('티켓이 없어요');
+  const [{data:msgs},{data:ev}]=await Promise.all([ sb.from('messages').select('id,body,photo_url,sender_id,by_ai,created_at').eq('room_id',t.room_id).order('id',{ascending:false}).limit(40), sb.from('support_events').select('*').eq('ticket_id',id).order('id') ]);
+  const d=t.detail||{}; const dl=[['screen','화면'],['when','시점'],['symptom','증상'],['device','기기']].filter(([k])=>d[k]).map(([k,l])=>`${l}: ${esc(d[k])}`).join(' · ');
+  openPanel(`<h2 style="margin-top:0">문의 #${t.id} <span class="chip">${esc(t.category)}</span> ${t.urgency==='urgent'?'<span class="chip r">긴급</span>':''}</h2>
+    <div><b>${esc(t.who?.nickname||'(탈퇴)')}</b> <span class="muted">${esc(t.who?.dong_name||'')} · Lv.${t.who?.act_level||0}</span> <a href="#" onclick="openUserPanel('${t.profile_id}');return false">회원 보기</a></div>
+    <div class="card" style="margin:8px 0"><b>AI 요약</b><div>${esc(t.summary)}</div>${dl?`<div class="muted">${dl}</div>`:''}</div>
+    <details open><summary>대화 (최근 ${(msgs||[]).length}개)</summary><div id="roomMsgs" style="margin:8px 0">${(msgs||[]).reverse().map(m=>`<div class="msg ${m.sender_id===SUPPORT_ID?'sup':''}">${m.sender_id===SUPPORT_ID?`<span class="muted" style="font-size:11px">${m.by_ai?'지기 AI':'대표'} · </span>`:''}${esc(m.body||'(사진)')}<div class="muted" style="font-size:11px">${fmt(m.created_at)}</div></div>`).join('')}</div></details>
+    ${t.status==='closed'?`<p class="muted">종료 · ${esc(t.resolution||'')} ${t.admin_answer?'<br>답변: '+esc(t.admin_answer):''}</p>`:`
+    <h2>답변</h2><textarea id="tkText" style="min-height:90px" placeholder="회원에게 보낼 답변. 지기 이름으로 전달돼요">${esc(t.admin_answer||'')}</textarea>
+    <div class="row" style="flex-wrap:wrap"><button onclick="tkPolish()">AI로 존댓말 다듬기</button><button class="p" onclick="tkSend(${t.id},false)">보내기 (내일 '해결됐나요?' 확인)</button><button onclick="tkSend(${t.id},true)">보내고 종료</button><button onclick="if(confirm('답변 없이 닫을까요?'))tkSend(${t.id},true,true)">답변 없이 닫기</button></div>`}
+    ${(ev||[]).length?`<h2>기록</h2>${ev.map(e=>`<div class="muted">${fmt(e.created_at)} · ${({member:'회원',ai:'AI',admin:'대표',system:'시스템'})[e.actor]} · ${esc(e.kind)}${e.body?' · '+esc(e.body.slice(0,120)):''}</div>`).join('')}`:''}`);
+}
+async function tkPolish(){ const t=$('#tkText').value.trim(); if(!t) return toast('답변을 먼저 적어 주세요'); toast('다듬는 중…'); try{ const r=await jigi('polish',{text:t}); if(r.text) $('#tkText').value=r.text; else toast('다듬지 못했어요'+(r.error?': '+r.error:'')); }catch(e){ toast(e.message); } }
+async function tkSend(id, close, empty){ const t=empty?'':$('#tkText').value.trim(); if(!empty && !t) return toast('답변을 적어 주세요'); const {error}=await sb.rpc('admin_support_answer',{p_ticket:id,p_text:t,p_close:!!close}); if(error) return toast(error.message); toast(empty?'닫았어요':'회원에게 전달했어요'); closePanel(); route(); refreshBadges&&refreshBadges(); }
+// ===== 지식 창고: 승인된 것만 지기 AI가 쓴다 =====
+const KB_KIND={faq:'자주 묻는 질문',term:'용어 사전',check:'확인 항목'};
+VIEWS.kb = async()=>{
+  const [{data:kb},{data:cand}]=await Promise.all([ sb.from('support_kb').select('*').order('kind').order('uses',{ascending:false}), sb.from('support_kb_candidates').select('*').eq('status','open').order('id',{ascending:false}) ]);
+  const K=kb||[];
+  $('#main').innerHTML=`<h1>지식 창고 <small>지기 AI가 상담에 쓰는 지식 · 승인한 것만 씀 · 매주 월요일 아침 후보 제안</small></h1>
+  <h2>제안된 후보 ${(cand||[]).length}</h2>
+  ${(cand||[]).map(c=>`<div class="card" style="margin-bottom:8px"><span class="chip">${KB_KIND[c.kind]}</span> <span class="chip">${esc(c.category)}</span> <span class="muted">근거 ${c.evidence?.count??(c.evidence?.tickets||[]).length}건</span>
+    <div class="row" style="margin-top:6px"><input id="cq-${c.id}" value="${esc(c.q)}" style="flex:1"></div><textarea id="ca-${c.id}" style="min-height:60px;margin-top:6px">${esc(c.a)}</textarea>
+    <div class="row"><button class="p" onclick="kbDecide(${c.id},true)">승인(위 내용대로)</button><button onclick="kbDecide(${c.id},false)">거절</button></div></div>`).join('')||'<p class="muted">아직 제안이 없어요. 상담이 쌓이면 매주 월요일 아침에 올라와요.</p>'}
+  <h2>직접 추가</h2><div class="row" style="flex-wrap:wrap"><select id="kbKind">${Object.entries(KB_KIND).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><input id="kbCat" placeholder="분류 (예: 로그인·가입)" style="width:160px"><input id="kbQ" placeholder="질문 패턴 / 회원이 쓰는 말 / 분류 이름" style="flex:1;min-width:220px"></div><textarea id="kbA" style="min-height:60px;margin:6px 0" placeholder="확정 답변 / 앱 용어와 뜻 / 꼭 확인할 항목(줄바꿈으로 구분)"></textarea><div class="row"><button class="p" onclick="kbAdd()">추가</button></div>
+  ${['faq','term','check'].map(k=>`<h2>${KB_KIND[k]} ${K.filter(x=>x.kind===k).length}</h2><table><tr><th>분류</th><th>${k==='faq'?'질문':k==='term'?'회원 표현':'분류'}</th><th>${k==='faq'?'답변':k==='term'?'앱 용어':'확인 항목'}</th><th>사용</th><th></th></tr>
+    ${K.filter(x=>x.kind===k).map(x=>`<tr class="${x.enabled?'':'muted'}"><td>${esc(x.category)}</td><td>${esc(x.q)}</td><td style="white-space:pre-wrap">${esc(x.a)}</td><td>${x.uses}</td><td><button onclick="kbToggle(${x.id},${!x.enabled})">${x.enabled?'끄기':'켜기'}</button> <button onclick="kbDel(${x.id})">삭제</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`).join('')}`;
+};
+async function kbAdd(){ const q=$('#kbQ').value.trim(), a=$('#kbA').value.trim(); if(!q||!a) return toast('내용을 적어 주세요'); const {error}=await sb.rpc('admin_kb',{p:{kind:$('#kbKind').value,category:$('#kbCat').value.trim()||'기타',q,a}}); if(error) return toast(error.message); route(); }
+async function kbToggle(id,on){ const {error}=await sb.rpc('admin_kb',{p:{id,enabled:on}}); if(error) return toast(error.message); route(); }
+async function kbDel(id){ if(!confirm('삭제할까요?')) return; const {error}=await sb.rpc('admin_kb',{p:{id,delete:true}}); if(error) return toast(error.message); route(); }
+async function kbDecide(id,ok){ const {error}=await sb.rpc('admin_kb_candidate',{p_id:id,p_approve:ok,p_q:ok?$('#cq-'+id).value.trim():null,p_a:ok?$('#ca-'+id).value.trim():null}); if(error) return toast(error.message); toast(ok?'승인했어요 · 다음 상담부터 써요':'거절했어요'); route(); }
 async function openRoomPanel(id){
   const { data:msgs } = await sb.from('messages').select('id,body,photo_url,sender_id,created_at').eq('room_id',id).order('created_at').limit(300);
   const { data:mem } = await sb.from('room_members').select('profile_id, profiles(nickname)').eq('room_id',id);
@@ -522,7 +567,7 @@ async function decideAuthor(id, ok){ let reason=null; if(!ok){ reason=prompt('�
 async function setAuthor(id, on){ if(!confirm(on?'작가로 지정할까요?':'작가 자격을 해제할까요? 등록한 도안은 남아 있어요(필요하면 도안 메뉴에서 숨김).')) return; const {error}=await sb.rpc('admin_set_author',{p_profile:id,p_on:on}); if(error) return toast(error.message); toast('처리했어요'); route(); }
 // ===== 지기 AI (작업지시서 Phase 3): 오늘 · 건별 처리 · 규칙 · 기록 · 기법 후보 · 욕설 사전 =====
 // 텔레그램과 같은 mod_items·같은 도구(jigi_tool)를 쓴다. 콘솔에서의 클릭 = 대표 승인(admin_jigi_tool).
-const MK={abuse:'비방·욕설',spam:'광고 의심',scam:'사기 의심',app_complaint:'앱 불만',risk:'위험',report:'신고',tech_candidate:'기법 후보',yarn_review:'실 이름 검토',other:'기타'}, MSEV={urgent:'긴급',today:'오늘',info:'참고'};
+const MK={abuse:'비방·욕설',spam:'광고 의심',scam:'사기 의심',app_complaint:'앱 불만',risk:'위험',report:'신고',tech_candidate:'기법 후보',yarn_review:'실 이름 검토',support:'문의',other:'기타'}, MSEV={urgent:'긴급',today:'오늘',info:'참고'};
 const jigi=async(route,body={})=>{ const {data,error}=await sb.functions.invoke('jigi',{body:{route,...body}}); if(error) throw new Error(error.message); return data; };
 const jtool=async(name,args)=>{ const {data,error}=await sb.rpc('admin_jigi_tool',{p_name:name,p_args:args}); if(error) throw new Error(error.message); if(data?.error) throw new Error(data.error); return data; };
 async function jsteps(item, steps){ for(const [i,s] of steps.entries()) await jtool(s[0], {...s[1], item_id:item.id, resolve:i===steps.length-1 && s[0]!=='dismiss_item'}); }
@@ -535,6 +580,7 @@ function modButtons(it){
   else if(pid && it.kind==='app_complaint'){ b.push(['답글 보내기','reply','p']); b.push(['확인함','seen','']); }
   else if(it.kind==='tech_candidate'){ b.push(['후보 보기','tech','p']); b.push(['나중에','seen','']); }
   else if(it.kind==='yarn_review'){ b.push(['실 사전 열기','yarn','p']); b.push(['확인함','seen','']); }
+  else if(it.kind==='support'){ b.push(['문의함에서 답변','support','p']); }
   else b.push(['확인함','seen','']);
   return b.map(([l,a,c])=>`<button class="${c}" onclick="modAct(${it.id},'${a}')">${l}</button>`).join(' ')+` <button onclick="openModItem(${it.id})">자세히</button>`;
 }
@@ -551,6 +597,7 @@ async function modAct(id, act){
     else if(act==='seen'){ await jtool('dismiss_item',{item_id:it.id,note:'확인'}); }
     else if(act==='tech'){ location.hash='#techcand'; return; }
     else if(act==='yarn'){ location.hash='#yarns'; return; }
+    else if(act==='support'){ location.hash='#support:'+(it.evidence?.ticket_id||it.target_id); return; }
     toast('처리했어요 · 기록에서 되돌릴 수 있어요'); closePanel(); if(location.hash.startsWith('#today')||!location.hash) VIEWS.today(); refreshBadges&&refreshBadges();
   }catch(e){ toast('실패: '+e.message); }
 }
@@ -822,7 +869,7 @@ async function decideClaim(id, ok, docPath){
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
-  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식',event_upsert:'이벤트 저장',event_app_selected:'이벤트 선정',event_app_rejected:'이벤트 미선정',event_app_applied:'이벤트 선정 되돌림',event_shipped:'이벤트 발송 처리',add_bad_word:'욕설 사전 추가',remove_bad_word:'욕설 사전 삭제'};
+  const L={hide_post:'글 숨김',unhide_post:'글 복구',delete_post:'글 삭제',suspend_user:'사용자 정지',unsuspend_user:'정지 해제',resolve_report:'신고 무시',add_banned:'금칙어 추가',remove_banned:'금칙어 삭제',broadcast:'공지 발송',add_admin:'관리자 지정',remove_admin:'관리자 해제',reply_support:'지기 답장',yarn_update:'실 사전 수정',yarn_merge:'실 합치기',upsert_pattern:'도안 저장',approve_author:'작가 승인',reject_author:'작가 반려',set_author:'작가 지정',unset_author:'작가 해제',upsert_shop:'가게 저장',approve_shop_claim:'가게 신청 승인',reject_shop_claim:'가게 신청 반려',shop_post:'가게 소식',event_upsert:'이벤트 저장',event_app_selected:'이벤트 선정',event_app_rejected:'이벤트 미선정',event_app_applied:'이벤트 선정 되돌림',event_shipped:'이벤트 발송 처리',support_answer:'문의 답변',kb_upsert:'지식 창고 저장',kb_delete:'지식 창고 삭제',kb_candidate_approve:'지식 후보 승인',kb_candidate_reject:'지식 후보 거절',add_bad_word:'욕설 사전 추가',remove_bad_word:'욕설 사전 삭제'};
   $('#main').innerHTML=`<h1>관리자 로그 <small>최근 300건 · 삭제 불가</small></h1><table><tr><th>시각</th><th>관리자</th><th>행위</th><th>대상</th><th>상세</th></tr>${(data||[]).map(l=>`<tr><td class="muted">${fmt(l.created_at)}</td><td>${esc(nm[l.admin_id]||l.admin_id.slice(0,8))}</td><td>${L[l.action]||esc(l.action)}</td><td class="muted">${esc(l.target_type||'')} ${esc((l.target_id||'').slice(0,18))}</td><td class="muted">${l.detail?esc(JSON.stringify(l.detail)).slice(0,120):''}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table>`;
 };
 VIEWS.settings = async()=>{

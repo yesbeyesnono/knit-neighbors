@@ -1967,7 +1967,7 @@ async function wEventPicked(){   // 이벤트에 실 사전의 실이 연결돼 
 
 // ============ 채팅 ============
 const SUPPORT_ID = 'e120eb67-b254-4008-92d8-08c95c821e9e';   // 뜨개동네 지기(운영진) 계정
-const SUPPORT_NOTICE = '뜨개동네를 만드는 사람들에게 바로 닿는 창구예요. 앱을 쓰다 궁금한 점, 불편한 점, 있었으면 하는 기능을 편하게 남겨 주세요. 지기가 읽고 답해 드려요.';
+const SUPPORT_NOTICE = '뜨개동네를 만드는 사람들에게 바로 닿는 창구예요. 궁금한 점, 불편한 점, 바라는 기능을 편하게 남겨 주세요. 먼저 <b>지기 AI</b>가 몇 가지 여쭤보고 대표에게 정확히 전달해요. 답변은 보통 하루 안에 이 채팅으로 드려요.';
 async function openSupportRoom(){
   const { data, error } = await sb.rpc('open_support_room', { p_support: SUPPORT_ID });
   if(error) return toast('채팅방을 열 수 없어요: '+error.message);
@@ -2017,7 +2017,7 @@ function nameOf(uid){ const m=roomInfo?.room_members.find(m=>m.profile_id===uid)
 function appendMsg(m){
   const mine=m.sender_id===me.id; const el=document.createElement('div'); el.className='bub'+(mine?' me':'');
   let body = m.body?esc(m.body):''; if(m.place) body += `<div>${ico('location')} ${esc(m.place.name)}${m.place.address?`<div class="muted">${esc(m.place.address)}</div>`:''}</div>`; if(m.photo_url){ body+=`<img class="chatph" alt="" onclick="openPhoto(this.src)">`; if(!m.body) el.classList.add('ph'); }
-  el.innerHTML = `${!mine&&roomInfo?.kind==='group'?`<span class="who">${esc(nameOf(m.sender_id))}</span>`:''}${body}<time>${hhmm(m.created_at)}</time>`;
+  el.innerHTML = `${!mine&&roomInfo?.kind==='group'?`<span class="who">${esc(nameOf(m.sender_id))}</span>`:''}${!mine&&m.sender_id===SUPPORT_ID?`<span class="who">${m.by_ai?'지기 AI':'뜨개동네 지기'}</span>`:''}${body}<time>${hhmm(m.created_at)}</time>`;
   if(m.photo_url){ const img=el.querySelector('img.chatph'); resolveChatPhoto(img, m.photo_url).then(()=>{ img.onload=scrollMsgs; }); }
   $('#msgs').appendChild(el);
 }

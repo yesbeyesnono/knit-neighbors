@@ -1143,3 +1143,15 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   크론 jigi-guard(매시 7분): 텔레그램 getWebhookInfo 로 웹훅 주소가 우리 주소인지 확인, 바뀌었으면 되돌리고 보안 알림(봇 토큰 도용 대비)
 --   알림 추가: insert into jigi_reminders(due_at, text) values ('2026-09-22 09:30+09', '...');
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 46. 지기 AI 1차 응대 (마이그레이션 support_ai, support_kb_bump) — 2026-09-26 대표 확정: 승인 FAQ만 직접 답변 · 답변 안내 "하루 안에" · 이름 '지기 AI'
+--   messages.by_ai(지기 AI가 보낸 메시지, 앱 배지) · messages.support_seen(응대 처리 표시)
+--   support_tickets(status open→waiting_admin→answered→closed, category, urgency, summary, detail{screen,when,symptom,device}, turns, admin_answer, followup_at, tg_message_id)
+--   support_kb(kind faq|term|check, q, a, enabled, uses) — **승인된 것만 AI가 씀** · support_kb_candidates(주간 학습 제안, 대표 승인/거절) · support_events(기록)
+--   트리거 support_on_message: 지기 방(direct + 지기 계정 참여)에 회원 메시지 → jigi_call('support') → Edge Function jigi route support:
+--     AI(Haiku)가 대화·티켓·지식 창고를 보고 JSON {reply, action ask|faq|escalate|note|resolved|reopen|chat, category, urgency, summary, detail} → 지기 AI 메시지 + 티켓 → 대표 대기면 mod_items(kind support) + 텔레그램(답장으로 답변, 처리 완료 버튼)
+--   대표 답변: admin_support_answer(콘솔) / support_deliver(service_role, 텔레그램 답장 → AI가 존댓말로 다듬은 초안·원문 중 선택 → mod_pending 'support_send' 단계)
+--   크론: jigi-support-sweep 10분(놓친 메시지) · jigi-support-followup 10:00 KST("해결되셨나요?", 3일 무응답 종료) · jigi-support-learn 월 07:00 KST(후보 제안)
+--   admin_kb / admin_kb_candidate / admin_support_stats / kb_bump
+-- ---------------------------------------------------------------

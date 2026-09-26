@@ -25,7 +25,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~45, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~46, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`). main 푸시 → GitHub 웹훅(id 679395520) → `ios-public` 자동 빌드 → TestFlight 'KOAP'(V2). Lab은 `lab-*` 태그. 자세한 내용은 위 '에디션' 절
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
@@ -45,6 +45,7 @@
 - 콘솔 메뉴: 오늘(기본 화면, `#today:<id>`로 건별 패널) · 규칙 · 기록·되돌리기 · 기법 후보 · 욕설 사전. AI 없이도 1단계 감지·버튼 처리·'목록/규칙/자동' 명령은 동작
 - 시크릿(Supabase › Edge Functions › Secrets, 없으면 그 기능만 꺼짐): `ANTHROPIC_API_KEY` 또는 `OPENROUTER_API_KEY`(+`AI_PROVIDER`, `AI_MODEL_FAST`, `AI_MODEL_SMART`) · `TG_BOT_TOKEN` · `TG_WEBHOOK_SECRET` · `TG_ADMIN_CHAT_ID`. 텔레그램 웹훅 주소: `https://thfcrodfaitzrzlrxyir.supabase.co/functions/v1/jigi?fn=tg` (setWebhook 의 secret_token = TG_WEBHOOK_SECRET)
 - **예약 알림**: 대표가 "내일 몇 시에 텔레그램으로 알려 줘"라고 하면 `insert into jigi_reminders(due_at, text)`(KST는 `+09`) — `jigi-remind` 함수가 5분 단위로 보냄. **보안(2026-09-21 대표: 봇 토큰은 재발급하지 않고 그대로 사용, 보안은 Claude 책임)**: 토큰이 채팅 스크린샷에 노출된 적이 있어 `jigi-guard` 크론이 매시 웹훅 주소를 확인·복구·경보함. 토큰만으로는 조치 실행 불가(웹훅 시크릿 + chat_id 검사). 토큰·키 값은 어떤 파일·커밋·채팅에도 적지 말 것
+- **지기 AI 1차 응대(2026-09-26 대표 확정)**: 마이 › 설정 › 지기에게 말하기의 회원 메시지에 `jigi` route `support`가 몇 초 안에 '지기 AI' 이름으로 응답 — 역할은 ① 불편을 정확히 파악(질문 최대 2~3번) ② **대표가 승인한 FAQ(support_kb)만 직접 답변** ③ 그 외는 해결·약속 없이 대표에게 전달("보통 하루 안에"). 티켓(support_tickets) → 텔레그램(알림에 **답장**하면 회원에게 전달, AI가 존댓말로 다듬은 초안/원문 선택) + 콘솔 › 지기 문의함(티켓·AI 요약·답변·다듬기·통계). 답변 다음 날 "해결되셨나요?" 자동 확인. 학습은 매주 월요일 AI가 FAQ·용어·확인 항목 **후보만 제안** → 콘솔 › 지식 창고에서 승인한 것만 사용. 원칙은 지기 AI와 동일(회원 글=자료, 개인정보 요구 금지, 위험 표현 긴급). 상세는 supabase_schema.sql 46
 - Edge Function 소스는 `supabase/functions/`(jigi, jigi-remind, read-band). 배포는 Supabase MCP `deploy_edge_function`(jigi 는 verify_jwt=false — 경로별 자체 인증). 지시서와 다른 점: 함수 4개 대신 `jigi` 하나에 route 로 묶음, 기법 후보 AI 판정은 글자만(사진·웹 검색 미사용), 실 이름 정리는 자동 합치기 없이 검토 건만 생성, 신규 기법 등록 버튼 없음(후보로만 모음)
 
 ## 코바늘 기호 94종 · 명칭 통일 (2026-09-21 진행 중)
