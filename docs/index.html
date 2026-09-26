@@ -657,6 +657,21 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .roomstrip{padding:8px 16px;font-size:.82rem;color:var(--moss);background:var(--moss-soft);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #v-room #roomTitle{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mirow{display:flex;gap:10px;align-items:flex-start;padding:4px 0}.mirow>i{flex:none;margin-top:2px;color:var(--ink3)}.mirow span{display:block;font-size:.85rem;color:var(--ink2)}
+/* 온보딩 4단계 (2026-09-26 시안) */
+#v-onboard .obs{display:none;flex:1}#v-onboard .obs.on{display:flex}#v-onboard.edit .obs{display:flex;flex:none;padding-top:8px;padding-bottom:8px}#v-onboard.edit .obs[data-s="4"],#v-onboard.edit .obnext,#v-onboard.edit .prog,#v-onboard.edit .obspacer,#v-onboard.edit .obttl,#v-onboard.edit .obsub,#v-onboard.edit #agreeWrap,#v-onboard.edit .obfoot{display:none}#v-onboard:not(.edit) #obSave{display:none}
+.prog{display:flex;gap:6px;padding:4px 16px 0}.prog i{flex:1;height:4px;border-radius:2px;background:var(--line)}.prog i.on{background:var(--acc)}
+.obttl{font-size:1.35rem;font-weight:800;margin:10px 0 0;text-align:center;letter-spacing:-.02em}.obttl.l{text-align:left;margin-top:4px}.obsub{margin:-8px 0 0;color:var(--ink2);text-align:center;font-size:.92rem}.obsub.l{text-align:left}
+.oboval{width:220px;height:300px;border-radius:120px;margin:6px auto 0;position:relative;box-shadow:0 14px 30px rgba(63,79,34,.18);background:var(--btn) center/cover no-repeat;cursor:pointer;flex:none}
+.oboval .cam{position:absolute;right:14px;bottom:26px;width:48px;height:48px;border-radius:50%;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.15);display:grid;place-items:center;color:var(--olive)}.oboval svg,.obtwo svg,.obset .h svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.obtwo{display:flex;gap:10px;justify-content:center}.obtwo .btn{width:auto;padding:12px 16px;font-size:.92rem;background:var(--chip);color:var(--olive);border:1px solid var(--line);margin:0}.obtwo .btn svg{width:18px;height:18px}
+.obspacer{flex:1}.oblink{text-align:center;color:var(--ink2);font-size:.9rem;cursor:pointer;margin-top:-8px}
+.dcard{background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px 16px;text-align:center}
+.dname{font-size:1.5rem;font-weight:800;margin:6px 0 8px}.dsub{color:var(--ink3);font-size:.85rem}.dwait{color:var(--ink2);padding:20px 0}
+.obset .card{display:flex;flex-direction:column;gap:6px;cursor:default}.obset .h{display:flex;align-items:center;gap:8px;font-weight:700}.obset .h svg{color:var(--olive)}
+.obdot{font-size:.8rem;color:var(--ink2)}.obdot::before{content:"● ";color:var(--acc);font-size:.6rem;vertical-align:2px}.obdot.warn{color:var(--rose)}.obdot.warn::before{color:var(--rose)}
+.obsw{margin-left:auto;position:relative;width:48px;height:28px;flex:none}.obsw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}.obsw i{position:absolute;inset:0;border-radius:999px;background:#D8DACF;transition:background .15s}.obsw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}.obsw input:checked+i{background:var(--acc)}.obsw input:checked+i::after{left:23px}
+.obfoot{display:none;align-items:center;gap:12px;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg)}.obfoot.on{display:flex}.obfoot .btn{width:auto;flex:none;padding:12px 26px;margin:0}
+.ring{width:44px;height:44px;border-radius:50%;border:4px solid var(--acc);display:grid;place-items:center;color:var(--olive);font-weight:800;flex:none}.ring.wait{border-color:var(--line);color:var(--ink3)}
 .evstrip{display:flex;gap:10px;overflow-x:auto;padding:10px 16px 2px;scrollbar-width:none}.evstrip::-webkit-scrollbar{display:none}.evstrip:empty{display:none}
 .evcard{flex:0 0 auto;width:min(78vw,300px);border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg,#fff);cursor:pointer}
 .evcard .ek{font-size:.72rem;font-weight:700;color:var(--acc)}.evcard b{display:block;margin:3px 0 4px;font-size:.98rem}.evcard .em{font-size:.8rem;color:var(--ink2,#6A6E73)}.evcard .es{margin-top:6px;font-size:.8rem;font-weight:600}
@@ -739,24 +754,42 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
     <p class="muted" style="font-size:.78rem;line-height:1.5">계속하면 <a href="terms.html" target="_blank" style="color:inherit">이용약관</a>과 <a href="privacy.html" target="_blank" style="color:inherit">개인정보처리방침</a>에 동의하는 것으로 봅니다.</p>
   </section>
 
-  <!-- 온보딩 / 프로필 편집 -->
+  <!-- 온보딩(4단계) / 프로필 편집(한 장) -->
   <section class="view" id="v-onboard">
     <div class="top"><button class="back" id="obBack" onclick="go('my')" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="obTitle">프로필 만들기</h1></div>
-    <div class="body form">
+    <div class="prog" id="obProg"><i></i><i></i><i></i><i></i></div>
+    <div class="body form obs" data-s="1">
+      <h2 class="obttl">프로필 사진을 올려 주세요</h2><p class="obsub">얼굴이 아니어도 괜찮아요.<br>뜨개하는 손이나 작품 사진도 좋아요.</p>
+      <div class="oboval" id="obOval" onclick="$('#obFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.2-2h5.4l1.2 2h1.6A2.5 2.5 0 0 1 20 8.5V17a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17z"/><circle cx="12" cy="13" r="3.4"/></svg></div></div>
+      <input id="obFile" type="file" accept="image/*" hidden onchange="pickAvatar(this.files[0]);this.value=''">
+      <div class="obtwo"><button type="button" class="btn" onclick="$('#obFile').click()"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg> 앨범에서 선택</button><button type="button" class="btn" onclick="$('#obFile').click()"><svg viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.2-2h5.4l1.2 2h1.6A2.5 2.5 0 0 1 20 8.5V17a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17z"/><circle cx="12" cy="13" r="3.4"/></svg> 사진 찍기</button></div>
+      <div class="obspacer"></div>
+      <button class="btn obnext" onclick="obGo(2)">다음</button><div class="oblink obnext" onclick="obGo(2)">나중에 할게요</div>
+    </div>
+    <div class="body form obs" data-s="2">
+      <h2 class="obttl">뜨개 이웃과 함께할 동네예요</h2><p class="obsub">자주 뜨개하는 동네를 정하면 가까운 이웃과 모임을 먼저 보여 드려요.</p>
+      <div class="dcard" id="locCard"><div id="locStatus"></div>
+        <div class="muted" style="margin-top:12px;font-size:.8rem">정확한 위치는 저장하지 않아요. 약 200m 격자로 흐려진 좌표만 저장돼요.</div></div>
+      <div class="obspacer"></div>
+      <button class="btn obnext" onclick="obGo(3)">이 동네로 정하기</button><div class="oblink"><span onclick="detectLocation()">다시 확인</span> · <span onclick="manualDong()">직접 입력</span></div>
+    </div>
+    <div class="body form obs" data-s="3">
+      <h2 class="obttl l">뭐라고 부를까요?</h2><p class="obsub l">지도와 글에 보이는 이름이에요.</p>
       <label class="f">닉네임<input id="f_nick" maxlength="20" placeholder="지도와 글에 보이는 이름"></label>
-      <div class="card soft" id="locCard"><b class="t">내 동네 (자동 인식)</b>
-        <div id="locStatus"><i class="ico" data-ico="location"><b>📍</b></i> 위치 확인 중…</div>
-        <div class="row" style="margin-top:8px"><button type="button" class="btn sm o" onclick="detectLocation()">다시 확인</button><button type="button" class="btn sm o" onclick="manualDong()">직접 입력</button></div>
-        <div class="muted" style="margin-top:6px">정확한 위치는 저장하지 않아요. 200m 격자로 흐려진 좌표만 저장돼요.</div>
-      </div>
       <div class="f">뜨개 경력<div class="seg" id="f_exp"></div></div>
       <div class="f">만나기 좋은 시간<div class="seg" id="f_avail"></div></div>
       <label class="f"><span>소개 <span class="muted">(선택, 300자)</span></span><textarea id="f_bio" maxlength="300" placeholder="예: 퇴근 후 코바늘. 가디건 완성이 목표. 같이 뜨실 분 환영"></textarea></label>
       <label class="f"><span>MBTI <span class="muted">(선택)</span></span><input id="f_mbti" maxlength="4" placeholder="ENFP" style="text-transform:uppercase"></label>
-      <div class="muted" style="font-size:.85rem">대바늘·코바늘 여부와 실력 단계는 다음 화면 "내 뜨개 단계"에서 기법을 체크하면 자동으로 정해져요.</div>
-      <label class="f" id="agreeWrap"><span style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:.9rem;line-height:1.45"><input type="checkbox" id="f_agree" style="width:auto;margin-top:3px"><span>(필수) <a href="terms.html" target="_blank">이용약관</a>·<a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a>·<a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다. 위치 정보는 200m 격자로 흐려진 좌표만 저장됩니다.</span></span></label>
-      <button class="btn" id="obSave" onclick="saveProfile()">저장하고 다음으로</button>
+      <label class="f" id="agreeWrap"><span style="display:flex;align-items:flex-start;gap:8px;font-weight:400;font-size:.9rem;line-height:1.45"><input type="checkbox" id="f_agree" style="width:auto;margin-top:3px"><span>(필수) <a href="terms.html" target="_blank">이용약관</a>·<a href="guidelines.html" target="_blank">커뮤니티 가이드라인</a>·<a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의해요</span></span></label>
+      <button class="btn obnext" onclick="obGo(4)">다음</button>
+      <button class="btn" id="obSave" onclick="saveProfile()">저장</button>
     </div>
+    <div class="body form obs obset" data-s="4">
+      <h2 class="obttl l">준비됐어요</h2><p class="obsub l">설정에서 언제든 바꿀 수 있어요.</p>
+      <div class="card"><div class="h"><svg viewBox="0 0 24 24"><path d="M3 11.5 21 3l-8.5 18-2.5-7.5z"/></svg> 위치 <span class="muted" style="font-weight:400">동네 단위</span><label class="obsw"><input type="checkbox" id="obVisible" onchange="toggleVisible(this.checked)"><i></i></label></div><div class="muted">지금 있는 동네만 이웃에게 보여요. 정확한 위치는 저장하지 않아요.</div><div class="obdot" id="obVisTxt"></div></div>
+      <div class="card" onclick="obSkills()" style="cursor:pointer"><div class="h"><svg viewBox="0 0 24 24"><path d="M4 20h5v-5h5v-5h5V5"/></svg> 내 뜨개 단계 <span class="chip" id="obSkillChip" style="margin-left:auto"></span><span style="color:var(--ink3)">›</span></div><div class="muted">할 줄 아는 기법을 체크하면 비슷한 수준의 이웃을 찾기 쉬워요.</div><div class="obdot" id="obSkillTxt"></div></div>
+    </div>
+    <div class="obfoot" id="obFoot"><div class="ring" id="obRing"></div><div><b id="obFootT"></b><div class="muted" id="obFootS"></div></div><span style="flex:1"></span><button class="btn" id="obStart" onclick="obStart()">시작하기</button></div>
   </section>
 
   <!-- 지도 홈 -->
@@ -1166,6 +1199,43 @@ $('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if
 seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
 let loc = { lat:null, lng:null, dong_name:null, dong_code:null, verified:false };
 function setLocStatus(html){ $('#locStatus').innerHTML = html; }
+// 동네 카드(2단계) — loc 상태를 카드로 그린다. 동네가 잡히기 전엔 안내 문구
+function renderDong(){
+  const el=$('#locStatus'); if(!el) return;
+  if(loc.dong_name){ const parts=(loc.dong_code||'').split('|'); const sub = loc.verified ? parts.slice(0,-1).join(' ') : '직접 입력'; el.innerHTML=`<div class="dname">${esc(loc.dong_name)}</div><div class="dsub">${esc(sub)}</div><div style="margin-top:10px"><span class="chip">${ico('location')} 우리 동네</span></div>`; }
+  else el.innerHTML=`<div class="dwait">${ico('location')} 위치 확인 중…<br><span class="muted" style="font-size:.8rem">위치 권한을 허용하면 동네를 자동으로 찾아요</span></div>`;
+}
+let obStep=1, obReturn=false;
+function obGo(n){
+  if(n===3 && !loc.dong_name) return toast('동네를 확인해 주세요 (다시 확인 또는 직접 입력)');
+  if(n===4){ return saveProfile().then(ok=>{ if(ok) obShow(4); }); }
+  obShow(n);
+}
+function obShow(n){
+  obStep=n; document.querySelectorAll('#v-onboard .obs').forEach(el=>el.classList.toggle('on', +el.dataset.s===n));
+  [...$('#obProg').children].forEach((i,k)=>i.classList.toggle('on', k<n));
+  $('#obFoot').classList.toggle('on', n===4); $('#v-onboard').scrollTop=0;
+  if(n===2){ renderDong(); if(!loc.dong_name) detectLocation(); }
+  if(n===4) renderObReady();
+}
+function renderObReady(){
+  const p=myProfile||{}; const vis=p.is_visible!==false; $('#obVisible').checked=vis; $('#obVisTxt').textContent = vis?'켜짐 · 우리 동네 이웃 지도에 내 핀이 보여요':'꺼짐 · 지도에 내 핀이 보이지 않아요';
+  const done=(p.skills||[]).length>0; const lv=lvShort(p);
+  $('#obSkillChip').textContent = done?'완료':'필수'; $('#obSkillChip').style.cssText = done?'margin-left:auto':'margin-left:auto;background:var(--rose-soft);color:var(--rose)';
+  const t=$('#obSkillTxt'); t.className='obdot'+(done?'':' warn'); t.textContent = done?`${lv||'체크 완료'} · 다시 눌러 고칠 수 있어요`:'아직 안 했어요 · 눌러서 기법 체크하기';
+  $('#obRing').className='ring'+(done?'':' wait'); $('#obRing').textContent = done?'✓':'3'; $('#obFootT').textContent = done?'4단계 중 4단계':'4단계 중 3단계'; $('#obFootS').textContent = done?'모두 준비됐어요':'내 뜨개 단계만 남았어요'; $('#obStart').disabled=!done;
+}
+function obSkills(){ obReturn=true; openSlides(()=>openSkills()); }
+function obStart(){ if(!(myProfile?.skills||[]).length) return toast('내 뜨개 단계를 먼저 체크해 주세요'); obReturn=false; go('map'); }
+async function pickAvatar(file){
+  if(!file) return; try{
+    const blob=await shrinkImage(file, 640); const path=`${me.id}/${Date.now()}.jpg`;
+    const up=await sb.storage.from('avatars').upload(path, blob, { contentType:'image/jpeg', upsert:false }); if(up.error) throw new Error(up.error.message);
+    const url=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+    const { error } = await sb.from('profiles').update({ avatar_url:url }).eq('id', me.id); if(error) throw new Error(error.message);
+    if(myProfile) myProfile.avatar_url=url; $('#obOval').style.backgroundImage=`url(${url})`; toast('프로필 사진을 올렸어요');
+  }catch(e){ toast('사진을 올리지 못했어요: '+(e.message||'')); }
+}
 // Google Maps 스크립트 로더 (지도·역지오코딩 공용, 1회만 주입)
 window.gm_authFailure = ()=>{ MapAdapter.fallback('gm_authFailure'); };
 function loadGoogleMaps(){
@@ -1196,49 +1266,53 @@ async function reverseGeocode(lat, lng){
 }
 function detectLocation(){
   if(!navigator.geolocation){ setLocStatus('이 브라우저는 위치를 지원하지 않아요. 직접 입력해 주세요.'); return; }
-  setLocStatus(ico('location')+' 위치 확인 중…');
+  renderDong();
   navigator.geolocation.getCurrentPosition(async pos=>{
     const { latitude:lat, longitude:lng } = pos.coords;
     try{
       const d = await reverseGeocode(lat, lng);
       loc = { lat, lng, dong_name:d.dong_name, dong_code:d.dong_code, verified:true };
-      setLocStatus(`${ico('location')} <b>${esc(d.dong_name)}</b> <span class="muted">${esc(d.dong_code.split('|').slice(0,-1).join(' '))}</span> ${ico('check')}`);
-    }catch(e){ loc = { lat, lng, dong_name:null, dong_code:null, verified:true }; setLocStatus('위치는 잡았지만 동네 이름을 찾지 못했어요. 직접 입력해 주세요.'); }
+      renderDong();
+    }catch(e){ loc = { lat, lng, dong_name:null, dong_code:null, verified:true }; setLocStatus('<div class="dwait">위치는 잡았지만 동네 이름을 찾지 못했어요.<br>아래 「직접 입력」을 눌러 주세요.</div>'); }
   }, err=>{
-    setLocStatus(err.code===1 ? '위치 권한이 거부됐어요. 브라우저 설정에서 허용하거나 직접 입력해 주세요.' : '위치를 가져오지 못했어요. 다시 확인하거나 직접 입력해 주세요.');
+    setLocStatus('<div class="dwait">'+(err.code===1 ? '위치 권한이 거부됐어요.<br>설정에서 허용하거나 「직접 입력」을 눌러 주세요.' : '위치를 가져오지 못했어요.<br>「다시 확인」하거나 「직접 입력」을 눌러 주세요.')+'</div>');
   }, { enableHighAccuracy:false, timeout:10000, maximumAge:300000 });
 }
 function manualDong(){
   const v = prompt('동네 이름을 입력해 주세요 (예: 역삼동)', loc.dong_name||''); if(v===null) return;
   const name = v.trim(); if(!name) return;
   loc.dong_name = name; loc.dong_code = loc.dong_code || name; loc.verified = false;
-  setLocStatus(`${ico('location')} <b>${esc(name)}</b> <span class="muted">직접 입력</span>${loc.lat?'':' · 지도 핀은 위치 확인 후 표시돼요'}`);
+  renderDong(); if(!loc.lat) toast('지도 핀은 위치 확인 후 표시돼요');
 }
-function openOnboard(edit){
+function openOnboard(edit, step){
   const p = myProfile||{};
-  $('#obTitle').textContent = edit?'프로필 수정':'프로필 만들기'; $('#obBack').hidden=!edit;
+  $('#obTitle').textContent = edit?'프로필 수정':'프로필 만들기'; $('#obBack').hidden=!edit; $('#v-onboard').classList.toggle('edit', !!edit);
   $('#f_nick').value=p.nickname||'';
   loc = { lat:p._c?.lat||null, lng:p._c?.lng||null, dong_name:p.dong_name||null, dong_code:p.dong_code||null, verified:!!p.dong_verified_at };
-  if(loc.dong_name) setLocStatus(`${ico('location')} <b>${esc(loc.dong_name)}</b> <span class="muted">${loc.verified?'확인됨 '+ico('check'):'직접 입력'}</span>`); else detectLocation();
+  $('#obOval').style.backgroundImage = p.avatar_url?`url(${p.avatar_url})`:'';
   segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
   $('#f_bio').value=p.bio||''; $('#f_mbti').value=p.mbti||'';
-  $('#obSave').textContent = edit ? '저장' : '저장하고 다음으로'; $('#agreeWrap').hidden = edit; if(!edit) $('#f_agree').checked = !!p.terms_agreed_at;
+  if(!edit) $('#f_agree').checked = !!p.terms_agreed_at;
   show('onboard');
+  if(edit){ document.querySelectorAll('#v-onboard .obs').forEach(el=>el.classList.remove('on')); $('#obFoot').classList.remove('on'); renderDong(); if(!loc.dong_name) detectLocation(); }
+  else obShow(step || (p.dong_name && p.nickname && p.terms_agreed_at ? 4 : 1));
 }
 async function saveProfile(){
   const edit = !$('#obBack').hidden;
-  if(!loc.dong_name) return toast('동네를 확인해 주세요 (자동 인식 또는 직접 입력)');
-  if(!edit && !$('#f_agree').checked) return toast('이용약관과 개인정보처리방침에 동의해 주세요');
+  if(!loc.dong_name){ toast('동네를 확인해 주세요 (자동 인식 또는 직접 입력)'); return false; }
+  if(!$('#f_nick').value.trim()){ toast('닉네임을 적어 주세요'); return false; }
+  if(!edit && !$('#f_agree').checked){ toast('이용약관과 개인정보처리방침에 동의해 주세요'); return false; }
   const mbti = $('#f_mbti').value.trim().toUpperCase();
-  if(mbti && !/^[EI][NS][TF][JP]$/.test(mbti)) return toast('MBTI 형식을 확인해 주세요');
+  if(mbti && !/^[EI][NS][TF][JP]$/.test(mbti)){ toast('MBTI 형식을 확인해 주세요'); return false; }
   const row = { nickname:$('#f_nick').value.trim()||'뜨개인', dong_code:loc.dong_code, dong_name:loc.dong_name, dong_verified_at: loc.verified ? new Date().toISOString() : null, experience:segVal('#f_exp'),
     bio:$('#f_bio').value.trim()||null, mbti:mbti||null, available:segVal('#f_avail',true), onboarded_at:new Date().toISOString(), ...(edit?{}:{terms_agreed_at:new Date().toISOString()}) };
   const { error } = await sb.from('profiles').update(row).eq('id', me.id);
-  if(error) return toast('저장 실패: '+error.message);
+  if(error){ toast('저장 실패: '+error.message); return false; }
   // 위치: 새로 잡은 GPS만 흐려서 저장 (원본은 서버에 남지 않음). 직접 입력만 했으면 기존 좌표 유지
   if(loc.lat && loc.verified){ const r = await sb.rpc('set_fuzzy_location', { p_lat:loc.lat, p_lng:loc.lng }); if(r.error) toast('위치 저장 실패: '+r.error.message); }
   await loadMe(); toast('저장했어요'); watchFriends(); loadMyRooms();
-  if(!(myProfile.skills||[]).length && !edit) openSlides(()=>openSkills()); else go(edit?'my':'map');
+  if(edit) go('my');
+  return true;
 }
 
 // ============ 지도 어댑터 (Google Maps ↔ Leaflet/OSM) ============
@@ -3132,8 +3206,8 @@ async function saveSkills(){
   if(error) return toast('저장 실패: '+error.message);
   Object.assign(myProfile, data); skillsDirty=false; loadRecs(true).then(()=>{ if(view==='skills') renderSkills(); });
 }
-async function finishSkills(){ if(skillsDirty) await saveSkills(); toast(`코바늘 ${myProfile.level_crochet||0}단계 · 대바늘 ${myProfile.level_knit||0}단계로 저장했어요`); go('map'); }
-async function leaveSkills(){ if(skillsDirty) await saveSkills(); go('my'); }
+async function finishSkills(){ if(skillsDirty) await saveSkills(); toast(`코바늘 ${myProfile.level_crochet||0}단계 · 대바늘 ${myProfile.level_knit||0}단계로 저장했어요`); if(obReturn) return openOnboard(false, 4); go('map'); }
+async function leaveSkills(){ if(skillsDirty) await saveSkills(); if(obReturn) return openOnboard(false, 4); go('my'); }
 
 // 단계 표시·비교
 function lvChips(p){ const out=[]; if(p.level_crochet>0) out.push(`<span class="lvchip">코바늘 <b>${p.level_crochet}단계</b> ${LVNAME[p.level_crochet]}</span>`); if(p.level_knit>0) out.push(`<span class="lvchip">대바늘 <b>${p.level_knit}단계</b> ${LVNAME[p.level_knit]}</span>`); return out.join(' '); }
