@@ -1209,3 +1209,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   알림: notify_on_shop_post — 가게 글은 팔로워(shop_post), 작가 클래스는 친구에게 notice + link {type:'profile', id, tab:'classes'}
 --   앱: openClassForm 이 작가 모드(가게 없음 → 장소 직접 입력, shop_id null) · 프로필/마이 '클래스' 탭(loadUserClasses) · ＋·설정에 클래스 열기 · openLink profile
 -- ---------------------------------------------------------------
+
+-- 53. 클래스 신청·확정 앱 안에서 (마이그레이션 class_applications, 2026-09-27 대표 지시: 외부 링크·전화·DM 신청 금지)
+--   class_applications(post_id, profile_id, status applied|accepted|rejected|cancelled, note, host_note, unique(post,profile)) · shop_posts.room_id(클래스 채팅방)
+--   class_host(post) = 가게 오너 또는 작가 · apply_class(post, note): 본인 클래스·시작 지남·마감·중복·거절자 재신청 차단, 호스트에게 알림(link class_manage)
+--   cancel_class_application(post): 본인 취소 + 채팅방에서 빠짐 · decide_class_application(id, accept, note): 호스트만, 최대 인원 검사, 확정 시 단체방 생성/초대 + 안내 메시지, 회원 알림(link class)
+--   class_applicants(post) 호스트용 · class_app_summary(posts[]) 카드용(내 상태·확정/대기 수·room_id) · my_class_applications() 설정 › 신청한 클래스
+--   앱: classBox 버튼 = 신청하기(남은 자리)/신청 완료·취소/확정·채팅방/정원 참/마감, 호스트는 [신청자 관리] 시트(확정·거절·확정 취소). 양식의 '신청 방법' 삭제(extra.apply='app'). 결제는 여전히 앱 밖
+-- ---------------------------------------------------------------

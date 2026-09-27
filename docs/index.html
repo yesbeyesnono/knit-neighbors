@@ -664,7 +664,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #v-meetform .cfphotos:empty{display:none}#v-meetform .ccard .fld{padding:10px 12px}#v-meetform .ccard .fld input{width:auto;flex:1}
 #v-classform .cfphotos:empty{display:none}#v-shopform .cfphotos:empty{display:none}#v-shopform .body{gap:10px}.cfl .req{display:inline-block;font-size:.7rem;background:var(--chip);color:var(--olive);border-radius:999px;padding:1px 7px;margin-left:4px;font-weight:600;vertical-align:1px}#v-classform .top .btn.sm{width:auto;padding:8px 16px}#v-classform .body{gap:10px}
 .ccard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}.ccard .cfl:first-child{margin-top:0}.ccard .cfl{margin:12px 0 6px}.ccard input,.ccard textarea,.ccard select{width:100%}.ccard .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.clsbox{margin:8px 0 4px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg2)}.clsbox .r{display:flex;gap:8px;font-size:.9rem;margin:4px 0}.clsbox .r span:first-child{flex:none;width:64px;color:var(--ink2)}.clsbox .r span:last-child{flex:1;white-space:pre-wrap}.clsbox .btnrow{display:flex;gap:8px;margin-top:10px}.clsbox .btnrow a,.clsbox .btnrow button{flex:1;text-align:center;font:inherit;font-size:.9rem;font-weight:600;padding:10px;border-radius:12px;border:0;background:var(--btn);color:var(--btn-ink);text-decoration:none;cursor:pointer}
+.clsbox{margin:8px 0 4px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg2)}.clsbox .r{display:flex;gap:8px;font-size:.9rem;margin:4px 0}.clsbox .r span:first-child{flex:none;width:64px;color:var(--ink2)}.clsbox .r span:last-child{flex:1;white-space:pre-wrap}.clsbox .btnrow{display:flex;gap:8px;margin-top:10px}.clsbox .btnrow a,.clsbox .btnrow button{flex:1;text-align:center;font:inherit;font-size:.9rem;font-weight:600;padding:10px;border-radius:12px;border:0;background:var(--btn);color:var(--btn-ink);text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}.clsbox .btnrow button.o{background:#fff;border:1px solid var(--line);color:var(--ink);flex:0 1 auto}.clsbox .btnrow button:disabled{background:var(--bg2);color:var(--ink3);cursor:default}
+.aprow{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.aprow .nm{flex:1;min-width:0}.aprow .nm b{display:block}.aprow .nm span{font-size:.8rem;color:var(--ink2)}.aprow .st{font-size:.72rem;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--olive)}.aprow .st.r{background:#fde8ea;color:#c9303f}.aprow button{font:inherit;font-size:.82rem;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer}.aprow button.p{background:var(--btn);border-color:var(--btn);color:var(--btn-ink);font-weight:600}
 .pubpill{align-self:center;font:inherit;font-size:.82rem;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--ink2);cursor:pointer}.pubpill svg{width:14px;height:14px;vertical-align:-2px;stroke:var(--acc);fill:none;stroke-width:2;margin-right:3px}
 .fld{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:1rem}.fld input{border:0;padding:4px 0;font-weight:700;font-size:1rem;background:transparent}.fld .r{margin-left:auto;color:var(--ink3);flex:none}.fld .r svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .fld.place{cursor:pointer}.fld.place b{display:block}.fld.place small{display:block;color:var(--ink2);font-size:.8rem;font-weight:400}.fld.place .r{color:var(--acc)}
@@ -1036,7 +1037,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
         <div class="cfl">커리큘럼 <span class="muted">한 줄에 한 단계</span></div><textarea id="cCurri" maxlength="600" placeholder="1. 실·바늘 잡는 법, 기초코&#10;2. 그래니 스퀘어 뜨기&#10;3. 연결하고 마무리" style="min-height:80px"></textarea>
         <div class="cfl">강사 소개 <span class="muted">(선택)</span></div><input id="cTeacher" maxlength="200" placeholder="예: 공방 운영 5년, 인스타 @…">
       </div>
-      <div class="ccard"><div class="cfl">신청 방법 <span class="req">필수</span></div><div class="seg" id="cApply"></div><input id="cApplyTo" maxlength="200" placeholder="신청 링크 또는 전화·인스타 아이디" style="margin-top:8px">
+      <div class="ccard"><div class="cfl">신청·확정 <span class="muted">앱 안에서</span></div><p class="muted" style="font-size:.85rem;margin:0">회원이 [신청하기]를 누르면 알림이 오고, 신청자 목록에서 확정·거절해요. 확정한 사람은 클래스 채팅방에 자동으로 들어와요. 외부 링크·전화로는 받지 않아요.</p>
         <div class="cfl">취소·환불 규정 <span class="req">필수</span> <span class="muted">결제 전에 보여야 효력이 있어요</span></div><div class="seg" id="cRefund"></div><textarea id="cRefundTxt" maxlength="400" style="min-height:70px;margin-top:8px"></textarea>
         <div class="cfl">유의사항 <span class="muted">(선택)</span></div><textarea id="cNote" maxlength="400" placeholder="예: 10분 전 도착, 아동 동반 불가, 사진 촬영 안내" style="min-height:60px"></textarea>
         <p class="muted" style="font-size:.78rem;margin:8px 0 0">결제·예약은 가게가 직접 받아요(앱은 소개만). 최소 인원이 안 차서 취소되면 전액 환불 문구가 자동으로 붙어요. 수강료 외 비용은 금액까지 적어 주세요.</p>
@@ -1617,7 +1618,7 @@ async function openShop(id){
     sb.from('shop_follows').select('shop_id').eq('shop_id',id).eq('profile_id',me.id)
   ]);
   if(!sh) return toast('가게를 찾을 수 없어요');
-  curShop=sh; const following=!!(fol&&fol.length); const mine = sh.owner_id===me.id;
+  curShop=sh; await loadClassApps(posts); const following=!!(fol&&fol.length); const mine = sh.owner_id===me.id;
   const links=sh.links||{}; const L=[['instagram','인스타그램'],['store','스토어'],['web','홈페이지'],['naver','네이버'],['kakao','카카오']].filter(([k])=>links[k]).map(([k,l])=>`<a class="btn o" href="${esc(links[k])}" target="_blank" rel="noopener">${l} ↗</a>`).join('');
   const c = sh.location ? parseGeo(sh.location) : null;
   $('#shopTitle').textContent = sh.name;
@@ -2085,6 +2086,7 @@ async function openLink(l){
   try{
     if(l.type==='meetup') return openMeetup(l.id); if(l.type==='event') return openEvent(l.id); if(l.type==='shop'||l.type==='class') return openShop(l.id); if(l.type==='post') return openPost(l.id);
     if(l.type==='pattern') return typeof openPattern==='function' ? openPattern(l.id) : go('comm');
+    if(l.type==='class'||l.type==='class_manage'){ const { data:p } = await sb.from('shop_posts').select('id,shop_id,author_id').eq('id', l.id).single(); if(!p) return go('comm'); if(p.shop_id) await openShop(p.shop_id); else { myTab='classes'; if(p.author_id===me.id) go('my'); else { await openProfile(p.author_id); const b=document.querySelector('#profTabs [data-t="classes"]'); if(b) b.click(); } } if(l.type==='class_manage') setTimeout(()=>openClassApplicants(l.id), 400); return; }
     if(l.type==='profile'){ if(l.id===me.id){ if(l.tab) myTab=l.tab; return go('my'); } await openProfile(l.id); if(l.tab){ const b=document.querySelector('#profTabs [data-t=+l.tab+]'); if(b) b.click(); } return; }
     if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(['map','comm','chats','my'].includes(v)) return go(v); }
   }catch(e){}
@@ -3000,7 +3002,7 @@ async function loadUserClasses(uid, el){
   el.innerHTML='<div class="empty">불러오는 중…</div>';
   const { data, error } = await sb.from('shop_posts').select('*').eq('author_id', uid).is('shop_id', null).eq('kind','class').order('created_at',{ascending:false}).limit(30);
   if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
-  const mine = uid===me.id;
+  await loadClassApps(data); const mine = uid===me.id;
   el.innerHTML = (data||[]).length ? data.map(p=>`<div class="spost" id="sp-${p.id}" style="border-top:0;border-bottom:1px solid var(--line)"><span class="k class">클래스</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteMyClass('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${Math.min(p.photos.length,4)}">${p.photos.slice(0,4).map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}${p.extra?.v?classBox(p):''}</div>`).join('')
     : `<div class="empty" style="white-space:pre-line">${mine?'아직 연 클래스가 없어요.\n＋ › 클래스 열기로 첫 클래스를 열어 보세요':'아직 연 클래스가 없어요'}</div>`;
 }
@@ -3024,7 +3026,7 @@ async function openClassForm(){
   closeSub(); closeSheet(); composeKind='class'; sPhotos=[]; cTechSel=new Set();
   if(!['compose','cert','meetform','classform'].includes(view)) composeBack=view;
   if(!$('#cCraft').children.length){
-    seg('#cCraft', C_CRAFT); seg('#cLevel', {1:'1단계 입문',2:'2단계 초급',3:'3단계 중급',4:'4단계 상급',5:'5단계 전문'}); seg('#cType', C_TYPE); seg('#cDur', M_DUR); seg('#cMat', C_MAT); seg('#cPlace', C_PLACE); seg('#cApply', C_APPLY); seg('#cRefund', C_REFUND);
+    seg('#cCraft', C_CRAFT); seg('#cLevel', {1:'1단계 입문',2:'2단계 초급',3:'3단계 중급',4:'4단계 상급',5:'5단계 전문'}); seg('#cType', C_TYPE); seg('#cDur', M_DUR); seg('#cMat', C_MAT); seg('#cPlace', C_PLACE); seg('#cRefund', C_REFUND);
     $('#cType').addEventListener('click', ()=>{ $('#cRepeatWrap').hidden = segVal('#cType')!=='course'; });
     $('#cMat').addEventListener('click', ()=>{ $('#cMatFee').hidden = segVal('#cMat')!=='extra'; });
     $('#cPlace').addEventListener('click', ()=>{ $('#cPlaceTxt').hidden = segVal('#cPlace')==='shop'; });
@@ -3033,9 +3035,9 @@ async function openClassForm(){
     $('#cEnds').addEventListener('input', ()=>{ $('#cEnds').dataset.touched='1'; });
     loadTech();
   }
-  ['cTitle','cTag','cWork','cSessions','cMin','cMax','cFee','cMatFee','cProvide','cBring','cPlaceTxt','cPlaceHint','cDescr','cFor','cCurri','cTeacher','cApplyTo','cNote'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
+  ['cTitle','cTag','cWork','cSessions','cMin','cMax','cFee','cMatFee','cProvide','cBring','cPlaceTxt','cPlaceHint','cDescr','cFor','cCurri','cTeacher','cNote'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
   const craft = myProfile?.craft==='knit'?'knit':myProfile?.craft==='both'?'crochet':'crochet';
-  segSet('#cCraft', craft); segSet('#cLevel','1'); segSet('#cType','oneday'); segSet('#cDur','120'); segSet('#cMat','incl'); segSet('#cPlace', myShop?'shop':'other'); segSet('#cApply','link'); segSet('#cRefund','d3');
+  segSet('#cCraft', craft); segSet('#cLevel','1'); segSet('#cType','oneday'); segSet('#cDur','120'); segSet('#cMat','incl'); segSet('#cPlace', myShop?'shop':'other'); segSet('#cRefund','d3');
   $('#cRepeatWrap').hidden=true; $('#cMatFee').hidden=true; $('#cPlaceTxt').hidden=!!myShop; [...$('#cPlace').children].forEach(b=>{ b.hidden = b.dataset.k==='shop' && !myShop; }); $('#cRefundTxt').value=C_REFUND_TXT.d3; delete $('#cEnds').dataset.touched;
   const d=new Date(); d.setDate(d.getDate()+7); const pad=n=>String(n).padStart(2,'0'); $('#cDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#cDate').min=(t=>`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`)(new Date()); $('#cClock').value='14:00'; d.setDate(d.getDate()-1); $('#cEnds').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   $('#cMin').value='1'; $('#classPost').disabled=false; renderCTech(); renderClassPhotos();
@@ -3068,14 +3070,13 @@ async function submitClass(){
     if(v('cFee')==='') throw new Error('수강료를 적어 주세요 (무료면 0)'); const fee=Math.max(0,+v('cFee')||0);
     const mat=segVal('#cMat')||'incl'; const matFee=mat==='extra'?+v('cMatFee')||0:0; if(mat==='extra' && !matFee) throw new Error('재료비가 별도면 금액을 적어 주세요');
     const place=segVal('#cPlace')||'shop'; const placeTxt=place==='shop'&&myShop?(myShop.address||myShop.name):v('cPlaceTxt'); if(place!=='shop' && !placeTxt) throw new Error('장소를 적어 주세요');
-    const apply=segVal('#cApply')||'link'; const applyTo=v('cApplyTo'); if(apply!=='visit' && !applyTo) throw new Error('신청 링크나 연락처를 적어 주세요'); if(apply==='link' && !/^https?:\/\/\S+$/i.test(applyTo)) throw new Error('신청 링크는 https:// 로 시작해야 해요');
     const refund=v('cRefundTxt'); if(!refund) throw new Error('취소·환불 규정을 적어 주세요');
     const ends = v('cEnds') ? new Date(v('cEnds')+'T23:59:59') : null; if(ends && ends>startsAt) throw new Error('모집 마감은 시작 전이어야 해요');
     await loadBanned(); if([title,v('cTag'),v('cDescr'),v('cNote')].some(hasBanned)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const photos = await uploadPhotos(sPhotos);
     const extra = { v:1, tag:v('cTag')||null, craft:segVal('#cCraft')||'crochet', level:+(segVal('#cLevel')||1), techniques:[...cTechSel], work, type, starts_at:startsAt.toISOString(), duration_min:+(segVal('#cDur')||120), sessions, cycle:type==='course'?v('cCycle'):null,
       min, max, fee, material:mat, material_fee:matFee, provide:v('cProvide')||null, bring:v('cBring')||null, place, place_text:placeTxt||null, place_hint:v('cPlaceHint')||null,
-      descr:v('cDescr')||null, target:v('cFor')||null, curriculum:v('cCurri').split('\n').map(x=>x.trim()).filter(Boolean), teacher:v('cTeacher')||null, apply, apply_to:applyTo||null, refund, note:v('cNote')||null };
+      descr:v('cDescr')||null, target:v('cFor')||null, curriculum:v('cCurri').split('\n').map(x=>x.trim()).filter(Boolean), teacher:v('cTeacher')||null, apply:'app', apply_to:null, refund, note:v('cNote')||null };
     const { error } = await sb.from('shop_posts').insert({ shop_id: myShop?myShop.id:null, author_id: me.id, kind:'class', title, body: extra.tag, photos, ends_at: ends?ends.toISOString():null, extra });
     if(error) throw new Error(error.message);
     sPhotos=[]; composeBack=null; if(myShop){ toast('클래스를 열었어요. 팔로워에게 알림이 갔어요'); return openShop(myShop.id); } toast('클래스를 열었어요. 친구들에게 알림이 갔어요'); myTab='classes'; return go('my');
@@ -3083,6 +3084,35 @@ async function submitClass(){
   b.disabled=false;
 }
 const won = n => (n||0).toLocaleString('ko-KR')+'원';
+let classApps={};
+function classHostOf(p){ return p.shop_id ? (curShop&&curShop.id===p.shop_id ? curShop.owner_id : (myShop&&myShop.id===p.shop_id ? me?.id : null)) : p.author_id; }
+async function loadClassApps(posts){ const ids=(posts||[]).filter(p=>p.kind==='class').map(p=>p.id); if(!ids.length || !me) return; const { data } = await sb.rpc('class_app_summary', { p_posts: ids }); classApps = Object.assign(classApps, data||{}); }
+async function refreshClassCard(postId){ const { data } = await sb.rpc('class_app_summary', { p_posts:[postId] }); Object.assign(classApps, data||{}); const { data:p } = await sb.from('shop_posts').select('*').eq('id', postId).single(); const el=document.querySelector(`#sp-${postId} .clsbox`); if(el && p) el.outerHTML = classBox(p); }
+async function openClassApply(postId){
+  const { data:p } = await sb.from('shop_posts').select('*').eq('id', postId).single(); if(!p) return toast('클래스를 찾을 수 없어요'); const x=p.extra||{};
+  openSheet(`<b style="font-size:1.05rem">클래스 신청</b><div><b>${esc(p.title)}</b><div class="muted" style="font-size:.85rem">${x.fee?won(x.fee):'무료'}${x.material==='extra'?` + 재료비 ${won(x.material_fee)}`:''} · 최대 ${x.max||'-'}명</div></div>
+    <div class="card soft" style="font-size:.85rem"><b>취소·환불</b> ${esc(x.refund||'')}<br><span class="muted">결제는 확정 뒤 호스트가 채팅방에서 안내해요. 앱 안에서 돈을 받지 않아요.</span></div>
+    <textarea id="capNote" maxlength="300" placeholder="호스트에게 남길 말 (선택 · 예: 왼손잡이예요, 초보예요)" style="min-height:70px"></textarea>
+    <button class="btn" id="capSend" onclick="sendClassApply('${p.id}')">신청하기</button>`);
+}
+async function sendClassApply(postId){ const b=$('#capSend'); b.disabled=true; const { error } = await sb.rpc('apply_class', { p_post: postId, p_note: $('#capNote').value.trim()||null }); if(error){ b.disabled=false; return toast(error.message); } closeSheet(); toast('신청했어요. 호스트가 확정하면 알림으로 알려 드려요'); refreshClassCard(postId); }
+async function cancelClassApp(postId){ if(!confirm('신청을 취소할까요?')) return; const { error } = await sb.rpc('cancel_class_application', { p_post: postId }); if(error) return toast(error.message); toast('취소했어요'); refreshClassCard(postId); }
+async function openClassApplicants(postId){
+  const [{ data:rows, error },{ data:p }] = await Promise.all([sb.rpc('class_applicants', { p_post: postId }), sb.from('shop_posts').select('id,title,extra,room_id').eq('id', postId).single()]); if(error) return toast(error.message);
+  const x=p?.extra||{}; const acc=(rows||[]).filter(r=>r.status==='accepted').length; const ST={applied:'대기',accepted:'확정',rejected:'거절',cancelled:'취소'};
+  openSheet(`<b style="font-size:1.05rem">신청자 관리</b><div class="muted" style="font-size:.85rem">${esc(p?.title||'')} · 확정 ${acc}${x.max?'/'+x.max:''}명${p?.room_id?` · <a href="#" onclick="closeSheet();openRoom('${p.room_id}');return false" style="color:var(--olive)">클래스 채팅방 열기</a>`:''}</div>
+    <div>${(rows||[]).map(r=>`<div class="aprow">${avatar({nickname:r.nickname,avatar_url:r.avatar_url})}<div class="nm"><b>${esc(r.nickname)} <span class="st ${r.status==='rejected'||r.status==='cancelled'?'r':''}">${ST[r.status]}</span></b><span>${esc(r.dong||'')}${r.lv_crochet?` · 코바늘 ${r.lv_crochet}단계`:''}${r.lv_knit?` · 대바늘 ${r.lv_knit}단계`:''}${r.note?`<br>"${esc(r.note)}"`:''}</span></div>${r.status==='applied'?`<button class="p" onclick="decideClassApp(${r.id},true,'${postId}')">확정</button><button onclick="decideClassApp(${r.id},false,'${postId}')">거절</button>`:r.status==='accepted'?`<button onclick="decideClassApp(${r.id},false,'${postId}')">확정 취소</button>`:''}</div>`).join('')||'<div class="empty">아직 신청이 없어요</div>'}</div>
+    <p class="muted" style="font-size:.78rem;margin:0">확정하면 신청자에게 알림이 가고 클래스 채팅방에 들어와요. 결제·준비물 안내는 채팅방에서 해 주세요.</p>`);
+}
+async function decideClassApp(id, accept, postId){
+  const note = accept ? null : (prompt('거절 사유 (선택, 신청자에게 전달돼요)') ?? null); if(!accept && note===null) return;
+  const { error } = await sb.rpc('decide_class_application', { p_id:id, p_accept:accept, p_note:note||null }); if(error) return toast(error.message);
+  toast(accept?'확정했어요. 채팅방에 초대됐어요':'처리했어요'); openClassApplicants(postId); refreshClassCard(postId);
+}
+async function openMyClassApps(){
+  const { data, error } = await sb.rpc('my_class_applications'); if(error) return toast(error.message); const ST={applied:'확인 기다리는 중',accepted:'확정',rejected:'함께하지 못함'};
+  openSub('신청한 클래스', `<div style="margin-top:8px">${(data||[]).map(a=>`<div class="aprow" style="cursor:pointer" onclick="closeSub();openLink({type:'class',id:'${a.post_id}'})"><div class="nm"><b>${esc(a.title)} <span class="st ${a.status==='rejected'?'r':''}">${ST[a.status]||a.status}</span></b><span>${esc(a.host||'')}${a.starts_at?' · '+fmtd(a.starts_at):''}${a.host_note?`<br>"${esc(a.host_note)}"`:''}</span></div>${a.status==='accepted'&&a.room_id?`<button onclick="event.stopPropagation();closeSub();openRoom('${a.room_id}')">채팅방</button>`:''}</div>`).join('')||'<div class="empty">아직 신청한 클래스가 없어요. 가게 화면이나 작가 프로필의 클래스에서 신청할 수 있어요.</div>'}</div>`);
+}
 function classBox(p){
   const x=p.extra||{}; const d=x.starts_at?new Date(x.starts_at):null; const wd=['일','월','화','수','목','금','토'];
   const when = d ? `${d.getMonth()+1}/${d.getDate()}(${wd[d.getDay()]}) ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : '';
@@ -3090,9 +3120,16 @@ function classBox(p){
   const cost = `${x.fee?won(x.fee):'무료'}${x.material==='extra'?` + 재료비 ${won(x.material_fee)} 별도`:x.material==='incl'?' (재료비 포함)':''}`;
   const techs=(x.techniques||[]); const techTxt=techs.length?`<span style="text-decoration:underline;text-underline-offset:2px;cursor:pointer" onclick="openTechView(${esc(JSON.stringify(techs))})">${esc(techs.map(techName).join(', '))} ›</span>`:'';
   const row=(l,v)=>v?`<div class="r"><span>${l}</span><span>${v}</span></div>`:'';
-  const applyBtn = x.apply==='link'&&x.apply_to?`<a href="${esc(x.apply_to)}" target="_blank" rel="noopener">신청하기</a>`:x.apply==='phone'&&x.apply_to?`<a href="tel:${esc(x.apply_to.replace(/[^\d+]/g,''))}">전화로 신청 ${esc(x.apply_to)}</a>`:x.apply==='insta'&&x.apply_to?`<a href="https://instagram.com/${esc(x.apply_to.replace(/^@/,''))}" target="_blank" rel="noopener">인스타 DM으로 신청</a>`:`<button type="button" onclick="toast('가게에 직접 신청해 주세요')">가게에 직접 신청</button>`;
+  const ap=classApps[p.id]||{}; const isHost = classHostOf(p)===me?.id; const full = x.max && (ap.accepted||0) >= x.max;
+  const applyBtn = isHost ? `<button type="button" onclick="openClassApplicants('${p.id}')">신청자 관리 · 확정 ${ap.accepted||0}${x.max?'/'+x.max:''}명${ap.applied?` · 대기 ${ap.applied}`:''}</button>${ap.room_id?`<button type="button" class="o" onclick="openRoom('${ap.room_id}')">채팅방</button>`:''}`
+    : ap.mine==='accepted' ? `<button type="button" class="o" onclick="${ap.room_id?`openRoom('${ap.room_id}')`:`toast('채팅방이 곧 열려요')`}">${ico('check')} 확정됐어요 · 채팅방</button><button type="button" class="o" onclick="cancelClassApp('${p.id}')">취소</button>`
+    : ap.mine==='applied' ? `<button type="button" class="o" onclick="toast('호스트가 확인하면 알림으로 알려 드려요')">신청 완료 · 확인 기다리는 중</button><button type="button" class="o" onclick="cancelClassApp('${p.id}')">취소</button>`
+    : ap.mine==='rejected' ? `<button type="button" class="o" disabled>이번엔 함께하지 못했어요</button>`
+    : (p.ends_at && new Date(p.ends_at)<new Date()) ? `<button type="button" class="o" disabled>모집 마감</button>`
+    : full ? `<button type="button" class="o" disabled>정원이 찼어요</button>`
+    : `<button type="button" onclick="openClassApply('${p.id}')">신청하기${x.max?` · 남은 자리 ${Math.max(0,x.max-(ap.accepted||0))}`:''}</button>`;
   return `<div class="clsbox">${row('일정', esc(sched))}${row('난이도', `${x.level}단계 ${LVNAME[x.level]||''} · ${C_CRAFT[x.craft]||''}`)}${row('배우기', techTxt)}${row('완성작', esc(x.work||''))}${row('인원', `최소 ${x.min}명 · 최대 ${x.max}명`)}${row('비용', esc(cost))}${row('제공', esc(x.provide||''))}${row('준비물', esc(x.bring||''))}${row('장소', esc((x.place==='online'?'온라인 · ':'')+(x.place_text||''))+(x.place_hint?`<br><span class="muted">${esc(x.place_hint)}</span>`:''))}${row('추천', esc(x.target||''))}${(x.curriculum||[]).length?row('커리큘럼', x.curriculum.map(esc).join('<br>')):''}${row('강사', esc(x.teacher||''))}${x.descr?`<div class="txt" style="margin:8px 0 2px;white-space:pre-wrap;font-size:.9rem">${esc(x.descr)}</div>`:''}
-    <div style="margin-top:8px;font-size:.8rem;color:var(--ink2)"><b>취소·환불</b> ${esc(x.refund||'')}${x.min>1?` 최소 인원(${x.min}명)이 안 차서 취소되면 전액 환불돼요.`:''}${x.note?`<br><b>유의</b> ${esc(x.note)}`:''}<br>결제·예약은 가게가 직접 받아요. 뜨개동네는 소개만 해요.</div>
+    <div style="margin-top:8px;font-size:.8rem;color:var(--ink2)"><b>취소·환불</b> ${esc(x.refund||'')}${x.min>1?` 최소 인원(${x.min}명)이 안 차서 취소되면 전액 환불돼요.`:''}${x.note?`<br><b>유의</b> ${esc(x.note)}`:''}<br>신청·확정은 앱에서, 결제는 호스트가 직접 받아요(앱 내 결제 없음).</div>
     <div class="btnrow">${applyBtn}</div></div>`;
 }
 
@@ -3820,6 +3857,8 @@ function openSettings(){
       <button class="srow" onclick="closeSheet();openShop(myShop.id)"><span>내 가게 보기<br><span class="muted">소식·클래스 올리기 · 팔로워</span></span><span class="car">›</span></button>`
       :`<button class="srow" onclick="openShopClaim()"><span>우리 가게 등록 신청<br><span class="muted">공방·실가게·뜨개 카페 사장님이라면</span></span><span class="car">›</span></button>`}
     </div>
+    <div class="sgrp">클래스</div>
+    <div class="slist"><button class="srow" onclick="closeSheet();openMyClassApps()"><span>신청한 클래스<br><span class="muted">확정 여부·채팅방</span></span><span class="car">›</span></button></div>
     <div class="sgrp">도움</div>
     <div class="slist">
       ${supStatus?.supporter?`<button class="srow" onclick="closeSheet();openSupporters()"><span>${ico('party')} 1기 서포터즈 <span class="muted">${supStatus.segment||''}구간 ${supStatus['seg'+(supStatus.segment||1)]||0}점 · 누적 ${supStatus.total||0}</span></span><span class="car">›</span></button>`:''}
