@@ -1223,3 +1223,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   앱 renderMy: ① 내 뜨개 단계 카드(myLvCard: 종목별 5칸 막대·다음 단계까지 남은 기법) ② 지금 할 일 띠(renderMyTop: 7일 내 모임·클래스 신청/확정·받은 친구 신청·호스트의 신청 대기, 없으면 숨김) ③ 이번 주(인증·글·답글, 서포터면 구간 점수) ⑤ 내 실함 요약 ⑥ 내 가게/작가 클래스(신청 대기 배지)
 --   ④ '첫 작품을 인증하면 Lv.1'은 카드 대신 알림: nudge_first_work() — 온보딩 2일 경과·인증 0·미발송이면 1회, link {type:view, view:cert} → 앱 openCert. check_in 이 호출
 -- ---------------------------------------------------------------
+
+-- 55. Connect / Host / Skill Index (마이그레이션 trait_index, 2026-09-27 대표 확정: 개수가 아닌 성향, 영어 이름, 프로필 공개)
+--   profiles.idx_connect/idx_host/idx_skill(0~100)·trait(connect|host|skill|balanced|new)·idx_updated_at — 사용자 UPDATE grant 없음(서버 계산)
+--   compute_trait_index(uid): Connect=답글(공감 받으면 +0.5)·누른 공감 0.5·참여한 모임 2 / Host=새 글(사진 1.5배)·연 모임 3·클래스 3 / Skill=인증 2(상급 기법 +2)·단계×3·인증 기법×0.5, 90일 안 가중 1·그 전 0.5, 100×(1−e^(−x/k)) k=12/8/12
+--   trait: 활동 3개 미만 new, 최고−2등 < 15 balanced, 아니면 최고 축. refresh_my_index()(본인, 마이 열 때) · refresh_all_trait_index() 크론 trait-index-nightly 15:40 UTC
+--   앱: 마이 idxcard(삼각 레이더 C/H/S + 막대) · 프로필 idxMini + 칩(MBTI 옆) · openIndexInfo 설명. 서포터즈 점수와 별개
+-- ---------------------------------------------------------------

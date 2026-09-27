@@ -422,6 +422,9 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .mycard{margin:10px 16px 0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;cursor:pointer}.mycard .hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}.mycard .hd b{font-size:1rem}.mycard .hd .car{margin-left:auto;color:var(--ink3)}
 .lvrow{display:flex;align-items:center;gap:10px;font-size:.88rem;margin:4px 0}.lvrow .nm{width:44px;color:var(--ink2);flex:none}.lvrow .lvmini{flex:1;display:flex;gap:3px}.lvrow .lvmini i{flex:1;height:7px;border-radius:4px;background:var(--bg2)}.lvrow .lvmini i.on{background:var(--acc)}.lvrow .st{flex:none;font-weight:600;min-width:72px;text-align:right}
 .todo{margin:10px 16px 0;border:1px solid var(--line);border-radius:14px;background:var(--bg2);overflow:hidden}.todo .tt{font-size:.78rem;color:var(--olive);font-weight:600;padding:8px 14px 0}.todo button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:0;border-top:1px solid #fff;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}.todo button:first-of-type{border-top:0}.todo .ic{flex:none;width:30px;height:30px;border-radius:9px;background:#fff;display:grid;place-items:center;color:var(--olive)}.todo .ic svg,.todo .ic img{width:16px;height:16px}.todo b{display:block;font-size:.9rem}.todo span{font-size:.78rem;color:var(--ink2)}.todo .ch{margin-left:auto;font-size:.72rem;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--olive);flex:none}
+.idxcard{margin:10px 16px 0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;display:flex;gap:14px;align-items:center;cursor:pointer}.idxcard svg{width:96px;height:88px;flex:none}.idxcard .rows{flex:1;min-width:0}.idxcard .r{display:flex;align-items:center;gap:8px;font-size:.85rem;margin:3px 0}.idxcard .r b{width:62px;flex:none;font-weight:700;letter-spacing:.01em}.idxcard .r i{flex:1;height:6px;border-radius:3px;background:var(--bg2);overflow:hidden}.idxcard .r i em{display:block;height:100%;background:var(--acc);border-radius:3px}.idxcard .r span{width:26px;text-align:right;font-size:.78rem;color:var(--ink2)}.idxcard .tr{font-size:.78rem;color:var(--ink2);margin-top:6px}.idxcard .tr b{color:var(--olive)}
+.idxchip{display:inline-block;font-size:.66rem;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--chip);color:var(--olive);vertical-align:middle;margin-left:4px;letter-spacing:.02em}
+.idxmini{display:flex;align-items:center;gap:10px;margin:8px 0 2px}.idxmini svg{width:64px;height:58px;flex:none}.idxmini .r{font-size:.76rem;color:var(--ink2);line-height:1.5}.idxmini .r b{color:var(--ink);width:56px;display:inline-block}
 .wk{margin:10px 16px 0;display:flex;gap:6px}.wk div{flex:1;background:var(--bg2);border-radius:12px;padding:8px 6px;text-align:center}.wk b{display:block;font-size:1.05rem}.wk span{font-size:.7rem;color:var(--ink2)}.wk .sup{background:var(--chip)}.wk .sup b{color:var(--olive)}
 .shopcard{margin:10px 16px 0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fafafa;display:flex;align-items:center;gap:12px;cursor:pointer}
 .shopcard .sq{width:44px;height:44px;border-radius:10px;border:2px solid var(--sel);display:grid;place-items:center;background:#fff}
@@ -1960,7 +1963,7 @@ async function openProfile(id){
   else action = `<button class="btn o" disabled>거절됨 · 30일 후 재신청</button>`;
   const handle=[p.dong_name?`${p.dong_name}${p.dong_verified_at?' ✓':''}`:'', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
   const bio = p.bio || [p.now_making?`지금 뜨는 것: ${p.now_making}`:'', p.stuck_on?`요즘 막히는 부분: ${p.stuck_on}`:''].filter(Boolean).join('\n');
-  const meta = [simBadge(p), p.experience?`<span class="chip">${EXP[p.experience]}</span>`:'', p.mbti?`<span class="chip">${esc(p.mbti)}</span>`:'', p.available?.length?`<span class="chip">${p.available.map(a=>AVAIL[a]).join(' · ')}</span>`:''].filter(Boolean).join('');
+  const meta = [simBadge(p), p.experience?`<span class="chip">${EXP[p.experience]}</span>`:'', p.mbti?`<span class="chip">${esc(p.mbti)}</span>`:'', p.trait&&p.trait!=='new'?`<span class="chip" style="background:var(--chip);color:var(--olive);font-weight:700">${traitLabel(p.trait)}</span>`:'', p.available?.length?`<span class="chip">${p.available.map(a=>AVAIL[a]).join(' · ')}</span>`:''].filter(Boolean).join('');
   $('#profTitle').textContent = p.nickname; if(!openProfile.scrollBound){ openProfile.scrollBound=true; $('#v-profile').addEventListener('scroll', e=>$('#profTitle').classList.toggle('show', e.target.scrollTop>70)); } $('#profTitle').classList.remove('show');
   $('#profBody').innerHTML = `
     <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}${lvBadge(p)}${p.is_author?'<span class="authbadge">작가</span>':''}</h2><div class="phandle">${esc(handle)}</div>${isWaving(p)?'<div style="margin-top:8px"><span class="wavebadge">'+ico('wave')+' 뜨개 친구를 찾고 있어요 · 먼저 인사해 주면 반가워해요</span></div>':''}</div>${avatar(p,true)}</div>
@@ -1969,6 +1972,7 @@ async function openProfile(id){
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}</div>
     ${p.is_author&&p.author_link?`<a class="authlink" href="${esc(p.author_link)}" target="_blank" rel="noopener">${linkLabel(p.author_link)} <span>↗</span></a>`:''}
+    <div style="padding:0 16px">${idxMini(p)}</div>
     <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${profTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button>${p.is_author?`<button data-t="classes" class="${profTab==='classes'?'on':''}">클래스</button>`:''}${FULL&&p.is_author?`<button data-t="patterns" class="${profTab==='patterns'?'on':''}">도안</button>`:''}</div>
     <div class="feed" id="profFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#profTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; profTab=b.dataset.t; [...$('#profTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadUserFeed(profId, profTab, $('#profFeed')); };
@@ -3827,6 +3831,27 @@ async function renderMy(){
   loadTech().then(()=>{ const el=$('#myLv'); if(el) el.innerHTML=myLvCard(); });
   renderMyTop();
 }
+// ---- Connect / Host / Skill Index (2026-09-27 대표 확정) — 서버가 계산(compute_trait_index), 앱은 그리기만
+const IDX_DEF=[['connect','Connect','연결 — 답글·공감·모임 참여'],['host','Host','모임을 만들고 사람을 모으는 힘 — 새 글·모임·클래스 열기'],['skill','Skill','뜨개 숙련도 — 작품 인증·상급 기법·뜨개 단계']];
+const TRAIT_TXT={connect:'Connect Index가 높아요 — 이웃과 이어지는 사람',host:'Host Index가 높아요 — 판을 벌이고 사람을 모으는 사람',skill:'Skill Index가 높아요 — 손끝이 좋은 사람',balanced:'세 Index가 고르게 — 두루두루',new:'아직 알아가는 중 — 활동이 쌓이면 성향이 보여요'};
+function idxRadar(p, size){
+  const v=[p.idx_connect||0, p.idx_host||0, p.idx_skill||0]; const W=size||96, H=Math.round(W*0.92), cx=W/2, cy=H*0.56, R=W*0.38;
+  const pt=(i,r)=>{ const a=-Math.PI/2 + i*2*Math.PI/3; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; };
+  const poly=r=>[0,1,2].map(i=>pt(i,r).map(n=>n.toFixed(1)).join(',')).join(' ');
+  const val=[0,1,2].map(i=>pt(i, R*Math.max(0.08, v[i]/100)).map(n=>n.toFixed(1)).join(',')).join(' ');
+  const lab=[['C',0],['H',1],['S',2]].map(([t,i])=>{ const [x,y]=pt(i,R+9); return `<text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="middle" font-size="9" font-weight="700" fill="#8f948a">${t}</text>`; }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}"><polygon points="${poly(R)}" fill="#F6F7F2" stroke="#E4E6D9"/><polygon points="${poly(R*0.5)}" fill="none" stroke="#E4E6D9"/><polygon points="${val}" fill="rgba(154,174,98,.45)" stroke="#3F4F22" stroke-width="1.5" stroke-linejoin="round"/>${lab}</svg>`;
+}
+function indexCard(p, mine){
+  const rows=IDX_DEF.map(([k,n])=>`<div class="r"><b>${n}</b><i><em style="width:${p['idx_'+k]||0}%"></em></i><span>${p['idx_'+k]||0}</span></div>`).join('');
+  return `<div class="idxcard" onclick="openIndexInfo()">${idxRadar(p,96)}<div class="rows">${rows}<div class="tr"><b>${traitLabel(p.trait)}</b> · ${TRAIT_TXT[p.trait]||TRAIT_TXT.new}</div></div></div>`;
+}
+function traitLabel(t){ return ({connect:'CONNECT',host:'HOST',skill:'SKILL',balanced:'BALANCED',new:'NEW'})[t||'new']; }
+function idxChip(p){ return p&&p.trait&&p.trait!=='new'?`<span class="idxchip" title="Connect ${p.idx_connect||0} · Host ${p.idx_host||0} · Skill ${p.idx_skill||0}">${traitLabel(p.trait)}</span>`:''; }
+function idxMini(p){ return `<div class="idxmini" onclick="openIndexInfo()">${idxRadar(p,64)}<div class="r">${IDX_DEF.map(([k,n])=>`<b>${n}</b>${p['idx_'+k]||0}<br>`).join('')}</div><div class="r" style="flex:1"><span style="color:var(--olive);font-weight:700">${traitLabel(p.trait)}</span><br>${esc((TRAIT_TXT[p.trait]||TRAIT_TXT.new).split(' — ')[1]||'')}</div></div>`; }
+function openIndexInfo(){ openSheet(`<b style="font-size:1.05rem">Connect · Host · Skill Index</b><p class="muted" style="margin:0;font-size:.88rem">몇 개 했는지가 아니라 어떤 성향인지를 보여 줘요. 최근 90일 활동을 더 크게 보고, 처음 몇 번은 크게 오르다가 많아질수록 천천히 올라요(도배로는 못 채워요). 매일 밤 다시 계산해요.</p>
+  ${IDX_DEF.map(([k,n,d])=>`<div class="card soft" style="font-size:.88rem"><b>${n} Index</b><div class="muted">${d}</div></div>`).join('')}
+  <p class="muted" style="margin:0;font-size:.8rem">가장 높은 Index가 다른 것보다 확실히 크면 그 이름이 프로필에 붙고(CONNECT·HOST·SKILL), 비슷하면 BALANCED예요. 서포터즈 점수와는 별개예요.</p><button class="btn o" onclick="closeSheet()">닫기</button>`); }
 // ---- 마이 상단 카드 (2026-09-27 대표 확정: 뜨개 단계 → 할 일 → 이번 주 → 실함 → 가게/작가)
 function myLvCard(){
   const p=myProfile||{}; const set=new Set(p.skills||[]); const crafts=myCrafts();
@@ -3856,7 +3881,7 @@ async function renderMyTop(){
   const td=$('#myTodo'); if(td) td.innerHTML = items.length ? `<div class="todo"><div class="tt">지금 할 일</div>${items.slice(0,5).map(i=>`<button type="button" onclick="${i.fn}"><span class="ic">${i.ic}</span><span style="flex:1;min-width:0"><b>${i.t}</b><span>${i.s}</span></span><span class="ch">${i.ch}</span></button>`).join('')}</div>` : '';
   // ③ 이번 주
   const posts=(psts.data||[]).filter(x=>!x.parent_id).length, replies=(psts.data||[]).filter(x=>x.parent_id).length; const s=supStatus||{};
-  const wkEl=$('#myWeek'); if(wkEl) wkEl.innerHTML = `<div class="wk"><div><b>${wks.count||0}</b><span>이번 주 인증</span></div><div><b>${posts}</b><span>글</span></div><div><b>${replies}</b><span>답글</span></div>${s.supporter&&s.status==='active'?`<div class="sup" onclick="openSupporters()" style="cursor:pointer"><b>${s['seg'+(s.segment||1)]||0}점</b><span>서포터 ${s.segment||1}구간</span></div>`:''}</div>`;
+  const wkEl=$('#myWeek'); if(wkEl){ const { data:ix } = await sb.rpc('refresh_my_index'); if(ix) Object.assign(myProfile, { idx_connect:ix.connect, idx_host:ix.host, idx_skill:ix.skill, trait:ix.trait }); wkEl.innerHTML = indexCard(myProfile, true) + (s.supporter&&s.status==='active'?`<div class="wk"><div><b>${wks.count||0}</b><span>이번 주 인증</span></div><div><b>${posts}</b><span>글</span></div><div><b>${replies}</b><span>답글</span></div><div class="sup" onclick="openSupporters()" style="cursor:pointer"><b>${s['seg'+(s.segment||1)]||0}점</b><span>서포터 ${s.segment||1}구간</span></div></div>`:''); }
   // ⑤ 실함 요약
   const st=stash.data||[]; const stEl=$('#myStashSub'); if(stEl) stEl.textContent = st.length ? `${st.length}종 보관 중 · 최근: ${st[0].raw_name||'이름 없는 실'}${st[0].left_balls!=null?` ${st[0].left_balls}볼`:''}` : '볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요';
   // ⑥ 가게/작가 배지
