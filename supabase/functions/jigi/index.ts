@@ -68,7 +68,16 @@ async function tg(method: string, body: J) {
   const r = await fetch(`https://api.telegram.org/bot${t}/${method}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   return r.ok ? (await r.json()).result : null;
 }
-const tgSend = (text: string, buttons?: J[][]) => env("TG_ADMIN_CHAT_ID") ? tg("sendMessage", { chat_id: env("TG_ADMIN_CHAT_ID"), text: text.slice(0, 3900), ...(buttons ? { reply_markup: { inline_keyboard: buttons } } : {}) }) : Promise.resolve(null);
+// 긴 글은 자르지 않고 3900자씩 나눠 보낸다(텔레그램 한도 4096). 버튼은 마지막 조각에. 반환값은 마지막 메시지(버튼이 달린 것)
+async function tgSend(text: string, buttons?: J[][]) {
+  if (!env("TG_ADMIN_CHAT_ID")) return null;
+  const parts: string[] = []; let rest = text ?? "";
+  while (rest.length > 3900) { let cut = rest.lastIndexOf("\n", 3900); if (cut < 2000) cut = 3900; parts.push(rest.slice(0, cut)); rest = rest.slice(cut).replace(/^\n/, ""); }
+  parts.push(rest);
+  let last: J = null;
+  for (const [i, p] of parts.entries()) last = await tg("sendMessage", { chat_id: env("TG_ADMIN_CHAT_ID"), text: p, ...(buttons && i === parts.length - 1 ? { reply_markup: { inline_keyboard: buttons } } : {}) });
+  return last;
+}
 async function pending(item: number | null, label: string, steps: J[], heavy = false) {
   const { data } = await db.from("mod_pending").insert({ item_id: item, label, steps, heavy }).select("token").single();
   return data?.token as string;

@@ -11,7 +11,11 @@ async function tg(method: string, body: unknown) {
   const r = await fetch(`https://api.telegram.org/bot${env("TG_BOT_TOKEN")}/${method}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   return r.ok ? (await r.json()).result : null;
 }
-const send = (text: string) => tg("sendMessage", { chat_id: env("TG_ADMIN_CHAT_ID"), text: text.slice(0, 3900) });
+async function send(text: string) {   // 긴 글은 3900자씩 나눠 보낸다(요약 금지 — 대표 2026-09-27)
+  let rest = text ?? ""; let last: unknown = null;
+  while (rest.length > 0) { let cut = rest.length > 3900 ? rest.lastIndexOf("\n", 3900) : rest.length; if (cut < 2000) cut = Math.min(3900, rest.length); last = await tg("sendMessage", { chat_id: env("TG_ADMIN_CHAT_ID"), text: rest.slice(0, cut) }); rest = rest.slice(cut).replace(/^\n/, ""); }
+  return last;
+}
 
 Deno.serve(async (req: Request) => {
   try {
