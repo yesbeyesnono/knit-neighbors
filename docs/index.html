@@ -644,11 +644,17 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .sacard{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px}.sacard .tx{flex:1;min-width:0}.sacard .tx>span{display:block;font-size:.82rem;color:var(--ink2)}
 .tbtn{background:none;border:0;font:inherit;color:var(--ink2);padding:0;cursor:pointer}
 #v-meetform .top .btn.sm{width:auto;padding:8px 16px}
+/* 작성 페이지 머리: 제목은 화면 정중앙(3칸 그리드), 게시는 알약 버튼 (2026-09-27 대표) */
+#v-shopform .top,#v-classform .top,#v-meetform .top,#v-cert .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+#v-shopform .top .tbtn,#v-classform .top .tbtn,#v-meetform .top .tbtn,#v-cert .top .back{justify-self:start}
+#v-shopform .top h1,#v-classform .top h1,#v-meetform .top h1,#v-cert .top h1{text-align:center;flex:none}
+#v-shopform .top .btn,#v-classform .top .btn,#v-meetform .top .btn,#v-cert .top .btn{justify-self:end;background:var(--btn);color:var(--btn-ink);border:0;border-radius:999px;padding:8px 16px;font-weight:700;font-size:.9rem;width:auto}
+#v-cert .top .btn:disabled{background:var(--chip);color:var(--ink3);opacity:1}
 .mhero{width:180px;height:200px;border-radius:22px;margin:4px auto 0;position:relative;box-shadow:0 10px 26px rgba(63,79,34,.18);transform:rotate(-2deg);background:var(--chip) center/cover no-repeat;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .mhero .cam{width:54px;height:54px;border-radius:50%;background:var(--olive);color:#fff;display:grid;place-items:center}.mhero .cam svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .mhero .mhint{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:.72rem;color:var(--olive);font-weight:600}.mhero.has .mhint{display:none}.mhero.has .cam{background:rgba(63,79,34,.55)}
 #v-meetform .cfphotos:empty{display:none}
-#v-classform .cfphotos:empty{display:none}.cfl .req{display:inline-block;font-size:.7rem;background:var(--chip);color:var(--olive);border-radius:999px;padding:1px 7px;margin-left:4px;font-weight:600;vertical-align:1px}#v-classform .top .btn.sm{width:auto;padding:8px 16px}#v-classform .body{gap:10px}
+#v-classform .cfphotos:empty{display:none}#v-shopform .cfphotos:empty{display:none}#v-shopform .body{gap:10px}.cfl .req{display:inline-block;font-size:.7rem;background:var(--chip);color:var(--olive);border-radius:999px;padding:1px 7px;margin-left:4px;font-weight:600;vertical-align:1px}#v-classform .top .btn.sm{width:auto;padding:8px 16px}#v-classform .body{gap:10px}
 .ccard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}.ccard .cfl:first-child{margin-top:0}.ccard .cfl{margin:12px 0 6px}.ccard input,.ccard textarea,.ccard select{width:100%}.ccard .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .clsbox{margin:8px 0 4px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg2)}.clsbox .r{display:flex;gap:8px;font-size:.9rem;margin:4px 0}.clsbox .r span:first-child{flex:none;width:64px;color:var(--ink2)}.clsbox .r span:last-child{flex:1;white-space:pre-wrap}.clsbox .btnrow{display:flex;gap:8px;margin-top:10px}.clsbox .btnrow a,.clsbox .btnrow button{flex:1;text-align:center;font:inherit;font-size:.9rem;font-weight:600;padding:10px;border-radius:12px;border:0;background:var(--btn);color:var(--btn-ink);text-decoration:none;cursor:pointer}
 .pubpill{align-self:center;font:inherit;font-size:.82rem;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--ink2);cursor:pointer}.pubpill svg{width:14px;height:14px;vertical-align:-2px;stroke:var(--acc);fill:none;stroke-width:2;margin-right:3px}
@@ -960,6 +966,22 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
   <section class="view" id="v-stash">
     <div class="top"><button class="back" onclick="closeStash()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>내 실함</h1></div>
     <div id="stashBody"></div>
+  </section>
+
+  <!-- 가게 소식 (새 페이지, 2026-09-27 대표: 클래스 열기와 같은 양식) -->
+  <section class="view" id="v-shopform">
+    <div class="top"><button class="tbtn" onclick="closeCompose()">취소</button><h1>가게 소식</h1><button class="btn sm" id="shopPost" onclick="submitShopNews()">게시</button></div>
+    <div class="body">
+      <div class="mhero" id="nHero" onclick="$('#nFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">대표 사진 · 신상·할인이 잘 보이게</span></div>
+      <div class="cfphotos" id="nfPhotos" style="justify-content:center"></div><input id="nFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
+      <div class="ccard"><div class="cfl">기본 <span class="req">필수</span> <span class="muted" id="nShopName"></span></div>
+        <div class="cfl" style="margin-top:0">종류</div><div class="seg" id="nKind"></div>
+        <input id="nTitle" maxlength="60" placeholder="제목 (예: 가을 신상 실 입고 · 10% 할인)" style="margin-top:10px">
+        <div class="cfl">마감일 <span class="muted">(선택 · 할인·행사 끝나는 날)</span></div><input id="nEnds" type="date">
+      </div>
+      <div class="ccard"><div class="cfl">내용</div><textarea id="nBody" maxlength="500" placeholder="예: 이번 주 토요일까지 전 상품 10% 할인. 새로 들어온 실도 구경 오세요" style="min-height:110px"></textarea>
+        <p class="muted" style="font-size:.78rem;margin:8px 0 0">팔로워에게 알림이 가고, 근처 이웃의 지도 핀에 종이 울려요. 클래스는 '종류'에서 클래스를 고르면 전용 양식으로 넘어가요.</p></div>
+    </div>
   </section>
 
   <!-- 가게 클래스 열기 (새 페이지, 2026-09-26) — 솜씨당·탈잉·프립·네이버 예약 등록 양식을 조사해 뜨개 가게에 맞게 추린 항목 -->
@@ -2828,7 +2850,7 @@ async function pickPhotos(files, which){
   const inp = which==='s' ? $('#sFile') : $('#cFile'); if(inp) inp.value=''; if(which==='s'){ if($('#wFile')) $('#wFile').value=''; if($('#mFile')) $('#mFile').value=''; }
 }
 function renderPv(which){
-  if(which==='s'){ renderCertPhotos(); renderClassPhotos(); }
+  if(which==='s'){ renderCertPhotos(); renderClassPhotos(); renderShopNewsPhotos(); }
   const arr = which==='s' ? sPhotos : cPhotos, el = which==='s' ? $('#sPv') : $('#cPv'); if(!el) return;
   el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">${ico('close')}</b></div>`).join('');
 }
@@ -2921,6 +2943,37 @@ async function submitCert(){
   certCheck.busy=false; certCheck();
 }
 
+// ===== 가게 소식 (새 페이지) =====
+const N_KIND={notice:'소식',sale:'할인',new:'신상',meetup:'모임',class:'클래스 열기 →'};
+function renderShopNewsPhotos(){
+  const hero=$('#nHero'); if(!hero || view!=='shopform') return; const p0=sPhotos[0];
+  hero.classList.toggle('has', !!p0); hero.style.backgroundImage = p0?`url(${p0.url})`:'';
+  const box=$('#nfPhotos'); if(!box) return;
+  box.innerHTML = sPhotos.length ? sPhotos.map((p,i)=>`<div style="background-image:url(${p.url});width:56px;height:56px">${i===0?'<span style="position:absolute;left:3px;bottom:3px;font-size:.6rem;font-weight:700;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff">대표</span>':''}<b onclick="event.stopPropagation();sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" style="width:56px;height:56px;font-size:.7rem" onclick="$('#nFile').click()">${ico('camera')}<br>추가</button>`:'') : '';
+}
+function openShopNewsForm(){
+  if(!myShop) return toast('가게 계정만 올릴 수 있어요');
+  closeSub(); closeSheet(); composeKind='shop'; sPhotos=[];
+  if(!['compose','cert','meetform','classform','shopform'].includes(view)) composeBack=view;
+  if(!$('#nKind').children.length){ seg('#nKind', N_KIND); $('#nKind').addEventListener('click', ()=>{ if(segVal('#nKind')==='class'){ segSet('#nKind','notice'); openClassForm(); } }); }
+  segSet('#nKind','notice'); $('#nTitle').value=''; $('#nEnds').value=''; $('#nBody').value=''; $('#nShopName').textContent='· '+myShop.name; $('#shopPost').disabled=false;
+  renderShopNewsPhotos(); show('shopform'); $('#v-shopform .body').scrollTop=0;
+}
+async function submitShopNews(){
+  const b=$('#shopPost'); b.disabled=true;
+  try{
+    if(!myShop) throw new Error('가게 계정만 올릴 수 있어요');
+    const title=$('#nTitle').value.trim(); if(!title) throw new Error('제목을 적어 주세요');
+    const body=$('#nBody').value.trim(); if(!body && !sPhotos.length) throw new Error('내용이나 사진을 넣어 주세요');
+    await loadBanned(); if(hasBanned(title)||hasBanned(body)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+    const photos = await uploadPhotos(sPhotos);
+    const ends = $('#nEnds').value ? new Date($('#nEnds').value+'T23:59:59').toISOString() : null;
+    const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind: segVal('#nKind')||'notice', title, body: body||null, photos, ends_at: ends });
+    if(error) throw new Error(error.message);
+    sPhotos=[]; toast('소식을 올렸어요. 팔로워에게 알림이 갔어요'); composeBack=null; return openShop(myShop.id);
+  }catch(e){ toast(e.message); }
+  b.disabled=false;
+}
 // ===== 가게 클래스 열기 (shop_posts kind 'class' + extra) =====
 const C_CRAFT={crochet:'코바늘',knit:'대바늘',other:'기타'}, C_TYPE={oneday:'원데이',course:'정규 (여러 회차)'}, C_MAT={incl:'수강료에 포함',extra:'별도',none:'재료비 없음'}, C_PLACE={shop:'우리 가게',other:'다른 장소',online:'온라인'};
 const C_APPLY={link:'링크로 신청',phone:'전화',insta:'인스타그램 DM',visit:'가게에 직접'};
@@ -3366,9 +3419,10 @@ let reviewMeetup=null;
 async function openCompose(kind, meetupId){
   if(kind==='work') return openCert();
   if(kind==='meetup') return openMeetForm();
+  if(kind==='shop') return openShopNewsForm();
   sPhotos=[]; composeKind = kind||'post'; reviewMeetup=null;
   if(kind==='review' && meetupId){ const { data:m } = await sb.from('meetups').select('id,title,place_name,starts_at').eq('id', meetupId).single(); reviewMeetup=m; }
-  if(!['compose','cert','meetform','classform'].includes(view)) composeBack = view;
+  if(!['compose','cert','meetform','classform','shopform'].includes(view)) composeBack = view;
   $('#sAva').innerHTML = avatar(myProfile||{}); $('#sName').textContent = myProfile?.nickname||'';
   $('#sText').value=''; $('#sPv').innerHTML=''; $('#sPost').disabled=false;
   if(myShop) $('#pShopName').textContent = myShop.name+' 소식'; $('#pTitle').value=''; $('#pEnds').value=''; $('#pKind').value='notice';
@@ -3407,7 +3461,7 @@ function renderWTech(){
   renderCertTech();
 }
 function toggleWTech(id){ if(wTechSel.has(id)) wTechSel.delete(id); else wTechSel.add(id); renderWTech(); }
-function closeCompose(){ if(view==='classform' && ($('#cTitle').value.trim()||sPhotos.length) && !confirm('작성 중인 클래스를 버릴까요?')) return; const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
+function closeCompose(){ if(view==='shopform' && ($('#nTitle').value.trim()||sPhotos.length) && !confirm('작성 중인 소식을 버릴까요?')) return; if(view==='classform' && ($('#cTitle').value.trim()||sPhotos.length) && !confirm('작성 중인 클래스를 버릴까요?')) return; const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
 async function submitCompose(){
   const body = $('#sText').value.trim();
   $('#sPost').disabled = true;
