@@ -1180,7 +1180,7 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   트리거 jigi_shop_claim(insert) → jigi_call('shop_claim') → Edge jigi.shopClaims(): 비공개 버킷 shop-docs 서류를 AI(vision)로 읽어 사업자번호(숫자 일치)·상호(정규화 포함)·주소(앞 토큰 2개) 비교
 --     셋 다 일치 → 자동 승인 + 서류 삭제 + mod_items auto_done + 텔레그램 알림 / 아니면 mod_items(kind shop_claim, today) + 텔레그램 [승인][반려] · scan() 때마다 재시도
 --   shops: authenticated UPDATE 는 컬럼 단위(name,kind,descr,address,phone,hours,links,logo_url,location) — 오너가 앱 '내 가게 관리'에서 수정, is_active·owner_id 는 콘솔/승인만
---   storage 'shops'(공개, 3MB): <shop_id>/logo-*.jpg, 오너만 쓰기 · shop_posts.extra jsonb: kind 'class' 양식(v1: tag, craft, level, techniques[], work, type oneday|course, starts_at, duration_min, sessions, cycle,
+--   storage 'shops'(공개, 3MB): <shop_id>/logo-*.jpg, 오너만 쓰기 — 정책 서브쿼리 안에서는 반드시 objects.name 으로 명시(shops.name 과 겹쳐 항상 거부됐던 버그, 2026-09-27 shops_bucket_policy_fix) · shop_posts.extra jsonb: kind 'class' 양식(v1: tag, craft, level, techniques[], work, type oneday|course, starts_at, duration_min, sessions, cycle,
 --     min, max, fee, material incl|extra|none, material_fee, provide, bring, place shop|other|online, place_text, place_hint, descr, target, curriculum[], teacher, apply link|phone|insta|visit, apply_to, refund, note)
 --     양식 근거: 솜씨당·탈잉·프립·네이버 예약 등록 항목 조사(2026-09-26) — 환불 규정 사전 표시, 재료비 금액 별도 표기, 최소 인원 미달 시 전액 환불 문구 자동
 --   mod_items kind 'shop_claim' / target_type 'shop_claim' 추가. 콘솔 오늘: '기다리는 신청·문의'(가게·작가·제보·문의·이벤트) 묶음 표시
