@@ -649,7 +649,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #v-shopform .top .tbtn,#v-classform .top .tbtn,#v-meetform .top .tbtn,#v-cert .top .back{justify-self:start}
 #v-shopform .top h1,#v-classform .top h1,#v-meetform .top h1,#v-cert .top h1{text-align:center;flex:none}
 #v-shopform .top .btn,#v-classform .top .btn,#v-meetform .top .btn,#v-cert .top .btn{justify-self:end;background:var(--btn);color:var(--btn-ink);border:0;border-radius:999px;padding:8px 16px;font-weight:700;font-size:.9rem;width:auto}
-#v-cert .top .btn:disabled{background:var(--chip);color:var(--ink3);opacity:1}
+#v-cert .top .btn:disabled{background:var(--chip);color:var(--ink3);opacity:1}#v-cert .cfphotos:empty{display:none}#v-cert .ccard input:not([type=hidden]),#v-cert .ccard textarea,#v-cert .ccard select{width:100%}
 .mhero{width:180px;height:200px;border-radius:22px;margin:4px auto 0;position:relative;box-shadow:0 10px 26px rgba(63,79,34,.18);transform:rotate(-2deg);background:var(--chip) center/cover no-repeat;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .mhero .cam{width:54px;height:54px;border-radius:50%;background:var(--olive);color:#fff;display:grid;place-items:center}.mhero .cam svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .mhero .mhint{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:.72rem;color:var(--olive);font-weight:600}.mhero.has .mhint{display:none}.mhero.has .cam{background:rgba(63,79,34,.55)}
@@ -905,28 +905,30 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
   <!-- 작품 인증 (새 페이지) -->
   <section class="view" id="v-cert">
     <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>작품 인증</h1><button class="btn" id="certPost" onclick="submitCert()" disabled>게시</button></div>
-    <div class="cfreq" id="cfReq"></div>
-    <div class="cfsec"><div class="cfh">사진 <em>필수</em><span>1~4장</span></div>
-      <div class="cfphotos" id="cfPhotos"></div><input id="wFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')"></div>
-    <div class="cfsec"><div class="cfh">작품 <em>필수</em></div>
-      <input id="wTitle" maxlength="60" placeholder="작품 이름 (예: 그래니 스퀘어 가디건)" oninput="certCheck()">
-      <div class="cfl">작품 종류</div><div class="seg" id="wItemChips"></div><input type="hidden" id="wItem">
-      <label class="f" id="wEventRow" hidden style="margin-top:12px">이벤트 인증<select id="wEvent" onchange="wEventPicked()"></select><span class="hint" style="font-size:.78rem;color:var(--ink3)">선정된 이벤트의 작품이면 골라 주세요. 샘플을 받아 뜬 작품에는 「샘플 제공」 표시가 붙어요.</span></label></div>
-    <div class="cfsec"><div class="cfh">사용한 기법 <em>필수</em></div>
-      <div class="tchips" id="cfTechChips"></div>
-      <button type="button" class="cfrow" onclick="openTechSub()"><span>기법 고르기</span><span class="muted" id="wPicked">0개 선택 ›</span></button></div>
-    <div class="cfsec"><div class="cfh">실 <span>선택 · 실 사전에서 고르면 규격이 자동으로 채워져요</span></div>
-      <div id="wYarnsBox"></div>
-      <div class="yadd"><button type="button" onclick="openYarnPick(-1)">＋ 실 추가</button><button type="button" id="wySameBtn" onclick="wyAddSame()">＋ 같은 실, 다른 색</button></div></div>
-    <div class="cfsec"><div class="cfh">바늘 <span>선택</span></div>
-      <div class="seg" id="wNeedlesBox"></div></div>
-    <div class="cfsec">
-      <button type="button" class="cfrow" onclick="$('#wMore').hidden=!$('#wMore').hidden"><span>게이지·완성 크기 적기</span><span class="muted">선택 ›</span></button>
-      <div id="wMore" hidden style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-        <label class="f">게이지<input id="wGauge" maxlength="60" placeholder="예: 20코 24단 (10cm)"></label>
-        <label class="f">완성 크기<input id="wSize" maxlength="60" placeholder="예: 지름 11cm"></label></div>
-      <div class="cfl">한 줄 소감 (선택)</div><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px"></textarea>
-      <p class="muted" style="font-size:.78rem;margin:10px 0 0">적어 주신 실·바늘 정보는 실 사전과 추천을 만드는 데 쓰여요. 커뮤니티 "작품" 탭에 올라가요.</p></div>
+    <div class="body" style="gap:10px">
+      <div class="mhero" id="wHero" onclick="$('#wFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">작품 사진 · 1~4장</span></div>
+      <div class="cfphotos" id="cfPhotos" style="justify-content:center"></div><input id="wFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
+      <div class="cfreq" id="cfReq" style="justify-content:center;padding:0"></div>
+      <div class="ccard"><div class="cfl">작품 <span class="req">필수</span></div>
+        <input id="wTitle" maxlength="60" placeholder="작품 이름 (예: 그래니 스퀘어 가디건)" oninput="certCheck()">
+        <div class="cfl">작품 종류</div><div class="seg" id="wItemChips"></div><input type="hidden" id="wItem">
+        <div id="wEventRow" hidden><div class="cfl">이벤트 인증</div><select id="wEvent" onchange="wEventPicked()"></select><p class="muted" style="font-size:.78rem;margin:6px 0 0">선정된 이벤트의 작품이면 골라 주세요. 샘플을 받아 뜬 작품에는 「샘플 제공」 표시가 붙어요.</p></div>
+      </div>
+      <div class="ccard"><div class="cfl">사용한 기법 <span class="req">필수</span> <span class="muted">기법 맵에서 여러 개</span></div>
+        <button type="button" class="cfrow" style="border-top:0;padding-top:0;margin-top:0" onclick="openTechSub()"><span>기법 고르기</span><span class="muted" id="wPicked">0개 선택 ›</span></button>
+        <div class="tchips" id="cfTechChips"></div>
+      </div>
+      <div class="ccard"><div class="cfl">실 <span class="muted">선택 · 실 사전에서 고르면 규격이 자동으로 채워져요</span></div>
+        <div id="wYarnsBox"></div>
+        <div class="yadd"><button type="button" onclick="openYarnPick(-1)">＋ 실 추가</button><button type="button" id="wySameBtn" onclick="wyAddSame()">＋ 같은 실, 다른 색</button></div>
+      </div>
+      <div class="ccard"><div class="cfl">바늘 <span class="muted">선택</span></div><div class="seg" id="wNeedlesBox"></div></div>
+      <div class="ccard"><div class="cfl">기록 <span class="muted">선택</span></div>
+        <div class="g2"><div><div class="cfl" style="margin-top:0">게이지</div><input id="wGauge" maxlength="60" placeholder="예: 20코 24단 (10cm)"></div><div><div class="cfl" style="margin-top:0">완성 크기</div><input id="wSize" maxlength="60" placeholder="예: 지름 11cm"></div></div>
+        <div class="cfl">한 줄 소감</div><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px"></textarea>
+        <p class="muted" style="font-size:.78rem;margin:10px 0 0">적어 주신 실·바늘 정보는 실 사전과 추천을 만드는 데 쓰여요. 커뮤니티 "작품" 탭에 올라가요.</p>
+      </div>
+    </div>
   </section>
 
   <!-- 모임 만들기 (새 페이지) — 2026-09-26 시안: 대표 사진 + 카드 3개 + 칩(누르면 설정 시트) -->
@@ -2908,8 +2910,9 @@ function renderMeetPhotos(){
 }
 function renderCertPhotos(){
   renderMeetPhotos();
+  const hero=$('#wHero'); if(hero){ const p0=sPhotos[0]; hero.classList.toggle('has', !!p0); hero.style.backgroundImage = p0?`url(${p0.url})`:''; }
   const box=$('#cfPhotos'); if(!box) return;
-  box.innerHTML = sPhotos.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" onclick="$('#wFile').click()">${ico('camera')}<br>${sPhotos.length?'추가':'사진'}</button>`:'');
+  box.innerHTML = sPhotos.length ? sPhotos.map((p,i)=>`<div style="background-image:url(${p.url});width:56px;height:56px">${i===0?'<span style="position:absolute;left:3px;bottom:3px;font-size:.6rem;font-weight:700;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff">대표</span>':''}<b onclick="event.stopPropagation();sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" style="width:56px;height:56px;font-size:.7rem" onclick="$('#wFile').click()">${ico('camera')}<br>추가</button>`:'') : '';
   certCheck();
 }
 function renderCertTech(){
