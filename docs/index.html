@@ -653,7 +653,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .mhero{width:180px;height:200px;border-radius:22px;margin:4px auto 0;position:relative;box-shadow:0 10px 26px rgba(63,79,34,.18);transform:rotate(-2deg);background:var(--chip) center/cover no-repeat;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .mhero .cam{width:54px;height:54px;border-radius:50%;background:var(--olive);color:#fff;display:grid;place-items:center}.mhero .cam svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .mhero .mhint{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:.72rem;color:var(--olive);font-weight:600}.mhero.has .mhint{display:none}.mhero.has .cam{background:rgba(63,79,34,.55)}
-#v-meetform .cfphotos:empty{display:none}
+#v-meetform .cfphotos:empty{display:none}#v-meetform .ccard .fld{padding:10px 12px}#v-meetform .ccard .fld input{width:auto;flex:1}
 #v-classform .cfphotos:empty{display:none}#v-shopform .cfphotos:empty{display:none}#v-shopform .body{gap:10px}.cfl .req{display:inline-block;font-size:.7rem;background:var(--chip);color:var(--olive);border-radius:999px;padding:1px 7px;margin-left:4px;font-weight:600;vertical-align:1px}#v-classform .top .btn.sm{width:auto;padding:8px 16px}#v-classform .body{gap:10px}
 .ccard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}.ccard .cfl:first-child{margin-top:0}.ccard .cfl{margin:12px 0 6px}.ccard input,.ccard textarea,.ccard select{width:100%}.ccard .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .clsbox{margin:8px 0 4px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg2)}.clsbox .r{display:flex;gap:8px;font-size:.9rem;margin:4px 0}.clsbox .r span:first-child{flex:none;width:64px;color:var(--ink2)}.clsbox .r span:last-child{flex:1;white-space:pre-wrap}.clsbox .btnrow{display:flex;gap:8px;margin-top:10px}.clsbox .btnrow a,.clsbox .btnrow button{flex:1;text-align:center;font:inherit;font-size:.9rem;font-weight:600;padding:10px;border-radius:12px;border:0;background:var(--btn);color:var(--btn-ink);text-decoration:none;cursor:pointer}
@@ -936,23 +936,29 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <div class="mhero" id="mHero" onclick="$('#mFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint" id="mHeroHint">대표 사진 · 이번에 함께 뜰 작품</span></div>
       <div class="cfphotos" id="mfPhotos" style="justify-content:center"></div><input id="mFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
       <button type="button" class="pubpill" id="mPubPill" onclick="toggleMeetPublic()"></button><input type="checkbox" id="mPublic" checked hidden>
-      <div class="fld"><input id="mTitle" maxlength="60" placeholder="모임 이름 (예: 토요일 오후 코바늘 모임)"><span class="r"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></span></div>
-      <div id="mPlaceBox"></div>
-      <div class="fld" style="display:block"><div class="cfl" style="margin:0 0 6px">언제</div><div style="display:flex;gap:8px"><input id="mDate" type="date" style="flex:1.3"><input id="mClock" type="time" step="600" style="flex:1"></div></div>
-      <div class="more" id="mChips"></div>
-      <p class="muted" style="font-size:.78rem;margin:2px 0 0">커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요. 유형·소요 시간·정원 등은 칩을 눌러 고쳐요. 첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</p>
-    </div>
-    <!-- 설정 시트로 옮겨 쓰는 입력 블록(평소엔 숨김). id·이벤트는 Phase 1 그대로 -->
-    <div id="mHold" hidden>
-      <div id="mBlk-kind"><div class="cfl" style="margin-top:0">모임 유형</div><div class="seg" id="mKind"></div><div id="mTechWrap" hidden style="margin-top:10px"><button type="button" class="cfrow" onclick="openMTechSub()"><span>배울 기법 <span class="muted">(여러 개 가능)</span></span><span class="muted" id="mTechPicked">0개 선택 ›</span></button><div class="tchips" id="mTechChips"></div><p class="muted" style="font-size:.78rem;margin:6px 0 0">기법 맵에서 고르면 참여자에게도 같은 그림으로 보여요 — 먼저 알아야 하는 기법까지 함께.</p></div></div>
-      <div id="mBlk-craft"><div class="cfl" style="margin-top:0">종목</div><div class="seg" id="mCraft"></div></div>
-      <div id="mBlk-lv"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f">권장 단계 (부터)<select id="mLvMin"></select></label><label class="f">권장 단계 (까지)<select id="mLvMax"></select></label></div><p class="muted" style="font-size:.8rem">참여자에게 "내 단계에 맞아요 / 조금 높아요"로 보여요</p></div>
-      <div id="mBlk-cap"><div class="muted" style="margin-bottom:12px">0이면 제한 없음</div><div style="display:flex;justify-content:center"><div class="stepper"><button type="button" onclick="mCapStep(-1)">−</button><b id="mCapVal">0</b><button type="button" onclick="mCapStep(1)">＋</button></div></div></div>
-      <div id="mBlk-dur"><div class="cfl" style="margin-top:0">소요 시간</div><div class="seg" id="mDurSeg"></div><div class="cfl">반복</div><div class="seg" id="mRepeatSeg"></div></div>
-      <div id="mBlk-fee"><div class="seg" id="mFeeSeg"></div><input id="mFee" maxlength="40" placeholder="예: 5,000원" hidden style="margin-top:8px"></div>
-      <div id="mBlk-bring"><input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘"></div>
-      <div id="mBlk-desc"><textarea id="mDesc" maxlength="300" placeholder="예: 초보 환영, 실·바늘 지참. 각자 뜨면서 수다" style="min-height:90px"></textarea></div>
-      <div id="mBlk-detail"><input id="mPlaceDetail" maxlength="40" placeholder="예: 2층 창가, 노래하는 분수대 앞"></div>
+      <div class="ccard"><div class="cfl">기본 <span class="req">필수</span></div>
+        <input id="mTitle" maxlength="60" placeholder="모임 이름 (예: 토요일 오후 코바늘 모임)">
+        <div class="cfl">종목</div><div class="seg" id="mCraft"></div>
+        <div class="cfl">모임 유형</div><div class="seg" id="mKind"></div>
+        <div id="mTechWrap" hidden style="margin-top:10px"><button type="button" class="cfrow" onclick="openMTechSub()"><span>배울 기법 <span class="muted">(여러 개 가능)</span></span><span class="muted" id="mTechPicked">0개 선택 ›</span></button><div class="tchips" id="mTechChips"></div><p class="muted" style="font-size:.78rem;margin:6px 0 0">기법 맵에서 고르면 참여자에게도 같은 그림으로 보여요 — 먼저 알아야 하는 기법까지 함께.</p></div>
+        <div class="cfl">권장 단계 <span class="muted">(선택)</span></div><div class="g2"><select id="mLvMin"></select><select id="mLvMax"></select></div><p class="muted" style="font-size:.78rem;margin:6px 0 0">참여자에게 "내 단계에 맞아요 / 조금 높아요"로 보여요</p>
+      </div>
+      <div class="ccard"><div class="cfl">장소·일정 <span class="req">필수</span></div>
+        <div id="mPlaceBox"></div>
+        <input id="mPlaceDetail" maxlength="40" placeholder="상세 위치 (선택 · 예: 2층 창가, 분수대 앞)" style="margin-top:8px">
+        <div class="cfl">언제</div><div class="g2"><input id="mDate" type="date"><input id="mClock" type="time" step="600"></div>
+        <div class="cfl">소요 시간</div><div class="seg" id="mDurSeg"></div>
+        <div class="cfl">반복</div><div class="seg" id="mRepeatSeg"></div>
+      </div>
+      <div class="ccard"><div class="cfl">인원·비용</div>
+        <div class="cfl" style="margin-top:0">정원 <span class="muted">0이면 제한 없음</span></div><div style="display:flex;justify-content:center"><div class="stepper"><button type="button" onclick="mCapStep(-1)">−</button><b id="mCapVal">0</b><button type="button" onclick="mCapStep(1)">＋</button></div></div>
+        <div class="cfl">참가비</div><div class="seg" id="mFeeSeg"></div><input id="mFee" maxlength="40" placeholder="예: 5,000원" hidden style="margin-top:8px">
+        <div class="cfl">준비물 <span class="muted">(선택)</span></div><input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘">
+      </div>
+      <div class="ccard"><div class="cfl">소개 <span class="muted">(선택)</span></div>
+        <textarea id="mDesc" maxlength="300" placeholder="예: 초보 환영, 실·바늘 지참. 각자 뜨면서 수다" style="min-height:90px"></textarea>
+        <p class="muted" style="font-size:.78rem;margin:8px 0 0">커뮤니티 글 + 지도 핀 + 단체 채팅방이 만들어져요. 첫 만남은 카페처럼 사람이 많은 공공장소에서 해요.</p>
+      </div>
     </div>
   </section>
 
