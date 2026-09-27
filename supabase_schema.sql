@@ -1218,3 +1218,8 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   앱: classBox 버튼 = 신청하기(남은 자리)/신청 완료·취소/확정·채팅방/정원 참/마감, 호스트는 [신청자 관리] 시트(확정·거절·확정 취소). 양식의 '신청 방법' 삭제(extra.apply='app'). 결제는 여전히 앱 밖
 -- ---------------------------------------------------------------
 --   (보강 class_payment_notice) 결제 방법 extra.pay onsite|transfer|deposit · deposit · pay_days: 확정 시 채팅방에 결제 방법·기한(KST 날짜)·환불 규정 자동 메시지 · class_applications.paid_at + mark_class_paid(id, paid) 호스트 [입금 확인] → 회원 알림 · 양식은 계좌번호 패턴 입력 차단(계좌는 채팅방에서만) · 약관 제9조의2 통신판매중개자 고지
+
+-- 54. 마이 상단 카드 + 첫 인증 알림 (마이그레이션 first_work_nudge, 2026-09-27 대표 확정)
+--   앱 renderMy: ① 내 뜨개 단계 카드(myLvCard: 종목별 5칸 막대·다음 단계까지 남은 기법) ② 지금 할 일 띠(renderMyTop: 7일 내 모임·클래스 신청/확정·받은 친구 신청·호스트의 신청 대기, 없으면 숨김) ③ 이번 주(인증·글·답글, 서포터면 구간 점수) ⑤ 내 실함 요약 ⑥ 내 가게/작가 클래스(신청 대기 배지)
+--   ④ '첫 작품을 인증하면 Lv.1'은 카드 대신 알림: nudge_first_work() — 온보딩 2일 경과·인증 0·미발송이면 1회, link {type:view, view:cert} → 앱 openCert. check_in 이 호출
+-- ---------------------------------------------------------------

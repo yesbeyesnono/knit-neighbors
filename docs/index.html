@@ -419,6 +419,10 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .spost .txt{white-space:pre-wrap;margin:6px 0;font-size:15px;line-height:1.45}
 .spost time{font-size:13px;color:var(--ink3)}
 .spost .ends{font-size:12px;color:#c9303f;margin-left:6px}
+.mycard{margin:10px 16px 0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;cursor:pointer}.mycard .hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}.mycard .hd b{font-size:1rem}.mycard .hd .car{margin-left:auto;color:var(--ink3)}
+.lvrow{display:flex;align-items:center;gap:10px;font-size:.88rem;margin:4px 0}.lvrow .nm{width:44px;color:var(--ink2);flex:none}.lvrow .lvmini{flex:1;display:flex;gap:3px}.lvrow .lvmini i{flex:1;height:7px;border-radius:4px;background:var(--bg2)}.lvrow .lvmini i.on{background:var(--acc)}.lvrow .st{flex:none;font-weight:600;min-width:72px;text-align:right}
+.todo{margin:10px 16px 0;border:1px solid var(--line);border-radius:14px;background:var(--bg2);overflow:hidden}.todo .tt{font-size:.78rem;color:var(--olive);font-weight:600;padding:8px 14px 0}.todo button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:0;border-top:1px solid #fff;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}.todo button:first-of-type{border-top:0}.todo .ic{flex:none;width:30px;height:30px;border-radius:9px;background:#fff;display:grid;place-items:center;color:var(--olive)}.todo .ic svg,.todo .ic img{width:16px;height:16px}.todo b{display:block;font-size:.9rem}.todo span{font-size:.78rem;color:var(--ink2)}.todo .ch{margin-left:auto;font-size:.72rem;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--olive);flex:none}
+.wk{margin:10px 16px 0;display:flex;gap:6px}.wk div{flex:1;background:var(--bg2);border-radius:12px;padding:8px 6px;text-align:center}.wk b{display:block;font-size:1.05rem}.wk span{font-size:.7rem;color:var(--ink2)}.wk .sup{background:var(--chip)}.wk .sup b{color:var(--olive)}
 .shopcard{margin:10px 16px 0;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fafafa;display:flex;align-items:center;gap:12px;cursor:pointer}
 .shopcard .sq{width:44px;height:44px;border-radius:10px;border:2px solid var(--sel);display:grid;place-items:center;background:#fff}
 .shopcard .sq svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -2093,7 +2097,7 @@ async function openLink(l){
     if(l.type==='pattern') return typeof openPattern==='function' ? openPattern(l.id) : go('comm');
     if(l.type==='class'||l.type==='class_manage'){ const { data:p } = await sb.from('shop_posts').select('id,shop_id,author_id').eq('id', l.id).single(); if(!p) return go('comm'); if(p.shop_id) await openShop(p.shop_id); else { myTab='classes'; if(p.author_id===me.id) go('my'); else { await openProfile(p.author_id); const b=document.querySelector('#profTabs [data-t="classes"]'); if(b) b.click(); } } if(l.type==='class_manage') setTimeout(()=>openClassApplicants(l.id), 400); return; }
     if(l.type==='profile'){ if(l.id===me.id){ if(l.tab) myTab=l.tab; return go('my'); } await openProfile(l.id); if(l.tab){ const b=document.querySelector('#profTabs [data-t=+l.tab+]'); if(b) b.click(); } return; }
-    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(['map','comm','chats','my'].includes(v)) return go(v); }
+    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='cert') return openCert(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(['map','comm','chats','my'].includes(v)) return go(v); }
   }catch(e){}
   return openSupportRoom();
 }
@@ -3808,14 +3812,55 @@ async function renderMy(){
   const bio = p.bio || [p.now_making?`지금 뜨는 것: ${p.now_making}`:'', p.stuck_on?`요즘 막히는 부분: ${p.stuck_on}`:''].filter(Boolean).join('\n');
   $('#myTitle').textContent = p.nickname||'마이'; if(!renderMy.scrollBound){ renderMy.scrollBound=true; $('#v-my').addEventListener('scroll', e=>$('#myTitle').classList.toggle('show', e.target.scrollTop>70)); } $('#myTitle').classList.toggle('show', $('#v-my').scrollTop>70);
   $('#myBody').innerHTML=`
+    <div id="myLv">${myLvCard()}</div>
+    <div id="myTodo"></div>
+    <div id="myWeek"></div>
     <div id="myRecs">${recCard(0)}</div>
-    <div class="shopcard" onclick="openStash()"><div class="sq">${ico('yarn')}</div><div style="flex:1;min-width:0"><b>내 실함</b><div class="muted">볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요</div></div><span style="color:var(--ink3)">›</span></div>
-    ${myShop?`<div class="shopcard" onclick="openShop('${myShop.id}')"><div class="sq">${SHOP_SVG}</div><div style="flex:1;min-width:0"><b>${esc(myShop.name)}</b><div class="muted">내 가게 · 소식 올리기 · 팔로워 보기</div></div><span style="color:var(--ink3)">›</span></div>`:''}
+    <div class="shopcard" id="myStashCard" onclick="openStash()"><div class="sq">${ico('yarn')}</div><div style="flex:1;min-width:0"><b>내 실함</b><div class="muted" id="myStashSub">볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요</div></div><span style="color:var(--ink3)">›</span></div>
+    ${myShop?`<div class="shopcard" onclick="openShop('${myShop.id}')"><div class="sq">${SHOP_SVG}</div><div style="flex:1;min-width:0"><b>${esc(myShop.name)}</b><div class="muted" id="myShopSub">내 가게 · 소식·클래스 올리기 · 팔로워</div></div><span style="color:var(--ink3)">›</span></div>`:''}
+    ${!myShop&&p.is_author?`<div class="shopcard" onclick="myTab='classes';go('my')"><div class="sq">${ico('cert')}</div><div style="flex:1;min-width:0"><b>작가 클래스</b><div class="muted" id="myShopSub">클래스 열기 · 신청자 확정</div></div><span style="color:var(--ink3)">›</span></div>`:''}
     <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${myTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button>${myProfile?.is_author?`<button data-t="classes" class="${myTab==='classes'?'on':''}">클래스</button>`:''}</div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
   loadMyFeed(); bindTabSwipe('#v-my', '#myTabs');
   loadRecs().then(()=>{ const el=$('#myRecs'); if(el) el.innerHTML=recCard(0); });
+  loadTech().then(()=>{ const el=$('#myLv'); if(el) el.innerHTML=myLvCard(); });
+  renderMyTop();
+}
+// ---- 마이 상단 카드 (2026-09-27 대표 확정: 뜨개 단계 → 할 일 → 이번 주 → 실함 → 가게/작가)
+function myLvCard(){
+  const p=myProfile||{}; const set=new Set(p.skills||[]); const crafts=myCrafts();
+  const rows=crafts.map(c=>{ const lv=TECH.length?lvOf(c,set):(c==='crochet'?p.level_crochet:p.level_knit)||0; const st=TECH.length?lvStats(c,set):null; const next=st&&lv<5&&st[lv+1]?Math.max(0,Math.ceil(st[lv+1].total/2)-st[lv+1].done):0; const done=st?Object.values(st).reduce((t,x)=>t+x.done,0):set.size;
+    return `<div class="lvrow"><span class="nm">${c==='crochet'?'코바늘':'대바늘'}</span><span class="lvmini">${[1,2,3,4,5].map(l=>`<i class="${l<=lv?'on':''}"></i>`).join('')}</span><span class="st">${lv?`${lv}단계 ${LVNAME[lv]}`:'아직 없음'}</span></div>${lv<5&&next?`<div class="muted" style="font-size:.75rem;margin:-2px 0 4px 54px">${lv+1}단계까지 기법 ${next}개 남음 · 익힌 기법 ${done}개</div>`:''}`; }).join('');
+  return `<div class="mycard" onclick="openSkills()"><div class="hd"><b>내 뜨개 단계</b>${lvBadge(p)}<span class="car">›</span></div>${rows}${set.size?'':'<div class="muted" style="font-size:.8rem">할 수 있는 기법을 체크하면 단계가 정해지고, 나에게 맞는 모임·클래스가 보여요</div>'}</div>`;
+}
+async function renderMyTop(){
+  if(!me) return; const now=new Date(); const in7=new Date(Date.now()+7*864e5).toISOString();
+  const wk=new Date(now); wk.setHours(0,0,0,0); wk.setDate(wk.getDate()-((wk.getDay()+6)%7)); const wkIso=wk.toISOString();
+  const [rm, apps, fr, wks, psts, stash, pend] = await Promise.all([
+    sb.from('room_members').select('room_id').eq('profile_id', me.id),
+    sb.rpc('my_class_applications'),
+    sb.from('friendships').select('requester_id',{count:'exact',head:true}).eq('addressee_id', me.id).eq('status','pending'),
+    sb.from('works').select('id',{count:'exact',head:true}).eq('profile_id', me.id).gte('created_at', wkIso),
+    sb.from('posts').select('id,parent_id').eq('author_id', me.id).gte('created_at', wkIso),
+    sb.from('yarn_stash').select('raw_name,left_balls,created_at').eq('owner_id', me.id).is('finished_at', null).order('created_at',{ascending:false}),
+    (myShop||myProfile?.is_author) ? sb.from('class_applications').select('id, post:shop_posts!inner(shop_id,author_id)').eq('status','applied') : Promise.resolve({data:[]}) ]);
+  // ② 할 일
+  const items=[]; const roomIds=(rm.data||[]).map(r=>r.room_id);
+  if(roomIds.length){ const { data:ms } = await sb.from('meetups').select('id,title,starts_at,place_name,room_id').in('room_id', roomIds).gte('starts_at', now.toISOString()).lte('starts_at', in7).order('starts_at').limit(3);
+    (ms||[]).forEach(m=>items.push({ic:ico('location'), t:esc(m.title), s:`${fmtd(m.starts_at)} ${new Date(m.starts_at).toTimeString().slice(0,5)} · ${esc(m.place_name||'')}`, ch:'모임', fn:`openMeetup('${m.id}')`})); }
+  (apps.data||[]).filter(a=>a.status!=='rejected').forEach(a=>{ const soon=!a.starts_at||new Date(a.starts_at)>=now; if(!soon) return; if(a.status==='applied') items.push({ic:ico('cert'), t:esc(a.title), s:'클래스 신청 · 호스트 확인 기다리는 중', ch:'대기', fn:`openLink({type:'class',id:'${a.post_id}'})`}); else if(a.status==='accepted' && (!a.starts_at || new Date(a.starts_at)<=new Date(in7))) items.push({ic:ico('cert'), t:esc(a.title), s:`${a.starts_at?fmtd(a.starts_at)+' · ':''}확정 · 결제·준비물은 채팅방에서`, ch:'클래스', fn:a.room_id?`openRoom('${a.room_id}')`:`openLink({type:'class',id:'${a.post_id}'})`}); });
+  if(fr.count) items.push({ic:ico('handshake'), t:`받은 친구 신청 ${fr.count}건`, s:'수락하면 지도에서 친구로 보여요', ch:'친구', fn:"go('chats')"});
+  const pendN=(pend.data||[]).filter(x=>x.post&&((myShop&&x.post.shop_id===myShop.id)||(!x.post.shop_id&&x.post.author_id===me.id))).length;
+  if(pendN) items.push({ic:ico('group'), t:`클래스 신청 대기 ${pendN}건`, s:'확정하면 신청자가 채팅방에 들어와요', ch:'호스트', fn: myShop?`openShop('${myShop.id}')`:"myTab='classes';go('my')"});
+  const td=$('#myTodo'); if(td) td.innerHTML = items.length ? `<div class="todo"><div class="tt">지금 할 일</div>${items.slice(0,5).map(i=>`<button type="button" onclick="${i.fn}"><span class="ic">${i.ic}</span><span style="flex:1;min-width:0"><b>${i.t}</b><span>${i.s}</span></span><span class="ch">${i.ch}</span></button>`).join('')}</div>` : '';
+  // ③ 이번 주
+  const posts=(psts.data||[]).filter(x=>!x.parent_id).length, replies=(psts.data||[]).filter(x=>x.parent_id).length; const s=supStatus||{};
+  const wkEl=$('#myWeek'); if(wkEl) wkEl.innerHTML = `<div class="wk"><div><b>${wks.count||0}</b><span>이번 주 인증</span></div><div><b>${posts}</b><span>글</span></div><div><b>${replies}</b><span>답글</span></div>${s.supporter&&s.status==='active'?`<div class="sup" onclick="openSupporters()" style="cursor:pointer"><b>${s['seg'+(s.segment||1)]||0}점</b><span>서포터 ${s.segment||1}구간</span></div>`:''}</div>`;
+  // ⑤ 실함 요약
+  const st=stash.data||[]; const stEl=$('#myStashSub'); if(stEl) stEl.textContent = st.length ? `${st.length}종 보관 중 · 최근: ${st[0].raw_name||'이름 없는 실'}${st[0].left_balls!=null?` ${st[0].left_balls}볼`:''}` : '볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요';
+  // ⑥ 가게/작가 배지
+  const shEl=$('#myShopSub'); if(shEl && pendN) shEl.innerHTML = `<span style="color:var(--olive);font-weight:600">클래스 신청 대기 ${pendN}건</span> · ${myShop?'소식·클래스 올리기':'클래스 열기 · 신청자 확정'}`;
 }
 async function renderMyFriends(){
   const rows = await fetchFriendships();
