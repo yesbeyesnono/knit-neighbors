@@ -727,7 +727,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .tmhead{position:absolute;top:0;text-align:center;font-size:12.5px;font-weight:700;padding:6px 0;border-radius:9px;background:var(--bg2);color:var(--ink2)}
 .tmhead.done{background:var(--sel);color:#fff}
 .tmhead span{font-weight:500;font-size:11px;opacity:.8;margin-left:2px}
-.tmnode{position:absolute;display:flex;align-items:center;gap:7px;padding:0 8px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.tmnode{position:absolute;display:flex;align-items:center;gap:7px;padding:0 8px;border-radius:12px;border:1.5px solid #C9CCBD;background:#fff;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
 .tmnode .sy{min-width:28px;height:28px;padding:0 2px;flex:none;border-radius:14px;border:1.5px solid var(--line);display:grid;place-items:center;color:var(--ink2);background:#fff;overflow:hidden}
 .tmnode .sy svg{display:block}
 .tmnode .nm{flex:1;min-width:0;font-size:12.5px;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -3697,7 +3697,7 @@ function techBoard(craft, cls, onClick, ver){
   list.forEach(t=>(t.prereq||[]).forEach(q=>{ const a=pos[q], b=pos[t.id]; if(!a||!b) return;
     const x1=a.x+colW, y1=a.y+nodeH/2, x2=b.x, y2=b.y+nodeH/2, mx=(x1+x2)/2;
     const cq=byId[q]?cls(byId[q]):'far', ct=cls(t); const hot = cq==='done'&&ct==='done', warm = !hot && cq!=='far' && ct!=='far';
-    svg += `<path d="M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" fill="none" stroke="${hot||warm?'#3C4043':'#dcdcdc'}" stroke-width="${hot?2.2:1.4}" ${warm?'stroke-dasharray="4 4"':''}/>`; }));
+    svg += `<path d="M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" fill="none" stroke="${hot||warm?'#3C4043':'#E9EAE2'}" stroke-width="${hot?2.2:1.1}" ${warm?'stroke-dasharray="4 4"':''}/>`; }));
   svg += '</svg>';
   let nodes='';
   for(let L=1; L<=5; L++){ const s2=st[L]; const dn=s2.total>0&&s2.done*2>=s2.total;
