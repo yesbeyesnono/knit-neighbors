@@ -1202,3 +1202,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   broadcast_run_due() 크론 broadcast-run-due(5분) · admin_broadcast_cancel · admin_broadcast_history(열람·클릭 수) · admin_bc_options(동네·기법·가게·이벤트·모임·글·도안·세그먼트·작품 종류)
 --   jigi route 'segment'(자연어 → 조건 JSON, 콘솔이 폼에 채워 대표가 확인) · 'bc_polish'(존댓말/신규/휴면/짧게). 앱: notifications.link → openLink() (meetup·event·shop·post·pattern·view)
 -- ---------------------------------------------------------------
+
+-- 52. 작가 자격 변경 + 작가 클래스 (마이그레이션 author_eligibility_and_classes, 2026-09-27 대표 지시)
+--   자격: 상급(techniques.level>=4) 이상 기법이 들어간 작품 인증 3개 이상 — author_adv_count(uid) · my_author_eligibility() {adv,total,needed} · apply_author 가 검사(기존 cert_count 3개 → 대체)
+--   권한: 작가도 클래스를 연다 — shop_posts.shop_id null 허용 + check(shop_id 또는 author_id&kind='class'), RLS shop_posts_insert/update/delete_author(작가 본인, shop_id null, kind class)
+--   알림: notify_on_shop_post — 가게 글은 팔로워(shop_post), 작가 클래스는 친구에게 notice + link {type:'profile', id, tab:'classes'}
+--   앱: openClassForm 이 작가 모드(가게 없음 → 장소 직접 입력, shop_id null) · 프로필/마이 '클래스' 탭(loadUserClasses) · ＋·설정에 클래스 열기 · openLink profile
+-- ---------------------------------------------------------------

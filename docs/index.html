@@ -1674,11 +1674,11 @@ async function saveAuthorLink(){
 const AUTHOR_MIN_CERTS = 3;
 async function openAuthorApply(){
   const { data:rows } = await sb.from('author_applications').select('*').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(1);
-  const a=(rows||[])[0]; const certs=myProfile?.cert_count||0;
+  const a=(rows||[])[0]; const { data:elig } = await sb.rpc('my_author_eligibility'); const certs=elig?.adv||0, total=elig?.total||0;
   if(a && a.status==='pending') return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0">신청을 확인하고 있어요. 보통 5일 안에 활동 알림으로 결과를 알려 드려요.</p><button class="btn o" onclick="cancelAuthorApply('${a.id}')">신청 취소</button>`);
-  if(certs < AUTHOR_MIN_CERTS) return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0">작품 인증 ${AUTHOR_MIN_CERTS}개부터 신청할 수 있어요. 지금 <b style="color:var(--ink)">${certs}개</b> 인증했어요.<br>작가가 되면 ${FULL?'도안을 등록해 이웃에게 추천되고, ':''}지도에 작가 핀으로 표시되고 내 인스타그램·링크를 프로필에 넣을 수 있어요.</p><button class="btn" onclick="closeSheet();openCompose('work')">작품 인증하러 가기</button>`);
+  if(certs < AUTHOR_MIN_CERTS) return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0"><b style="color:var(--ink)">상급(4단계) 이상 기법</b>이 들어간 작품 인증 ${AUTHOR_MIN_CERTS}개부터 신청할 수 있어요. 지금 <b style="color:var(--ink)">${certs}개</b>예요 (전체 인증 ${total}개).<br>작가가 되면 ${FULL?'도안을 등록해 이웃에게 추천되고, ':''}지도에 작가 핀으로 표시되고 내 인스타그램·링크를 프로필에 넣을 수 있어요.</p><button class="btn" onclick="closeSheet();openCompose('work')">작품 인증하러 가기</button>`);
   openSheet(`<b>작가 신청</b>
-    <p class="muted" style="margin:0">인증한 작품 ${certs}개와 아래 내용을 운영진이 확인한 뒤 승인해요. 승인되면 ${FULL?'도안을 등록할 수 있고 ':''}지도에 작가 핀으로 표시되고, 아래 활동 링크가 프로필에 보여요.${a&&a.status==='rejected'?`<br>지난 신청은 반려됐어요${a.reject_reason?': '+esc(a.reject_reason):''}`:''}</p>
+    <p class="muted" style="margin:0">상급 이상 기법으로 인증한 작품 ${certs}개와 아래 내용을 운영진이 확인한 뒤 승인해요. 승인되면 ${FULL?'도안을 등록할 수 있고 ':''}지도에 작가 핀으로 표시되고, 가게처럼 <b style="color:var(--ink)">클래스를 열 수</b> 있고, 아래 활동 링크가 프로필에 보여요.${a&&a.status==='rejected'?`<br>지난 신청은 반려됐어요${a.reject_reason?': '+esc(a.reject_reason):''}`:''}</p>
     <label class="f">이름 (본인 확인용, 공개되지 않아요)<input id="auName" maxlength="40" placeholder="실명 또는 사업자 상호"></label>
     <label class="f">활동 링크<input id="auLink" maxlength="300" inputmode="url" placeholder="https:// 인스타그램·블로그·판매처"></label>
     <textarea id="auNote" maxlength="1000" placeholder="직접 만든 도안이나 작업을 소개해 주세요"></textarea>
@@ -1950,7 +1950,7 @@ async function openProfile(id){
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}</div>
     ${p.is_author&&p.author_link?`<a class="authlink" href="${esc(p.author_link)}" target="_blank" rel="noopener">${linkLabel(p.author_link)} <span>↗</span></a>`:''}
-    <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${profTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button>${FULL&&p.is_author?`<button data-t="patterns" class="${profTab==='patterns'?'on':''}">도안</button>`:''}</div>
+    <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${profTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button>${p.is_author?`<button data-t="classes" class="${profTab==='classes'?'on':''}">클래스</button>`:''}${FULL&&p.is_author?`<button data-t="patterns" class="${profTab==='patterns'?'on':''}">도안</button>`:''}</div>
     <div class="feed" id="profFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#profTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; profTab=b.dataset.t; [...$('#profTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadUserFeed(profId, profTab, $('#profFeed')); };
   show('profile'); bindTabSwipe('#v-profile', '#profTabs');
@@ -1962,6 +1962,7 @@ async function shareUser(){ const p=profData||{}; const text=`뜨개동네 · ${
 // 특정 사용자 글 목록 (마이·프로필 공용)
 async function loadUserFeed(uid, tab, el){
   if(tab==='patterns') return loadUserPatterns(uid, el);
+  if(tab==='classes') return loadUserClasses(uid, el);
   if(tab==='reposts'){
     el.innerHTML='<div class="empty">불러오는 중…</div>';
     const { data:rp, error:e2 } = await sb.from('post_reposts').select('created_at, post:posts(*, '+AUTHOR_SEL+')').eq('profile_id', uid).order('created_at',{ascending:false}).limit(50);
@@ -2075,6 +2076,7 @@ async function openLink(l){
   try{
     if(l.type==='meetup') return openMeetup(l.id); if(l.type==='event') return openEvent(l.id); if(l.type==='shop'||l.type==='class') return openShop(l.id); if(l.type==='post') return openPost(l.id);
     if(l.type==='pattern') return typeof openPattern==='function' ? openPattern(l.id) : go('comm');
+    if(l.type==='profile'){ if(l.id===me.id){ if(l.tab) myTab=l.tab; return go('my'); } await openProfile(l.id); if(l.tab){ const b=document.querySelector('#profTabs [data-t=+l.tab+]'); if(b) b.click(); } return; }
     if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(['map','comm','chats','my'].includes(v)) return go(v); }
   }catch(e){}
   return openSupportRoom();
@@ -2876,7 +2878,8 @@ function openPlusSheet(){
     ${row("closeSheet();openCompose('post')", SVG_PEN, '글', '동네 이웃에게 소식·질문 남기기')}
     ${row("closeSheet();openCert()", ico('cert'), '작품 인증', '완성작 사진과 기법·실 기록 · 활동 레벨이 올라요')}
     ${row("closeSheet();openMeetForm()", ico('location'), '모임 만들기', '장소·일시를 정해 이웃 모으기', certified?'':'<span class="lock">작품 인증 1개부터 열 수 있어요</span>')}
-    ${myShop?row("closeSheet();openCompose('shop')", ico('signal'), '가게 소식', esc(myShop.name)+' 팔로워에게 알리기')+row("closeSheet();openClassForm()", ico('cert'), '클래스 열기', '일정·인원·비용·환불 규정까지 양식으로'):''}
+    ${myShop?row("closeSheet();openCompose('shop')", ico('signal'), '가게 소식', esc(myShop.name)+' 팔로워에게 알리기'):''}
+    ${myShop||myProfile?.is_author?row("closeSheet();openClassForm()", ico('cert'), '클래스 열기', myShop?'일정·인원·비용·환불 규정까지 양식으로':'작가 클래스 · 마이 › 클래스 탭에 보여요'):''}
     ${FULL && myProfile?.is_author?row("closeSheet();openPatternForm()", ico('ruler'), '도안', '내 도안 등록하기'):''}
   </div><button class="btn o" onclick="closeSheet()">닫기</button>`);
 }
@@ -2983,6 +2986,16 @@ async function submitShopNews(){
   }catch(e){ toast(e.message); }
   b.disabled=false;
 }
+// 작가 클래스 목록(프로필·마이 '클래스' 탭): shop_id 가 null 인 class 글
+async function loadUserClasses(uid, el){
+  el.innerHTML='<div class="empty">불러오는 중…</div>';
+  const { data, error } = await sb.from('shop_posts').select('*').eq('author_id', uid).is('shop_id', null).eq('kind','class').order('created_at',{ascending:false}).limit(30);
+  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
+  const mine = uid===me.id;
+  el.innerHTML = (data||[]).length ? data.map(p=>`<div class="spost" id="sp-${p.id}" style="border-top:0;border-bottom:1px solid var(--line)"><span class="k class">클래스</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteMyClass('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${Math.min(p.photos.length,4)}">${p.photos.slice(0,4).map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}${p.extra?.v?classBox(p):''}</div>`).join('')
+    : `<div class="empty" style="white-space:pre-line">${mine?'아직 연 클래스가 없어요.\n＋ › 클래스 열기로 첫 클래스를 열어 보세요':'아직 연 클래스가 없어요'}</div>`;
+}
+async function deleteMyClass(id){ if(!confirm('이 클래스를 삭제할까요?')) return; const {error}=await sb.from('shop_posts').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); loadMyFeed(); }
 // ===== 가게 클래스 열기 (shop_posts kind 'class' + extra) =====
 const C_CRAFT={crochet:'코바늘',knit:'대바늘',other:'기타'}, C_TYPE={oneday:'원데이',course:'정규 (여러 회차)'}, C_MAT={incl:'수강료에 포함',extra:'별도',none:'재료비 없음'}, C_PLACE={shop:'우리 가게',other:'다른 장소',online:'온라인'};
 const C_APPLY={link:'링크로 신청',phone:'전화',insta:'인스타그램 DM',visit:'가게에 직접'};
@@ -2996,8 +3009,9 @@ function renderClassPhotos(){
   box.innerHTML = sPhotos.length ? sPhotos.map((p,i)=>`<div style="background-image:url(${p.url});width:56px;height:56px">${i===0?'<span style="position:absolute;left:3px;bottom:3px;font-size:.6rem;font-weight:700;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff">대표</span>':''}<b onclick="event.stopPropagation();sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" style="width:56px;height:56px;font-size:.7rem" onclick="$('#cFile').click()">${ico('camera')}<br>추가</button>`:'') : '';
 }
 async function openClassForm(){
-  if(!myShop) return toast('가게 계정만 클래스를 열 수 있어요');
-  if(!myShop.is_active) return toast('가게가 지도에 공개된 뒤 클래스를 열 수 있어요');
+  const asAuthor = !myShop && !!myProfile?.is_author;
+  if(!myShop && !asAuthor) return toast('가게 계정이나 작가만 클래스를 열 수 있어요');
+  if(myShop && !myShop.is_active) return toast('가게가 지도에 공개된 뒤 클래스를 열 수 있어요');
   closeSub(); closeSheet(); composeKind='class'; sPhotos=[]; cTechSel=new Set();
   if(!['compose','cert','meetform','classform'].includes(view)) composeBack=view;
   if(!$('#cCraft').children.length){
@@ -3012,8 +3026,8 @@ async function openClassForm(){
   }
   ['cTitle','cTag','cWork','cSessions','cMin','cMax','cFee','cMatFee','cProvide','cBring','cPlaceTxt','cPlaceHint','cDescr','cFor','cCurri','cTeacher','cApplyTo','cNote'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
   const craft = myProfile?.craft==='knit'?'knit':myProfile?.craft==='both'?'crochet':'crochet';
-  segSet('#cCraft', craft); segSet('#cLevel','1'); segSet('#cType','oneday'); segSet('#cDur','120'); segSet('#cMat','incl'); segSet('#cPlace','shop'); segSet('#cApply','link'); segSet('#cRefund','d3');
-  $('#cRepeatWrap').hidden=true; $('#cMatFee').hidden=true; $('#cPlaceTxt').hidden=true; $('#cRefundTxt').value=C_REFUND_TXT.d3; delete $('#cEnds').dataset.touched;
+  segSet('#cCraft', craft); segSet('#cLevel','1'); segSet('#cType','oneday'); segSet('#cDur','120'); segSet('#cMat','incl'); segSet('#cPlace', myShop?'shop':'other'); segSet('#cApply','link'); segSet('#cRefund','d3');
+  $('#cRepeatWrap').hidden=true; $('#cMatFee').hidden=true; $('#cPlaceTxt').hidden=!!myShop; [...$('#cPlace').children].forEach(b=>{ b.hidden = b.dataset.k==='shop' && !myShop; }); $('#cRefundTxt').value=C_REFUND_TXT.d3; delete $('#cEnds').dataset.touched;
   const d=new Date(); d.setDate(d.getDate()+7); const pad=n=>String(n).padStart(2,'0'); $('#cDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#cDate').min=(t=>`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`)(new Date()); $('#cClock').value='14:00'; d.setDate(d.getDate()-1); $('#cEnds').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   $('#cMin').value='1'; $('#classPost').disabled=false; renderCTech(); renderClassPhotos();
   show('classform'); $('#v-classform .body').scrollTop=0;
@@ -3044,7 +3058,7 @@ async function submitClass(){
     const min=Math.max(1,+v('cMin')||1), max=+v('cMax')||0; if(!max) throw new Error('최대 인원을 적어 주세요'); if(max<min) throw new Error('최대 인원이 최소 인원보다 작아요');
     if(v('cFee')==='') throw new Error('수강료를 적어 주세요 (무료면 0)'); const fee=Math.max(0,+v('cFee')||0);
     const mat=segVal('#cMat')||'incl'; const matFee=mat==='extra'?+v('cMatFee')||0:0; if(mat==='extra' && !matFee) throw new Error('재료비가 별도면 금액을 적어 주세요');
-    const place=segVal('#cPlace')||'shop'; const placeTxt=place==='shop'?(myShop.address||myShop.name):v('cPlaceTxt'); if(place!=='shop' && !placeTxt) throw new Error('장소를 적어 주세요');
+    const place=segVal('#cPlace')||'shop'; const placeTxt=place==='shop'&&myShop?(myShop.address||myShop.name):v('cPlaceTxt'); if(place!=='shop' && !placeTxt) throw new Error('장소를 적어 주세요');
     const apply=segVal('#cApply')||'link'; const applyTo=v('cApplyTo'); if(apply!=='visit' && !applyTo) throw new Error('신청 링크나 연락처를 적어 주세요'); if(apply==='link' && !/^https?:\/\/\S+$/i.test(applyTo)) throw new Error('신청 링크는 https:// 로 시작해야 해요');
     const refund=v('cRefundTxt'); if(!refund) throw new Error('취소·환불 규정을 적어 주세요');
     const ends = v('cEnds') ? new Date(v('cEnds')+'T23:59:59') : null; if(ends && ends>startsAt) throw new Error('모집 마감은 시작 전이어야 해요');
@@ -3053,9 +3067,9 @@ async function submitClass(){
     const extra = { v:1, tag:v('cTag')||null, craft:segVal('#cCraft')||'crochet', level:+(segVal('#cLevel')||1), techniques:[...cTechSel], work, type, starts_at:startsAt.toISOString(), duration_min:+(segVal('#cDur')||120), sessions, cycle:type==='course'?v('cCycle'):null,
       min, max, fee, material:mat, material_fee:matFee, provide:v('cProvide')||null, bring:v('cBring')||null, place, place_text:placeTxt||null, place_hint:v('cPlaceHint')||null,
       descr:v('cDescr')||null, target:v('cFor')||null, curriculum:v('cCurri').split('\n').map(x=>x.trim()).filter(Boolean), teacher:v('cTeacher')||null, apply, apply_to:applyTo||null, refund, note:v('cNote')||null };
-    const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind:'class', title, body: extra.tag, photos, ends_at: ends?ends.toISOString():null, extra });
+    const { error } = await sb.from('shop_posts').insert({ shop_id: myShop?myShop.id:null, author_id: me.id, kind:'class', title, body: extra.tag, photos, ends_at: ends?ends.toISOString():null, extra });
     if(error) throw new Error(error.message);
-    sPhotos=[]; toast('클래스를 열었어요. 팔로워에게 알림이 갔어요'); composeBack=null; return openShop(myShop.id);
+    sPhotos=[]; composeBack=null; if(myShop){ toast('클래스를 열었어요. 팔로워에게 알림이 갔어요'); return openShop(myShop.id); } toast('클래스를 열었어요. 친구들에게 알림이 갔어요'); myTab='classes'; return go('my');
   }catch(e){ toast(e.message); }
   b.disabled=false;
 }
@@ -3739,7 +3753,7 @@ async function renderMy(){
     <div id="myRecs">${recCard(0)}</div>
     <div class="shopcard" onclick="openStash()"><div class="sq">${ico('yarn')}</div><div style="flex:1;min-width:0"><b>내 실함</b><div class="muted">볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요</div></div><span style="color:var(--ink3)">›</span></div>
     ${myShop?`<div class="shopcard" onclick="openShop('${myShop.id}')"><div class="sq">${SHOP_SVG}</div><div style="flex:1;min-width:0"><b>${esc(myShop.name)}</b><div class="muted">내 가게 · 소식 올리기 · 팔로워 보기</div></div><span style="color:var(--ink3)">›</span></div>`:''}
-    <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${myTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button></div>
+    <div class="subtabs" id="myTabs"><button data-t="posts" class="${myTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${myTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${myTab==='works'?'on':''}">인증</button><button data-t="meetups" class="${myTab==='meetups'?'on':''}">모임</button>${myProfile?.is_author?`<button data-t="classes" class="${myTab==='classes'?'on':''}">클래스</button>`:''}</div>
     <div class="feed" id="myFeed"><div class="empty">불러오는 중…</div></div>`;
   $('#myTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; myTab=b.dataset.t; [...$('#myTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadMyFeed(); };
   loadMyFeed(); bindTabSwipe('#v-my', '#myTabs');
@@ -3787,7 +3801,7 @@ function openSettings(){
       <button class="srow" onclick="closeSheet();openSkills()"><span>내 뜨개 단계 <span class="muted">${lvShort(p)||'아직 없음'}</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openSlides()"><span>뜨개 단계 설명</span><span class="car">›</span></button>
       ${FULL?`<button class="srow" onclick="openSavedPatterns()"><span>찜한 도안</span><span class="car">›</span></button>`:''}
-      ${p.is_author?`${FULL?`<button class="srow" onclick="openMyPatterns()"><span>내 도안 <span class="authbadge">작가</span><br><span class="muted">도안 등록·수정</span></span><span class="car">›</span></button>`:''}<button class="srow" onclick="openAuthorLink()"><span>작가 링크 ${FULL?'':'<span class="authbadge">작가</span>'}<br><span class="muted">${p.author_link?esc(p.author_link.replace(/^https?:\/\//,'').slice(0,40)):'인스타그램·블로그 등을 프로필에 보여 줘요'}</span></span><span class="car">›</span></button>`:`<button class="srow" onclick="openAuthorApply()"><span>작가 신청<br><span class="muted">작품 인증 ${AUTHOR_MIN_CERTS}개부터 · ${FULL?'도안을 등록하고 ':''}지도에 작가로 표시돼요</span></span><span class="car">›</span></button>`}
+      ${p.is_author?`${FULL?`<button class="srow" onclick="openMyPatterns()"><span>내 도안 <span class="authbadge">작가</span><br><span class="muted">도안 등록·수정</span></span><span class="car">›</span></button>`:''}<button class="srow" onclick="closeSheet();openClassForm()"><span>클래스 열기 <span class="authbadge">작가</span><br><span class="muted">일정·인원·비용·환불 규정까지 양식으로 · 마이 › 클래스 탭에 보여요</span></span><span class="car">›</span></button><button class="srow" onclick="openAuthorLink()"><span>작가 링크 ${FULL?'':'<span class="authbadge">작가</span>'}<br><span class="muted">${p.author_link?esc(p.author_link.replace(/^https?:\/\//,'').slice(0,40)):'인스타그램·블로그 등을 프로필에 보여 줘요'}</span></span><span class="car">›</span></button>`:`<button class="srow" onclick="openAuthorApply()"><span>작가 신청<br><span class="muted">상급 이상 기법 작품 인증 ${AUTHOR_MIN_CERTS}개부터 · 클래스 열기${FULL?'·도안 등록':''} · 지도에 작가로 표시</span></span><span class="car">›</span></button>`}
       <button class="srow" onclick="relocateNow()"><span>현위치로 동네 다시 설정<br><span class="muted">지금 ${esc(p.dong_name||'미설정')} · 가입한 위치로 고정돼 있어요</span></span><span class="car">›</span></button>
       <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 200m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
     </div>
