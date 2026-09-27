@@ -1383,6 +1383,29 @@ async function saveProfile(){
 }
 
 // ============ 지도 어댑터 (Google Maps ↔ Leaflet/OSM) ============
+// 지도 선화 스타일(2026-09-27 대표 확정): 거의 흰 바탕 + 가는 회록 선, 공원은 칩색, 물은 연회색, 업체·명소·대중교통 아이콘 숨김 → 이웃 핀만 또렷하게. 앱 팔레트와 같은 색만 사용
+const MAP_STYLE = [
+  {elementType:'geometry',stylers:[{color:'#FBFBF8'}]},
+  {elementType:'labels.icon',stylers:[{visibility:'off'}]},
+  {elementType:'labels.text.fill',stylers:[{color:'#5f6368'}]},
+  {elementType:'labels.text.stroke',stylers:[{color:'#FBFBF8'},{weight:3}]},
+  {featureType:'poi',stylers:[{visibility:'off'}]},
+  {featureType:'poi.park',elementType:'geometry',stylers:[{visibility:'on'},{color:'#EDF2DD'}]},
+  {featureType:'poi.park',elementType:'labels.text.fill',stylers:[{visibility:'on'},{color:'#6f7f4a'}]},
+  {featureType:'landscape.man_made',elementType:'geometry.fill',stylers:[{color:'#FBFBF8'}]},
+  {featureType:'landscape.man_made',elementType:'geometry.stroke',stylers:[{color:'#E4E6D9'},{weight:.6}]},
+  {featureType:'road',elementType:'geometry.fill',stylers:[{color:'#ffffff'}]},
+  {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#C9CCBD'},{weight:.8}]},
+  {featureType:'road.highway',elementType:'geometry.fill',stylers:[{color:'#F3F4EC'}]},
+  {featureType:'road.highway',elementType:'geometry.stroke',stylers:[{color:'#B9BEA9'},{weight:1}]},
+  {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#8f948a'}]},
+  {featureType:'transit',stylers:[{visibility:'off'}]},
+  {featureType:'transit.line',elementType:'geometry',stylers:[{visibility:'on'},{color:'#DADCCF'}]},
+  {featureType:'water',elementType:'geometry',stylers:[{color:'#EEF0E8'}]},
+  {featureType:'water',elementType:'labels.text.fill',stylers:[{color:'#9aa08f'}]},
+  {featureType:'administrative',elementType:'geometry.stroke',stylers:[{color:'#C9CCBD'}]},
+  {featureType:'administrative.locality',elementType:'labels.text.fill',stylers:[{color:'#3C4043'}]}
+];
 const MapAdapter = {
   impl:null, ready:false, pending:null, el:null,
   init(el, center){
@@ -1445,17 +1468,7 @@ function makeHtmlPin(){
 const GMap = {
   map:null, markers:[],
   async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,minZoom:9,maxZoom:18,gestureHandling:'greedy',disableDefaultUI:true,clickableIcons:false,
-    // 업체·명소 아이콘 숨김 + 지도 톤 다운 → 사용자 핀만 또렷하게
-    styles:[
-      {featureType:'poi',stylers:[{visibility:'off'}]},
-      {featureType:'poi.park',elementType:'geometry',stylers:[{visibility:'on'},{saturation:-30}]},
-      {featureType:'transit',elementType:'labels.icon',stylers:[{visibility:'off'}]},
-      {featureType:'road',elementType:'geometry',stylers:[{saturation:-70},{lightness:20}]},
-      {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#8a8a8a'}]},
-      {featureType:'landscape',stylers:[{saturation:-40},{lightness:10}]},
-      {featureType:'water',stylers:[{saturation:-50},{lightness:10}]},
-      {featureType:'administrative',elementType:'labels.text.fill',stylers:[{color:'#555'}]}
-    ]}); this.Pin=makeHtmlPin(); },
+    styles:MAP_STYLE }); this.Pin=makeHtmlPin(); },
   setCenter(c){ this.map.setCenter(c); this.map.setZoom(14); },
   clear(){ this.markers.forEach(m=>m.setMap(null)); this.markers=[]; },
   marker(o){ const w=document.createElement('div'); w.innerHTML=pinHtml(o); const d=w.firstElementChild; const m=new this.Pin(new google.maps.LatLng(o.lat,o.lng), d, o.onClick); m.setMap(this.map); this.markers.push(m); },
@@ -3271,7 +3284,7 @@ function renderMeetPlace(){
   miniMap($('#mMini'), r);
 }
 async function miniMap(el, c, interactive){
-  try{ await loadGoogleMaps(); if(!el.isConnected) return null; return new google.maps.Map(el, { center:{lat:c.lat,lng:c.lng}, zoom:interactive?16:16, disableDefaultUI:true, clickableIcons:false, gestureHandling:interactive?'greedy':'none', keyboardShortcuts:false }); }
+  try{ await loadGoogleMaps(); if(!el.isConnected) return null; return new google.maps.Map(el, { center:{lat:c.lat,lng:c.lng}, zoom:interactive?16:16, disableDefaultUI:true, clickableIcons:false, gestureHandling:interactive?'greedy':'none', keyboardShortcuts:false , styles:MAP_STYLE }); }
   catch(e){ el.innerHTML='<div class="muted" style="padding:16px;font-size:.85rem">지도를 불러오지 못했어요. 주소를 확인해 주세요.</div>'; return null; }
 }
 async function submitMeet(){
