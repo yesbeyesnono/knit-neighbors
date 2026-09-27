@@ -1217,3 +1217,4 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   class_applicants(post) 호스트용 · class_app_summary(posts[]) 카드용(내 상태·확정/대기 수·room_id) · my_class_applications() 설정 › 신청한 클래스
 --   앱: classBox 버튼 = 신청하기(남은 자리)/신청 완료·취소/확정·채팅방/정원 참/마감, 호스트는 [신청자 관리] 시트(확정·거절·확정 취소). 양식의 '신청 방법' 삭제(extra.apply='app'). 결제는 여전히 앱 밖
 -- ---------------------------------------------------------------
+--   (보강 class_payment_notice) 결제 방법 extra.pay onsite|transfer|deposit · deposit · pay_days: 확정 시 채팅방에 결제 방법·기한(KST 날짜)·환불 규정 자동 메시지 · class_applications.paid_at + mark_class_paid(id, paid) 호스트 [입금 확인] → 회원 알림 · 양식은 계좌번호 패턴 입력 차단(계좌는 채팅방에서만) · 약관 제9조의2 통신판매중개자 고지

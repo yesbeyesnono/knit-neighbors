@@ -1031,6 +1031,11 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
         <div class="cfl">준비물 <span class="muted">(선택)</span></div><input id="cBring" maxlength="120" placeholder="예: 없음 / 5호 코바늘 지참">
       </div>
       <div class="ccard"><div class="cfl">장소</div><div class="seg" id="cPlace"></div><input id="cPlaceTxt" maxlength="120" placeholder="장소 이름·주소 또는 온라인 방식(줌 등)" hidden style="margin-top:8px"><input id="cPlaceHint" maxlength="120" placeholder="찾아오는 길·주차 (선택)" style="margin-top:8px"></div>
+      <div class="ccard"><div class="cfl">결제 방법 <span class="req">필수</span> <span class="muted">앱은 결제를 받지 않아요</span></div><div class="seg" id="cPay"></div>
+        <input id="cDeposit" type="number" min="0" step="1000" inputmode="numeric" placeholder="예약금 금액 (원)" hidden style="margin-top:8px">
+        <div id="cPayDaysWrap" hidden><div class="cfl">입금 기한 <span class="muted">확정 후</span></div><div class="seg" id="cPayDays"></div></div>
+        <p class="muted" style="font-size:.78rem;margin:8px 0 0">계좌번호는 여기 적지 말고, 확정된 사람에게 클래스 채팅방에서만 알려 주세요(사기·스팸 예방). 확정하면 결제 방법·기한·환불 규정이 채팅방에 자동으로 안내돼요.</p>
+      </div>
       <div class="ccard"><div class="cfl">소개 <span class="muted">(선택이지만 신청에 큰 도움이 돼요)</span></div>
         <textarea id="cDescr" maxlength="1000" placeholder="클래스 소개 · 이런 점이 좋아요" style="min-height:90px"></textarea>
         <div class="cfl">이런 분께 추천</div><input id="cFor" maxlength="120" placeholder="예: 사슬뜨기·짧은뜨기를 해 본 초보, 선물 만들고 싶은 분">
@@ -3011,7 +3016,9 @@ async function deleteMyClass(id){ if(!confirm('이 클래스를 삭제할까요?
 const C_CRAFT={crochet:'코바늘',knit:'대바늘',other:'기타'}, C_TYPE={oneday:'원데이',course:'정규 (여러 회차)'}, C_MAT={incl:'수강료에 포함',extra:'별도',none:'재료비 없음'}, C_PLACE={shop:'우리 가게',other:'다른 장소',online:'온라인'};
 const C_APPLY={link:'링크로 신청',phone:'전화',insta:'인스타그램 DM',visit:'가게에 직접'};
 const C_REFUND={d3:'3일 전까지 100% · 이후 재료비 제외 · 당일 불가',d1:'1일 전까지 100% · 당일 불가',custom:'직접 입력'};
-const C_REFUND_TXT={d3:'수업 3일 전까지 취소하면 전액 환불돼요. 그 이후에는 재료비를 제외하고 환불되고, 수업 당일에는 환불이 어려워요.',d1:'수업 1일 전까지 취소하면 전액 환불돼요. 수업 당일에는 환불이 어려워요.',custom:''};
+const C_REFUND_TXT={d3:'수업 3일 전까지 취소하면 전액 환불돼요. 그 이후에는 재료비를 제외하고 환불되고, 수업 당일에는 환불이 어려워요. 환불은 호스트가 이체로 돌려드려요(영업일 3일 안).',d1:'수업 1일 전까지 취소하면 전액 환불돼요. 수업 당일에는 환불이 어려워요. 환불은 호스트가 이체로 돌려드려요(영업일 3일 안).',custom:''};
+const C_PAY={onsite:'현장 결제',transfer:'계좌이체',deposit:'예약금 + 현장 잔금'}, C_PAYDAYS={1:'1일 안',2:'2일 안',3:'3일 안',7:'7일 안'};
+const ACCT_RE=/\d{2,6}-\d{2,6}-\d{2,8}|\d{10,16}/;   // 계좌번호처럼 보이는 숫자열 — 양식에 못 적게
 let cTechSel=new Set(), cTechCraft='crochet';
 function renderClassPhotos(){
   const hero=$('#cHero'); if(!hero || view!=='classform') return; const p0=sPhotos[0];
@@ -3026,7 +3033,8 @@ async function openClassForm(){
   closeSub(); closeSheet(); composeKind='class'; sPhotos=[]; cTechSel=new Set();
   if(!['compose','cert','meetform','classform'].includes(view)) composeBack=view;
   if(!$('#cCraft').children.length){
-    seg('#cCraft', C_CRAFT); seg('#cLevel', {1:'1단계 입문',2:'2단계 초급',3:'3단계 중급',4:'4단계 상급',5:'5단계 전문'}); seg('#cType', C_TYPE); seg('#cDur', M_DUR); seg('#cMat', C_MAT); seg('#cPlace', C_PLACE); seg('#cRefund', C_REFUND);
+    seg('#cCraft', C_CRAFT); seg('#cLevel', {1:'1단계 입문',2:'2단계 초급',3:'3단계 중급',4:'4단계 상급',5:'5단계 전문'}); seg('#cType', C_TYPE); seg('#cDur', M_DUR); seg('#cMat', C_MAT); seg('#cPlace', C_PLACE); seg('#cRefund', C_REFUND); seg('#cPay', C_PAY); seg('#cPayDays', C_PAYDAYS);
+    $('#cPay').addEventListener('click', ()=>{ const k=segVal('#cPay'); $('#cDeposit').hidden = k!=='deposit'; $('#cPayDaysWrap').hidden = k==='onsite'; });
     $('#cType').addEventListener('click', ()=>{ $('#cRepeatWrap').hidden = segVal('#cType')!=='course'; });
     $('#cMat').addEventListener('click', ()=>{ $('#cMatFee').hidden = segVal('#cMat')!=='extra'; });
     $('#cPlace').addEventListener('click', ()=>{ $('#cPlaceTxt').hidden = segVal('#cPlace')==='shop'; });
@@ -3037,7 +3045,7 @@ async function openClassForm(){
   }
   ['cTitle','cTag','cWork','cSessions','cMin','cMax','cFee','cMatFee','cProvide','cBring','cPlaceTxt','cPlaceHint','cDescr','cFor','cCurri','cTeacher','cNote'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; });
   const craft = myProfile?.craft==='knit'?'knit':myProfile?.craft==='both'?'crochet':'crochet';
-  segSet('#cCraft', craft); segSet('#cLevel','1'); segSet('#cType','oneday'); segSet('#cDur','120'); segSet('#cMat','incl'); segSet('#cPlace', myShop?'shop':'other'); segSet('#cRefund','d3');
+  segSet('#cCraft', craft); segSet('#cLevel','1'); segSet('#cType','oneday'); segSet('#cDur','120'); segSet('#cMat','incl'); segSet('#cPlace', myShop?'shop':'other'); segSet('#cRefund','d3'); segSet('#cPay','onsite'); segSet('#cPayDays','2'); $('#cDeposit').hidden=true; $('#cDeposit').value=''; $('#cPayDaysWrap').hidden=true;
   $('#cRepeatWrap').hidden=true; $('#cMatFee').hidden=true; $('#cPlaceTxt').hidden=!!myShop; [...$('#cPlace').children].forEach(b=>{ b.hidden = b.dataset.k==='shop' && !myShop; }); $('#cRefundTxt').value=C_REFUND_TXT.d3; delete $('#cEnds').dataset.touched;
   const d=new Date(); d.setDate(d.getDate()+7); const pad=n=>String(n).padStart(2,'0'); $('#cDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#cDate').min=(t=>`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`)(new Date()); $('#cClock').value='14:00'; d.setDate(d.getDate()-1); $('#cEnds').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   $('#cMin').value='1'; $('#classPost').disabled=false; renderCTech(); renderClassPhotos();
@@ -3058,7 +3066,7 @@ function toggleCTech(id){ if(cTechSel.has(id)) cTechSel.delete(id); else cTechSe
 async function submitClass(){
   const b=$('#classPost'); b.disabled=true;
   try{
-    if(!myShop) throw new Error('가게 계정만 올릴 수 있어요');
+    if(!myShop && !myProfile?.is_author) throw new Error('가게 계정이나 작가만 올릴 수 있어요');
     const v=id=>$('#'+id).value.trim();
     const title=v('cTitle'); if(!title) throw new Error('클래스명을 적어 주세요');
     if(!sPhotos.length) throw new Error('대표 사진을 1장 이상 올려 주세요');
@@ -3072,10 +3080,12 @@ async function submitClass(){
     const place=segVal('#cPlace')||'shop'; const placeTxt=place==='shop'&&myShop?(myShop.address||myShop.name):v('cPlaceTxt'); if(place!=='shop' && !placeTxt) throw new Error('장소를 적어 주세요');
     const refund=v('cRefundTxt'); if(!refund) throw new Error('취소·환불 규정을 적어 주세요');
     const ends = v('cEnds') ? new Date(v('cEnds')+'T23:59:59') : null; if(ends && ends>startsAt) throw new Error('모집 마감은 시작 전이어야 해요');
+    const pay=segVal('#cPay')||'onsite'; const deposit=pay==='deposit'?+v('cDeposit')||0:0; if(pay==='deposit' && !deposit) throw new Error('예약금 금액을 적어 주세요'); const payDays=+(segVal('#cPayDays')||2);
+    if([v('cTag'),v('cDescr'),v('cProvide'),v('cBring'),v('cFor'),v('cCurri'),v('cTeacher'),v('cRefundTxt'),v('cNote'),v('cPlaceHint')].some(t=>ACCT_RE.test(t))) throw new Error('계좌번호는 양식에 적을 수 없어요. 확정 뒤 클래스 채팅방에서만 알려 주세요');
     await loadBanned(); if([title,v('cTag'),v('cDescr'),v('cNote')].some(hasBanned)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const photos = await uploadPhotos(sPhotos);
     const extra = { v:1, tag:v('cTag')||null, craft:segVal('#cCraft')||'crochet', level:+(segVal('#cLevel')||1), techniques:[...cTechSel], work, type, starts_at:startsAt.toISOString(), duration_min:+(segVal('#cDur')||120), sessions, cycle:type==='course'?v('cCycle'):null,
-      min, max, fee, material:mat, material_fee:matFee, provide:v('cProvide')||null, bring:v('cBring')||null, place, place_text:placeTxt||null, place_hint:v('cPlaceHint')||null,
+      min, max, fee, material:mat, material_fee:matFee, pay, deposit, pay_days:payDays, provide:v('cProvide')||null, bring:v('cBring')||null, place, place_text:placeTxt||null, place_hint:v('cPlaceHint')||null,
       descr:v('cDescr')||null, target:v('cFor')||null, curriculum:v('cCurri').split('\n').map(x=>x.trim()).filter(Boolean), teacher:v('cTeacher')||null, apply:'app', apply_to:null, refund, note:v('cNote')||null };
     const { error } = await sb.from('shop_posts').insert({ shop_id: myShop?myShop.id:null, author_id: me.id, kind:'class', title, body: extra.tag, photos, ends_at: ends?ends.toISOString():null, extra });
     if(error) throw new Error(error.message);
@@ -3091,7 +3101,7 @@ async function refreshClassCard(postId){ const { data } = await sb.rpc('class_ap
 async function openClassApply(postId){
   const { data:p } = await sb.from('shop_posts').select('*').eq('id', postId).single(); if(!p) return toast('클래스를 찾을 수 없어요'); const x=p.extra||{};
   openSheet(`<b style="font-size:1.05rem">클래스 신청</b><div><b>${esc(p.title)}</b><div class="muted" style="font-size:.85rem">${x.fee?won(x.fee):'무료'}${x.material==='extra'?` + 재료비 ${won(x.material_fee)}`:''} · 최대 ${x.max||'-'}명</div></div>
-    <div class="card soft" style="font-size:.85rem"><b>취소·환불</b> ${esc(x.refund||'')}<br><span class="muted">결제는 확정 뒤 호스트가 채팅방에서 안내해요. 앱 안에서 돈을 받지 않아요.</span></div>
+    <div class="card soft" style="font-size:.85rem"><b>결제</b> ${esc(payText(x))}<br><b>취소·환불</b> ${esc(x.refund||'')}<br><span class="muted">결제는 앱에서 하지 않아요. 확정되면 호스트가 채팅방에서 방법과 기한을 안내해요. 뜨개동네는 결제·환불에 관여하지 않고 신청·확정 기록만 남겨요.</span></div>
     <textarea id="capNote" maxlength="300" placeholder="호스트에게 남길 말 (선택 · 예: 왼손잡이예요, 초보예요)" style="min-height:70px"></textarea>
     <button class="btn" id="capSend" onclick="sendClassApply('${p.id}')">신청하기</button>`);
 }
@@ -3101,9 +3111,10 @@ async function openClassApplicants(postId){
   const [{ data:rows, error },{ data:p }] = await Promise.all([sb.rpc('class_applicants', { p_post: postId }), sb.from('shop_posts').select('id,title,extra,room_id').eq('id', postId).single()]); if(error) return toast(error.message);
   const x=p?.extra||{}; const acc=(rows||[]).filter(r=>r.status==='accepted').length; const ST={applied:'대기',accepted:'확정',rejected:'거절',cancelled:'취소'};
   openSheet(`<b style="font-size:1.05rem">신청자 관리</b><div class="muted" style="font-size:.85rem">${esc(p?.title||'')} · 확정 ${acc}${x.max?'/'+x.max:''}명${p?.room_id?` · <a href="#" onclick="closeSheet();openRoom('${p.room_id}');return false" style="color:var(--olive)">클래스 채팅방 열기</a>`:''}</div>
-    <div>${(rows||[]).map(r=>`<div class="aprow">${avatar({nickname:r.nickname,avatar_url:r.avatar_url})}<div class="nm"><b>${esc(r.nickname)} <span class="st ${r.status==='rejected'||r.status==='cancelled'?'r':''}">${ST[r.status]}</span></b><span>${esc(r.dong||'')}${r.lv_crochet?` · 코바늘 ${r.lv_crochet}단계`:''}${r.lv_knit?` · 대바늘 ${r.lv_knit}단계`:''}${r.note?`<br>"${esc(r.note)}"`:''}</span></div>${r.status==='applied'?`<button class="p" onclick="decideClassApp(${r.id},true,'${postId}')">확정</button><button onclick="decideClassApp(${r.id},false,'${postId}')">거절</button>`:r.status==='accepted'?`<button onclick="decideClassApp(${r.id},false,'${postId}')">확정 취소</button>`:''}</div>`).join('')||'<div class="empty">아직 신청이 없어요</div>'}</div>
+    <div>${(rows||[]).map(r=>`<div class="aprow">${avatar({nickname:r.nickname,avatar_url:r.avatar_url})}<div class="nm"><b>${esc(r.nickname)} <span class="st ${r.status==='rejected'||r.status==='cancelled'?'r':''}">${ST[r.status]}</span></b><span>${esc(r.dong||'')}${r.lv_crochet?` · 코바늘 ${r.lv_crochet}단계`:''}${r.lv_knit?` · 대바늘 ${r.lv_knit}단계`:''}${r.note?`<br>"${esc(r.note)}"`:''}</span></div>${r.status==='applied'?`<button class="p" onclick="decideClassApp(${r.id},true,'${postId}')">확정</button><button onclick="decideClassApp(${r.id},false,'${postId}')">거절</button>`:r.status==='accepted'?`<button class="${r.paid_at?'':'p'}" onclick="markPaid(${r.id},${!r.paid_at},'${postId}')">${r.paid_at?'입금 확인됨 ✓':'입금 확인'}</button><button onclick="decideClassApp(${r.id},false,'${postId}')">확정 취소</button>`:''}</div>`).join('')||'<div class="empty">아직 신청이 없어요</div>'}</div>
     <p class="muted" style="font-size:.78rem;margin:0">확정하면 신청자에게 알림이 가고 클래스 채팅방에 들어와요. 결제·준비물 안내는 채팅방에서 해 주세요.</p>`);
 }
+async function markPaid(id, paid, postId){ const { error } = await sb.rpc('mark_class_paid', { p_id:id, p_paid:paid }); if(error) return toast(error.message); toast(paid?'입금 확인을 표시했어요. 신청자에게 알림이 가요':'입금 확인을 취소했어요'); openClassApplicants(postId); }
 async function decideClassApp(id, accept, postId){
   const note = accept ? null : (prompt('거절 사유 (선택, 신청자에게 전달돼요)') ?? null); if(!accept && note===null) return;
   const { error } = await sb.rpc('decide_class_application', { p_id:id, p_accept:accept, p_note:note||null }); if(error) return toast(error.message);
@@ -3113,6 +3124,7 @@ async function openMyClassApps(){
   const { data, error } = await sb.rpc('my_class_applications'); if(error) return toast(error.message); const ST={applied:'확인 기다리는 중',accepted:'확정',rejected:'함께하지 못함'};
   openSub('신청한 클래스', `<div style="margin-top:8px">${(data||[]).map(a=>`<div class="aprow" style="cursor:pointer" onclick="closeSub();openLink({type:'class',id:'${a.post_id}'})"><div class="nm"><b>${esc(a.title)} <span class="st ${a.status==='rejected'?'r':''}">${ST[a.status]||a.status}</span></b><span>${esc(a.host||'')}${a.starts_at?' · '+fmtd(a.starts_at):''}${a.host_note?`<br>"${esc(a.host_note)}"`:''}</span></div>${a.status==='accepted'&&a.room_id?`<button onclick="event.stopPropagation();closeSub();openRoom('${a.room_id}')">채팅방</button>`:''}</div>`).join('')||'<div class="empty">아직 신청한 클래스가 없어요. 가게 화면이나 작가 프로필의 클래스에서 신청할 수 있어요.</div>'}</div>`);
 }
+function payText(x){ const d=x.pay_days||2; return x.pay==='transfer'?`계좌이체 · 확정 후 ${d}일 안 입금 (계좌는 채팅방에서 안내)`:x.pay==='deposit'?`예약금 ${won(x.deposit)} 이체(확정 후 ${d}일 안) + 잔금 현장`:'현장 결제 (수업 당일)'; }
 function classBox(p){
   const x=p.extra||{}; const d=x.starts_at?new Date(x.starts_at):null; const wd=['일','월','화','수','목','금','토'];
   const when = d ? `${d.getMonth()+1}/${d.getDate()}(${wd[d.getDay()]}) ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : '';
@@ -3122,14 +3134,14 @@ function classBox(p){
   const row=(l,v)=>v?`<div class="r"><span>${l}</span><span>${v}</span></div>`:'';
   const ap=classApps[p.id]||{}; const isHost = classHostOf(p)===me?.id; const full = x.max && (ap.accepted||0) >= x.max;
   const applyBtn = isHost ? `<button type="button" onclick="openClassApplicants('${p.id}')">신청자 관리 · 확정 ${ap.accepted||0}${x.max?'/'+x.max:''}명${ap.applied?` · 대기 ${ap.applied}`:''}</button>${ap.room_id?`<button type="button" class="o" onclick="openRoom('${ap.room_id}')">채팅방</button>`:''}`
-    : ap.mine==='accepted' ? `<button type="button" class="o" onclick="${ap.room_id?`openRoom('${ap.room_id}')`:`toast('채팅방이 곧 열려요')`}">${ico('check')} 확정됐어요 · 채팅방</button><button type="button" class="o" onclick="cancelClassApp('${p.id}')">취소</button>`
+    : ap.mine==='accepted' ? `<button type="button" class="o" onclick="${ap.room_id?`openRoom('${ap.room_id}')`:`toast('채팅방이 곧 열려요')`}">${ico('check')} ${ap.mine_paid?'입금 확인됨':'확정됐어요'} · 채팅방</button><button type="button" class="o" onclick="cancelClassApp('${p.id}')">취소</button>`
     : ap.mine==='applied' ? `<button type="button" class="o" onclick="toast('호스트가 확인하면 알림으로 알려 드려요')">신청 완료 · 확인 기다리는 중</button><button type="button" class="o" onclick="cancelClassApp('${p.id}')">취소</button>`
     : ap.mine==='rejected' ? `<button type="button" class="o" disabled>이번엔 함께하지 못했어요</button>`
     : (p.ends_at && new Date(p.ends_at)<new Date()) ? `<button type="button" class="o" disabled>모집 마감</button>`
     : full ? `<button type="button" class="o" disabled>정원이 찼어요</button>`
     : `<button type="button" onclick="openClassApply('${p.id}')">신청하기${x.max?` · 남은 자리 ${Math.max(0,x.max-(ap.accepted||0))}`:''}</button>`;
-  return `<div class="clsbox">${row('일정', esc(sched))}${row('난이도', `${x.level}단계 ${LVNAME[x.level]||''} · ${C_CRAFT[x.craft]||''}`)}${row('배우기', techTxt)}${row('완성작', esc(x.work||''))}${row('인원', `최소 ${x.min}명 · 최대 ${x.max}명`)}${row('비용', esc(cost))}${row('제공', esc(x.provide||''))}${row('준비물', esc(x.bring||''))}${row('장소', esc((x.place==='online'?'온라인 · ':'')+(x.place_text||''))+(x.place_hint?`<br><span class="muted">${esc(x.place_hint)}</span>`:''))}${row('추천', esc(x.target||''))}${(x.curriculum||[]).length?row('커리큘럼', x.curriculum.map(esc).join('<br>')):''}${row('강사', esc(x.teacher||''))}${x.descr?`<div class="txt" style="margin:8px 0 2px;white-space:pre-wrap;font-size:.9rem">${esc(x.descr)}</div>`:''}
-    <div style="margin-top:8px;font-size:.8rem;color:var(--ink2)"><b>취소·환불</b> ${esc(x.refund||'')}${x.min>1?` 최소 인원(${x.min}명)이 안 차서 취소되면 전액 환불돼요.`:''}${x.note?`<br><b>유의</b> ${esc(x.note)}`:''}<br>신청·확정은 앱에서, 결제는 호스트가 직접 받아요(앱 내 결제 없음).</div>
+  return `<div class="clsbox">${row('일정', esc(sched))}${row('난이도', `${x.level}단계 ${LVNAME[x.level]||''} · ${C_CRAFT[x.craft]||''}`)}${row('배우기', techTxt)}${row('완성작', esc(x.work||''))}${row('인원', `최소 ${x.min}명 · 최대 ${x.max}명`)}${row('비용', esc(cost))}${row('결제', esc(payText(x)))}${row('제공', esc(x.provide||''))}${row('준비물', esc(x.bring||''))}${row('장소', esc((x.place==='online'?'온라인 · ':'')+(x.place_text||''))+(x.place_hint?`<br><span class="muted">${esc(x.place_hint)}</span>`:''))}${row('추천', esc(x.target||''))}${(x.curriculum||[]).length?row('커리큘럼', x.curriculum.map(esc).join('<br>')):''}${row('강사', esc(x.teacher||''))}${x.descr?`<div class="txt" style="margin:8px 0 2px;white-space:pre-wrap;font-size:.9rem">${esc(x.descr)}</div>`:''}
+    <div style="margin-top:8px;font-size:.8rem;color:var(--ink2)"><b>취소·환불</b> ${esc(x.refund||'')}${x.min>1?` 최소 인원(${x.min}명)이 안 차서 취소되면 호스트가 전액 이체로 환불해요.`:''}${x.note?`<br><b>유의</b> ${esc(x.note)}`:''}<br><span style="color:var(--ink3)">뜨개동네는 통신판매중개자이며 거래 당사자가 아니에요. 결제·환불 책임은 클래스를 연 호스트에게 있어요. 문제가 있으면 설정 › 지기에게 말하기로 알려 주세요.</span></div>
     <div class="btnrow">${applyBtn}</div></div>`;
 }
 
