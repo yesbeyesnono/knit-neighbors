@@ -1635,7 +1635,7 @@ async function openShop(id){
   ]);
   if(!sh) return toast('가게를 찾을 수 없어요');
   curShop=sh; await loadClassApps(posts); const following=!!(fol&&fol.length); const mine = sh.owner_id===me.id;
-  const links=sh.links||{}; const L=[['instagram','인스타그램'],['store','스토어'],['web','홈페이지'],['naver','네이버'],['kakao','카카오']].filter(([k])=>links[k]).map(([k,l])=>`<a class="btn o" href="${esc(links[k])}" target="_blank" rel="noopener">${l} ↗</a>`).join('');
+  const links=sh.links||{}; const L=[['instagram','인스타그램'],['store','스토어'],['web','홈페이지'],['naver','네이버'],['kakao','카카오']].filter(([k])=>links[k]).map(([k,l])=>`<a class="btn o" href="#" onclick="event.preventDefault();openExt(${JSON.stringify(links[k])}, '가게가 등록한 링크')">${l} ↗</a>`).join('');
   const c = sh.location ? parseGeo(sh.location) : null;
   $('#shopTitle').textContent = sh.name;
   $('#shopBody').innerHTML = `
@@ -1686,6 +1686,13 @@ window.addEventListener('message', e=>{
 });
 function readPkgFile(file){ return new Promise((res, rej)=>{ if(file.size>3*1024*1024) return rej(new Error('패키지가 너무 커요 (3MB 이하)')); const rd=new FileReader(); rd.onerror=()=>rej(new Error('파일을 읽지 못했어요')); rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='knitup-pattern-package' || !Array.isArray(j.charts) || !j.charts.length) throw 0; res(j); }catch(e){ rej(new Error('knitup 도안 패키지(.knitup-pkg.json)가 아니에요')); } }; rd.readAsText(file); }); }
 // ===== 작가 =====
+// 외부 링크는 바로 열지 않고 어디로 가는지(도메인) 보여 준 뒤 연다(2026-09-28 보안 점검: 리다이렉트 피싱 예방)
+function openExt(u, what){
+  let host=''; try{ const x=new URL(u); if(!/^https?:$/.test(x.protocol)) return toast('열 수 없는 주소예요'); host=x.hostname.replace(/^www\./,''); }catch(e){ return toast('주소가 올바르지 않아요'); }
+  openSheet(`<b style="font-size:1.05rem">외부 사이트로 이동해요</b><div class="card soft" style="font-size:.9rem"><b>${esc(host)}</b><div class="muted" style="word-break:break-all;font-size:.8rem;margin-top:4px">${esc(u.slice(0,120))}${u.length>120?'…':''}</div></div>
+    <p class="muted" style="margin:0;font-size:.82rem">${what||'회원이 등록한 링크'}예요. 뜨개동네 밖 사이트라 결제·개인정보 입력은 그곳 책임이에요. 뜨개동네는 앱 밖에서 돈이나 비밀번호를 요구하지 않아요.</p>
+    <a class="btn" href="${esc(u)}" target="_blank" rel="noopener noreferrer" onclick="closeSheet()">열기</a><button class="btn o" onclick="closeSheet()">취소</button>`);
+}
 function linkLabel(u){ try{ const h=new URL(u); const host=h.hostname.replace(/^www\./,''); if(host.includes('instagram.com')) return '인스타그램 @'+esc(h.pathname.split('/').filter(Boolean)[0]||''); return esc(host+(h.pathname.length>1?h.pathname:'')).slice(0,48); }catch(e){ return esc(u).slice(0,48); } }
 function openAuthorLink(){
   openSheet(`<b>작가 링크</b><p class="muted" style="margin:0">운영하는 인스타그램·블로그·판매처 주소 하나를 프로필에 보여 줘요. 비우고 저장하면 지워져요.</p>
@@ -1826,7 +1833,7 @@ async function openPattern(id){
     ${techs.length?`<div><div class="muted" style="font-size:.8rem;margin-bottom:6px">쓰이는 기법 · <b style="color:var(--ink)">굵은 테두리</b>는 아직 체크 안 한 기법</div><div class="patchips">${techs.map(t=>`<span class="${mine.has(t.id)?'':'new'}">${esc(t.name_ko)}</span>`).join('')}</div></div>`:''}
     ${p.yarn_weight||p.needle_size?`<div class="muted">${[p.yarn_weight&&'실 '+esc(p.yarn_weight), p.needle_size&&'바늘 '+esc(p.needle_size)].filter(Boolean).join(' · ')}</div>`:''}
     ${p.has_viewer ? ((p.price===0 || p.author_id===me.id) ? `<button class="btn" onclick="openPatternViewer('${p.id}')">도안 열기 · 단별 진도 저장</button>` : `<div class="card soft muted" style="font-size:.85rem">앱 안에서 열리는 도안이에요. 앱 내 구매는 준비 중이에요.</div>`) : ''}
-    <div style="display:flex;gap:8px"><button class="btn o" style="flex:1" onclick="toggleSavePattern('${p.id}',${!saved})">${saved?'찜 해제':'찜하기'}</button>${p.buy_url?`<a class="btn" style="flex:2;text-align:center;text-decoration:none" href="${esc(p.buy_url)}" target="_blank" rel="noopener">${priceKo(p)} · 도안 보러 가기</a>`:`<span class="btn" style="flex:2;text-align:center;opacity:.5">${priceKo(p)} · 링크 준비 중</span>`}</div>
+    <div style="display:flex;gap:8px"><button class="btn o" style="flex:1" onclick="toggleSavePattern('${p.id}',${!saved})">${saved?'찜 해제':'찜하기'}</button>${p.buy_url?`<a class="btn" style="flex:2;text-align:center;text-decoration:none" href="#" onclick="event.preventDefault();openExt(${JSON.stringify(p.buy_url)}, '작가가 등록한 판매 링크')">${priceKo(p)} · 도안 보러 가기</a>`:`<span class="btn" style="flex:2;text-align:center;opacity:.5">${priceKo(p)} · 링크 준비 중</span>`}</div>
     <div class="muted" style="font-size:.78rem">도안 구매·결제는 작가의 판매 페이지에서 이뤄져요. 뜨개동네는 거래에 관여하지 않아요.</div>`);
 }
 async function toggleSavePattern(id, on){
@@ -1975,7 +1982,7 @@ async function openProfile(id){
     ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:#fbf6e6;color:#8a6d1a">${ico('cert')} 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}</div>
-    ${p.is_author&&p.author_link?`<a class="authlink" href="${esc(p.author_link)}" target="_blank" rel="noopener">${linkLabel(p.author_link)} <span>↗</span></a>`:''}
+    ${p.is_author&&p.author_link?`<a class="authlink" href="#" onclick="event.preventDefault();openExt(${JSON.stringify(p.author_link)}, '작가가 등록한 링크')">${linkLabel(p.author_link)} <span>↗</span></a>`:''}
     <div style="padding:0 16px">${idxMini(p)}</div>
     <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${profTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button>${p.is_author?`<button data-t="classes" class="${profTab==='classes'?'on':''}">클래스</button>`:''}${FULL&&p.is_author?`<button data-t="patterns" class="${profTab==='patterns'?'on':''}">도안</button>`:''}</div>
     <div class="feed" id="profFeed"><div class="empty">불러오는 중…</div></div>`;
@@ -3041,7 +3048,8 @@ const C_APPLY={link:'링크로 신청',phone:'전화',insta:'인스타그램 DM'
 const C_REFUND={d3:'3일 전까지 100% · 이후 재료비 제외 · 당일 불가',d1:'1일 전까지 100% · 당일 불가',custom:'직접 입력'};
 const C_REFUND_TXT={d3:'수업 3일 전까지 취소하면 전액 환불돼요. 그 이후에는 재료비를 제외하고 환불되고, 수업 당일에는 환불이 어려워요. 환불은 호스트가 이체로 돌려드려요(영업일 3일 안).',d1:'수업 1일 전까지 취소하면 전액 환불돼요. 수업 당일에는 환불이 어려워요. 환불은 호스트가 이체로 돌려드려요(영업일 3일 안).',custom:''};
 const C_PAY={onsite:'현장 결제',transfer:'계좌이체',deposit:'예약금 + 현장 잔금'}, C_PAYDAYS={1:'1일 안',2:'2일 안',3:'3일 안',7:'7일 안'};
-const ACCT_RE=/\d{2,6}-\d{2,6}-\d{2,8}|\d{10,16}/;   // 계좌번호처럼 보이는 숫자열 — 양식에 못 적게
+const ACCT_RE=/\d{2,6}-\d{2,6}-\d{2,8}|\d{10,16}/;
+const LINK_RE=/https?:\/\/|www\.|[a-z0-9-]+\.(com|net|kr|co|io|me|shop|store|link|page)(\/|\b)/i;   // 클래스·모임 본문에 링크 금지(결제·신청은 앱 안에서만)   // 계좌번호처럼 보이는 숫자열 — 양식에 못 적게
 let cTechSel=new Set(), cTechCraft='crochet';
 function renderClassPhotos(){
   const hero=$('#cHero'); if(!hero || view!=='classform') return; const p0=sPhotos[0];
@@ -3104,7 +3112,9 @@ async function submitClass(){
     const refund=v('cRefundTxt'); if(!refund) throw new Error('취소·환불 규정을 적어 주세요');
     const ends = v('cEnds') ? new Date(v('cEnds')+'T23:59:59') : null; if(ends && ends>startsAt) throw new Error('모집 마감은 시작 전이어야 해요');
     const pay=segVal('#cPay')||'onsite'; const deposit=pay==='deposit'?+v('cDeposit')||0:0; if(pay==='deposit' && !deposit) throw new Error('예약금 금액을 적어 주세요'); const payDays=+(segVal('#cPayDays')||2);
-    if([v('cTag'),v('cDescr'),v('cProvide'),v('cBring'),v('cFor'),v('cCurri'),v('cTeacher'),v('cRefundTxt'),v('cNote'),v('cPlaceHint')].some(t=>ACCT_RE.test(t))) throw new Error('계좌번호는 양식에 적을 수 없어요. 확정 뒤 클래스 채팅방에서만 알려 주세요');
+    const cTexts=[title,v('cTag'),v('cDescr'),v('cProvide'),v('cBring'),v('cFor'),v('cCurri'),v('cTeacher'),v('cRefundTxt'),v('cNote'),v('cPlaceHint'),v('cWork')];
+    if(cTexts.some(t=>ACCT_RE.test(t))) throw new Error('계좌번호는 양식에 적을 수 없어요. 확정 뒤 클래스 채팅방에서만 알려 주세요');
+    if(cTexts.some(t=>LINK_RE.test(t))) throw new Error('클래스 안내에는 링크를 넣을 수 없어요. 신청·결제 안내는 앱 안에서 이루어져요');
     await loadBanned(); if([title,v('cTag'),v('cDescr'),v('cNote')].some(hasBanned)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const photos = await uploadPhotos(sPhotos);
     const extra = { v:1, tag:v('cTag')||null, craft:segVal('#cCraft')||'crochet', level:+(segVal('#cLevel')||1), techniques:[...cTechSel], work, type, starts_at:startsAt.toISOString(), duration_min:+(segVal('#cDur')||120), sessions, cycle:type==='course'?v('cCycle'):null,
@@ -3455,6 +3465,8 @@ async function submitMeet(){
     const pname=($('#mPlace')?.value||'').trim(); if(!pname) throw new Error('장소 이름을 적어 주세요');
     const detail=$('#mPlaceDetail').value.trim(); const place=(pname+(detail?` · ${detail}`:'')).slice(0,80);
     await loadBanned(); if(hasBanned(title) || hasBanned($('#mDesc').value) || hasBanned(place)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+    if([title, $('#mDesc').value, $('#mBring').value, $('#mPlaceDetail').value, $('#mFee').value].some(t=>ACCT_RE.test(t||''))) throw new Error('계좌번호는 모임 글에 적을 수 없어요. 참가비 안내는 모임 채팅방에서 해 주세요');
+    if([title, $('#mDesc').value, $('#mBring').value, $('#mPlaceDetail').value].some(t=>LINK_RE.test(t||''))) throw new Error('모임 안내에는 링크를 넣을 수 없어요. 참여 신청은 앱 안에서 이루어져요');
     const lmin=$('#mLvMin').value, lmax=$('#mLvMax').value; if(lmin && lmax && +lmin > +lmax) throw new Error('권장 단계 범위를 확인해 주세요');
     const kind = segVal('#mKind')||'free'; if(kind==='workshop' && !mTechSel.size) throw new Error('배울 기법을 골라 주세요');
     const feeK=segVal('#mFeeSeg'); const fee = feeK==='custom' ? ($('#mFee').value.trim()||null) : (M_FEE[feeK]||null);
