@@ -37,7 +37,7 @@ for t in dic:
     t['aliases'] = []
     if t['id'] in RENAME:
         ko, ja, memo = RENAME[t['id']]; t['name_ko'], t['name_ja'], t['rename_memo'] = ko, ja, memo
-        t['aliases'] = [x for x in {old_ko, old_ja} if x and x not in (ko, ja)] + {'C10': ['줄기뜨기'], 'C15': ['셸뜨기', '조개뜨기', 'シェル編み'], 'C27': ['코일뜨기']}.get(t['id'], [])
+        t['aliases'] = sorted({x for x in [old_ko, old_ja] + {'C10': ['줄기뜨기'], 'C15': ['셸뜨기', '조개뜨기', 'シェル編み'], 'C27': ['코일뜨기']}.get(t['id'], []) if x and x not in (ko, ja)})
     techs.append(t)
 for n in NEW: techs.append(dict(n, craft='crochet', aliases={'C34': ['클로스뜨기', 'X-st'], 'C38': ['퍼프 스티치', 'puff']}.get(n['id'], []), status='candidate'))
 
