@@ -2432,6 +2432,7 @@ const AUTHOR_SEL = 'author:profiles!posts_author_id_fkey(id,nickname,avatar_url,
 function autoGrow(t){ t.style.height='auto'; t.style.height=Math.min(160, t.scrollHeight)+'px'; }
 function updateCnt(){ const n=$('#cText').value.length; $('#cCnt').textContent = n>400 ? n+'/500' : ''; }
 $('#commTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; commFilter=b.dataset.f; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadFeed(); };
+bindTabSwipe('#v-comm', '#commTabs');   // 커뮤니티 탭도 좌우 스와이프(2026-09-28 대표 지시)
 async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); $('#cboxName').textContent = myProfile?.nickname||''; loadTech(); loadFeed(); }
 async function friendIds(){ const rows=await fetchFriendships(); return rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee_id:r.requester_id); }
 async function loadFeed(more){
