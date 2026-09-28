@@ -6,6 +6,23 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SYM = os.path.join(ROOT, 'resources', 'symbols')
 lib = json.load(io.open(os.path.join(SYM, 'crochet_symbols_v1.2.json'), encoding='utf-8'))['symbols']
 master = {m['no']: m for m in json.load(io.open(os.path.join(ROOT, 'tools', 'crochet-symbols-master.json'), encoding='utf-8'))}
+names = json.load(io.open(os.path.join(SYM, 'names_v3.json'), encoding='utf-8'))
+NAME = {s['no']: s for s in names['symbols']}
+TECH = {t['id']: t for t in names['techniques']}
+# 2026-09-28 일본 사이트에서 모양·뜨는 법을 확인한 기호 (이미지는 가져오지 않고 모양만 대조)
+WEBREF = {
+ 16: ('변형 구슬 = 구슬 위에 줄기 + 가로대(두 번째 빼기). 방추 안 3가닥', 'TORUYURI 편도(変わり中長編み3目の玉編み) · ごしょう産業 4-19 · 日本ヴォーグ社 표지', 'https://www.gosyo.co.jp/kiso-movie-kagi/4-19'),
+ 17: ('16과 같은 모양, 밑이 떨어짐(코 아래에서)', 'TORUYURI 편도(鎖編みに編み入れる)', 'https://toruyuri.com/2020/01/17/nakanagaaminotamaami/'),
+ 18: ('팝콘 = 방추형 위에 사슬 고리 하나', '日本ヴォーグ社 표지 · amimono 460 · Craftie', 'https://amimono.me/article/detail.html?id=460'),
+ 39: ('짧은뜨기(+)와 같은 코에서 한길 긴 3코가 부채꼴로, 끝에 사슬', '日本ヴォーグ社 표지(5행 2열)', 'https://amimono.me/article/series.html?id=36'),
+ 40: ('39와 같되 짧은뜨기 다리(기둥)에서 시작', '원본 표 기준 — 웹 자료 없음', ''),
+ 57: ('사슬 아치 가운데 피코(사슬 3+빼뜨기 점)', 'ごしょう産業 4-44 変わりピコット · あむゆーず', 'https://www.gosyo.co.jp/kiso-movie-kagi/4-44'),
+ 64: ('한길 긴 3코를 먼저 뜨고, 1코가 오른쪽에서 위로 지나감(뒤 기둥은 끊어 표시)', 'ごしょう産業 18-2 長編み1目右上3目交差', 'https://www.gosyo.co.jp/kiso-movie-kagi/18-2'),
+ 65: ('64의 좌우 반전', 'ごしょう産業 18-1', 'https://www.gosyo.co.jp/kiso-movie-kagi/18-1'),
+ 84: ('꼭짓점이 왼쪽 위, 밑이 오른쪽으로 퍼지는 부채. 각 기둥에 사선', '日本ヴォーグ社 표지(1행 5열)', 'https://nihonvogue.com/book/detail.html?id=2347&c=knit&d=07'),
+ 86: ('아래로 뾰족한 물방울 + 줄기 + 위 ×', '日本ヴォーグ社 표지 · amimono 470 · ごしょう産業 57-2', 'https://amimono.me/article/detail.html?id=470'),
+ 87: ('기둥에 고리 3개(감은 실) + 위 가로대', '日本ヴォーグ社 표지 · ごしょう産業 58-2 ロール編み', 'https://www.gosyo.co.jp/kiso-movie-kagi/58-2'),
+}
 esc = lambda s: (s or '').replace('&', '&amp;').replace('<', '&lt;').replace('"', '&quot;')
 b64 = lambda no: base64.b64encode(open(os.path.join(SYM, 'ref', '%02d.png' % no), 'rb').read()).decode()
 today = datetime.date.today().strftime('%Y-%m-%d')
@@ -16,10 +33,14 @@ for key, v in sorted(lib.items(), key=lambda kv: kv[1]['no']):
     if m['sec'] != sec:
         cards.append(('</div>' if sec else '') + '<h2>%s</h2><div class="g">' % esc(m['sec'])); sec = m['sec']
     same = ' <span class="tag same">기호는 %d번과 같음(이름으로 구분)</span>' % lib[v['same_as']]['no'] if v.get('same_as') else ''
+    nm = NAME[v['no']]; tech = TECH.get(nm['tech']) if nm['tech'] else None
+    techtag = (' <span class="tag t">%s %s%s</span>' % (nm['tech'], esc(tech['name_ko']), ' · 새 기법 후보' if tech.get('status') == 'candidate' else '')) if tech else ''
+    wr = WEBREF.get(v['no'])
+    webhtml = ('<div class="web"><b>확인</b> %s <span class="src">— %s%s</span></div>' % (esc(wr[0]), esc(wr[1]), (' <a href="%s" target="_blank" rel="noopener">보기</a>' % wr[2]) if wr[2] else '')) if wr else ''
     cards.append('''<div class="c" data-no="%d" data-ko="%s"><div class="pic"><div><svg width="%d" height="64" viewBox="0 0 %d 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">%s</svg><small>새로 그린 기호</small></div><div><img src="data:image/png;base64,%s" alt=""><small>원본</small></div></div>
-<div class="tx"><span class="no">%d</span> <span class="ko">%s</span><div class="jp">%s</div><div class="en">%s</div>%s</div>
+<div class="tx"><span class="no">%d</span> <span class="ko">%s</span><div class="jp">%s</div><div class="en">%s</div>%s%s%s</div>
 <div class="fb"><label><input type="radio" name="r%d" value="ok"> 맞아요</label><label><input type="radio" name="r%d" value="fix"> 고쳐야 해요</label><input type="text" placeholder="어디가 다른지 · 이름이 어색하면 바른 이름" maxlength="200"></div></div>''' % (
-        v['no'], esc(m['ko']), round(64 * v['w'] / 48), v['w'], v['svg'], b64(v['no']), v['no'], esc(m['ko']), esc(m['jp']), esc(m['en']), same, v['no'], v['no']))
+        v['no'], esc(nm['ko']), round(64 * v['w'] / 48), v['w'], v['svg'], b64(v['no']), v['no'], esc(nm['ko']), esc(nm['ja']), esc(nm['en']), techtag, same, webhtml, v['no'], v['no']))
 cards.append('</div>')
 
 html = '''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>코바늘 기호 94종 검수 요청</title>
@@ -34,7 +55,9 @@ h1{font-size:22px;margin:0 0 6px}h2{font-size:15px;margin:26px 0 10px;padding-to
 .pic{display:flex;gap:8px;align-items:flex-end}.pic>div{text-align:center}.pic small{display:block;font-size:10.5px;color:#9AA0A6;margin-top:2px}
 .pic svg{background:#fafafa;border-radius:8px}.pic img{height:50px;border-radius:6px;border:1px solid #eee;display:block}
 .no{font-weight:700;color:#5C7A4C}.ko{font-weight:600;font-size:14.5px}.jp,.en{font-size:12px;color:#6A6E73}
-.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;margin-top:3px}.tag.same{background:#eee;color:#666}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;margin-top:3px}.tag.same{background:#eee;color:#666}.tag.t{background:#EDF2DD;color:#3F4F22}
+.web{font-size:12px;margin-top:5px;padding:6px 8px;border-radius:8px;background:#f5f5f5}.web .src{color:#6A6E73}.web a{color:#3F4F22}
+.names{font-size:13px;border-collapse:collapse;width:100%;margin:8px 0}.names th,.names td{border:1px solid #e3e3e3;padding:5px 8px;text-align:left;vertical-align:top}.names th{background:#f5f5f5}
 .fb{grid-column:1 / -1;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;border-top:1px dashed #e3e3e3;padding-top:8px}
 .fb input[type=text]{flex:1;min-width:180px;font:inherit;padding:7px 10px;border:1px solid #ddd;border-radius:8px}
 .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #ddd;padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13.5px}
@@ -49,6 +72,10 @@ textarea#out{width:100%;min-height:160px;font:13px/1.5 inherit;padding:10px;bord
 <ul><li>각 칸의 <b>왼쪽 = 저희가 새로 그린 기호</b>, <b>오른쪽 = 원본 표의 기호</b>입니다. 모양이 같은 뜻으로 읽히는지 봐 주세요(선 굵기·비율이 조금 다른 것은 괜찮습니다).</li>
 <li><b>한국어 이름</b>이 현장에서 쓰는 말과 다르면 바른 이름을 적어 주세요. 이름은 한국 관행(긴뜨기 · 한길 긴뜨기 · 두길 긴뜨기 · 세길 · 네길)으로 통일했습니다.</li>
 <li>칸마다 「맞아요 / 고쳐야 해요」를 고르고, 고칠 곳은 한 줄로 적어 주세요. 다 보신 뒤 맨 아래 <b>「검수 결과 복사」</b>를 눌러 그 내용을 메일·메신저로 보내 주시면 됩니다.</li></ul></div>
+<div class="box"><b>이름 통일 (같이 봐 주세요)</b> — 한글은 한국 관행(긴뜨기 · 한길 긴뜨기 · 두길 긴뜨기 · 세길 · 네길), 일어는 日本ヴォーグ社 『かぎ針編みの編み目記号』 명칭으로 맞췄습니다. 아래 표의 이름이 현장 표기와 다르면 카드의 메모 칸에 적어 주세요.
+<table class="names"><tr><th>ID</th><th>바꾸는 이름</th><th>전에는</th><th>일어</th></tr>__RENAMES__</table>
+<b>새로 넣는 기법 후보</b> — 기존 60종에 없어 새 번호를 붙였습니다. 단계(1~5)와 먼저 알아야 할 기법은 저희 초안입니다.
+<table class="names"><tr><th>ID</th><th>이름</th><th>일어</th><th>단계</th><th>먼저 알아야 할 기법</th></tr>__NEWS__</table></div>
 <div class="box"><b>그린 규칙</b> — 책의 그림을 옮긴 것이 아니라 JIS 편목기호 규칙으로 새로 그렸습니다: 기둥의 <b>사선 수 = 실을 감는 횟수</b>(긴 0 · 한길 긴 1 · 두길 2 · 세길 3 · 네길 4) / <b>밑이 한 점에 모이면 「코에 넣어」</b>, <b>밑이 떨어져 있으면 「코 아래(사슬 공간)에서」</b> / 위가 한 점에 모이면 모아뜨기·구슬뜨기. 짧은뜨기는 ×로 그렸습니다(원본은 +, 같은 기호의 두 가지 표기).
 <br>원본 기호 이미지는 검수 대조용으로만 넣었습니다. 이 파일은 외부에 공개·재배포하지 말아 주세요.</div>
 __CARDS__
@@ -70,7 +97,7 @@ function copyResult(){var s=state(),fix=[],ok=0;cards().forEach(function(c){var 
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){alert('복사했어요. 메일이나 메신저에 붙여 넣어 보내 주세요.');},function(){alert('아래 상자의 내용을 복사해 보내 주세요.');});}else{try{document.execCommand('copy');alert('복사했어요.');}catch(e){alert('아래 상자의 내용을 복사해 보내 주세요.');}}
  ta.scrollIntoView({behavior:'smooth'});}
 load();
-</script></body></html>'''.replace('__DATE__', today).replace('__CARDS__', '\n'.join(cards))
+</script></body></html>'''.replace('__DATE__', today).replace('__CARDS__', '\n'.join(cards)).replace('__RENAMES__', ''.join('<tr><td>%s</td><td><b>%s</b></td><td>%s</td><td>%s</td></tr>' % (t['id'], esc(t['name_ko']), esc(' · '.join(t['aliases'])), esc(t['name_ja'])) for t in names['techniques'] if 'rename_memo' in t)).replace('__NEWS__', ''.join('<tr><td>%s</td><td><b>%s</b></td><td>%s</td><td>%d단계</td><td>%s</td></tr>' % (t['id'], esc(t['name_ko']), esc(t['name_ja']), t['level'], esc(', '.join(TECH[p]['name_ko'] for p in t['prereq']))) for t in names['techniques'] if t.get('status') == 'candidate'))
 out = os.path.join(SYM, 'ref', '코바늘기호94_검수요청.html')
 io.open(out, 'w', encoding='utf-8').write(html)
 print(out, os.path.getsize(out) // 1024, 'KB')

@@ -1,0 +1,2873 @@
+{
+ "version": "3-draft",
+ "date": "2026-09-28",
+ "rule": "한글=한국 관행(中長編み 긴뜨기 · 長編み 한길 긴뜨기 · 長々編み 두길 긴뜨기 · 三つ巻き 세길 · 四つ巻き 네길), 일어=日本ヴォーグ社 編み目記号 명칭. 옛 이름은 aliases 로 보존",
+ "techniques": [
+  {
+   "id": "C01",
+   "craft": "crochet",
+   "name_ko": "사슬뜨기",
+   "name_ja": "くさり編み",
+   "abbr": "ch",
+   "symbol": "○",
+   "level": 1,
+   "category": "기초",
+   "prereq": [],
+   "desc": "기초코와 기둥코를 만드는 모든 코바늘 뜨기의 출발점",
+   "name_en": "chain stitch",
+   "abbr_en_uk": "chain",
+   "jis_master_rows": "4",
+   "aliases": []
+  },
+  {
+   "id": "C02",
+   "craft": "crochet",
+   "name_ko": "짧은뜨기",
+   "name_ja": "細編み",
+   "abbr": "sc",
+   "symbol": "×",
+   "level": 1,
+   "category": "기초",
+   "prereq": [
+    "C01"
+   ],
+   "desc": "가장 기본이 되는 낮은 코. 촘촘하고 단단한 편물을 만든다",
+   "symbol_desc": "JIS는 ×, 영미권(CYC)은 + — 병기 필요",
+   "name_en": "single crochet",
+   "abbr_en_uk": "double crochet (dc)",
+   "jis_master_rows": "6",
+   "aliases": []
+  },
+  {
+   "id": "C03",
+   "craft": "crochet",
+   "name_ko": "빼뜨기",
+   "name_ja": "引き抜き編み",
+   "abbr": "sl st",
+   "symbol": "•",
+   "level": 1,
+   "category": "기초",
+   "prereq": [
+    "C01"
+   ],
+   "desc": "높이 없이 코를 이동하거나 단을 닫을 때 쓰는 코",
+   "name_en": "slip stitch",
+   "abbr_en_uk": "slip stitch (ss)",
+   "jis_master_rows": "5",
+   "aliases": []
+  },
+  {
+   "id": "C04",
+   "craft": "crochet",
+   "name_ko": "기둥코·왕복뜨기",
+   "name_ja": "立ち上がり・往復編み",
+   "abbr": "turning ch",
+   "symbol": "–",
+   "level": 1,
+   "category": "구성",
+   "prereq": [
+    "C01",
+    "C02"
+   ],
+   "desc": "단 시작에 기둥코를 세우고 편물을 뒤집어 평면으로 뜨는 방법",
+   "name_en": "turning chain / working in rows",
+   "abbr_en_uk": "turning chain",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C05",
+   "craft": "crochet",
+   "name_ko": "매직링",
+   "name_ja": "わの作り目",
+   "abbr": "magic ring",
+   "symbol": "◎",
+   "level": 2,
+   "category": "기초",
+   "prereq": [
+    "C01"
+   ],
+   "desc": "중심에 구멍이 생기지 않는 원형 시작코",
+   "name_en": "magic ring (adjustable ring)",
+   "abbr_en_uk": "magic ring",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C06",
+   "craft": "crochet",
+   "name_ko": "원형뜨기",
+   "name_ja": "輪編み",
+   "abbr": "in the round",
+   "symbol": "–",
+   "level": 2,
+   "category": "구성",
+   "prereq": [
+    "C02",
+    "C05"
+   ],
+   "desc": "중심에서 바깥으로 나선 또는 단 단위로 돌려 뜨는 구조",
+   "name_en": "working in the round",
+   "abbr_en_uk": "in the round",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C07",
+   "craft": "crochet",
+   "name_ko": "코 늘리기",
+   "name_ja": "増し目",
+   "abbr": "inc",
+   "symbol": "V",
+   "level": 2,
+   "category": "성형",
+   "prereq": [
+    "C02"
+   ],
+   "desc": "한 코에 2코 이상 떠서 코 수를 늘리는 성형 기법",
+   "symbol_desc": "정식 기호는 ×2개의 V자 배치(細編み2目編み入れる). V 단독은 아미구루미 속기",
+   "symbol_svg_required": true,
+   "name_en": "increase (2 sts in same st)",
+   "abbr_en_uk": "increase",
+   "jis_master_rows": "33-52",
+   "aliases": []
+  },
+  {
+   "id": "C08",
+   "craft": "crochet",
+   "name_ko": "코 줄이기",
+   "name_ja": "減らし目",
+   "abbr": "dec",
+   "symbol": "∧",
+   "level": 2,
+   "category": "성형",
+   "prereq": [
+    "C02"
+   ],
+   "desc": "2코를 하나로 모아 떠 코 수를 줄이는 성형 기법",
+   "symbol_desc": "짧은뜨기 2코가 위에서 결합하는 ∧ 배치(細編み2目一度)",
+   "symbol_svg_required": true,
+   "name_en": "decrease (2 sts together)",
+   "abbr_en_uk": "decrease",
+   "jis_master_rows": "55-61",
+   "aliases": []
+  },
+  {
+   "id": "C09",
+   "craft": "crochet",
+   "name_ko": "줄무늬 배색",
+   "name_ja": "しま模様",
+   "abbr": "stripes",
+   "symbol": "–",
+   "level": 2,
+   "category": "배색",
+   "prereq": [
+    "C02"
+   ],
+   "desc": "단이 바뀔 때 실 색을 교체해 가로 줄무늬를 만드는 기법",
+   "name_en": "stripes (color change by row)",
+   "abbr_en_uk": "stripes",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C10",
+   "craft": "crochet",
+   "name_ko": "이랑뜨기·줄기뜨기",
+   "name_ja": "うね編み・すじ編み",
+   "abbr": "BLO",
+   "symbol": "×̲",
+   "level": 2,
+   "category": "질감",
+   "prereq": [
+    "C02"
+   ],
+   "desc": "코의 뒤쪽 반 코에만 떠서 이랑 무늬를 내는 기법",
+   "symbol_desc": "× 아래 짧은 가로선(밑줄형) — 日本ヴォーグ社 『かぎ針編みの編み目記号』 목차에서 실재 확인(すじ編み 往復/輪・うね編み 3종, 마스터표 65~69행). v1.1에서 폐기했던 밑줄 표기 복원",
+   "name_en": "back loop only (BLO) / ridge stitch",
+   "abbr_en_uk": "BLO",
+   "jis_master_rows": "65-69",
+   "symbol_svg_required": true,
+   "aliases": [
+    "すじ編み",
+    "이랑뜨기"
+   ],
+   "rename_memo": "뒤 반 코만 뜨는 기법 하나로 묶음. 왕복=이랑(うね), 원형=줄기(すじ)"
+  },
+  {
+   "id": "C11",
+   "craft": "crochet",
+   "name_ko": "파트 조립·꿰매기",
+   "name_ja": "とじ・組み立て",
+   "abbr": "seaming",
+   "symbol": "–",
+   "level": 2,
+   "category": "구성",
+   "prereq": [
+    "C02",
+    "C03"
+   ],
+   "desc": "완성된 조각들을 돗바늘이나 빼뜨기로 잇는 마무리",
+   "name_en": "seaming / assembling",
+   "abbr_en_uk": "seaming",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C12",
+   "craft": "crochet",
+   "name_ko": "긴뜨기",
+   "name_ja": "中長編み",
+   "abbr": "hdc",
+   "symbol": "T",
+   "level": 3,
+   "category": "코높이",
+   "prereq": [
+    "C02",
+    "C04"
+   ],
+   "desc": "짧은뜨기와 긴뜨기의 중간 높이 코",
+   "name_en": "half double crochet",
+   "abbr_en_uk": "half treble (htr)",
+   "jis_master_rows": "7",
+   "aliases": [
+    "중간긴뜨기"
+   ],
+   "rename_memo": "한국 관행: 中長編み=긴뜨기"
+  },
+  {
+   "id": "C13",
+   "craft": "crochet",
+   "name_ko": "한길 긴뜨기",
+   "name_ja": "長編み",
+   "abbr": "dc",
+   "symbol": "T̷",
+   "level": 3,
+   "category": "코높이",
+   "prereq": [
+    "C02",
+    "C04"
+   ],
+   "desc": "실을 한 번 감아 뜨는 표준 높은 코. 가방·모자의 주력 기법",
+   "symbol_desc": "세로줄기+윗가로대에 사선 1개(실 1회 감기). 사선 수=감김 수 원칙",
+   "symbol_svg_required": true,
+   "name_en": "double crochet",
+   "abbr_en_uk": "treble (tr)",
+   "jis_master_rows": "8",
+   "aliases": [
+    "긴뜨기"
+   ],
+   "rename_memo": "한국 관행: 長編み=한길 긴뜨기"
+  },
+  {
+   "id": "C14",
+   "craft": "crochet",
+   "name_ko": "피코뜨기",
+   "name_ja": "ピコット",
+   "abbr": "picot",
+   "symbol": "○₃",
+   "level": 3,
+   "category": "장식",
+   "prereq": [
+    "C01",
+    "C02"
+   ],
+   "desc": "사슬 3코를 작은 고리로 만들어 가장자리를 장식하는 기법",
+   "symbol_desc": "사슬 3코가 부채꼴로 묶인 전용 기호. 알파벳 P 폐기",
+   "symbol_svg_required": true,
+   "name_en": "picot",
+   "abbr_en_uk": "picot",
+   "jis_master_rows": "70-75",
+   "aliases": []
+  },
+  {
+   "id": "C15",
+   "craft": "crochet",
+   "name_ko": "솔잎뜨기(셸뜨기)",
+   "name_ja": "松編み",
+   "abbr": "shell",
+   "symbol": "조합",
+   "level": 3,
+   "category": "질감",
+   "prereq": [
+    "C13"
+   ],
+   "desc": "한 코에 긴뜨기 여러 개를 떠 부채(조개) 모양을 만드는 무늬",
+   "symbol_desc": "T̷ 여러 개가 한 점에서 부챗살로 퍼진 조합 무늬 — 단독 기호 아님(⌒ 폐기)",
+   "name_en": "shell stitch",
+   "abbr_en_uk": "shell (5 tr)",
+   "jis_master_rows": "45,48,49,50",
+   "aliases": [
+    "셸뜨기"
+   ],
+   "rename_memo": "엑셀: 松編み=솔잎뜨기, シェル編み=조개뜨기 → 둘 다 C15 변형"
+  },
+  {
+   "id": "C16",
+   "craft": "crochet",
+   "name_ko": "네트뜨기",
+   "name_ja": "ネット編み",
+   "abbr": "mesh",
+   "symbol": "조합",
+   "level": 3,
+   "category": "질감",
+   "prereq": [
+    "C01",
+    "C02"
+   ],
+   "desc": "사슬 아치를 반복해 그물 조직을 만드는 기법",
+   "symbol_desc": "사슬 아치 반복 조합 무늬(◇ 폐기)",
+   "name_en": "mesh / net stitch",
+   "abbr_en_uk": "mesh",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C17",
+   "craft": "crochet",
+   "name_ko": "모티프 이어뜨기",
+   "name_ja": "モチーフつなぎ",
+   "abbr": "join",
+   "symbol": "조합",
+   "level": 3,
+   "category": "구성",
+   "prereq": [
+    "C03",
+    "C06"
+   ],
+   "desc": "모티프를 뜨면서 또는 뜬 뒤 서로 연결하는 기법",
+   "symbol_desc": "구성 기법 — 연결 방식별 조합 표기(□─□ 폐기)",
+   "name_en": "joining motifs (join-as-you-go)",
+   "abbr_en_uk": "joining motifs",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C18",
+   "craft": "crochet",
+   "name_ko": "두길 긴뜨기",
+   "name_ja": "長々編み",
+   "abbr": "tr",
+   "symbol": "T⃫",
+   "level": 4,
+   "category": "코높이",
+   "prereq": [
+    "C13"
+   ],
+   "desc": "실을 두 번 감아 뜨는 더 높은 코",
+   "symbol_desc": "T에 사선 2개(실 2회 감기)",
+   "symbol_svg_required": true,
+   "name_en": "treble crochet",
+   "abbr_en_uk": "double treble (dtr)",
+   "jis_master_rows": "9",
+   "aliases": [
+    "두길긴뜨기"
+   ],
+   "rename_memo": "띄어쓰기 통일"
+  },
+  {
+   "id": "C19",
+   "craft": "crochet",
+   "name_ko": "구슬뜨기",
+   "name_ja": "玉編み",
+   "abbr": "bobble",
+   "symbol": "⬯",
+   "level": 4,
+   "category": "질감",
+   "prereq": [
+    "C13"
+   ],
+   "desc": "미완성 긴뜨기 여러 개를 한 번에 묶어 볼록한 구슬을 만드는 기법",
+   "symbol_desc": "끝이 모인 세로 타원 안에 미완성 긴뜨기 다리 여러 개",
+   "symbol_svg_required": true,
+   "name_en": "cluster / bobble (JIS 玉編み)",
+   "abbr_en_uk": "cluster / bobble",
+   "jis_master_rows": "16-24,107",
+   "aliases": []
+  },
+  {
+   "id": "C20",
+   "craft": "crochet",
+   "name_ko": "팝콘뜨기",
+   "name_ja": "パプコーン編み",
+   "abbr": "popcorn",
+   "symbol": "⬮",
+   "level": 4,
+   "category": "질감",
+   "prereq": [
+    "C19"
+   ],
+   "desc": "완성된 긴뜨기 묶음을 접어 고정해 구슬뜨기보다 더 돌출시키는 기법",
+   "symbol_desc": "긴뜨기 5개 부챗살 위가 고리로 닫힌 타원형. ☆ 폐기",
+   "symbol_svg_required": true,
+   "name_en": "popcorn stitch",
+   "abbr_en_uk": "popcorn",
+   "jis_master_rows": "26-29",
+   "aliases": []
+  },
+  {
+   "id": "C21",
+   "craft": "crochet",
+   "name_ko": "교차뜨기",
+   "name_ja": "交差編み",
+   "abbr": "crossed dc",
+   "symbol": "✕",
+   "level": 4,
+   "category": "질감",
+   "prereq": [
+    "C13"
+   ],
+   "desc": "긴뜨기 두 코를 서로 엇갈려 떠 X자 무늬를 만드는 기법",
+   "symbol_desc": "실제는 T̷ 2개가 교차한 X형",
+   "symbol_svg_required": true,
+   "name_en": "crossed double crochet",
+   "abbr_en_uk": "crossed treble",
+   "jis_master_rows": "79-86",
+   "aliases": []
+  },
+  {
+   "id": "C22",
+   "craft": "crochet",
+   "name_ko": "배색뜨기",
+   "name_ja": "編み込み・配色",
+   "abbr": "tapestry",
+   "symbol": "■□",
+   "level": 4,
+   "category": "배색",
+   "prereq": [
+    "C09"
+   ],
+   "desc": "한 단 안에서 여러 색을 바꿔 가며 무늬를 그리는 기법",
+   "name_en": "tapestry crochet (color work)",
+   "abbr_en_uk": "tapestry crochet",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C23",
+   "craft": "crochet",
+   "name_ko": "의류 구성",
+   "name_ja": "ウェア構成",
+   "abbr": "garment",
+   "symbol": "–",
+   "level": 4,
+   "category": "구성",
+   "prereq": [
+    "C07",
+    "C08",
+    "C11"
+   ],
+   "desc": "몸판·소매를 성형하고 봉제해 의류로 완성하는 종합 기술",
+   "name_en": "garment construction",
+   "abbr_en_uk": "garment construction",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C24",
+   "craft": "crochet",
+   "name_ko": "걸어뜨기",
+   "name_ja": "引き上げ編み",
+   "abbr": "fpdc/bpdc",
+   "symbol": "T̷ʃ",
+   "level": 5,
+   "category": "질감",
+   "prereq": [
+    "C13"
+   ],
+   "desc": "코가 아닌 기둥(post)에 바늘을 걸어 입체 골을 세우는 기법",
+   "symbol_desc": "긴뜨기 기호 하단이 갈고리(J형)로 굽음. 앞걸기/뒤걸기는 갈고리 방향 반전 — 2종 제작",
+   "symbol_svg_required": true,
+   "name_en": "front/back post double crochet",
+   "abbr_en_uk": "front/back post treble",
+   "jis_master_rows": "89-98",
+   "aliases": []
+  },
+  {
+   "id": "C25",
+   "craft": "crochet",
+   "name_ko": "바구니뜨기",
+   "name_ja": "かご組み",
+   "abbr": "basket weave",
+   "symbol": "조합",
+   "level": 5,
+   "category": "질감",
+   "prereq": [
+    "C24"
+   ],
+   "desc": "앞·뒤 걸어뜨기를 블록으로 교대해 격자 짜임을 만드는 기법",
+   "symbol_desc": "앞·뒤 걸어뜨기 블록 교대 조합 무늬(⊞ 폐기)",
+   "name_en": "basketweave stitch",
+   "abbr_en_uk": "basketweave",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C26",
+   "craft": "crochet",
+   "name_ko": "스타크로셰",
+   "name_ja": "スタークロッシェ",
+   "abbr": "star st",
+   "symbol": "조합",
+   "level": 5,
+   "category": "특수",
+   "prereq": [
+    "C12"
+   ],
+   "desc": "여러 코에서 실을 끌어와 한 번에 묶어 별 모양을 만드는 특수 기법",
+   "symbol_desc": "전용 표준 기호 없음 — 도안마다 조합 기호로 표기. ★ 폐기",
+   "name_en": "star stitch",
+   "abbr_en_uk": "star stitch",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C27",
+   "craft": "crochet",
+   "name_ko": "감아뜨기(코일뜨기)",
+   "name_ja": "巻き編み",
+   "abbr": "bullion",
+   "symbol": "∿",
+   "level": 5,
+   "category": "특수",
+   "prereq": [
+    "C13"
+   ],
+   "desc": "바늘에 실을 여러 번 감아 코일째 빼내는 특수 기법",
+   "symbol_desc": "세로 타원에 가로선 다수(감은 코일). ∿는 근사",
+   "symbol_svg_required": true,
+   "name_en": "bullion stitch",
+   "abbr_en_uk": "bullion / roll stitch",
+   "jis_master_rows": "113",
+   "aliases": [
+    "코일뜨기",
+    "コイル編み"
+   ],
+   "rename_memo": "JIS·ヴォーグ 명칭은 巻き編み. コイル編み는 별칭"
+  },
+  {
+   "id": "C28",
+   "craft": "crochet",
+   "name_ko": "한붓뜨기",
+   "name_ja": "一筆書き",
+   "abbr": "continuous",
+   "symbol": "–",
+   "level": 5,
+   "category": "특수",
+   "prereq": [
+    "C06",
+    "C17"
+   ],
+   "desc": "실을 끊지 않고 작품 전체를 한 번에 완성하는 구성 기법",
+   "symbol_desc": "구조 기법 — 전용 기호 없음 규칙 적용(∞ 폐기)",
+   "name_en": "continuous (one-piece) crochet",
+   "abbr_en_uk": "continuous",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C29",
+   "craft": "crochet",
+   "name_ko": "브레이드",
+   "name_ja": "ブレード",
+   "abbr": "braid",
+   "symbol": "–",
+   "level": 5,
+   "category": "특수",
+   "prereq": [
+    "C11",
+    "C13"
+   ],
+   "desc": "띠 형태로 뜬 편물을 엮어 조립하는 구조 기법",
+   "symbol_desc": "구조 기법 — 전용 기호 없음 규칙 적용(≡ 폐기)",
+   "name_en": "braid",
+   "abbr_en_uk": "braid",
+   "jis_master_rows": "",
+   "aliases": []
+  },
+  {
+   "id": "C30",
+   "craft": "crochet",
+   "name_ko": "짧은 링뜨기",
+   "name_ja": "リング細編み",
+   "abbr": "loop sc",
+   "symbol": "⌓×",
+   "level": 3,
+   "category": "질감",
+   "prereq": [
+    "C02"
+   ],
+   "desc": "손가락에 실을 걸어 편물 뒷면에 고리(링)를 남기며 뜨는 짧은뜨기 — 모프·러그·털 질감(AMO-030 등 하마나카 도안)",
+   "symbol_desc": "× 위를 둥근 고리(⌓)로 감싼 형태. 2코·3코 넣기는 같은 밑코에서 갈라지는 다리를 추가(리ング細編み2目/3目編み入れる). 에디터 type: sc_loop / sc_loop2 / sc_loop3",
+   "symbol_svg_required": true,
+   "variants": [
+    {
+     "type": "sc_inc3",
+     "name_ko": "짧은뜨기 3코 넣기",
+     "name_ja": "細編み3目編み入れる",
+     "symbol": "⩒",
+     "maps_to": "C07"
+    },
+    {
+     "type": "sc_dec3",
+     "name_ko": "짧은뜨기 3코 모아뜨기",
+     "name_ja": "細編み3目1度",
+     "symbol": "⩚",
+     "maps_to": "C08"
+    }
+   ],
+   "name_en": "loop stitch (sc)",
+   "abbr_en_uk": "loop stitch",
+   "jis_master_rows": "114-115",
+   "aliases": [
+    "링 짧은뜨기"
+   ],
+   "rename_memo": "엑셀 표기"
+  },
+  {
+   "id": "K01",
+   "craft": "knitting",
+   "name_ko": "기본 코잡기",
+   "name_ja": "作り目",
+   "abbr": "CO",
+   "symbol": "–",
+   "level": 1,
+   "category": "기초",
+   "prereq": [],
+   "desc": "바늘에 첫 코들을 만드는 뜨개의 시작",
+   "aliases": []
+  },
+  {
+   "id": "K02",
+   "craft": "knitting",
+   "name_ko": "겉뜨기",
+   "name_ja": "表目",
+   "abbr": "k",
+   "symbol": "│",
+   "level": 1,
+   "category": "기초",
+   "prereq": [
+    "K01"
+   ],
+   "desc": "가장 기본 스티치. 앞면에 V자 결이 생긴다",
+   "aliases": []
+  },
+  {
+   "id": "K03",
+   "craft": "knitting",
+   "name_ko": "안뜨기",
+   "name_ja": "裏目",
+   "abbr": "p",
+   "symbol": "─",
+   "level": 1,
+   "category": "기초",
+   "prereq": [
+    "K02"
+   ],
+   "desc": "겉뜨기의 반대면 스티치. 가로 돌기가 생긴다",
+   "aliases": []
+  },
+  {
+   "id": "K04",
+   "craft": "knitting",
+   "name_ko": "코 막기",
+   "name_ja": "伏せ目",
+   "abbr": "BO",
+   "symbol": "●",
+   "level": 1,
+   "category": "기초",
+   "prereq": [
+    "K02"
+   ],
+   "desc": "코를 차례로 덮어 편물을 마무리하는 기법",
+   "aliases": []
+  },
+  {
+   "id": "K05",
+   "craft": "knitting",
+   "name_ko": "가터뜨기",
+   "name_ja": "ガーター編み",
+   "abbr": "garter",
+   "symbol": "–",
+   "level": 1,
+   "category": "조직",
+   "prereq": [
+    "K02"
+   ],
+   "desc": "매단 겉뜨기만 반복해 가로 이랑이 지는 조직",
+   "aliases": []
+  },
+  {
+   "id": "K06",
+   "craft": "knitting",
+   "name_ko": "롱테일 캐스트온",
+   "name_ja": "指でかける作り目",
+   "abbr": "long-tail CO",
+   "symbol": "–",
+   "level": 2,
+   "category": "기초",
+   "prereq": [
+    "K01"
+   ],
+   "desc": "실꼬리를 함께 사용해 만드는 신축성 있는 표준 시작코",
+   "aliases": []
+  },
+  {
+   "id": "K07",
+   "craft": "knitting",
+   "name_ko": "메리야스뜨기",
+   "name_ja": "メリヤス編み",
+   "abbr": "St st",
+   "symbol": "–",
+   "level": 2,
+   "category": "조직",
+   "prereq": [
+    "K02",
+    "K03"
+   ],
+   "desc": "겉뜨기 단과 안뜨기 단을 교대해 매끈한 V결을 만드는 기본 조직",
+   "aliases": []
+  },
+  {
+   "id": "K08",
+   "craft": "knitting",
+   "name_ko": "고무뜨기",
+   "name_ja": "ゴム編み",
+   "abbr": "rib",
+   "symbol": "–",
+   "level": 2,
+   "category": "조직",
+   "prereq": [
+    "K02",
+    "K03"
+   ],
+   "desc": "겉·안뜨기를 세로로 교대(1×1, 2×2)해 신축성을 내는 조직",
+   "aliases": []
+  },
+  {
+   "id": "K09",
+   "craft": "knitting",
+   "name_ko": "멍석뜨기",
+   "name_ja": "かのこ編み",
+   "abbr": "seed st",
+   "symbol": "–",
+   "level": 2,
+   "category": "조직",
+   "prereq": [
+    "K02",
+    "K03"
+   ],
+   "desc": "겉·안뜨기를 엇갈리게 배치해 오톨도톨한 질감을 만드는 조직",
+   "aliases": []
+  },
+  {
+   "id": "K10",
+   "craft": "knitting",
+   "name_ko": "실 잇기",
+   "name_ja": "糸継ぎ",
+   "abbr": "join yarn",
+   "symbol": "–",
+   "level": 2,
+   "category": "구성",
+   "prereq": [
+    "K02"
+   ],
+   "desc": "실이 끝났을 때 새 실을 이어 붙이는 기법",
+   "aliases": []
+  },
+  {
+   "id": "K11",
+   "craft": "knitting",
+   "name_ko": "줄무늬 배색",
+   "name_ja": "しま模様",
+   "abbr": "stripes",
+   "symbol": "–",
+   "level": 2,
+   "category": "배색",
+   "prereq": [
+    "K02",
+    "K10"
+   ],
+   "desc": "단 교체 시 실 색을 바꿔 가로 줄무늬를 만드는 기법",
+   "aliases": []
+  },
+  {
+   "id": "K12",
+   "craft": "knitting",
+   "name_ko": "걸기코",
+   "name_ja": "かけ目",
+   "abbr": "yo",
+   "symbol": "○",
+   "level": 2,
+   "category": "성형",
+   "prereq": [
+    "K02"
+   ],
+   "desc": "실을 바늘에 걸어 새 코와 비침(구멍)을 만드는 늘림코",
+   "aliases": []
+  },
+  {
+   "id": "K13",
+   "craft": "knitting",
+   "name_ko": "왼코 모아뜨기",
+   "name_ja": "左上2目一度",
+   "abbr": "k2tog",
+   "symbol": "人",
+   "level": 2,
+   "category": "성형",
+   "prereq": [
+    "K02"
+   ],
+   "desc": "두 코를 한 번에 겉뜨기해 오른쪽으로 기우는 줄임코",
+   "aliases": []
+  },
+  {
+   "id": "K14",
+   "craft": "knitting",
+   "name_ko": "오른코 모아뜨기",
+   "name_ja": "右上2目一度",
+   "abbr": "ssk",
+   "symbol": "入",
+   "level": 2,
+   "category": "성형",
+   "prereq": [
+    "K13"
+   ],
+   "desc": "두 코를 옮겨 잡은 뒤 함께 떠 왼쪽으로 기우는 줄임코",
+   "aliases": []
+  },
+  {
+   "id": "K15",
+   "craft": "knitting",
+   "name_ko": "코 늘리기",
+   "name_ja": "増し目",
+   "abbr": "M1/kfb",
+   "symbol": "M",
+   "level": 2,
+   "category": "성형",
+   "prereq": [
+    "K02",
+    "K03"
+   ],
+   "desc": "코 사이 실이나 한 코에서 새 코를 만들어 늘리는 기법",
+   "symbol_desc": "서구 차트 관행 M(M1L/M1R 방향 구분 필요). kfb는 전용 기호 없음. JIS ねじり増し目는 Ω계열이라 K17과 SVG에서 구분 필수",
+   "symbol_svg_required": true,
+   "aliases": []
+  },
+  {
+   "id": "K16",
+   "craft": "knitting",
+   "name_ko": "원형뜨기",
+   "name_ja": "輪編み",
+   "abbr": "in the round",
+   "symbol": "–",
+   "level": 3,
+   "category": "구성",
+   "prereq": [
+    "K01",
+    "K02"
+   ],
+   "desc": "원형바늘·장갑바늘로 이음매 없이 통으로 뜨는 구조",
+   "aliases": []
+  },
+  {
+   "id": "K17",
+   "craft": "knitting",
+   "name_ko": "꼬아뜨기",
+   "name_ja": "ねじり目",
+   "abbr": "ktbl",
+   "symbol": "Ω",
+   "level": 3,
+   "category": "질감",
+   "prereq": [
+    "K02"
+   ],
+   "desc": "코 뒤쪽 고리에 떠서 코를 꼬아 또렷한 선을 만드는 기법",
+   "symbol_desc": "JIS ねじり目 = 다리가 교차한 고리(Ω형). Q는 서구 소프트웨어 근사 표기 — 폐기",
+   "symbol_svg_required": true,
+   "aliases": []
+  },
+  {
+   "id": "K18",
+   "craft": "knitting",
+   "name_ko": "케이블뜨기",
+   "name_ja": "交差編み",
+   "abbr": "cable",
+   "symbol": "＞＜",
+   "level": 3,
+   "category": "질감",
+   "prereq": [
+    "K07"
+   ],
+   "desc": "코 순서를 바꿔 떠 꽈배기 무늬를 만드는 교차 기법",
+   "symbol_desc": "실제 기호는 코 수·방향별로 여러 칸에 걸친 사선 교차 — ＞＜는 근사",
+   "symbol_svg_required": true,
+   "aliases": []
+  },
+  {
+   "id": "K19",
+   "craft": "knitting",
+   "name_ko": "돗바늘 잇기",
+   "name_ja": "とじ・はぎ",
+   "abbr": "mattress st",
+   "symbol": "–",
+   "level": 3,
+   "category": "구성",
+   "prereq": [
+    "K04",
+    "K07"
+   ],
+   "desc": "완성 조각을 돗바늘로 티 나지 않게 잇는 솔기 기법",
+   "aliases": []
+  },
+  {
+   "id": "K20",
+   "craft": "knitting",
+   "name_ko": "코 줍기",
+   "name_ja": "拾い目",
+   "abbr": "pick up",
+   "symbol": "–",
+   "level": 3,
+   "category": "구성",
+   "prereq": [
+    "K02"
+   ],
+   "desc": "편물 가장자리에서 새 코를 주워 이어 뜨는 기법(목둘레·밴드)",
+   "aliases": []
+  },
+  {
+   "id": "K21",
+   "craft": "knitting",
+   "name_ko": "레이스뜨기 기초",
+   "name_ja": "透かし編み",
+   "abbr": "lace",
+   "symbol": "○人",
+   "level": 3,
+   "category": "질감",
+   "prereq": [
+    "K12",
+    "K13",
+    "K14"
+   ],
+   "desc": "걸기코와 줄임코를 짝지어 비침무늬를 만드는 기법",
+   "aliases": []
+  },
+  {
+   "id": "K22",
+   "craft": "knitting",
+   "name_ko": "중심 3코 모아뜨기",
+   "name_ja": "中上3目一度",
+   "abbr": "cdd",
+   "symbol": "个",
+   "level": 3,
+   "category": "성형",
+   "prereq": [
+    "K13",
+    "K14"
+   ],
+   "desc": "3코를 가운데 코가 위로 오도록 모아 뜨는 대칭 줄임코",
+   "symbol_desc": "3획: 중앙 세로선이 맨 위 + 양쪽 사선(중심 코가 위로). ㅅ(2획)은 人(K13)과 혼동되어 폐기",
+   "symbol_svg_required": true,
+   "aliases": []
+  },
+  {
+   "id": "K23",
+   "craft": "knitting",
+   "name_ko": "숏로우",
+   "name_ja": "引き返し編み",
+   "abbr": "short rows",
+   "symbol": "–",
+   "level": 4,
+   "category": "성형",
+   "prereq": [
+    "K07"
+   ],
+   "desc": "단을 끝까지 뜨지 않고 되돌아와 입체 굴곡을 만드는 기법",
+   "aliases": []
+  },
+  {
+   "id": "K24",
+   "craft": "knitting",
+   "name_ko": "페어아일",
+   "name_ja": "編み込み",
+   "abbr": "stranded",
+   "symbol": "■□",
+   "level": 4,
+   "category": "배색",
+   "prereq": [
+    "K11",
+    "K16"
+   ],
+   "desc": "쉬는 실을 뒤로 건너뛰며 두 색 이상으로 무늬를 짜는 배색 기법",
+   "aliases": []
+  },
+  {
+   "id": "K25",
+   "craft": "knitting",
+   "name_ko": "인타르시아",
+   "name_ja": "インターシャ",
+   "abbr": "intarsia",
+   "symbol": "▧",
+   "level": 4,
+   "category": "배색",
+   "prereq": [
+    "K11"
+   ],
+   "desc": "색 구역마다 실을 따로 준비해 큰 그림을 짜는 배색 기법",
+   "aliases": []
+  },
+  {
+   "id": "K26",
+   "craft": "knitting",
+   "name_ko": "아란무늬",
+   "name_ja": "アラン模様",
+   "abbr": "aran",
+   "symbol": "–",
+   "level": 4,
+   "category": "질감",
+   "prereq": [
+    "K17",
+    "K18"
+   ],
+   "desc": "여러 케이블·꼬아뜨기를 조합한 복합 입체 무늬",
+   "aliases": []
+  },
+  {
+   "id": "K27",
+   "craft": "knitting",
+   "name_ko": "도미노뜨기",
+   "name_ja": "ドミノ編み",
+   "abbr": "modular",
+   "symbol": "–",
+   "level": 4,
+   "category": "구성",
+   "prereq": [
+    "K20",
+    "K22"
+   ],
+   "desc": "중심 줄임코로 사각 모듈을 떠서 이어 붙이는 구성 기법",
+   "aliases": []
+  },
+  {
+   "id": "K28",
+   "craft": "knitting",
+   "name_ko": "의류 구성",
+   "name_ja": "ウェア構成",
+   "abbr": "garment",
+   "symbol": "–",
+   "level": 4,
+   "category": "구성",
+   "prereq": [
+    "K13",
+    "K14",
+    "K15",
+    "K19"
+   ],
+   "desc": "래글런·세트인 등 성형과 조립로 의류를 완성하는 종합 기술",
+   "aliases": []
+  },
+  {
+   "id": "K29",
+   "craft": "knitting",
+   "name_ko": "브리오슈",
+   "name_ja": "ブリオッシュ編み",
+   "abbr": "brioche",
+   "symbol": "–",
+   "level": 5,
+   "category": "특수",
+   "prereq": [
+    "K08",
+    "K12"
+   ],
+   "desc": "걸기코와 걸러뜨기를 결합해 도톰한 양면 골을 만드는 특수 기법",
+   "aliases": []
+  },
+  {
+   "id": "K30",
+   "craft": "knitting",
+   "name_ko": "스틱",
+   "name_ja": "スティーク",
+   "abbr": "steek",
+   "symbol": "–",
+   "level": 5,
+   "category": "특수",
+   "prereq": [
+    "K24"
+   ],
+   "desc": "통으로 뜬 편물을 잘라 열어 카디건 등을 만드는 특수 기법",
+   "aliases": []
+  },
+  {
+   "id": "C31",
+   "name_ko": "세길 긴뜨기",
+   "name_ja": "三つ巻き長編み",
+   "name_en": "double treble crochet",
+   "abbr": "dtr",
+   "level": 4,
+   "prereq": [
+    "C18"
+   ],
+   "category": "기본 코",
+   "desc": "실을 세 번 감아 뜨는 코. 두길 긴뜨기보다 한 단 더 높다",
+   "rows": [
+    10
+   ],
+   "craft": "crochet",
+   "aliases": [],
+   "status": "candidate"
+  },
+  {
+   "id": "C32",
+   "name_ko": "네길 긴뜨기",
+   "name_ja": "四つ巻き長編み",
+   "name_en": "triple treble crochet",
+   "abbr": "trtr",
+   "level": 4,
+   "prereq": [
+    "C31"
+   ],
+   "category": "기본 코",
+   "desc": "실을 네 번 감아 뜨는 코",
+   "rows": [
+    11
+   ],
+   "craft": "crochet",
+   "aliases": [],
+   "status": "candidate"
+  },
+  {
+   "id": "C33",
+   "name_ko": "Y자뜨기·역Y자뜨기",
+   "name_ja": "Y字編み・逆Y字編み",
+   "name_en": "Y-stitch / inverted Y-stitch",
+   "abbr": "Y-st",
+   "level": 5,
+   "prereq": [
+    "C18"
+   ],
+   "category": "응용 코",
+   "desc": "두길 긴뜨기 기둥에서 가지를 내거나(Y), 두 다리를 한 기둥으로 모으는(역Y) 코",
+   "rows": [
+    101,
+    102,
+    103,
+    108,
+    111
+   ],
+   "craft": "crochet",
+   "aliases": [],
+   "status": "candidate"
+  },
+  {
+   "id": "C34",
+   "name_ko": "X자뜨기(클로스뜨기)",
+   "name_ja": "クロス編み",
+   "name_en": "X-stitch (crossed dc)",
+   "abbr": "X-st",
+   "level": 5,
+   "prereq": [
+    "C18"
+   ],
+   "category": "응용 코",
+   "desc": "두 다리를 모아 허리를 만들고 다시 두 팔로 벌리는 X 모양 코",
+   "rows": [
+    104,
+    105,
+    106
+   ],
+   "craft": "crochet",
+   "aliases": [],
+   "status": "candidate"
+  },
+  {
+   "id": "C35",
+   "name_ko": "삼각뜨기",
+   "name_ja": "三角編み",
+   "name_en": "triangle stitch",
+   "abbr": "tri-st",
+   "level": 5,
+   "prereq": [
+    "C33"
+   ],
+   "category": "응용 코",
+   "desc": "높이가 다른 미완성 코 여러 개를 한 점에 모아 삼각형을 만드는 코",
+   "rows": [
+    109
+   ],
+   "craft": "crochet",
+   "aliases": [],
+   "status": "candidate"
+  },
+  {
+   "id": "C36",
+   "name_ko": "칠보뜨기",
+   "name_ja": "七宝編み",
+   "name_en": "Solomon's knot",
+   "abbr": "Sk",
+   "level": 3,
+   "prereq": [
+    "C01",
+    "C02"
+   ],
+   "category": "응용 코",
+   "desc": "사슬 고리를 길게 뽑아 짧은뜨기로 고정하며 그물처럼 잇는 코",
+   "rows": [
+    112
+   ],
+   "craft": "crochet",
+   "aliases": [],
+   "status": "candidate"
+  },
+  {
+   "id": "C37",
+   "name_ko": "되돌아 짧은뜨기",
+   "name_ja": "バック細編み",
+   "name_en": "reverse single crochet (crab stitch)",
+   "abbr": "rev sc",
+   "level": 2,
+   "prereq": [
+    "C02"
+   ],
+   "category": "기본 코",
+   "desc": "왼쪽에서 오른쪽으로 되돌아가며 뜨는 짧은뜨기. 가장자리 마감용 (바늘 돌려서·실 돌려서 짧은뜨기는 변형)",
+   "rows": [
+    121,
+    122,
+    123,
+    124,
+    125
+   ],
+   "craft": "crochet",
+   "aliases": [],
+   "status": "candidate"
+  },
+  {
+   "id": "C38",
+   "name_ko": "변형 구슬뜨기(퍼프)",
+   "name_ja": "変わり玉編み",
+   "name_en": "puff stitch (modified cluster)",
+   "abbr": "puff",
+   "level": 4,
+   "prereq": [
+    "C19"
+   ],
+   "category": "입체 코",
+   "desc": "미완성 긴뜨기 고리만 먼저 빼고 남은 2고리를 한 번 더 빼서 위가 정돈된 구슬",
+   "rows": [
+    23,
+    24
+   ],
+   "craft": "crochet",
+   "aliases": [],
+   "status": "candidate"
+  }
+ ],
+ "symbols": [
+  {
+   "no": 1,
+   "src_row": 4,
+   "ko": "사슬뜨기",
+   "ja": "鎖編み目",
+   "en": "chain stitch",
+   "abbr": "ch",
+   "en_uk": "chain (ch)",
+   "tech": "C01",
+   "variant": false,
+   "section": "基本の編み目 / 기본 코",
+   "aliases": [
+    "ch",
+    "chain stitch",
+    "鎖編み目"
+   ]
+  },
+  {
+   "no": 2,
+   "src_row": 5,
+   "ko": "빼뜨기",
+   "ja": "引き抜き編み目",
+   "en": "slip stitch",
+   "abbr": "sl st",
+   "en_uk": "slip stitch (ss)",
+   "tech": "C03",
+   "variant": false,
+   "section": "基本の編み目 / 기본 코",
+   "aliases": [
+    "sl st",
+    "slip stitch",
+    "引き抜き編み目"
+   ]
+  },
+  {
+   "no": 3,
+   "src_row": 6,
+   "ko": "짧은뜨기",
+   "ja": "細編み目",
+   "en": "single crochet",
+   "abbr": "sc",
+   "en_uk": "double crochet (dc)",
+   "tech": "C02",
+   "variant": false,
+   "section": "基本の編み目 / 기본 코",
+   "aliases": [
+    "sc",
+    "single crochet",
+    "細編み目"
+   ]
+  },
+  {
+   "no": 4,
+   "src_row": 7,
+   "ko": "긴뜨기",
+   "ja": "中長編み目",
+   "en": "half double crochet",
+   "abbr": "hdc",
+   "en_uk": "half treble (htr)",
+   "tech": "C12",
+   "variant": false,
+   "section": "基本の編み目 / 기본 코",
+   "aliases": [
+    "half double crochet",
+    "hdc",
+    "中長編み目",
+    "중간긴뜨기"
+   ]
+  },
+  {
+   "no": 5,
+   "src_row": 8,
+   "ko": "한길 긴뜨기",
+   "ja": "長編み目",
+   "en": "double crochet",
+   "abbr": "dc",
+   "en_uk": "treble (tr)",
+   "tech": "C13",
+   "variant": false,
+   "section": "基本の編み目 / 기본 코",
+   "aliases": [
+    "dc",
+    "double crochet",
+    "長編み目",
+    "긴뜨기"
+   ]
+  },
+  {
+   "no": 6,
+   "src_row": 9,
+   "ko": "두길 긴뜨기",
+   "ja": "長々編み目",
+   "en": "treble crochet",
+   "abbr": "tr",
+   "en_uk": "double treble (dtr)",
+   "tech": "C18",
+   "variant": false,
+   "section": "基本の編み目 / 기본 코",
+   "aliases": [
+    "tr",
+    "treble crochet",
+    "長々編み目",
+    "두길긴뜨기"
+   ]
+  },
+  {
+   "no": 7,
+   "src_row": 10,
+   "ko": "세길 긴뜨기",
+   "ja": "三つ巻き長編み目",
+   "en": "double treble crochet",
+   "abbr": "dtr",
+   "en_uk": "triple treble (trtr)",
+   "tech": "C31",
+   "variant": false,
+   "section": "基本の編み目 / 기본 코",
+   "aliases": [
+    "double treble crochet",
+    "dtr",
+    "三つ巻き長編み目"
+   ]
+  },
+  {
+   "no": 8,
+   "src_row": 11,
+   "ko": "네길 긴뜨기",
+   "ja": "四つ巻き長編み目",
+   "en": "triple treble crochet",
+   "abbr": "trtr",
+   "en_uk": "quadruple treble (qtr)",
+   "tech": "C32",
+   "variant": false,
+   "section": "基本の編み目 / 기본 코",
+   "aliases": [
+    "triple treble crochet",
+    "trtr",
+    "四つ巻き長編み目"
+   ]
+  },
+  {
+   "no": 9,
+   "src_row": 16,
+   "ko": "긴 3코 구슬뜨기",
+   "ja": "中長編み3目の玉編み目",
+   "en": "3-hdc cluster (hdc3tog in same st)",
+   "abbr": "hdc3-cl",
+   "en_uk": "3-htr cluster",
+   "tech": "C19",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "3-hdc cluster (hdc3tog in same st)",
+    "hdc3-cl",
+    "中長編み3目の玉編み目",
+    "구슬뜨기"
+   ]
+  },
+  {
+   "no": 10,
+   "src_row": 17,
+   "ko": "한길 긴 3코 구슬뜨기",
+   "ja": "長編み3目の玉編み目",
+   "en": "3-dc cluster (dc3tog in same st)",
+   "abbr": "dc3-cl",
+   "en_uk": "3-tr cluster",
+   "tech": "C19",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "3-dc cluster (dc3tog in same st)",
+    "dc3-cl",
+    "長編み3目の玉編み目",
+    "구슬뜨기"
+   ]
+  },
+  {
+   "no": 11,
+   "src_row": 18,
+   "ko": "한길 긴 5코 구슬뜨기",
+   "ja": "長編み5目の玉編み目",
+   "en": "5-dc cluster / bobble (dc5tog in same st)",
+   "abbr": "dc5-cl / bobble",
+   "en_uk": "5-tr cluster",
+   "tech": "C19",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "5-dc cluster / bobble (dc5tog in same st)",
+    "dc5-cl / bobble",
+    "長編み5目の玉編み目",
+    "구슬뜨기"
+   ]
+  },
+  {
+   "no": 12,
+   "src_row": 19,
+   "ko": "긴 3코 구슬뜨기(코 아래에서)",
+   "ja": "中長編み3目の玉編み目（束に編み入れる）",
+   "en": "3-hdc cluster worked in ch-space",
+   "abbr": "hdc3-cl in ch-sp",
+   "en_uk": "3-htr cluster in ch-sp",
+   "tech": "C19",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "3-hdc cluster worked in ch-space",
+    "hdc3-cl in ch-sp",
+    "中長編み3目の玉編み目（束に編み入れる）"
+   ]
+  },
+  {
+   "no": 13,
+   "src_row": 20,
+   "ko": "한길 긴 3코 구슬뜨기(코 아래에서)",
+   "ja": "長編み3目の玉編み目（束に編み入れる）",
+   "en": "3-dc cluster worked in ch-space",
+   "abbr": "dc3-cl in ch-sp",
+   "en_uk": "3-tr cluster in ch-sp",
+   "tech": "C19",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "3-dc cluster worked in ch-space",
+    "dc3-cl in ch-sp",
+    "長編み3目の玉編み目（束に編み入れる）"
+   ]
+  },
+  {
+   "no": 14,
+   "src_row": 21,
+   "ko": "한길 긴 5코 구슬뜨기(코 아래에서)",
+   "ja": "長編み5目の玉編み目（束に編み入れる）",
+   "en": "5-dc cluster worked in ch-space",
+   "abbr": "dc5-cl in ch-sp",
+   "en_uk": "5-tr cluster in ch-sp",
+   "tech": "C19",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "5-dc cluster worked in ch-space",
+    "dc5-cl in ch-sp",
+    "長編み5目の玉編み目（束に編み入れる）"
+   ]
+  },
+  {
+   "no": 15,
+   "src_row": 22,
+   "ko": "두길 긴 5코 구슬뜨기",
+   "ja": "長々編み5目の玉編み目",
+   "en": "5-tr cluster (tr5tog in same st)",
+   "abbr": "tr5-cl",
+   "en_uk": "5-dtr cluster",
+   "tech": "C19",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "5-tr cluster (tr5tog in same st)",
+    "tr5-cl",
+    "長々編み5目の玉編み目"
+   ]
+  },
+  {
+   "no": 16,
+   "src_row": 23,
+   "ko": "긴 3코 변형 구슬뜨기",
+   "ja": "変わり中長編み3目の玉編み目",
+   "en": "puff stitch (3 hdc puff)",
+   "abbr": "puff",
+   "en_uk": "puff stitch",
+   "tech": "C19(변형)",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "puff",
+    "puff stitch (3 hdc puff)",
+    "変わり中長編み3目の玉編み目"
+   ]
+  },
+  {
+   "no": 17,
+   "src_row": 24,
+   "ko": "긴 3코 변형 구슬뜨기(코 아래에서)",
+   "ja": "変わり中長編み3目の玉編み目（束に編み入れる）",
+   "en": "puff stitch worked in ch-space",
+   "abbr": "puff in ch-sp",
+   "en_uk": "puff in ch-sp",
+   "tech": "C19(변형)",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "puff in ch-sp",
+    "puff stitch worked in ch-space",
+    "変わり中長編み3目の玉編み目（束に編み入れる）"
+   ]
+  },
+  {
+   "no": 18,
+   "src_row": 26,
+   "ko": "한길 긴 5코 팝콘뜨기",
+   "ja": "長編み5目のパプコーン編み目",
+   "en": "5-dc popcorn",
+   "abbr": "pc (5 dc)",
+   "en_uk": "5-tr popcorn",
+   "tech": "C20",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "5-dc popcorn",
+    "pc (5 dc)",
+    "長編み5目のパプコーン編み目",
+    "팝콘뜨기"
+   ]
+  },
+  {
+   "no": 19,
+   "src_row": 27,
+   "ko": "두길 긴 5코 팝콘뜨기",
+   "ja": "長々編み5目のパプコーン編み目※",
+   "en": "5-tr popcorn",
+   "abbr": "pc (5 tr)",
+   "en_uk": "5-dtr popcorn",
+   "tech": "C20",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "5-tr popcorn",
+    "pc (5 tr)",
+    "長々編み5目のパプコーン編み目※"
+   ]
+  },
+  {
+   "no": 20,
+   "src_row": 28,
+   "ko": "한길 긴 5코 팝콘뜨기(코 아래에서)",
+   "ja": "長編み5目のパプコーン編み目（束に編み入れる）",
+   "en": "5-dc popcorn worked in ch-space",
+   "abbr": "pc in ch-sp",
+   "en_uk": "5-tr popcorn in ch-sp",
+   "tech": "C20",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "5-dc popcorn worked in ch-space",
+    "pc in ch-sp",
+    "長編み5目のパプコーン編み目（束に編み入れる）"
+   ]
+  },
+  {
+   "no": 21,
+   "src_row": 29,
+   "ko": "긴 5코 팝콘뜨기",
+   "ja": "中長編み5目のパプコーン編み目※",
+   "en": "5-hdc popcorn",
+   "abbr": "pc (5 hdc)",
+   "en_uk": "5-htr popcorn",
+   "tech": "C20",
+   "variant": true,
+   "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
+   "aliases": [
+    "5-hdc popcorn",
+    "pc (5 hdc)",
+    "中長編み5目のパプコーン編み目※"
+   ]
+  },
+  {
+   "no": 22,
+   "src_row": 33,
+   "ko": "짧은 2코 늘려뜨기",
+   "ja": "細編み2目を編み入れる",
+   "en": "2 sc in same st (sc increase)",
+   "abbr": "2 sc in 1 / sc inc",
+   "en_uk": "2 dc in 1",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "2 sc in 1 / sc inc",
+    "2 sc in same st (sc increase)",
+    "細編み2目を編み入れる",
+    "코 늘리기"
+   ]
+  },
+  {
+   "no": 23,
+   "src_row": 34,
+   "ko": "짧은 2코 늘려뜨기(사이에 사슬 1코)",
+   "ja": "細編み2目を編み入れる（あいだに鎖1目）※",
+   "en": "(sc, ch 1, sc) in same st",
+   "abbr": "sc-ch1-sc",
+   "en_uk": "(dc, ch1, dc) in 1",
+   "tech": "C07(변형)",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "(sc, ch 1, sc) in same st",
+    "sc-ch1-sc",
+    "細編み2目を編み入れる（あいだに鎖1目）※"
+   ]
+  },
+  {
+   "no": 24,
+   "src_row": 35,
+   "ko": "짧은 3코 늘려뜨기",
+   "ja": "細編み3目を編み入れる ※",
+   "en": "3 sc in same st",
+   "abbr": "3 sc in 1",
+   "en_uk": "3 dc in 1",
+   "tech": "C07(변형)",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "3 sc in 1",
+    "3 sc in same st",
+    "細編み3目を編み入れる ※"
+   ]
+  },
+  {
+   "no": 25,
+   "src_row": 37,
+   "ko": "긴 2코 늘려뜨기",
+   "ja": "中長編み2目を編み入れる",
+   "en": "2 hdc in same st",
+   "abbr": "2 hdc in 1",
+   "en_uk": "2 htr in 1",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "2 hdc in 1",
+    "2 hdc in same st",
+    "中長編み2目を編み入れる"
+   ]
+  },
+  {
+   "no": 26,
+   "src_row": 38,
+   "ko": "긴 3코 늘려뜨기",
+   "ja": "中長編み3目を編み入れる ※",
+   "en": "3 hdc in same st",
+   "abbr": "3 hdc in 1",
+   "en_uk": "3 htr in 1",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "3 hdc in 1",
+    "3 hdc in same st",
+    "中長編み3目を編み入れる ※"
+   ]
+  },
+  {
+   "no": 27,
+   "src_row": 39,
+   "ko": "한길 긴 2코 늘려뜨기",
+   "ja": "長編み2目を編み入れる",
+   "en": "2 dc in same st (dc increase)",
+   "abbr": "2 dc in 1 / dc inc",
+   "en_uk": "2 tr in 1",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "2 dc in 1 / dc inc",
+    "2 dc in same st (dc increase)",
+    "長編み2目を編み入れる"
+   ]
+  },
+  {
+   "no": 28,
+   "src_row": 40,
+   "ko": "긴 2코 늘려뜨기(코 아래에서)",
+   "ja": "中長編み2目を編み入れる（束に拾う）※",
+   "en": "2 hdc in ch-space",
+   "abbr": "2 hdc in ch-sp",
+   "en_uk": "2 htr in ch-sp",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "2 hdc in ch-sp",
+    "2 hdc in ch-space",
+    "中長編み2目を編み入れる（束に拾う）※"
+   ]
+  },
+  {
+   "no": 29,
+   "src_row": 41,
+   "ko": "긴 3코 늘려뜨기(코 아래에서)",
+   "ja": "中長編み3目を編み入れる（束に拾う）※",
+   "en": "3 hdc in ch-space",
+   "abbr": "3 hdc in ch-sp",
+   "en_uk": "3 htr in ch-sp",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "3 hdc in ch-sp",
+    "3 hdc in ch-space",
+    "中長編み3目を編み入れる（束に拾う）※"
+   ]
+  },
+  {
+   "no": 30,
+   "src_row": 42,
+   "ko": "한길 긴 2코 늘려뜨기(코 아래에서)",
+   "ja": "長編み2目を編み入れる（束に拾う）",
+   "en": "2 dc in ch-space",
+   "abbr": "2 dc in ch-sp",
+   "en_uk": "2 tr in ch-sp",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "2 dc in ch-sp",
+    "2 dc in ch-space",
+    "長編み2目を編み入れる（束に拾う）"
+   ]
+  },
+  {
+   "no": 31,
+   "src_row": 43,
+   "ko": "한길 긴 2코 늘려뜨기(사이에 사슬 1코)",
+   "ja": "長編み2目を編み入れる（あいだに鎖1目）※",
+   "en": "V-stitch: (dc, ch 1, dc) in same st",
+   "abbr": "V-st",
+   "en_uk": "V-st (tr, ch1, tr)",
+   "tech": "C07(변형)",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "V-st",
+    "V-stitch: (dc, ch 1, dc) in same st",
+    "長編み2目を編み入れる（あいだに鎖1目）※"
+   ]
+  },
+  {
+   "no": 32,
+   "src_row": 44,
+   "ko": "한길 긴 3코 늘려뜨기",
+   "ja": "長編み3目を編み入れる※",
+   "en": "3 dc in same st",
+   "abbr": "3 dc in 1",
+   "en_uk": "3 tr in 1",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "3 dc in 1",
+    "3 dc in same st",
+    "長編み3目を編み入れる※"
+   ]
+  },
+  {
+   "no": 33,
+   "src_row": 45,
+   "ko": "한길 긴 5코 늘려뜨기=솔잎뜨기",
+   "ja": "長編み5目を編み入れる＝松編み※",
+   "en": "shell: 5 dc in same st",
+   "abbr": "sh (5 dc)",
+   "en_uk": "5-tr shell",
+   "tech": "C15",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "sh (5 dc)",
+    "shell: 5 dc in same st",
+    "長編み5目を編み入れる＝松編み※",
+    "셸뜨기"
+   ]
+  },
+  {
+   "no": 34,
+   "src_row": 46,
+   "ko": "한길 긴 2코 늘려뜨기(사이에 사슬 1코)(코 아래에서)",
+   "ja": "長編み2目を編み入れる（あいだに鎖1目）（束に拾う）※",
+   "en": "V-stitch worked in ch-space",
+   "abbr": "V-st in ch-sp",
+   "en_uk": "V-st in ch-sp",
+   "tech": "C07(변형)",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "V-st in ch-sp",
+    "V-stitch worked in ch-space",
+    "長編み2目を編み入れる（あいだに鎖1目）（束に拾う）※"
+   ]
+  },
+  {
+   "no": 35,
+   "src_row": 47,
+   "ko": "한길 긴 3코 늘려뜨기(코 아래에서)",
+   "ja": "長編み3目を編み入れる（束に拾う）※",
+   "en": "3 dc in ch-space",
+   "abbr": "3 dc in ch-sp",
+   "en_uk": "3 tr in ch-sp",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "3 dc in ch-sp",
+    "3 dc in ch-space",
+    "長編み3目を編み入れる（束に拾う）※"
+   ]
+  },
+  {
+   "no": 36,
+   "src_row": 48,
+   "ko": "한길 긴 5코 늘려뜨기=솔잎뜨기(코 아래에서)",
+   "ja": "長編み5目を編み入れる＝松編み（束に拾う）※",
+   "en": "shell: 5 dc in ch-space",
+   "abbr": "sh in ch-sp",
+   "en_uk": "5-tr shell in ch-sp",
+   "tech": "C15",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "sh in ch-sp",
+    "shell: 5 dc in ch-space",
+    "長編み5目を編み入れる＝松編み（束に拾う）※"
+   ]
+  },
+  {
+   "no": 37,
+   "src_row": 49,
+   "ko": "한길 긴 4코 늘려뜨기(사이에 사슬 1코)=조개뜨기",
+   "ja": "長編み4目を編み入れる（あいだに鎖1目）＝シェル編み ※",
+   "en": "shell: (2 dc, ch 1, 2 dc) in same st",
+   "abbr": "sh (2dc-ch1-2dc)",
+   "en_uk": "(2tr, ch1, 2tr) shell",
+   "tech": "C15",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "sh (2dc-ch1-2dc)",
+    "shell: (2 dc, ch 1, 2 dc) in same st",
+    "長編み4目を編み入れる（あいだに鎖1目）＝シェル編み ※"
+   ]
+  },
+  {
+   "no": 38,
+   "src_row": 50,
+   "ko": "한길 긴 4코 늘려뜨기(사이에 사슬 1코)=조개뜨기(코 아래에서)",
+   "ja": "長編み4目を編み入れる（あいだに鎖1目）＝シェル編み（束に拾う）※",
+   "en": "shell: (2 dc, ch 1, 2 dc) in ch-space",
+   "abbr": "sh in ch-sp",
+   "en_uk": "shell in ch-sp",
+   "tech": "C15",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "sh in ch-sp",
+    "shell: (2 dc, ch 1, 2 dc) in ch-space",
+    "長編み4目を編み入れる（あいだに鎖1目）＝シェル編み（束に拾う）※"
+   ]
+  },
+  {
+   "no": 39,
+   "src_row": 51,
+   "ko": "한길 긴 3코 늘려뜨기(짧은뜨기와 같은 코에)",
+   "ja": "長編み3目を編み入れる（細編みと同じ目に編み入れる）",
+   "en": "3 dc in same st as the sc",
+   "abbr": "3 dc in sc st",
+   "en_uk": "3 tr in dc st",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "3 dc in same st as the sc",
+    "3 dc in sc st",
+    "長編み3目を編み入れる（細編みと同じ目に編み入れる）"
+   ]
+  },
+  {
+   "no": 40,
+   "src_row": 52,
+   "ko": "한길 긴 3코 늘려뜨기(짧은뜨기의 다리에)",
+   "ja": "長編み3目を編み入れる（細編みの足2本に編み入れる）",
+   "en": "3 dc worked around the two legs (post) of the sc",
+   "abbr": "3 dc around sc post",
+   "en_uk": "3 tr around dc post",
+   "tech": "C07",
+   "variant": true,
+   "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
+   "aliases": [
+    "3 dc around sc post",
+    "3 dc worked around the two legs (post) of the sc",
+    "長編み3目を編み入れる（細編みの足2本に編み入れる）"
+   ]
+  },
+  {
+   "no": 41,
+   "src_row": 55,
+   "ko": "짧은 2코 모아뜨기",
+   "ja": "細編み2目一度",
+   "en": "sc2tog (single crochet 2 together)",
+   "abbr": "sc2tog",
+   "en_uk": "dc2tog",
+   "tech": "C08",
+   "variant": true,
+   "section": "複数の目をまとめる / 줄이기(모아뜨기)",
+   "aliases": [
+    "sc2tog",
+    "sc2tog (single crochet 2 together)",
+    "細編み2目一度",
+    "코 줄이기"
+   ]
+  },
+  {
+   "no": 42,
+   "src_row": 56,
+   "ko": "긴 2코 모아뜨기",
+   "ja": "中長編み2目一度",
+   "en": "hdc2tog",
+   "abbr": "hdc2tog",
+   "en_uk": "htr2tog",
+   "tech": "C08",
+   "variant": true,
+   "section": "複数の目をまとめる / 줄이기(모아뜨기)",
+   "aliases": [
+    "hdc2tog",
+    "中長編み2目一度"
+   ]
+  },
+  {
+   "no": 43,
+   "src_row": 57,
+   "ko": "한길 긴 2코 모아뜨기",
+   "ja": "長編み2目一度",
+   "en": "dc2tog",
+   "abbr": "dc2tog",
+   "en_uk": "tr2tog",
+   "tech": "C08",
+   "variant": true,
+   "section": "複数の目をまとめる / 줄이기(모아뜨기)",
+   "aliases": [
+    "dc2tog",
+    "長編み2目一度"
+   ]
+  },
+  {
+   "no": 44,
+   "src_row": 58,
+   "ko": "짧은 3코 모아뜨기",
+   "ja": "細編み3目一度",
+   "en": "sc3tog",
+   "abbr": "sc3tog",
+   "en_uk": "dc3tog",
+   "tech": "C08(변형)",
+   "variant": true,
+   "section": "複数の目をまとめる / 줄이기(모아뜨기)",
+   "aliases": [
+    "sc3tog",
+    "細編み3目一度"
+   ]
+  },
+  {
+   "no": 45,
+   "src_row": 59,
+   "ko": "짧은 3코 모아뜨기(가운데 1코 건너뛰기)",
+   "ja": "細編み3目一度（中央の目をとばす）",
+   "en": "sc3tog skipping the center st (sc2tog over 3 sts)",
+   "abbr": "sc3tog (skip 1)",
+   "en_uk": "dc3tog (skip 1)",
+   "tech": "C08(변형)",
+   "variant": true,
+   "section": "複数の目をまとめる / 줄이기(모아뜨기)",
+   "aliases": [
+    "sc3tog (skip 1)",
+    "sc3tog skipping the center st (sc2tog over 3 sts)",
+    "細編み3目一度（中央の目をとばす）"
+   ]
+  },
+  {
+   "no": 46,
+   "src_row": 60,
+   "ko": "긴 3코 모아뜨기",
+   "ja": "中長編み3目一度 ※",
+   "en": "hdc3tog",
+   "abbr": "hdc3tog",
+   "en_uk": "htr3tog",
+   "tech": "C08",
+   "variant": true,
+   "section": "複数の目をまとめる / 줄이기(모아뜨기)",
+   "aliases": [
+    "hdc3tog",
+    "中長編み3目一度 ※"
+   ]
+  },
+  {
+   "no": 47,
+   "src_row": 61,
+   "ko": "한길 긴 3코 모아뜨기",
+   "ja": "長編み3目一度 ※",
+   "en": "dc3tog",
+   "abbr": "dc3tog",
+   "en_uk": "tr3tog",
+   "tech": "C08",
+   "variant": true,
+   "section": "複数の目をまとめる / 줄이기(모아뜨기)",
+   "aliases": [
+    "dc3tog",
+    "長編み3目一度 ※"
+   ]
+  },
+  {
+   "no": 48,
+   "src_row": 65,
+   "ko": "짧은 줄기뜨기(왕복뜨기)",
+   "ja": "細編みのすじ編み目（往復編み）",
+   "en": "sc in back loop only — in rows",
+   "abbr": "sc BLO (rows)",
+   "en_uk": "dc BLO",
+   "tech": "C10",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "sc BLO (rows)",
+    "sc in back loop only — in rows",
+    "細編みのすじ編み目（往復編み）",
+    "이랑뜨기"
+   ]
+  },
+  {
+   "no": 49,
+   "src_row": 66,
+   "ko": "짧은 줄기뜨기(원형뜨기)",
+   "ja": "細編みのすじ編み目（輪編み）",
+   "en": "sc in back loop only — in the round",
+   "abbr": "sc BLO (rnd)",
+   "en_uk": "dc BLO",
+   "tech": "C10",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "sc BLO (rnd)",
+    "sc in back loop only — in the round",
+    "細編みのすじ編み目（輪編み）"
+   ]
+  },
+  {
+   "no": 50,
+   "src_row": 67,
+   "ko": "짧은 이랑뜨기",
+   "ja": "細編みのうね編み目",
+   "en": "ridge stitch: sc in back loop only every row (both sides ridged)",
+   "abbr": "sc BLO ridge",
+   "en_uk": "dc BLO ridge",
+   "tech": "C10",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "ridge stitch: sc in back loop only every row (both sides ridged)",
+    "sc BLO ridge",
+    "細編みのうね編み目"
+   ]
+  },
+  {
+   "no": 51,
+   "src_row": 68,
+   "ko": "긴 줄기뜨기(원형뜨기)",
+   "ja": "中長編みのすじ編み目（輪編み）",
+   "en": "hdc in back loop only — in the round",
+   "abbr": "hdc BLO",
+   "en_uk": "htr BLO",
+   "tech": "C10",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "hdc BLO",
+    "hdc in back loop only — in the round",
+    "中長編みのすじ編み目（輪編み）"
+   ]
+  },
+  {
+   "no": 52,
+   "src_row": 69,
+   "ko": "한길 긴 줄기뜨기(원형뜨기)",
+   "ja": "長編みのすじ編み目（輪編み）",
+   "en": "dc in back loop only — in the round",
+   "abbr": "dc BLO",
+   "en_uk": "tr BLO",
+   "tech": "C10",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "dc BLO",
+    "dc in back loop only — in the round",
+    "長編みのすじ編み目（輪編み）"
+   ]
+  },
+  {
+   "no": 53,
+   "src_row": 70,
+   "ko": "피코뜨기",
+   "ja": "鎖3目のピコット",
+   "en": "ch-3 picot",
+   "abbr": "picot (ch 3)",
+   "en_uk": "picot",
+   "tech": "C14",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "ch-3 picot",
+    "picot (ch 3)",
+    "鎖3目のピコット"
+   ]
+  },
+  {
+   "no": 54,
+   "src_row": 71,
+   "ko": "빼뜨기의 피코뜨기(짧은뜨기에서)",
+   "ja": "鎖3目の引き抜きピコット（細編みに編む）",
+   "en": "ch-3 slip-stitch picot, worked on sc",
+   "abbr": "sl st picot on sc",
+   "en_uk": "ss picot",
+   "tech": "C14",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "ch-3 slip-stitch picot, worked on sc",
+    "sl st picot on sc",
+    "鎖3目の引き抜きピコット（細編みに編む）"
+   ]
+  },
+  {
+   "no": 55,
+   "src_row": 72,
+   "ko": "짧은 피코뜨기",
+   "ja": "鎖3目の細編みピコット",
+   "en": "ch-3 sc picot",
+   "abbr": "sc picot",
+   "en_uk": "dc picot",
+   "tech": "C14",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "ch-3 sc picot",
+    "sc picot",
+    "鎖3目の細編みピコット"
+   ]
+  },
+  {
+   "no": 56,
+   "src_row": 74,
+   "ko": "빼뜨기의 피코뜨기(한길 긴뜨기에서)",
+   "ja": "鎖3目の引き抜きピコット（長編みに編む）",
+   "en": "ch-3 slip-stitch picot, worked on dc",
+   "abbr": "sl st picot on dc",
+   "en_uk": "ss picot on tr",
+   "tech": "C14",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "ch-3 slip-stitch picot, worked on dc",
+    "sl st picot on dc",
+    "鎖3目の引き抜きピコット（長編みに編む）"
+   ]
+  },
+  {
+   "no": 57,
+   "src_row": 75,
+   "ko": "빼뜨기의 피코뜨기(사슬뜨기에서)",
+   "ja": "鎖3目の引き抜きピコット（鎖編みに編む）",
+   "en": "ch-3 slip-stitch picot, worked on chain",
+   "abbr": "sl st picot on ch",
+   "en_uk": "ss picot on ch",
+   "tech": "C14",
+   "variant": true,
+   "section": "すじ編み・うね編み・ピコット / 줄기·이랑·피코",
+   "aliases": [
+    "ch-3 slip-stitch picot, worked on chain",
+    "sl st picot on ch",
+    "鎖3目の引き抜きピコット（鎖編みに編む）"
+   ]
+  },
+  {
+   "no": 58,
+   "src_row": 79,
+   "ko": "긴 1코 교차뜨기",
+   "ja": "中長編み1目交差",
+   "en": "crossed hdc (1 st)",
+   "abbr": "crossed hdc",
+   "en_uk": "crossed htr",
+   "tech": "C21",
+   "variant": true,
+   "section": "交差編み目 / 교차뜨기",
+   "aliases": [
+    "crossed hdc",
+    "crossed hdc (1 st)",
+    "中長編み1目交差"
+   ]
+  },
+  {
+   "no": 59,
+   "src_row": 80,
+   "ko": "한길 긴 1코 교차뜨기",
+   "ja": "長編み1目交差",
+   "en": "crossed dc (1 st)",
+   "abbr": "crossed dc",
+   "en_uk": "crossed tr",
+   "tech": "C21",
+   "variant": true,
+   "section": "交差編み目 / 교차뜨기",
+   "aliases": [
+    "crossed dc",
+    "crossed dc (1 st)",
+    "長編み1目交差",
+    "교차뜨기"
+   ]
+  },
+  {
+   "no": 60,
+   "src_row": 81,
+   "ko": "한길 긴 1코 교차뜨기(사이에 사슬 1코)",
+   "ja": "長編み1目交差（あいだに鎖1目）※",
+   "en": "crossed dc with ch 1 between",
+   "abbr": "crossed dc, ch1",
+   "en_uk": "crossed tr, ch1",
+   "tech": "C21",
+   "variant": true,
+   "section": "交差編み目 / 교차뜨기",
+   "aliases": [
+    "crossed dc with ch 1 between",
+    "crossed dc, ch1",
+    "長編み1目交差（あいだに鎖1目）※"
+   ]
+  },
+  {
+   "no": 61,
+   "src_row": 82,
+   "ko": "변형 한길 긴 1코 교차뜨기(오른코 뒤)",
+   "ja": "変わり長編み1目交差（右上）",
+   "en": "modified crossed dc, right over left",
+   "abbr": "mod. crossed dc (R)",
+   "en_uk": "mod. crossed tr (R)",
+   "tech": "C21",
+   "variant": true,
+   "section": "交差編み目 / 교차뜨기",
+   "aliases": [
+    "mod. crossed dc (R)",
+    "modified crossed dc, right over left",
+    "変わり長編み1目交差（右上）"
+   ]
+  },
+  {
+   "no": 62,
+   "src_row": 83,
+   "ko": "변형 한길 긴 1코 교차뜨기(왼코 뒤)",
+   "ja": "変わり長編み1目交差（左上）",
+   "en": "modified crossed dc, left over right",
+   "abbr": "mod. crossed dc (L)",
+   "en_uk": "mod. crossed tr (L)",
+   "tech": "C21",
+   "variant": true,
+   "section": "交差編み目 / 교차뜨기",
+   "aliases": [
+    "mod. crossed dc (L)",
+    "modified crossed dc, left over right",
+    "変わり長編み1目交差（左上）"
+   ]
+  },
+  {
+   "no": 63,
+   "src_row": 84,
+   "ko": "두길 긴 1코 교차뜨기",
+   "ja": "長々編み1目交差 ※",
+   "en": "crossed tr (1 st)",
+   "abbr": "crossed tr",
+   "en_uk": "crossed dtr",
+   "tech": "C21",
+   "variant": true,
+   "section": "交差編み目 / 교차뜨기",
+   "aliases": [
+    "crossed tr",
+    "crossed tr (1 st)",
+    "長々編み1目交差 ※"
+   ]
+  },
+  {
+   "no": 64,
+   "src_row": 85,
+   "ko": "변형 한길 긴 1코와 3코 교차뜨기(오른코 뒤)",
+   "ja": "変わり長編み1目と3目の交差（右上）",
+   "en": "modified 1-over-3 crossed dc, right over",
+   "abbr": "1×3 crossed dc (R)",
+   "en_uk": "1×3 crossed tr (R)",
+   "tech": "C21",
+   "variant": true,
+   "section": "交差編み目 / 교차뜨기",
+   "aliases": [
+    "1×3 crossed dc (R)",
+    "modified 1-over-3 crossed dc, right over",
+    "変わり長編み1目と3目の交差（右上）"
+   ]
+  },
+  {
+   "no": 65,
+   "src_row": 86,
+   "ko": "변형 한길 긴 1코와 3코 교차뜨기(왼코 뒤)",
+   "ja": "変わり長編み1目と3目の交差（左上）",
+   "en": "modified 1-over-3 crossed dc, left over",
+   "abbr": "1×3 crossed dc (L)",
+   "en_uk": "1×3 crossed tr (L)",
+   "tech": "C21",
+   "variant": true,
+   "section": "交差編み目 / 교차뜨기",
+   "aliases": [
+    "1×3 crossed dc (L)",
+    "modified 1-over-3 crossed dc, left over",
+    "変わり長編み1目と3目の交差（左上）"
+   ]
+  },
+  {
+   "no": 66,
+   "src_row": 89,
+   "ko": "짧은 앞걸어뜨기",
+   "ja": "細編みの表引き上げ編み目",
+   "en": "front post single crochet",
+   "abbr": "FPsc",
+   "en_uk": "front post dc (FPdc UK)",
+   "tech": "C24",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "FPsc",
+    "front post single crochet",
+    "細編みの表引き上げ編み目"
+   ]
+  },
+  {
+   "no": 67,
+   "src_row": 90,
+   "ko": "긴 앞걸어뜨기",
+   "ja": "中長編みの表引き上げ編み目",
+   "en": "front post half double crochet",
+   "abbr": "FPhdc",
+   "en_uk": "front post htr",
+   "tech": "C24",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "FPhdc",
+    "front post half double crochet",
+    "中長編みの表引き上げ編み目"
+   ]
+  },
+  {
+   "no": 68,
+   "src_row": 91,
+   "ko": "한길 긴 앞걸어뜨기",
+   "ja": "長編みの表引き上げ編み目",
+   "en": "front post double crochet",
+   "abbr": "FPdc",
+   "en_uk": "front post treble (FPtr)",
+   "tech": "C24",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "FPdc",
+    "front post double crochet",
+    "長編みの表引き上げ編み目",
+    "걸어뜨기"
+   ]
+  },
+  {
+   "no": 69,
+   "src_row": 92,
+   "ko": "짧은 뒤걸어뜨기",
+   "ja": "細編みの裏引き上げ編み目",
+   "en": "back post single crochet",
+   "abbr": "BPsc",
+   "en_uk": "back post dc",
+   "tech": "C24",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "BPsc",
+    "back post single crochet",
+    "細編みの裏引き上げ編み目"
+   ]
+  },
+  {
+   "no": 70,
+   "src_row": 93,
+   "ko": "긴 뒤걸어뜨기",
+   "ja": "中長編みの裏引き上げ編み目",
+   "en": "back post half double crochet",
+   "abbr": "BPhdc",
+   "en_uk": "back post htr",
+   "tech": "C24",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "BPhdc",
+    "back post half double crochet",
+    "中長編みの裏引き上げ編み目"
+   ]
+  },
+  {
+   "no": 71,
+   "src_row": 94,
+   "ko": "한길 긴 뒤걸어뜨기",
+   "ja": "長編みの裏引き上げ編み目",
+   "en": "back post double crochet",
+   "abbr": "BPdc",
+   "en_uk": "back post treble (BPtr)",
+   "tech": "C24",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "BPdc",
+    "back post double crochet",
+    "長編みの裏引き上げ編み目"
+   ]
+  },
+  {
+   "no": 72,
+   "src_row": 95,
+   "ko": "한길 긴 앞걸어 2코 모아뜨기",
+   "ja": "長編みの表引き上げ編みの2目一度",
+   "en": "FPdc2tog",
+   "abbr": "FPdc2tog",
+   "en_uk": "FPtr2tog",
+   "tech": "C24(변형)",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "FPdc2tog",
+    "長編みの表引き上げ編みの2目一度"
+   ]
+  },
+  {
+   "no": 73,
+   "src_row": 96,
+   "ko": "두길 긴 앞걸어 2코 모아뜨기",
+   "ja": "長々編みの表引き上げ編みの2目一度 ※",
+   "en": "FPtr2tog",
+   "abbr": "FPtr2tog",
+   "en_uk": "FPdtr2tog",
+   "tech": "C24(변형)",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "FPtr2tog",
+    "長々編みの表引き上げ編みの2目一度 ※"
+   ]
+  },
+  {
+   "no": 74,
+   "src_row": 97,
+   "ko": "한길 긴 앞걸어 1코 교차뜨기(사이에 사슬 1코)",
+   "ja": "長編みの表引き上げ編み1目交差（あいだに鎖1目）",
+   "en": "crossed FPdc with ch 1 between",
+   "abbr": "crossed FPdc, ch1",
+   "en_uk": "crossed FPtr, ch1",
+   "tech": "C24(변형)",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "crossed FPdc with ch 1 between",
+    "crossed FPdc, ch1",
+    "長編みの表引き上げ編み1目交差（あいだに鎖1目）"
+   ]
+  },
+  {
+   "no": 75,
+   "src_row": 98,
+   "ko": "한길 긴 앞걸어 2코 늘려뜨기",
+   "ja": "長編みの表引き上げ編みを2目編み入れる",
+   "en": "2 FPdc in same st",
+   "abbr": "2 FPdc in 1",
+   "en_uk": "2 FPtr in 1",
+   "tech": "C24(변형)",
+   "variant": true,
+   "section": "引き上げ編み目 / 걸어뜨기",
+   "aliases": [
+    "2 FPdc in 1",
+    "2 FPdc in same st",
+    "長編みの表引き上げ編みを2目編み入れる"
+   ]
+  },
+  {
+   "no": 76,
+   "src_row": 101,
+   "ko": "Y자뜨기",
+   "ja": "Y字編み目",
+   "en": "Y-stitch",
+   "abbr": "Y-st",
+   "en_uk": "Y-st",
+   "tech": "C33",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "Y-st",
+    "Y-stitch",
+    "Y字編み目"
+   ]
+  },
+  {
+   "no": 77,
+   "src_row": 102,
+   "ko": "역Y자뜨기(실 2회 감고 시작)",
+   "ja": "逆Y字編み目（最初に糸を巻く回数が2回）",
+   "en": "inverted Y-stitch (yo 2 to start)",
+   "abbr": "inv. Y-st (yo2)",
+   "en_uk": "inverted Y-st",
+   "tech": "C33",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "inv. Y-st (yo2)",
+    "inverted Y-stitch (yo 2 to start)",
+    "逆Y字編み目（最初に糸を巻く回数が2回）"
+   ]
+  },
+  {
+   "no": 78,
+   "src_row": 103,
+   "ko": "역Y자뜨기(실 3회 감고 시작)",
+   "ja": "逆Y字編み目（最初に糸を巻く回数が3回）",
+   "en": "inverted Y-stitch (yo 3 to start)",
+   "abbr": "inv. Y-st (yo3)",
+   "en_uk": "inverted Y-st",
+   "tech": "C33",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "inv. Y-st (yo3)",
+    "inverted Y-stitch (yo 3 to start)",
+    "逆Y字編み目（最初に糸を巻く回数が3回）"
+   ]
+  },
+  {
+   "no": 79,
+   "src_row": 104,
+   "ko": "한길 긴 X자뜨기(실 2회 감고 시작)",
+   "ja": "長編みのクロス編み目（最初に糸を巻く回数が2回）",
+   "en": "X-stitch / crossed dc (yo 2 to start)",
+   "abbr": "X-st (yo2)",
+   "en_uk": "X-st",
+   "tech": "C34",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "X-st (yo2)",
+    "X-stitch / crossed dc (yo 2 to start)",
+    "長編みのクロス編み目（最初に糸を巻く回数が2回）"
+   ]
+  },
+  {
+   "no": 80,
+   "src_row": 105,
+   "ko": "한길 긴 X자뜨기(실 3회 감고 시작)",
+   "ja": "長編みのクロス編み目（最初に糸を巻く回数が3回）",
+   "en": "X-stitch / crossed dc (yo 3 to start)",
+   "abbr": "X-st (yo3)",
+   "en_uk": "X-st",
+   "tech": "C34",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "X-st (yo3)",
+    "X-stitch / crossed dc (yo 3 to start)",
+    "長編みのクロス編み目（最初に糸を巻く回数が3回）"
+   ]
+  },
+  {
+   "no": 81,
+   "src_row": 106,
+   "ko": "두길 긴 X자뜨기",
+   "ja": "長々編みのクロス編み目",
+   "en": "treble X-stitch",
+   "abbr": "tr X-st",
+   "en_uk": "dtr X-st",
+   "tech": "C34",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "tr X-st",
+    "treble X-stitch",
+    "長々編みのクロス編み目"
+   ]
+  },
+  {
+   "no": 82,
+   "src_row": 107,
+   "ko": "다리 달린 한길 긴 5코 구슬뜨기",
+   "ja": "長編み5目の足つき玉編み目",
+   "en": "5-dc cluster with stem (footed cluster)",
+   "abbr": "footed dc5-cl",
+   "en_uk": "footed tr5-cl",
+   "tech": "C19(변형)",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "5-dc cluster with stem (footed cluster)",
+    "footed dc5-cl",
+    "長編み5目の足つき玉編み目"
+   ]
+  },
+  {
+   "no": 83,
+   "src_row": 108,
+   "ko": "역Y자와 Y자의 조합(실 3회 감고 시작)",
+   "ja": "逆Y字とY字を組み合わせた編み目（最初に糸を巻く回数が3回）",
+   "en": "inverted-Y + Y combination stitch (yo 3)",
+   "abbr": "inv.Y+Y (yo3)",
+   "en_uk": "inverted-Y+Y",
+   "tech": "C33",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "inv.Y+Y (yo3)",
+    "inverted-Y + Y combination stitch (yo 3)",
+    "逆Y字とY字を組み合わせた編み目（最初に糸を巻く回数が3回）"
+   ]
+  },
+  {
+   "no": 84,
+   "src_row": 109,
+   "ko": "삼각뜨기",
+   "ja": "三角編み目",
+   "en": "triangle stitch",
+   "abbr": "triangle st",
+   "en_uk": "triangle st",
+   "tech": "C35",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "triangle st",
+    "triangle stitch",
+    "三角編み目"
+   ]
+  },
+  {
+   "no": 85,
+   "src_row": 111,
+   "ko": "역Y자와 Y자의 조합(실 4회 감고 시작)",
+   "ja": "逆Y字とY字を組み合わせた編み目（最初に糸を巻く回数が4回）",
+   "en": "inverted-Y + Y combination stitch (yo 4)",
+   "abbr": "inv.Y+Y (yo4)",
+   "en_uk": "inverted-Y+Y",
+   "tech": "C33",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "inv.Y+Y (yo4)",
+    "inverted-Y + Y combination stitch (yo 4)",
+    "逆Y字とY字を組み合わせた編み目（最初に糸を巻く回数が4回）"
+   ]
+  },
+  {
+   "no": 86,
+   "src_row": 112,
+   "ko": "칠보뜨기",
+   "ja": "七宝編み目",
+   "en": "Solomon's knot (lover's knot)",
+   "abbr": "Sk / lk",
+   "en_uk": "Solomon's knot",
+   "tech": "C36",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "Sk / lk",
+    "Solomon's knot (lover's knot)",
+    "七宝編み目"
+   ]
+  },
+  {
+   "no": 87,
+   "src_row": 113,
+   "ko": "감아뜨기(7회 감기)",
+   "ja": "巻き編み目（7回巻き）",
+   "en": "bullion stitch (7 wraps)",
+   "abbr": "bullion (7)",
+   "en_uk": "bullion / roll st",
+   "tech": "C27",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "bullion (7)",
+    "bullion stitch (7 wraps)",
+    "巻き編み目（7回巻き）",
+    "코일뜨기"
+   ]
+  },
+  {
+   "no": 88,
+   "src_row": 114,
+   "ko": "짧은 링뜨기",
+   "ja": "細編みのリング編み目",
+   "en": "loop stitch (sc)",
+   "abbr": "loop sc",
+   "en_uk": "loop st (dc)",
+   "tech": "C30",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "loop sc",
+    "loop stitch (sc)",
+    "細編みのリング編み目",
+    "링 짧은뜨기"
+   ]
+  },
+  {
+   "no": 89,
+   "src_row": 115,
+   "ko": "한길 긴 링뜨기",
+   "ja": "長編みのリング編み目",
+   "en": "loop stitch (dc)",
+   "abbr": "loop dc",
+   "en_uk": "loop st (tr)",
+   "tech": "C30(변형)",
+   "variant": true,
+   "section": "編み目のバリエーション / 응용 코",
+   "aliases": [
+    "loop dc",
+    "loop stitch (dc)",
+    "長編みのリング編み目"
+   ]
+  },
+  {
+   "no": 90,
+   "src_row": 121,
+   "ko": "되돌아 짧은뜨기",
+   "ja": "バック細編み目",
+   "en": "reverse single crochet (crab stitch)",
+   "abbr": "rev sc / crab st",
+   "en_uk": "crab st (reverse dc)",
+   "tech": "C37",
+   "variant": true,
+   "section": "細編みのバリエーション / 짧은뜨기 응용",
+   "aliases": [
+    "rev sc / crab st",
+    "reverse single crochet (crab stitch)",
+    "バック細編み目"
+   ]
+  },
+  {
+   "no": 91,
+   "src_row": 122,
+   "ko": "바늘 돌려서 짧은뜨기",
+   "ja": "ねじり細編み目",
+   "en": "twisted single crochet",
+   "abbr": "twisted sc",
+   "en_uk": "twisted dc",
+   "tech": "C37",
+   "variant": true,
+   "section": "細編みのバリエーション / 짧은뜨기 응용",
+   "aliases": [
+    "twisted sc",
+    "twisted single crochet",
+    "ねじり細編み目"
+   ]
+  },
+  {
+   "no": 92,
+   "src_row": 123,
+   "ko": "변형 되돌아 짧은뜨기(한 코 줍기)",
+   "ja": "変わりバック細編み目（よろけ細編み）2本拾い",
+   "en": "modified reverse sc — insert under both loops",
+   "abbr": "mod. rev sc (2 loops)",
+   "en_uk": "mod. crab st",
+   "tech": "C37",
+   "variant": true,
+   "section": "細編みのバリエーション / 짧은뜨기 응용",
+   "aliases": [
+    "mod. rev sc (2 loops)",
+    "modified reverse sc — insert under both loops",
+    "変わりバック細編み目（よろけ細編み）2本拾い"
+   ]
+  },
+  {
+   "no": 93,
+   "src_row": 124,
+   "ko": "변형 되돌아 짧은뜨기(반 코 줍기)",
+   "ja": "変わりバック細編み目（よろけ細編み）1本拾い",
+   "en": "modified reverse sc — insert under one loop",
+   "abbr": "mod. rev sc (1 loop)",
+   "en_uk": "mod. crab st",
+   "tech": "C37",
+   "variant": true,
+   "section": "細編みのバリエーション / 짧은뜨기 응용",
+   "aliases": [
+    "mod. rev sc (1 loop)",
+    "modified reverse sc — insert under one loop",
+    "変わりバック細編み目（よろけ細編み）1本拾い"
+   ]
+  },
+  {
+   "no": 94,
+   "src_row": 125,
+   "ko": "실 돌려서 짧은뜨기",
+   "ja": "糸かけ細編み目",
+   "en": "yarn-over single crochet (yo before inserting hook)",
+   "abbr": "yo-sc",
+   "en_uk": "yo-dc",
+   "tech": "C37",
+   "variant": true,
+   "section": "細編みのバリエーション / 짧은뜨기 응용",
+   "aliases": [
+    "yarn-over single crochet (yo before inserting hook)",
+    "yo-sc",
+    "糸かけ細編み目"
+   ]
+  }
+ ]
+}

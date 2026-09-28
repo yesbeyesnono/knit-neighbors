@@ -95,7 +95,7 @@ def S_cluster(kind, n, space=False, popcorn=False, puff_var=False, leg=False):
             thin.append(seg(x - 2.1, y + 1.3, x + 2.1, y - 1.3))
     out = ''
     if popcorn: d.append(seg(24 - half * 0.55, top, 24 + half * 0.55, top)); out += ell(24, 7.5, 5.2, 3.2)
-    elif puff_var: d += [seg(24, top, 24, 9), seg(17, 9, 31, 9), seg(19.5, 15, 28.5, 15)]
+    elif puff_var: d += [seg(24 - 7, top, 24 + 7, top), seg(24, top, 24, 9), seg(17, 9, 31, 9)]
     elif leg: d += post(24, top, 24, 7, hn, bar=7, s0=0.5, slash=3.6)
     else: d.append(seg(24 - 8, top, 24 + 8, top))
     return 48, path(d) + (path(thin, '1.6') if thin else '') + out
@@ -155,9 +155,9 @@ def S_y(kind='Y', wraps=2, arms_ch=0, combo=False, w=48):
 
 def S_triangle():
     d = [];  # 높이가 차례로 줄어드는 기둥들이 위 한 점에서 모임
-    for i, bx in enumerate([9, 17, 25, 33, 41]): d += post(bx, 43, 38, 7, 0, bar=0) + [tick(bx, 43, 38, 7, 0.45, 3.2)] * (1 if i < 4 else 0)
-    return 48, path(d + [seg(32, 7, 44, 7)])
-def S_solomon(): return 48, '<path d="M24 14 C34 22 30 38 24 44 C18 38 14 22 24 14 Z"/>' + path(xmark(24, 9, 3.6))
+    for i, bx in enumerate([9, 17, 25, 33, 41]): d += post(bx, 43, 10, 7, 0, bar=0) + [tick(bx, 43, 10, 7, 0.45, 3.2)] * (1 if i > 0 else 0)
+    return 48, path(d + [seg(4, 7, 16, 7)])
+def S_solomon(): return 48, '<path d="M24 17 C31 21 32 33 24 45 C16 33 17 21 24 17 Z"/>' + path([seg(24, 17, 24, 9)] + xmark(24, 6.5, 3.4))
 def S_bullion(): return 48, path(post(24, 42, 24, 8, 0, bar=9)) + ell(24, 20, 6.5, 3.2) + ell(24, 25.5, 6.5, 3.2) + ell(24, 31, 6.5, 3.2)
 def S_ring(kind):
     if kind == 'sc': return 48, '<path d="M13 12 13 28 C13 40 35 40 35 28 L35 12"/>' + path(xmark(24, 22, 5))
@@ -183,7 +183,7 @@ def S_into_sc(on_leg):
     """짧은뜨기와 같은 코에 / 짧은뜨기의 다리에 한길 긴 3코"""
     w = 72; bx, by = (16, 40) if not on_leg else (20, 33); d = xmark(14, 38, 5.2)
     for tx, ty in [(30, 8), (46, 13), (58, 24)]: d += post(bx, by, tx, ty, 1, bar=4.2, s0=0.3, slash=3.4)
-    return w, path(d)
+    return w, path(d) + ell(60, 9, 5, 2.8, 35) + ell(67, 16, 5, 2.8, 60)
 
 # No(마스터표 번호) → (라이브러리 키, 그리기). 같은 JIS 기호를 쓰는 항목은 같은 그림(뜨는 법만 다름)
 SPEC = {
