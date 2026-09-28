@@ -64,7 +64,7 @@
 - 2단계(2026-09-28): 애매한 기호 10종을 일본 사이트(日本ヴォーグ社 표지·amimono.me·ごしょう産業 기초·TORUYURI)에서 모양 확인 후 생성기 수정(삼각뜨기 꼭짓점 왼쪽, 칠보 물방울+×, 변형 구슬 줄기+가로대, 39·40 사슬). 웹 이미지는 가져오지 않고 모양만 대조. 헤드리스 크롬(`chrome.exe --headless=new --screenshot`)으로 렌더 확인(브라우저 패널이 숨겨져 있으면 스크린샷이 안 됨)
 - **명칭 통일표 v3**: `python tools/build-names-v3.py` → `resources/symbols/names_v3.json` + `명칭통일_v3.md`. 바꾸는 이름 7(C10 이랑·줄기, C12 긴, C13 한길 긴, C15 솔잎(셸), C18 두길 긴, C27 감아(코일), C30 짧은 링) + 새 기법 후보 8(C31 세길·C32 네길·C33 Y/역Y·C34 X자·C35 삼각·C36 칠보·C37 되돌아 짧은뜨기·C38 변형 구슬) — 단계·선행은 초안. 검수 요청 파일 `python tools/build-symbol-review-share.py` → `resources/symbols/ref/코바늘기호94_검수요청.html`(원본 이미지 포함이라 저장소 밖, 담당자 1인 검수용)
 - **3단계(2026-09-28 완료, 대표 확정)**: 사전 v1.4 = `python tools/build-dict-v14.py` → `resources/symbols/technique_dictionary_v1.4.json`·`기법사전_v1.4.md`(+knitup 폴더 복사). 코바늘 30→38(새 기법 C31~C38), 대바늘 **B안**(메리야스→1, 줄무늬 배색→3, 아란·의류 구성→5, K06→K01·K14→K13 '모아뜨기' 합침, hidden+merged_into). 분포 코 4·8·8·9·9 / 대 6·6·8·4·4. DB 반영 마이그레이션 `techniques_v14`(schema 56). 앱: `SYMLIB` v1.2(코바늘 94+대바늘) · `TECH_DRAW`(대표 기호) · `TECH_VARIANTS`(기법 칸 '기호 N' 배지 → `openTechVariants` 시트) · `loadTech`가 hidden 제외. 기법 이름·단계는 DB techniques 가 원본(앱에 하드코딩 없음)
-- 다음: 담당자 검수 결과 반영(기호 모양) → 새 기법 8의 단계·선행 대표 확인 → 사전 v1.4 확정판
+- **사전 v1.4 확정(2026-09-29 대표)**: 새 기법 8의 단계·선행 그대로 확정, TestFlight 확인 완료. 남은 것: 담당자 기호 검수 결과 반영(기호 모양만)
 
 ## 보안 원칙 (2026-09-28, KG이니시스 가맹점 권고 참고)
 - **값이 곧 권리인 것은 서버가 계산**(점수·레벨·Index·자격·확정·결제 금액). 클라이언트가 보낸 숫자·URL은 믿지 않는다. 알림 딥링크는 서버가 만든 `notifications.link`만, 앱 `openLink`는 정해진 종류만 연다

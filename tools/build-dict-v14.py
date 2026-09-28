@@ -27,7 +27,7 @@ KVAR = {'K01': [('cast_on', '기본 코잡기', '作り目'), ('long_tail', '롱
 
 # ---- 코바늘 새 기법 확정(후보→정식), 정렬
 for t in techs.values():
-    if t.get('status') == 'candidate': t['status'] = 'new_in_1.4'
+    if t.get('status') == 'candidate': t['status'] = 'new_in_1.4'   # 단계·선행 2026-09-29 대표 확정
 order = {'crochet': 0, 'knitting': 1}
 alive = [t for t in techs.values() if not t.get('hidden')]
 alive.sort(key=lambda t: (order[t['craft']], t['level'], t['id']))
@@ -61,7 +61,7 @@ PRIMARY = {'C01': 'chain', 'C02': 'sc', 'C03': 'slip', 'C05': 'magic_ring', 'C07
            'C19': 'dc3_cl', 'C20': 'dc5_pc', 'C21': 'cross_dc', 'C24': 'fpdc', 'C27': 'bullion7', 'C30': 'sc_loop', 'C31': 'dtr', 'C32': 'trtr', 'C33': 'y_st', 'C34': 'x_st_2', 'C35': 'triangle', 'C36': 'solomon', 'C37': 'rsc', 'C38': 'hdc3_puff',
            'K02': 'knit', 'K03': 'purl', 'K04': 'bind_off', 'K12': 'yo', 'K13': 'k2tog', 'K15': 'm1l', 'K17': 'k_tbl', 'K18': 'cable', 'K21': 'lace', 'K22': 'cdd', 'K24': 'stranded', 'K25': 'intarsia'}
 
-out = dict(version='1.4', updated='2026-09-28', basis='v1.3 + 코바늘 명칭 통일(한국 관행)·새 기법 8(C31~C38) + 대바늘 B안(메리야스→1, 줄무늬 배색→3, 아란무늬·의류 구성→5, K06→K01·K14→K13 변형 합침)',
+out = dict(version='1.4', updated='2026-09-29', basis='v1.3 + 코바늘 명칭 통일(한국 관행)·새 기법 8(C31~C38) + 대바늘 B안(메리야스→1, 줄무늬 배색→3, 아란무늬·의류 구성→5, K06→K01·K14→K13 변형 합침)',
            techniques=sorted(techs.values(), key=lambda t: t['sort']), variants=variants, primary_symbol=PRIMARY)
 json.dump(out, io.open(os.path.join(SYM, 'technique_dictionary_v1.4.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
@@ -70,9 +70,9 @@ def dist(craft):
     for t in alive:
         if t['craft'] == craft: d[t['level']] = d.get(t['level'], 0) + 1
     return ' · '.join('Lv.%d ×%d' % (l, d.get(l, 0)) for l in range(1, 6))
-md = ['# knitup 기법 사전 v1.4', '', '작성일: 2026-09-28 (v1.3: 2026-09-02) · 데이터: technique_dictionary_v1.4.json', '', '## 0. v1.4 변경 요약', '',
+md = ['# knitup 기법 사전 v1.4', '', '작성일: 2026-09-29 (v1.3: 2026-09-02) · 데이터: technique_dictionary_v1.4.json', '', '## 0. v1.4 변경 요약', '',
       '- **한국어 명칭 통일(대표 확정)**: 中長編み=긴뜨기 · 長編み=한길 긴뜨기 · 長々編み=두길 긴뜨기 · 三つ巻き=세길 · 四つ巻き=네길. 옛 이름은 aliases 로 보존(검색·기법 후보 AI 매칭)',
-      '- **코바늘 새 기법 8**: C31 세길 긴뜨기 · C32 네길 긴뜨기 · C33 Y자·역Y자뜨기 · C34 X자뜨기 · C35 삼각뜨기 · C36 칠보뜨기 · C37 되돌아 짧은뜨기 · C38 변형 구슬뜨기(퍼프). 단계·선행은 초안',
+      '- **코바늘 새 기법 8**: C31 세길 긴뜨기 · C32 네길 긴뜨기 · C33 Y자·역Y자뜨기 · C34 X자뜨기 · C35 삼각뜨기 · C36 칠보뜨기 · C37 되돌아 짧은뜨기 · C38 변형 구슬뜨기(퍼프). 단계·선행 2026-09-29 대표 확정',
       '- **코바늘 기호 94종**(JIS 마스터표) → 기법별 변형 기호로 연결(`variants`). 기법표는 기법 단위만, 높이·코 수·코 아래에서 변형은 ID 없이 기호로',
       '- **대바늘 B안(대표 확정)**: 메리야스뜨기→Lv.1, 줄무늬 배색→Lv.3, 아란무늬·의류 구성→Lv.5. 롱테일 캐스트온(K06)→기본 코잡기(K01) 변형, 오른코 모아뜨기(K14)→**모아뜨기(K13)** 변형(人/入). K06·K14 는 hidden + merged_into (옛 데이터 호환)',
       '- 분포: 코바늘 ' + dist('crochet') + ' / 대바늘 ' + dist('knitting'), '',
