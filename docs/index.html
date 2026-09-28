@@ -1268,7 +1268,7 @@ async function loginTest(n){
   const { error } = await sb.auth.signInWithPassword({ email:`tester${n}@example.com`, password:'knit1234' });
   if(error) toast('로그인 실패: '+error.message);
 }
-async function logout(){ await sb.auth.signOut(); }
+async function logout(){ await pushUnregister(); await sb.auth.signOut(); }
 
 let initStarted=false;
 sb.auth.onAuthStateChange(async (ev, session) => {
@@ -1283,7 +1283,7 @@ sb.auth.onAuthStateChange(async (ev, session) => {
   initStarted=true;
   await loadMe();
   if(!myProfile?.onboarded_at){ openOnboard(false); }
-  else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); }
+  else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); else setTimeout(pushSetup, 1500); }
 });
 function openConsent(){
   openSheet(`<b style="font-size:1.05rem">이용약관 동의</b>
@@ -1350,7 +1350,7 @@ function renderObReady(){
   $('#obRing').className='ring'+(done?'':' wait'); $('#obRing').textContent = done?'✓':'3'; $('#obFootT').textContent = done?'4단계 중 4단계':'4단계 중 3단계'; $('#obFootS').textContent = done?'모두 준비됐어요':'내 뜨개 단계만 남았어요'; $('#obStart').disabled=!done;
 }
 function obSkills(){ obReturn=true; openSlides(()=>openSkills()); }
-function obStart(){ if(!(myProfile?.skills||[]).length) return toast('내 뜨개 단계를 먼저 체크해 주세요'); obReturn=false; go('map'); supCheckIn().then(maybeSupporterPrompt); }
+function obStart(){ if(!(myProfile?.skills||[]).length) return toast('내 뜨개 단계를 먼저 체크해 주세요'); obReturn=false; go('map'); setTimeout(pushSetup, 2500); supCheckIn().then(maybeSupporterPrompt); }
 async function pickAvatar(file){
   if(!file) return; try{
     const blob=await shrinkImage(file, 640); const path=`${me.id}/${Date.now()}.jpg`;
@@ -2302,6 +2302,38 @@ async function applyReferrer(){
     if(data?.ok){ toast(`${data.inviter}님과 연결됐어요`); localStorage.removeItem('kn_ref'); }
     else if(data?.error==='NOT_FOUND') toast('추천인을 찾지 못했어요. 닉네임을 확인해 주세요'); }catch(e){}
 }
+
+// ============ 앱 푸시 알림 (APNs · @capacitor/push-notifications) ============
+// 흐름: 안내 시트(1회) → iOS 권한 창 → 토큰을 register_device_token 으로 저장 → 서버가 notifications insert 때 push-send 로 발송
+// 알림 문구는 서버(push_payload)가 만들고, 앱은 누르면 활동 화면(🔔)으로 간다. 웹에서는 아무것도 하지 않는다
+const PushN = isNative && CAP?.Plugins?.PushNotifications ? CAP.Plugins.PushNotifications : null;
+let pushToken = null;
+async function pushSetup(){
+  if(!PushN || !me || !myProfile?.onboarded_at) return;
+  try{
+    const perm = await PushN.checkPermissions();
+    if(perm.receive === 'granted') return pushRegister();
+    if(perm.receive === 'denied') return;                       // 설정 앱에서 켜야 함 — 설정 화면에서 안내
+    const asked = localStorage.getItem('kn_push_asked'); if(asked) return;   // 안내 시트는 한 번만
+    localStorage.setItem('kn_push_asked', '1');
+    openSheet(`<b style="font-size:1.05rem">알림을 받아 볼까요?</b><p class="muted" style="margin:0;font-size:.9rem;line-height:1.5">답글·친구 신청·모임 소식·이벤트 선정처럼 놓치면 아쉬운 것만 보내요. 광고 알림은 없어요. iOS 설정에서 언제든 끌 수 있어요.</p>
+      <button class="btn" onclick="closeSheet();pushAsk()">알림 받기</button><button class="btn o" onclick="closeSheet()">나중에</button>`);
+  }catch(e){}
+}
+async function pushAsk(){ if(!PushN) return; try{ const r = await PushN.requestPermissions(); if(r.receive === 'granted') pushRegister(); else toast('설정 › 뜨개동네 › 알림에서 켤 수 있어요'); }catch(e){} }
+function pushRegister(){ if(!PushN) return; PushN.register().catch(()=>{}); }
+if(PushN){
+  PushN.addListener('registration', async ({ value }) => {
+    pushToken = value;
+    const { error } = await sb.rpc('register_device_token', { p_token:value, p_platform:'ios', p_bundle:(window.KN_SCHEME==='knitneighborslab'?'kr.co.firmtech.knitneighbors.lab':'kr.co.firmtech.knitneighbors'), p_version:APP_VERSION });
+    if(error) console.warn('push token', error.message);
+  });
+  PushN.addListener('registrationError', e => console.warn('push reg error', e));
+  PushN.addListener('pushNotificationReceived', n => { refreshBadge(); if(n?.body) toast(n.body); });   // 앱을 보고 있을 때 온 알림
+  PushN.addListener('pushNotificationActionPerformed', () => { setTimeout(()=>{ if(me && myProfile?.onboarded_at) openActivity(); }, 300); });   // 알림을 눌러 앱이 열렸을 때
+}
+async function pushUnregister(){ if(!PushN || !pushToken) return; try{ await sb.rpc('unregister_device_token', { p_token:pushToken }); }catch(e){} }
+async function pushStatusText(){ if(!PushN) return ''; try{ const p = await PushN.checkPermissions(); return p.receive==='granted' ? '켜짐' : p.receive==='denied' ? '꺼짐 · iOS 설정에서 켤 수 있어요' : '아직 안 정함'; }catch(e){ return ''; } }
 
 // ============ 채팅 ============
 const SUPPORT_ID = 'e120eb67-b254-4008-92d8-08c95c821e9e';   // 뜨개동네 지기(운영진) 계정
@@ -3969,7 +4001,15 @@ async function loadMyMeetups(el){
     <div class="msec">참여하는 모임 ${upJoin.length}</div>${upJoin.length?upJoin.map(m=>row(m,false)).join(''):'<div class="empty" style="padding:20px">참여 예정인 모임이 없어요</div>'}
     <div class="msec">완료 ${past.length}</div>${past.length?past.map(m=>row(m,true)).join(''):'<div class="empty" style="padding:20px">아직 완료한 모임이 없어요</div>'}`;
 }
-function openSettings(){
+async function pushSettingsRow(){
+  if(!PushN) return; const p = await PushN.checkPermissions();
+  if(p.receive==='granted'){ pushRegister(); openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 켜져 있어요. 끄려면 iOS 설정 › 뜨개동네 › 알림에서 바꿔 주세요.</p><button class="btn o" onclick="closeSheet();pushTest()">테스트 알림 보내기</button>`); }
+  else if(p.receive==='denied') openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 꺼져 있어요. iOS 설정 › 뜨개동네 › 알림에서 켜 주세요.</p>`);
+  else pushAsk();
+}
+async function pushTest(){ closeSheet(); const { data, error } = await sb.functions.invoke('push-send', { body:{ route:'test' } }); if(error) return toast(error.message); toast(data?.sent ? '보냈어요 · 잠시 뒤 알림이 와요' : (data?.error==='no_apns_key' ? '서버에 APNs 키가 아직 없어요' : '등록된 기기가 없어요')); }
+function openSettings(){ openSettingsInner(); pushStatusText().then(t=>{ const e=$('#pushStat'); if(e) e.textContent=t; }); }
+function openSettingsInner(){
   const p=myProfile||{};
   const handle=[p.dong_name||'동네 미설정', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
   openSheet(`<b style="font-size:1.05rem">설정</b>
@@ -3981,6 +4021,7 @@ function openSettings(){
     </div>
     <div class="sgrp">내 뜨개</div>
     <div class="slist">
+      ${PushN?`<button class="srow" onclick="closeSheet();pushSettingsRow()"><span>앱 알림 <span class="muted" id="pushStat"></span></span><span class="car">›</span></button>`:''}
       <button class="srow" onclick="closeSheet();openSkills()"><span>내 뜨개 단계 <span class="muted">${lvShort(p)||'아직 없음'}</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openSlides()"><span>뜨개 단계 설명</span><span class="car">›</span></button>
       ${FULL?`<button class="srow" onclick="openSavedPatterns()"><span>찜한 도안</span><span class="car">›</span></button>`:''}

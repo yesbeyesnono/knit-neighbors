@@ -1240,3 +1240,13 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   데이터 원본: resources/symbols/technique_dictionary_v1.4.json (tools/build-dict-v14.py) · 기호 라이브러리 v1.2 = 앱 SYMLIB/TECH_DRAW/TECH_VARIANTS
 --   (techniques_v14_levels) compute_skill_level 이 hidden 기법을 제외. profiles.skills 의 K06→K01·K14→K13 치환 후 level_crochet/level_knit 전원 재계산. sort 는 generated(level*100+번호)라 마이그레이션에서 넣지 않음
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 57. 앱 푸시 알림 APNs (마이그레이션 push_device_tokens) — 2026-09-29
+--   device_tokens(token PK, profile_id, platform, bundle=APNs 토픽(KOAP/Lab), app_version, last_seen, disabled_at, fail_count) · RLS 본인 select, 쓰기는 함수만
+--   register_device_token(token, platform, bundle, version) · unregister_device_token(token) [authenticated] · push_mark(token, ok, dead) · push_payload(id) [service_role]
+--   트리거 notifications_push(after insert) → pg_net → Edge Function `push-send`(x-jigi-secret). 실패해도 알림 저장은 막지 않음. 기기 토큰이 없는 회원은 호출 안 함
+--   push_payload: 앱 활동 화면과 같은 문구(닉네임+kind 문장, notice/supporter 는 snippet, 이벤트는 제목 '이벤트'), badge = 안 읽은 알림 수
+--   Edge Function push-send(supabase/functions/push-send): APNs HTTP/2 + 제공자 JWT(ES256, WebCrypto). 시크릿 APNS_KEY(.p8 전체)·APNS_KEY_ID·APNS_TEAM_ID·(APNS_SANDBOX=1). route 'test' = 로그인 회원이 자기 기기로 테스트, 'status'
+--   iOS: @capacitor/push-notifications 8, App.entitlements(aps-environment production), AppDelegate 에 didRegister/didFail 전달. Apple Developer › Identifiers 에서 두 App ID(…knitneighbors, …knitneighbors.lab)에 Push Notifications 켜야 프로파일에 들어감
+-- ---------------------------------------------------------------
