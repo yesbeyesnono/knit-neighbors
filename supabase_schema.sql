@@ -1230,3 +1230,12 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   trait: 활동 3개 미만 new, 최고−2등 < 15 balanced, 아니면 최고 축. refresh_my_index()(본인, 마이 열 때) · refresh_all_trait_index() 크론 trait-index-nightly 15:40 UTC
 --   앱: 마이 idxcard(삼각 레이더 C/H/S + 막대) · 프로필 idxMini + 칩(MBTI 옆) · openIndexInfo 설명. 서포터즈 점수와 별개
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 56. 기법 사전 v1.4 (마이그레이션 techniques_v14) — 2026-09-28 대표 확정
+--   techniques 추가 컬럼: name_ja, name_en, abbr, aliases text[], hidden, merged_into. 읽기 전용(anon·authenticated 쓰기 grant 회수)
+--   코바늘: 한글 명칭 통일(中長編み 긴뜨기 · 長編み 한길 긴뜨기 · 長々編み 두길 긴뜨기 · C10 이랑뜨기 · C15 솔잎뜨기 · C27 감아뜨기 · C30 짧은 링뜨기) + 새 기법 C31~C38(세길·네길·Y/역Y·X자·삼각·칠보·되돌아 짧은뜨기·변형 구슬)
+--   대바늘 B안: K07→Lv1, K11→Lv3, K26·K28→Lv5. K06(롱테일)→K01, K14(오른코 모아뜨기)→K13 '모아뜨기'로 합침 — hidden=true, merged_into. ID·행은 지우지 않음(profiles.skills·works.techniques 옛 값 호환, 앱은 hidden 제외)
+--   technique_aliases: 옛 이름 + JIS 기호 94종의 한·일·영 이름(소문자·공백 제거) → 기법 ID. authenticated 읽기 정책 추가(기법 후보 AI·앱 검색용)
+--   데이터 원본: resources/symbols/technique_dictionary_v1.4.json (tools/build-dict-v14.py) · 기호 라이브러리 v1.2 = 앱 SYMLIB/TECH_DRAW/TECH_VARIANTS
+-- ---------------------------------------------------------------

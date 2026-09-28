@@ -25,7 +25,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~47, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~56, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`). main 푸시 → GitHub 웹훅(id 679395520) → `ios-public` 자동 빌드 → TestFlight 'KOAP'(V2). Lab은 `lab-*` 태그. 자세한 내용은 위 '에디션' 절
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
@@ -63,7 +63,8 @@
 - **대바늘 단계 재배치(2026-09-27 검토, 대표: '나중에')**: 지금 5·10·7·6·2. 제안 A(옮기기만): 메리야스뜨기→입문, 줄무늬 배색→중급, 아란무늬·의류 구성→전문 = 6·8·8·4·4. 제안 B(A+변형 합치기: 롱테일→기본 코잡기 변형, 왼/오른 모아뜨기→'모아뜨기' 하나, 옛 ID 별칭) = 6·6·8·4·4. 코바늘 94종 정리 때 함께
 - 2단계(2026-09-28): 애매한 기호 10종을 일본 사이트(日本ヴォーグ社 표지·amimono.me·ごしょう産業 기초·TORUYURI)에서 모양 확인 후 생성기 수정(삼각뜨기 꼭짓점 왼쪽, 칠보 물방울+×, 변형 구슬 줄기+가로대, 39·40 사슬). 웹 이미지는 가져오지 않고 모양만 대조. 헤드리스 크롬(`chrome.exe --headless=new --screenshot`)으로 렌더 확인(브라우저 패널이 숨겨져 있으면 스크린샷이 안 됨)
 - **명칭 통일표 v3**: `python tools/build-names-v3.py` → `resources/symbols/names_v3.json` + `명칭통일_v3.md`. 바꾸는 이름 7(C10 이랑·줄기, C12 긴, C13 한길 긴, C15 솔잎(셸), C18 두길 긴, C27 감아(코일), C30 짧은 링) + 새 기법 후보 8(C31 세길·C32 네길·C33 Y/역Y·C34 X자·C35 삼각·C36 칠보·C37 되돌아 짧은뜨기·C38 변형 구슬) — 단계·선행은 초안. 검수 요청 파일 `python tools/build-symbol-review-share.py` → `resources/symbols/ref/코바늘기호94_검수요청.html`(원본 이미지 포함이라 저장소 밖, 담당자 1인 검수용)
-- 다음: 담당자 검수 결과 반영 → 사전 v1.4·라이브러리 v1.2 확정 → 앱 반영(techniques 이름 변경+technique_aliases, 새 기법 추가, 기법을 누르면 변형 기호 펼쳐 보기, 94종 명칭을 기법 후보 AI 별칭으로)
+- **3단계(2026-09-28 완료, 대표 확정)**: 사전 v1.4 = `python tools/build-dict-v14.py` → `resources/symbols/technique_dictionary_v1.4.json`·`기법사전_v1.4.md`(+knitup 폴더 복사). 코바늘 30→38(새 기법 C31~C38), 대바늘 **B안**(메리야스→1, 줄무늬 배색→3, 아란·의류 구성→5, K06→K01·K14→K13 '모아뜨기' 합침, hidden+merged_into). 분포 코 4·8·8·9·9 / 대 6·6·8·4·4. DB 반영 마이그레이션 `techniques_v14`(schema 56). 앱: `SYMLIB` v1.2(코바늘 94+대바늘) · `TECH_DRAW`(대표 기호) · `TECH_VARIANTS`(기법 칸 '기호 N' 배지 → `openTechVariants` 시트) · `loadTech`가 hidden 제외. 기법 이름·단계는 DB techniques 가 원본(앱에 하드코딩 없음)
+- 다음: 담당자 검수 결과 반영(기호 모양) → 새 기법 8의 단계·선행 대표 확인 → 사전 v1.4 확정판
 
 ## 보안 원칙 (2026-09-28, KG이니시스 가맹점 권고 참고)
 - **값이 곧 권리인 것은 서버가 계산**(점수·레벨·Index·자격·확정·결제 금액). 클라이언트가 보낸 숫자·URL은 믿지 않는다. 알림 딥링크는 서버가 만든 `notifications.link`만, 앱 `openLink`는 정해진 종류만 연다

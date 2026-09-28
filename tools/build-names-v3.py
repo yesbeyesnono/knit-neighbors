@@ -13,9 +13,9 @@ RENAME = {   # id: (새 한글, 새 일어, 메모)
  'C12': ('긴뜨기', '中長編み', '한국 관행: 中長編み=긴뜨기'),
  'C13': ('한길 긴뜨기', '長編み', '한국 관행: 長編み=한길 긴뜨기'),
  'C18': ('두길 긴뜨기', '長々編み', '띄어쓰기 통일'),
- 'C10': ('이랑뜨기·줄기뜨기', 'うね編み・すじ編み', '뒤 반 코만 뜨는 기법 하나로 묶음. 왕복=이랑(うね), 원형=줄기(すじ)'),
- 'C15': ('솔잎뜨기(셸뜨기)', '松編み', '엑셀: 松編み=솔잎뜨기, シェル編み=조개뜨기 → 둘 다 C15 변형'),
- 'C27': ('감아뜨기(코일뜨기)', '巻き編み', 'JIS·ヴォーグ 명칭은 巻き編み. コイル編み는 별칭'),
+ 'C10': ('이랑뜨기', 'うね編み・すじ編み', '뒤 반 코만 뜨는 기법 하나로 묶음. 왕복=이랑(うね), 원형=줄기(すじ). 줄기뜨기는 별칭'),
+ 'C15': ('솔잎뜨기', '松編み', '엑셀: 松編み=솔잎뜨기, シェル編み=조개뜨기 → 둘 다 C15 변형'),
+ 'C27': ('감아뜨기', '巻き編み', 'JIS·ヴォーグ 명칭은 巻き編み. コイル編み는 별칭'),
  'C30': ('짧은 링뜨기', 'リング細編み', '엑셀 표기'),
 }
 # ② 새 기법 후보 (단계·선행은 초안 — 대표 확인)
@@ -23,11 +23,11 @@ NEW = [
  dict(id='C31', name_ko='세길 긴뜨기', name_ja='三つ巻き長編み', name_en='double treble crochet', abbr='dtr', level=4, prereq=['C18'], category='기본 코', desc='실을 세 번 감아 뜨는 코. 두길 긴뜨기보다 한 단 더 높다', rows=[10]),
  dict(id='C32', name_ko='네길 긴뜨기', name_ja='四つ巻き長編み', name_en='triple treble crochet', abbr='trtr', level=4, prereq=['C31'], category='기본 코', desc='실을 네 번 감아 뜨는 코', rows=[11]),
  dict(id='C33', name_ko='Y자뜨기·역Y자뜨기', name_ja='Y字編み・逆Y字編み', name_en='Y-stitch / inverted Y-stitch', abbr='Y-st', level=5, prereq=['C18'], category='응용 코', desc='두길 긴뜨기 기둥에서 가지를 내거나(Y), 두 다리를 한 기둥으로 모으는(역Y) 코', rows=[101, 102, 103, 108, 111]),
- dict(id='C34', name_ko='X자뜨기(클로스뜨기)', name_ja='クロス編み', name_en='X-stitch (crossed dc)', abbr='X-st', level=5, prereq=['C18'], category='응용 코', desc='두 다리를 모아 허리를 만들고 다시 두 팔로 벌리는 X 모양 코', rows=[104, 105, 106]),
+ dict(id='C34', name_ko='X자뜨기', name_ja='クロス編み', name_en='X-stitch (crossed dc)', abbr='X-st', level=5, prereq=['C18'], category='응용 코', desc='두 다리를 모아 허리를 만들고 다시 두 팔로 벌리는 X 모양 코', rows=[104, 105, 106]),
  dict(id='C35', name_ko='삼각뜨기', name_ja='三角編み', name_en='triangle stitch', abbr='tri-st', level=5, prereq=['C33'], category='응용 코', desc='높이가 다른 미완성 코 여러 개를 한 점에 모아 삼각형을 만드는 코', rows=[109]),
  dict(id='C36', name_ko='칠보뜨기', name_ja='七宝編み', name_en="Solomon's knot", abbr='Sk', level=3, prereq=['C01', 'C02'], category='응용 코', desc='사슬 고리를 길게 뽑아 짧은뜨기로 고정하며 그물처럼 잇는 코', rows=[112]),
  dict(id='C37', name_ko='되돌아 짧은뜨기', name_ja='バック細編み', name_en='reverse single crochet (crab stitch)', abbr='rev sc', level=2, prereq=['C02'], category='기본 코', desc='왼쪽에서 오른쪽으로 되돌아가며 뜨는 짧은뜨기. 가장자리 마감용 (바늘 돌려서·실 돌려서 짧은뜨기는 변형)', rows=[121, 122, 123, 124, 125]),
- dict(id='C38', name_ko='변형 구슬뜨기(퍼프)', name_ja='変わり玉編み', name_en='puff stitch (modified cluster)', abbr='puff', level=4, prereq=['C19'], category='입체 코', desc='미완성 긴뜨기 고리만 먼저 빼고 남은 2고리를 한 번 더 빼서 위가 정돈된 구슬', rows=[23, 24]),
+ dict(id='C38', name_ko='변형 구슬뜨기', name_ja='変わり玉編み', name_en='puff stitch (modified cluster)', abbr='puff', level=4, prereq=['C19'], category='입체 코', desc='미완성 긴뜨기 고리만 먼저 빼고 남은 2고리를 한 번 더 빼서 위가 정돈된 구슬', rows=[23, 24]),
 ]
 by_row = {n['id']: set(n['rows']) for n in NEW}
 
@@ -37,13 +37,13 @@ for t in dic:
     t['aliases'] = []
     if t['id'] in RENAME:
         ko, ja, memo = RENAME[t['id']]; t['name_ko'], t['name_ja'], t['rename_memo'] = ko, ja, memo
-        t['aliases'] = [x for x in {old_ko, old_ja} if x and x not in (ko, ja)]
+        t['aliases'] = [x for x in {old_ko, old_ja} if x and x not in (ko, ja)] + {'C10': ['줄기뜨기'], 'C15': ['셸뜨기', '조개뜨기', 'シェル編み'], 'C27': ['코일뜨기']}.get(t['id'], [])
     techs.append(t)
-for n in NEW: techs.append(dict(n, craft='crochet', aliases=[], status='candidate'))
+for n in NEW: techs.append(dict(n, craft='crochet', aliases={'C34': ['클로스뜨기', 'X-st'], 'C38': ['퍼프 스티치', 'puff']}.get(n['id'], []), status='candidate'))
 
 symbols = []
 for m in master:
-    tech = m['tech'] if m['tech'].startswith('C') else next((k for k, rs in by_row.items() if m['src'] in rs), None)
+    tech = m['tech'][:3] if m['tech'].startswith('C') else next((k for k, rs in by_row.items() if m['src'] in rs), None)   # 'C07(변형)' 표기 → ID만
     ko = m['ko'].replace('から -> 사슬뜨기에서', '에서').replace('코 아래から', '코 아래에서').replace('※', '').strip()
     if m['no'] == 94: ko = '실 돌려서 짧은뜨기'
     old_dict_ko = m['ko_dict'].split(' (')[0] if m['ko_dict'] else ''

@@ -173,7 +173,7 @@
   {
    "id": "C10",
    "craft": "crochet",
-   "name_ko": "이랑뜨기·줄기뜨기",
+   "name_ko": "이랑뜨기",
    "name_ja": "うね編み・すじ編み",
    "abbr": "BLO",
    "symbol": "×̲",
@@ -190,9 +190,9 @@
    "symbol_svg_required": true,
    "aliases": [
     "すじ編み",
-    "이랑뜨기"
+    "줄기뜨기"
    ],
-   "rename_memo": "뒤 반 코만 뜨는 기법 하나로 묶음. 왕복=이랑(うね), 원형=줄기(すじ)"
+   "rename_memo": "뒤 반 코만 뜨는 기법 하나로 묶음. 왕복=이랑(うね), 원형=줄기(すじ). 줄기뜨기는 별칭"
   },
   {
    "id": "C11",
@@ -283,7 +283,7 @@
   {
    "id": "C15",
    "craft": "crochet",
-   "name_ko": "솔잎뜨기(셸뜨기)",
+   "name_ko": "솔잎뜨기",
    "name_ja": "松編み",
    "abbr": "shell",
    "symbol": "조합",
@@ -298,7 +298,10 @@
    "abbr_en_uk": "shell (5 tr)",
    "jis_master_rows": "45,48,49,50",
    "aliases": [
-    "셸뜨기"
+    "셸뜨기",
+    "셸뜨기",
+    "조개뜨기",
+    "シェル編み"
    ],
    "rename_memo": "엑셀: 松編み=솔잎뜨기, シェル編み=조개뜨기 → 둘 다 C15 변형"
   },
@@ -524,7 +527,7 @@
   {
    "id": "C27",
    "craft": "crochet",
-   "name_ko": "감아뜨기(코일뜨기)",
+   "name_ko": "감아뜨기",
    "name_ja": "巻き編み",
    "abbr": "bullion",
    "symbol": "∿",
@@ -540,8 +543,9 @@
    "abbr_en_uk": "bullion / roll stitch",
    "jis_master_rows": "113",
    "aliases": [
+    "コイル編み",
     "코일뜨기",
-    "コイル編み"
+    "코일뜨기"
    ],
    "rename_memo": "JIS·ヴォーグ 명칭은 巻き編み. コイル編み는 별칭"
   },
@@ -1160,7 +1164,7 @@
   },
   {
    "id": "C34",
-   "name_ko": "X자뜨기(클로스뜨기)",
+   "name_ko": "X자뜨기",
    "name_ja": "クロス編み",
    "name_en": "X-stitch (crossed dc)",
    "abbr": "X-st",
@@ -1176,7 +1180,10 @@
     106
    ],
    "craft": "crochet",
-   "aliases": [],
+   "aliases": [
+    "클로스뜨기",
+    "X-st"
+   ],
    "status": "candidate"
   },
   {
@@ -1243,7 +1250,7 @@
   },
   {
    "id": "C38",
-   "name_ko": "변형 구슬뜨기(퍼프)",
+   "name_ko": "변형 구슬뜨기",
    "name_ja": "変わり玉編み",
    "name_en": "puff stitch (modified cluster)",
    "abbr": "puff",
@@ -1258,7 +1265,10 @@
     24
    ],
    "craft": "crochet",
-   "aliases": [],
+   "aliases": [
+    "퍼프 스티치",
+    "puff"
+   ],
    "status": "candidate"
   }
  ],
@@ -1532,7 +1542,7 @@
    "en": "puff stitch (3 hdc puff)",
    "abbr": "puff",
    "en_uk": "puff stitch",
-   "tech": "C19(변형)",
+   "tech": "C19",
    "variant": true,
    "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
    "aliases": [
@@ -1549,7 +1559,7 @@
    "en": "puff stitch worked in ch-space",
    "abbr": "puff in ch-sp",
    "en_uk": "puff in ch-sp",
-   "tech": "C19(변형)",
+   "tech": "C19",
    "variant": true,
    "section": "玉編み目・パプコーン編み目 / 구슬·팝콘",
    "aliases": [
@@ -1653,7 +1663,7 @@
    "en": "(sc, ch 1, sc) in same st",
    "abbr": "sc-ch1-sc",
    "en_uk": "(dc, ch1, dc) in 1",
-   "tech": "C07(변형)",
+   "tech": "C07",
    "variant": true,
    "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
    "aliases": [
@@ -1670,7 +1680,7 @@
    "en": "3 sc in same st",
    "abbr": "3 sc in 1",
    "en_uk": "3 dc in 1",
-   "tech": "C07(변형)",
+   "tech": "C07",
    "variant": true,
    "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
    "aliases": [
@@ -1789,7 +1799,7 @@
    "en": "V-stitch: (dc, ch 1, dc) in same st",
    "abbr": "V-st",
    "en_uk": "V-st (tr, ch1, tr)",
-   "tech": "C07(변형)",
+   "tech": "C07",
    "variant": true,
    "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
    "aliases": [
@@ -1841,7 +1851,7 @@
    "en": "V-stitch worked in ch-space",
    "abbr": "V-st in ch-sp",
    "en_uk": "V-st in ch-sp",
-   "tech": "C07(변형)",
+   "tech": "C07",
    "variant": true,
    "section": "複数の目を編み入れる / 늘리기(한 코에 여러 코)",
    "aliases": [
@@ -2010,7 +2020,7 @@
    "en": "sc3tog",
    "abbr": "sc3tog",
    "en_uk": "dc3tog",
-   "tech": "C08(변형)",
+   "tech": "C08",
    "variant": true,
    "section": "複数の目をまとめる / 줄이기(모아뜨기)",
    "aliases": [
@@ -2026,7 +2036,7 @@
    "en": "sc3tog skipping the center st (sc2tog over 3 sts)",
    "abbr": "sc3tog (skip 1)",
    "en_uk": "dc3tog (skip 1)",
-   "tech": "C08(변형)",
+   "tech": "C08",
    "variant": true,
    "section": "複数の目をまとめる / 줄이기(모아뜨기)",
    "aliases": [
@@ -2486,7 +2496,7 @@
    "en": "FPdc2tog",
    "abbr": "FPdc2tog",
    "en_uk": "FPtr2tog",
-   "tech": "C24(변형)",
+   "tech": "C24",
    "variant": true,
    "section": "引き上げ編み目 / 걸어뜨기",
    "aliases": [
@@ -2502,7 +2512,7 @@
    "en": "FPtr2tog",
    "abbr": "FPtr2tog",
    "en_uk": "FPdtr2tog",
-   "tech": "C24(변형)",
+   "tech": "C24",
    "variant": true,
    "section": "引き上げ編み目 / 걸어뜨기",
    "aliases": [
@@ -2518,7 +2528,7 @@
    "en": "crossed FPdc with ch 1 between",
    "abbr": "crossed FPdc, ch1",
    "en_uk": "crossed FPtr, ch1",
-   "tech": "C24(변형)",
+   "tech": "C24",
    "variant": true,
    "section": "引き上げ編み目 / 걸어뜨기",
    "aliases": [
@@ -2535,7 +2545,7 @@
    "en": "2 FPdc in same st",
    "abbr": "2 FPdc in 1",
    "en_uk": "2 FPtr in 1",
-   "tech": "C24(변형)",
+   "tech": "C24",
    "variant": true,
    "section": "引き上げ編み目 / 걸어뜨기",
    "aliases": [
@@ -2654,7 +2664,7 @@
    "en": "5-dc cluster with stem (footed cluster)",
    "abbr": "footed dc5-cl",
    "en_uk": "footed tr5-cl",
-   "tech": "C19(변형)",
+   "tech": "C19",
    "variant": true,
    "section": "編み目のバリエーション / 응용 코",
    "aliases": [
@@ -2775,7 +2785,7 @@
    "en": "loop stitch (dc)",
    "abbr": "loop dc",
    "en_uk": "loop st (tr)",
-   "tech": "C30(변형)",
+   "tech": "C30",
    "variant": true,
    "section": "編み目のバリエーション / 응용 코",
    "aliases": [
