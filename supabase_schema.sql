@@ -1238,4 +1238,5 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   대바늘 B안: K07→Lv1, K11→Lv3, K26·K28→Lv5. K06(롱테일)→K01, K14(오른코 모아뜨기)→K13 '모아뜨기'로 합침 — hidden=true, merged_into. ID·행은 지우지 않음(profiles.skills·works.techniques 옛 값 호환, 앱은 hidden 제외)
 --   technique_aliases: 옛 이름 + JIS 기호 94종의 한·일·영 이름(소문자·공백 제거) → 기법 ID. authenticated 읽기 정책 추가(기법 후보 AI·앱 검색용)
 --   데이터 원본: resources/symbols/technique_dictionary_v1.4.json (tools/build-dict-v14.py) · 기호 라이브러리 v1.2 = 앱 SYMLIB/TECH_DRAW/TECH_VARIANTS
+--   (techniques_v14_levels) compute_skill_level 이 hidden 기법을 제외. profiles.skills 의 K06→K01·K14→K13 치환 후 level_crochet/level_knit 전원 재계산. sort 는 generated(level*100+번호)라 마이그레이션에서 넣지 않음
 -- ---------------------------------------------------------------
