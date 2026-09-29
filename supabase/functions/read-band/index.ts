@@ -82,7 +82,8 @@ Deno.serve(async (req: Request) => {
     const text = await readLabel(p, b64, file.type || "image/jpeg");
     const m = text.match(/\{[\s\S]*\}/);
     const parsed = m ? JSON.parse(m[0]) : null;
-    const good = !!(parsed && typeof parsed === "object" && parsed.product);
+    // 제품명을 못 읽어도 브랜드·규격·혼용률이 있으면 DB(stash_apply_read)가 규격으로 사전에서 찾는다(schema 65) — 진짜 실패(파싱 불가·볼밴드 아님)만 false
+    const good = !!(parsed && typeof parsed === "object" && !parsed.error && (parsed.product || parsed.brand || parsed.ball_g || parsed.ball_m));
     await admin.rpc("stash_apply_read", { p_id: id, p_json: parsed ?? { error: "parse" }, p_ok: good });
     return json({ ok: good });
   } catch (e) {
