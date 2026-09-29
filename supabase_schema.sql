@@ -1268,3 +1268,13 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     여러 색: 그라데이션(2~4, 순서) / 믹스·트위드(바탕 + 1~2) / 멜란지(2) — 칩은 colorCss(hex, mode)로 그림(linear / radial 점 / repeating 사선), 이름은 multiName 자동 조합
 --     저장: works.yarns[].color_hex/color_mode/color_families(wYarnPayload) · yarn_stash(실함 담기·실 정보 편집 siPickColor) · 실함 → 인증(stashYarn) 복사. 사전 색 목록(yarn_colors)에서 고르면 hex 없이 이름·계열만(기존)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 60. 실 사전 색상 실물 사진 · 낙양모사 47종 (마이그레이션 yarn_colors_photo) — 2026-09-29 대표 지시(구두 제휴, 앱에 '제휴' 표시는 하지 않음)
+--   yarn_colors.photo(버킷 yarn-colors 안 경로) · color_hex text[] · color_mode — 사진이 있는 색은 앱 색 목록에 실물 사진 칩으로, 고르면 hex/mode 도 함께 저장(ydColorAt)
+--   버킷 yarn-colors(공개 읽기, 관리자 쓰기). admin_yarn_color_photo(catalog, no, name, photo, hex[], mode) 관리자용 upsert
+--   낙양모사: yarn_catalog 47종(verified, shop 낙양모사, source_url = 스토어 상품 페이지) + yarn_colors 1,329색(사진 1,313). 브랜드 별칭 낙양·nakyang
+--   수집 도구(tools/): scrape-nakyang.py(스토어 공개 스펙·색 옵션·상세 이미지 주소 → resources/yarn/nakyang.json) → nakyang-import.py(yarn_catalog_import 용 JSON) →
+--     nakyang-swatches.py(상세 이미지의 color chart 에서 타일 자동 검출 + 검수 몽타주) → 사람이 라벨 대조(map.txt) → nakyang-finalize.py(타일 160px·대표색) → upload-yarn-colors.py(demo1 임시 insert 정책으로 업로드 후 정책 삭제) → SQL upsert
+--   색 이름은 스토어 옵션 그대로("9304 들꽃정원"), 차트에만 있고 옵션에 없는 색은 번호만. 폭스·썸머 라피아는 사진에 라벨 띠가 있어 hex 없음(사진만)
+-- ---------------------------------------------------------------

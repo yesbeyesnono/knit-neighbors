@@ -661,7 +661,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .ycslots{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}.ycslots .sl{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);cursor:pointer}.ycslots .sl.on{outline:2.5px solid var(--sel);outline-offset:2px}.ycslots .sl b{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:var(--ink2);color:#fff;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:400}.ycslots .sl em{position:absolute;bottom:-14px;left:0;right:0;text-align:center;font-size:.6rem;color:var(--ink3);font-style:normal;white-space:nowrap}.ycslots .add{width:40px;height:40px;border-radius:50%;border:1px dashed var(--ink3);background:none;color:var(--ink2);font-size:1.2rem;cursor:pointer}
 .cgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px 6px;margin:8px 0}
 .cgrid button{border:0;background:none;font:inherit;font-size:.7rem;color:var(--ink2);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:0;line-height:1.2;word-break:break-all}
-.cgrid button i{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:block}.cgrid button.on i{outline:2.5px solid var(--sel);outline-offset:2px}.cgrid button.on{color:var(--ink);font-weight:600}
+.cgrid button i{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:block;background-size:cover;background-position:center}.cgrid button.on i{outline:2.5px solid var(--sel);outline-offset:2px}.cgrid button.on{color:var(--ink);font-weight:600}
 .minimap{height:130px;border-radius:14px;overflow:hidden;background:var(--bg2);position:relative;margin-bottom:10px}.minimap .mm{position:absolute;inset:0}
 .cpin{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);z-index:2;pointer-events:none;color:var(--moss);filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
 .pickmap{position:relative;height:56vh;border-radius:14px;overflow:hidden;background:var(--bg2);margin:8px 0 12px}.pickmap .mm{position:absolute;inset:0}
@@ -2813,7 +2813,7 @@ function wyAddSame(){ if(wYarns.length>=6) return toast('실은 6개까지 적�
 async function yarnFromDict(r){
   const y=wyBlank(); y.name=r.name; y.catalogId=r.id||null; y.fromDict=!!r.id;
   if(r.ball_g) y.ball_g=String(r.ball_g); if(r.ball_m) y.ball_m=String(r.ball_m); if(r.fiber) y.fiber=r.fiber; if(r.fibers) y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', ');
-  if(r.id){ const { data:cs } = await sb.from('yarn_colors').select('no,name,family').eq('catalog_id', r.id).order('id').limit(120); y.colors=cs||[]; }
+  if(r.id){ const { data:cs } = await sb.from('yarn_colors').select('no,name,family,photo,color_hex,color_mode').eq('catalog_id', r.id).order('id').limit(160); y.colors=cs||[]; }
   wyAutoWeight(y); return y;
 }
 function renderWNeedles(){
@@ -3395,7 +3395,7 @@ function ydRender(){
       <label class="f">굵기<select onchange="yd.weightManual=!!this.value;yd.weight=this.value;if(!this.value)wyAutoWeight(yd)"><option value="">자동</option>${YW_NAMES.map(n=>`<option ${y.weightManual&&y.weight===n?'selected':''}>${n}</option>`).join('')}</select></label></div>`:''}
     <div class="cfl">색</div>
     ${fams.length>1?`<div class="seg" style="margin-top:0"><button type="button" class="${ydFam?'':'on'}" onclick="ydFam='';ydRender()">전체</button>${fams.map(f=>`<button type="button" class="${ydFam===f?'on':''}" data-f="${esc(f)}" onclick="ydFam=this.dataset.f;ydRender()">${esc(f)}</button>`).join('')}</div>`:''}
-    ${cols.length?`<div class="cgrid">${cols.map(c=>`<button type="button" class="${y.color===label(c)?'on':''}" data-l="${esc(label(c))}" data-f="${esc(c.family||'')}" onclick="ydColor(this.dataset.l,this.dataset.f)"><i style="background:${famBg(c.family)}"></i>${esc(label(c))}</button>`).join('')}</div>`:''}
+    ${cols.length?`<div class="cgrid">${cols.map((c,ci)=>`<button type="button" class="${y.color===label(c)?'on':''}" data-i="${ci}" onclick="ydColorAt(+this.dataset.i)"><i style="background:${c.photo?`url(${colorPhotoUrl(c.photo)}) center/cover`:(colorCss(c.color_hex,c.color_mode)||famBg(c.family))}"></i>${esc(label(c))}</button>`).join('')}</div>`:''}
     <div class="ycrow" onclick="ydPickColor()"><i class="ychip" style="background:${yColorCss(y)}"></i><div class="tx"><b>${esc(y.color||'색 고르기')}</b><span>${y.colorHex&&y.colorHex.length?(COLOR_MODES[y.colorMode]||'단색')+(y.colorFamily?' · '+esc(y.colorFamily):''):(cols.length?'목록에 없으면 팔레트에서 직접 골라요':'팔레트에서 고르면 이름이 자동으로 붙어요 · 여러 색 실도 돼요')}</span></div><span class="car">›</span></div>
     <div class="cfl">${ypStashMode==='manual'?'몇 볼 샀나요?':'사용량'}</div>
     <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button type="button" onclick="ydStep(-1)">−</button><input id="ydAmt" inputmode="decimal" maxlength="7" value="${esc(y.amount)}" placeholder="0" onfocus="this.select()" oninput="yd.amount=this.value.replace(',', '.')"><button type="button" onclick="ydStep(1)">＋</button></div>
@@ -3407,6 +3407,9 @@ function ydRender(){
   `, { label: ypStashMode==='manual'?'실함에 담기':'완료', fn:ydDone });
 }
 function ydColor(label, fam){ yd.color=label; yd.colorFamily=fam||''; yd.colorHex=null; yd.colorMode='solid'; yd.colorFamilies=fam?[fam]:[]; ydRender(); }
+// 사전 색 목록에서 고름: 사진이 있는 색은 대표색(hex)·섞임 방식도 함께 저장 → 계열 집계·검색에 쓰임
+function ydColorAt(i){ const cols=(yd.colors||[]).filter(c=>!ydFam || c.family===ydFam); const c=cols[i]; if(!c) return; const label=(c.no?c.no+' ':'')+c.name; const fam=c.family||(c.color_hex&&c.color_hex[0]?(hexFamily(c.color_hex[0])||{}).fam:'')||''; yd.color=label; yd.colorFamily=fam; yd.colorHex=(c.color_hex&&c.color_hex.length)?c.color_hex:null; yd.colorMode=c.color_mode||'solid'; yd.colorFamilies=fam?[fam]:[]; ydRender(); }
+function colorPhotoUrl(path){ return `${SB_URL}/storage/v1/object/public/yarn-colors/${path}`; }
 function ydPickColor(){ openColorPick({ name:yd.color, family:yd.colorFamily, hex:yd.colorHex, mode:yd.colorMode }, r=>{ yd.color=r.name; yd.colorFamily=r.family; yd.colorFamilies=r.families; yd.colorHex=r.hex; yd.colorMode=r.mode; ydRender(); }); }
 function ydUnit(u){ if(yd.unit===u) return; yd.unit=u; yd.amount = u==='g' ? '' : '1'; ydRender(); }
 function ydStep(d){ const step = yd.unit==='g'?10:0.5; let v=parseFloat(yd.amount)||0; v=Math.max(0, Math.round((v+d*step)*100)/100); yd.amount = v?String(v):''; const el=$('#ydAmt'); if(el) el.value=yd.amount; }
