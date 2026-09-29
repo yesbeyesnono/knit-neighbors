@@ -3452,8 +3452,7 @@ function renderStash(){
   $('#stashBody').innerHTML=`<div class="ssum"><div><b>${stashRows.length}</b><span>보유 실</span></div><div><b>${fmtBalls(has.reduce((t,s)=>t+(+s.left_balls),0))}</b><span>남은 볼</span></div><div><b>${done.length}</b><span>다 쓴 실</span></div></div>
     <div style="padding:0 16px"><button class="btn" style="width:100%" onclick="openStashAdd()">${ico('camera')} 볼밴드 찍어서 추가</button></div>
     <div class="seg" style="padding:12px 16px 4px">${[['all','전체'],['left','남은 실'],['done','다 쓴 실']].map(([k,l])=>`<button type="button" class="${stashFilter===k?'on':''}" onclick="stashFilter='${k}';renderStash()">${l}</button>`).join('')}</div>
-    <div class="list">${list.map(s=>`<div class="item" onclick="openStashItem('${s.id}')">${stashThumbHtml(s)}<div class="tx"><b>${esc(stashName(s))}</b><span>${esc(s.read_status==='pending'?'잠시 뒤 이름·규격이 채워져요':stashSpec(s)||(s.read_status==='failed'?'볼밴드를 읽지 못했어요 · 눌러서 직접 적기':''))}</span></div><span class="sleft ${+s.left_balls>0?'':'end'}">${+s.left_balls>0?fmtBalls(s.left_balls)+'볼 남음':'다 씀'}</span></div>`).join('')||`<div class="empty">아직 담은 실이 없어요.<br>산 실의 볼밴드를 찍어 두면 작품 인증 때 한 번에 들어가요</div>`}</div>
-    <p class="muted" style="text-align:center;font-size:.8rem;padding:16px">내 실함은 나와 운영진만 볼 수 있어요</p>`;
+    <div class="list">${list.map(s=>`<div class="item" onclick="openStashItem('${s.id}')">${stashThumbHtml(s)}<div class="tx"><b>${esc(stashName(s))}</b><span>${esc(s.read_status==='pending'?'잠시 뒤 이름·규격이 채워져요':stashSpec(s)||(s.read_status==='failed'?'볼밴드를 읽지 못했어요 · 눌러서 직접 적기':''))}</span></div><span class="sleft ${+s.left_balls>0?'':'end'}">${+s.left_balls>0?fmtBalls(s.left_balls)+'볼 남음':'다 씀'}</span></div>`).join('')||`<div class="empty">아직 담은 실이 없어요.<br>산 실의 볼밴드를 찍어 두면 작품 인증 때 한 번에 들어가요</div>`}</div>`;
 }
 // ----- 실 추가: 볼밴드를 연달아 찍고 볼 수만 적는다. 찍는 즉시 저장·읽기 시작
 let saDraft=[];   // {id, url, balls}
