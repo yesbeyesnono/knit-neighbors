@@ -951,17 +951,46 @@ async function eventLottery(ev){ if(!confirm('남은 자리만큼 신청자 중�
 async function markShipped(app, ev){ if(!confirm('발송 처리할까요? 30일 뒤 배송지가 자동 삭제돼요.')) return; const {error}=await sb.rpc('admin_event_mark_shipped',{p_app:app}); if(error) return toast(error.message); toast('발송 처리했어요'); openEventForm(ev); }
 function downloadEventShip(){ const rows=(window.EV_APPS||[]).filter(x=>x.ship_addr); if(!rows.length) return toast('입력된 배송지가 없어요'); download('event-shipping.csv', csv(rows, ['nickname','ship_name','ship_phone','ship_zip','ship_addr','ship_memo','shipped_at'])); }
 // ===== 회원 실함 =====
-// 회원이 볼밴드를 찍어 보관한 실(yarn_stash). 2026-09-20 대표 지시로 운영진도 열람(수정은 회원 본인만). 개인정보처리방침에 기재됨
+// 2026-09-30 대표: 수만 명이 등록해도 줄 나열이 아니라 '같은 실 묶음'을 한 번만 처리 → 표기가 별칭(규칙)이 되어 다음부터 자동. 개별 조회는 검색으로만(50줄씩)
+// 자동 매칭: ① 이름(브랜드 별칭+제품명) ② 규격(브랜드+1볼 g·m+혼용률+색번호, yarn_match_spec_one) ③ 남는 것만 여기 큐로
+let SQ=null, sqOffset=0, sqQ='';
 VIEWS.stash = async()=>{
-  const {data,error}=await sb.from('yarn_stash').select('*, owner:profiles!yarn_stash_owner_id_fkey(id,nickname)').order('created_at',{ascending:false}).limit(1000);
-  if(error){ $('#main').innerHTML='<h1>회원 실함</h1><p class="muted">'+esc(error.message)+'</p>'; return; }
-  const rows=data||[]; const owners=new Set(rows.map(r=>r.owner_id)); const left=rows.reduce((t,r)=>t+(+r.left_balls||0),0);
-  const st={pending:'읽는 중',done:'AI 읽음',failed:'읽기 실패',manual:'직접 입력'};
-  $('#main').innerHTML=`<h1>회원 실함 <small>${owners.size}명 · 실 ${rows.length}개 · 남은 볼 ${Math.round(left*10)/10}</small></h1>
-  <table><tr><th>회원</th><th>실</th><th>색</th><th>규격</th><th>산 볼</th><th>남은 볼</th><th>읽기</th><th>볼밴드</th><th>담은 날</th></tr>
-  ${rows.map(r=>`<tr><td><b>${esc(r.owner?.nickname||'')}</b></td><td>${esc(r.raw_name||'')}${r.catalog_id?'':' <span class="chip r">사전 미연결</span>'}</td><td>${esc(r.color||'')}<div class="muted">${esc(r.color_family||'')}</div></td><td>${r.ball_g||'–'}g · ${r.ball_m||'–'}m<div class="muted">${esc(r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '):(r.fiber||''))}</div></td><td>${+r.bought_balls}</td><td><b>${+r.left_balls}</b></td><td><span class="chip ${r.read_status==='done'?'g':r.read_status==='failed'?'r':''}">${st[r.read_status]||''}</span></td><td>${r.band_photo?`<a href="#" data-p="${esc(r.band_photo)}" onclick="showBand(this.dataset.p);return false">사진</a>`:''}</td><td class="muted">${fmtd(r.created_at)}</td></tr>`).join('')||'<tr><td colspan="9" class="muted">아직 없어요</td></tr>'}</table>
-  <p class="muted">읽기 실패가 많으면 Supabase › Edge Functions › Secrets 의 AI 키(ANTHROPIC_API_KEY 또는 OPENROUTER_API_KEY)를 확인하세요.</p>`;
+  $('#main').innerHTML='<h1>회원 실함</h1><div class="muted">불러오는 중…</div>';
+  const {data,error}=await sb.rpc('admin_yarn_queue'); if(error){ $('#main').innerHTML='<h1>회원 실함</h1><p class="muted">'+esc(error.message)+'</p>'; return; }
+  SQ=data||{}; renderStashQueue();
 };
+function renderStashQueue(){
+  const st=SQ.stats||{}, groups=SQ.groups||[];
+  const rate=st.stash_rows?Math.round(st.stash_matched/st.stash_rows*100):null, erate=st.entries?Math.round(st.entries_matched/st.entries*100):null;
+  const failHi = st.stash_rows>=10 && st.stash_failed/st.stash_rows>0.3;
+  const spec=g=>[g.brand, g.g?g.g+'g':'', g.m?g.m+'m':'', g.fibers&&Object.keys(g.fibers).length?Object.entries(g.fibers).map(([k,v])=>k+' '+v).join('/'):''].filter(Boolean).join(' · ');
+  $('#main').innerHTML=`<h1>회원 실함 <small>실함 ${(st.stash_rows||0).toLocaleString()}줄 · 회원 ${(st.stash_members||0).toLocaleString()}명 · 처리할 묶음 ${st.groups||0}</small></h1>
+  <div class="hero3" style="grid-template-columns:repeat(4,1fr)">
+    <div class="card"><div class="muted">실함 자동 매칭률</div><div class="big">${rate==null?'–':rate+'%'}</div><div class="muted">${st.stash_matched||0} / ${st.stash_rows||0}줄이 사전 실에 연결됨</div></div>
+    <div class="card"><div class="muted">작품 인증 실 매칭률</div><div class="big">${erate==null?'–':erate+'%'}</div><div class="muted">${st.entries_matched||0} / ${st.entries||0}건 · 후보(auto) 실은 미연결로 침</div></div>
+    <div class="card"><div class="muted">볼밴드 읽기 실패</div><div class="big" style="${failHi?'color:var(--red)':''}">${st.stash_failed||0}</div><div class="muted">${failHi?'실패가 30%를 넘어요 — Supabase › Edge Functions › Secrets 의 AI 키를 확인하세요':'읽는 중 '+(st.stash_pending||0)+' · 이름을 못 읽어도 규격으로 맞추고, 남은 것만 아래 큐로'}</div></div>
+    <div class="card"><div class="muted">처리할 묶음</div><div class="big">${st.groups||0}</div><div class="muted">회원 많은 순 · 묶음 하나를 연결하면 그 묶음 전체 + 앞으로 들어오는 같은 표기가 자동</div></div>
+  </div>
+  <div class="card" style="margin-bottom:12px"><b>처리할 묶음</b> <span class="muted">같은 실로 보이는 입력끼리 묶었어요(이름 또는 브랜드·규격·혼용률). 후보를 누르거나 실 이름을 검색해 연결하세요. 회원 1~2명짜리 꼬리는 두어도 됩니다</span>
+    <table style="font-size:12.5px;margin-top:6px"><tr><th>회원이 적은/볼밴드에서 읽은 것</th><th>브랜드·규격·혼용률</th><th>색번호</th><th>회원</th><th>줄</th><th>연결할 실</th></tr>
+    ${groups.map((g,i)=>`<tr><td><b>${esc(g.label||'(이름 없음)')}</b> <span class="chip ${g.kind==='stash'?'':'y'}">${g.kind==='stash'?'실함':'작품 인증'}</span>${+g.failed?`<div class="muted" style="font-size:11px">볼밴드 이름 못 읽음 ${g.failed}</div>`:''}${g.auto_id?`<div class="muted" style="font-size:11px">후보 실로 등록돼 있음 — 연결하면 합쳐져요 · <a href="#" onclick="openYarnForm('${g.auto_id}');return false">후보 열기</a></div>`:''}</td>
+      <td class="muted">${esc(spec(g))||'–'}</td><td class="muted">${esc((g.colors||[]).join(', '))}</td><td><b>${g.members}</b></td><td>${g.n}</td>
+      <td onclick="event.stopPropagation()"><div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">${(g.suggest||[]).map(sg=>`<button class="${sg.score>=70?'p':''}" data-k="${esc(g.key)}" data-id="${sg.id}" data-n="${esc(sg.name)}" onclick="sqLink(this.dataset.k,this.dataset.id,this.dataset.n)" title="점수 ${sg.score}">${esc(sg.name)} <span class="muted">${sg.score}</span></button>`).join('')}
+        <input placeholder="실 이름 검색" style="width:130px" data-k="${esc(g.key)}" oninput="clearTimeout(this._t);this._t=setTimeout(()=>sqPick(this),250)"><span class="sqres" id="sqres_${i}"></span></div></td></tr>`).join('')||'<tr><td colspan="6" class="muted">처리할 묶음이 없어요 👍</td></tr>'}</table></div>
+  <div class="card"><b>회원·실 찾기</b> <span class="muted">닉네임·실 이름으로 그 회원의 실함만 봅니다(50줄씩). 수정은 회원 본인만</span>
+    <div class="row" style="margin-top:6px"><input id="sqQ" placeholder="닉네임 또는 실 이름" value="${esc(sqQ)}" style="flex:1;max-width:320px" onkeydown="if(event.key==='Enter'){sqOffset=0;sqSearch()}"><button class="p" onclick="sqOffset=0;sqSearch()">찾기</button><span id="sqInfo" class="muted"></span></div>
+    <div id="sqTable"></div></div>`;
+}
+async function sqPick(inp){ const q=inp.value.trim(); const box=inp.nextElementSibling; if(!q){ box.innerHTML=''; return; } const {data}=await sb.rpc('yarn_suggest',{p_q:q}); box.innerHTML=(data||[]).slice(0,5).map(r=>`<button data-k="${esc(inp.dataset.k)}" data-id="${r.id}" data-n="${esc(r.name)}" onclick="sqLink(this.dataset.k,this.dataset.id,this.dataset.n)">${esc(r.name)}${r.verified?'':' <span class="chip y">후보</span>'}</button>`).join(' ')||'<span class="muted">없음 — 실 사전에서 먼저 등록</span>'; }
+async function sqLink(key,id,name){ if(!confirm(`이 묶음을 "${name}"(으)로 연결할까요?\n묶음의 모든 줄이 연결되고, 회원 표기가 별칭으로 저장돼 다음부터 자동으로 맞춥니다.`)) return;
+  const {data,error}=await sb.rpc('admin_yarn_queue_link',{p_key:key,p_catalog:id}); if(error) return toast(error.message); toast(`${data.linked}줄을 연결했어요`); VIEWS.stash(); }
+async function sqSearch(){ sqQ=$('#sqQ').value.trim(); const {data,error}=await sb.rpc('admin_stash_search',{p_q:sqQ,p_offset:sqOffset}); if(error) return toast(error.message); const rows=data||[];
+  const st={pending:'읽는 중',done:'AI 읽음',failed:'읽기 실패',manual:'직접 입력'};
+  $('#sqInfo').textContent=rows.length?`${sqOffset+1}~${sqOffset+rows.length}`:'없음';
+  $('#sqTable').innerHTML=`<table style="margin-top:6px"><tr><th>회원</th><th>실</th><th>색</th><th>규격</th><th>산 볼</th><th>남은 볼</th><th>읽기</th><th>볼밴드</th><th>담은 날</th></tr>
+  ${rows.map(r=>`<tr><td><b><a href="#" onclick="openUserPanel('${r.owner_id}');return false">${esc(r.nickname||'')}</a></b></td><td>${r.catalog_id?`<a href="#" onclick="openYarnForm('${r.catalog_id}');return false">${esc(r.catalog_name||r.raw_name||'')}</a>${r.raw_name&&r.raw_name!==r.catalog_name?`<div class="muted" style="font-size:11px">표기: ${esc(r.raw_name)}</div>`:''}`:`${esc(r.raw_name||'')} <span class="chip r">미연결</span>`}</td><td>${esc(r.color||'')}<div class="muted">${esc(r.color_family||'')}</div></td><td>${r.ball_g||'–'}g · ${r.ball_m||'–'}m<div class="muted">${esc(r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '):(r.fiber||''))}</div></td><td>${+r.bought_balls}</td><td><b>${+r.left_balls}</b></td><td><span class="chip ${r.read_status==='done'?'g':r.read_status==='failed'?'r':''}">${st[r.read_status]||''}</span></td><td>${r.band_photo?`<a href="#" data-p="${esc(r.band_photo)}" onclick="showBand(this.dataset.p);return false">사진</a>`:''}</td><td class="muted">${fmtd(r.created_at)}</td></tr>`).join('')||'<tr><td colspan="9" class="muted">없음</td></tr>'}</table>
+  <div class="row" style="margin-top:6px">${sqOffset>0?'<button onclick="sqOffset=Math.max(0,sqOffset-50);sqSearch()">이전</button>':''}${rows.length===50?'<button onclick="sqOffset+=50;sqSearch()">다음 50</button>':''}</div>`;
+}
 async function showBand(path){ const {data,error}=await sb.storage.from('bands').createSignedUrl(path, 600); if(error) return toast(error.message); window.open(data.signedUrl,'_blank','noopener'); }
 // ===== 실 사전(표준화) =====
 // 회원이 작품 인증에 적은 실 이름은 yarn_entries(원문)로 쌓이고, 이름이 같은(정규화 키가 같은) 것끼리 yarn_catalog 한 줄로 묶인다.
