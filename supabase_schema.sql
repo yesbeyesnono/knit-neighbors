@@ -1278,3 +1278,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     nakyang-swatches.py(상세 이미지의 color chart 에서 타일 자동 검출 + 검수 몽타주) → 사람이 라벨 대조(map.txt) → nakyang-finalize.py(타일 160px·대표색) → upload-yarn-colors.py(demo1 임시 insert 정책으로 업로드 후 정책 삭제) → SQL upsert
 --   색 이름은 스토어 옵션 그대로("9304 들꽃정원"), 차트에만 있고 옵션에 없는 색은 번호만. 폭스·썸머 라피아는 사진에 라벨 띠가 있어 hex 없음(사진만)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 61. 실 사전 관리 도구 (마이그레이션 yarn_admin_tools) — 2026-09-29 대표: 실 사전은 핵심 자산(데이터 확보 → 추천 → 직접 판매), 콘솔에서 따로 관리
+--   admin_yarn_update(jsonb): 기존 항목 + product_en·shop·source_url·season·needle_knit·needle_crochet·gauge·put_up·texture·use_tags 를 한 번에
+--   yarn_colors: authenticated 에 insert/update/delete grant + 정책 yarn_colors_admin_write(is_admin) → 콘솔이 직접 색 추가·수정·삭제(사진은 버킷 yarn-colors, 관리자 쓰기 정책)
+--   admin_yarn_stats(): 요약(실·확정·후보·브랜드·색·사진·회원 입력·30일·실함) + 품질(규격 없음·촉감 미정·색 없음) + 브랜드별 표 + 30일 상위 실 + 작품 종류별
+--   admin_yarn_detail_stats(id): 실 한 종의 회원 입력·작품·실함·평가·이유·작품 종류·색·바늘·월별
+--   콘솔 › 실 사전(VIEWS.yarns): 요약 카드 → 품질 필터 버튼 → 브랜드 탭 → 검색·시즌·정렬 → 표(첫 색 사진 썸네일·색 수·사진 수) → 30일 상위/작품 종류/브랜드별 카드.
+--     상세 패널: 통계 줄 · 기본 정보(판매·추천 항목 포함) · 색상 격자(사진 칩, 끌어다 놓기 업로드 160px, 번호·이름·대표색·섞임 편집, 삭제, 추가) · 합치기 · 호환 실 · 회원 입력 원문
+--     브랜드 별칭 패널(yarn_brand_aliases 추가·삭제) · CSV 내보내기(실 / 색)
+-- ---------------------------------------------------------------
