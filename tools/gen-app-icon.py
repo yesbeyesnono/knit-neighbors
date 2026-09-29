@@ -45,7 +45,7 @@ def land_mask(w=2880, h=1440):
 mask_img = land_mask()
 MW, MH = mask_img.size
 cell_deg = 180.0 / COLS
-blur = mask_img.filter(ImageFilter.GaussianBlur(radius=cell_deg * 0.20 * MW / 360))
+blur = mask_img.filter(ImageFilter.GaussianBlur(radius=cell_deg * float(os.environ.get('BLUR', '0.20')) * MW / 360))
 MASK = np.asarray(blur, dtype=np.float32) / 255.0
 
 def is_land(x, y, z):
@@ -54,7 +54,7 @@ def is_land(x, y, z):
     a = -y * math.sin(la0) + z * math.cos(la0); e = x; n = y * math.cos(la0) + z * math.sin(la0)
     lat = np.arcsin(np.clip(n, -1, 1)); lon = lo0 + np.arctan2(e, a)
     u = ((np.degrees(lon) + 180) % 360) / 360 * MW; v = (90 - np.degrees(lat)) / 180 * MH
-    return MASK[np.clip(v.astype(int), 0, MH - 1), np.clip(u.astype(int), 0, MW - 1)] > 0.40
+    return MASK[np.clip(v.astype(int), 0, MH - 1), np.clip(u.astype(int), 0, MW - 1)] > float(os.environ.get('THR', '0.40'))
 
 # ---------- 화면 좌표 ----------
 ys, xs = np.mgrid[0:N, 0:N].astype(np.float32)
@@ -99,7 +99,7 @@ land = is_land(cx_, cy_, cz_)
 base = np.where(land[..., None], LANDC, SEA)
 import os
 if os.environ.get('KOREA_ACCENT'):   # 선택: 한가운데(한국) 코만 포인트 색 실로
-    korea = land & (iu == 0) & (civ >= 0) & (civ <= 1)
+    korea = (iu == 0) & (civ == 0) if COLS < 40 else land & (iu == 0) & (civ >= 0) & (civ <= 1)   # 굵은 코에서는 한가운데 한 코
     base = np.where(korea[..., None], np.array([0.91, 0.42, 0.36]), base)
 
 # 실 질감: 가닥의 둥근 단면 + 꼬임 줄 + 잔 보풀
