@@ -970,7 +970,7 @@ let YARNS=[], YCOL={}, YST=null, yBrand='', yFilter='';
 const Y_TEX=['일반사','모헤어·헤일로','부클·퍼','셔닐·벨벳·수면사','테이프·라피아·페이퍼','패브릭얀·코드','수세미사','메탈릭'];
 const Y_USES=['의류','방한 소품','여름 의류·소품','가방·바구니','인형','블랭킷·쿠션','코스터·매트','수세미','아기용품'];
 const Y_W=['레이스·극세','합세(Fingering)','중세(Sport)','합태(DK)','병태(Worsted)','극태(Bulky)','초극태'];
-const yPhoto=path=>`${SB_URL}/storage/v1/object/public/yarn-colors/${path}`;
+const yPhoto=path=>`${SB_URL}/storage/v1/object/public/yarn-colors/${encodeURI(path)}`;
 const yName=y=>(y.brand?y.brand+' ':'')+y.product;
 function yChipCss(c){ return c.photo?`url(${yPhoto(c.photo)}) center/cover`:(c.color_hex&&c.color_hex.length? (c.color_hex.length>1&&c.color_mode==='mix'?`radial-gradient(circle at 30% 35%, ${c.color_hex[1]} 14%, transparent 15%), radial-gradient(circle at 68% 64%, ${c.color_hex[2]||c.color_hex[1]} 12%, transparent 13%), ${c.color_hex[0]}`:c.color_hex[0]) : 'var(--soft)'); }
 const YFAM={'화이트·아이보리':'#F7F3EA','베이지·크림':'#E3D2B4','브라운':'#8A5A3B','블랙':'#2B2B2B','그레이':'#9A9DA1','레드':'#C0392B','와인·버건디':'#7B2D3A','핑크':'#E8A0B4','오렌지':'#E58A3C','옐로·머스터드':'#D9A520','그린':'#4F8A4B','카키·올리브':'#7A7A45','민트·청록':'#58B7A8','블루·스카이':'#5C9BD6','네이비':'#27365E','퍼플·라벤더':'#9077B8','멀티·믹스':'linear-gradient(135deg,#E8A0B4,#D9A520,#58B7A8,#5C9BD6)'};

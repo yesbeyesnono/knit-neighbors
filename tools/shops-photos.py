@@ -7,7 +7,8 @@ import io, os, sys, json, re, hashlib, urllib.request, urllib.parse, importlib.u
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 ROOT = os.path.join(os.path.dirname(__file__), '..')
-OUT = sys.argv[1]; ONLY = sys.argv[2] if len(sys.argv) > 2 else None
+RESUME = '--resume' in sys.argv; ARGS = [a for a in sys.argv[1:] if a != '--resume']
+OUT = ARGS[0]; ONLY = ARGS[1] if len(ARGS) > 1 else None   # --resume: map 파일에 있는 실도 이미 결과가 있으면 건너뜀
 rows = json.load(io.open(os.path.join(OUT, 'normalized.json'), encoding='utf-8'))
 UA = {'User-Agent': 'Mozilla/5.0'}
 FONT = ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 13)
@@ -30,21 +31,25 @@ def dl(u):
 def square(img, side=160):
     w, h = img.size; s = min(w, h); return img.convert('RGB').crop(((w - s) // 2, (h - s) // 2, (w - s) // 2 + s, (h - s) // 2 + s)).resize((side, side), Image.LANCZOS)
 
-# 검수 결과: <out>/photos_map.txt 의 줄 "site|product: idx:색번호 idx:색번호 …" → 타일을 그 색으로 연결
+# 검수 결과: <out>/photos_map.txt 의 줄 "site|product: idx:색번호 idx:색번호=이름 …" → 타일을 그 색으로 연결(=이름 은 옵션에 없는 색을 새로 넣을 때)
 MAP = {}
 mp = os.path.join(OUT, 'photos_map.txt')
 if os.path.exists(mp):
     for line in io.open(mp, encoding='utf-8'):
         if ':' not in line or '|' not in line: continue
         head, rest = line.strip().split(':', 1); site_, prod_ = head.split('|', 1)
-        MAP[(site_.strip(), prod_.strip())] = {int(a): b for a, b in (x.split(':', 1) for x in rest.split())}
+        toks = []
+        for x in rest.split():   # ':' 없는 낱말은 앞 이름에 붙임(이름에 띄어쓰기 허용)
+            if ':' in x: toks.append(x)
+            elif toks: toks[-1] += ' ' + x
+        MAP[(site_.strip(), prod_.strip())] = {int(a): b for a, b in (x.split(':', 1) for x in toks)}   # 값은 '번호' 또는 '번호=이름'(옵션에 없는 색 추가)
 res_path = os.path.join(OUT, 'photos.json'); res = json.load(io.open(res_path, encoding='utf-8')) if os.path.exists(res_path) else []
 done = {(r['site'], r['product'], r['no'] or r['name']) for r in res}
 for r in rows:
     if ONLY and r['site'] != ONLY: continue
     if not r['colors']: continue
     site = r['site']; pdir = os.path.join(OUT, 'photos', site); os.makedirs(pdir, exist_ok=True); sl = slug(r['product'])
-    if any((site, r['product'], c['no'] or c['name']) in done for c in r['colors']) and (site, r['product']) not in MAP: continue
+    if any((site, r['product'], c['no'] or c['name']) in done for c in r['colors']) and ((site, r['product']) not in MAP or RESUME): continue
     if (site, r['product']) in MAP: res = [x for x in res if not (x['site'] == site and x['product'] == r['product'])]
     # ① 옵션 이미지
     if all(c.get('img') for c in r['colors']):
@@ -74,7 +79,12 @@ for r in rows:
     mm = MAP.get((site, r['product']))
     if mm:   # 사람이 읽은 라벨로 연결
         byno = {(c['no'] or c['name']): c for c in r['colors']}
-        guess = [byno.get(mm.get(i)) or ({'no': mm[i], 'name': mm[i]} if i in mm else None) for i in range(len(tiles))]
+        def _g(i):
+            if i not in mm: return None
+            v = mm[i]
+            if '=' in v: no, name = v.split('=', 1); return {'no': no, 'name': name}   # 사람이 적은 번호=이름이 우선(옵션의 번호 없는 항목을 덮음)
+            return byno.get(v) or {'no': v, 'name': v}
+        guess = [_g(i) for i in range(len(tiles))]
     cells = []
     for i, (img, (x, y, w, h, lab)) in enumerate(tiles):
         side = min(w, h); crop = img.convert('RGB').crop((x + (w - side) // 2, y + (h - side) // 2, x + (w - side) // 2 + side, y + (h - side) // 2 + side)).resize((160, 160), Image.LANCZOS)

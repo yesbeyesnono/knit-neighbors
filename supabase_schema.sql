@@ -1305,5 +1305,6 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     같은 실 찾기: 브랜드+제품명 키가 겹치거나, 제품명 키가 겹치면서 브랜드가 같거나/비어 있거나/가게 자체 브랜드(쎄비·앵콜스·바늘이야기·청송뜨개실)인 경우 → 빈 항목만 채우고 색(번호/이름 기준 없는 것만)·판매처 추가. 없으면 verified 로 새로 등록
 --   admin_yarn_photos_apply(jsonb[{brand, product, no, name, file, hex[], mode}]) → yarn_colors.photo 연결(없는 색은 추가)
 --   큰 JSON 은 SQL 에 붙이지 않고 버킷 yarn-import(공개)에 올린 뒤 pg_net(net.http_get → net._http_response.content) 로 읽어 함수에 넘김
+--   2026-09-30 사진: 옵션 이미지 2,732 + 색상표 타일 15,500 → 18,253장 적용(linked 15,086 · 색 추가 3,069 · 실 못 찾음 98 = 바늘이야기가 파는 낙양모사 실 4종, 낙양 사진이 이미 있어 건너뜀). Storage 키는 ASCII 만 허용 → shops-photos-ascii.py 로 md5 이름. 앵콜스 '아임울2/4 I'm'(색 0)은 낙양모사 아임울로 merge
 --   수집 도구(tools/): scrape-shops.py(Cafe24 3곳 + 메이크샵 1곳: 상품명·규격 표·요약·옵션(색상 묶음 제목 포함)·옵션 이미지·상세 이미지, 카테고리 회원 목록은 cats:<site>) → shops-normalize.py(키트 제외, 제조사 브랜드 추출, g/m·혼용률·권장 바늘·게이지 파싱, 카테고리→시즌·굵기·바늘·용도, 촉감 추정, 용량/콘 변형 합치기, 가게 간 같은 실 합치기) → shops-import.py(import_items.json) → shops-photos.py(옵션 이미지 or 색상표 타일 검출·자동 매칭·검수 몽타주) → upload-yarn-colors.py / upload-file.py
 -- ---------------------------------------------------------------

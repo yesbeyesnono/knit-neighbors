@@ -25,7 +25,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~61, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~63, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`). main 푸시 → GitHub 웹훅(id 679395520) → `ios-public` 자동 빌드 → TestFlight 'KOAP'(V2). Lab은 `lab-*` 태그. 자세한 내용은 위 '에디션' 절
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
@@ -111,6 +111,7 @@
 - 수집은 V2 공개 앱에서도 한다(작품 종류 필수, 실 카드: 이름·색·사용량·1볼 중량/길이·소재·혼용률·만족도). 굵기는 100g당 길이로 자동 추정. **추천 화면은 아직 Lab(FULL) 전용**(작품 카드 › 실 이름 › 대신 쓸 수 있는 실)
 - 운영: 관리자 콘솔 › 실 사전(표준화)에서 새 실 후보를 합치고(별칭) 브랜드·규격을 확정. 규격(1볼 g·m)이 있어야 호환 추천에 쓰임. **2026-09-29 개편(대표: 실 사전 = 핵심 자산, 추천 → 직접 판매)**: **대시보드형 탭**(대시보드: 분포 차트·색 계열 띠 / 실 목록 / 색상 탐색 / 브랜드 카드 / 추천·호환(속성으로 찾기 + 기준 실 호환 순위) / 품질 점검 / 브랜드 별칭), 상세 패널에 회원 사용 통계·판매 항목(영문명·판매처·출처 URL·시즌·권장 바늘·게이지·포장)·색상 격자(사진 끌어다 놓기 업로드·대표색·삭제·추가)·브랜드 별칭·CSV 내보내기. schema 61. 가격은 아직 수집 안 함(판매 단계에서 추가)
 - **호환 기준(대표 확정)**: 1순위는 촉감·재질과 '어떤 작품에 맞는 실인가'. `texture`(촉감·구조)가 같고 `use_tags`(맞는 작품)가 겹치는 실끼리만 호환으로 묶고, 그 안에서 소재 유사도 → 굵기 순. 굵기·색은 조금 달라도 됨
+- **협력 쇼핑몰 4곳 전량 수집(2026-09-29, 대표: 쎄비·앵콜스·바늘이야기·청송뜨개실 구두 협업 완료)**: 실 202 → 1,156종, 색 27,000+, 판매처 1,242. 실 = 제조사 제품 하나, 판매처는 `yarn_sellers`로 여러 개(회원이 어느 가게에서 샀든 같은 실로 매칭, 나중에 우리 가게도 판매처로). 갱신은 `tools/scrape-shops.py <out> <site|cats:site>` → `shops-normalize.py` → `shops-import.py` → JSON 을 버킷 `yarn-import`에 올려 `net.http_get` 으로 읽고 `admin_yarn_bulk_upsert` → `shops-photos.py`(옵션 이미지/색상표 타일 검출, 개수 불일치는 검수 몽타주 `review/`를 보고 `photos_map.txt`에 "site|product: 타일idx:색번호 …", 옵션에 없는 색은 `idx:번호=이름`, `--resume`은 이미 된 실 건너뜀) → `shops-photos-apply.py`(photos_apply.json) → `shops-photos-ascii.py`(**Storage 키에 한글 불가(InvalidKey)** → md5 이름으로 복사) → `upload-yarn-colors.py <photos_ascii> <photos_files.txt>` → JSON 을 `yarn-import`에 올려 `admin_yarn_photos_apply`. **2026-09-30 결과: 색 실물 사진 18,784장(830종)** — 쎄비 2,094·앵콜스 5,711·청송 6,325·바늘이야기 1,320·낙양 1,324·수입 브랜드(올림푸스·랑·다루마 등) 나머지. 검수 몽타주 517개는 Claude 가 라벨을 읽어 매핑했음(사람 검수 없음 — 색 번호가 틀린 사진이 있으면 콘솔 › 실 사전 색상 격자에서 고침). 브랜드 없는 실은 두지 않는다(정확하지 않으면 삭제/합치기). 키트·도안·도구는 제외. schema 62·63
 - **낙양모사(2026-09-29, 구두 제휴)**: 스토어 YARN 47종 전부 + 색 1,329개(실물 사진 1,313장, 버킷 `yarn-colors`) 등록 — 색 고르기에서 사진 칩으로 보임. **앱 어디에도 '제휴' 표시를 하지 않는다**(시장이 좁아 특정 업체와 가깝다는 인상 금지 — 대표 지시). 갱신은 `tools/scrape-nakyang.py` → `nakyang-import.py` → `nakyang-swatches.py`(검수 몽타주) → `nakyang-finalize.py` → `upload-yarn-colors.py`. schema 60
 - 초기 데이터(2026-09-20): 바늘이야기·쎄비하우스·앵콜스·청송뜨개실 대표 실 155종 + 색 2,888개 등록(공개 볼밴드 규격만, 출처 URL 보관). 색은 `color_lexicon`(한글·영어 낱말 → 17개 색 계열, 이름의 맨 뒤 낱말 기준)으로 자동 판정. 쇼핑몰 데이터 전체 자동 수집은 하지 않는다(권리 문제) — 확장은 제휴로 목록을 받아 `yarn_catalog_import`
 - 다음 단계 후보: 도안(patterns)에 표준 실 연결 → 도안 상세에서 호환 실 자동 표시, 색 번호 표준화, 실 상세 페이지

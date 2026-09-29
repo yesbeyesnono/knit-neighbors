@@ -3409,7 +3409,7 @@ function ydRender(){
 function ydColor(label, fam){ yd.color=label; yd.colorFamily=fam||''; yd.colorHex=null; yd.colorMode='solid'; yd.colorFamilies=fam?[fam]:[]; ydRender(); }
 // 사전 색 목록에서 고름: 사진이 있는 색은 대표색(hex)·섞임 방식도 함께 저장 → 계열 집계·검색에 쓰임
 function ydColorAt(i){ const cols=(yd.colors||[]).filter(c=>!ydFam || c.family===ydFam); const c=cols[i]; if(!c) return; const label=(c.no?c.no+' ':'')+c.name; const fam=c.family||(c.color_hex&&c.color_hex[0]?(hexFamily(c.color_hex[0])||{}).fam:'')||''; yd.color=label; yd.colorFamily=fam; yd.colorHex=(c.color_hex&&c.color_hex.length)?c.color_hex:null; yd.colorMode=c.color_mode||'solid'; yd.colorFamilies=fam?[fam]:[]; ydRender(); }
-function colorPhotoUrl(path){ return `${SB_URL}/storage/v1/object/public/yarn-colors/${path}`; }
+function colorPhotoUrl(path){ return `${SB_URL}/storage/v1/object/public/yarn-colors/${encodeURI(path)}`; }   // 쇼핑몰 사진은 한글 파일명
 function ydPickColor(){ openColorPick({ name:yd.color, family:yd.colorFamily, hex:yd.colorHex, mode:yd.colorMode }, r=>{ yd.color=r.name; yd.colorFamily=r.family; yd.colorFamilies=r.families; yd.colorHex=r.hex; yd.colorMode=r.mode; ydRender(); }); }
 function ydUnit(u){ if(yd.unit===u) return; yd.unit=u; yd.amount = u==='g' ? '' : '1'; ydRender(); }
 function ydStep(d){ const step = yd.unit==='g'?10:0.5; let v=parseFloat(yd.amount)||0; v=Math.max(0, Math.round((v+d*step)*100)/100); yd.amount = v?String(v):''; const el=$('#ydAmt'); if(el) el.value=yd.amount; }
