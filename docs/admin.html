@@ -975,9 +975,9 @@ const yName=y=>(y.brand?y.brand+' ':'')+y.product;
 function yChipCss(c){ return c.photo?`url(${yPhoto(c.photo)}) center/cover`:(c.color_hex&&c.color_hex.length? (c.color_hex.length>1&&c.color_mode==='mix'?`radial-gradient(circle at 30% 35%, ${c.color_hex[1]} 14%, transparent 15%), radial-gradient(circle at 68% 64%, ${c.color_hex[2]||c.color_hex[1]} 12%, transparent 13%), ${c.color_hex[0]}`:c.color_hex[0]) : 'var(--soft)'); }
 const YFAM={'화이트·아이보리':'#F7F3EA','베이지·크림':'#E3D2B4','브라운':'#8A5A3B','블랙':'#2B2B2B','그레이':'#9A9DA1','레드':'#C0392B','와인·버건디':'#7B2D3A','핑크':'#E8A0B4','오렌지':'#E58A3C','옐로·머스터드':'#D9A520','그린':'#4F8A4B','카키·올리브':'#7A7A45','민트·청록':'#58B7A8','블루·스카이':'#5C9BD6','네이비':'#27365E','퍼플·라벤더':'#9077B8','멀티·믹스':'linear-gradient(135deg,#E8A0B4,#D9A520,#58B7A8,#5C9BD6)'};
 let YCOLS=[], yTab='dash', yFam='', yColBrand='';
-const Y_TABS=[['dash','대시보드'],['list','실 목록'],['colors','색상'],['brands','브랜드'],['reco','추천·호환'],['quality','품질 점검'],['alias','브랜드 별칭']];
+const Y_TABS=[['dash','대시보드'],['demand','수요'],['list','실 목록'],['colors','색상'],['brands','브랜드'],['reco','추천·호환'],['quality','품질 점검'],['alias','브랜드 별칭']];
 function yCount(list, key){ const m={}; list.forEach(y=>{ const k=key(y)||'(없음)'; m[k]=(m[k]||0)+1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]); }
-function yBars(pairs, onClick, max){ const top=pairs[0]?.[1]||1; return pairs.slice(0,max||12).map(([k,n])=>`<div class="hbar" ${onClick?`style="cursor:pointer" onclick="${onClick}(this.dataset.k)" data-k="${esc(k)}"`:''}><span title="${esc(k)}">${esc(k)}</span><span class="w"><b style="width:${Math.round(n/top*100)}%"></b></span><span class="muted">${n}</span></div>`).join('')||'<div class="muted">없음</div>'; }
+function yBars(pairs, onClick, max){ const top=Math.max(1,...pairs.map(p=>+p[1]||0)); return pairs.slice(0,max||12).map(([k,n])=>`<div class="hbar" ${onClick?`style="cursor:pointer" onclick="${onClick}(this.dataset.k)" data-k="${esc(k)}"`:''}><span title="${esc(k)}">${esc(k)}</span><span class="w"><b style="width:${Math.round(n/top*100)}%"></b></span><span class="muted">${n}</span></div>`).join('')||'<div class="muted">없음</div>'; }
 VIEWS.yarns = async(arg)=>{
   if(arg && Y_TABS.some(t=>t[0]===arg)) yTab=arg;
   const [{data}, {data:cols}, {data:st}] = await Promise.all([
@@ -995,6 +995,7 @@ function ySetTab(t){ yTab=t; location.hash='#yarns:'+t; }
 function renderYarnTab(){
   const el=$('#yBody'); if(!el) return;
   if(yTab==='dash') el.innerHTML=yDashHtml();
+  else if(yTab==='demand'){ el.innerHTML='<div class="muted">계산 중…</div>'; yDemandLoad(); }
   else if(yTab==='list'){ el.innerHTML=yListShell(); renderYarnTable(); }
   else if(yTab==='colors') el.innerHTML=yColorsHtml();
   else if(yTab==='brands') el.innerHTML=yBrandsHtml();
@@ -1043,6 +1044,69 @@ function yGoBrand(b){ yBrand=b==='(없음)'?'(브랜드 없음)':b; yFilter=''; 
 function yGoWeight(w){ yBrand=''; yFilter=''; yTab='list'; renderYarnTab(); $('#yW2').value=w==='(없음)'?'':w; renderYarnTable(); }
 function yGoFiber(f){ yBrand=''; yFilter=''; yTab='list'; renderYarnTab(); $('#yQ').value=f==='(없음)'?'':f; renderYarnTable(); }
 function yGoFam(f){ yFam=f; yTab='colors'; renderYarnTab(); }
+// ---- 수요 분석 (2026-09-30 대표: 브랜드가 아니라 "어떤 소재 조합 · 어떤 색 · 어떤 굵기"가 얼마나(g) 쓰이는지. 수입·제조 판단용. 금액은 계산하지 않음)
+let YD=null; window._yd=window._yd||{days:'365',craft:'',item:''};
+const yKg=g=>{ g=+g||0; return g>=1000?(g/1000).toFixed(g>=10000?0:1)+'kg':Math.round(g)+'g'; };
+async function yDemandLoad(){
+  const f=window._yd; const {data,error}=await sb.rpc('admin_yarn_demand',{p_days:f.days?+f.days:null, p_craft:f.craft||null, p_item:f.item||null});
+  const el=$('#yBody'); if(!el||yTab!=='demand') return; if(error) return el.innerHTML=esc(error.message);
+  YD=data||{}; el.innerHTML=yDemandHtml();
+}
+function yDf(k,v){ window._yd[k]=v; renderYarnTab(); }
+function yDemandHtml(){
+  const d=YD, f=window._yd, sm=d.summary||{}, st=d.stash||{};
+  const famOrder=Object.keys(YFAM).concat(['(색 미상)']);
+  const fibers={}; (d.heat||[]).forEach(h=>{ (fibers[h.fiber]=fibers[h.fiber]||{g:0,n:0,cells:{}}); fibers[h.fiber].g+=+h.g; fibers[h.fiber].n+=+h.n; fibers[h.fiber].cells[h.fam]=h; });
+  const fams=famOrder.filter(k=>(d.heat||[]).some(h=>h.fam===k)); const rows=Object.entries(fibers).sort((a,b)=>b[1].g-a[1].g||b[1].n-a[1].n);
+  const maxG=Math.max(1,...(d.heat||[]).map(h=>+h.g)), maxN=Math.max(1,...(d.heat||[]).map(h=>+h.n));
+  const cell=h=>{ if(!h) return '<td style="background:var(--soft)"></td>'; const t=Math.max(+h.g/maxG, (+h.g?0:+h.n/maxN*0.5)); const bg=YFAM[h.fam]&&!YFAM[h.fam].startsWith('linear')?YFAM[h.fam]:'#9A9DA1';
+    const lum=(()=>{ const m=/^#([0-9a-f]{6})$/i.exec(bg); if(!m) return 0; const v=parseInt(m[1],16); return (0.299*(v>>16)+0.587*((v>>8)&255)+0.114*(v&255))/255; })(); const dark=lum>0.7;
+    return `<td class="clk" onclick="yDemandCell(this.dataset.f,this.dataset.c)" data-f="${esc(h.fiber)}" data-c="${esc(h.fam)}" title="${esc(h.fiber)} · ${esc(h.fam)}: ${yKg(h.g)} · 입력 ${h.n} · 회원 ${h.members}${+h.unknown_balls?' · 무게 미상 '+h.unknown_balls+'볼':''}" style="text-align:center;background:${bg};opacity:${(0.35+0.65*t).toFixed(2)};color:${dark?'var(--ink)':'#fff'};${dark?'':'text-shadow:0 0 3px rgba(0,0,0,.6);'}font-weight:700">${+h.g?yKg(h.g):'?'}<div style="font-size:10px;font-weight:400">${h.n}건</div></td>`; };
+  const sel=window._ydSel; const combos=(d.combos||[]).filter(c=>!sel||(c.fiber===sel[0]&&c.fam===sel[1]));
+  const stashRows={}; (d.stash_heat||[]).forEach(h=>{ (stashRows[h.fiber]=stashRows[h.fiber]||{g:0,gl:0,n:0,fams:[]}); stashRows[h.fiber].g+=+h.g; stashRows[h.fiber].gl+=+h.g_left; stashRows[h.fiber].n+=+h.n; stashRows[h.fiber].fams.push(h); });
+  return `<div class="row"><select onchange="yDf('days',this.value)">${[['30','최근 30일'],['90','최근 90일'],['365','최근 1년'],['','전체 기간']].map(([v,l])=>`<option value="${v}" ${f.days===v?'selected':''}>${l}</option>`).join('')}</select>
+    <select onchange="yDf('craft',this.value)"><option value="">종목 전체</option><option value="knitting" ${f.craft==='knitting'?'selected':''}>대바늘</option><option value="crochet" ${f.craft==='crochet'?'selected':''}>코바늘</option></select>
+    <select onchange="yDf('item',this.value)"><option value="">작품 종류 전체</option>${(d.items||[]).map(t=>`<option value="${esc(t.k)}" ${f.item===t.k?'selected':''}>${esc(t.k)} ${t.n}</option>`).join('')}</select>
+    <button onclick="yDemandCsv()">CSV(조합)</button><span class="muted">수량 = 볼 수 × 1볼 g(본인 입력 → 사전 규격). 1볼 g을 모르는 볼은 '무게 미상'으로 따로 셉니다. 금액은 계산하지 않습니다.</span></div>
+  <div class="hero3" style="grid-template-columns:repeat(4,1fr)">
+    <div class="card"><div class="muted">작품에 쓴 실</div><div class="big">${yKg(sm.g)}</div><div class="muted">입력 ${sm.n||0}건 · 회원 ${sm.members||0}명 · 길이 ${sm.m?Math.round(sm.m).toLocaleString()+'m':'–'}</div></div>
+    <div class="card"><div class="muted">무게 미상</div><div class="big">${(+sm.unknown_balls||0).toLocaleString()}<small style="font-size:16px">볼</small></div><div class="muted">${sm.unknown_n||0}건 — 1볼 g이 없어 합계에서 빠짐 · 사전 규격을 채우면 잡혀요</div></div>
+    <div class="card"><div class="muted">실함(산 실)</div><div class="big">${yKg(st.g_bought)}</div><div class="muted">남은 ${yKg(st.g_left)} · ${st.rows||0}줄 · 회원 ${st.members||0}명${+st.unknown_balls?' · 무게 미상 '+st.unknown_balls+'볼':''}</div></div>
+    <div class="card"><div class="muted">사전 미연결 입력</div><div class="big">${sm.unmatched_n||0}</div><div class="muted">이름으로 실을 못 찾은 입력 — 아래에서 연결하면 소재·굵기가 채워져요</div></div>
+  </div>
+  <div class="card" style="margin-bottom:12px"><b>소재 조합 × 색 계열</b> <span class="muted">칸 = 작품에 쓴 g(진할수록 많음) · 누르면 아래 조합 표가 그 칸으로 걸러져요${sel?` · <a href="#" onclick="window._ydSel=null;renderYarnTab();return false">필터 해제(${esc(sel[0])} · ${esc(sel[1])})</a>`:''}</span>
+    <div style="overflow-x:auto;margin-top:8px"><table style="font-size:12px"><tr><th style="text-align:left">소재 조합</th><th>합계</th>${fams.map(k=>`<th style="min-width:64px"><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${YFAM[k]||'#ddd'};border:1px solid var(--line);vertical-align:-1px"></i> ${esc(k.split('·')[0])}</th>`).join('')}</tr>
+    ${rows.map(([fb,o])=>`<tr><td style="text-align:left;white-space:nowrap"><b>${esc(fb)}</b></td><td style="white-space:nowrap">${yKg(o.g)}<div class="muted" style="font-size:10px">${o.n}건</div></td>${fams.map(k=>cell(o.cells[k])).join('')}</tr>`).join('')||'<tr><td colspan="9" class="muted">아직 작품 인증에 적힌 실이 없어요</td></tr>'}</table></div></div>
+  <div class="hero3" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="card"><b>굵기별</b> <span class="muted">g 기준</span>${yBars((d.weights||[]).map(w=>[w.k, Math.round(+w.g)]),null,8).replace(/<span class="muted">(\d+)<\/span>/g,(m,n)=>`<span class="muted">${yKg(n)}</span>`)}</div>
+    <div class="card"><b>월별 (최근 12개월)</b>${yBars((d.months||[]).map(m=>[m.m, Math.round(+m.g)]),null,12).replace(/<span class="muted">(\d+)<\/span>/g,(m,n)=>`<span class="muted">${yKg(n)}</span>`)}</div>
+    <div class="card"><b>실함에 있는 실</b> <span class="muted">산 g / 남은 g</span>${Object.entries(stashRows).sort((a,b)=>b[1].g-a[1].g).slice(0,8).map(([fb,o])=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0"><span>${esc(fb)} <span class="muted">${o.fams.filter(h=>h.fam!=='(색 미상)').sort((a,b)=>b.g-a.g).slice(0,3).map(h=>h.fam.split('·')[0]).join(', ')}</span></span><span><b>${yKg(o.g)}</b> <span class="muted">/ ${yKg(o.gl)}</span></span></div>`).join('')||'<div class="muted">없음</div>'}</div>
+  </div>
+  <div class="card" style="margin-bottom:12px"><b>조합 순위</b> <span class="muted">소재 조합 · 색 · 굵기 — 제작·수입은 이 단위로 판단</span>
+    <table style="font-size:12.5px"><tr><th>#</th><th>소재 조합</th><th>색 계열</th><th>굵기</th><th>작품에 쓴 양</th><th>길이</th><th>입력</th><th>회원</th><th>무게 미상</th></tr>${combos.map((c,i)=>`<tr><td>${i+1}</td><td><b>${esc(c.fiber)}</b></td><td><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${YFAM[c.fam]||'#ddd'};border:1px solid var(--line);vertical-align:-1px"></i> ${esc(c.fam)}</td><td>${esc(c.wc)}</td><td><b>${yKg(c.g)}</b></td><td class="muted">${+c.m?Math.round(c.m).toLocaleString()+'m':'–'}</td><td>${c.n}</td><td>${c.members}</td><td class="muted">${+c.unknown_balls?c.unknown_balls+'볼':''}</td></tr>`).join('')||'<tr><td colspan="9" class="muted">없음</td></tr>'}</table></div>
+  <div class="card" style="margin-bottom:12px"><b>실별 순위</b> <span class="muted">사전에 연결된 실 — "이 조합에서 회원이 실제로 쓴 실". 가격은 대표가 실 상세에서 확인해 적은 값만</span>
+    <table style="font-size:12.5px"><tr><th>#</th><th>실</th><th>소재</th><th>굵기</th><th>작품에 쓴 양</th><th>입력</th><th>회원</th><th>많이 쓴 색</th><th>판매가</th><th></th></tr>${(d.yarns||[]).map((y,i)=>`<tr><td>${i+1}</td><td class="clk" onclick="openYarnForm('${y.id}')"><b>${esc(y.name)}</b></td><td>${esc(y.fiber)}</td><td>${esc(y.wc)}</td><td><b>${yKg(y.g)}</b>${+y.unknown_balls?`<div class="muted" style="font-size:10px">+ 미상 ${y.unknown_balls}볼</div>`:''}</td><td>${y.n}</td><td>${y.members}</td><td class="muted">${(y.fams||[]).filter(x=>x.k!=='(색 미상)').slice(0,3).map(x=>x.k.split('·')[0]).join(', ')}</td><td>${y.price?y.price.toLocaleString()+'원<div class="muted" style="font-size:10px">'+fmtd(y.price_at)+'</div>':'<span class="muted">미확인</span>'}</td><td><button onclick="yMargin('${y.id}')">마진 계산</button></td></tr>`).join('')||'<tr><td colspan="10" class="muted">없음</td></tr>'}</table></div>
+  <div class="card"><b>사전에 못 맞춘 원문</b> <span class="muted">오타·줄임말 — 실을 열어 확정하거나 같은 실로 합치면 위 표에 들어가요</span>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${(d.unmatched||[]).map(u=>`<button onclick="${u.id?`openYarnForm('${u.id}')`:`yUnmatchedAdd(this.dataset.n)`}" data-n="${esc(u.raw)}">${esc(u.raw)} <span class="muted">${u.n}건${+u.g?' · '+yKg(u.g):''}</span></button>`).join('')||'<span class="muted">없음 👍</span>'}</div></div>`;
+}
+function yDemandCell(fb,fam){ window._ydSel=[fb,fam]; renderYarnTab(); }
+function yUnmatchedAdd(name){ openYarnForm(); setTimeout(()=>{ const i=$('#yProduct'); if(i) i.value=name; },50); }
+function yDemandCsv(){ if(!YD) return; download('yarn_demand.csv', '\ufeff'+csv((YD.combos||[]).map(c=>({fiber:c.fiber, color:c.fam, weight:c.wc, g:Math.round(+c.g), m:Math.round(+c.m), entries:c.n, members:c.members, unknown_balls:c.unknown_balls})), ['fiber','color','weight','g','m','entries','members','unknown_balls'])); }
+// 마진 계산기 — 저장하지 않는 계산(값은 대표가 넣음). 수요 kg → 볼 수 → 매출·원가·마진
+function yMargin(id){
+  const y=(YD?.yarns||[]).find(v=>v.id===id)||{}; const c=YARNS.find(v=>v.id===id)||{}; const g=+y.g||0, bg=+c.ball_g||0;
+  openPanel(`<h2 style="margin-top:0">마진 계산 — ${esc(y.name||yName(c))}</h2>
+    <p class="muted">이 실이 작품에 쓰인 양 <b>${yKg(g)}</b>(입력 ${y.n||0}건 · 회원 ${y.members||0}명)${bg?` · 1볼 ${bg}g → 약 <b>${Math.ceil(g/bg)}볼</b>`:' · 1볼 g이 없어 볼 수를 못 구해요(실 상세에서 규격 입력)'}${y.price?` · 확인된 판매가 ${y.price.toLocaleString()}원/볼 (${fmtd(y.price_at)})`:''}</p>
+    <div class="row"><label>수요 볼 수 <input id="mgBalls" type="number" value="${bg?Math.ceil(g/bg):''}" style="width:110px"></label><label>기간 배수 <input id="mgX" type="number" value="1" step="0.5" style="width:70px" title="예: 회원이 10배 늘면 10"></label></div>
+    <div class="row"><label>판매가/볼 <input id="mgSell" type="number" value="${y.price||''}" style="width:110px"></label><label>원가/볼(수입·제조+운송) <input id="mgCost" type="number" style="width:110px"></label><label>부대비용/볼(포장·수수료) <input id="mgFee" type="number" value="0" style="width:110px"></label></div>
+    <div class="row"><button class="p" onclick="yMarginCalc()">계산</button></div><div id="mgOut" class="card" style="margin-top:8px"></div>
+    <p class="muted">값은 저장되지 않아요. 판매처 가격은 실 상세 › 판매처·가격에서 확인일과 함께 기록해 두세요.</p>`);
+}
+function yMarginCalc(){
+  const n=Math.max(0,+$('#mgBalls').value||0)*(+$('#mgX').value||1), sell=+$('#mgSell').value||0, cost=+$('#mgCost').value||0, fee=+$('#mgFee').value||0;
+  const rev=n*sell, cst=n*(cost+fee), mg=rev-cst;
+  $('#mgOut').innerHTML=`<div class="hero3 kp" style="grid-template-columns:repeat(4,1fr)"><div><b>${Math.round(n).toLocaleString()}볼</b><span>수량</span></div><div><b>${Math.round(rev).toLocaleString()}원</b><span>매출</span></div><div><b>${Math.round(cst).toLocaleString()}원</b><span>원가+부대</span></div><div><b style="color:${mg>=0?'var(--olive)':'var(--red)'}">${Math.round(mg).toLocaleString()}원</b><span>마진 ${rev?Math.round(mg/rev*100):0}%</span></div></div>`;
+}
 // ---- 실 목록
 function yListShell(){
   const brands=yCount(YARNS,y=>y.brand); const W=[...new Set(YARNS.map(y=>y.weight_class).filter(Boolean))];
@@ -1136,10 +1200,10 @@ function yExport(kind){
 }
 async function openYarnForm(id){
   const y = id ? YARNS.find(v=>v.id===id) : {aliases:[],status:'verified'};
-  let entries=[], sim=[], dst={}, colors=[];
-  if(id){ const [r,r2,r3,r4]=await Promise.all([ sb.from('yarn_entries').select('raw_name,color,ball_g,ball_m,weight,fiber,rating,rating_reason,needles,item_type,created_at').eq('catalog_id',id).order('created_at',{ascending:false}).limit(30),
-      sb.rpc('yarn_similar',{p_catalog:id,p_limit:6}), sb.from('yarn_colors').select('*').eq('catalog_id',id).order('no').limit(300), sb.rpc('admin_yarn_detail_stats',{p_id:id}) ]);
-    entries=r.data||[]; sim=r2.data||[]; colors=r3.data||[]; dst=r4.data||{}; }
+  let entries=[], sim=[], dst={}, colors=[], sellers=[];
+  if(id){ const [r,r2,r3,r4,r5]=await Promise.all([ sb.from('yarn_entries').select('raw_name,color,ball_g,ball_m,weight,fiber,rating,rating_reason,needles,item_type,created_at').eq('catalog_id',id).order('created_at',{ascending:false}).limit(30),
+      sb.rpc('yarn_similar',{p_catalog:id,p_limit:6}), sb.from('yarn_colors').select('*').eq('catalog_id',id).order('no').limit(300), sb.rpc('admin_yarn_detail_stats',{p_id:id}), sb.from('yarn_sellers').select('*').eq('catalog_id',id).order('shop') ]);
+    entries=r.data||[]; sim=r2.data||[]; colors=r3.data||[]; dst=r4.data||{}; sellers=r5.data||[]; }
   window.YCOLORS=colors;
   openPanel(`<h2 style="margin-top:0">${id?esc(yName(y)):'실 추가'} ${id?`<span class="chip ${y.status==='verified'?'g':'y'}">${y.status==='verified'?'확정':'후보'}</span>`:''}</h2>
     ${id?`<div class="row" style="gap:14px"><span><b>${dst.entries||0}</b> <span class="muted">회원 입력</span></span><span><b>${dst.works||0}</b> <span class="muted">작품</span></span><span><b>${dst.stash||0}</b> <span class="muted">실함 보유</span></span><span><b>${dst.rating_pos||0}</b> <span class="muted">또 쓸래요</span></span><span><b>${dst.rating_neg||0}</b> <span class="muted">비추</span></span></div>
@@ -1156,10 +1220,14 @@ async function openYarnForm(id){
     <div class="row"><button class="p" onclick="saveYarn('${id||''}','verified')">확정으로 저장</button>${id?`<button onclick="saveYarn('${id}','auto')">후보로 두고 저장</button>`:''}</div>
     ${id?`<h2>색상 ${colors.length} <small class="muted">사진 ${colors.filter(c=>c.photo).length} · 칩을 누르면 수정, 사진은 칩에 끌어다 놓거나 수정 창에서 올려요</small></h2>
     <div id="yColorGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px">${colors.map((c,i)=>yColorTile(c,i)).join('')}<button onclick="openColorEdit('${id}',-1)" style="height:76px;border:1px dashed var(--ink3);border-radius:10px;background:none">＋ 색 추가</button></div>
+    <h2>판매처·가격 <small class="muted">가격은 자동 수집하지 않아요 — 확인한 값을 적으면 확인일이 같이 남고, 수요 탭 마진 계산에 쓰여요</small></h2>
+    <table style="font-size:12.5px"><tr><th>판매처</th><th>포장</th><th>가격(원)</th><th>확인일</th><th></th></tr>${sellers.map(sl=>`<tr><td>${sl.url?`<a href="${esc(sl.url)}" target="_blank" rel="noopener">${esc(sl.shop)}</a>`:esc(sl.shop)}</td><td class="muted">${esc(sl.put_up||'')}</td><td><input type="number" value="${sl.price??''}" style="width:100px" id="ysp_${sl.id}"></td><td class="muted">${sl.checked_at?fmtd(sl.checked_at):'–'}</td><td><button onclick="ySellerSave(${sl.id},'${id}')">저장</button></td></tr>`).join('')}<tr><td><input id="ysNewShop" placeholder="판매처 이름" style="width:120px"></td><td><input id="ysNewUrl" placeholder="URL" style="width:180px"></td><td><input id="ysNewPrice" type="number" placeholder="가격" style="width:100px"></td><td></td><td><button onclick="ySellerAdd('${id}')">추가</button></td></tr></table>
     <h2>같은 실로 합치기</h2><div class="row"><input id="yMergeQ" placeholder="합칠 대상(남길 실) 이름 검색" style="flex:1" oninput="yarnMergePick(this.value,'${id}')"></div><div id="yMergeRes" class="muted">이 실의 기록·별칭을 고른 실로 옮깁니다.</div>
     <h2>호환 실 <small class="muted">같은 촉감·구조 + 맞는 작품이 겹침 → 소재 유사도 → 굵기 순 (앱 추천에 쓰이는 순서)</small></h2>${sim.map(r=>`<div style="padding:4px 0"><b>${esc(r.name)}</b> <span class="chip ${r.verdict.startsWith('거의')?'g':''}">${esc(r.verdict)}</span> <span class="muted">소재 유사 ${Math.round(r.fiber_sim*100)}% · 굵기 차이 ${r.diff_pct==null?'?':r.diff_pct+'%'} · 겹치는 작품: ${esc((r.shared_uses||[]).join(', '))}</span></div>`).join('')||'<div class="muted">같은 촉감·용도의 실이 아직 없어요 — 촉감·구조와 맞는 작품을 채우면 호환 실이 잡혀요</div>'}
     <h2>회원 입력 원문 ${entries.length}</h2>${entries.map(e=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><b>${esc(e.raw_name)}</b> <span class="muted">${[e.color, e.ball_g&&e.ball_m?`${e.ball_g}g·${e.ball_m}m`:'', e.weight, e.fiber, e.item_type, (e.needles||[]).map(n=>n.size).join('/'), e.rating===1?'또 쓸래요':e.rating===-1?'비추':'', e.rating_reason, fmt(e.created_at)].filter(Boolean).map(esc).join(' · ')}</span></div>`).join('')||'<div class="muted">없음</div>'}`:''}`);
 }
+async function ySellerSave(sid, cid){ const v=$('#ysp_'+sid).value; const {error}=await sb.from('yarn_sellers').update({price:v===''?null:+v, checked_at:new Date().toISOString()}).eq('id',sid); if(error) return toast(error.message); toast('저장했어요'); openYarnForm(cid); }
+async function ySellerAdd(cid){ const shop=$('#ysNewShop').value.trim(); if(!shop) return toast('판매처 이름을 적어 주세요'); const p=$('#ysNewPrice').value; const {error}=await sb.from('yarn_sellers').insert({catalog_id:cid, shop, url:$('#ysNewUrl').value.trim()||null, price:p===''?null:+p, checked_at:p===''?null:new Date().toISOString()}); if(error) return toast(error.message); toast('추가했어요'); openYarnForm(cid); }
 function yColorTile(c,i){ return `<div class="yct" data-i="${i}" onclick="openColorEdit('${c.catalog_id}',${i})" ondragover="event.preventDefault();this.style.outline='2px solid var(--olive)'" ondragleave="this.style.outline=''" ondrop="event.preventDefault();this.style.outline='';yColorDrop(event,${i})" style="cursor:pointer;text-align:center;font-size:11px"><div style="width:100%;aspect-ratio:1;border-radius:10px;border:1px solid var(--line);background:${yChipCss(c)}"></div><div style="margin-top:3px;line-height:1.2">${esc((c.no?c.no+' ':'')+c.name)}</div><div class="muted" style="font-size:10px">${c.family?esc(c.family):'계열 미판정'}${c.photo?'':' · 사진 없음'}</div></div>`; }
 async function yColorDrop(ev,i){ const f=ev.dataTransfer?.files?.[0]; const c=window.YCOLORS[i]; if(!f||!c) return; await yColorUpload(c, f); }
 async function yColorUpload(c, file){
@@ -1167,7 +1235,7 @@ async function yColorUpload(c, file){
   const img=await new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=URL.createObjectURL(file); });
   const cv=document.createElement('canvas'); cv.width=cv.height=160; const ctx=cv.getContext('2d'); const side=Math.min(img.width,img.height); ctx.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,160,160);
   const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',0.8));
-  const path=`${c.catalog_id}/${(c.no||c.name||'c').replace(/[^A-Za-z0-9가-힣_-]/g,'_')}_${Date.now().toString(36)}.jpg`;
+  const path=`${c.catalog_id}/${(c.no||'c').replace(/[^A-Za-z0-9_-]/g,'_')}_${Date.now().toString(36)}.jpg`;   // Storage 키는 ASCII 만(한글 InvalidKey)
   const up=await sb.storage.from('yarn-colors').upload(path, blob, {contentType:'image/jpeg', upsert:true}); if(up.error) return toast(up.error.message);
   // 대표색: 가운데 픽셀 평균
   const d=ctx.getImageData(40,40,80,80).data; let r=0,g=0,b=0,n=0; for(let k=0;k<d.length;k+=16){ r+=d[k]; g+=d[k+1]; b+=d[k+2]; n++; } const hex='#'+[r,g,b].map(v=>Math.round(v/n).toString(16).padStart(2,'0')).join('');

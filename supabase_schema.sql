@@ -1309,3 +1309,13 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   임시 정책(yarn_colors_tmp_upload/update, yarn_import_tmp)은 마이그레이션 yarn_import_drop_tmp_policies 로 제거, yarn-import 버킷 비움 — 다시 대량 업로드하려면 같은 정책을 잠시 다시 만들 것
 --   수집 도구(tools/): scrape-shops.py(Cafe24 3곳 + 메이크샵 1곳: 상품명·규격 표·요약·옵션(색상 묶음 제목 포함)·옵션 이미지·상세 이미지, 카테고리 회원 목록은 cats:<site>) → shops-normalize.py(키트 제외, 제조사 브랜드 추출, g/m·혼용률·권장 바늘·게이지 파싱, 카테고리→시즌·굵기·바늘·용도, 촉감 추정, 용량/콘 변형 합치기, 가게 간 같은 실 합치기) → shops-import.py(import_items.json) → shops-photos.py(옵션 이미지 or 색상표 타일 검출·자동 매칭·검수 몽타주) → upload-yarn-colors.py / upload-file.py
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 64. 실 수요 분석 (마이그레이션 yarn_demand) — 2026-09-30 대표: 브랜드가 아니라 "어떤 소재 조합 · 어떤 색 · 어떤 굵기"가 얼마나 쓰이는지. 수입·제조 판단용
+--   yarn_fiber_combo(fibers jsonb, fallback): 혼용률에서 5% 이상 소재를 비율 큰 순서로 '+' 묶음 (면+아크릴). 없으면 주 소재, 그것도 없으면 '(소재 미상)'
+--   admin_yarn_demand(p_days, p_craft, p_item): 작품 인증의 yarn_entries(실함 원문 제외)를 소재 조합 × 색 계열(바탕색) × 굵기(사전 규격 우선)로 집계
+--     수량 = 볼 수 × 1볼 g(본인 입력 → 사전 규격 순), g 단위 입력은 그대로. 1볼 g 을 모르는 볼은 unknown_balls 로 따로 셈(합계에 섞지 않음). m 합계는 참고. 금액은 계산하지 않음
+--     반환: summary · heat(소재×색) · weights · combos(상위 40) · yarns(확정 실 상위 40 + 판매처 최저 price/checked_at + 색 분포) · unmatched(미연결/후보 원문) · months(12개월) · stash/stash_heat(실함 산 g·남은 g) · items
+--   콘솔 › 실 사전 › 수요 탭(yDemandHtml): 기간·종목·작품 종류 필터, 히트맵(칸 누르면 조합 표 필터), 굵기·월별·실함, 조합 순위, 실별 순위(마진 계산기 yMargin — 저장 안 함), 미연결 원문(열어서 확정/합치기), CSV
+--   실 상세 › 판매처·가격: yarn_sellers.price 를 대표가 확인한 값으로 기록(checked_at 자동). 자동 수집 없음(변동·권리)
+-- ---------------------------------------------------------------
