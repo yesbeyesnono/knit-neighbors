@@ -1257,3 +1257,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   yarn_suggest: 매칭 키에 norm_keys + 브랜드+제품명 + 브랜드+영문 제품명 + (별칭+제품명, 별칭+영문 제품명) 포함 → "세비 로미오"·"sevy" 로도 쎄비 실이 나옴
 --   새 브랜드 별칭은 이 표에 행만 추가(콘솔 화면 없음, SQL 로)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 59. 실 색 값·여러 색 실 (마이그레이션 yarn_color_hex) — 2026-09-29 대표 확정
+--   yarn_entries / yarn_stash 에 color_hex text[](1~4개 #rrggbb) · color_mode(solid|gradient|mix|melange) · color_families text[] 추가
+--   트리거(yarn_entries_set_family, yarn_stash_fill): color_hex_clean(형식 맞는 것만, 최대 4) · color_families_clean(color_lexicon 에 있는 계열만) · hex 없으면 mode null
+--     color_family = color_families[1](바탕색 계열) 우선, 없으면 이름으로 판정(기존) → "베이지→핑크 그라데이션"도 베이지 계열로 집계
+--   yarn_log_entry: y.color_hex / color_mode / color_families 를 yarn_entries 에 기록. stash_apply_read: AI 가 읽은 color_hex(실 자체 색 추정)를 실함에 넣고(회원이 색을 고쳤으면 무시) 로그에도 전달
+--   앱(docs/index.html): COLOR_FAMS(계열 16종 = 색 계열 17 − 멀티) → openColorPick 시트: 계열 칩 → 사각 팔레트(canvas, 가로 따뜻함→차가움, 세로 밝기) + 채도 슬라이더(무채색 계열은 숨김) → 이름 자동(colorAutoName: 연한/진한 × 뽀얀/쨍한 + 계열 기본 이름) + color_lexicon 표준 이름 칩으로 바꾸기
+--     여러 색: 그라데이션(2~4, 순서) / 믹스·트위드(바탕 + 1~2) / 멜란지(2) — 칩은 colorCss(hex, mode)로 그림(linear / radial 점 / repeating 사선), 이름은 multiName 자동 조합
+--     저장: works.yarns[].color_hex/color_mode/color_families(wYarnPayload) · yarn_stash(실함 담기·실 정보 편집 siPickColor) · 실함 → 인증(stashYarn) 복사. 사전 색 목록(yarn_colors)에서 고르면 hex 없이 이름·계열만(기존)
+-- ---------------------------------------------------------------

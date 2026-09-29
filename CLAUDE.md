@@ -25,7 +25,7 @@
 - 법적 문서: `docs/privacy.html` · `terms.html` · `guidelines.html` · `delete-account.html`
 - 아이콘: `docs/icons/<key>.svg` 20종 + `nav-*.svg`(인라인 삽입) · 스펙 `resources/icons/ICONS.md` · `ICON_IMAGES=true`
 - 시·도 경계: `docs/kr-provinces.json` (관리자 인포그래픽)
-- DB 스키마 기록: `supabase_schema.sql` (섹션 0~56, 마이그레이션과 1:1)
+- DB 스키마 기록: `supabase_schema.sql` (섹션 0~59, 마이그레이션과 1:1)
 - 네이티브: Capacitor 8 (`capacitor.config.json`, `android/`, `ios/`), appId `kr.co.firmtech.knitneighbors`
 - iOS 빌드: Codemagic(`codemagic.yaml`). main 푸시 → GitHub 웹훅(id 679395520) → `ios-public` 자동 빌드 → TestFlight 'KOAP'(V2). Lab은 `lab-*` 태그. 자세한 내용은 위 '에디션' 절
 - Android: JDK 21(Temurin) + SDK `C:/Android/Sdk`. `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon` → `android/app/build/outputs/bundle/release/app-release.aab`. 업로드 키 `android/keys/upload-keystore.jks`(gitignore, 백업 필요). Play 내부 테스트에 versionCode 1 올라감, 현재 코드 versionCode 2(1.0.1)
@@ -40,6 +40,7 @@
 - **마이 상단(2026-09-27 대표 확정, 다른 앱 조사 후)**: 내 뜨개 단계 카드(앱의 기준이라 맨 위, `myLvCard`) → 지금 할 일 띠(7일 내 모임·클래스 상태·친구 신청·호스트 신청 대기, 있을 때만, `renderMyTop`) → 이번 주 활동(서포터 점수 포함) → 내 실함 요약 → 내 가게/작가 클래스 → 탭. '첫 인증 유도'는 카드 대신 알림(`nudge_first_work`). 설정의 내 뜨개 단계 항목은 유지
 - **서포터즈 안내는 설정이 아니라 🔔 활동 알림**(`supporter_invite_notice()`: 첫 활동 또는 다음 날 재접속 때 1회) + 상단 띠 + 첫 게시 팝업. 설정 줄은 서포터에게만. 서포터 방은 `join_supporter_room()`이 '방의 약속'·환영을 지기 AI 이름으로 남기고, 크론 `supporters-room-report`(21:00 KST)가 jigi `supporters_room`으로 하루치 대화를 정리해 텔레그램으로 보냄
 - 실 입력: `<datalist>` 금지(iOS WebView 불안정) → `openYarnPick`(yarn_suggest 직접 그린 목록 · 최근 쓴 실 · 이웃이 많이 쓴 실 · 직접 입력) → `ydOpen`(색상칩 5열 = 색 계열 대표색 `FAMHEX`, 사용량 0.5볼/10g 단위 + 직접 입력). 저장 형식은 그대로(works.yarns, amount 는 numeric)
+- **색 고르기(2026-09-29 대표 확정)**: `openColorPick(cur, done)` 시트 — 계열 칩(`COLOR_FAMS` 16종) → 사각 팔레트(canvas: 가로 따뜻함↔차가움, 세로 밝기) + 채도 슬라이더 → 이름 자동(`colorAutoName`: 연한/진한·뽀얀/쨍한 + 기본 이름, color_lexicon 표준 이름 칩으로 바꾸기). 여러 색 실은 그라데이션(2~4)/믹스·트위드(바탕+1~2)/멜란지(2) — 칩 그림 `colorCss(hex, mode)`. 저장 `color_hex[]·color_mode·color_families[]`(works.yarns·yarn_entries·yarn_stash, 계열은 바탕색 기준). 실함 편집·실함 담기·볼밴드 AI(`color_hex` 추정)도 같은 값. 브랜드 표기 별칭은 `yarn_brand_aliases`(쎄비=세비=Sevy). schema 58·59
 - 장소 검색: `openPlaceSearch(k)` 입력 즉시(300ms) → `geocodePlace()`(Google 지오코더 → OSM). 현재 위치에서 찾기·지도에서 핀 찍기. **카카오(검색·지도)는 반영하지 않는다(2026-09-20 대표 지시)** — 작업지시서의 카카오 로컬 검색·`KAKAO_REST_KEY`는 폐기. 모임 위치 수정도 같은 검색. **권장 단계는 시안의 'Lv.' 대신 기존 'N단계' 표기 유지**(Lv.는 활동 레벨이라 헷갈림)
 - Phase 2(완료): **내 실함** — 마이 › 내 실함(`openStash`, `v-stash`). 볼밴드를 찍는 즉시 저장(`yarn_stash`, 비공개 버킷 `bands`) + Edge Function `read-band`가 AI로 읽어 이름·색·규격 제안(회원이 고친 값 우선). 실 고르기의 '내 실함' 탭에서 고르면 `works.yarns[].stash_id`로 저장돼 자동 차감, 인증 삭제 시 복원. **대표 지시로 지시서와 다른 점: 운영진도 열람(콘솔 › 회원 실함), 남은 볼은 본인이 직접 수정 가능**. AI 공급자는 시크릿으로 전환: `AI_PROVIDER`(anthropic|openrouter) · `ANTHROPIC_API_KEY`/`OPENROUTER_API_KEY` · `AI_MODEL_FAST` — 나중에 OpenRouter의 싼 모델로 바꿀 수 있게 만들었음. 키가 없으면 읽기만 꺼짐
 - Phase 3(완료): 아래 '지기 AI' 절 참고. 필요한 시크릿: ANTHROPIC_API_KEY, TG_BOT_TOKEN, TG_WEBHOOK_SECRET, TG_ADMIN_CHAT_ID

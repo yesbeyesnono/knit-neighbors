@@ -651,6 +651,14 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .plist>button b{display:block}.plist>button span{display:block;font-size:.82rem;color:var(--ink2)}
 .vtag{display:inline-block;font-size:.68rem;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--moss-soft);color:var(--moss);margin-left:6px;vertical-align:middle}
 .specband{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--moss-soft);font-size:.85rem;margin:8px 0 4px}.specband div{flex:1;min-width:0}.specband b{display:block;color:var(--moss);font-size:.78rem}.specband button{flex:none;border:0;background:none;font:inherit;text-decoration:underline;color:var(--ink2);cursor:pointer}
+.ycrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:#fff;margin-top:6px}.ycrow .ychip{flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--line)}.ycrow .tx{flex:1;min-width:0}.ycrow .tx b{display:block;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ycrow .tx span{display:block;font-size:.78rem;color:var(--ink2)}.ycrow .car{color:var(--ink3);font-size:1.2rem}
+.ycfam{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}.ycfam button{border:0;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font:inherit;font-size:.6rem;color:var(--ink2);line-height:1.1}.ycfam button i{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);display:block}.ycfam button.on i{outline:2.5px solid var(--sel);outline-offset:2px}.ycfam button.on{color:var(--ink);font-weight:600}
+.ycsq{position:relative;width:100%;height:170px;border-radius:12px;overflow:hidden;border:1px solid var(--line);touch-action:none}.ycsq canvas{width:100%;height:100%;display:block}.ycsq .mk{position:absolute;width:18px;height:18px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.35);transform:translate(-50%,-50%);pointer-events:none}
+.ycax{display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink3);margin-top:3px}
+.ycsl{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--ink3);margin-top:8px}.ycsl input{flex:1;accent-color:var(--olive)}
+.ycprev{display:flex;align-items:center;gap:10px;margin-top:8px}.ycprev i{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line)}.ycprev input{flex:1}
+.ycnames{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.ycnames button{font:inherit;font-size:.78rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer}.ycnames button.on{background:var(--chip);color:var(--olive);border-color:var(--chip);font-weight:600}
+.ycslots{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}.ycslots .sl{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);cursor:pointer}.ycslots .sl.on{outline:2.5px solid var(--sel);outline-offset:2px}.ycslots .sl b{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:var(--ink2);color:#fff;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:400}.ycslots .sl em{position:absolute;bottom:-14px;left:0;right:0;text-align:center;font-size:.6rem;color:var(--ink3);font-style:normal;white-space:nowrap}.ycslots .add{width:40px;height:40px;border-radius:50%;border:1px dashed var(--ink3);background:none;color:var(--ink2);font-size:1.2rem;cursor:pointer}
 .cgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px 6px;margin:8px 0}
 .cgrid button{border:0;background:none;font:inherit;font-size:.7rem;color:var(--ink2);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:0;line-height:1.2;word-break:break-all}
 .cgrid button i{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:block}.cgrid button.on i{outline:2.5px solid var(--sel);outline-offset:2px}.cgrid button.on{color:var(--ink);font-weight:600}
@@ -2659,7 +2667,7 @@ const NEEDLES = {
 };
 NEEDLES['줄바늘'] = ['2.0mm','2.5mm','3.0mm','3.5mm','4.0mm','4.5mm','5.0mm','5.5mm','6.0mm','7mm','8mm','9mm','10mm','12mm'];
 let wYarns=[], wNeedles=[], yarnSug={}, yarnSugTimer=null;
-function wyBlank(){ return { name:'', color:'', amount:'', unit:'볼', ball_g:'', ball_m:'', weight:'', weightManual:false, fiber:'', rating:'', rating_reason:'', mix:'' }; }
+function wyBlank(){ return { name:'', color:'', colorFamily:'', colorHex:null, colorMode:'solid', colorFamilies:[], amount:'', unit:'볼', ball_g:'', ball_m:'', weight:'', weightManual:false, fiber:'', rating:'', rating_reason:'', mix:'' }; }
 function parseMix(t){ const o={}; (t||'').split(/[,/·]+/).forEach(x=>{ const m=/^\s*([^\d%]+?)\s*(\d{1,3})\s*%?\s*$/.exec(x); if(m && +m[2]<=100) o[m[1].trim().slice(0,12)]=+m[2]; }); return Object.keys(o).length?o:null; }
 function wDefaultNeedleType(){ const ids=[...wTechSel]; const k=ids.filter(x=>x[0]==='K').length, c=ids.filter(x=>x[0]==='C').length; if(k>c) return '대바늘'; if(c>k) return '코바늘'; return (myProfile?.craft==='knit')?'대바늘':'코바늘'; }
 function wyReset(){ fillWEvent(); wItemSet(''); wYarns=[]; wNeedles=[]; renderWYarns(); renderWNeedles(); const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=''; if(z) z.value=''; const m=$('#wMore'); if(m) m.hidden=true; }
@@ -2676,13 +2684,127 @@ function yarnWeightGuess(y){
 // 색 계열(color_lexicon 17종) 대표색 — 실마다 hex 가 없어서 색상칩은 계열 대표색으로 그린다
 const FAMHEX = {'화이트·아이보리':'#F7F3EA','베이지·크림':'#E3D2B4','브라운':'#8A5A3B','블랙':'#2B2B2B','그레이':'#9A9DA1','레드':'#C0392B','와인·버건디':'#7B2D3A','핑크':'#E8A0B4','오렌지':'#E58A3C','옐로·머스터드':'#D9A520','그린':'#4F8A4B','카키·올리브':'#7A7A45','민트·청록':'#58B7A8','블루·스카이':'#5C9BD6','네이비':'#27365E','퍼플·라벤더':'#9077B8','멀티·믹스':'linear-gradient(135deg,#E8A0B4,#D9A520,#58B7A8,#5C9BD6)'};
 function famBg(f){ return FAMHEX[f] || 'var(--bg2)'; }
+// ---- 색 고르기 (2026-09-29 대표 확정): 계열 → 사각 팔레트(가로 = 따뜻함↔차가움, 세로 = 밝기) + 채도 → 이름 자동. 여러 색은 그라데이션/믹스·트위드/멜란지
+// 계열별 범위: h 색상(왼쪽 따뜻함 → 오른쪽 차가움, 360 넘김 허용), s 채도(슬라이더), l 밝기(위 밝음 → 아래 어두움), nm 기본 이름 쌍(by: 'h' 가로 위치 / 'l' 밝기로 고름)
+const COLOR_FAMS=[
+  ['화이트·아이보리',{h:[45,220],s:[3,28],l:[86,97],nm:['아이보리','화이트'],by:'h'}],
+  ['베이지·크림',{h:[28,50],s:[20,60],l:[66,90],nm:['베이지','크림'],by:'l'}],
+  ['브라운',{h:[12,40],s:[25,70],l:[18,55],nm:['브라운','브라운']}],
+  ['그레이',{h:[40,220],s:[0,10],l:[28,84],nm:['그레이','그레이']}],
+  ['블랙',{h:[40,220],s:[0,15],l:[4,20],nm:['블랙','블랙']}],
+  ['레드',{h:[352,372],s:[55,95],l:[30,58],nm:['레드','레드']}],
+  ['와인·버건디',{h:[330,358],s:[35,80],l:[16,40],nm:['버건디','와인'],by:'h'}],
+  ['핑크',{h:[325,372],s:[35,90],l:[60,90],nm:['핑크','핑크']}],
+  ['오렌지',{h:[14,40],s:[65,100],l:[42,68],nm:['오렌지','오렌지']}],
+  ['옐로·머스터드',{h:[38,58],s:[55,100],l:[38,72],nm:['머스터드','옐로'],by:'l'}],
+  ['그린',{h:[75,160],s:[25,80],l:[28,66],nm:['그린','그린']}],
+  ['카키·올리브',{h:[50,95],s:[18,50],l:[22,50],nm:['카키','올리브'],by:'h'}],
+  ['민트·청록',{h:[150,195],s:[30,80],l:[36,82],nm:['청록','민트'],by:'l'}],
+  ['블루·스카이',{h:[195,232],s:[40,90],l:[42,86],nm:['블루','스카이'],by:'l'}],
+  ['네이비',{h:[212,248],s:[35,80],l:[10,32],nm:['네이비','네이비']}],
+  ['퍼플·라벤더',{h:[255,305],s:[25,70],l:[32,84],nm:['퍼플','라벤더'],by:'l'}],
+];
+const COLOR_MODES={solid:'단색',gradient:'그라데이션',mix:'믹스·트위드',melange:'멜란지'};
+function hslToHex(h,s,l){ h=((h%360)+360)%360; s/=100; l/=100; const a=s*Math.min(l,1-l); const f=n=>{ const k=(n+h/30)%12; const c=l-a*Math.max(-1,Math.min(k-3,9-k,1)); return Math.round(255*c).toString(16).padStart(2,'0'); }; return `#${f(0)}${f(8)}${f(4)}`; }
+function hexToHsl(hex){ const m=/^#?([0-9a-f]{6})$/i.exec(hex||''); if(!m) return null; const n=parseInt(m[1],16), r=(n>>16&255)/255, g=(n>>8&255)/255, b=(n&255)/255, mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2; let h=0,s=0; if(mx!==mn){ const d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn); h = mx===r?((g-b)/d+(g<b?6:0)) : mx===g?((b-r)/d+2) : ((r-g)/d+4); h*=60; } return { h, s:s*100, l:l*100 }; }
+// 팔레트 위치(x 0~1 가로, y 0~1 위→아래, t 0~1 채도) → hsl
+function famPos(cfg, x, y, t){ return { h: cfg.h[0]+(cfg.h[1]-cfg.h[0])*x, s: cfg.s[0]+(cfg.s[1]-cfg.s[0])*t, l: cfg.l[1]-(cfg.l[1]-cfg.l[0])*y }; }
+// hex → 가장 가까운 계열 + 팔레트 위치(범위 밖이면 가장자리)
+function hexFamily(hex){
+  const c=hexToHsl(hex); if(!c) return null; let best=null;
+  for(const [fam,cfg] of COLOR_FAMS){
+    let h=c.h; if(cfg.h[1]>360 && h<cfg.h[0]-180) h+=360;
+    const dh = h<cfg.h[0]?cfg.h[0]-h : h>cfg.h[1]?h-cfg.h[1] : 0;
+    const ds = c.s<cfg.s[0]?cfg.s[0]-c.s : c.s>cfg.s[1]?c.s-cfg.s[1] : 0;
+    const dl = c.l<cfg.l[0]?cfg.l[0]-c.l : c.l>cfg.l[1]?c.l-cfg.l[1] : 0;
+    const pen = (c.s<12 ? 0 : dh*0.6) + ds*1.2 + dl*1.6;   // 채도가 낮으면 색상은 의미 없음(흰·회·검)
+    if(!best || pen<best.pen){ const cl=(v,a,b)=>Math.max(0,Math.min(1,(v-a)/((b-a)||1))); best={ fam, cfg, pen, x:cl(h,cfg.h[0],cfg.h[1]), y:1-cl(c.l,cfg.l[0],cfg.l[1]), t:cl(c.s,cfg.s[0],cfg.s[1]) }; }
+  }
+  return best;
+}
+// 위치 → 이름: 연한/진한(밝기 3등분) + 뽀얀/쨍한(채도 3등분, 무채색 계열은 생략) + 계열 기본 이름
+function colorAutoName(fam, x, y, t, short){
+  const cfg=(COLOR_FAMS.find(f=>f[0]===fam)||[])[1]; if(!cfg) return fam||'';
+  const base = cfg.by==='h' ? (x<0.5?cfg.nm[0]:cfg.nm[1]) : cfg.by==='l' ? (y<0.5?cfg.nm[1]:cfg.nm[0]) : cfg.nm[0];
+  if(short) return base;
+  const lm = y<0.3?'연한 ':y>0.7?'진한 ':'';
+  const sm = (cfg.s[1]-cfg.s[0])<20 ? '' : t<0.3?'뽀얀 ':t>0.7?'쨍한 ':'';
+  return (lm+sm+base).trim();
+}
+// 색 칩 배경 CSS: 단색 / 그라데이션(왼→오른) / 믹스(바탕 + 점) / 멜란지(두 색 꼬임)
+function colorCss(hex, mode){
+  const h=(hex||[]).filter(Boolean); if(!h.length) return '';
+  if(h.length===1 || mode==='solid' || !mode) return h[0];
+  if(mode==='gradient') return `linear-gradient(90deg, ${h.join(', ')})`;
+  if(mode==='mix'){ const c2=h[1], c3=h[2]||h[1]; return `radial-gradient(circle at 30% 35%, ${c2} 14%, transparent 15%), radial-gradient(circle at 68% 64%, ${c3} 12%, transparent 13%), radial-gradient(circle at 60% 20%, ${c2} 8%, transparent 9%), radial-gradient(circle at 25% 75%, ${c3} 9%, transparent 10%), ${h[0]}`; }
+  return `repeating-linear-gradient(135deg, ${h[0]} 0 4px, ${h[1]} 4px 8px)`;   // melange
+}
+function yColorCss(y){ return colorCss(y.colorHex, y.colorMode) || famBg(y.colorFamily); }
+function stashColorCss(s){ return colorCss(s.color_hex, s.color_mode) || famBg(s.color_family); }
+// 여러 색 이름 자동 조합
+function multiName(mode, slots){
+  const n=slots.map(sl=>colorAutoName(sl.fam, sl.x, sl.y, sl.t, true));
+  if(mode==='gradient') return n.join('→')+' 그라데이션';
+  if(mode==='mix') return `${n[0]} 바탕 ${n.slice(1).join('·')} 트위드`;
+  return `${n[0]}·${n[1]||n[0]} 멜란지`;
+}
+const YC_MIN={gradient:2,mix:2,melange:2}, YC_MAX={gradient:4,mix:3,melange:2};
+let yc=null, ycLex={};
+// 열기: cur={name, family, hex[], mode}, done(result{name, family, families[], hex[], mode})
+function openColorPick(cur, done){
+  const slotOf=(hex, fam)=>{ const f=hexFamily(hex) || { fam: fam||'베이지·크림', x:.5, y:.5, t:.5 }; return { fam:f.fam, x:f.x, y:f.y, t:f.t }; };
+  const hx=(cur.hex||[]).filter(Boolean); const multi = hx.length>1 && cur.mode && cur.mode!=='solid';
+  const slots = hx.length ? hx.map(h=>slotOf(h)) : [ (cur.family && COLOR_FAMS.some(f=>f[0]===cur.family)) ? { fam:cur.family, x:.5, y:.5, t:.5 } : { fam:'베이지·크림', x:.5, y:.5, t:.5 } ];
+  yc={ multi, mode: multi?cur.mode:'gradient', slots, active:0, name: cur.name||'', nameEdited: !!(cur.name && hx.length), done };
+  if(!hx.length) yc.nameEdited=false;
+  ycRender();
+}
+function ycSlot(){ return yc.slots[yc.active]; }
+function ycHex(sl){ const c=famPos((COLOR_FAMS.find(f=>f[0]===sl.fam)||[])[1], sl.x, sl.y, sl.t); return hslToHex(c.h,c.s,c.l); }
+function ycAuto(){ return yc.multi ? multiName(yc.mode, yc.slots) : colorAutoName(ycSlot().fam, ycSlot().x, ycSlot().y, ycSlot().t); }
+function ycRender(){
+  const sl=ycSlot(), cfg=(COLOR_FAMS.find(f=>f[0]===sl.fam)||[])[1]; if(!yc.nameEdited) yc.name=ycAuto();
+  const hexes=yc.slots.map(ycHex);
+  openSheet(`<b style="font-size:1.05rem">색 고르기</b>
+    <div class="seg" style="margin-top:0"><button type="button" class="${yc.multi?'':'on'}" onclick="ycMulti(false)">단색</button><button type="button" class="${yc.multi?'on':''}" onclick="ycMulti(true)">여러 색이 섞인 실</button></div>
+    ${yc.multi?`<div class="seg" style="margin-top:0">${Object.entries(COLOR_MODES).filter(([k])=>k!=='solid').map(([k,l])=>`<button type="button" class="${yc.mode===k?'on':''}" onclick="ycMode('${k}')">${l}</button>`).join('')}</div>
+      <p class="muted" style="margin:0;font-size:.78rem">${yc.mode==='gradient'?'한 타래 안에서 색이 서서히 바뀌는 실 — 순서대로 2~4색':yc.mode==='mix'?'바탕색에 점·얼룩이 섞인 실 — 바탕 1색 + 섞인 색 1~2색':'두 색 가닥이 꼬여 있는 실 — 2색'}</p>
+      <div class="ycslots" style="margin-bottom:12px">${yc.slots.map((x,i)=>`<div class="sl ${i===yc.active?'on':''}" style="background:${hexes[i]}" onclick="yc.active=${i};ycRender()">${yc.slots.length>YC_MIN[yc.mode]?`<b onclick="event.stopPropagation();ycDel(${i})">×</b>`:''}<em>${yc.mode==='mix'?(i?'섞인 색':'바탕'):yc.mode==='gradient'?(i+1)+'번째':(i?'둘째':'첫째')}</em></div>`).join('')}${yc.slots.length<YC_MAX[yc.mode]?`<button type="button" class="add" onclick="ycAdd()">＋</button>`:''}</div>`:''}
+    <div class="ycfam">${COLOR_FAMS.map(([f])=>`<button type="button" class="${sl.fam===f?'on':''}" data-f="${f}" onclick="ycFam(this.dataset.f)"><i style="background:${famBg(f)}"></i>${f.split('·')[0]}</button>`).join('')}</div>
+    <div class="ycsq" id="ycSq"><canvas id="ycCv" width="120" height="100"></canvas><div class="mk" id="ycMk"></div></div>
+    <div class="ycax"><span>← 따뜻한</span><span>${sl.fam.split('·')[0]} · 위로 갈수록 밝아요</span><span>차가운 →</span></div>
+    ${(cfg.s[1]-cfg.s[0])>=20?`<div class="ycsl"><span>뽀얀</span><input type="range" min="0" max="100" value="${Math.round(sl.t*100)}" oninput="ycSat(this.value)"><span>쨍한</span></div>`:''}
+    <div class="ycprev"><i id="ycPv" style="background:${colorCss(hexes, yc.multi?yc.mode:'solid')}"></i><input id="ycName" maxlength="40" value="${esc(yc.name)}" placeholder="색 이름" oninput="yc.name=this.value;yc.nameEdited=true"></div>
+    <div class="ycnames" id="ycLex"></div>
+    <div style="display:flex;gap:8px;margin-top:4px"><button type="button" class="btn o" style="flex:1" onclick="closeSheet()">취소</button><button type="button" class="btn" style="flex:2" onclick="ycDone()">이 색으로</button></div>`);
+  ycDraw(); ycMark(); ycLoadLex(sl.fam);
+  const sq=$('#ycSq'); const pick=e=>{ const r=sq.getBoundingClientRect(); const x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)), y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height)); const s=ycSlot(); s.x=x; s.y=y; ycMark(); ycUpdate(); };
+  sq.onpointerdown=e=>{ sq.setPointerCapture(e.pointerId); pick(e); }; sq.onpointermove=e=>{ if(e.buttons) pick(e); };
+}
+function ycDraw(){ const cv=$('#ycCv'); if(!cv) return; const sl=ycSlot(), cfg=(COLOR_FAMS.find(f=>f[0]===sl.fam)||[])[1]; const ctx=cv.getContext('2d'); for(let i=0;i<cv.width;i++){ const top=famPos(cfg,i/(cv.width-1),0,sl.t), bot=famPos(cfg,i/(cv.width-1),1,sl.t); const g=ctx.createLinearGradient(0,0,0,cv.height); g.addColorStop(0,`hsl(${top.h} ${top.s}% ${top.l}%)`); g.addColorStop(1,`hsl(${bot.h} ${bot.s}% ${bot.l}%)`); ctx.fillStyle=g; ctx.fillRect(i,0,1,cv.height); } }
+function ycMark(){ const m=$('#ycMk'), sl=ycSlot(); if(!m) return; m.style.left=(sl.x*100)+'%'; m.style.top=(sl.y*100)+'%'; m.style.background=ycHex(sl); }
+function ycUpdate(){ if(!yc.nameEdited){ yc.name=ycAuto(); const n=$('#ycName'); if(n) n.value=yc.name; } const pv=$('#ycPv'); if(pv) pv.style.background=colorCss(yc.slots.map(ycHex), yc.multi?yc.mode:'solid'); ycMark(); const sls=document.querySelectorAll('.ycslots .sl'); if(sls[yc.active]) sls[yc.active].style.background=ycHex(ycSlot()); }
+function ycSat(v){ ycSlot().t=v/100; ycDraw(); ycUpdate(); }
+function ycFam(f){ const sl=ycSlot(); sl.fam=f; sl.x=.5; sl.y=.5; sl.t=.5; yc.nameEdited=false; ycRender(); }
+function ycMulti(on){ if(yc.multi===on) return; yc.multi=on; yc.nameEdited=false; if(on){ while(yc.slots.length<YC_MIN[yc.mode]) ycAddSlot(); } else { yc.slots=[yc.slots[0]]; yc.active=0; } ycRender(); }
+function ycMode(m){ yc.mode=m; yc.nameEdited=false; while(yc.slots.length<YC_MIN[m]) ycAddSlot(); yc.slots=yc.slots.slice(0,YC_MAX[m]); yc.active=Math.min(yc.active, yc.slots.length-1); ycRender(); }
+function ycAddSlot(){ const b=yc.slots[yc.slots.length-1]; yc.slots.push({ fam:b.fam, x:Math.min(1,b.x+.25), y: b.y<0.5?Math.min(1,b.y+.5):Math.max(0,b.y-.5), t:b.t }); }   // 새 색은 같은 계열에서 밝기를 확 다르게(구분되게)
+function ycAdd(){ if(yc.slots.length>=YC_MAX[yc.mode]) return; ycAddSlot(); yc.active=yc.slots.length-1; yc.nameEdited=false; ycRender(); }
+function ycDel(i){ if(yc.slots.length<=YC_MIN[yc.mode]) return; yc.slots.splice(i,1); yc.active=Math.max(0,Math.min(yc.active,yc.slots.length-1)); yc.nameEdited=false; ycRender(); }
+async function ycLoadLex(fam){   // 사람들이 쓰는 이름(color_lexicon 표준 이름) — 누르면 그 이름으로
+  if(!ycLex[fam]){ const { data } = await sb.from('color_lexicon').select('canonical_ko').eq('family', fam).not('canonical_ko','is',null).limit(80); ycLex[fam]=[...new Set((data||[]).map(r=>r.canonical_ko).filter(n=>/^[가-힣]{2,6}$/.test(n)))].slice(0,14); }
+  const el=$('#ycLex'); if(!el || ycSlot().fam!==fam) return;
+  el.innerHTML = ycLex[fam].length ? `<span class="muted" style="font-size:.72rem;width:100%">이름을 바꾸려면 골라 보세요</span>`+ycLex[fam].map(n=>`<button type="button" class="${yc.name===n?'on':''}" onclick="ycPickName(this.textContent)">${esc(n)}</button>`).join('') : '';
+}
+function ycPickName(n){ if(yc.multi){ const sl=ycSlot(); const parts=yc.slots.map((s,i)=>i===yc.active?n:colorAutoName(s.fam,s.x,s.y,s.t,true)); yc.name = yc.mode==='gradient'?parts.join('→')+' 그라데이션': yc.mode==='mix'?`${parts[0]} 바탕 ${parts.slice(1).join('·')} 트위드`:`${parts[0]}·${parts[1]||parts[0]} 멜란지`; } else yc.name=n; yc.nameEdited=true; const el=$('#ycName'); if(el) el.value=yc.name; document.querySelectorAll('#ycLex button').forEach(b=>b.classList.toggle('on', b.textContent===n)); }
+function ycDone(){ const name=(yc.name||ycAuto()).trim().slice(0,40); const hex=yc.slots.map(ycHex); const fams=yc.slots.map(s=>s.fam); const r={ name, family:fams[0], families:[...new Set(fams)], hex, mode: yc.multi?yc.mode:'solid' }; closeSheet(); yc.done(r); }
 function ySpecLine(y){ return [y.ball_g&&y.ball_m?`${y.ball_g}g · ${y.ball_m}m`:(y.ball_g?`${y.ball_g}g`:''), y.mix||y.fiber||'', (y.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · '); }
 function yAmtTxt(y){ return y.amount!=='' && y.amount!=null ? `${y.amount}${y.unit||'볼'}` : ''; }
 function wyAutoWeight(y){ if(!y.weightManual){ const g=yarnWeightGuess(y); y.weight=g?g.name:''; } }
 function wyHintAll(){ wYarns.forEach(wyAutoWeight); renderWYarns(); }
 function renderWYarns(){
   const box=$('#wYarnsBox'); if(!box) return;
-  box.innerHTML = wYarns.map((y,i)=>`<div class="ysum" onclick="openYarnDetail(${i})"><div class="dot" style="background:${famBg(y.colorFamily)}"></div><div class="tx"><b>${esc(y.name)}</b><span>${esc([y.color, yAmtTxt(y)].filter(Boolean).join(' · ')||'색·사용량을 적어 보세요')}</span>${ySpecLine(y)?`<span>${esc(ySpecLine(y))}</span>`:''}</div><button type="button" title="지우기" onclick="event.stopPropagation();wyDel(${i})">${ico('close')}</button></div>`).join('');
+  box.innerHTML = wYarns.map((y,i)=>`<div class="ysum" onclick="openYarnDetail(${i})"><div class="dot" style="background:${yColorCss(y)}"></div><div class="tx"><b>${esc(y.name)}</b><span>${esc([y.color, yAmtTxt(y)].filter(Boolean).join(' · ')||'색·사용량을 적어 보세요')}</span>${ySpecLine(y)?`<span>${esc(ySpecLine(y))}</span>`:''}</div><button type="button" title="지우기" onclick="event.stopPropagation();wyDel(${i})">${ico('close')}</button></div>`).join('');
   const sb2=$('#wySameBtn'); if(sb2) sb2.hidden=!wYarns.length;
 }
 function wyDel(i){ wYarns.splice(i,1); renderWYarns(); }
@@ -2712,7 +2834,7 @@ function renderNeedleAdd(){
 function wnCommit(){ if(!wnDraft?.size) return toast('호수를 골라 주세요'); wNeedles.push({type:wnDraft.type, size:wnDraft.size}); closeSheet(); renderWNeedles(); wYarns.forEach(wyAutoWeight); renderWYarns(); }
 function wnDel(i){ wNeedles.splice(i,1); renderWNeedles(); }
 function wYarnPayload(){
-  const ys=wYarns.map(y=>({ name:(y.name||'').trim(), color:(y.color||'').trim(), amount:String(y.amount||'').trim(), unit:y.unit, ball_g:String(y.ball_g||'').trim(), ball_m:String(y.ball_m||'').trim(), weight:y.weight||'', fiber:y.fiber||'', rating:y.rating||'', rating_reason:y.rating_reason||'', fibers:parseMix(y.mix), stash_id:y.stashId||undefined })).filter(y=>y.name);
+  const ys=wYarns.map(y=>({ name:(y.name||'').trim(), color:(y.color||'').trim(), amount:String(y.amount||'').trim(), unit:y.unit, ball_g:String(y.ball_g||'').trim(), ball_m:String(y.ball_m||'').trim(), weight:y.weight||'', fiber:y.fiber||'', rating:y.rating||'', rating_reason:y.rating_reason||'', fibers:parseMix(y.mix), stash_id:y.stashId||undefined, color_hex:(y.colorHex&&y.colorHex.length)?y.colorHex:undefined, color_mode:(y.colorHex&&y.colorHex.length)?(y.colorMode||'solid'):undefined, color_families:(y.colorFamilies&&y.colorFamilies.length)?y.colorFamilies:undefined })).filter(y=>y.name);
   const ns=wNeedles.filter(n=>(n.size||'').trim()).map(n=>({ type:n.type, size:n.size.trim() }));
   const y0=ys[0], n0=ns[0];
   const needleTxt = n0 ? `${n0.type} ${n0.size}` : '';
@@ -2731,7 +2853,7 @@ async function openYarnSimilar(name){
 }
 function workYarnDetail(w){
   const ys=w.yarns||[], ns=w.needles||[]; if(ys.length<2 && ns.length<2 && !w.gauge && !w.finished_size && !(ys[0]&&(ys[0].amount||ys[0].ball_g))) return '';
-  const yl=ys.map(y=>`<div>· ${FULL?`<a href="#" data-n="${esc(y.name)}" onclick="event.stopPropagation();openYarnSimilar(this.dataset.n);return false" style="color:inherit;text-decoration:underline">${esc(y.name)}</a>`:esc(y.name)}${y.color?` <span class="muted">${esc(y.color)}</span>`:''}${y.amount?` · ${y.amount}${esc(y.unit||'')}`:''}${y.ball_g&&y.ball_m?` <span class="muted">(${y.ball_g}g·${y.ball_m}m)</span>`:''}${y.weight?` · ${esc(y.weight)}`:''}</div>`).join('');
+  const yl=ys.map(y=>`<div>· ${FULL?`<a href="#" data-n="${esc(y.name)}" onclick="event.stopPropagation();openYarnSimilar(this.dataset.n);return false" style="color:inherit;text-decoration:underline">${esc(y.name)}</a>`:esc(y.name)}${y.color?` ${y.color_hex&&y.color_hex.length?`<i style="display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid var(--line);vertical-align:-1px;background:${colorCss(y.color_hex,y.color_mode)}"></i> `:''}<span class="muted">${esc(y.color)}</span>`:''}${y.amount?` · ${y.amount}${esc(y.unit||'')}`:''}${y.ball_g&&y.ball_m?` <span class="muted">(${y.ball_g}g·${y.ball_m}m)</span>`:''}${y.weight?` · ${esc(y.weight)}`:''}</div>`).join('');
   const nl=ns.length?`<div>· 바늘 ${ns.map(n=>esc((n.type?n.type+' ':'')+n.size)).join(', ')}</div>`:'';
   const ex=[w.gauge&&`게이지 ${esc(w.gauge)}`, w.finished_size&&`완성 ${esc(w.finished_size)}`].filter(Boolean).join(' · ');
   return `<details class="wyd" onclick="event.stopPropagation()"><summary>실·바늘 자세히</summary><div class="ml" style="line-height:1.6">${yl}${nl}${ex?`<div>· ${ex}</div>`:''}</div></details>`;
@@ -3274,7 +3396,7 @@ function ydRender(){
     <div class="cfl">색</div>
     ${fams.length>1?`<div class="seg" style="margin-top:0"><button type="button" class="${ydFam?'':'on'}" onclick="ydFam='';ydRender()">전체</button>${fams.map(f=>`<button type="button" class="${ydFam===f?'on':''}" data-f="${esc(f)}" onclick="ydFam=this.dataset.f;ydRender()">${esc(f)}</button>`).join('')}</div>`:''}
     ${cols.length?`<div class="cgrid">${cols.map(c=>`<button type="button" class="${y.color===label(c)?'on':''}" data-l="${esc(label(c))}" data-f="${esc(c.family||'')}" onclick="ydColor(this.dataset.l,this.dataset.f)"><i style="background:${famBg(c.family)}"></i>${esc(label(c))}</button>`).join('')}</div>`:''}
-    <input id="ydColorIn" maxlength="40" placeholder="${(y.colors||[]).length?'목록에 없는 색 직접 입력':'색 이름·번호 (예: 베이지 #2)'}" value="${esc((y.colors||[]).some(c=>label(c)===y.color)?'':y.color||'')}" oninput="yd.color=this.value;yd.colorFamily=''">
+    <div class="ycrow" onclick="ydPickColor()"><i class="ychip" style="background:${yColorCss(y)}"></i><div class="tx"><b>${esc(y.color||'색 고르기')}</b><span>${y.colorHex&&y.colorHex.length?(COLOR_MODES[y.colorMode]||'단색')+(y.colorFamily?' · '+esc(y.colorFamily):''):(cols.length?'목록에 없으면 팔레트에서 직접 골라요':'팔레트에서 고르면 이름이 자동으로 붙어요 · 여러 색 실도 돼요')}</span></div><span class="car">›</span></div>
     <div class="cfl">${ypStashMode==='manual'?'몇 볼 샀나요?':'사용량'}</div>
     <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button type="button" onclick="ydStep(-1)">−</button><input id="ydAmt" inputmode="decimal" maxlength="7" value="${esc(y.amount)}" placeholder="0" onfocus="this.select()" oninput="yd.amount=this.value.replace(',', '.')"><button type="button" onclick="ydStep(1)">＋</button></div>
       <div class="seg" style="margin:0">${['볼','g'].map(u=>`<button type="button" class="${y.unit===u?'on':''}" onclick="ydUnit('${u}')">${u}</button>`).join('')}</div></div>
@@ -3284,7 +3406,8 @@ function ydRender(){
     ${y.rating!==''&&y.rating!=null?`<div class="cfl">이유</div><div class="seg" style="margin-top:0">${Y_REASONS.map(r=>`<button type="button" class="${y.rating_reason===r?'on':''}" onclick="yd.rating_reason=(yd.rating_reason==='${r}'?'':'${r}');ydRender()">${r}</button>`).join('')}</div>`:''}
   `, { label: ypStashMode==='manual'?'실함에 담기':'완료', fn:ydDone });
 }
-function ydColor(label, fam){ yd.color=label; yd.colorFamily=fam||''; ydRender(); }
+function ydColor(label, fam){ yd.color=label; yd.colorFamily=fam||''; yd.colorHex=null; yd.colorMode='solid'; yd.colorFamilies=fam?[fam]:[]; ydRender(); }
+function ydPickColor(){ openColorPick({ name:yd.color, family:yd.colorFamily, hex:yd.colorHex, mode:yd.colorMode }, r=>{ yd.color=r.name; yd.colorFamily=r.family; yd.colorFamilies=r.families; yd.colorHex=r.hex; yd.colorMode=r.mode; ydRender(); }); }
 function ydUnit(u){ if(yd.unit===u) return; yd.unit=u; yd.amount = u==='g' ? '' : '1'; ydRender(); }
 function ydStep(d){ const step = yd.unit==='g'?10:0.5; let v=parseFloat(yd.amount)||0; v=Math.max(0, Math.round((v+d*step)*100)/100); yd.amount = v?String(v):''; const el=$('#ydAmt'); if(el) el.value=yd.amount; }
 function ydDone(){
@@ -3311,7 +3434,7 @@ async function loadStash(){
   return stashRows;
 }
 function stashSpec(s){ return [s.color, s.ball_g&&s.ball_m?`${fmtBalls(s.ball_g)}g · ${fmtBalls(s.ball_m)}m`:(s.ball_g?`${fmtBalls(s.ball_g)}g`:''), s.fibers?Object.entries(s.fibers).map(([k,v])=>k+' '+v).join(' '):(s.fiber||''), (s.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · '); }
-function stashThumbHtml(s){ const u=s.band_photo&&stashThumb[s.band_photo]; return `<div class="sthumb" style="${u?`background-image:url(${u})`:''}">${u?'':ico('yarn')}<i style="background:${famBg(s.color_family)}"></i></div>`; }
+function stashThumbHtml(s){ const u=s.band_photo&&stashThumb[s.band_photo]; return `<div class="sthumb" style="${u?`background-image:url(${u})`:''}">${u?'':ico('yarn')}<i style="background:${stashColorCss(s)}"></i></div>`; }
 function stashName(s){ return s.raw_name || (s.read_status==='pending'?'볼밴드 읽는 중…':s.read_status==='failed'?'이름을 적어 주세요':'이름 없는 실'); }
 async function openStash(){ show('stash'); $('#stashBody').innerHTML='<div class="empty">불러오는 중…</div>'; await loadStash(); renderStash(); stashWatch(); }
 function closeStash(){ clearTimeout(stashPoll); stashPoll=null; go('my'); }
@@ -3365,15 +3488,17 @@ async function stashAddSave(){
 function stashAddManual(){ ypStashMode='manual'; openYarnPick(-1); }
 // ----- 실함 항목 상세: 볼밴드 원본, 규격·남은 볼 수정, 삭제, 이 실로 뜬 작품
 let siRow=null;
-async function openStashItem(id){
-  const s=stashRows.find(x=>x.id===id); if(!s) return; siRow=JSON.parse(JSON.stringify(s));
+async function openStashItem(id, draft){
+  const s=draft||stashRows.find(x=>x.id===id); if(!s) return; siRow=draft||JSON.parse(JSON.stringify(s)); if(draft && draft._ed) siRow._ed=draft._ed;
   const { data:logs } = await sb.from('yarn_stash_log').select('work_id,delta,created_at').eq('stash_id', id).order('created_at',{ascending:false}).limit(20);
   let works=[]; const wids=(logs||[]).map(l=>l.work_id).filter(Boolean); if(wids.length){ const r=await sb.from('works').select('id,title').in('id', wids); works=r.data||[]; }
   const u=s.band_photo&&stashThumb[s.band_photo];
   openSub('실 정보', `${u?`<img src="${u}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--bg2);margin-top:8px" onclick="openPhoto(this.src)">`:''}
     ${s.read_status==='failed'?'<p class="muted" style="font-size:.85rem">볼밴드를 읽지 못했어요. 아래에 직접 적어 주세요.</p>':s.read_status==='done'?'<p class="muted" style="font-size:.85rem">볼밴드에서 읽어 온 값이에요. 다르면 고쳐 주세요 — 고친 값이 우선이에요.</p>':''}
     <label class="f" style="margin-top:8px">실 이름<input maxlength="60" value="${esc(s.raw_name||'')}" placeholder="브랜드 + 제품명" oninput="siSet('raw_name',this.value)"></label>
-    <label class="f" style="margin-top:10px">색 이름·번호<input maxlength="40" value="${esc(s.color||'')}" placeholder="예: 2 베이지" oninput="siSet('color',this.value)"></label>
+    <div class="cfl">색 <span class="muted">번호가 있으면 이름 앞에 같이 적어요</span></div>
+    <div class="ycrow" style="margin-top:0" onclick="siPickColor()"><i class="ychip" style="background:${stashColorCss(s)}"></i><div class="tx"><b>${esc(s.color||'색 고르기')}</b><span>${s.color_hex&&s.color_hex.length?(COLOR_MODES[s.color_mode]||'단색')+(s.color_family?' · '+esc(s.color_family):''):'팔레트에서 고르면 이름이 자동으로 붙어요'}</span></div><span class="car">›</span></div>
+    <input maxlength="40" style="margin-top:6px" value="${esc(s.color||'')}" placeholder="색 이름·번호 직접 적기 (예: 2 베이지)" oninput="siSet('color',this.value);const b=this.previousElementSibling.querySelector('.tx b');if(b)b.textContent=this.value||'색 고르기'">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px"><label class="f">1볼 중량 (g)<input inputmode="decimal" maxlength="6" value="${s.ball_g?fmtBalls(s.ball_g):''}" oninput="siSet('ball_g',this.value)"></label><label class="f">1볼 길이 (m)<input inputmode="decimal" maxlength="6" value="${s.ball_m?fmtBalls(s.ball_m):''}" oninput="siSet('ball_m',this.value)"></label></div>
     <label class="f" style="margin-top:10px">혼용률<input maxlength="40" value="${esc(s.fibers?Object.entries(s.fibers).map(([k,v])=>k+' '+v).join(', '):'')}" placeholder="예: 울 80, 나일론 20" oninput="siSet('mix',this.value)"></label>
     <div class="cfl">남은 볼 <span class="muted">잃어버렸거나 나눠 줬으면 직접 고쳐 주세요</span></div>
@@ -3382,13 +3507,14 @@ async function openStashItem(id){
     <button type="button" class="btn r" style="width:100%;margin-top:22px" onclick="stashDelete('${s.id}')">실함에서 지우기</button>`, { label:'저장', fn:stashItemSave });
 }
 function siSet(k,v){ siRow[k]=v; (siRow._ed=siRow._ed||new Set()).add(k==='mix'?'fibers':k); }
+function siPickColor(){ const s=siRow; openColorPick({ name:s.color, family:s.color_family, hex:s.color_hex, mode:s.color_mode }, r=>{ s.color=r.name; s.color_family=r.family; s.color_families=r.families; s.color_hex=r.hex; s.color_mode=r.mode; (s._ed=s._ed||new Set()).add('color'); openStashItem(s.id, s); }); }
 function siStep(d){ siRow.left_balls=Math.max(0, Math.round(((parseFloat(siRow.left_balls)||0)+d*0.5)*100)/100); $('#siLeft').value=fmtBalls(siRow.left_balls); }
 async function stashItemSave(){
   const s=siRow, num=v=>{ const t=String(v??'').trim().replace(',', '.'); return t===''?null:(/^\d{1,5}(\.\d{1,2})?$/.test(t)&&+t>0?+t:NaN); };
   const g=num(s.ball_g), m=num(s.ball_m), left=parseFloat(s.left_balls);
   if(Number.isNaN(g)||Number.isNaN(m)) return toast('1볼 중량·길이는 숫자로 적어 주세요'); if(!(left>=0)||left>999) return toast('남은 볼을 확인해 주세요');
   const edited=[...new Set([...(s.edited||[]), ...(s._ed||[])])];
-  const patch={ raw_name:(s.raw_name||'').trim().slice(0,60)||null, color:(s.color||'').trim().slice(0,40)||null, ball_g:g, ball_m:m, left_balls:Math.round(left*100)/100, edited };
+  const patch={ raw_name:(s.raw_name||'').trim().slice(0,60)||null, color:(s.color||'').trim().slice(0,40)||null, color_hex:(s.color_hex&&s.color_hex.length)?s.color_hex:null, color_mode:(s.color_hex&&s.color_hex.length)?(s.color_mode||'solid'):null, color_families:(s.color_families&&s.color_families.length)?s.color_families:null, ball_g:g, ball_m:m, left_balls:Math.round(left*100)/100, edited };
   if(s._ed?.has('fibers')) patch.fibers=parseMix(s.mix);
   if(left>+s.bought_balls) patch.bought_balls=patch.left_balls;
   if(patch.raw_name && s.read_status!=='done') patch.read_status='manual';
@@ -3406,13 +3532,13 @@ async function stashDelete(id){
 // ----- 실 고르기와의 연결
 let ypStashMode='';   // 'manual' = 실함에 이름으로 직접 추가하는 중, 'cert' = 인증 도중 볼밴드 추가
 async function stashYarn(s){   // 실함의 실 → 인증 입력용 실
-  const y=wyBlank(); y.name=s.raw_name||''; y.color=s.color||''; y.colorFamily=s.color_family||''; y.catalogId=s.catalog_id||null; y.stashId=s.id; y.stashLeft=+s.left_balls; y.fromDict=true;
+  const y=wyBlank(); y.name=s.raw_name||''; y.color=s.color||''; y.colorFamily=s.color_family||''; y.colorHex=s.color_hex||null; y.colorMode=s.color_mode||'solid'; y.colorFamilies=s.color_families||(s.color_family?[s.color_family]:[]); y.catalogId=s.catalog_id||null; y.stashId=s.id; y.stashLeft=+s.left_balls; y.fromDict=true;
   if(s.ball_g) y.ball_g=fmtBalls(s.ball_g); if(s.ball_m) y.ball_m=fmtBalls(s.ball_m); if(s.fiber) y.fiber=s.fiber; if(s.fibers) y.mix=Object.entries(s.fibers).map(([k,v])=>k+' '+v).join(', ');
   wyAutoWeight(y); return y;
 }
 async function stashAddFromDict(y){   // 실 사전·직접 입력으로 고른 실을 실함에 담기
   const g=parseFloat(y.ball_g)||null, m=parseFloat(y.ball_m)||null;
-  const { data:row, error } = await sb.from('yarn_stash').insert({ catalog_id:y.catalogId||null, raw_name:y.name.slice(0,60), color:(y.color||'').slice(0,40)||null, ball_g:g, ball_m:m, fiber:y.fiber||null, fibers:parseMix(y.mix), weight:y.weight||null, bought_balls:+y.amount||1, left_balls:+y.amount||1, read_status:'manual' }).select('id').single();
+  const { data:row, error } = await sb.from('yarn_stash').insert({ catalog_id:y.catalogId||null, raw_name:y.name.slice(0,60), color:(y.color||'').slice(0,40)||null, color_hex:(y.colorHex&&y.colorHex.length)?y.colorHex:null, color_mode:(y.colorHex&&y.colorHex.length)?(y.colorMode||'solid'):null, color_families:(y.colorFamilies&&y.colorFamilies.length)?y.colorFamilies:null, ball_g:g, ball_m:m, fiber:y.fiber||null, fibers:parseMix(y.mix), weight:y.weight||null, bought_balls:+y.amount||1, left_balls:+y.amount||1, read_status:'manual' }).select('id').single();
   if(error) return toast(error.message);
   if(!y.catalogId) sb.rpc('stash_link_catalog', { p_id:row.id }).then(()=>{});
   toast('내 실함에 담았어요'); closeSub(); ypStashMode=''; openStash();
