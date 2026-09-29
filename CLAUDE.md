@@ -71,6 +71,7 @@
 - **값이 곧 권리인 것은 서버가 계산**(점수·레벨·Index·자격·확정·결제 금액). 클라이언트가 보낸 숫자·URL은 믿지 않는다. 알림 딥링크는 서버가 만든 `notifications.link`만, 앱 `openLink`는 정해진 종류만 연다
 - **외부 링크는 확인 시트로**(`openExt(url, what)`: 도메인 표시 → 열기): 작가 링크·가게 링크·도안 구매 링크. 앱이 임의 URL로 리다이렉트하지 않음. 로그인 복귀 주소는 고정
 - **클래스·모임 본문에 링크·계좌번호 금지**(`LINK_RE`·`ACCT_RE`) — 신청·결제 안내는 앱 안(채팅방)에서만. 지기 AI 1단계 규칙(가입 3일 내 외부 링크) 유지
+- **권한 전수 점검(2026-09-30, schema 66)**: `supabase/tests/permissions_test.sql` 4블록(demo1→demo2 읽기·쓰기·관리자 함수·anon)을 **새 마이그레이션마다 실행**, 새 테이블·함수는 테스트에 한 줄 추가. 자산 분류표 `resources/security/data_assets.md`(등급·위치·열쇠별 범위) 갱신. anon 은 app_config 만. **실 사전·색·판매처·브랜드 별칭은 관리자만 직접 조회** — 앱은 `yarn_suggest`·`yarn_popular`·`yarn_colors_of`·`yarn_catalog_name`·`yarn_similar` 함수로만(테이블 직접 `from('yarn_catalog')` 금지). 1급 데이터(이메일·배송지)를 내보내는 관리자 함수는 `perform log_access(kind, target, n)` 한 줄 필수(`access_logs` 400일). `admins` 변경은 트리거가 즉시 텔레그램 경보
 - **나중에 결제(PG) 붙일 때**: 주문은 서버가 만들고 금액·주문번호를 먼저 저장 → PG 서명(SHA256/512) 검증 + DB 금액 일치할 때만 승인 · 승인 URL은 IDC 센터 코드(fc/ks/stg)별 허용 목록을 서버 설정에 고정하고 결과값의 URL은 따라가지 않음 · 웹훅/리턴 URL 고정 + 시크릿 검증 · 오프라인 클래스·모임비는 외부 PG + 통신판매업 신고, 유료 도안은 Apple IAP(서버 영수증 검증)
 
 ## 백엔드 (Supabase)

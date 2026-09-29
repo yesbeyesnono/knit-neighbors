@@ -1331,3 +1331,18 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_stash_search(q, offset): 닉네임·실 이름으로 실함 50줄씩(회원별 보기는 검색으로만)
 --   콘솔 › 회원 실함: 숫자 4장(매칭률·인증 매칭률·읽기 실패(30% 넘으면 AI 키 경고)·묶음 수) → 처리할 묶음 표(후보 버튼 70점 이상 강조 + 실 이름 검색 → 연결) → 회원·실 찾기(50줄 페이지)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 66. 권한 전수 점검 · 회사 자산 보호 · 1급 열람 기록 · 관리자 변경 경보 (마이그레이션 security_audit_v1) — 2026-09-30 대표 지시 "마이그레이션 적용해"
+--   점검 테스트: supabase/tests/permissions_test.sql (P1 남의 데이터·자산 읽기 / P2 남의 데이터·서버 계산값 쓰기 / P3 관리자·권한 상승 함수 / P4 anon). 새 마이그레이션마다 재실행, 새 테이블·함수는 한 줄씩 추가
+--   자산 분류표: resources/security/data_assets.md (등급·위치·열람자·보관·열쇠별 범위)
+--   ① anon: 모든 테이블·시퀀스·함수 권한 회수 + default privileges 회수, app_config select 만 (RLS 는 원래 authenticated 전용이었음 — 이중 잠금)
+--   ② authenticated: truncate/references/trigger 회수. 트리거·내부 함수 실행 회수: jigi_on_shop_claim, yarn_stash_fill, yarn_add_alias, yarn_catalog_import (트리거는 EXECUTE 권한 없어도 발동함 — 확인)
+--   ③ open_support_room(p_support): p_support 가 admins 에 있을 때만 (전에는 아무 회원과 1:1 방 개설 가능 = 친구·차단 우회 DM 경로)
+--   ④ supporter_stats(): 관리자 또는 서비스(auth.uid() null)만, 회원은 null
+--   ⑤ 회사 자산 직접 조회 차단: yarn_catalog·yarn_colors·yarn_sellers·yarn_brand_aliases select 정책 → is_admin(). 앱은 함수로만: yarn_suggest(8) · yarn_similar · yarn_popular()(uses>0 상위 12) · yarn_colors_of(catalog)(200) · yarn_catalog_name(id). 색 실물 사진 URL(버킷 yarn-colors) 은 공개 유지
+--   ⑥ access_logs(actor, kind, target, n): 1급 데이터 열람 기록, 관리자 읽기·service_role 쓰기. log_access(kind, target, n) 은 grant 없음(함수 안에서만). admin_find_users(이메일) · admin_event_apps(배송지) 가 기록. 크론 access-logs-clean(매월 1일 03:30 KST) 400일 지난 것 삭제 — 안전성 확보조치 기준 '접속기록 1년'
+--   ⑦ admins insert/delete 트리거 admins_alert → jigi_reminders 에 긴 경보 글(누가·무엇·언제·할 일) + jigi_remind_call('tick') 즉시 텔레그램
+--   ⑧ search_path 지정: kst_date, supporter_segment, color_hex_clean, yarn_fiber_combo, yarn_fiber_norm
+--   남은 것(대표): Supabase 대시보드 › Authentication › Leaked password protection 켜기 · 계정 2단계 인증 · PITR 여부 확인(Database › Backups). pg_net 스키마 이동은 호출 코드 영향으로 안 함
+-- ---------------------------------------------------------------

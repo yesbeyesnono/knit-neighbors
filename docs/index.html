@@ -2192,8 +2192,8 @@ async function fillWEvent(){
 }
 async function wEventPicked(){   // 이벤트에 실 사전의 실이 연결돼 있으면 실 카드를 하나 만들어 준다
   const ev=(fillWEvent.map||{})[$('#wEvent').value]; if(!ev?.catalog_id || wYarns.length) return;
-  const { data:c } = await sb.from('yarn_catalog').select('product').eq('id', ev.catalog_id).maybeSingle(); if(!c) return;
-  const { data } = await sb.rpc('yarn_suggest', { p_q:c.product }); const r=(data||[]).find(x=>x.id===ev.catalog_id); if(!r) return;
+  const { data:cname } = await sb.rpc('yarn_catalog_name', { p_id: ev.catalog_id }); if(!cname) return;
+  const { data } = await sb.rpc('yarn_suggest', { p_q:cname }); const r=(data||[]).find(x=>x.id===ev.catalog_id); if(!r) return;
   wYarns=[await yarnFromDict(r)]; renderWYarns();
 }
 
@@ -2813,7 +2813,7 @@ function wyAddSame(){ if(wYarns.length>=6) return toast('실은 6개까지 적�
 async function yarnFromDict(r){
   const y=wyBlank(); y.name=r.name; y.catalogId=r.id||null; y.fromDict=!!r.id;
   if(r.ball_g) y.ball_g=String(r.ball_g); if(r.ball_m) y.ball_m=String(r.ball_m); if(r.fiber) y.fiber=r.fiber; if(r.fibers) y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', ');
-  if(r.id){ const { data:cs } = await sb.from('yarn_colors').select('no,name,family,photo,color_hex,color_mode').eq('catalog_id', r.id).order('id').limit(160); y.colors=cs||[]; }
+  if(r.id){ const { data:cs } = await sb.rpc('yarn_colors_of', { p_catalog: r.id }); y.colors=cs||[]; }   // 실 사전은 직접 조회 불가(schema 66) — 함수로 실 하나씩
   wyAutoWeight(y); return y;
 }
 function renderWNeedles(){
@@ -3364,7 +3364,7 @@ async function ypLoadTab(k){
   ypRows=[]; ypRender('불러오는 중…');
   let rows=[];
   if(k==='recent'){ const { data } = await sb.from('works').select('yarns').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(12); const seen=new Set(); (data||[]).forEach(w=>(w.yarns||[]).forEach(y=>{ if(y.name && !seen.has(y.name) && rows.length<10){ seen.add(y.name); rows.push({ id:null, name:y.name, ball_g:y.ball_g, ball_m:y.ball_m, weight:y.weight, fiber:y.fiber, fibers:y.fibers, verified:false, _recent:true }); } })); }
-  else { const { data } = await sb.from('yarn_catalog').select('id,brand,product,ball_g,ball_m,weight_class,fiber_main,fibers,status,uses').is('merged_into',null).gt('uses',0).order('uses',{ascending:false}).limit(12); rows=(data||[]).map(c=>({ id:c.id, name:(c.brand?c.brand+' ':'')+c.product, ball_g:c.ball_g, ball_m:c.ball_m, weight:c.weight_class, fiber:c.fiber_main, fibers:c.fibers, verified:c.status==='verified' })); }
+  else { const { data } = await sb.rpc('yarn_popular'); rows=data||[]; }   // 이웃이 많이 쓴 실 12개 (schema 66: 함수 경유)
   if(seq!==ypSeq) return; ypRows=rows; ypRender(k==='recent'?'아직 인증에 적은 실이 없어요. 위에서 실 이름으로 찾아보세요':'아직 모인 기록이 없어요');
 }
 async function ypPick(i){
