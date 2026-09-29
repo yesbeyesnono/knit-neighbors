@@ -1292,3 +1292,18 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     상세 패널: 통계 줄 · 기본 정보(판매·추천 항목 포함) · 색상 격자(사진 칩, 끌어다 놓기 업로드 160px, 번호·이름·대표색·섞임 편집, 삭제, 추가) · 합치기 · 호환 실 · 회원 입력 원문
 --     브랜드 별칭 패널(yarn_brand_aliases 추가·삭제) · CSV 내보내기(실 / 색)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 62. 실 = 제조사 제품, 판매처는 여러 곳 (마이그레이션 yarn_sellers) — 2026-09-29 대표: 회원이 어느 가게에서 샀든 같은 실로 매칭, 나중에 우리 가게도 판매처로
+--   yarn_sellers(catalog_id, shop, url, price, put_up, in_stock, checked_at) unique(catalog_id, shop). authenticated 읽기, 쓰기는 관리자 정책. 기존 shop/source_url 은 첫 판매처로 복사
+--   admin_yarn_merge: 판매처도 옮김(같은 가게가 이미 있으면 버림)
+-- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 63. 쇼핑몰 4곳 실 전량 수집·등록 (마이그레이션 yarn_bulk_upsert, yarn_bulk_upsert_fix_keys, yarn_photos_apply) — 2026-09-29 대표: 쎄비·앵콜스·바늘이야기·청송뜨개실 구두 협업 완료, 더 많이·속성 누락 없이
+--   admin_yarn_bulk_upsert(jsonb[{brand, product, product_en, aliases[], g, m, fibers{}, fiber_main, weight_class, season, needle_knit, needle_crochet, gauge, put_up, texture, use_tags[], shop, url, colors[{no,name}], sellers[{shop,url,price}]}])
+--     같은 실 찾기: 브랜드+제품명 키가 겹치거나, 제품명 키가 겹치면서 브랜드가 같거나/비어 있거나/가게 자체 브랜드(쎄비·앵콜스·바늘이야기·청송뜨개실)인 경우 → 빈 항목만 채우고 색(번호/이름 기준 없는 것만)·판매처 추가. 없으면 verified 로 새로 등록
+--   admin_yarn_photos_apply(jsonb[{brand, product, no, name, file, hex[], mode}]) → yarn_colors.photo 연결(없는 색은 추가)
+--   큰 JSON 은 SQL 에 붙이지 않고 버킷 yarn-import(공개)에 올린 뒤 pg_net(net.http_get → net._http_response.content) 로 읽어 함수에 넘김
+--   수집 도구(tools/): scrape-shops.py(Cafe24 3곳 + 메이크샵 1곳: 상품명·규격 표·요약·옵션(색상 묶음 제목 포함)·옵션 이미지·상세 이미지, 카테고리 회원 목록은 cats:<site>) → shops-normalize.py(키트 제외, 제조사 브랜드 추출, g/m·혼용률·권장 바늘·게이지 파싱, 카테고리→시즌·굵기·바늘·용도, 촉감 추정, 용량/콘 변형 합치기, 가게 간 같은 실 합치기) → shops-import.py(import_items.json) → shops-photos.py(옵션 이미지 or 색상표 타일 검출·자동 매칭·검수 몽타주) → upload-yarn-colors.py / upload-file.py
+-- ---------------------------------------------------------------
