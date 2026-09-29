@@ -1250,3 +1250,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   Edge Function push-send(supabase/functions/push-send): APNs HTTP/2 + 제공자 JWT(ES256, WebCrypto). 시크릿 APNS_KEY(.p8 전체)·APNS_KEY_ID·APNS_TEAM_ID·(APNS_SANDBOX=1). route 'test' = 로그인 회원이 자기 기기로 테스트, 'status'
 --   iOS: @capacitor/push-notifications 8, App.entitlements(aps-environment production), AppDelegate 에 didRegister/didFail 전달. Apple Developer › Identifiers 에서 두 App ID(…knitneighbors, …knitneighbors.lab)에 Push Notifications 켜야 프로파일에 들어감
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 58. 실 브랜드 별칭 (마이그레이션 yarn_brand_aliases) — 2026-09-29 대표 지시: 쎄비·세비·Sevy 는 같은 브랜드
+--   yarn_brand_aliases(brand, alias): 브랜드 표기 별칭. authenticated 읽기, 쓰기는 관리자(is_admin) 정책. 초기값 쎄비 ← 세비·Sevy·쎄비하우스·세비하우스·Sevy House·Sevyhouse
+--   yarn_suggest: 매칭 키에 norm_keys + 브랜드+제품명 + 브랜드+영문 제품명 + (별칭+제품명, 별칭+영문 제품명) 포함 → "세비 로미오"·"sevy" 로도 쎄비 실이 나옴
+--   새 브랜드 별칭은 이 표에 행만 추가(콘솔 화면 없음, SQL 로)
+-- ---------------------------------------------------------------
