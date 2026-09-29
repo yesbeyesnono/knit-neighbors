@@ -4025,10 +4025,10 @@ async function renderMy(){
     <div id="myDash" ${myPage==='thread'?'hidden':''}>
     <div class="mepro" onclick="openOnboard(true)"><div class="av">${avatar(p,true)}</div><div style="flex:1;min-width:0"><div class="nm">${esc(p.nickname||'')}${lvBadge(p)}${idxChip(p)}</div><div class="sub">${esc(handle)}${p.mbti?' · '+esc(p.mbti):''}</div></div><span class="car">›</span></div>
     <div id="myLv">${myLvCard()}</div>
+    <div class="shopcard" id="myStashCard" onclick="openStash()"><div class="sq">${ico('yarn')}</div><div style="flex:1;min-width:0"><b>내 실함</b><div class="muted" id="myStashSub">볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요</div></div><span style="color:var(--ink3)">›</span></div>
     <div id="myTodo"></div>
     <div id="myWeek"></div>
     <div id="myRecs">${recCard(0)}</div>
-    <div class="shopcard" id="myStashCard" onclick="openStash()"><div class="sq">${ico('yarn')}</div><div style="flex:1;min-width:0"><b>내 실함</b><div class="muted" id="myStashSub">볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요</div></div><span style="color:var(--ink3)">›</span></div>
     ${myShop?`<div class="shopcard" onclick="openShop('${myShop.id}')"><div class="sq">${SHOP_SVG}</div><div style="flex:1;min-width:0"><b>${esc(myShop.name)}</b><div class="muted" id="myShopSub">내 가게 · 소식·클래스 올리기 · 팔로워</div></div><span style="color:var(--ink3)">›</span></div>`:''}
     ${!myShop&&p.is_author?`<div class="shopcard" onclick="goMy('thread','classes')"><div class="sq">${ico('cert')}</div><div style="flex:1;min-width:0"><b>작가 클래스</b><div class="muted" id="myShopSub">클래스 열기 · 신청자 확정</div></div><span style="color:var(--ink3)">›</span></div>`:''}
     <p class="muted" style="text-align:center;font-size:.78rem;padding:14px 0 6px">왼쪽으로 밀면 내 기록(Thread) →</p>
