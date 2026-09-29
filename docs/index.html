@@ -3497,7 +3497,9 @@ async function openStashItem(id, draft){
   const u=s.band_photo&&stashThumb[s.band_photo];
   openSub('실 정보', `${u?`<img src="${u}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--bg2);margin-top:8px" onclick="openPhoto(this.src)">`:''}
     ${s.read_status==='failed'?'<p class="muted" style="font-size:.85rem">볼밴드를 읽지 못했어요. 아래에 직접 적어 주세요.</p>':s.read_status==='done'?'<p class="muted" style="font-size:.85rem">볼밴드에서 읽어 온 값이에요. 다르면 고쳐 주세요 — 고친 값이 우선이에요.</p>':''}
-    <label class="f" style="margin-top:8px">실 이름<input maxlength="60" value="${esc(s.raw_name||'')}" placeholder="브랜드 + 제품명" oninput="siSet('raw_name',this.value)"></label>
+    <label class="f" style="margin-top:8px">실 이름<input id="siName" maxlength="60" autocomplete="off" value="${esc(s.raw_name||'')}" placeholder="브랜드 + 제품명 (예: 낙양모사 아임울)" oninput="siSet('raw_name',this.value);siSuggest(this.value)"></label>
+    <div class="plist" id="siSug" hidden></div>
+    <p class="muted" id="siLink" style="font-size:.8rem;margin:4px 0 0">${s.catalog_id?'✓ 실 사전에 연결된 실이에요':'이름을 적으면 실 사전에서 찾아 드려요 · 고르면 규격이 채워져요'}</p>
     <div class="cfl">색 <span class="muted">번호가 있으면 이름 앞에 같이 적어요</span></div>
     <div class="ycrow" style="margin-top:0" onclick="siPickColor()"><i class="ychip" style="background:${stashColorCss(s)}"></i><div class="tx"><b>${esc(s.color||'색 고르기')}</b><span>${s.color_hex&&s.color_hex.length?(COLOR_MODES[s.color_mode]||'단색')+(s.color_family?' · '+esc(s.color_family):''):'팔레트에서 고르면 이름이 자동으로 붙어요'}</span></div><span class="car">›</span></div>
     <input maxlength="40" style="margin-top:6px" value="${esc(s.color||'')}" placeholder="색 이름·번호 직접 적기 (예: 2 베이지)" oninput="siSet('color',this.value);const b=this.previousElementSibling.querySelector('.tx b');if(b)b.textContent=this.value||'색 고르기'">
@@ -3508,7 +3510,24 @@ async function openStashItem(id, draft){
     ${works.length?`<div class="cfl">이 실로 뜬 내 작품</div>${works.map(w=>`<div class="muted" style="padding:3px 0">· ${esc(w.title||'')}</div>`).join('')}`:''}
     <button type="button" class="btn r" style="width:100%;margin-top:22px" onclick="stashDelete('${s.id}')">실함에서 지우기</button>`, { label:'저장', fn:stashItemSave });
 }
-function siSet(k,v){ siRow[k]=v; (siRow._ed=siRow._ed||new Set()).add(k==='mix'?'fibers':k); }
+function siSet(k,v){ siRow[k]=v; (siRow._ed=siRow._ed||new Set()).add(k==='mix'?'fibers':k); if(k==='raw_name') siRow.catalog_id=null; }
+// 실 이름 자동완성(실 사전 yarn_suggest) — 고르면 표준 이름·규격·혼용률을 채우고 catalog_id 로 연결
+let siSugTimer=null, siSugSeq=0, siSugRows=[];
+function siSuggest(v){
+  clearTimeout(siSugTimer); const q=(v||'').trim(); const box=$('#siSug'); if(!box) return;
+  if(q.length<2){ box.hidden=true; box.innerHTML=''; return; }
+  siSugTimer=setTimeout(async()=>{ const seq=++siSugSeq; const { data } = await sb.rpc('yarn_suggest', { p_q:q }); if(seq!==siSugSeq || !$('#siSug')) return; siSugRows=data||[];
+    box.innerHTML=siSugRows.map((r,i)=>`<button type="button" onclick="siPickDict(${i})"><div><b>${esc(r.name)}${r.verified?'<span class="vtag">확인된 실</span>':''}</b><span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('');
+    box.hidden=!siSugRows.length; }, 250);
+}
+function siPickDict(i){
+  const r=siSugRows[i]; if(!r) return; const s=siRow, ed=(s._ed=s._ed||new Set());
+  s.raw_name=r.name; s.catalog_id=r.id||null; ed.add('raw_name');
+  if(r.ball_g){ s.ball_g=String(r.ball_g); ed.add('ball_g'); } if(r.ball_m){ s.ball_m=String(r.ball_m); ed.add('ball_m'); }
+  if(r.fibers){ s.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '); s.fibers=r.fibers; ed.add('fibers'); }
+  if(r.weight) s.weight=r.weight;
+  siSugRows=[]; openStashItem(s.id, s); toast('실 사전과 연결했어요');
+}
 function siPickColor(){ const s=siRow; openColorPick({ name:s.color, family:s.color_family, hex:s.color_hex, mode:s.color_mode }, r=>{ s.color=r.name; s.color_family=r.family; s.color_families=r.families; s.color_hex=r.hex; s.color_mode=r.mode; (s._ed=s._ed||new Set()).add('color'); openStashItem(s.id, s); }); }
 function siStep(d){ siRow.left_balls=Math.max(0, Math.round(((parseFloat(siRow.left_balls)||0)+d*0.5)*100)/100); $('#siLeft').value=fmtBalls(siRow.left_balls); }
 async function stashItemSave(){
@@ -3518,6 +3537,7 @@ async function stashItemSave(){
   const edited=[...new Set([...(s.edited||[]), ...(s._ed||[])])];
   const patch={ raw_name:(s.raw_name||'').trim().slice(0,60)||null, color:(s.color||'').trim().slice(0,40)||null, color_hex:(s.color_hex&&s.color_hex.length)?s.color_hex:null, color_mode:(s.color_hex&&s.color_hex.length)?(s.color_mode||'solid'):null, color_families:(s.color_families&&s.color_families.length)?s.color_families:null, ball_g:g, ball_m:m, left_balls:Math.round(left*100)/100, edited };
   if(s._ed?.has('fibers')) patch.fibers=parseMix(s.mix);
+  if(s._ed?.has('raw_name')) patch.catalog_id=s.catalog_id||null;   // 자동완성에서 고른 사전 실 → 바로 연결, 이름을 새로 적었으면 연결 해제 뒤 다시 찾기
   if(left>+s.bought_balls) patch.bought_balls=patch.left_balls;
   if(patch.raw_name && s.read_status!=='done') patch.read_status='manual';
   const y={ ball_g:patch.ball_g, ball_m:patch.ball_m }; const gw=yarnWeightGuess(y); if(gw) patch.weight=gw.name;
