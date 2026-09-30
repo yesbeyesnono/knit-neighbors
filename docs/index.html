@@ -552,8 +552,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .top{padding-top:calc(14px + env(safe-area-inset-top,0px))}
 #v-compose .top{padding-top:calc(10px + env(safe-area-inset-top,0px))}
 #v-comm .subtabs{top:env(safe-area-inset-top,0px)}
-.filters{top:env(safe-area-inset-top,0px)}
-.mapempty{top:calc(70px + env(safe-area-inset-top,0px))}
+.filters{top:0}   /* 지도는 머리(.top) 아래에 있어 노치 여백을 또 주면 칩 위가 비어 보임 */
+.mapempty{top:70px}
 .slides{padding-top:env(safe-area-inset-top,0px)}
 .sheet{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}
 /* 작성 행 */
