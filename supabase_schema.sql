@@ -1346,3 +1346,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   ⑧ search_path 지정: kst_date, supporter_segment, color_hex_clean, yarn_fiber_combo, yarn_fiber_norm
 --   남은 것(대표): Supabase 대시보드 › Authentication › Leaked password protection 켜기 · 계정 2단계 인증 · PITR 여부 확인(Database › Backups). pg_net 스키마 이동은 호출 코드 영향으로 안 함
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 67. 실 사전 자동완성 더보기 (마이그레이션 yarn_suggest_page) — 2026-09-30 대표: "8건 보여 주고 목록 끝 '더보기'를 누르면 8건씩 더"
+--   yarn_suggest_page(p_q, p_offset): yarn_suggest 와 같은 조건·순서(확인된 실 → 많이 쓴 순 → 브랜드·제품·id 로 고정) + offset, 9건 반환 → 앱은 8건 표시 + 9번째가 있으면 '더보기'
+--   앱 ypSearch(q, more): ypQuery/ypOffset/ypMore 상태, 더보기는 ypSearch(ypQuery, true). yarn_suggest(8건)는 실함 편집 자동완성·이벤트 실 연결 등에서 그대로 사용
+--   같이 고침: 실 고르기 목록의 '확인된 실' 칩이 제목 너비로 늘어나던 CSS(.plist>button span{display:block} 이 .vtag 에 적용) → .plist>button b .vtag inline-block
+-- ---------------------------------------------------------------

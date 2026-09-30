@@ -648,7 +648,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .plist{display:flex;flex-direction:column}
 .plist>button{display:flex;align-items:center;gap:12px;width:100%;padding:13px 2px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .plist>button .pi{flex:none;width:36px;height:36px;border-radius:10px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center}
-.plist>button b{display:block}.plist>button span{display:block;font-size:.82rem;color:var(--ink2)}
+.plist>button b{display:block}.plist>button span{display:block;font-size:.82rem;color:var(--ink2)}.plist>button b .vtag{display:inline-block;font-size:.68rem;color:var(--moss)}
 .vtag{display:inline-block;font-size:.68rem;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--moss-soft);color:var(--moss);margin-left:6px;vertical-align:middle}
 .specband{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--moss-soft);font-size:.85rem;margin:8px 0 4px}.specband div{flex:1;min-width:0}.specband b{display:block;color:var(--moss);font-size:.78rem}.specband button{flex:none;border:0;background:none;font:inherit;text-decoration:underline;color:var(--ink2);cursor:pointer}
 .ycrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:#fff;margin-top:6px}.ycrow .ychip{flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--line)}.ycrow .tx{flex:1;min-width:0}.ycrow .tx b{display:block;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ycrow .tx span{display:block;font-size:.78rem;color:var(--ink2)}.ycrow .car{color:var(--ink3);font-size:1.2rem}
@@ -3337,7 +3337,7 @@ function classBox(p){
 }
 
 // ----- 실 고르기 (datalist 대신 직접 그린 목록)
-let ypIdx=-1, ypTab='search', ypRows=[], ypTimer=null, ypSeq=0;
+let ypIdx=-1, ypTab='search', ypRows=[], ypTimer=null, ypSeq=0, ypQuery='', ypOffset=0, ypMore=false;
 function openYarnPick(idx){
   if(idx<0 && ypStashMode!=='manual' && wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요');
   ypIdx=idx; ypTab='recent'; ypRows=[]; const manual = ypStashMode==='manual';
@@ -3350,13 +3350,17 @@ function openYarnPick(idx){
 function ypTabsRender(){ const n=stashRows.filter(x=>+x.left_balls>0 && x.raw_name).length; $('#ypTabs').innerHTML=[...(ypStashMode==='manual'?[]:[['stash','내 실함'+(n?' '+n:'')]]),['search','검색 결과'],['recent','최근 쓴 실'],['popular','이웃이 많이 쓴 실']].map(([k,l])=>`<button type="button" class="${ypTab===k?'on':''}" onclick="ypLoadTab('${k}')">${l}</button>`).join(''); }
 function ypRender(emptyMsg){
   ypTabsRender();
-  $('#ypList').innerHTML = ypRows.length ? ypRows.map((r,i)=> r._stash ? `<button type="button" onclick="ypPick(${i})">${stashThumbHtml(r._stash)}<div style="flex:1;min-width:0"><b>${esc(r.name)}</b><span>${esc(stashSpec(r._stash))}</span></div><span class="sleft">${fmtBalls(r._stash.left_balls)}볼 남음</span></button>` : `<button type="button" onclick="ypPick(${i})"><div><b>${esc(r.name)}${r.verified?'<span class="vtag">확인된 실</span>':''}</b><span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('') : `<div class="empty" style="padding:24px 0">${emptyMsg||''}</div>`;
+  $('#ypList').innerHTML = ypRows.length ? ypRows.map((r,i)=> r._stash ? `<button type="button" onclick="ypPick(${i})">${stashThumbHtml(r._stash)}<div style="flex:1;min-width:0"><b>${esc(r.name)}</b><span>${esc(stashSpec(r._stash))}</span></div><span class="sleft">${fmtBalls(r._stash.left_balls)}볼 남음</span></button>` : `<button type="button" onclick="ypPick(${i})"><div><b>${esc(r.name)}${r.verified?'<span class="vtag">확인된 실</span>':''}</b><span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('') + (ypTab==='search'&&ypMore?`<button type="button" style="justify-content:center;color:var(--acc);font-weight:700" onclick="ypSearch(ypQuery,true)">더보기 ↓</button>`:'') : `<div class="empty" style="padding:24px 0">${emptyMsg||''}</div>`;
   const q=($('#ypQ')?.value||'').trim();
   if(ypTab==='stash' && !q){ $('#ypDirect').innerHTML=`<p class="muted" style="font-size:.82rem;margin:12px 0">찍어 둔 실에서 고르면 이름·규격·색이 한 번에 들어가요.</p><button type="button" class="btn o" style="width:100%" onclick="ypStashMode='cert';openStashAdd()">${ico('camera')} 볼밴드 찍어서 바로 추가</button><button type="button" class="cfrow" onclick="ypLoadTab('search');$('#ypQ').focus()"><span>실함에 없는 실 직접 입력</span><span class="muted">›</span></button>`; return; }
   $('#ypDirect').innerHTML = q ? `<button type="button" class="cfrow" onclick="ypDirect()"><span>"${esc(q)}" 직접 입력하기</span><span class="muted">›</span></button>` : `<p class="muted" style="font-size:.82rem;margin-top:14px">찾는 실이 없으면 이름을 적고 「직접 입력하기」를 눌러 주세요.</p>`;
 }
 function ypInput(v){ clearTimeout(ypTimer); const q=v.trim(); if(!q){ return ypLoadTab('recent'); } ypTimer=setTimeout(()=>ypSearch(q), 250); }
-async function ypSearch(q){ const seq=++ypSeq; ypTab='search'; const { data } = await sb.rpc('yarn_suggest', { p_q:q }); if(seq!==ypSeq) return; ypRows=data||[]; ypRender('실 사전에 아직 없는 실이에요'); }
+async function ypSearch(q, more){   // 8건씩, 9번째가 있으면 '더보기' (대표 2026-09-30)
+  const seq=++ypSeq; ypTab='search'; const off=more?ypOffset+8:0;
+  const { data } = await sb.rpc('yarn_suggest_page', { p_q:q, p_offset:off }); if(seq!==ypSeq) return;
+  const rows=data||[]; ypMore=rows.length>8; const page=rows.slice(0,8); ypRows=more?ypRows.concat(page):page; ypOffset=off; ypQuery=q;
+  ypRender('실 사전에 아직 없는 실이에요'); }
 async function ypLoadTab(k){
   const seq=++ypSeq; ypTab=k;
   if(k==='search'){ const q=($('#ypQ')?.value||'').trim(); if(q) return ypSearch(q); ypRows=[]; return ypRender('실 이름을 입력해 보세요'); }
