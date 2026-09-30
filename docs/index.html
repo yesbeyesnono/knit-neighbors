@@ -386,7 +386,12 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .subtabs::-webkit-scrollbar{display:none}
 /* 커뮤니티: 제목은 스크롤로 올라가고 카테고리 탭이 상단에 고정(스크롤·키보드 후 탭이 제목 밑에 숨던 문제) */
 #v-comm .top{position:static}
-#v-chats .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}#v-chats .top h1{flex:none;text-align:center}#v-chats .top .btn{justify-self:end;width:auto;padding:7px 14px;font-size:.85rem;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink)}
+#v-chats .top{display:flex;justify-content:space-between;align-items:center}#v-chats .top h1{flex:none;text-align:left}
+/* 털실체 제목(2026-09-30 대표 확정): 맨 윗줄 제목은 tsSvg 가 그린 SVG. 탭 화면(커뮤니티·지도·채팅)은 부제목형 + 실 한 가닥(E-4), 보조 화면은 뒤로 + 왼쪽 제목. 마이는 제목 없음 */
+.top h1 svg{display:block;margin:0 auto;max-width:100%;height:auto}.top .back + h1 svg{margin:0}.tshead h1 svg{margin:0}.top.tsl{justify-content:flex-start}.top.tsl h1{flex:none;text-align:left}
+#v-compose .top h1 svg,#v-cert .top h1 svg,#v-meetform .top h1 svg,#v-shopform .top h1 svg,#v-classform .top h1 svg{margin:0 auto}
+.tshead{display:flex;flex-direction:column;gap:4px;min-width:0}.tshead .yarn{display:block;line-height:0}.tshead .yarn svg{display:block}
+#v-map .top{position:relative;z-index:6}#v-chats .top .btn{justify-self:end;width:auto;padding:7px 14px;font-size:.85rem;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink)}
 #v-supporters .body{padding:12px 16px 24px;gap:12px}
 #v-comm .subtabs{position:sticky;top:0;z-index:6;flex:none;background:var(--chip);box-shadow:0 0 0 6px var(--bg)}
 /* 가게(파트너) 핀: 각진 상점 모양 + 새 소식 종 */
@@ -846,6 +851,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 지도 홈 -->
   <section class="view" id="v-map">
+    <div class="top tsl"><div class="tshead"><h1>우리 동네 뜨개 지도</h1><i class="yarn"></i></div></div>
     <div id="mapview" style="flex:1;position:relative">
       <div id="map"></div>
       <div class="mapui filters" id="filters"></div>
@@ -856,7 +862,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 커뮤니티 (Threads 스타일) -->
   <section class="view" id="v-comm">
-    <div class="top"><h1>커뮤니티</h1></div>
+    <div class="top tsl"><div class="tshead"><h1>우리 동네 뜨개 이야기</h1><i class="yarn"></i></div></div>
     <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="meet">모임</button><button data-f="work">작품</button><button data-f="dong">동네</button><button data-f="friends">친구</button></div>
     <div class="cbox" id="cbox" hidden>
       <div id="cboxAva"></div>
@@ -892,7 +898,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 채팅 목록 -->
   <section class="view" id="v-chats">
-    <div class="top"><span style="width:1px"></span><h1>채팅</h1><button class="btn sm o" onclick="openGroupForm()">＋ 단체방</button></div>
+    <div class="top tsl"><div class="tshead"><h1>친구·모임·클래스 대화</h1><i class="yarn"></i></div><button class="btn sm o" onclick="openGroupForm()">＋ 단체방</button></div>
     <div class="body" id="chatsBody"></div>
   </section>
 
@@ -1278,6 +1284,93 @@ async function loginTest(n){
 }
 async function logout(){ await pushUnregister(); await sb.auth.signOut(); }
 
+
+// ============ 털실체(제목 글자) ============ 2026-09-30 대표 확정
+// 맨 윗줄 제목만 규격(모노라인·획 95/1000·끝 반원·자폭 100%·자간 -1%)대로 그린 SVG 로 바꾼다. 한글 음절·숫자·공백·가운뎃점만 지원, 그 밖의 글자가 섞이면 원래 글꼴 유지.
+const TS=(()=>{
+  const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ', JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ', JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
+  const CL={'ㄲ':'ㄱㄱ','ㄸ':'ㄷㄷ','ㅃ':'ㅂㅂ','ㅆ':'ㅅㅅ','ㅉ':'ㅈㅈ','ㄳ':'ㄱㅅ','ㄵ':'ㄴㅈ','ㄶ':'ㄴㅎ','ㄺ':'ㄹㄱ','ㄻ':'ㄹㅁ','ㄼ':'ㄹㅂ','ㄽ':'ㄹㅅ','ㄾ':'ㄹㅌ','ㄿ':'ㄹㅍ','ㅀ':'ㄹㅎ','ㅄ':'ㅂㅅ'};
+  const VERT={'ㅡ':1,'ㅗ':1,'ㅜ':1,'ㅛ':1,'ㅠ':1}, CX={'ㅘ':['ㅗ','ㅏ'],'ㅙ':['ㅗ','ㅐ'],'ㅚ':['ㅗ','ㅣ'],'ㅝ':['ㅜ','ㅓ'],'ㅞ':['ㅜ','ㅔ'],'ㅟ':['ㅜ','ㅣ'],'ㅢ':['ㅡ','ㅣ']};
+  function J(n,x0,y0,x1,y1){
+    if(CL[n]){ const [a,b]=CL[n]; const w=(x1-x0-60)/2; return J(a,x0,y0,x0+w,y1)+' '+J(b,x1-w,y0,x1,y1); }
+    const xm=(x0+x1)/2, ym=(y0+y1)/2, w=x1-x0, h=y1-y0;
+    switch(n){
+      case 'ㄱ': return `M${x0} ${y0} H${x1} V${y1}`;
+      case 'ㄴ': return `M${x0} ${y0} V${y1} H${x1}`;
+      case 'ㄷ': return `M${x1} ${y0} H${x0} V${y1} H${x1}`;
+      case 'ㄹ': return `M${x0} ${y0} H${x1} V${ym} H${x0} V${y1} H${x1}`;
+      case 'ㅁ': return `M${x0} ${y0} H${x1} V${y1} H${x0} Z`;
+      case 'ㅂ': return `M${x0} ${y0} V${y1} H${x1} V${y0} M${x0} ${ym} H${x1}`;
+      case 'ㅅ': return `M${xm} ${y0} Q${xm-w*0.18} ${ym+h*0.1} ${x0} ${y1} M${xm} ${y0} Q${xm+w*0.18} ${ym+h*0.1} ${x1} ${y1}`;
+      case 'ㅈ': return `M${x0} ${y0} H${x1} `+J('ㅅ',x0,y0+h*0.22,x1,y1);
+      case 'ㅊ': return `M${xm-w*0.15} ${y0} H${xm+w*0.15} `+J('ㅈ',x0,y0+h*0.2,x1,y1);
+      case 'ㅎ': { const r=(h-h*0.42)/2, cy=y1-r; return `M${xm-w*0.18} ${y0} H${xm+w*0.18} M${x0} ${y0+h*0.24} H${x1} M${xm-r} ${cy} a${r} ${r} 0 1 0 ${2*r} 0 a${r} ${r} 0 1 0 ${-2*r} 0`; }
+      case 'ㅇ': { const r=Math.min(w,h)/2; return `M${xm-r} ${ym} a${r} ${r} 0 1 0 ${2*r} 0 a${r} ${r} 0 1 0 ${-2*r} 0`; }
+      case 'ㅋ': return `M${x0} ${y0} H${x1} V${y1} M${x0} ${ym} H${x1}`;
+      case 'ㅌ': return `M${x1} ${y0} H${x0} V${y1} H${x1} M${x0} ${ym} H${x1}`;
+      case 'ㅍ': return `M${x0} ${y0} H${x1} M${x0+w*0.3} ${y0} V${y1} M${x1-w*0.3} ${y0} V${y1} M${x0} ${y1} H${x1}`;
+      case 'ㅡ': return `M${x0} ${ym} H${x1}`;
+      case 'ㅗ': return `M${x0} ${y1} H${x1} M${xm} ${y0} V${y1}`;
+      case 'ㅛ': return `M${x0} ${y1} H${x1} M${x0+w*0.33} ${y0} V${y1} M${x1-w*0.33} ${y0} V${y1}`;
+      case 'ㅜ': return `M${x0} ${y0} H${x1} M${xm} ${y0} V${y1}`;
+      case 'ㅠ': return `M${x0} ${y0} H${x1} M${x0+w*0.33} ${y0} V${y1} M${x1-w*0.33} ${y0} V${y1}`;
+      case 'ㅏ': return `M${x0} ${y0} V${y1} M${x0} ${ym} H${x0+w*0.55}`;
+      case 'ㅑ': return `M${x0} ${y0} V${y1} M${x0} ${y0+h*0.38} H${x0+w*0.55} M${x0} ${y0+h*0.62} H${x0+w*0.55}`;
+      case 'ㅐ': return `M${x0} ${y0} V${y1} M${x0} ${ym} H${x1} M${x1} ${y0} V${y1}`;
+      case 'ㅒ': return `M${x0} ${y0} V${y1} M${x0} ${y0+h*0.38} H${x1} M${x0} ${y0+h*0.62} H${x1} M${x1} ${y0} V${y1}`;
+      case 'ㅓ': { const xa=x0+w*0.55; return `M${xa} ${y0} V${y1} M${x0} ${ym} H${xa}`; }
+      case 'ㅕ': { const xa=x0+w*0.55; return `M${xa} ${y0} V${y1} M${x0} ${y0+h*0.38} H${xa} M${x0} ${y0+h*0.62} H${xa}`; }
+      case 'ㅔ': { const xa=x0+w*0.45; return `M${xa} ${y0} V${y1} M${x0} ${ym} H${xa} M${x1} ${y0} V${y1}`; }
+      case 'ㅖ': { const xa=x0+w*0.45; return `M${xa} ${y0} V${y1} M${x0} ${y0+h*0.38} H${xa} M${x0} ${y0+h*0.62} H${xa} M${x1} ${y0} V${y1}`; }
+      case 'ㅣ': return `M${xm} ${y0} V${y1}`;
+    }
+    return '';
+  }
+  function syl(c,v,f){
+    if(CX[v]){ const [b,r]=CX[v];
+      if(!f) return [J(c,80,100,440,440), b==='ㅡ'?'M60 560 H500':J(b,60,470,500,620), J(r,600,80,930,900)].join(' ');
+      return [J(c,100,80,420,340), b==='ㅡ'?'M60 450 H480':J(b,60,370,480,500), J(r,600,60,930,560), J(f,90,640,900,920)].join(' ');
+    }
+    if(!VERT[v]){ const nx=v==='ㅣ'; const vx0=nx?600:590, vx1=nx?760:930;
+      if(!f) return J(c,70,120,470,880)+' '+J(v,vx0,90,vx1,910);
+      return [J(c,70,90,470,470), J(v,vx0,60,vx1,560), J(f,90,640,900,920)].join(' ');
+    }
+    const tall = v!=='ㅡ';
+    if(!f) return J(c,140,90,860,470)+' '+(tall?J(v,90,560,910,900):J(v,90,640,910,760));
+    return [J(c,190,80,810,380), tall?J(v,90,420,910,600):J(v,90,470,910,560), J(f,140,660,860,920)].join(' ');
+  }
+  const DIG={'0':'M500 90 a230 410 0 1 0 1 0','1':'M400 230 L560 90 V910','2':'M330 260 a220 220 0 1 1 380 160 L330 910 H720','3':'M340 210 a210 190 0 1 1 260 300 M600 510 a220 200 0 1 1 -280 300','4':'M640 90 L280 640 H760 M640 400 V910','5':'M700 90 H360 L330 480 c 100 -70 340 -40 340 190 c 0 250 -260 290 -380 180','6':'M640 100 c -280 120 -340 400 -320 560 a220 220 0 1 0 60 -220','7':'M300 90 H720 L450 910','8':'M500 480 a200 190 0 1 0 -1 0 M500 480 a215 215 0 1 1 -1 0','9':'M360 900 c 280 -120 340 -400 320 -560 a220 220 0 1 1 -60 220'};
+  function svg(text, size, sw, color){
+    sw=sw||95; color=color||'currentColor'; let x=0; const out=[];
+    for(const ch of text){
+      if(ch===' '){ x+=360; continue; }
+      if(ch==='·'){ out.push(`<circle cx="${x+230}" cy="520" r="${sw*0.6}" fill="${color}"/>`); x+=460; continue; }
+      let d, adv=1000;
+      if(DIG[ch]) d=DIG[ch];
+      else { const o=ch.charCodeAt(0)-0xAC00; if(o<0||o>11171) return null; const c=CHO[Math.floor(o/588)], v=JUNG[Math.floor((o%588)/28)], f=JONG[o%28].trim(); d=syl(c,v,f||null); if(v==='ㅣ'&&!f) adv=860; }
+      out.push(`<path d="${d}" transform="translate(${Math.round(x)},0)" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`);
+      x+=adv*0.99;
+    }
+    if(!out.length) return null;
+    return `<svg width="${(x*size/1000).toFixed(1)}" height="${size}" viewBox="0 0 ${Math.round(x)} 1000" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${text.replace(/"/g,'&quot;')}">${out.join('')}</svg>`;
+  }
+  return { svg };
+})();
+const YARN_SVG=(w)=>`<svg width="${w}" height="18" viewBox="0 0 ${w} 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 9 c 20 -8 30 10 50 2 s 30 -10 50 -2 s 30 10 50 2 s 20 -6 30 -2" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round"/><circle cx="${w-9}" cy="9" r="7" fill="var(--btn)" stroke="var(--acc)" stroke-width="2"/><path d="M${w-14} 6.5 c3 1 7 1 10 0 M${w-14} 11.5 c3 1 7 1 10 0" fill="none" stroke="var(--acc)" stroke-width="1.3" stroke-linecap="round"/></svg>`;
+// 제목 변환: .top h1 의 글자를 SVG 로 (사용자 내용이 들어가는 방 이름·가게 이름·프로필 이름은 제외). 글자가 바뀌면(openSub 등) 관찰자가 다시 그린다
+const TS_SKIP=new Set(['roomTitle','shopTitle','profTitle']);
+function tsTitle(h1){
+  if(TS_SKIP.has(h1.id) || h1.querySelector('svg')) return;
+  const t=h1.textContent.trim(); if(!t) return;
+  const tab=!!h1.closest('.tshead'); const sv=TS.svg(t, tab?19:18); if(!sv) return;
+  h1.dataset.ts=t; h1.innerHTML=sv;
+  if(tab){ const y=h1.parentElement.querySelector('.yarn'); if(y){ const w=Math.round(parseFloat(h1.firstChild.getAttribute('width'))||180)+22; y.innerHTML=YARN_SVG(Math.min(300, Math.max(120, w))); } }
+}
+let tsRaf=0;
+function tsScan(){ tsRaf=0; document.querySelectorAll('.top h1').forEach(tsTitle); }
+new MutationObserver(()=>{ if(!tsRaf) tsRaf=requestAnimationFrame(tsScan); }).observe(document.body,{childList:true,characterData:true,subtree:true});
+tsScan();
+
 let initStarted=false;
 sb.auth.onAuthStateChange(async (ev, session) => {
   me = session?.user || null;
@@ -1513,7 +1606,7 @@ function pinHtml({label, sub, avatar, cls, wave, bell}){
 function isWaving(p){ return !!(p && p.wave_until && new Date(p.wave_until) > new Date()); }
 const LMap = {
   map:null, layer:null,
-  async init(el, c){ this.map=L.map(el,{zoomControl:false,attributionControl:true,minZoom:9,maxZoom:18}).setView([c.lat,c.lng],14); L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(this.map); this.layer=L.layerGroup().addTo(this.map); },
+  async init(el, c){ this.map=L.map(el,{zoomControl:false,attributionControl:true,minZoom:5,maxZoom:18,maxBounds:[[32.5,123.5],[39.6,133.2]],maxBoundsViscosity:0.8}).setView([c.lat,c.lng],14); /* 축소 한계 = 대한민국 전체(독도 131.9E 포함) — 대표 2026-09-30 */ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(this.map); this.layer=L.layerGroup().addTo(this.map); },
   setCenter(c){ this.map.setView([c.lat,c.lng],14); },
   clear(){ this.layer.clearLayers(); },
   marker(o){ const m=L.marker([o.lat,o.lng],{icon:L.divIcon({html:pinHtml(o).replace('class="upin','style="position:static;transform:none" class="upin'),iconSize:[0,0],iconAnchor:[0,0]})}); if(o.onClick)m.on('click',o.onClick); m.addTo(this.layer); },
@@ -1533,7 +1626,7 @@ function makeHtmlPin(){
 }
 const GMap = {
   map:null, markers:[],
-  async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,minZoom:9,maxZoom:18,gestureHandling:'greedy',disableDefaultUI:true,clickableIcons:false,
+  async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,minZoom:5,maxZoom:18,restriction:{latLngBounds:{north:39.6,south:32.5,west:123.5,east:133.2},strictBounds:false},gestureHandling:'greedy',disableDefaultUI:true,clickableIcons:false, /* 축소 한계 = 대한민국 전체(독도 포함) — 대표 2026-09-30 */
     styles:MAP_STYLE }); this.Pin=makeHtmlPin(); },
   setCenter(c){ this.map.setCenter(c); this.map.setZoom(14); },
   clear(){ this.markers.forEach(m=>m.setMap(null)); this.markers=[]; },
