@@ -1606,7 +1606,7 @@ function pinHtml({label, sub, avatar, cls, wave, bell}){
 function isWaving(p){ return !!(p && p.wave_until && new Date(p.wave_until) > new Date()); }
 const LMap = {
   map:null, layer:null,
-  async init(el, c){ this.map=L.map(el,{zoomControl:false,attributionControl:true,minZoom:5,maxZoom:18,maxBounds:[[32.5,123.5],[39.6,133.2]],maxBoundsViscosity:0.8}).setView([c.lat,c.lng],14); /* 축소 한계 = 대한민국 전체(독도 131.9E 포함) — 대표 2026-09-30 */ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(this.map); this.layer=L.layerGroup().addTo(this.map); },
+  async init(el, c){ this.map=L.map(el,{zoomControl:false,attributionControl:true,minZoom:5,maxZoom:18}).setView([c.lat,c.lng],14); /* 축소 한계 = 대한민국 전체(독도 포함) 크기까지, 이동은 전 세계 — 대표 2026-09-30 */ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(this.map); this.layer=L.layerGroup().addTo(this.map); },
   setCenter(c){ this.map.setView([c.lat,c.lng],14); },
   clear(){ this.layer.clearLayers(); },
   marker(o){ const m=L.marker([o.lat,o.lng],{icon:L.divIcon({html:pinHtml(o).replace('class="upin','style="position:static;transform:none" class="upin'),iconSize:[0,0],iconAnchor:[0,0]})}); if(o.onClick)m.on('click',o.onClick); m.addTo(this.layer); },
@@ -1626,7 +1626,7 @@ function makeHtmlPin(){
 }
 const GMap = {
   map:null, markers:[],
-  async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,minZoom:5,maxZoom:18,restriction:{latLngBounds:{north:39.6,south:32.5,west:123.5,east:133.2},strictBounds:false},gestureHandling:'greedy',disableDefaultUI:true,clickableIcons:false, /* 축소 한계 = 대한민국 전체(독도 포함) — 대표 2026-09-30 */
+  async init(el, c){ await loadGoogleMaps(); this.map=new google.maps.Map(el,{center:c,zoom:14,minZoom:5,maxZoom:18,gestureHandling:'greedy',disableDefaultUI:true,clickableIcons:false, /* 축소 한계 = 대한민국 전체(독도 포함) 크기까지, 이동은 전 세계 — 대표 2026-09-30 */
     styles:MAP_STYLE }); this.Pin=makeHtmlPin(); },
   setCenter(c){ this.map.setCenter(c); this.map.setZoom(14); },
   clear(){ this.markers.forEach(m=>m.setMap(null)); this.markers=[]; },
