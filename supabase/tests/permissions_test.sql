@@ -95,6 +95,7 @@ begin
   out := pg_temp.must_fail(out, 'admin_stats', 'select public.admin_stats()');
   out := pg_temp.must_fail(out, 'admin_broadcast_send', 'select public.admin_broadcast_send(''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'admin_yarn_update', 'select public.admin_yarn_update(''{}''::jsonb)');
+  out := pg_temp.must_fail(out, 'admin_yarn_set_gauge', 'select public.admin_yarn_set_gauge(gen_random_uuid(), null, null, true)');   -- schema 68
   out := pg_temp.must_fail(out, 'admin_event_apps', 'select * from public.admin_event_apps(gen_random_uuid())');
   begin v := public.admin_stash_search('a', 0); out := out || ' | ' || case when v is null then 'admin_stash_search hidden' else 'FAIL admin_stash_search visible' end; exception when others then out := out || ' | admin_stash_search blocked'; end;
   out := pg_temp.must_fail(out, 'admin_jigi_tool', 'select public.admin_jigi_tool(''get_item'', ''{}''::jsonb)');
@@ -125,6 +126,7 @@ begin
   out := pg_temp.cnt(out, 'yarn_catalog', 'select count(*) from public.yarn_catalog', 0);
   out := pg_temp.cnt(out, 'app_config>0', 'select least(count(*),1) from public.app_config', 1);
   out := pg_temp.cnt(out, 'yarn_suggest(anon)', 'select count(*) from public.yarn_suggest(''낙양'')', 0);
+  out := pg_temp.cnt(out, 'yarn_spec(anon)', 'select case when public.yarn_spec(gen_random_uuid()) is null then 0 else 1 end', 0);   -- schema 68
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;
