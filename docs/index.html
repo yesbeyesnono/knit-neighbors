@@ -4159,10 +4159,12 @@ async function setWave(on){
 // ===== 좌우로 쓸어 탭 전환 (마이페이지·프로필) =====
 function bindTabSwipe(viewSel, tabsSel){
   const v=$(viewSel); if(!v || v.dataset.swipe) return; v.dataset.swipe='1';
-  let x0=null, y0=0, t0=0;
-  v.addEventListener('touchstart', e=>{ if(e.touches.length!==1 || e.target.closest('.recrow,.pgrid,.tmscroll,input,textarea,select')){ x0=null; return; } x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); }, {passive:true});
+  let x0=null, y0=0, t0=0, sc=null, sl=0;
+  // 가로로 넘기는 줄(사진 여러 장·추천 줄·기법 맵) 위에서는 그 줄이 먼저 — 단, 넘길 게 없거나(사진 1장) 이미 끝까지 간 방향이면 탭 전환
+  v.addEventListener('touchstart', e=>{ if(e.touches.length!==1 || e.target.closest('input,textarea,select')){ x0=null; return; } sc=e.target.closest('.recrow,.pgrid,.tmscroll'); sl=sc?sc.scrollLeft:0; x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); }, {passive:true});
   v.addEventListener('touchend', e=>{ if(x0===null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
     if(Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.8 || Date.now()-t0>700) return;
+    if(sc){ const max=sc.scrollWidth-sc.clientWidth; if(max>4 && !(dx>0 ? sl<=2 : sl>=max-2)) return; }
     if(viewSel==='#v-my'){ if(myPage==='dash'){ if(dx<0) setMyPage('thread'); return; } const tb=[...($(tabsSel)?.children||[])]; const ci=tb.findIndex(b=>b.classList.contains('on')); if(dx>0 && ci<=0){ setMyPage('dash'); return; } }
     const tabs=[...($(tabsSel)?.children||[])]; const i=tabs.findIndex(b=>b.classList.contains('on')); const n=i+(dx<0?1:-1);
     if(i<0 || n<0 || n>=tabs.length) return; tabs[n].click(); tabs[n].scrollIntoView?.({inline:'nearest', block:'nearest'});
