@@ -1353,3 +1353,16 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   앱 ypSearch(q, more): ypQuery/ypOffset/ypMore 상태, 더보기는 ypSearch(ypQuery, true). yarn_suggest(8건)는 실함 편집 자동완성·이벤트 실 연결 등에서 그대로 사용
 --   같이 고침: 실 고르기 목록의 '확인된 실' 칩이 제목 너비로 늘어나던 CSS(.plist>button span{display:block} 이 .vtag 에 적용) → .plist>button b .vtag inline-block
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 68. 실 게이지 구조화 (마이그레이션 yarn_gauge_struct, yarn_gauge_parse_v2, yarn_gauge_parse_v3) — 2026-10-03 대표: "이런 정보(10cm 코·단)가 있으면 AI 사이즈 조정이 정확해진다"
+--   yarn_catalog.gauge_knit / gauge_crochet jsonb {needle:"4mm"|"6/0호"|"레이스 0호", sts, rows, stitch:"메리야스"|"한길긴뜨기"|…, size:"10x10"} — 기존 gauge 문장은 그대로(추가만)
+--   yarn_parse_gauge(text) immutable: "N코 M단" 자리마다 구간(앞 바늘 표기 + 뒤 괄호)을 잘라 종목(대바늘/코바늘)·바늘·편물 판정, 범위(23~24코)는 앞 숫자, 한 문장에 두 종목 가능
+--     바늘이야기 형식 "21코 28단(대바늘 4mm, 10cm x 10cm, 메리야스 편물)" 이 표준. 적용 결과: 바늘이야기 67/70 · 앵콜스 20/22 (나머지는 게이지가 아닌 문장)
+--   낙양모사 40종: 상세 이미지의 게이지 그림(대바늘 메리야스 / 코바늘 한길긴뜨기, 10cm) 을 읽어 직접 입력(tools 없음 — 몽타주를 보고 옮김). gauge 문장도 "대바늘 3mm 29코×39단, 코바늘 3/0호 25코×14단" 로 채움
+--     없는 7종: 바당 컬러웨이·솔솔·포그니(그림 없음), 퐁듀·선셋·씨씨·반딧불(이미지 404)
+--   admin_yarn_set_gauge(p_id, p_knit, p_crochet, p_clear): 관리자 — 콘솔 실 상세 '대바늘 게이지 / 코바늘 게이지' 줄(바늘·코·단·편물), [문장→칸] 이 yarn_parse_gauge 로 채움. 저장 때 admin_yarn_update 뒤에 호출(p_clear=true → 빈 칸은 null)
+--   yarn_spec(p_id) → jsonb {needle_knit, needle_crochet, gauge_knit, gauge_crochet, gauge, season, texture, use_tags}: 앱용(실 사전 직접 조회 금지 원칙). authenticated 만
+--   앱: yarnFromDict 가 yarn_colors_of 와 함께 yarn_spec 호출 → y.spec. 실 상세 규격 띠 둘째 줄 "대바늘 3mm 29코×39단 · 코바늘 3/0호 25코×14단"(ySpecLine2), 작품 인증 게이지 칸 아래 "실 사전 기준(10cm): …" 힌트(#wGaugeHint)
+--     회원이 직접 적은 works.gauge 가 항상 우선(사전 값은 works 에 저장하지 않음 — catalog_id 로 언제든 조회). 다음: knitup 뷰어 사이즈 변환이 이 값을 기본 게이지로
+-- ---------------------------------------------------------------

@@ -961,7 +961,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       </div>
       <div class="ccard"><div class="cfl">바늘 <span class="muted">선택</span></div><div class="seg" id="wNeedlesBox"></div></div>
       <div class="ccard"><div class="cfl">기록 <span class="muted">선택</span></div>
-        <div class="g2"><div><div class="cfl" style="margin-top:0">게이지</div><input id="wGauge" maxlength="60" placeholder="예: 20코 24단 (10cm)"></div><div><div class="cfl" style="margin-top:0">완성 크기</div><input id="wSize" maxlength="60" placeholder="예: 지름 11cm"></div></div>
+        <div class="g2"><div><div class="cfl" style="margin-top:0">게이지</div><input id="wGauge" maxlength="60" placeholder="예: 20코 24단 (10cm)"><div id="wGaugeHint" class="muted" style="font-size:.74rem;margin-top:3px" hidden></div></div><div><div class="cfl" style="margin-top:0">완성 크기</div><input id="wSize" maxlength="60" placeholder="예: 지름 11cm"></div></div>
         <div class="cfl">한 줄 소감</div><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px"></textarea>
         <p class="muted" style="font-size:.78rem;margin:10px 0 0">적어 주신 실·바늘 정보는 실 사전과 추천을 만드는 데 쓰여요. 커뮤니티 "작품" 탭에 올라가요.</p>
       </div>
@@ -2910,6 +2910,10 @@ async function ycLoadLex(fam){   // 사람들이 쓰는 이름(color_lexicon 표
 function ycPickName(n){ if(yc.multi){ const sl=ycSlot(); const parts=yc.slots.map((s,i)=>i===yc.active?n:colorAutoName(s.fam,s.x,s.y,s.t,true)); yc.name = yc.mode==='gradient'?parts.join('→')+' 그라데이션': yc.mode==='mix'?`${parts[0]} 바탕 ${parts.slice(1).join('·')} 트위드`:`${parts[0]}·${parts[1]||parts[0]} 멜란지`; } else yc.name=n; yc.nameEdited=true; const el=$('#ycName'); if(el) el.value=yc.name; document.querySelectorAll('#ycLex button').forEach(b=>b.classList.toggle('on', b.textContent===n)); }
 function ycDone(){ const name=(yc.name||ycAuto()).trim().slice(0,40); const hex=yc.slots.map(ycHex); const fams=yc.slots.map(s=>s.fam); const r={ name, family:fams[0], families:[...new Set(fams)], hex, mode: yc.multi?yc.mode:'solid' }; closeSheet(); yc.done(r); }
 function ySpecLine(y){ return [y.ball_g&&y.ball_m?`${y.ball_g}g · ${y.ball_m}m`:(y.ball_g?`${y.ball_g}g`:''), y.mix||y.fiber||'', (y.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · '); }
+// 실 사전의 바늘·게이지(schema 68 yarn_spec): "대바늘 3mm 29코×39단 · 코바늘 3/0호 25코×14단" — 10cm 기준. 회원이 직접 적은 게이지(#wGauge)가 있으면 그게 우선
+function yGaugeTxt(g, label){ if(!g||!(g.sts&&g.rows)) return ''; return `${label} ${g.needle?g.needle+' ':''}${g.sts}코×${g.rows}단${g.stitch&&g.stitch!=='메리야스'&&g.stitch!=='한길긴뜨기'?`(${g.stitch})`:''}`; }
+function ySpecLine2(y){ const s=y.spec; if(!s) return ''; const a=[yGaugeTxt(s.gauge_knit,'대바늘'), yGaugeTxt(s.gauge_crochet,'코바늘')].filter(Boolean); if(a.length) return a.join(' · '); const n=[s.needle_knit?'대바늘 '+s.needle_knit:'', s.needle_crochet?'코바늘 '+s.needle_crochet:''].filter(Boolean); return n.length? '권장 바늘 '+n.join(' · ') : ''; }
+function wGaugeHint(){ const el=$('#wGaugeHint'); if(!el) return; const y=wYarns.find(y=>y.spec&&(y.spec.gauge_knit||y.spec.gauge_crochet)); const t=y?ySpecLine2(y):''; el.textContent = t ? `실 사전 기준(10cm): ${t}` : ''; el.hidden=!t; }
 function yAmtTxt(y){ return y.amount!=='' && y.amount!=null ? `${y.amount}${y.unit||'볼'}` : ''; }
 function wyAutoWeight(y){ if(!y.weightManual){ const g=yarnWeightGuess(y); y.weight=g?g.name:''; } }
 function wyHintAll(){ wYarns.forEach(wyAutoWeight); renderWYarns(); }
@@ -2917,14 +2921,15 @@ function renderWYarns(){
   const box=$('#wYarnsBox'); if(!box) return;
   box.innerHTML = wYarns.map((y,i)=>`<div class="ysum" onclick="openYarnDetail(${i})"><div class="dot" style="background:${yColorCss(y)}"></div><div class="tx"><b>${esc(y.name)}</b><span>${esc([y.color, yAmtTxt(y)].filter(Boolean).join(' · ')||'색·사용량을 적어 보세요')}</span>${ySpecLine(y)?`<span>${esc(ySpecLine(y))}</span>`:''}</div><button type="button" title="지우기" onclick="event.stopPropagation();wyDel(${i})">${ico('close')}</button></div>`).join('');
   const sb2=$('#wySameBtn'); if(sb2) sb2.hidden=!wYarns.length;
+  wGaugeHint();
 }
 function wyDel(i){ wYarns.splice(i,1); renderWYarns(); }
-function wyAddSame(){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]; if(!last) return openYarnPick(-1); const y=Object.assign(wyBlank(), {name:last.name, catalogId:last.catalogId, colors:last.colors, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix, fromDict:last.fromDict}); ydOpen(y, -1); }
+function wyAddSame(){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]; if(!last) return openYarnPick(-1); const y=Object.assign(wyBlank(), {name:last.name, catalogId:last.catalogId, colors:last.colors, spec:last.spec, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix, fromDict:last.fromDict}); ydOpen(y, -1); }
 // 실 사전 한 줄(yarn_suggest 결과) → 입력용 실 객체. 색 목록도 같이 불러온다
 async function yarnFromDict(r){
   const y=wyBlank(); y.name=r.name; y.catalogId=r.id||null; y.fromDict=!!r.id;
   if(r.ball_g) y.ball_g=String(r.ball_g); if(r.ball_m) y.ball_m=String(r.ball_m); if(r.fiber) y.fiber=r.fiber; if(r.fibers) y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', ');
-  if(r.id){ const { data:cs } = await sb.rpc('yarn_colors_of', { p_catalog: r.id }); y.colors=cs||[]; }   // 실 사전은 직접 조회 불가(schema 66) — 함수로 실 하나씩
+  if(r.id){ const [{ data:cs }, { data:sp }] = await Promise.all([sb.rpc('yarn_colors_of', { p_catalog: r.id }), sb.rpc('yarn_spec', { p_id: r.id })]); y.colors=cs||[]; y.spec=sp||null; }   // 실 사전은 직접 조회 불가(schema 66) — 함수로 실 하나씩(색 목록 + 바늘·게이지)
   wyAutoWeight(y); return y;
 }
 function renderWNeedles(){
@@ -3500,7 +3505,7 @@ function ydRender(){
   const cols=(y.colors||[]).filter(c=>!ydFam || c.family===ydFam);
   const label=c=>(c.no?c.no+' ':'')+c.name;
   openSub(y.name, `
-    <div class="specband"><div><b>${y.stashId?`내 실함 · ${fmtBalls(y.stashLeft)}볼 남음`:y.fromDict?'실 사전에서 불러왔어요':'규격'}</b>${esc(ySpecLine(y)||'1볼 중량·길이를 적으면 굵기를 알려 드려요 (몰라도 괜찮아요)')}</div><button type="button" onclick="ydSpecOpen=!ydSpecOpen;ydRender()">${ydSpecOpen?'접기':'고치기'}</button></div>
+    <div class="specband"><div><b>${y.stashId?`내 실함 · ${fmtBalls(y.stashLeft)}볼 남음`:y.fromDict?'실 사전에서 불러왔어요':'규격'}</b>${esc(ySpecLine(y)||'1볼 중량·길이를 적으면 굵기를 알려 드려요 (몰라도 괜찮아요)')}${ySpecLine2(y)?`<span style="display:block;color:var(--ink2);font-size:.78rem;margin-top:2px">${esc(ySpecLine2(y))}</span>`:''}</div><button type="button" onclick="ydSpecOpen=!ydSpecOpen;ydRender()">${ydSpecOpen?'접기':'고치기'}</button></div>
     ${ydSpecOpen?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
       <label class="f">실 이름<input maxlength="60" value="${esc(y.name)}" oninput="yd.name=this.value"></label>
       <label class="f">소재<select onchange="yd.fiber=this.value">${['',...FIBERS].map(f=>`<option value="${f}" ${y.fiber===f?'selected':''}>${f||'선택'}</option>`).join('')}</select></label>
