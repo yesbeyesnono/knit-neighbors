@@ -1784,9 +1784,10 @@ async function deleteShopPost(id){ if(!confirm('이 소식을 삭제할까요?')
 // ===== knitup 도안 뷰어 (docs/viewer.html, tools/build-viewer.js 로 생성) =====
 let pvId=null, pvTimer=null;
 async function openPatternViewer(id){
-  const [{ data:c, error }, { data:pr }] = await Promise.all([
+  const [{ data:c, error }, { data:pr }, { data:gctx }] = await Promise.all([
     sb.from('pattern_contents').select('pkg').eq('pattern_id', id).maybeSingle(),
-    sb.from('pattern_progress').select('prog').eq('pattern_id', id).eq('profile_id', me.id).maybeSingle()
+    sb.from('pattern_progress').select('prog').eq('pattern_id', id).eq('profile_id', me.id).maybeSingle(),
+    sb.rpc('pattern_gauge_ctx', { p_pattern: id })   // schema 69: 기준 게이지(작가 → 기준 실 → 바늘 추정) + 내 실함의 실
   ]);
   if(error || !c) return toast('이 도안은 아직 앱에서 열 수 없어요');
   closeSheet(); pvId=id;
@@ -1796,13 +1797,15 @@ async function openPatternViewer(id){
   w.innerHTML='<iframe title="도안 뷰어" sandbox="allow-scripts"></iframe>'; w.classList.add('on');
   const f=w.querySelector('iframe');
   f.srcdoc=openPatternViewer.html;
-  f.onload=()=>f.contentWindow.postMessage({ type:'knitup-pkg', pkg:c.pkg, prog:pr?.prog||0, who:myProfile?.nickname||'' }, '*');
+  f.onload=()=>f.contentWindow.postMessage({ type:'knitup-pkg', pkg:c.pkg, prog:pr?.prog||0, who:myProfile?.nickname||'', gauge:gctx||null }, '*');
 }
 function closePatternViewer(){ const w=$('#pviewer'); if(w){ w.classList.remove('on'); w.innerHTML=''; } pvId=null; }
 window.addEventListener('message', e=>{
   const w=$('#pviewer'); const f=w&&w.querySelector('iframe'); if(!f || e.source!==f.contentWindow) return;
   const d=e.data||{};
   if(d.type==='kn-close') return closePatternViewer();
+  if(d.type==='kn-yarn-q' && pvId){ const q=String(d.q||'').slice(0,40);   // 뷰어의 '내 실 찾기' — 게이지가 등록된 실만(실 사전은 함수로만)
+    sb.rpc('yarn_gauge_search', { p_q:q, p_craft: d.craft==='knitting'?'knitting':'crochet' }).then(({ data })=>{ try{ f.contentWindow.postMessage({ type:'kn-yarn-r', q, rows:data||[] }, '*'); }catch(e){} }); return; }
   if(d.type==='kn-prog' && pvId && me){ const id=pvId, prog=Math.max(0, Math.min(100000, d.prog|0)); clearTimeout(pvTimer);
     pvTimer=setTimeout(()=>sb.from('pattern_progress').upsert({ profile_id:me.id, pattern_id:id, prog, updated_at:new Date().toISOString() }), 600); }
 });
@@ -1860,7 +1863,8 @@ async function openPatternForm(id){
   await loadTech();
   let x={craft:myCrafts()[0], level:1, price:0, is_published:true, techniques:[], photos:[]};
   if(id){ const r=await sb.from('patterns').select('*').eq('id',id).eq('author_id',me.id).maybeSingle(); if(!r.data) return toast('도안을 찾을 수 없어요'); x=r.data; }
-  pfSel=new Set(x.techniques||[]); pfPhotos=[]; pfKeep=[...(x.photos||[])]; pfPkg=null; pfPkgClear=false;
+  pfSel=new Set(x.techniques||[]); pfPhotos=[]; pfKeep=[...(x.photos||[])]; pfPkg=null; pfPkgClear=false; pfCat=null;
+  if(x.catalog_id){ const { data:nm } = await sb.rpc('yarn_catalog_name', { p_id: x.catalog_id }); if(nm) pfCat={ id:x.catalog_id, name:nm }; }
   openSheet(`<b style="font-size:1.05rem">${id?'도안 수정':'도안 등록'}</b>
     <label class="f">도안 이름<input id="pfTitle" maxlength="80" value="${esc(x.title||'')}" placeholder="예: 네트백 여름 가방"></label>
     <div style="display:flex;gap:8px"><label class="f" style="flex:1">종목<select id="pfCraft" onchange="renderPfTech()"><option value="crochet" ${x.craft==='crochet'?'selected':''}>코바늘</option><option value="knitting" ${x.craft==='knitting'?'selected':''}>대바늘</option></select></label>
@@ -1869,6 +1873,10 @@ async function openPatternForm(id){
     <label class="f">사진 (최대 4장)<input type="file" accept="image/*" multiple onchange="pfPick(this.files)"></label><div id="pfPv" class="muted" style="font-size:.85rem"></div>
     <textarea id="pfDescr" maxlength="2000" placeholder="소개 · 완성 크기, 준비물, 도안 구성 등">${esc(x.descr||'')}</textarea>
     <div style="display:flex;gap:8px"><label class="f" style="flex:1">실 굵기<input id="pfYarn" maxlength="30" value="${esc(x.yarn_weight||'')}" placeholder="예: DK"></label><label class="f" style="flex:1">바늘<input id="pfNeedle" maxlength="30" value="${esc(x.needle_size||'')}" placeholder="예: 4mm"></label></div>
+    <div style="display:flex;gap:8px"><label class="f" style="flex:1">게이지 코<input id="pfGs" type="number" step="0.5" min="3" max="80" inputmode="decimal" value="${x.gauge?.sts??''}" placeholder="10cm 예: 20"></label><label class="f" style="flex:1">단<input id="pfGr" type="number" step="0.5" min="2" max="150" inputmode="decimal" value="${x.gauge?.rows??''}" placeholder="예: 24"></label><label class="f" style="flex:1.3">편물<select id="pfGt">${['메리야스','짧은뜨기','한길긴뜨기','긴뜨기','무늬'].map(t=>`<option ${(x.gauge?.stitch||(x.craft==='knitting'?'메리야스':'짧은뜨기'))===t?'selected':''}>${t}</option>`).join('')}</select></label></div>
+    <label class="f">기준 실 (선택 · 실 사전에서 찾기)<input id="pfYq" maxlength="40" placeholder="실 이름 (브랜드 + 제품명)" autocomplete="off" oninput="pfYarnSearch(this.value)"></label>
+    <div id="pfYres" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:-4px"></div><div id="pfYsel" class="muted" style="font-size:.85rem"></div>
+    <div class="muted" style="font-size:.78rem;margin-top:-4px">게이지(10cm 코·단)를 적어 두면 뷰어에서 완성 크기와 '내 실로 뜨면' 계산의 기준이 돼요</div>
     <label class="f">knitup 도안 패키지 (선택)<input type="file" accept=".json,application/json" onchange="pfPickPkg(this)"></label>
     <div class="muted" style="font-size:.8rem;margin-top:-6px" id="pfPkgMsg">${x.has_viewer?'첨부됨 · 새 파일을 고르면 교체돼요 <a href="#" onclick="pfPkg=null;pfPkgClear=true;this.parentNode.textContent=\'저장하면 첨부가 지워져요\';return false" style="color:inherit;text-decoration:underline">첨부 지우기</a>':'knitup 에디터에서 내보낸 .knitup-pkg.json 을 첨부하면 앱 안에서 차트·단별 지시문·진도 체크로 열려요'}</div>
     <label class="f">가격 (원, 0이면 무료)<input id="pfPrice" type="number" min="0" inputmode="numeric" value="${x.price||0}"></label>
@@ -1877,8 +1885,17 @@ async function openPatternForm(id){
     <p class="muted" style="margin:0;font-size:.78rem">결제는 작가님의 판매 페이지에서 이뤄져요. 직접 만든 도안만 올려 주세요. 타인의 도안을 올리면 삭제되고 작가 자격이 취소될 수 있어요.</p>
     <button class="btn" id="pfSave" onclick="savePatternForm('${id||''}')">${id?'저장':'등록하기'}</button>
     ${id?`<button class="btn r" onclick="deleteMyPattern('${id}')">삭제</button>`:''}`);
-  renderPfTech(); renderPfPv();
+  renderPfTech(); renderPfPv(); pfYarnShow();
 }
+// 도안의 기준 실(실 사전) · 게이지(schema 69)
+let pfCat=null, pfYT=null, pfYrows=[];
+function pfYarnSearch(q){ clearTimeout(pfYT); q=q.trim(); const el=$('#pfYres'); if(q.length<2){ el.innerHTML=''; return; }
+  pfYT=setTimeout(async()=>{ const { data } = await sb.rpc('yarn_suggest', { p_q:q }); pfYrows=data||[]; if(!$('#pfYres')) return;
+    $('#pfYres').innerHTML = pfYrows.map((r,i)=>`<button type="button" class="tech" onclick="pfYarnPick(${i})">${esc(r.name)}</button>`).join('') || '<span class="muted" style="font-size:.8rem">찾는 실이 없어요 — 비워 두어도 괜찮아요</span>'; }, 300); }
+async function pfYarnPick(i){ const r=pfYrows[i]; if(!r) return; pfCat={ id:r.id, name:r.name }; $('#pfYres').innerHTML=''; $('#pfYq').value=''; pfYarnShow();
+  if(!$('#pfGs').value && !$('#pfGr').value){ const { data:sp } = await sb.rpc('yarn_spec', { p_id:r.id }); const g=sp && ($('#pfCraft').value==='knitting'?sp.gauge_knit:sp.gauge_crochet);
+    if(g && $('#pfGs')){ $('#pfGs').value=g.sts; $('#pfGr').value=g.rows; if(g.stitch) $('#pfGt').value=g.stitch; if(g.needle && !$('#pfNeedle').value) $('#pfNeedle').value=g.needle; toast('실 사전의 게이지를 채웠어요 — 도안과 다르면 고쳐 주세요'); } } }
+function pfYarnShow(){ const el=$('#pfYsel'); if(el) el.innerHTML = pfCat ? `기준 실: <b>${esc(pfCat.name)}</b> <a href="#" onclick="pfCat=null;pfYarnShow();return false" style="color:inherit;text-decoration:underline">지우기</a>` : ''; }
 function renderPfTech(){ const c=$('#pfCraft').value; $('#pfTech').innerHTML=techOf(c).map(t=>`<button type="button" class="tech ${pfSel.has(t.id)?'on':''}" onclick="pfSel.has('${t.id}')?pfSel.delete('${t.id}'):pfSel.add('${t.id}');renderPfTech()">${esc(t.name_ko)}</button>`).join(''); }
 function renderPfPv(){ const n=pfKeep.length+pfPhotos.length; $('#pfPv').innerHTML = n?`사진 ${n}장 선택됨 <a href="#" onclick="pfKeep=[];pfPhotos=[];renderPfPv();return false" style="color:inherit;text-decoration:underline">모두 지우기</a>`:''; }
 async function pfPick(files){ for(const f of [...files]){ if(pfKeep.length+pfPhotos.length>=4){ toast('사진은 4장까지 올릴 수 있어요'); break; } try{ pfPhotos.push({ blob: await shrinkImage(f, 1600) }); }catch(e){ toast(e.message); } } renderPfPv(); }
@@ -1892,7 +1909,8 @@ async function savePatternForm(id){
   $('#pfSave').disabled=true;
   try{
     const photos = pfKeep.concat(await uploadPhotos(pfPhotos));
-    const p={ title, craft, level:+$('#pfLevel').value, techniques, photos, descr:$('#pfDescr').value.trim(), yarn_weight:$('#pfYarn').value.trim(), needle_size:$('#pfNeedle').value.trim(), price:Math.max(0,Math.floor(+$('#pfPrice').value||0)), buy_url:url, is_published:$('#pfPub').checked };
+    const p={ title, craft, level:+$('#pfLevel').value, techniques, photos, descr:$('#pfDescr').value.trim(), yarn_weight:$('#pfYarn').value.trim(), needle_size:$('#pfNeedle').value.trim(), price:Math.max(0,Math.floor(+$('#pfPrice').value||0)), buy_url:url, is_published:$('#pfPub').checked,
+      gauge: (+$('#pfGs').value>0 && +$('#pfGr').value>0) ? { sts:+$('#pfGs').value, rows:+$('#pfGr').value, stitch:$('#pfGt').value, needle:$('#pfNeedle').value.trim() } : null, catalog_id: pfCat?.id||'' };
     if(id) p.id=id;
     const { data:newId, error } = await sb.rpc('author_upsert_pattern', { p }); if(error) throw new Error(error.message);
     if(pfPkg || pfPkgClear){ const r2 = await sb.rpc('set_pattern_pkg', { p_id: id||newId, p_pkg: pfPkg }); if(r2.error) throw new Error('도안은 저장됐지만 패키지 첨부에 실패했어요: '+r2.error.message); }
@@ -1953,7 +1971,7 @@ async function openPattern(id){
     <div onclick="closeSheet();openProfile('${p.author.id}')" style="display:flex;align-items:center;gap:8px;cursor:pointer">${avatar(p.author).replace('class="ava"','class="ava sm"')}<span>${esc(p.author.nickname)}</span><span class="muted">›</span></div>
     ${p.descr?`<div style="white-space:pre-wrap;font-size:.95rem">${esc(p.descr)}</div>`:''}
     ${techs.length?`<div><div class="muted" style="font-size:.8rem;margin-bottom:6px">쓰이는 기법 · <b style="color:var(--ink)">굵은 테두리</b>는 아직 체크 안 한 기법</div><div class="patchips">${techs.map(t=>`<span class="${mine.has(t.id)?'':'new'}">${esc(t.name_ko)}</span>`).join('')}</div></div>`:''}
-    ${p.yarn_weight||p.needle_size?`<div class="muted">${[p.yarn_weight&&'실 '+esc(p.yarn_weight), p.needle_size&&'바늘 '+esc(p.needle_size)].filter(Boolean).join(' · ')}</div>`:''}
+    ${p.yarn_weight||p.needle_size||p.gauge?`<div class="muted">${[p.yarn_weight&&'실 '+esc(p.yarn_weight), p.needle_size&&'바늘 '+esc(p.needle_size), p.gauge&&p.gauge.sts&&`게이지 ${+p.gauge.sts}코×${+p.gauge.rows}단`].filter(Boolean).join(' · ')}</div>`:''}
     ${p.has_viewer ? ((p.price===0 || p.author_id===me.id) ? `<button class="btn" onclick="openPatternViewer('${p.id}')">도안 열기 · 단별 진도 저장</button>` : `<div class="card soft muted" style="font-size:.85rem">앱 안에서 열리는 도안이에요. 앱 내 구매는 준비 중이에요.</div>`) : ''}
     <div style="display:flex;gap:8px"><button class="btn o" style="flex:1" onclick="toggleSavePattern('${p.id}',${!saved})">${saved?'찜 해제':'찜하기'}</button>${p.buy_url?`<a class="btn" style="flex:2;text-align:center;text-decoration:none" href="#" onclick="event.preventDefault();openExt(${JSON.stringify(p.buy_url)}, '작가가 등록한 판매 링크')">${priceKo(p)} · 도안 보러 가기</a>`:`<span class="btn" style="flex:2;text-align:center;opacity:.5">${priceKo(p)} · 링크 준비 중</span>`}</div>
     <div class="muted" style="font-size:.78rem">도안 구매·결제는 작가의 판매 페이지에서 이뤄져요. 뜨개동네는 거래에 관여하지 않아요.</div>`);

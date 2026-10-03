@@ -83,7 +83,9 @@ html = html.replace('<meta name="viewport"', '<meta name="kn-x" content=""><meta
 if (!/name="viewport"/.test(html)) html = html.replace('<head>', '<head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">');
 html = html.replace('</head>', css + '\n</head>');
 const end = html.lastIndexOf('</body>');
-html = html.slice(0, end) + js + '\n' + html.slice(end);
+// 게이지 · 완성 크기 카드(schema 69): 별도 파일을 그대로 넣는다(템플릿 문자열 이스케이프를 피하려고 분리)
+const gaugeJs = '<script>\n' + fs.readFileSync(path.join(__dirname, 'viewer-gauge.js'), 'utf8').replace(/<\/script/gi, '<\\/script') + '\n</' + 'script>';
+html = html.slice(0, end) + js + '\n' + gaugeJs + '\n' + html.slice(end);
 html = html.replace(/<title>[^<]*<\/title>/, '<title>뜨개동네 · 도안 뷰어</title>');
 const out = path.join(__dirname, '..', 'docs', 'viewer.html');
 fs.writeFileSync(out, html);

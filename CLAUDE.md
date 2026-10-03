@@ -125,6 +125,7 @@
 ## 유료 도안·정산 방향 (2026-09-19 대표 확정)
 - 회사가 판매자(작가는 이용허락), 작가 정산 = 판매가 − Apple 수수료 − 플랫폼 15% → **3.3% 원천징수** 후 지급. 가격은 **티어 중 선택**(IAP 티어 상품). 순서: ① knitup 뷰어 연동(완료) → ② IAP 티어·구매 내역·환불 → ③ 작가 정산 정보·월 정산 → ④ 통신판매업·약관
 - knitup 뷰어: `docs/viewer.html` = `node tools/build-viewer.js` 로 `knitup/docs/app_v9.html`의 VIEWER_SIZE_HTML 에서 생성(직접 수정 금지, 빌드 스크립트를 고칠 것). 앱은 sandbox+srcdoc iframe 으로 열고 postMessage(knitup-pkg / kn-prog / kn-close). 실 소요량 카드·AI 사이즈 변환 대화는 예시 데이터·모자 전용이라 숨김
+- **뷰어 게이지 연결(2026-10-03, schema 69)**: 뷰어 맨 위 '게이지 · 완성 크기' 카드 = `tools/viewer-gauge.js`(build-viewer.js 가 삽입, viewer.html 직접 수정 금지). 기준 게이지는 작가 값(`patterns.gauge`) → 기준 실(`patterns.catalog_id`)의 실 사전 → 바늘 호수 추정 순(`pattern_gauge_ctx`). 내 게이지는 스와치 입력·내 실함·실 검색(`yarn_gauge_search`, 메시지 kn-yarn-q/kn-yarn-r) → 그대로 뜨면 크기 차이 + 같은 크기로 뜨려면 코·단 배율. **도안 코 수 구조는 바꾸지 않음**(작가 원본 유지), 편물이 다른 사전 게이지는 코만 쓰고 단은 추정. 도안 등록 폼(Lab)에 게이지 코·단·편물 + 기준 실. 스테이징 포트 8765 를 다른 프로젝트가 쓰면 이 저장소 `.claude/launch.json`(8767, 지도는 키 제한으로 안 뜸)
 - 작가는 도안 등록 폼에서 knitup 에디터의 `.knitup-pkg.json` 첨부 → `pattern_contents`. 무료 도안만 누구나 열람, 유료는 구매 기능 전까지 작가 본인·관리자만
 
 ## App Store 신청 준비 (2026-09-21~)

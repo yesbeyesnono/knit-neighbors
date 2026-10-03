@@ -1366,3 +1366,17 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   앱: yarnFromDict 가 yarn_colors_of 와 함께 yarn_spec 호출 → y.spec. 실 상세 규격 띠 둘째 줄 "대바늘 3mm 29코×39단 · 코바늘 3/0호 25코×14단"(ySpecLine2), 작품 인증 게이지 칸 아래 "실 사전 기준(10cm): …" 힌트(#wGaugeHint)
 --     회원이 직접 적은 works.gauge 가 항상 우선(사전 값은 works 에 저장하지 않음 — catalog_id 로 언제든 조회). 다음: knitup 뷰어 사이즈 변환이 이 값을 기본 게이지로
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 69. 도안 게이지 · 기준 실 → knitup 뷰어 사이즈 변환의 기본 게이지 (마이그레이션 pattern_gauge) — 2026-10-03 대표 "진행해"
+--   patterns.gauge jsonb {sts, rows, needle, stitch, size} · patterns.catalog_id → yarn_catalog(기준 실, 지워지면 null)
+--   gauge_clean(jsonb): 범위 검사(코 3~80, 단 2~150) 후 필요한 키만. author_upsert_pattern 이 p.gauge / p.catalog_id 를 받음(키가 없으면 기존 값 유지 — 옛 앱 호환)
+--   pattern_gauge_ctx(p_pattern) → {craft, base{sts,rows,needle,stitch,src}, needle_mm, needle, yarn, mine[]}: 볼 수 있는 도안만(공개 또는 본인·관리자)
+--     base 우선순위: 작가 게이지(author) → 기준 실의 실 사전 게이지(yarn) → 대바늘은 같은 바늘(±0.26mm) 실 사전 중앙값(needle). 코바늘 바늘 추정은 뷰어의 HOOK_GAUGE 표(짧은뜨기)
+--     mine: 내 실함(yarn_stash) 중 사전 게이지가 있는 실 6개까지
+--   yarn_gauge_search(p_q, p_craft): 게이지가 있는 실만 이름 검색 8건(yarn_suggest 와 같은 매칭) — 뷰어 '내 실 찾기'
+--   뷰어: tools/viewer-gauge.js(= build-viewer.js 가 viewer.html 끝에 삽입) '게이지 · 완성 크기' 카드 — 기준 게이지·완성 크기, 내 게이지(스와치 입력 / 내 실함 / 실 검색) → 그대로 뜨면 크기 차이 + 같은 크기로 뜨려면 코·단 배율
+--     편물이 다른 사전 게이지(예: 도안 짧은뜨기 vs 사전 한길긴뜨기)는 코만 쓰고 단은 도안 비율로 추정. 도안 코 수 구조는 바꾸지 않음(작가 원본 유지)
+--     앱 ↔ 뷰어 메시지: knitup-pkg{…, gauge} · kn-yarn-q{q, craft} → kn-yarn-r{q, rows}
+--   앱 도안 등록 폼(Lab): 게이지 코·단·편물 + 기준 실(yarn_suggest 검색, 고르면 yarn_spec 으로 빈 게이지 채움). 도안 상세에 '게이지 N코×M단'
+-- ---------------------------------------------------------------
