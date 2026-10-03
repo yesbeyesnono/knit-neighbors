@@ -1290,9 +1290,10 @@ async function logout(){ await pushUnregister(); await sb.auth.signOut(); }
 const TS=(()=>{
   const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ', JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ', JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
   const CL={'ㄲ':'ㄱㄱ','ㄸ':'ㄷㄷ','ㅃ':'ㅂㅂ','ㅆ':'ㅅㅅ','ㅉ':'ㅈㅈ','ㄳ':'ㄱㅅ','ㄵ':'ㄴㅈ','ㄶ':'ㄴㅎ','ㄺ':'ㄹㄱ','ㄻ':'ㄹㅁ','ㄼ':'ㄹㅂ','ㄽ':'ㄹㅅ','ㄾ':'ㄹㅌ','ㄿ':'ㄹㅍ','ㅀ':'ㄹㅎ','ㅄ':'ㅂㅅ'};
+  let SW=95; const B=()=>SW>=110;   // 현재 획 두께 · 굵은 글자 보정 켜짐(110 이상 — 앱 제목 95는 그대로)
   const VERT={'ㅡ':1,'ㅗ':1,'ㅜ':1,'ㅛ':1,'ㅠ':1}, CX={'ㅘ':['ㅗ','ㅏ'],'ㅙ':['ㅗ','ㅐ'],'ㅚ':['ㅗ','ㅣ'],'ㅝ':['ㅜ','ㅓ'],'ㅞ':['ㅜ','ㅔ'],'ㅟ':['ㅜ','ㅣ'],'ㅢ':['ㅡ','ㅣ']};
   function J(n,x0,y0,x1,y1){
-    if(CL[n]){ const [a,b]=CL[n]; const w=(x1-x0-60)/2; return J(a,x0,y0,x0+w,y1)+' '+J(b,x1-w,y0,x1,y1); }
+    if(CL[n]){ const [a,b]=CL[n]; const g=60+Math.max(0,SW-95)*1.2; const w=(x1-x0-g)/2; return J(a,x0,y0,x0+w,y1)+' '+J(b,x1-w,y0,x1,y1); }   // 겹자음 사이 틈은 획 두께에 비례
     const xm=(x0+x1)/2, ym=(y0+y1)/2, w=x1-x0, h=y1-y0;
     switch(n){
       case 'ㄱ': return `M${x0} ${y0} H${x1} V${y1}`;
@@ -1303,8 +1304,9 @@ const TS=(()=>{
       case 'ㅂ': return `M${x0} ${y0} V${y1} H${x1} V${y0} M${x0} ${ym} H${x1}`;
       case 'ㅅ': return `M${xm} ${y0} Q${xm-w*0.18} ${ym+h*0.1} ${x0} ${y1} M${xm} ${y0} Q${xm+w*0.18} ${ym+h*0.1} ${x1} ${y1}`;
       case 'ㅈ': return `M${x0} ${y0} H${x1} `+J('ㅅ',x0,y0+h*0.22,x1,y1);
-      case 'ㅊ': return `M${xm-w*0.15} ${y0} H${xm+w*0.15} `+J('ㅈ',x0,y0+h*0.2,x1,y1);
-      case 'ㅎ': { const r=(h-h*0.42)/2, cy=y1-r; return `M${xm-w*0.18} ${y0} H${xm+w*0.18} M${x0} ${y0+h*0.24} H${x1} M${xm-r} ${cy} a${r} ${r} 0 1 0 ${2*r} 0 a${r} ${r} 0 1 0 ${-2*r} 0`; }
+      case 'ㅊ': return B() ? `M${xm} ${y0} V${y0+h*0.22} `+J('ㅈ',x0,y0+h*0.22,x1,y1) : `M${xm-w*0.15} ${y0} H${xm+w*0.15} `+J('ㅈ',x0,y0+h*0.2,x1,y1);
+      case 'ㅎ': { if(B()){ const yb=y0+h*0.22, r=Math.min(w*0.44,(y1-yb-SW*0.25)/2), cy=y1-r; return `M${xm} ${y0} V${yb} M${x0} ${yb} H${x1} M${xm-r} ${cy} a${r} ${r} 0 1 0 ${2*r} 0 a${r} ${r} 0 1 0 ${-2*r} 0`; }
+        const r=(h-h*0.42)/2, cy=y1-r; return `M${xm-w*0.18} ${y0} H${xm+w*0.18} M${x0} ${y0+h*0.24} H${x1} M${xm-r} ${cy} a${r} ${r} 0 1 0 ${2*r} 0 a${r} ${r} 0 1 0 ${-2*r} 0`; }
       case 'ㅇ': { const r=Math.min(w,h)/2; return `M${xm-r} ${ym} a${r} ${r} 0 1 0 ${2*r} 0 a${r} ${r} 0 1 0 ${-2*r} 0`; }
       case 'ㅋ': return `M${x0} ${y0} H${x1} V${y1} M${x0} ${ym} H${x1}`;
       case 'ㅌ': return `M${x1} ${y0} H${x0} V${y1} H${x1} M${x0} ${ym} H${x1}`;
@@ -1327,6 +1329,7 @@ const TS=(()=>{
     return '';
   }
   function syl(c,v,f){
+    if(B()) return sylB(c,v,f);
     if(CX[v]){ const [b,r]=CX[v];
       if(!f) return [J(c,80,100,440,440), b==='ㅡ'?'M60 560 H500':J(b,60,470,500,620), J(r,600,80,930,900)].join(' ');
       return [J(c,100,80,420,340), b==='ㅡ'?'M60 450 H480':J(b,60,370,480,500), J(r,600,60,930,560), J(f,90,640,900,920)].join(' ');
@@ -1339,9 +1342,24 @@ const TS=(()=>{
     if(!f) return J(c,140,90,860,470)+' '+(tall?J(v,90,560,910,900):J(v,90,640,910,760));
     return [J(c,190,80,810,380), tall?J(v,90,420,910,600):J(v,90,470,910,560), J(f,140,660,860,920)].join(' ');
   }
+  // 굵은 글자(Bold) 전용 상자: 받침 상자 높이 ≥ 340(가로획 3개 + 틈), 초성 상자도 조금 위로, 복합모음은 좌우 자모 폭 확보
+  function sylB(c,v,f){
+    const e=Math.round((SW-95)*0.4), dc=CL[c]?30:0;   // 겹자음 초성은 좌우 30 더   // 굵을수록 상자를 위아래로 조금 더 씀(125 → 12)
+    if(CX[v]){ const [b,r]=CX[v];
+      if(!f) return [J(c,70,90-e,430,430), b==='ㅡ'?'M50 560 H500':J(b,50,470,500,630), J(r,610,70-e,940,910+e)].join(' ');
+      return [J(c,90,60-e,420,330), b==='ㅡ'?'M50 440 H480':J(b,50,360,480,500), J(r,610,40-e,940,540), J(f,80,610,910,930+e)].join(' ');
+    }
+    if(!VERT[v]){ const nx=v==='ㅣ'; const vx0=nx?600:590, vx1=nx?760:930;
+      if(!f) return J(c,60-dc,100-e,470+dc,890+e)+' '+J(v,vx0,80-e,vx1,920+e);
+      return [J(c,60-dc,60-e,470+dc,440), J(v,vx0,40-e,vx1,540), J(f,80,610,910,930+e)].join(' ');
+    }
+    const tall = v!=='ㅡ';
+    if(!f) return J(c,130-dc,70-e,870+dc,460)+' '+(tall?J(v,80,550,920,910+e):J(v,80,640,920,770));
+    return [J(c,170-dc,50-e,830+dc,370), tall?J(v,80,410,920,580):J(v,80,450,920,540), J(f,130,610,870,930+e)].join(' ');
+  }
   const DIG={'0':'M500 90 a230 410 0 1 0 1 0','1':'M400 230 L560 90 V910','2':'M330 260 a220 220 0 1 1 380 160 L330 910 H720','3':'M340 210 a210 190 0 1 1 260 300 M600 510 a220 200 0 1 1 -280 300','4':'M640 90 L280 640 H760 M640 400 V910','5':'M700 90 H360 L330 480 c 100 -70 340 -40 340 190 c 0 250 -260 290 -380 180','6':'M640 100 c -280 120 -340 400 -320 560 a220 220 0 1 0 60 -220','7':'M300 90 H720 L450 910','8':'M500 480 a200 190 0 1 0 -1 0 M500 480 a215 215 0 1 1 -1 0','9':'M360 900 c 280 -120 340 -400 320 -560 a220 220 0 1 1 -60 220'};
   function svg(text, size, sw, color){
-    sw=sw||95; color=color||'currentColor'; let x=0; const out=[];
+    sw=sw||95; SW=sw; color=color||'currentColor'; let x=0; const out=[];
     for(const ch of text){
       if(ch===' '){ x+=360; continue; }
       if(ch==='·'){ out.push(`<circle cx="${x+230}" cy="520" r="${sw*0.6}" fill="${color}"/>`); x+=460; continue; }
