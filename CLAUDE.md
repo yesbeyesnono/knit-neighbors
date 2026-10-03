@@ -136,6 +136,7 @@
 ## 남은 일
 - 대표: 2단계 인증(구글·Supabase·GitHub·Apple·Codemagic), 구글 클라이언트 시크릿 재발급, Play Console에 versionCode 2 .aab 업로드·데이터 보안 설문, App Store 테스트 정보 입력, 앱 아이콘(1024 PNG) 전달, 쎄비하우스 오너 계정·링크 입력
 - **앱 푸시 알림 APNs(2026-09-29 구현, schema 57)**: 앱 `pushSetup`(온보딩 끝난 회원에게 안내 시트 1회 → iOS 권한 → `register_device_token`), 설정 › 앱 알림(상태·테스트 발송), 알림 누르면 활동 화면. 서버는 notifications insert 트리거 → `push-send`(APNs JWT). **대표가 넣을 것**: ① developer.apple.com › Keys 에서 APNs 키(.p8) 1개 발급 → Supabase Secrets `APNS_KEY`(.p8 내용 전체) · `APNS_KEY_ID` · `APNS_TEAM_ID`=M59979ZT3A ② Identifiers › App ID 둘 다(…knitneighbors, …knitneighbors.lab) Push Notifications 체크. 키 없으면 발송만 조용히 실패. Codemagic 은 npm ci + cap sync 로 플러그인 자동 포함, 프로파일은 fetch-signing-files 가 다시 만듦
+- **안드로이드(2026-10-03 대표: 다음 주 공개, 공개판만, Play 법인 계정이라 비공개 테스트 불필요)**: 빌드는 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk) → .aab 를 대표가 Play Console 에 업로드. 올릴 때마다 `versionCode` +1(현재 3 · 1.0.1). 푸시는 FCM(schema 70): `android/app/google-services.json`(gitignore, 이 PC 에만) + Supabase 시크릿 `FCM_SERVICE_ACCOUNT`(서비스 계정 JSON 전체, 대표가 입력)
 - **다음 할 일**: 응원 메시지 체계 `resources/plans/encourage_messages.md`(원칙: 하루 1건·우선순위·서포터 알림 간소화·응원 7일 자동 삭제·**응원 끄기 설정 없음**·지기 AI 채팅은 4개만) 구현. 텔레그램 리마인더 09-28 14:00 예약됨
 - 개발 후보: 이상 접근 감지·사고 대응 문서, PITR 백업, 스토어 스크린샷·설명, 공유 링크, 고유 아이디(@handle), '지금 이 근처' 임시 위치, 관리자 PNG 내보내기
 - 출시 전: demo1~6 데이터 삭제, 데모 도안 14개 삭제(위 참고), 법률 검토, 위치기반서비스 신고 대상 확인

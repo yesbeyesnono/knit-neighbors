@@ -2440,11 +2440,12 @@ async function applyReferrer(){
     else if(data?.error==='NOT_FOUND') toast('추천인을 찾지 못했어요. 닉네임을 확인해 주세요'); }catch(e){}
 }
 
-// ============ 앱 푸시 알림 (APNs · @capacitor/push-notifications) ============
+// ============ 앱 푸시 알림 (iOS APNs · Android FCM · @capacitor/push-notifications) ============
 // 흐름: 안내 시트(1회) → iOS 권한 창 → 토큰을 register_device_token 으로 저장 → 서버가 notifications insert 때 push-send 로 발송
 // 알림 문구는 서버(push_payload)가 만들고, 앱은 누르면 활동 화면(🔔)으로 간다. 웹에서는 아무것도 하지 않는다
 const PushN = isNative && CAP?.Plugins?.PushNotifications ? CAP.Plugins.PushNotifications : null;
 let pushToken = null;
+const PUSH_ANDROID = isNative && CAP.getPlatform && CAP.getPlatform()==='android', PUSH_OS = PUSH_ANDROID ? '휴대폰' : 'iOS';   // 안내 문구·토큰 종류
 async function pushSetup(){
   if(!PushN || !me || !myProfile?.onboarded_at) return;
   try{
@@ -2453,7 +2454,7 @@ async function pushSetup(){
     if(perm.receive === 'denied') return;                       // 설정 앱에서 켜야 함 — 설정 화면에서 안내
     const asked = localStorage.getItem('kn_push_asked'); if(asked) return;   // 안내 시트는 한 번만
     localStorage.setItem('kn_push_asked', '1');
-    openSheet(`<b style="font-size:1.05rem">알림을 받아 볼까요?</b><p class="muted" style="margin:0;font-size:.9rem;line-height:1.5">답글·친구 신청·모임 소식·이벤트 선정처럼 놓치면 아쉬운 것만 보내요. 광고 알림은 없어요. iOS 설정에서 언제든 끌 수 있어요.</p>
+    openSheet(`<b style="font-size:1.05rem">알림을 받아 볼까요?</b><p class="muted" style="margin:0;font-size:.9rem;line-height:1.5">답글·친구 신청·모임 소식·이벤트 선정처럼 놓치면 아쉬운 것만 보내요. 광고 알림은 없어요. ${PUSH_OS} 설정에서 언제든 끌 수 있어요.</p>
       <button class="btn" onclick="closeSheet();pushAsk()">알림 받기</button><button class="btn o" onclick="closeSheet()">나중에</button>`);
   }catch(e){}
 }
@@ -2462,7 +2463,7 @@ function pushRegister(){ if(!PushN) return; PushN.register().catch(()=>{}); }
 if(PushN){
   PushN.addListener('registration', async ({ value }) => {
     pushToken = value;
-    const { error } = await sb.rpc('register_device_token', { p_token:value, p_platform:'ios', p_bundle:(window.KN_SCHEME==='knitneighborslab'?'kr.co.firmtech.knitneighbors.lab':'kr.co.firmtech.knitneighbors'), p_version:APP_VERSION });
+    const { error } = await sb.rpc('register_device_token', { p_token:value, p_platform: PUSH_ANDROID ? 'android' : 'ios', p_bundle:(window.KN_SCHEME==='knitneighborslab'?'kr.co.firmtech.knitneighbors.lab':'kr.co.firmtech.knitneighbors'), p_version:APP_VERSION });
     if(error) console.warn('push token', error.message);
   });
   PushN.addListener('registrationError', e => console.warn('push reg error', e));
@@ -2470,7 +2471,7 @@ if(PushN){
   PushN.addListener('pushNotificationActionPerformed', () => { setTimeout(()=>{ if(me && myProfile?.onboarded_at) openActivity(); }, 300); });   // 알림을 눌러 앱이 열렸을 때
 }
 async function pushUnregister(){ if(!PushN || !pushToken) return; try{ await sb.rpc('unregister_device_token', { p_token:pushToken }); }catch(e){} }
-async function pushStatusText(){ if(!PushN) return ''; try{ const p = await PushN.checkPermissions(); return p.receive==='granted' ? '켜짐' : p.receive==='denied' ? '꺼짐 · iOS 설정에서 켤 수 있어요' : '아직 안 정함'; }catch(e){ return ''; } }
+async function pushStatusText(){ if(!PushN) return ''; try{ const p = await PushN.checkPermissions(); return p.receive==='granted' ? '켜짐' : p.receive==='denied' ? `꺼짐 · ${PUSH_OS} 설정에서 켤 수 있어요` : '아직 안 정함'; }catch(e){ return ''; } }
 
 // ============ 채팅 ============
 const SUPPORT_ID = 'e120eb67-b254-4008-92d8-08c95c821e9e';   // 뜨개동네 지기(운영진) 계정
@@ -4291,11 +4292,11 @@ async function loadMyMeetups(el){
 }
 async function pushSettingsRow(){
   if(!PushN) return; const p = await PushN.checkPermissions();
-  if(p.receive==='granted'){ pushRegister(); openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 켜져 있어요. 끄려면 iOS 설정 › 뜨개동네 › 알림에서 바꿔 주세요.</p><button class="btn o" onclick="closeSheet();pushTest()">테스트 알림 보내기</button>`); }
-  else if(p.receive==='denied') openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 꺼져 있어요. iOS 설정 › 뜨개동네 › 알림에서 켜 주세요.</p>`);
+  if(p.receive==='granted'){ pushRegister(); openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 켜져 있어요. 끄려면 ${PUSH_OS} 설정 › 뜨개동네 › 알림에서 바꿔 주세요.</p><button class="btn o" onclick="closeSheet();pushTest()">테스트 알림 보내기</button>`); }
+  else if(p.receive==='denied') openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 꺼져 있어요. ${PUSH_OS} 설정 › 뜨개동네 › 알림에서 켜 주세요.</p>`);
   else pushAsk();
 }
-async function pushTest(){ closeSheet(); const { data, error } = await sb.functions.invoke('push-send', { body:{ route:'test' } }); if(error) return toast(error.message); toast(data?.sent ? '보냈어요 · 잠시 뒤 알림이 와요' : (data?.error==='no_apns_key' ? '서버에 APNs 키가 아직 없어요' : '등록된 기기가 없어요')); }
+async function pushTest(){ closeSheet(); const { data, error } = await sb.functions.invoke('push-send', { body:{ route:'test' } }); if(error) return toast(error.message); toast(data?.sent ? '보냈어요 · 잠시 뒤 알림이 와요' : (/^(no|bad)_/.test(data?.error||'') ? '서버에 푸시 키가 아직 없어요' : data?.tried ? '보내지 못했어요 · 잠시 뒤 다시 해 주세요' : '등록된 기기가 없어요')); }
 function openSettings(){ openSettingsInner(); pushStatusText().then(t=>{ const e=$('#pushStat'); if(e) e.textContent=t; }); }
 function openSettingsInner(){
   const p=myProfile||{};

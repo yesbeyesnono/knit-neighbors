@@ -20,3 +20,6 @@ android/keystore.properties
 # 책에서 잘라 온 원본 기호 이미지(검수용) — 저장소에 올리지 않는다
 resources/symbols/ref/
 __pycache__/
+# Firebase 설정(키 포함) — 빌드하는 PC 에만 둔다
+android/app/google-services.json
+*firebase-adminsdk*.json

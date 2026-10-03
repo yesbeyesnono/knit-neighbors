@@ -1380,3 +1380,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     앱 ↔ 뷰어 메시지: knitup-pkg{…, gauge} · kn-yarn-q{q, craft} → kn-yarn-r{q, rows}
 --   앱 도안 등록 폼(Lab): 게이지 코·단·편물 + 기준 실(yarn_suggest 검색, 고르면 yarn_spec 으로 빈 게이지 채움). 도안 상세에 '게이지 N코×M단'
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 70. 안드로이드 푸시(FCM) (마이그레이션 push_android_fcm) — 2026-10-03 대표: Firebase 프로젝트 knit-neighbors 생성
+--   register_device_token: platform 'android' 면 FCM 토큰 형식([A-Za-z0-9_:-], 대소문자 유지, 32~1000자), iOS 는 그대로(16진수·소문자). 재등록 때 platform 도 갱신
+--   Edge Function push-send v6: 기기별로 iOS=APNs / Android=FCM HTTP v1(서비스 계정 JWT RS256 → OAuth 토큰 50분 캐시 → messages:send). 한쪽 키가 없어도 다른 쪽은 발송
+--     시크릿 FCM_SERVICE_ACCOUNT = Firebase 서비스 계정 JSON 전체(값은 어디에도 적지 말 것). 404·UNREGISTERED 는 토큰 비활성화. route status 에 fcm 여부
+--   앱: p_platform 을 CAP.getPlatform() 으로, 안내 문구의 'iOS 설정' → 플랫폼별. AndroidManifest 에 POST_NOTIFICATIONS(안드로이드 13+). android/app/google-services.json 은 gitignore(빌드 PC 에만)
+-- ---------------------------------------------------------------
