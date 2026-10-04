@@ -10,7 +10,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const URL_ = Deno.env.get("SUPABASE_URL")!;
 const db = createClient(URL_, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const env = (k: string) => Deno.env.get(k) ?? "";
-const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json" } });
+const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };   // 앱(웹뷰)에서 테스트 발송을 부를 수 있게
+const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...cors, "Content-Type": "application/json" } });
 const b64url = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const pemDer = (pem: string) => Uint8Array.from(atob(pem.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "")), (c) => c.charCodeAt(0));
 type Msg = { title: string; body: string; badge?: number; kind: string; nid?: string };
@@ -70,6 +71,7 @@ async function sendTo(t: { token: string; bundle: string; platform: string }, m:
 }
 
 Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   try {
     const body = await req.json().catch(() => ({}));
     const { data: cfg } = await db.from("jigi_config").select("value").eq("key", "hook_secret").single();
