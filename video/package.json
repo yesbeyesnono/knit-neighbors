@@ -1,0 +1,24 @@
+{
+  "name": "knit-neighbors-video",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "뜨개동네 소개 영상 (Remotion)",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render KnitIntro16x9 out/knit-intro-16x9.mp4",
+    "stills": "node tools/stills.mjs",
+    "postinstall": "node tools/fetch-fonts.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.533",
+    "@remotion/fonts": "^4.0.533",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "remotion": "4.0.533"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.0",
+    "typescript": "5.8.3"
+  }
+}
