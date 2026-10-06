@@ -74,6 +74,10 @@ emit('logo-horizontal', int(420 + tw + 60), 420, ball(bg=None, scale=0.41, ox=0,
 # 5) 세로 로고: 실뭉치 위, 글자 아래 — 투명 바탕
 tp2, tw2 = text_path('뜨개동네', 220, 0, 0)
 W = max(560, int(tw2 + 80)); emit('logo-vertical', W, 760, ball(bg=None, scale=0.5, ox=(W - 512) / 2, oy=0) + f'<g transform="translate({(W - tw2) / 2:.1f} 690)">{tp2}</g>')
+# 5b) 어두운 바탕용(올리브·검정 명함): 실뭉치 연두 #EDF2DD + 글자 흰색 — 투명 바탕
+tpl, _ = text_path('뜨개동네', 300, 0, 0, fill='#FFFFFF')
+emit('logo-horizontal-light', int(420 + tw + 60), 420, ball(fg='#EDF2DD', bg=None, scale=0.41) + f'<g transform="translate(400 318)">{tpl}</g>')
+emit('icon-mark-light', S, S, ball(fg='#EDF2DD', bg=None))
 # 6) 인쇄용 큰 PNG(3배)
 render(os.path.join(OUT, 'icon-rounded.svg'), os.path.join(OUT, 'icon-rounded@3x.png'), S, S, 3); files.append(os.path.join(OUT, 'icon-rounded@3x.png'))
 render(os.path.join(OUT, 'logo-horizontal.svg'), os.path.join(OUT, 'logo-horizontal@3x.png'), int(420 + tw + 60), 420, 3); files.append(os.path.join(OUT, 'logo-horizontal@3x.png'))

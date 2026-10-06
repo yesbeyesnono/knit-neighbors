@@ -10,5 +10,6 @@
 | `icon-mark.svg/.png` | 실뭉치만, 투명 바탕(감긴 실 틈도 뚫림) — 명함 바탕색 위에 올릴 때 |
 | `logo-horizontal.svg/.png`, `@3x` | 실뭉치 + 뜨개동네 가로 조합, 투명 바탕 |
 | `logo-vertical.svg/.png` | 세로 조합, 투명 바탕 |
+| `logo-horizontal-light.svg/.png`, `icon-mark-light.svg/.png` | 어두운 바탕(올리브·검정 명함)용: 실뭉치 연두 + 글자 흰색 |
 
 인쇄소에는 SVG(벡터)를 주는 게 가장 선명하다. SVG 를 못 받으면 @3x PNG(300dpi 기준 약 26cm 폭).
