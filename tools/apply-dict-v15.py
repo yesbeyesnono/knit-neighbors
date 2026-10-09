@@ -3,7 +3,7 @@
 #   입력: knitup/knitup_technique_dictionary_v1.5.json (다른 세션이 만든 원본) → resources/symbols/ 에 복사
 #   출력 1) resources/symbols/editor_symbol_techs_v1.5.json — 에디터 기호 키 → 기법 ID 목록(대표 + also). 앱·에디터가 같은 표를 쓴다
 #        2) docs/index.html — TECH_VARIANTS(also 포함)·TECH_DRAW·PKG_SYM_TECHS 줄 교체
-#        3) knitup/docs/app_v9.html (+ 같은 내용의 knitup_커뮤니티_PWA_노트북패드_v9.html) — SYMS ids·TECH·TECH_LV·techsFromText·DATA 를 v1.5 로
+#        3) knitup/docs/knitup-studio.html (+ 루트 knitup-studio.html 동일 사본) — SYMS ids·TECH·TECH_LV·techsFromText·DATA 를 v1.5 로. Studio 의 SYMS 는 사전 변형 키 94종을 그대로 쓰므로 사전 키는 자동 대응
 #   규칙(v1.5): 도안 필요 기법 = 기호마다 {대표 기법} ∪ also 를 모아 중복 제거. 기법 ID·단계·선행은 v1.4 와 같다
 #   다시 실행해도 같은 결과(앵커를 정규식으로 찾아 통째로 바꿈)
 import io, json, os, re, shutil, sys
@@ -23,7 +23,7 @@ variants = d['variants']
 vindex = {v['key']: (tid, [a for a in v.get('also', []) if a != tid]) for tid, arr in variants.items() for v in arr}
 
 # ---------- 1) 에디터 기호 키 → 기법 ID 목록 ----------
-# 에디터(app_v9 SYMS)의 키는 v1.3 때 만든 짧은 키. 사전의 변형 키와 같은 것은 그대로, 이름만 다른 것은 대응표, 사전에 없는 것은 손으로
+# 에디터(knitup-studio SYMS)의 키는 v1.3 때 만든 짧은 키. 사전의 변형 키와 같은 것은 그대로, 이름만 다른 것은 대응표, 사전에 없는 것은 손으로
 EDITOR_TO_DICT = {'chain': 'chain', 'slip': 'slip', 'sc': 'sc', 'hdc': 'hdc', 'dc': 'dc', 'tr': 'tr', 'dtr': 'dtr',
                   'sc_inc': 'sc_inc', 'dc_inc': 'dc_inc', 'sc_dec': 'sc_dec', 'dc_dec': 'dc_dec', 'shell': 'shell5', 'bobble': 'dc3_cl', 'popcorn': 'dc5_pc',
                   'v_st': 'v_st', 'cross_dc': 'cross_dc', 'picot': 'picot', 'blo': 'sc_blo_rows', 'sc_inc3': 'sc_inc3', 'sc_dec3': 'sc_dec3', 'sc_loop': 'sc_loop',
@@ -36,6 +36,9 @@ SYM_TECHS = {}
 for k, vk in EDITOR_TO_DICT.items():
     tid, also = vindex[vk]; SYM_TECHS[k] = [tid] + also
 SYM_TECHS.update(MANUAL)
+# knitup Studio(2026-10-10)는 사전 변형 키(코바늘 94종 등)를 그대로 기호 키로 쓴다 → 사전에 있는 키는 그대로 대표 기법 + also
+for vk, (tid, also) in vindex.items():
+    SYM_TECHS.setdefault(vk, [tid] + also)
 for k, ids in SYM_TECHS.items():
     for i in ids: assert i in techs, (k, i)
 json.dump({'version': VER, 'rule': '도안 필요 기법 = 기호마다 {대표 기법} ∪ also, 중복 제거', 'editor_key_to_dict_key': EDITOR_TO_DICT, 'techs': SYM_TECHS},
@@ -56,8 +59,8 @@ else: s = s.replace('const TECH_DRAW = ', line + 'const TECH_DRAW = ', 1)
 s = s.replace('// 기법 기호 라이브러리 v1.2 (2026-09-28)', '// 기법 기호 라이브러리 v1.2 (2026-09-28, 사전 v1.5 연결 2026-10-09: TECH_VARIANTS[].also = 함께 쓰는 기법)', 1)
 io.open(p, 'w', encoding='utf-8', newline='').write(s)
 
-# ---------- 3) knitup 에디터·기법맵 (app_v9.html) ----------
-p9 = os.path.join(KNITUP, 'docs', 'app_v9.html'); e = io.open(p9, encoding='utf-8').read()
+# ---------- 3) knitup 에디터·기법맵 (knitup-studio.html) ----------
+p9 = os.path.join(KNITUP, 'docs', 'knitup-studio.html'); e = io.open(p9, encoding='utf-8').read()
 # 3a) SYMS: ids 추가 + 이름을 v1.5 명칭으로(긴뜨기 계열). 에디터 HTML 은 템플릿 리터럴 안이라 역따옴표·${ 를 쓰지 않는다
 RENAME = {'hdc': ('긴뜨기', '긴뜨기'), 'dc': ('한길긴', '한길 긴뜨기'), 'tr': ('두길긴', '두길 긴뜨기'), 'dtr': ('세길긴', '세길 긴뜨기'),
           'dc_inc': ('한길늘림', '한길 긴 2코 늘려뜨기'), 'dc_dec': ('한길모아', '한길 긴 2코 모아뜨기'), 'v_st': ('V스티치', '한길 긴 2코 늘려뜨기(사이에 사슬 1코)'),
@@ -66,6 +69,7 @@ def fix_sym(m):
     t = m.group(1); ids = SYM_TECHS.get(t)
     assert ids is not None, t
     body = m.group(0)
+    body = re.sub(r"\s*ids:\[[^\]]*\],?", "", body)   # 이미 ids 가 있으면(다시 실행) 지우고 새로
     body = re.sub(r"id:(?:'[CK]\d\d'|null),?\s*", "id:%s, ids:%s, " % ("'%s'" % ids[0] if ids else 'null', jsdump(ids)), body, count=1)
     if t in RENAME:
         n, full = RENAME[t]
@@ -123,13 +127,15 @@ assert '`' not in new_fn and '${' not in new_fn and '\\' not in new_fn
 # 3e) 기법맵 DATA: 이름·단계·선행·설명을 v1.5 로(기호 열은 기존 유지, 새 기법은 사전 기호)
 i0 = e.index('const DATA = ['); i1 = e.index('\n].map(', i0)
 old_rows = {}
-for m in re.finditer(r'^ \[("[CK]\d\d"),("[a-z]+"),"([^"]*)","([^"]*)","([^"]*)",(\d),(\[[^\]]*\]),"([^"]*)","([^"]*)"\]', e[i0:i1], re.M):
+for m in re.finditer(r'^ \[("[CK]\d\d"),("[a-z]+"),"([^"]*)","([^"]*)","([^"]*)",(\d),(\[[^\]]*\]),"([^"]*)","([^"]*)"(?:,"[^"]*")?\]', e[i0:i1], re.M):
     old_rows[json.loads(m.group(1))] = dict(ab=m.group(4), sym=m.group(5), symStd=m.group(9))
 rows = []
+has_merged = ',merged])' in e[i1:i1 + 200]   # Studio(2026-10-10)의 DATA 는 10번째 열 merged(합쳐진 기법 ID) → hidden 판정. 있으면 그대로 써 준다
 for t in order:
     o = old_rows.get(t['id'], {}); sym = o.get('sym') or (t.get('symbol') or '–'); ab = o.get('ab') or t.get('abbr', ''); std = o.get('symStd') or (t.get('symbol') if t.get('symbol') and len(t['symbol']) <= 2 else '–')
-    rows.append(' [%s,%s,%s,%s,%s,%d,%s,%s,%s]' % (jsdump(t['id']), jsdump(t['craft']), jsdump(t['name_ko']), jsdump(ab), jsdump(sym), t['level'], jsdump(t.get('prereq', [])), jsdump(t.get('desc', '')), jsdump(std)))
+    rows.append(' [%s,%s,%s,%s,%s,%d,%s,%s,%s%s]' % (jsdump(t['id']), jsdump(t['craft']), jsdump(t['name_ko']), jsdump(ab), jsdump(sym), t['level'], jsdump(t.get('prereq', [])), jsdump(t.get('desc', '')), jsdump(std),
+                                                      (',' + jsdump(t['merged_into'])) if has_merged and t.get('merged_into') else ''))
 e = e[:i0] + 'const DATA = [   /* 기법 사전 v1.5 (2026-10-09, tools/apply-dict-v15.py) — ID 는 지우지 않음(K06·K14 는 v1.4 에서 K01·K13 에 합쳐짐) */\n' + ',\n'.join(rows) + e[i1:]
 io.open(p9, 'w', encoding='utf-8', newline='').write(e)
-shutil.copy(p9, os.path.join(KNITUP, 'knitup_커뮤니티_PWA_노트북패드_v9.html'))
+shutil.copy(p9, os.path.join(KNITUP, 'knitup-studio.html'))   # 루트 사본(= docs 와 동일)
 print('ok: SYM_TECHS', len(SYM_TECHS), '| also 기호', sum(1 for v in SYM_TECHS.values() if len(v) > 1), '| TECH_VARIANTS', sum(len(v) for v in tv.values()), '| DATA rows', len(rows), '| seqs', len(seq_list))

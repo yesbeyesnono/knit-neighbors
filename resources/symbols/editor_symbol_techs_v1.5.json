@@ -180,6 +180,274 @@
   "marker": [],
   "turn": [
    "C04"
+  ],
+  "trtr": [
+   "C32"
+  ],
+  "hdc3_cl": [
+   "C19",
+   "C12"
+  ],
+  "dc3_cl": [
+   "C19"
+  ],
+  "dc5_cl": [
+   "C19"
+  ],
+  "hdc3_cl_sp": [
+   "C19",
+   "C12"
+  ],
+  "dc3_cl_sp": [
+   "C19"
+  ],
+  "dc5_cl_sp": [
+   "C19"
+  ],
+  "tr5_cl": [
+   "C19",
+   "C18"
+  ],
+  "dc5_cl_leg": [
+   "C19"
+  ],
+  "dc5_pc": [
+   "C20"
+  ],
+  "tr5_pc": [
+   "C20",
+   "C18"
+  ],
+  "dc5_pc_sp": [
+   "C20"
+  ],
+  "hdc5_pc": [
+   "C20",
+   "C12"
+  ],
+  "sc_inc_ch1": [
+   "C07"
+  ],
+  "hdc_inc": [
+   "C07",
+   "C12"
+  ],
+  "hdc_inc3": [
+   "C07",
+   "C12"
+  ],
+  "hdc_inc_sp": [
+   "C07",
+   "C12"
+  ],
+  "hdc_inc3_sp": [
+   "C07",
+   "C12"
+  ],
+  "dc_inc_sp": [
+   "C07",
+   "C13"
+  ],
+  "dc_inc3": [
+   "C07",
+   "C13"
+  ],
+  "v_st_sp": [
+   "C07",
+   "C13"
+  ],
+  "dc_inc3_sp": [
+   "C07",
+   "C13"
+  ],
+  "dc3_in_sc": [
+   "C07",
+   "C13"
+  ],
+  "dc3_on_sc_leg": [
+   "C07",
+   "C13"
+  ],
+  "shell5": [
+   "C15",
+   "C07"
+  ],
+  "shell5_sp": [
+   "C15",
+   "C07"
+  ],
+  "shell4_ch1": [
+   "C15",
+   "C07"
+  ],
+  "shell4_ch1_sp": [
+   "C15",
+   "C07"
+  ],
+  "hdc_dec": [
+   "C08",
+   "C12"
+  ],
+  "sc_dec3_skip": [
+   "C08"
+  ],
+  "hdc_dec3": [
+   "C08",
+   "C12"
+  ],
+  "dc_dec3": [
+   "C08",
+   "C13"
+  ],
+  "sc_blo_rows": [
+   "C10"
+  ],
+  "sc_blo_round": [
+   "C10"
+  ],
+  "sc_ridge": [
+   "C10"
+  ],
+  "hdc_blo": [
+   "C10",
+   "C12"
+  ],
+  "dc_blo": [
+   "C10",
+   "C13"
+  ],
+  "picot_sl_on_sc": [
+   "C14",
+   "C03"
+  ],
+  "picot_sc": [
+   "C14"
+  ],
+  "picot_sl_on_dc": [
+   "C14",
+   "C03",
+   "C13"
+  ],
+  "picot_sl_on_ch": [
+   "C14",
+   "C03"
+  ],
+  "cross_hdc": [
+   "C21",
+   "C12"
+  ],
+  "cross_dc_ch1": [
+   "C21"
+  ],
+  "cross_dc_right": [
+   "C21"
+  ],
+  "cross_dc_left": [
+   "C21"
+  ],
+  "cross_tr": [
+   "C21",
+   "C18"
+  ],
+  "cross_1x3_right": [
+   "C21"
+  ],
+  "cross_1x3_left": [
+   "C21"
+  ],
+  "fpsc": [
+   "C24"
+  ],
+  "fphdc": [
+   "C24",
+   "C12"
+  ],
+  "bpsc": [
+   "C24"
+  ],
+  "bphdc": [
+   "C24",
+   "C12"
+  ],
+  "fpdc_dec": [
+   "C24",
+   "C08"
+  ],
+  "fptr_dec": [
+   "C24",
+   "C08",
+   "C18"
+  ],
+  "fpdc_cross_ch1": [
+   "C24",
+   "C21"
+  ],
+  "fpdc_inc": [
+   "C24",
+   "C07"
+  ],
+  "y_st": [
+   "C33"
+  ],
+  "inv_y_2": [
+   "C33"
+  ],
+  "inv_y_3": [
+   "C33"
+  ],
+  "inv_y_y_3": [
+   "C33"
+  ],
+  "inv_y_y_4": [
+   "C33"
+  ],
+  "x_st_2": [
+   "C34"
+  ],
+  "x_st_3": [
+   "C34"
+  ],
+  "x_st_tr": [
+   "C34"
+  ],
+  "triangle": [
+   "C35"
+  ],
+  "solomon": [
+   "C36"
+  ],
+  "bullion7": [
+   "C27"
+  ],
+  "dc_loop": [
+   "C30",
+   "C13"
+  ],
+  "rsc": [
+   "C37"
+  ],
+  "twisted_sc": [
+   "C37"
+  ],
+  "rsc_var_2loops": [
+   "C37"
+  ],
+  "rsc_var_1loop": [
+   "C37"
+  ],
+  "yo_sc": [
+   "C37"
+  ],
+  "long_tail": [
+   "K01"
+  ],
+  "hdc3_puff": [
+   "C38",
+   "C12"
+  ],
+  "hdc3_puff_sp": [
+   "C38",
+   "C12"
   ]
  }
 }

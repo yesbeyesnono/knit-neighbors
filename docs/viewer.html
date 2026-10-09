@@ -16,12 +16,14 @@
 -->
 <style>
   :root{
-    --bg:#faf6f1; --card:#fff; --ink:#3d2f28; --sub:#8a7a6e; --line:#e8ddd2;
-    --accent:#c9614a; --accent-soft:#f6ddd5; --green:#4a8c6f; --green-soft:#dff0e8;
-    --blue:#4a8c9d; --blue-soft:#e2eef2; --gold:#d08a3e; --gold-soft:#f6ead8;
+    /* 뜨개동네 토큰(피스타치오) — 2026-10-10 UI 통일 */
+    --bg:#F3F4EC; --card:#fff; --ink:#3C4043; --sub:#6A6E73; --line:#E4E6D9;
+    --accent:#3F4F22; --accent-soft:#EDF2DD; --green:#5C7A4C; --green-soft:#E6EDDF;
+    --blue:#4a8c9d; --blue-soft:#e2eef2; --gold:#C9922F; --gold-soft:#F6EBD3;
+    --bg2:#F3F4EC; --ink2:#6A6E73; --ink3:#9AA0A6; --btn:#BFCF90; --btn-ink:#3F4F22; --acc:#9AAE62; --chip:#EDF2DD; --olive:#3F4F22; --sel:#3F4F22;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--ink);
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif; letter-spacing:-0.01em; word-break:keep-all; background:var(--bg); color:var(--ink);
        -webkit-user-select:none; user-select:none;}
   header{max-width:1360px; margin:0 auto; padding:18px 24px 0;}
   .brand{font-size:12px; letter-spacing:2px; color:var(--accent); font-weight:700;}
@@ -35,7 +37,7 @@
   @media(max-width:1100px){.main{grid-template-columns:1fr;}}
   /* 상단 실 소요량 스트립 */
   .ystats{display:flex; gap:10px; flex-wrap:wrap;}
-  .yst{flex:1; min-width:150px; background:#faf6f1; border:1px solid var(--line); border-radius:10px; padding:8px 12px;}
+  .yst{flex:1; min-width:150px; background:#F3F4EC; border:1px solid var(--line); border-radius:10px; padding:8px 12px;}
   .yst .yl{font-size:10.5px; color:var(--sub); font-weight:700;}
   .yst .yv{font-size:17px; font-weight:800; margin-top:2px;}
   .yst .yv .old{color:var(--sub); text-decoration:line-through; font-weight:400; font-size:12px; margin-right:6px;}
@@ -59,11 +61,11 @@
   .yneed .v .old{color:var(--sub); text-decoration:line-through; font-weight:400; font-size:11px; margin-right:4px;}
   .subs{margin-top:8px; border-top:1px dashed var(--line); padding-top:7px;}
   .subs .t{font-size:10.5px; font-weight:800; color:var(--sub); margin-bottom:5px;}
-  .sub{display:flex; align-items:center; gap:7px; font-size:11px; padding:4px 6px; border-radius:8px; background:#faf6f1; margin-bottom:4px;}
+  .sub{display:flex; align-items:center; gap:7px; font-size:11px; padding:4px 6px; border-radius:8px; background:#F3F4EC; margin-bottom:4px;}
   .sub .m{margin-left:auto; font-weight:800; color:var(--green); background:var(--green-soft); padding:2px 7px; border-radius:9px; font-size:10.5px; white-space:nowrap;}
   /* 차트 뷰포트: 휠 줌 + 그랩 패닝 */
   #chartVp{position:relative; height:560px; overflow:hidden; cursor:grab; border:1px solid var(--line);
-           border-radius:12px; background:#fffdfb; touch-action:none;}
+           border-radius:12px; background:#FFFFFF; touch-action:none;}
   #chartVp.grabbing{cursor:grabbing;}
   #chartVp .board{transform-origin:0 0; will-change:transform;}
   .vzhint{position:absolute; right:10px; bottom:8px; z-index:7; font-size:10.5px; color:var(--sub);
@@ -95,7 +97,7 @@
   .r-fix{background:var(--green-soft);} .r-fix .k{background:var(--green);}
   /* ---- chat assistant ---- */
   .chatlog{height:295px; overflow:auto; border:1px solid var(--line); border-radius:10px; padding:10px;
-           background:#fdfbf8; display:flex; flex-direction:column; gap:8px;}
+           background:#F7F8F1; display:flex; flex-direction:column; gap:8px;}
   .bb{max-width:90%; padding:8px 11px; border-radius:12px; font-size:12.5px; line-height:1.55; white-space:pre-wrap;}
   .bb.a{background:#fff; border:1px solid var(--line); align-self:flex-start; border-bottom-left-radius:4px;}
   .bb.u{background:var(--accent); color:#fff; align-self:flex-end; border-bottom-right-radius:4px;}
@@ -127,9 +129,9 @@
   .instr-wrap{max-height:330px; overflow:auto; margin-top:6px; border:1px solid var(--line); border-radius:10px;}
   table.instr{width:100%; border-collapse:collapse; font-size:12px;}
   table.instr th{font-size:10.5px; color:var(--sub); text-align:left; padding:6px 8px; border-bottom:1.5px solid var(--line); position:sticky; top:0; background:#fff; z-index:2;}
-  table.instr td{padding:5px 8px; border-bottom:1px solid #f0e9e0; vertical-align:top;}
+  table.instr td{padding:5px 8px; border-bottom:1px solid #E4E6D9; vertical-align:top;}
   table.instr tbody tr{cursor:pointer;}
-  table.instr tbody tr:hover td{background:#faf6f1;}
+  table.instr tbody tr:hover td{background:#F3F4EC;}
   table.instr tr.dn td{background:var(--green-soft);}
   table.instr tr.dn td:first-child{color:var(--green); font-weight:800;}
   table.instr tr.nx td{background:var(--accent-soft);}
@@ -142,7 +144,7 @@
   #toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(90px); background:var(--ink);
          color:#fff; padding:11px 20px; border-radius:22px; font-size:13px; opacity:0; transition:all .35s; z-index:60;}
   #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-  .flow{font-size:10.5px; color:var(--sub); background:#f7f2ec; border-radius:9px; padding:8px 10px; margin-top:10px; line-height:1.6;}
+  .flow{font-size:10.5px; color:var(--sub); background:#F3F4EC; border-radius:9px; padding:8px 10px; margin-top:10px; line-height:1.6;}
 </style>
 <style id="kn-embed">
   body{visibility:hidden;-webkit-text-size-adjust:100%}
@@ -270,7 +272,7 @@ const COEF={ sc:{l:1,h:1,nm:'짧은뜨기',sym:'×'}, inc:{l:2,h:1,nm:'늘려뜨
 
 /* ═══ 실 메타 DB (예시 데이터 — 서비스에서는 국내 실 메타 DB 연동) ═══ */
 const YARN_DB={
-  main:{ role:'본체색 · 크라운+본판', color:'#d9c3a0', colorName:'14. 오트베이지',
+  main:{ role:'본체색 · 크라운+본판', color:'#BFCF90', colorName:'14. 오트베이지',
     brand:'낙양모사', name:'클래식 울 DK', comp:'울 80% · 나일론 20%',
     unitG:50, unitM:120, hook:'코바늘 4.0~5.0mm', gauge:'17코×20단/10cm', price:6500, wash:'30℃ 울코스·손세탁',
     subs:[ {brand:'바늘이야기', name:'소프트 메리노 DK', comp:'울 100%', unit:'50g·110m', price:7200, match:93},
@@ -348,7 +350,7 @@ function render(base){
     let h='<svg width="'+size+'" height="'+size+'" style="position:absolute; left:0; top:0">';
     g.links.forEach(l=>{ const a=byId[l.from], c=byId[l.to]; if(!a||!c) return;
       h+='<line x1="'+px(a)+'" y1="'+py(a)+'" x2="'+px(c)+'" y2="'+py(c)+'" stroke="'
-        +(l.rel==='into'?'#c9a227':'#e3ddd2')+'" stroke-width="'+(l.rel==='into'?1.6:1)+'"'
+        +(l.rel==='into'?'#c9a227':'#E4E6D9')+'" stroke-width="'+(l.rel==='into'?1.6:1)+'"'
         +(l.rel==='seq'?' stroke-dasharray="3 3"':'')+'/>'; });
     h+='</svg>';
     g.nodes.forEach(n=>{

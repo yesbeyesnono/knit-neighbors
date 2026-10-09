@@ -1,9 +1,9 @@
 // knitup v9 앱의 📐 사이즈 변환 뷰어(VIEWER_SIZE_HTML)를 뽑아 뜨개동네용 docs/viewer.html 로 만든다.
-// 사용: node tools/build-viewer.js [knitup/docs/app_v9.html 경로]
+// 사용: node tools/build-viewer.js [knitup/docs/knitup-studio.html 경로]
 // knitup 쪽 뷰어가 바뀌면 다시 실행하면 된다. (knitup 폴더에서는 읽기만 한다)
 const fs = require('fs');
 const path = require('path');
-const srcPath = process.argv[2] || path.join(__dirname, '..', '..', 'knitup', 'docs', 'app_v9.html');
+const srcPath = process.argv[2] || path.join(__dirname, '..', '..', 'knitup', 'docs', 'knitup-studio.html');
 const src = fs.readFileSync(srcPath, 'utf8');
 const head = 'const VIEWER_SIZE_HTML = `';
 const i = src.indexOf(head);
