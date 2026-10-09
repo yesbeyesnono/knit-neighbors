@@ -1388,3 +1388,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     시크릿 FCM_SERVICE_ACCOUNT = Firebase 서비스 계정 JSON 전체(값은 어디에도 적지 말 것). 404·UNREGISTERED 는 토큰 비활성화. route status 에 fcm 여부
 --   앱: p_platform 을 CAP.getPlatform() 으로, 안내 문구의 'iOS 설정' → 플랫폼별. AndroidManifest 에 POST_NOTIFICATIONS(안드로이드 13+). android/app/google-services.json 은 gitignore(빌드 PC 에만)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 70. 안드로이드 푸시(FCM) — 위 70번 참고 (push_android_fcm)
+-- 71. knitup v9 기능 이식 ① 기법 패널 ② 이어뜨기·완성 모멘트 ③ 도안 새 기법 요약 ④ 작가 대시보드 (마이그레이션 pattern_continue, author_pattern_stats) — 2026-10-10 대표 "진행해"
+--   pattern_progress.done_at: 마지막 단까지 체크하면 앱이 기록(upsert, 본인 행만). 다시 체크를 풀면 null
+--   my_patterns_in_progress() → [{id,title,photo,craft,level,techniques,prog,total,updated_at}] 내가 뜨는 중(prog>0, 미완성)인 공개 도안, total = 패키지 차트 단 합계. 마이 '지금 할 일' 맨 위 '이어뜨기' 줄(FULL)
+--   my_pattern_stats() → {pattern_id:{saves,started,done}} 내 도안별 집계(작가 본인). 설정 › 내 도안 머리에 합계 + 도안별 줄
+--   앱: openTechPanel(id)(기법 맵 'ⓘ/기호 N' 배지·도안 상세 기법 칩): 상태(할 수 있어요/지금 도전/먼저 배울 것)·설명·선행/다음 기법 칩·변형 기호·▶ 영상 보기(유튜브 검색, openExt 확인 시트)·이 기법으로 인증하기(techPanelCert → 인증 폼에 기법 선택)
+--       뷰어: pvMeta/pvTotal, kn-prog 에서 prog>=total 이면 done_at 기록 + 뷰어 닫고 openPatternDone(🎉 → certFromPattern: 제목·기법 자동 / openNextChallenge: recommend_patterns) · 도안 상세: '새로 배우는 기법 N개' 카드, 버튼이 '이어뜨기 · N단까지'로
+--   남은 것(후순위): 진도 뷰어 보강(도안 노트·단계 체크리스트·배색 바), 기법별 자체 영상 주소(techniques 에 열 추가 예정)
+-- ---------------------------------------------------------------

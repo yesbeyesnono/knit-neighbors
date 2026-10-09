@@ -128,6 +128,8 @@ begin
   out := pg_temp.cnt(out, 'yarn_suggest(anon)', 'select count(*) from public.yarn_suggest(''낙양'')', 0);
   out := pg_temp.cnt(out, 'yarn_gauge_search(anon)', 'select jsonb_array_length(public.yarn_gauge_search(''낙양'', ''crochet''))', 0);   -- schema 69
   out := pg_temp.cnt(out, 'pattern_gauge_ctx(anon)', 'select case when public.pattern_gauge_ctx((select id from public.patterns limit 1)) is null then 0 else 1 end', 0);
+  out := pg_temp.cnt(out, 'my_patterns_in_progress(anon)', 'select jsonb_array_length(public.my_patterns_in_progress())', 0);   -- schema 71
+  out := pg_temp.cnt(out, 'my_pattern_stats(anon)', 'select case when public.my_pattern_stats() = ''{}''::jsonb then 0 else 1 end', 0);
   out := pg_temp.cnt(out, 'yarn_spec(anon)', 'select case when public.yarn_spec(gen_random_uuid()) is null then 0 else 1 end', 0);   -- schema 68
   reset role;
   raise exception 'RESULT(rolled back): %', out;
