@@ -99,7 +99,8 @@ order = sorted(techs.values(), key=lambda t: t['sort'])
 tech_js = 'const TECH = {   /* 사전 v1.5 (2026-10-09) — tools/apply-dict-v15.py 가 씀 */\n  ' + ', '.join("%s:'%s'" % (t['id'], t['name_ko'].replace("'", '')) for t in order) + '\n};'
 i0 = e.index('const TECH = {'); i1 = e.index('};', i0) + 2; e = e[:i0] + tech_js + e[i1:]
 lv_js = 'const TECH_LV={' + ','.join('%s:%d' % (t['id'], t['level']) for t in order) + '};   /* 사전 v1.5 단계 */'
-i0 = e.index('const TECH_LV={'); i1 = e.index('};', i0) + 2; e = e[:i0] + lv_js + e[i1:]
+i0 = e.index('const TECH_LV={'); i1 = e.index('
+', i0); e = e[:i0] + lv_js + e[i1:]   # 줄 전체 교체(끝 주석이 매번 덧붙지 않게)
 # 3d) 지시문 글 → 기법: 복합 기호 이름(대표 + also)·SYMS 전체 이름·기법 이름·별칭. 긴 이름부터
 seqs = {}
 def put(text, ids):
