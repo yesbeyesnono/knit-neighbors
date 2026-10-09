@@ -3,7 +3,9 @@
 // knitup 쪽 뷰어가 바뀌면 다시 실행하면 된다. (knitup 폴더에서는 읽기만 한다)
 const fs = require('fs');
 const path = require('path');
-const srcPath = process.argv[2] || path.join(__dirname, '..', '..', 'knitup', 'docs', 'knitup-studio.html');
+// knitup Studio 폴더: 저장소 이름이 knitup-studio 로 바뀜(2026-10-10) — 로컬 폴더가 아직 knitup 이면 그것도 찾는다
+const studioDir = ['knitup-studio', 'knitup'].map(d => path.join(__dirname, '..', '..', d)).find(d => fs.existsSync(path.join(d, 'docs', 'knitup-studio.html')));
+const srcPath = process.argv[2] || path.join(studioDir, 'docs', 'knitup-studio.html');
 const src = fs.readFileSync(srcPath, 'utf8');
 const head = 'const VIEWER_SIZE_HTML = `';
 const i = src.indexOf(head);

@@ -9,7 +9,7 @@
 import io, json, os, re, shutil, sys
 sys.stdout.reconfigure(encoding='utf-8')
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-KNITUP = os.path.join(os.path.dirname(ROOT), 'knitup')
+KNITUP = next(d for d in (os.path.join(os.path.dirname(ROOT), n) for n in ('knitup-studio', 'knitup')) if os.path.isdir(d))   # 저장소 이름 knitup-studio(2026-10-10), 로컬 폴더는 둘 중 있는 쪽
 SYM = os.path.join(ROOT, 'resources', 'symbols')
 VER = '1.5'
 
@@ -99,8 +99,7 @@ order = sorted(techs.values(), key=lambda t: t['sort'])
 tech_js = 'const TECH = {   /* 사전 v1.5 (2026-10-09) — tools/apply-dict-v15.py 가 씀 */\n  ' + ', '.join("%s:'%s'" % (t['id'], t['name_ko'].replace("'", '')) for t in order) + '\n};'
 i0 = e.index('const TECH = {'); i1 = e.index('};', i0) + 2; e = e[:i0] + tech_js + e[i1:]
 lv_js = 'const TECH_LV={' + ','.join('%s:%d' % (t['id'], t['level']) for t in order) + '};   /* 사전 v1.5 단계 */'
-i0 = e.index('const TECH_LV={'); i1 = e.index('
-', i0); e = e[:i0] + lv_js + e[i1:]   # 줄 전체 교체(끝 주석이 매번 덧붙지 않게)
+i0 = e.index('const TECH_LV={'); i1 = e.index(chr(10), i0); e = e[:i0] + lv_js + e[i1:]   # 줄 전체 교체(끝 주석이 매번 덧붙지 않게)
 # 3d) 지시문 글 → 기법: 복합 기호 이름(대표 + also)·SYMS 전체 이름·기법 이름·별칭. 긴 이름부터
 seqs = {}
 def put(text, ids):
