@@ -19,7 +19,7 @@
 - Codemagic 워크플로(2026-09-20 대표 지시로 자동/수동을 뒤집음): `ios-public`(meet, Bundle ID `kr.co.firmtech.knitneighbors` = App Store Connect 앱 **KOAP**, **main 푸시마다 자동** → KOAP TestFlight) · `ios-lab`(full, `kr.co.firmtech.knitneighbors.lab` = 앱 **뜨개동네 Lab**, **`lab-*` 태그 푸시 또는 수동 실행**, 복귀 주소 `knitneighborslab://auth`). 빌드 번호는 시각 기반(yymmddHHMM). KOAP의 옛 full 빌드(`2609190323`·숫자만 있는 빌드)는 심사에 제출하지 말 것
 - **작업·배포 흐름(2026-09-20 대표 지시)**: **V2(공개 앱)를 우선 개발**한다. 수정 → main 푸시 → KOAP TestFlight에 자동 반영(대표가 바로 확인). V1(Lab)은 나중에 만들어 가며, 대표가 **"Lab 올려줘"**라고 할 때만 `git tag lab-YYYYMMDD-N && git push origin <태그>`. 새 기능은 기본적으로 V2에 보이게 만들되, 대표가 "Lab 전용"이라고 한 것만 `FULL`로 감싼다. 실제 사용자가 쓰게 되면 main 푸시 = 곧 TestFlight 빌드이므로 DB·화면 변경을 더 신중히. App Store 심사 제출 버튼은 대표가 누른다
 - 공개 후 원칙: DB 변경은 추가만(옛 앱 버전이 계속 동작해야 함), 기존 컬럼·함수 삭제 금지. 구버전 차단은 `app_config.min_version`
-- 공개 전 할 일: demo1~6 계정 데이터 삭제(데모 도안은 지기 소유로 옮겨 Lab 시연용으로 유지), APP_VERSION·MARKETING_VERSION 정리
+- 공개 전 할 일: APP_VERSION·MARKETING_VERSION 정리 (demo 데이터·데모 도안은 2026-10-09 삭제 완료)
 
 ## 구조
 - 앱 본체: `docs/index.html` 단일 파일(HTML+CSS+JS). GitHub Pages(main /docs) → https://yesbeyesnono.github.io/knit-neighbors/
@@ -95,7 +95,7 @@
 - **클래스 열기**(가게 오너, `openClassForm` → `v-classform`, shop_posts kind class + extra v1): 양식은 솜씨당·탈잉·프립·네이버 예약 조사 결과로 확정 — 대표 사진·클래스명·한 줄 소개·종목·난이도(N단계)·배울 기법(기법 맵)·완성작·원데이/정규(회차·주기)·일시·소요·모집 마감·최소/최대 인원·수강료·재료비(포함/별도 금액)·제공/준비물·장소·소개/추천/커리큘럼/강사·신청 방법(링크/전화/인스타/직접)·취소환불 규정 프리셋·유의사항. 가게 화면 `classBox()` 카드에 '최소 인원 미달 시 전액 환불' 문구 자동. **신청·확정은 앱 안에서만(2026-09-27 대표 지시: 외부 링크·전화·DM 금지)** — [신청하기] → 호스트 알림 → [신청자 관리]에서 확정/거절 → 확정자는 클래스 채팅방(단체방) 자동 입장, 설정 › 신청한 클래스. 결제는 호스트가 채팅방에서 직접(앱 내 결제 없음). schema 53
 - 도안 추천: `recommend_patterns`(내 단계~+1, 새 기법 1~2개 우선). 피드 6번째 글 뒤·작품 인증 직후·내 단계 화면·설정 › 찜한 도안. 결제는 외부 링크만(앱 내 결제 없음). **등록된 도안이 없으면 카드가 안 보임** — 관리자 콘솔 › 도안에서 등록
 - 작가(2026-09-27 자격 변경): **상급(4단계) 이상 기법이 들어간 작품 인증 3개 이상**(`author_adv_count`, `my_author_eligibility`) → 설정 › 작가 신청 → 콘솔 › 작가 신청 승인. 권한: 지도 작가 핀(#8a6d1a)·프로필 링크·**클래스 열기(가게와 같은 양식, shop_posts.shop_id null + author_id)** → 프로필/마이 '클래스' 탭, 친구에게 알림. Lab에서는 ＋ › 도안 / 설정 › 내 도안. schema 52
-- **데모 도안 14개**(표지 그림 `docs/patterns/demo-*.svg`, 작가: demo2 코바늘요정·demo3 킨텍스뜨개·지기, 판매 링크 없음). 출시 전 삭제: `delete from patterns where photos[1] like '%/patterns/demo-%'` + `docs/patterns/demo-*.svg` 제거
+- **데모 데이터 정리 완료(2026-10-09 대표 지시)**: demo1~6 의 글·작품·모임·방·친구·알림·기술 이력·Storage 사진 전부 삭제, 데모 도안 14개(`docs/patterns/demo-*.svg` 포함) 삭제. **계정 6개는 남김**(닉네임 demo1~6, 지도 비공개, 작가 아님 — 권한 테스트·심사용 로그인에 필요). 지운 행은 DB `archive.demo_2026_10_09`(tbl, row jsonb)에 보관 — 필요 없으면 나중에 drop. Storage 삭제 도구 `tools/delete-demo-storage.py`
 
 ## 레벨·이벤트 (2026-09-20 대표 확정)
 - **레벨(Lv.N)** = 작품 인증을 올린 날 수(`profiles.act_level`, 하루 1개만 인정, 서버 계산). '뜨개 단계'(실력)와 별개인 활동량. 닉네임 옆 `lvBadge()`로 표시(글·프로필·설정)
@@ -140,4 +140,4 @@
 - **안드로이드(2026-10-03 대표: 다음 주 공개, 공개판만, Play 법인 계정이라 비공개 테스트 불필요)**: 빌드는 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk) → .aab 를 대표가 Play Console 에 업로드. 올릴 때마다 `versionCode` +1(현재 3 · 1.0.1). 푸시는 FCM(schema 70): `android/app/google-services.json`(gitignore, 이 PC 에만) + Supabase 시크릿 `FCM_SERVICE_ACCOUNT`(서비스 계정 JSON 전체, 대표가 입력)
 - **다음 할 일**: 응원 메시지 체계 `resources/plans/encourage_messages.md`(원칙: 하루 1건·우선순위·서포터 알림 간소화·응원 7일 자동 삭제·**응원 끄기 설정 없음**·지기 AI 채팅은 4개만) 구현. 텔레그램 리마인더 09-28 14:00 예약됨
 - 개발 후보: 이상 접근 감지·사고 대응 문서, PITR 백업, 스토어 스크린샷·설명, 공유 링크, 고유 아이디(@handle), '지금 이 근처' 임시 위치, 관리자 PNG 내보내기
-- 출시 전: demo1~6 데이터 삭제, 데모 도안 14개 삭제(위 참고), 법률 검토, 위치기반서비스 신고 대상 확인
+- 출시 전: 법률 검토, 위치기반서비스 신고 대상 확인 (demo 데이터·데모 도안 삭제는 2026-10-09 완료)
