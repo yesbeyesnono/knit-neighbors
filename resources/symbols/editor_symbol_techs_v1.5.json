@@ -1,0 +1,185 @@
+{
+ "version": "1.5",
+ "rule": "도안 필요 기법 = 기호마다 {대표 기법} ∪ also, 중복 제거",
+ "editor_key_to_dict_key": {
+  "chain": "chain",
+  "slip": "slip",
+  "sc": "sc",
+  "hdc": "hdc",
+  "dc": "dc",
+  "tr": "tr",
+  "dtr": "dtr",
+  "sc_inc": "sc_inc",
+  "dc_inc": "dc_inc",
+  "sc_dec": "sc_dec",
+  "dc_dec": "dc_dec",
+  "shell": "shell5",
+  "bobble": "dc3_cl",
+  "popcorn": "dc5_pc",
+  "v_st": "v_st",
+  "cross_dc": "cross_dc",
+  "picot": "picot",
+  "blo": "sc_blo_rows",
+  "sc_inc3": "sc_inc3",
+  "sc_dec3": "sc_dec3",
+  "sc_loop": "sc_loop",
+  "fpdc": "fpdc",
+  "bpdc": "bpdc",
+  "k2tog": "k2tog",
+  "ssk": "ssk",
+  "cast_on": "cast_on"
+ },
+ "techs": {
+  "chain": [
+   "C01"
+  ],
+  "slip": [
+   "C03"
+  ],
+  "sc": [
+   "C02"
+  ],
+  "hdc": [
+   "C12"
+  ],
+  "dc": [
+   "C13"
+  ],
+  "tr": [
+   "C18"
+  ],
+  "dtr": [
+   "C31"
+  ],
+  "sc_inc": [
+   "C07"
+  ],
+  "dc_inc": [
+   "C07",
+   "C13"
+  ],
+  "sc_dec": [
+   "C08"
+  ],
+  "dc_dec": [
+   "C08",
+   "C13"
+  ],
+  "shell": [
+   "C15",
+   "C07"
+  ],
+  "bobble": [
+   "C19"
+  ],
+  "popcorn": [
+   "C20"
+  ],
+  "v_st": [
+   "C07",
+   "C13"
+  ],
+  "cross_dc": [
+   "C21"
+  ],
+  "picot": [
+   "C14"
+  ],
+  "blo": [
+   "C10"
+  ],
+  "sc_inc3": [
+   "C07"
+  ],
+  "sc_dec3": [
+   "C08"
+  ],
+  "sc_loop": [
+   "C30"
+  ],
+  "fpdc": [
+   "C24"
+  ],
+  "bpdc": [
+   "C24"
+  ],
+  "k2tog": [
+   "K13"
+  ],
+  "ssk": [
+   "K13"
+  ],
+  "cast_on": [
+   "K01"
+  ],
+  "sc_loop2": [
+   "C30",
+   "C07"
+  ],
+  "sc_loop3": [
+   "C30",
+   "C07"
+  ],
+  "knit": [
+   "K02"
+  ],
+  "purl": [
+   "K03"
+  ],
+  "yo": [
+   "K12"
+  ],
+  "sl1": [],
+  "no_st": [],
+  "cdd": [
+   "K22"
+  ],
+  "k3tog": [
+   "K13"
+  ],
+  "p2tog": [
+   "K13"
+  ],
+  "m1r": [
+   "K15"
+  ],
+  "m1l": [
+   "K15"
+  ],
+  "kfb": [
+   "K15"
+  ],
+  "k_tbl": [
+   "K17"
+  ],
+  "p_tbl": [
+   "K17"
+  ],
+  "cbl_r2": [
+   "K18"
+  ],
+  "cbl_l2": [
+   "K18"
+  ],
+  "cbl_r3": [
+   "K18"
+  ],
+  "cbl_l3": [
+   "K18"
+  ],
+  "magic_ring": [
+   "C05"
+  ],
+  "bind_off": [
+   "K04"
+  ],
+  "join": [
+   "K10"
+  ],
+  "cut": [],
+  "marker": [],
+  "turn": [
+   "C04"
+  ]
+ }
+}
