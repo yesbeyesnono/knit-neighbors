@@ -131,6 +131,7 @@ begin
   out := pg_temp.cnt(out, 'app_config>0', 'select least(count(*),1) from public.app_config', 1);
   out := pg_temp.cnt(out, 'yarn_suggest(anon)', 'select count(*) from public.yarn_suggest(''낙양'')', 0);
   out := pg_temp.cnt(out, 'yarn_gauge_search(anon)', 'select jsonb_array_length(public.yarn_gauge_search(''낙양'', ''crochet''))', 0);   -- schema 69
+  out := pg_temp.cnt(out, 'studio_yarn_search(anon)', 'select jsonb_array_length(public.studio_yarn_search(''낙양'', ''crochet''))', 8);   -- schema 73: Studio 전용 이름·게이지 8건은 anon 허용
   out := pg_temp.cnt(out, 'pattern_gauge_ctx(anon)', 'select case when public.pattern_gauge_ctx((select id from public.patterns limit 1)) is null then 0 else 1 end', 0);
   out := pg_temp.cnt(out, 'my_patterns_in_progress(anon)', 'select jsonb_array_length(public.my_patterns_in_progress())', 0);   -- schema 71
   out := pg_temp.cnt(out, 'my_pattern_stats(anon)', 'select case when public.my_pattern_stats() = ''{}''::jsonb then 0 else 1 end', 0);

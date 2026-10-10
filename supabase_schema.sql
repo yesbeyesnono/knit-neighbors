@@ -1414,3 +1414,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   D5 입금 기한 D-1(마이그레이션 cheer_system_d5): 클래스 extra.pay(transfer|deposit)·pay_days(확정 후 N일, 폼의 '결제 방법 › 입금 기한')로 확정일+N일이 내일이고 paid_at 없으면 신청자에게 remind(푸시). notifications.kind 제약에 cheer·remind 추가(cheer_system_kind_check — 밤 검증 때 큐에만 들어가 드러나지 않았던 누락)
 --   이미 있던 것 유지: A3 nudge_first_work · A6 supporter_invite_notice · B1 · B9 · D4
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 73. knitup Studio 전용 실 사전 검색 (마이그레이션 studio_yarn_search) — 2026-10-11 대표 승인 "실행해도 돼"
+--   studio_yarn_search(p_q, p_craft='crochet'): yarn_gauge_search 와 같은 매칭·정렬·8건이되 auth.uid() 검사 없음, 돌려주는 키는 name·sts·rows·needle·stitch 뿐(id·가격·판매처·색·규격·별칭 없음). 2글자 미만은 빈 배열
+--   grant execute → anon·authenticated·service_role. 쓰는 곳: knitup Studio(별도 Supabase 프로젝트, anon) 계획서 실 칩·"실 ○○로" (PLAN.yarnSearch → studio_yarn_search → 실패 시 yarn_gauge_search)
+--   권한 점검: permissions_test 블록 ④ 'studio_yarn_search(anon)' 기대값 8(낙양). 원본 SQL: supabase/studio_yarn_search.sql
+-- ---------------------------------------------------------------

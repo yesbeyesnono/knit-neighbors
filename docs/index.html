@@ -1197,6 +1197,36 @@ function openStudio(){
     <p class="muted" style="margin:0;font-size:.82rem">뜨개동네와 같은 운영자가 만든 사이트(yesbeyesnono.github.io)예요. 패드·노트북 화면에 맞춰져 있어요.</p>
     <a class="btn" href="${STUDIO_URL}" target="_blank" rel="noopener noreferrer" onclick="closeSheet()">열기</a><button class="btn o" onclick="closeSheet()">취소</button>`);
 }
+// ===== knitup Studio → 뜨개동네 등록 핸드오프(2026-10-11) =====
+// Studio(같은 origin yesbeyesnono.github.io)가 localStorage `kn_studio_handoff` 에 {title, pkg, meta} 를 두고 #studio-import 로 연다.
+// 로그인·작가면 등록 폼을 열어 제목·패키지·실·바늘·게이지·기법·소개를 채운다(사진만 올리면 등록). 7일 지나면 버림. 네이티브 앱은 저장소가 달라 해당 없음.
+const STUDIO_HANDOFF_KEY='kn_studio_handoff';
+function studioHandoffPeek(){ try{ const j=JSON.parse(localStorage.getItem(STUDIO_HANDOFF_KEY)||'null'); if(!j||!j.pkg||!Array.isArray(j.pkg.charts)||!j.pkg.charts.length) return null;
+  if(Date.now()-new Date(j.at||0).getTime()>7*86400e3){ localStorage.removeItem(STUDIO_HANDOFF_KEY); return null; } return j; }catch(e){ return null; } }
+async function studioImportCheck(){
+  const j=studioHandoffPeek(); if(!j) return;
+  if(location.hash==='#studio-import') history.replaceState(null,'',location.pathname+location.search);
+  const t=esc(j.title||'제목 없는 도안'), n=j.pkg.charts.length;
+  if(!myProfile?.is_author){ openSheet(`<b style="font-size:1.05rem">knitup Studio 에서 보낸 도안</b><div class="card soft" style="font-size:.9rem">「${t}」 · 차트 ${n}개<div class="muted" style="font-size:.82rem;margin-top:4px">작가로 승인되면 등록할 수 있어요 — 마이 › 작가 되기. 도안은 이 기기에 7일간 보관돼요.</div></div><button class="btn o" onclick="closeSheet()">닫기</button>`); return; }
+  openSheet(`<b style="font-size:1.05rem">knitup Studio 에서 보낸 도안</b><div class="card soft" style="font-size:.9rem">「${t}」 · 차트 ${n}개${j.meta?.gauge?` · 게이지 ${j.meta.gauge.sts}코×${j.meta.gauge.rows}단`:''}<div class="muted" style="font-size:.82rem;margin-top:4px">등록 폼에 제목·패키지·실·게이지·기법을 채워 드려요. 사진 1장 이상만 올리면 돼요.</div></div>
+    <button class="btn" onclick="openPatternFormFromStudio()">등록 폼 열기</button><button class="btn o" onclick="closeSheet()">나중에</button><button class="btn o" onclick="localStorage.removeItem(STUDIO_HANDOFF_KEY);closeSheet();toast('지웠어요')">지우기</button>`);
+}
+async function openPatternFormFromStudio(){
+  const j=studioHandoffPeek(); if(!j) return toast('보낸 도안이 없어요');
+  await openPatternForm();
+  const m=j.meta||{};
+  $('#pfTitle').value=(j.title||'').slice(0,80);
+  if(m.craft&&$('#pfCraft')) $('#pfCraft').value=m.craft;
+  pfPkg=j.pkg; pfPkgClear=false; if($('#pfPkgMsg')) $('#pfPkgMsg').textContent=`Studio 패키지 첨부됨 · 「${j.title||''}」 차트 ${j.pkg.charts.length}개`;
+  if(m.yarn&&$('#pfYarn')) $('#pfYarn').value=m.yarn.slice(0,30); if(m.needle&&$('#pfNeedle')) $('#pfNeedle').value=m.needle.slice(0,30);
+  if(m.gauge&&$('#pfGs')){ $('#pfGs').value=m.gauge.sts||''; $('#pfGr').value=m.gauge.rows||''; if(m.gauge.stitch&&$('#pfGt')) $('#pfGt').value=m.gauge.stitch; }
+  if(m.descr&&$('#pfDescr')&&!$('#pfDescr').value) $('#pfDescr').value=m.descr.slice(0,2000);
+  if(j.pkg.level&&$('#pfLevel')) $('#pfLevel').value=Math.min(5,Math.max(1,+j.pkg.level||1));
+  const craft=$('#pfCraft').value; (j.pkg.techs||[]).forEach(id=>{ if(TECH.find(k=>k.id===id&&k.craft===craft)) pfSel.add(id); }); renderPfTech();
+  localStorage.removeItem(STUDIO_HANDOFF_KEY);
+  toast('Studio 도안을 채웠어요 — 사진 1장 이상 올리고 등록하세요');
+}
+window.addEventListener('hashchange', ()=>{ if(location.hash==='#studio-import'&&me) studioImportCheck(); });
 // 팔레트 되돌리기(대표 요청): ?theme=graphite → 2026-09-26 이전 흑백 톤. 네이티브도 주소 없이 localStorage 값이 있으면 따름
 (()=>{ try{ const q=new URLSearchParams(location.search).get('theme'); if(q==='graphite'||q==='pistachio') localStorage.setItem('kn_theme', q); if(localStorage.getItem('kn_theme')!=='graphite') return;
   const r=document.documentElement.style; for(const [k,v] of Object.entries({'--btn':'#3C4043','--btn-ink':'#fff','--acc':'#3C4043','--chip':'#f2f2f2','--olive':'#3C4043','--sel':'#3C4043','--line':'#e6e6e6','--bg2':'#f5f5f5','--accent-soft':'#f2f2f2'})) r.setProperty(k,v); }catch(e){} })();
@@ -1409,7 +1439,7 @@ sb.auth.onAuthStateChange(async (ev, session) => {
   initStarted=true;
   await loadMe();
   if(!myProfile?.onboarded_at){ openOnboard(false); }
-  else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); else setTimeout(pushSetup, 1500); }
+  else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); else setTimeout(pushSetup, 1500); setTimeout(studioImportCheck, 900); }
 });
 function openConsent(){
   openSheet(`<b style="font-size:1.05rem">이용약관 동의</b>

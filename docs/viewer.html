@@ -72,6 +72,10 @@
           background:rgba(255,255,255,.85); border:1px solid var(--line); border-radius:8px; padding:3px 8px;}
   .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px;}
   .card h2{font-size:13.5px; margin-bottom:10px;}
+  .asm-list{display:flex; flex-direction:column; gap:5px; margin-bottom:6px;}
+  .asm-it{display:flex; align-items:center; gap:8px; padding:7px 10px; border:1px solid var(--line); border-radius:10px; font-size:12.5px; cursor:pointer; background:#fff;}
+  .asm-it.on{background:var(--accent-soft); border-color:var(--accent);} .asm-it.done .n{opacity:.55; text-decoration:line-through;}
+  .asm-it input{accent-color:var(--accent); margin:0;} .asm-it .n{flex:1; font-weight:700;} .asm-it small{color:var(--sub);}
   .card h2 small{color:var(--sub); font-weight:400; font-size:11px;}
   .fld{margin-bottom:10px;}
   .fld label{display:block; font-size:11.5px; color:var(--sub); font-weight:700; margin-bottom:4px;}
@@ -184,6 +188,13 @@
     <div class="ystats" id="yarn"></div>
     <div class="ygrid" id="yarnCards"></div>
     <div class="flow" id="yarnFlow"></div>
+  </div>
+
+  <!-- ══════ 🧷 파트 · 조립 체크리스트 (여러 파트 또는 조립 정보가 있는 패키지만) ══════ -->
+  <div class="card" id="asmCard" style="display:none">
+    <h2>🧷 파트 · 조립 <small id="asmSub"></small></h2>
+    <div id="asmParts" class="asm-list"></div>
+    <div id="asmSteps" class="asm-list"></div>
   </div>
 
   <div class="main">
@@ -453,9 +464,30 @@ function pkgPattern(rounds, gx, gy){
     crownH:(S*ux)/(2*Math.PI), width:S*ux,
     height:rounds.reduce((s,r)=>s+uy*(r.region==='fix'?2:1),0) };
 }
-function loadPackage(pkg){
+let asmKey='', asmDone={};
+function asmLoad(){ try{ asmDone=JSON.parse(localStorage.getItem(asmKey)||'{}'); }catch(e){ asmDone={}; } }
+function asmSave(){ try{ localStorage.setItem(asmKey, JSON.stringify(asmDone)); }catch(e){} }
+/* 🧷 파트·조립 체크리스트: 파트별 '뜨기 완료' + 꿰매기 순서(pkg.assembly). 파트 클릭 = 그 파트 차트로 전환. 저장 knitup_asm_{pid} */
+function renderAsm(){
+  const pkg=pkgState&&pkgState.pkg; const card=document.getElementById('asmCard'); if(!card) return;
+  const asm=(pkg&&pkg.assembly)||[];
+  if(!pkg||!(pkg.charts.length>1||asm.length)){ card.style.display='none'; return; }
+  card.style.display='block';
+  const curIdx=pkg.charts.indexOf(pkgState.chart);
+  document.getElementById('asmParts').innerHTML='<div class="hint" style="margin:0 0 4px">파트 '+pkg.charts.length+'개 — 뜬 파트는 체크, 이름을 누르면 그 파트 차트로 바뀝니다</div>'
+    +pkg.charts.map(function(c,i){ const k='p'+i; const last=c.rounds[c.rounds.length-1]; return '<label class="asm-it'+(i===curIdx?' on':'')+(asmDone[k]?' done':'')+'" data-i="'+i+'"><input type="checkbox" data-k="'+k+'"'+(asmDone[k]?' checked':'')+'><span class="n">'+(c.part||('파트 '+(i+1)))+'</span><small>'+c.rounds.length+'단'+(last&&last.cnt?' · '+last.cnt+'코':'')+'</small></label>'; }).join('');
+  document.getElementById('asmSteps').innerHTML=asm.length?('<div class="hint" style="margin:6px 0 4px">꿰매기 순서 — 각 파트는 실을 길게 남겨 끊고 돗바늘로</div>'
+    +asm.map(function(a,i){ const k='a'+i; return '<label class="asm-it'+(asmDone[k]?' done':'')+'"><input type="checkbox" data-k="'+k+'"'+(asmDone[k]?' checked':'')+'><span class="n">'+a.part+' → '+a.to+' '+a.round+'단 '+(a.where||'')+(a.qty>1?' ('+a.qty+'장)':'')+'</span><small>꿰매기</small></label>'; }).join('')):'';
+  const total=pkg.charts.length+asm.length, done=Object.keys(asmDone).filter(function(k){ return asmDone[k]; }).length;
+  document.getElementById('asmSub').textContent='— '+done+' / '+total+' 완료'+(total&&done>=total?' 🎉 완성!':'');
+  card.querySelectorAll('input[type=checkbox]').forEach(function(cb){ cb.addEventListener('change',function(e){ e.stopPropagation(); if(cb.checked) asmDone[cb.dataset.k]=true; else delete asmDone[cb.dataset.k]; asmSave(); renderAsm(); }); });
+  card.querySelectorAll('#asmParts .asm-it').forEach(function(el){ el.addEventListener('click',function(e){ if(e.target.tagName==='INPUT') return; e.preventDefault(); const i=+el.dataset.i; if(i!==curIdx) loadPackage(pkg,{chartIdx:i, keep:true, pid:asmKey.replace(/^knitup_asm_/,'')}); }); });
+}
+function loadPackage(pkg,opt){
+  opt=opt||{};
   try{
-    const chart=pkg.charts.find(c=>c.kind==='free'&&c.graph&&c.graph.nodes.length) || pkg.charts.slice().sort((a,b)=>b.rounds.length-a.rounds.length)[0];
+    const chart=(opt.chartIdx!=null&&pkg.charts[opt.chartIdx]) || pkg.charts.find(c=>c.kind==='free'&&c.graph&&c.graph.nodes.length) || pkg.charts.slice().sort((a,b)=>b.rounds.length-a.rounds.length)[0];
+    asmKey='knitup_asm_'+(opt.pid||('t_'+String(pkg.title||'').slice(0,30)+'_'+pkg.charts.length)); asmLoad();
     const rounds=chart.rounds.map((r,i)=>({ region:r.region||'var', cnt:r.cnt, syms:r.syms||{},
       txt:(chart.instr&&chart.instr[i+1]&&chart.instr[i+1].text)||'' }));
     const g=hookToGauge(4.0);
@@ -467,9 +499,11 @@ function loadPackage(pkg){
     if(pkg.level) document.getElementById('pLv').textContent='Lv.'+pkg.level;
     document.getElementById('subT').innerHTML='📦 작가 패키지 · '+(chart.part||'차트')
       +(chart.kind==='free'?' · 자유 그래프':'')+' · 4.0mm 표준 게이지 기준 — <b>대화로 치수·게이지를 알려주면 반영합니다</b>';
-    render(null); vzReset();
-    bubble('a','작가 패키지 「'+(pkg.title||'도안')+'」를 불러왔어요. 바늘 호수나 스와치를 알려주시면 게이지를 반영해 치수·실 소요량을 다시 계산해 드릴게요.');
-    toast('패키지 로드 완료 — 에디터 제작 도안이 View-only로 열렸습니다');
+    render(null); vzReset(); renderAsm();
+    if(!opt.keep){
+      bubble('a','작가 패키지 「'+(pkg.title||'도안')+'」를 불러왔어요.'+(pkg.charts.length>1?' 파트 '+pkg.charts.length+'개예요 — 🧷 파트·조립 카드에서 파트를 고르고 완료를 체크하세요.':'')+' 바늘 호수나 스와치를 알려주시면 게이지를 반영해 치수·실 소요량을 다시 계산해 드릴게요.');
+      toast('패키지 로드 완료 — 에디터 제작 도안이 View-only로 열렸습니다');
+    } else toast('파트 「'+(chart.part||'')+'」 차트로 바꿨어요');
   }catch(e){ toast('패키지 형식을 읽지 못했습니다: '+e.message); }
 }
 document.getElementById('btnPkg').addEventListener('click', ()=>document.getElementById('filePkg').click());
@@ -620,7 +654,7 @@ bubble('a','안녕하세요! 이 도안을 내 치수로 바꿔 드릴게요. �
 window.addEventListener('message', function(e){
   var d=e.data;
   if(d && d.type==='knitup-pkg' && d.pkg){
-    try{ loadPackage(d.pkg); }catch(err){ toast('패키지 로드 실패: '+err.message); }
+    try{ loadPackage(d.pkg,{pid:d.pid||null}); }catch(err){ toast('패키지 로드 실패: '+err.message); }
   }
 });
 </script>
