@@ -1203,8 +1203,12 @@ function openStudio(){
 const STUDIO_HANDOFF_KEY='kn_studio_handoff';
 function studioHandoffPeek(){ try{ const j=JSON.parse(localStorage.getItem(STUDIO_HANDOFF_KEY)||'null'); if(!j||!j.pkg||!Array.isArray(j.pkg.charts)||!j.pkg.charts.length) return null;
   if(Date.now()-new Date(j.at||0).getTime()>7*86400e3){ localStorage.removeItem(STUDIO_HANDOFF_KEY); return null; } return j; }catch(e){ return null; } }
+async function studioInboxPull(){   // 네이티브 앱: 서버 전달함에서 가져와 localStorage 핸드오프로 옮김(그 뒤는 같은 흐름)
+  if(!me||!myProfile?.is_author) return null;
+  try{ const { data } = await sb.rpc('studio_inbox_take'); if(data&&data.pkg){ localStorage.setItem(STUDIO_HANDOFF_KEY, JSON.stringify({ v:1, at:data.at||new Date().toISOString(), title:data.title||'', pkg:data.pkg, meta:data.meta||{} })); return studioHandoffPeek(); } }catch(e){}
+  return null; }
 async function studioImportCheck(){
-  const j=studioHandoffPeek(); if(!j) return;
+  let j=studioHandoffPeek(); if(!j) j=await studioInboxPull(); if(!j) return;
   if(location.hash==='#studio-import') history.replaceState(null,'',location.pathname+location.search);
   const t=esc(j.title||'제목 없는 도안'), n=j.pkg.charts.length;
   if(!myProfile?.is_author){ openSheet(`<b style="font-size:1.05rem">knitup Studio 에서 보낸 도안</b><div class="card soft" style="font-size:.9rem">「${t}」 · 차트 ${n}개<div class="muted" style="font-size:.82rem;margin-top:4px">작가로 승인되면 등록할 수 있어요 — 마이 › 작가 되기. 도안은 이 기기에 7일간 보관돼요.</div></div><button class="btn o" onclick="closeSheet()">닫기</button>`); return; }
@@ -1219,6 +1223,8 @@ async function openPatternFormFromStudio(){
   if(m.craft&&$('#pfCraft')) $('#pfCraft').value=m.craft;
   pfPkg=j.pkg; pfPkgClear=false; if($('#pfPkgMsg')) $('#pfPkgMsg').textContent=`Studio 패키지 첨부됨 · 「${j.title||''}」 차트 ${j.pkg.charts.length}개`;
   if(m.yarn&&$('#pfYarn')) $('#pfYarn').value=m.yarn.slice(0,30); if(m.needle&&$('#pfNeedle')) $('#pfNeedle').value=m.needle.slice(0,30);
+  // Studio 가 뜨개동네 실 사전에서 고른 실이면 기준 실(catalog_id)까지 자동 연결
+  if(m.yarn&&m.yarnSrc==='뜨개동네 실 사전'){ try{ const { data } = await sb.rpc('yarn_suggest', { p_q:m.yarn }); const norm=x=>String(x||'').replace(/\s+/g,''); const hit=(data||[]).find(r=>norm(r.name)===norm(m.yarn))||(data||[])[0]; if(hit){ pfCat={ id:hit.id, name:hit.name }; pfYarnShow(); } }catch(e){} }
   if(m.gauge&&$('#pfGs')){ $('#pfGs').value=m.gauge.sts||''; $('#pfGr').value=m.gauge.rows||''; if(m.gauge.stitch&&$('#pfGt')) $('#pfGt').value=m.gauge.stitch; }
   if(m.descr&&$('#pfDescr')&&!$('#pfDescr').value) $('#pfDescr').value=m.descr.slice(0,2000);
   if(j.pkg.level&&$('#pfLevel')) $('#pfLevel').value=Math.min(5,Math.max(1,+j.pkg.level||1));
@@ -1227,6 +1233,16 @@ async function openPatternFormFromStudio(){
   toast('Studio 도안을 채웠어요 — 사진 1장 이상 올리고 등록하세요');
 }
 window.addEventListener('hashchange', ()=>{ if(location.hash==='#studio-import'&&me) studioImportCheck(); });
+// 앱(네이티브)·다른 기기: 6자리 코드로 받기 — Studio [뜨개동네에 등록] › '앱으로 보내기' 에 코드 입력
+async function studioCodeSheet(){
+  if(!myProfile?.is_author) return toast('작가로 승인되면 쓸 수 있어요');
+  const { data:code, error } = await sb.rpc('studio_claim_code'); if(error||!code) return toast('코드를 만들지 못했어요: '+(error?.message||''));
+  openSheet(`<b style="font-size:1.05rem">knitup Studio 에서 가져오기</b>
+    <div class="card soft" style="text-align:center"><div class="muted" style="font-size:.82rem">Studio 의 [뜨개동네에 등록] › <b>앱으로 보내기</b>에 이 코드를 입력하세요 (10분 유효)</div><div style="font-size:2.2rem;font-weight:800;letter-spacing:.25em;margin:8px 0;color:var(--olive)">${esc(code)}</div></div>
+    <div class="muted" style="font-size:.82rem">Studio 는 PC·패드 브라우저에서 엽니다: <a href="#" onclick="event.preventDefault();openStudio()" style="color:var(--olive);font-weight:600">knitup Studio</a></div>
+    <button class="btn" onclick="studioCodeCheck()">받았는지 확인</button><button class="btn o" onclick="closeSheet()">닫기</button>`);
+}
+async function studioCodeCheck(){ const j=await studioInboxPull(); if(!j) return toast('아직 안 왔어요 — Studio 에서 코드로 보낸 뒤 다시 눌러 주세요'); closeSheet(); studioImportCheck(); }
 // 팔레트 되돌리기(대표 요청): ?theme=graphite → 2026-09-26 이전 흑백 톤. 네이티브도 주소 없이 localStorage 값이 있으면 따름
 (()=>{ try{ const q=new URLSearchParams(location.search).get('theme'); if(q==='graphite'||q==='pistachio') localStorage.setItem('kn_theme', q); if(localStorage.getItem('kn_theme')!=='graphite') return;
   const r=document.documentElement.style; for(const [k,v] of Object.entries({'--btn':'#3C4043','--btn-ink':'#fff','--acc':'#3C4043','--chip':'#f2f2f2','--olive':'#3C4043','--sel':'#3C4043','--line':'#e6e6e6','--bg2':'#f5f5f5','--accent-soft':'#f2f2f2'})) r.setProperty(k,v); }catch(e){} })();
@@ -1906,7 +1922,7 @@ async function cancelAuthorApply(id){ if(!confirm('신청을 취소할까요?'))
 async function openMyPatterns(){   // 작가 대시보드(2026-10-10): 도안별 찜·뜨기 시작·완성 수(my_pattern_stats, 서버 집계)
   const [{ data }, { data:st }] = await Promise.all([sb.from('patterns').select('id,title,craft,level,photos,price,is_published,hidden').eq('author_id', me.id).order('created_at',{ascending:false}), sb.rpc('my_pattern_stats')]);
   const S=st||{}; const tot=k=>(data||[]).reduce((n,p)=>n+((S[p.id]||{})[k]||0),0);
-  openSheet(`<b style="font-size:1.05rem">내 도안</b>${(data||[]).length?`<div class="wk" style="margin-top:-4px"><div><b>${data.length}</b><span>도안</span></div><div><b>${tot('saves')}</b><span>찜</span></div><div><b>${tot('started')}</b><span>뜨는 중</span></div><div><b>${tot('done')}</b><span>완성</span></div></div>`:''}<button class="btn" onclick="openPatternForm()">도안 등록</button>
+  openSheet(`<b style="font-size:1.05rem">내 도안</b><div style="margin:6px 0 2px"><button type="button" class="btn o" style="width:auto;font-size:.85rem;padding:6px 12px" onclick="studioCodeSheet()">✦ knitup Studio 에서 가져오기</button></div>${(data||[]).length?`<div class="wk" style="margin-top:-4px"><div><b>${data.length}</b><span>도안</span></div><div><b>${tot('saves')}</b><span>찜</span></div><div><b>${tot('started')}</b><span>뜨는 중</span></div><div><b>${tot('done')}</b><span>완성</span></div></div>`:''}<button class="btn" onclick="openPatternForm()">도안 등록</button>
     <div class="patlist">${(data||[]).length?data.map(p=>{ const x=S[p.id]||{}; return `<div class="pat" onclick="openPatternForm('${p.id}')">${patThumb(p)}<div style="min-width:0;flex:1"><div class="tt">${esc(p.title)}</div><div class="mt">${CRAFT_KO[p.craft]} ${p.level}단계 · ${priceKo(p)}${p.hidden?' · 운영진이 숨김':p.is_published?'':' · 비공개'}</div><div class="mt">찜 ${x.saves||0} · 뜨는 중 ${x.started||0} · 완성 ${x.done||0}</div></div></div>`; }).join(''):'<div class="empty">아직 등록한 도안이 없어요</div>'}</div>`);
 }
 let pfSel=new Set(), pfPhotos=[], pfKeep=[], pfPkg=null, pfPkgClear=false;

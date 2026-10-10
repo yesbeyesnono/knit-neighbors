@@ -1421,3 +1421,13 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   grant execute → anon·authenticated·service_role. 쓰는 곳: knitup Studio(별도 Supabase 프로젝트, anon) 계획서 실 칩·"실 ○○로" (PLAN.yarnSearch → studio_yarn_search → 실패 시 yarn_gauge_search)
 --   권한 점검: permissions_test 블록 ④ 'studio_yarn_search(anon)' 기대값 8(낙양). 원본 SQL: supabase/studio_yarn_search.sql
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 74. knitup Studio → 앱 도안 전달함 (마이그레이션 studio_inbox) — 2026-10-11 대표 "네이티브 앱 대비 진행해"
+--   네이티브 앱(Capacitor)은 Studio(웹)와 localStorage 를 공유하지 못해 같은 origin 핸드오프가 안 됨 → 서버 전달함.
+--   studio_inbox(profile_id, code 6자리, title, meta, pkg, expires_at 10분, claimed_at): RLS 본인 select/delete, anon 직접 접근 없음
+--   studio_claim_code()(authenticated) 코드 발급(본인 미사용 코드 교체, 하루 지난 행 정리) · studio_submit(code,title,meta,pkg)(anon) 코드·형식('knitup-pattern-package', charts≥1)·3MB 검사 후 저장, 실패는 false
+--   studio_inbox_take()(authenticated) 7일 이내 최신 1건 돌려주고 삭제. 앱: 마이 › 내 도안 › [Studio 에서 가져오기] 시트(코드 표시·[받았는지 확인]), 로그인 때도 studioImportCheck 가 전달함을 봄 → localStorage 핸드오프로 옮겨 등록 폼 자동 채움
+--   Studio: [뜨개동네에 등록] 시트 ② '앱으로 보내기' 코드 입력 → studio_submit. 원본 SQL: supabase/studio_inbox.sql. 권한 점검 P1·P4 네 줄
+-- ---------------------------------------------------------------
+

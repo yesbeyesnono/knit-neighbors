@@ -38,6 +38,7 @@ begin
   select count(*) into n from public.survey_responses where user_id = d2; out := pg_temp.chk(out, 'survey', n, 0);
   select count(*) into n from public.mod_items; out := pg_temp.chk(out, 'mod_items', n, 0);
   select count(*) into n from public.jigi_reminders; out := pg_temp.chk(out, 'jigi_reminders', n, 0);
+  select count(*) into n from public.studio_inbox where profile_id = d2; out := pg_temp.chk(out, 'studio_inbox(other)', n, 0);   -- schema 74
   begin select count(*) into n from public.cheer_log; exception when others then n := 0; end; out := pg_temp.chk(out, 'cheer_log', n, 0);   -- schema 72
   select count(*) into n from public.yarn_catalog; out := pg_temp.chk(out, 'yarn_catalog(asset)', n, 0);
   select count(*) into n from public.yarn_colors; out := pg_temp.chk(out, 'yarn_colors(asset)', n, 0);
@@ -132,6 +133,9 @@ begin
   out := pg_temp.cnt(out, 'yarn_suggest(anon)', 'select count(*) from public.yarn_suggest(''낙양'')', 0);
   out := pg_temp.cnt(out, 'yarn_gauge_search(anon)', 'select jsonb_array_length(public.yarn_gauge_search(''낙양'', ''crochet''))', 0);   -- schema 69
   out := pg_temp.cnt(out, 'studio_yarn_search(anon)', 'select jsonb_array_length(public.studio_yarn_search(''낙양'', ''crochet''))', 8);   -- schema 73: Studio 전용 이름·게이지 8건은 anon 허용
+  out := pg_temp.cnt(out, 'studio_inbox(anon)', 'select count(*) from public.studio_inbox', 0);   -- schema 74
+  out := pg_temp.cnt(out, 'studio_submit bad code(anon)', 'select case when public.studio_submit(''000000'', ''x'', ''{}''::jsonb, ''{"app":"knitup-pattern-package","charts":[{}]}''::jsonb) then 1 else 0 end', 0);   -- schema 74
+  out := pg_temp.cnt(out, 'studio_inbox_take(anon)', 'select case when public.studio_inbox_take() is null then 0 else 1 end', 0);   -- schema 74
   out := pg_temp.cnt(out, 'pattern_gauge_ctx(anon)', 'select case when public.pattern_gauge_ctx((select id from public.patterns limit 1)) is null then 0 else 1 end', 0);
   out := pg_temp.cnt(out, 'my_patterns_in_progress(anon)', 'select jsonb_array_length(public.my_patterns_in_progress())', 0);   -- schema 71
   out := pg_temp.cnt(out, 'my_pattern_stats(anon)', 'select case when public.my_pattern_stats() = ''{}''::jsonb then 0 else 1 end', 0);
