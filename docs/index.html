@@ -1190,7 +1190,7 @@ const EDITION = (()=>{ let e = window.KN_EDITION==='full' ? 'full' : 'meet';
   if(!isNative){ try{ const q=new URLSearchParams(location.search).get('edition'); if(q==='full'||q==='meet') localStorage.setItem('kn_edition', q); const v=localStorage.getItem('kn_edition'); if(v==='full'||v==='meet') e=v; }catch(_){} }
   return e; })();
 const FULL = EDITION==='full';
-const STUDIO_URL='https://yesbeyesnono.github.io/knitup-studio/knitup-studio.html';   // knitup Studio — 작가용 도안 제작 도구(같은 운영자 사이트)
+const STUDIO_URL='https://yesbeyesnono.github.io/knitup/knitup-studio.html';   // knitup Studio — 작가용 도안 제작 도구(같은 운영자 사이트)
 function openStudio(){
   openSheet(`<b style="font-size:1.05rem">knitup Studio 로 이동해요</b>
     <div class="card soft" style="font-size:.9rem"><b>작가용 도안 제작 도구</b><div class="muted" style="font-size:.82rem;margin-top:4px">차트(원형·왕복·타원)를 그리면 지시문·인쇄(JIS/A4)·도안 패키지까지 만들어져요. 만든 패키지(.knitup-pkg.json)는 뜨개동네 '내 도안 › 도안 등록'에 첨부하면 뷰어로 열려요.</div></div>
