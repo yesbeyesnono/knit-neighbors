@@ -934,7 +934,7 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   shop_posts(kind sale|new|meetup|class|notice, title, body, photos, ends_at, hidden) · shop_reads(사용자별 마지막 열람) · shop_follows
 --   nearby_shops(lat,lng,radius): 반경 안 가게 + unread(열람 후 새 글) + following · 팔로워 알림 kind 'shop_post'(notifications.shop_id)
 --   관리자: admin_upsert_shop(jsonb) / admin_shop_post(jsonb). 오너 계정은 앱 ＋ › 가게 소식 탭으로 직접 작성
---   등록: 쎄비하우스(성수, 연무장5가길 28, 37.5431317/127.0555276, 반경 8km)
+--   등록: (2026-10-11 쎄비하우스 가게 레코드 삭제 — 대표 지시. 현재 등록 가게 없음)
 -- ---------------------------------------------------------------
 --   + admin_reply_support(p_room, p_body, p_photo): 사진 답장(경로 = <관리자 uid>/<room>/<ts>.jpg, 방 참여자 읽기 가능) · storage_chat_photos_admin_read 정책
 --   + admin_dong_map(): 동네별 사용자 수·평균 좌표·친구 찾는 중 수, 예정 모임, 파트너 가게 → 관리자 동네 분포 지도(Leaflet)

@@ -86,7 +86,7 @@
 - **새 테이블 GRANT 필수(Supabase 공지, 2026-10-30부터)**: public 스키마에 새 테이블을 만들면 Data API 권한이 자동으로 붙지 않는다. 테이블을 만드는 **같은 마이그레이션 안에** 반드시 `grant select on public.<t> to anon;` `grant select, insert, update, delete on public.<t> to authenticated;` `grant select, insert, update, delete on public.<t> to service_role;`를 넣을 것(비로그인이 볼 필요 없는 테이블은 anon 생략, RLS는 별도로 켬). 기존 테이블은 영향 없음. 빠뜨리면 API가 permission denied.
 - 원칙: 모든 테이블 RLS. SECURITY DEFINER 함수는 만들 때 `revoke ... from public, anon` 후 필요한 역할에만 grant(기본 권한도 PUBLIC 차단으로 바꿔 둠). 관리자 기능은 `is_admin()` 검사 + `admin_log` 기록. profiles는 **컬럼 단위 UPDATE grant**(서버 계산값·is_author 위조 방지) — 컬럼을 추가하면 사용자가 고칠 것만 grant.
 - 지기(운영진) 계정 = knitup.official 프로필 `e120eb67-b254-4008-92d8-08c95c821e9e`(닉네임 '뜨개동네 지기'). 앱 `SUPPORT_ID`.
-- 파트너 가게: 쎄비하우스 등록됨(`002ce2de-e380-4bb5-ae38-d5ee1feb076c`, 성수 연무장5가길 28). 오너 계정 미지정.
+- 파트너 가게: 없음(2026-10-11 대표 지시로 쎄비하우스 가게 레코드·팔로우·열람 기록 삭제. 실 사전의 판매처·브랜드 별칭 데이터는 유지)
 
 ## 앱 기능 요약
 지도(이웃·모임·가게 핀, 필터: 전체/친구 찾는 이웃/모임/가게/비슷한 수준/시간 맞음/친구, 같은 지점 핀 분산) · 커뮤니티(추천 랭킹·최신·모임·작품·동네·친구, 인라인 답글, @멘션, 리포스트(「해결됐어요」 버튼·표시는 2026-09-20 대표 지시로 화면에서 제거 — DB 함수는 남아 있음)=저장 겸 프로필 공개·외부 공유는 ··· 메뉴) · ＋ 작성(글/작품 인증/모임/가게 소식/후기) · 채팅(카카오식 입력, 사진 전송. 뜨개동네 지기 채널은 채팅 목록이 아니라 마이 › 설정 › 지기에게 말하기로 이동 — 2026-09-20) · 마이(🔔 활동, 맨 위 도안 추천 → 탭(글·리포스트·인증·모임, 좌우로 쓸어 전환 — 프로필도 동일). 친구 줄(친구 수·받은 신청)은 채팅 탭 맨 위로 이동. 프로필·프로필 편집·뜨개 친구 찾기(손 들기 14일)는 설정 안으로 이동(2026-09-18), 설정: 내 뜨개 단계(knitup식 가로 기법 맵: 단계별 열 + 선행 기법 연결선, 옆으로 스크롤. 기호는 글자가 아니라 knitup 기호 라이브러리 v1.1 그림 `SYMLIB`+`TECH_DRAW`(사전 v1.3 기준 31종, 기호 없는 구성·조합 기법은 칸 없음))·현위치로 동네 다시 설정·지기에게 말하기·약관·계정 삭제) · 신고/차단/금칙어/약관 동의
@@ -138,7 +138,7 @@
 - 남은 것: 심사용 계정+이메일 로그인 입구, 이벤트 화면 'Apple과 무관' 문구(5.3), 내 실함 AI 처리 고지, 버전 1.0.0, 개인정보 라벨 표, 심사 메모(영문), 최종 아이콘·스크린샷(대표)
 
 ## 남은 일
-- 대표: 2단계 인증(구글·Supabase·GitHub·Apple·Codemagic), 구글 클라이언트 시크릿 재발급, Play Console에 versionCode 2 .aab 업로드·데이터 보안 설문, App Store 테스트 정보 입력, 앱 아이콘(1024 PNG) 전달, 쎄비하우스 오너 계정·링크 입력
+- 대표: 2단계 인증(구글·Supabase·GitHub·Apple·Codemagic), 구글 클라이언트 시크릿 재발급, Play Console에 versionCode 2 .aab 업로드·데이터 보안 설문, App Store 테스트 정보 입력, 앱 아이콘(1024 PNG) 전달
 - **앱 푸시 알림 APNs(2026-09-29 구현, schema 57)**: 앱 `pushSetup`(온보딩 끝난 회원에게 안내 시트 1회 → iOS 권한 → `register_device_token`), 설정 › 앱 알림(상태·테스트 발송), 알림 누르면 활동 화면. 서버는 notifications insert 트리거 → `push-send`(APNs JWT). **대표가 넣을 것**: ① developer.apple.com › Keys 에서 APNs 키(.p8) 1개 발급 → Supabase Secrets `APNS_KEY`(.p8 내용 전체) · `APNS_KEY_ID` · `APNS_TEAM_ID`=M59979ZT3A ② Identifiers › App ID 둘 다(…knitneighbors, …knitneighbors.lab) Push Notifications 체크. 키 없으면 발송만 조용히 실패. Codemagic 은 npm ci + cap sync 로 플러그인 자동 포함, 프로파일은 fetch-signing-files 가 다시 만듦
 - **안드로이드(2026-10-03 대표: 다음 주 공개, 공개판만, Play 법인 계정이라 비공개 테스트 불필요)**: 빌드는 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk) → .aab 를 대표가 Play Console 에 업로드. 올릴 때마다 `versionCode` +1(현재 3 · 1.0.1). 푸시는 FCM(schema 70): `android/app/google-services.json`(gitignore, 이 PC 에만) + Supabase 시크릿 `FCM_SERVICE_ACCOUNT`(서비스 계정 JSON 전체, 대표가 입력)
 - **knitup v9 이식(2026-10-10, schema 71)**: ① 기법 패널 `openTechPanel`(기법 맵 ⓘ/기호 N 배지·도안 상세 기법 칩 → 상태·설명·선행/다음 기법·변형 기호·영상(유튜브 검색, 외부 링크 확인 시트)·이 기법으로 인증) — 공개판도 ② 이어뜨기(마이 '지금 할 일' 맨 위, `my_patterns_in_progress`) + 완성 모멘트(`openPatternDone` → 인증 폼 자동 채움 / 다음 도전=추천 도안) — Lab ③ 도안 상세 '새로 배우는 기법 N개' ④ 설정 › 내 도안에 찜·뜨는 중·완성 수(`my_pattern_stats`). 클래스 신청·수강생 관리는 이미 있었음(schema 53). 후순위: 진도 뷰어 보강(노트·체크리스트·배색 바), 자체 영상 주소
