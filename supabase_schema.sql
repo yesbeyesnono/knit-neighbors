@@ -1399,3 +1399,17 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --       뷰어: pvMeta/pvTotal, kn-prog 에서 prog>=total 이면 done_at 기록 + 뷰어 닫고 openPatternDone(🎉 → certFromPattern: 제목·기법 자동 / openNextChallenge: recommend_patterns) · 도안 상세: '새로 배우는 기법 N개' 카드, 버튼이 '이어뜨기 · N단까지'로
 --   남은 것(후순위): 진도 뷰어 보강(도안 노트·단계 체크리스트·배색 바), 기법별 자체 영상 주소(techniques 에 열 추가 예정)
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 72. 응원·독려 메시지 체계 (마이그레이션 cheer_system_v1, cheer_system_push_payload) — resources/plans/encourage_messages.md(2026-09-27 대표 확정) → 2026-10-10 구현
+--   종류: kind 'cheer' = 이정표·응원(푸시 X · 회원당 하루 1건(KST) · 종류별 1회 · 21~08시는 큐 → 08:30 발송 · 초과분은 버림 · 7일 뒤 삭제) / kind 'remind' = 실무(푸시 O, link.push='0' 이면 푸시 X) / 지기 채팅(support_msg: 지기 계정이 1:1 방에 by_ai 로)
+--   profiles.last_seen_at(check_in 이 1시간 간격으로 갱신, 처음은 auth.last_sign_in_at) · cheer_log(user_id, key PK — 종류별 1회 보장, queued, body/link, sent_at) service_role 전용
+--   함수: cheer_send(user, key, body, link, kind) · cheer_flush_queue() · support_msg(user, key, body) · cheer_quiet() · lv_name() · lv_stats(user, craft) · lv_of(user, craft)(앱 lvOf 와 같은 규칙: 단계의 절반 이상) · next_tech(user, craft[, level])(선행 충족 우선)
+--   트리거: cheer_profile(A1 온보딩→지기 채팅 · C1 단계 상승 · C2 다음 단계까지 1개 · C3 Lv 상승 · C4 성향 확정) · cheer_post(A4 첫 글) · cheer_work(A5 첫 인증 · C5 작가 자격) · cheer_points(B3 60점 · B6 100점) · cheer_follow(F2 첫 팔로워)
+--   check_in: E3(14일+ 만에 복귀 → 지기 채팅) + last_seen_at
+--   크론: cheer-daily 23:30 UTC(08:30 KST) = 큐 비우기 + A2 가입 다음 날 활동 0 · B2 3일째 0점 · B5 D-2 100점 미만(지기 채팅) · B7 5일 연속 출석 · B8 7일 미출석(8일째) · B10 종료 후 7일 · D3 내 모임 D-3 참여자 0(지기 채팅) · E1 14일 미접속 · E2 30일 · F1 가게 승인 3일 소식 0 · cheer 7일 삭제
+--         remind-daily 09:00 UTC(18:00 KST) = D1 모임 D-1(참여자, 푸시) · D6 클래스 전날(확정자, 푸시) · F3 신청 24h 대기(호스트, 푸시, 매일) · remind-tick */30 = D2 모임 끝 2시간 뒤 후기 요청(푸시 X)
+--   finalize_supporters: B4(D-7)는 100점 미만일 때만 · push_on_notification: cheer·link.push='0' 건너뜀 · push_payload: cheer/remind 는 본문 그대로
+--   앱: NTF_TEXT/NTF_ICON 에 cheer(🎉)/remind(📍) — 보낸 이는 '뜨개동네 지기', 누르면 link(view:skills/my/comm/map/cert/supporters/support, meetup, shop, class, class_manage)
+--   뺀 것: D5 입금 기한 D-1(클래스에 입금 기한 항목 없음). 이미 있던 것 유지: A3 nudge_first_work · A6 supporter_invite_notice · B1 · B9 · D4
+-- ---------------------------------------------------------------
