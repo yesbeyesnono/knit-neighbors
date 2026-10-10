@@ -1411,5 +1411,6 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --         remind-daily 09:00 UTC(18:00 KST) = D1 모임 D-1(참여자, 푸시) · D6 클래스 전날(확정자, 푸시) · F3 신청 24h 대기(호스트, 푸시, 매일) · remind-tick */30 = D2 모임 끝 2시간 뒤 후기 요청(푸시 X)
 --   finalize_supporters: B4(D-7)는 100점 미만일 때만 · push_on_notification: cheer·link.push='0' 건너뜀 · push_payload: cheer/remind 는 본문 그대로
 --   앱: NTF_TEXT/NTF_ICON 에 cheer(🎉)/remind(📍) — 보낸 이는 '뜨개동네 지기', 누르면 link(view:skills/my/comm/map/cert/supporters/support, meetup, shop, class, class_manage)
---   뺀 것: D5 입금 기한 D-1(클래스에 입금 기한 항목 없음). 이미 있던 것 유지: A3 nudge_first_work · A6 supporter_invite_notice · B1 · B9 · D4
+--   D5 입금 기한 D-1(마이그레이션 cheer_system_d5): 클래스 extra.pay(transfer|deposit)·pay_days(확정 후 N일, 폼의 '결제 방법 › 입금 기한')로 확정일+N일이 내일이고 paid_at 없으면 신청자에게 remind(푸시). notifications.kind 제약에 cheer·remind 추가(cheer_system_kind_check — 밤 검증 때 큐에만 들어가 드러나지 않았던 누락)
+--   이미 있던 것 유지: A3 nudge_first_work · A6 supporter_invite_notice · B1 · B9 · D4
 -- ---------------------------------------------------------------
