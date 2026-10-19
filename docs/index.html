@@ -799,6 +799,19 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .patlist .pat .ph{width:64px;height:64px;flex:none}.patlist .pat .tt{margin-top:0}
 .patchips{display:flex;flex-wrap:wrap;gap:6px}.patchips span{font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink2)}
 .patchips span.new{border-color:var(--sel);color:var(--ink);font-weight:600}
+/* 커머스 데모(Lab, 2026-10-19): 뜨개 상점·장바구니·주문·정산 */
+.stgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 20px}
+.stcard{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;cursor:pointer}
+.stcard .im{aspect-ratio:1;background:var(--bg2) center/cover no-repeat}
+.stcard .tx{padding:8px 10px 10px}.stcard b{display:block;font-size:.92rem;line-height:1.3}.stcard .pr{font-size:.95rem;font-weight:700;margin-top:3px}.stcard .mt{font-size:.74rem;color:var(--ink3);margin-top:2px}
+.sttabs{display:flex;gap:4px;margin:8px 16px 12px;padding:4px;background:var(--chip);border-radius:999px}.sttabs button{flex:1;background:none;border:0;font:inherit;padding:8px 0;color:var(--olive);border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:600}.sttabs button.on{background:var(--olive);color:#fff}
+.cchips{display:flex;flex-wrap:wrap;gap:8px}.cchips button{border:2px solid transparent;background:none;padding:2px;border-radius:12px;cursor:pointer;text-align:center;width:64px;font:inherit}.cchips button i{display:block;width:56px;height:56px;border-radius:10px;background:var(--bg2) center/cover no-repeat;border:1px solid var(--line);margin:0 auto}.cchips button span{display:block;font-size:.66rem;color:var(--ink2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cchips button.on{border-color:var(--sel)}
+.cartrow{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.cartrow .im{width:56px;height:56px;border-radius:10px;background:var(--bg2) center/cover no-repeat;flex:none}.cartrow .tx{flex:1;min-width:0}.cartrow b{display:block;font-size:.92rem}.cartrow .mt{font-size:.78rem;color:var(--ink2)}
+.stepper.sm button{width:34px;height:32px;font-size:1rem}.stepper.sm b{width:40px!important;height:32px;line-height:32px;font-size:.95rem}
+.sumrow{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:.92rem}.sumrow.tot{font-weight:800;font-size:1.05rem;border-top:1px solid var(--line);margin-top:4px;padding-top:10px}
+.flow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:.78rem;margin-top:6px}.flow span{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px 7px}.flow b{color:var(--olive)}.flow i{font-style:normal;color:var(--ink3)}
+.ostat{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--chip-ink);vertical-align:middle}.ostat.p{background:#fff3e0;color:#9a5a00}.ostat.x{background:var(--bg2);color:var(--ink3)}
+.cartbtn{position:relative}.cartbtn .n{position:absolute;top:-2px;right:-4px;background:var(--btn);color:#fff;font-size:.62rem;font-weight:700;border-radius:999px;padding:0 5px;min-width:16px;height:16px;line-height:16px;text-align:center}
 </style>
 </head>
 <body>
@@ -1016,6 +1029,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
   <section class="view" id="v-stash">
     <div class="top"><button class="back" onclick="closeStash()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>내 실함</h1></div>
     <div id="stashBody"></div>
+  </section>
+
+  <!-- 뜨개 상점 (Lab 커머스 데모, 2026-10-19): 실 판매(무통장) · 도안(무료 체험) -->
+  <section class="view" id="v-store">
+    <div class="top"><button class="back" onclick="go('my')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>뜨개 상점</h1><button class="ib cartbtn" onclick="openCart()" aria-label="장바구니"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H7"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg><span class="n" id="cartN" hidden></span></button></div>
+    <div id="storeBody"></div>
   </section>
 
   <!-- 가게 소식 (새 페이지, 2026-09-27 대표: 클래스 열기와 같은 양식) -->
@@ -1877,6 +1896,9 @@ window.addEventListener('message', e=>{
   const w=$('#pviewer'); const f=w&&w.querySelector('iframe'); if(!f || e.source!==f.contentWindow) return;
   const d=e.data||{};
   if(d.type==='kn-close') return closePatternViewer();
+  if(d.type==='kn-ai-q' && pvId){ const q=String(d.q||'').slice(0,300); const id=pvId;   // 뷰어 'AI에게 묻기' → Edge Function pattern-ai(내 실함·실 사전·도안 게이지로 답)
+    sb.functions.invoke('pattern-ai', { body:{ pattern_id:id, q, ctx:d.ctx||{} } }).then(async({ data, error })=>{ let r=data||{}; if(error){ let m='연결에 실패했어요'; try{ const j=await error.context.json(); m=j.error||m; }catch(e){} r={ error:m }; }
+      try{ f.contentWindow.postMessage({ type:'kn-ai-r', q, answer:r.answer||'', yarns:r.yarns||[], error:r.error||null }, '*'); }catch(e){} }); return; }
   if(d.type==='kn-yarn-q' && pvId){ const q=String(d.q||'').slice(0,40);   // 뷰어의 '내 실 찾기' — 게이지가 등록된 실만(실 사전은 함수로만)
     sb.rpc('yarn_gauge_search', { p_q:q, p_craft: d.craft==='knitting'?'knitting':'crochet' }).then(({ data })=>{ try{ f.contentWindow.postMessage({ type:'kn-yarn-r', q, rows:data||[] }, '*'); }catch(e){} }); return; }
   if(d.type==='kn-prog' && pvId && me){ const id=pvId, prog=Math.max(0, Math.min(100000, d.prog|0)); clearTimeout(pvTimer);
@@ -1885,6 +1907,102 @@ window.addEventListener('message', e=>{
       if(finished && !pvDone && pvId===id){ pvDone=true; const m=pvMeta; closePatternViewer(); openPatternDone(m); } }, 600); }
 });
 function readPkgFile(file){ return new Promise((res, rej)=>{ if(file.size>3*1024*1024) return rej(new Error('패키지가 너무 커요 (3MB 이하)')); const rd=new FileReader(); rd.onerror=()=>rej(new Error('파일을 읽지 못했어요')); rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='knitup-pattern-package' || !Array.isArray(j.charts) || !j.charts.length) throw 0; res(j); }catch(e){ rej(new Error('knitup 도안 패키지(.knitup-pkg.json)가 아니에요')); } }; rd.readAsText(file); }); }
+// ===== 커머스 데모(Lab, 2026-10-19 대표 지시: 작가 설명회용) — 실 판매(무통장) · 도안 구매(임시 무료) · 작가 정산 · 실함→도안 =====
+//   가격·배송비·재고·수수료는 서버 함수(place_order·purchase_pattern·pattern_fee_calc)가 계산. 화면은 보여 주기만.
+// won(n) 은 아래(실 사전 호환 블록)에 이미 있음
+const BANK_DEMO={ bank:'카카오뱅크', no:'3333-00-0000000 (예시)', holder:'㈜펌텍 뜨개동네' };
+const OSTAT={ pending_payment:['입금 대기','p'], paid:['입금 확인 · 발송 준비',''], shipped:['발송됨',''], done:['완료','x'], cancelled:['취소','x'] };
+function prodPhoto(p){ const u=p&&p.photo; if(!u) return ''; return /^https?:/.test(u)?u:colorPhotoUrl(u); }
+function colorImg(c, p){ return c&&c.photo ? colorPhotoUrl(c.photo) : prodPhoto(p); }
+function fmtDT(t){ const d=new Date(t); return `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+let storeTab='yarn', storeProducts=[], cartRows=[], prSel={ id:null, color:'', qty:1 }, ckDraft={};
+async function openStore(tab){ if(tab) storeTab=tab; show('store'); $('#storeBody').innerHTML='<div class="empty">불러오는 중…</div>'; await Promise.all([loadProducts(), loadCart()]); renderStore(); }
+async function loadProducts(){ const { data }=await sb.from('shop_products').select('*').eq('is_active',true).order('sort').order('created_at'); storeProducts=data||[]; }
+async function loadCart(){ if(!me) return; const { data }=await sb.from('cart_items').select('*').eq('profile_id',me.id).order('created_at'); cartRows=data||[]; const n=cartRows.reduce((t,c)=>t+c.qty,0); const b=$('#cartN'); if(b){ b.textContent=n; b.hidden=!n; } }
+function storeTabs(){ return `<div class="sttabs">${[['yarn','실'],['pattern','도안']].map(([k,l])=>`<button type="button" class="${storeTab===k?'on':''}" onclick="storeTab='${k}';renderStore()">${l}</button>`).join('')}</div>`; }
+function renderStore(){
+  if(storeTab!=='yarn') return renderStorePatterns();
+  $('#storeBody').innerHTML=storeTabs()+`<p class="muted" style="margin:0 16px 10px;font-size:.82rem">실 사전의 실을 바로 살 수 있어요. 지금은 <b>무통장 입금</b>만 받아요 · 3만 원 이상 배송비 무료 (예시 가격·예시 운영)</p>
+    <div class="stgrid">${storeProducts.map(p=>`<div class="stcard" onclick="openProduct('${p.id}')"><div class="im" style="background-image:url(${prodPhoto(p)})"></div><div class="tx"><b>${esc(p.name)}</b><div class="pr">${won(p.price)} <span class="muted" style="font-weight:400;font-size:.75rem">/ 1볼</span></div><div class="mt">${esc(p.brand||'')} · 색 ${(p.colors||[]).length}가지${p.stock<=0?' · 품절':p.stock<=5?' · 재고 '+p.stock+'볼':''}</div></div></div>`).join('')||'<div class="empty" style="grid-column:1/-1">아직 판매 중인 실이 없어요</div>'}</div>`;
+}
+async function renderStorePatterns(){
+  const [{ data }, { data:pp }]=await Promise.all([sb.from('patterns').select('id,title,craft,level,photos,price,has_viewer,author_id').eq('is_published',true).eq('hidden',false).order('created_at',{ascending:false}), sb.from('pattern_purchases').select('pattern_id').eq('profile_id',me.id)]);
+  const own=new Set((pp||[]).map(x=>x.pattern_id));
+  $('#storeBody').innerHTML=storeTabs()+`<div class="card soft" style="margin:0 16px 10px;font-size:.85rem"><b>지금은 무료 체험</b> — 유료 도안도 결제 없이 열려요. 정식 출시 후에는 앱 내 결제로 바뀌고 작가에게 정산돼요.</div>
+    <div class="patlist" style="padding:0 16px">${(data||[]).map(p=>`<div class="pat" onclick="openPattern('${p.id}')">${patThumb(p)}<div style="min-width:0;flex:1"><div class="tt">${esc(p.title)}</div><div class="mt">${own.has(p.id)?'<span class="ostat" style="margin-right:4px">구매함</span>':''}${CRAFT_KO[p.craft]||''} ${p.level}단계 · ${priceKo(p)}${p.has_viewer?' · 앱에서 열기':''}</div></div></div>`).join('')||'<div class="empty">등록된 도안이 없어요</div>'}</div>`;
+}
+function openProduct(id){ const p=storeProducts.find(x=>x.id===id); if(!p) return; prSel={ id, color:(p.colors||[])[0]?.name||'', qty:1 }; renderProduct(); }
+function prPickColor(i){ const p=storeProducts.find(x=>x.id===prSel.id); const c=(p&&p.colors||[])[i]; if(c){ prSel.color=c.name||''; renderProduct(); } }
+function renderProduct(){ const p=storeProducts.find(x=>x.id===prSel.id); if(!p) return; const c=(p.colors||[]).find(x=>x.name===prSel.color)||(p.colors||[])[0]; const photo=colorImg(c,p);
+  openSheet(`<div style="aspect-ratio:1;border-radius:14px;background:var(--bg2) url(${photo}) center/cover no-repeat;cursor:pointer" onclick="openPhoto('${photo}')"></div>
+    <b style="font-size:1.1rem">${esc(p.name)}</b><div class="muted" style="margin-top:-6px">${esc(p.brand||'')}${p.ball_g?` · 1볼 ${fmtBalls(p.ball_g)}g${p.ball_m?' '+fmtBalls(p.ball_m)+'m':''}`:''}</div>
+    <div style="font-size:1.2rem;font-weight:800">${won(p.price)} <span class="muted" style="font-size:.8rem;font-weight:400">/ 1볼 · ${p.stock>0?`재고 ${p.stock}볼`:'품절'}</span></div>
+    ${p.descr?`<div class="muted" style="font-size:.85rem">${esc(p.descr)}</div>`:''}
+    ${(p.colors||[]).length?`<div class="cfl" style="margin-top:4px">색 고르기 <span class="muted">${esc(c?.no?c.no+' ':'')}${esc(c?.name||'')}</span></div><div class="cchips">${p.colors.map((x,i)=>`<button type="button" class="${x.name===prSel.color?'on':''}" onclick="prPickColor(${i})"><i style="${x.photo?`background-image:url(${colorPhotoUrl(x.photo)})`:(x.hex?'background-color:'+esc(x.hex):'')}"></i><span>${esc(x.name||x.no||'')}</span></button>`).join('')}</div>`:''}
+    <div class="cfl">수량</div><div style="display:flex;align-items:center;gap:12px"><div class="stepper"><button type="button" onclick="prSel.qty=Math.max(1,prSel.qty-1);renderProduct()">−</button><b>${prSel.qty}</b><button type="button" onclick="prSel.qty=Math.min(99,prSel.qty+1);renderProduct()">＋</button></div><b>${won(p.price*prSel.qty)}</b></div>
+    <button class="btn" ${p.stock<=0?'disabled':''} onclick="addToCart()">장바구니 담기</button>`);
+}
+async function addToCart(){ const p=storeProducts.find(x=>x.id===prSel.id); if(!p) return; const ex=cartRows.find(c=>c.product_id===p.id&&c.color===prSel.color); const qty=Math.min(99,(ex?ex.qty:0)+prSel.qty);
+  const { error }=await sb.from('cart_items').upsert({ profile_id:me.id, product_id:p.id, color:prSel.color, qty }); if(error) return toast('담지 못했어요: '+error.message);
+  await loadCart(); closeSheet(); toast(`장바구니에 담았어요 · ${cartSum().n}볼`); }
+function cartLines(){ return cartRows.map(c=>({ ...c, p:storeProducts.find(x=>x.id===c.product_id) })).filter(x=>x.p); }
+function cartSum(){ const ls=cartLines(); const sub=ls.reduce((t,x)=>t+x.p.price*x.qty,0); const fee=sub>0&&sub<30000?3000:0; return { sub, fee, tot:sub+fee, n:ls.reduce((t,x)=>t+x.qty,0) }; }
+async function cartSetI(i, qty){ const c=cartRows[i]; if(!c) return; if(qty<=0) await sb.from('cart_items').delete().eq('profile_id',me.id).eq('product_id',c.product_id).eq('color',c.color); else await sb.from('cart_items').update({ qty:Math.min(99,qty) }).eq('profile_id',me.id).eq('product_id',c.product_id).eq('color',c.color); await loadCart(); renderCart(); }
+async function openCart(){ if(!storeProducts.length) await loadProducts(); await loadCart(); renderCart(); }
+function renderCart(){ const ls=cartLines(), s=cartSum();
+  openSub('장바구니', ls.length?`${ls.map((x,i)=>{ const c=(x.p.colors||[]).find(k=>k.name===x.color); return `<div class="cartrow"><div class="im" style="background-image:url(${colorImg(c,x.p)})"></div><div class="tx"><b>${esc(x.p.name)}</b><div class="mt">${esc(x.color||'색 미지정')} · ${won(x.p.price)}/볼</div><div style="display:flex;align-items:center;gap:10px;margin-top:6px"><div class="stepper sm"><button type="button" onclick="cartSetI(${cartRows.indexOf(x)},${x.qty-1})">−</button><b>${x.qty}</b><button type="button" onclick="cartSetI(${cartRows.indexOf(x)},${x.qty+1})">＋</button></div><b>${won(x.p.price*x.qty)}</b></div></div></div>`; }).join('')}
+    <div style="margin-top:12px"><div class="sumrow"><span>상품 합계 (${s.n}볼)</span><span>${won(s.sub)}</span></div><div class="sumrow"><span>배송비 <span class="muted">(3만 원 이상 무료)</span></span><span>${s.fee?won(s.fee):'무료'}</span></div><div class="sumrow tot"><span>결제 금액</span><span>${won(s.tot)}</span></div></div>
+    <button class="btn" style="width:100%;margin-top:12px" onclick="openCheckout()">주문하기 · 무통장 입금</button>`:'<div class="empty">장바구니가 비어 있어요</div>', null);
+  subOnBack=()=>{ closeSub(); if(view==='store') renderStore(); };
+}
+function openCheckout(){ const s=cartSum(); if(!s.n) return toast('장바구니가 비어 있어요'); ckDraft={ name:ckDraft.name||myProfile?.nickname||'', phone:ckDraft.phone||'', addr:ckDraft.addr||'', memo:ckDraft.memo||'', depositor:ckDraft.depositor||'' };
+  openSub('주문 · 결제', `<div class="cfl">배송지</div>
+    <label class="f">받는 분<input maxlength="40" value="${esc(ckDraft.name)}" oninput="ckDraft.name=this.value"></label>
+    <label class="f" style="margin-top:8px">연락처<input inputmode="tel" maxlength="30" value="${esc(ckDraft.phone)}" placeholder="010-0000-0000" oninput="ckDraft.phone=this.value"></label>
+    <label class="f" style="margin-top:8px">주소<input maxlength="200" value="${esc(ckDraft.addr)}" placeholder="도로명 주소 · 상세 주소" oninput="ckDraft.addr=this.value"></label>
+    <label class="f" style="margin-top:8px">배송 메모 <span class="muted">(선택)</span><input maxlength="200" value="${esc(ckDraft.memo)}" placeholder="문 앞에 놓아 주세요" oninput="ckDraft.memo=this.value"></label>
+    <div class="cfl">결제 방법</div><div class="card soft" style="font-size:.9rem"><b>무통장 입금</b><div class="muted" style="margin-top:4px">${BANK_DEMO.bank} ${BANK_DEMO.no} · 예금주 ${BANK_DEMO.holder}<br>주문 후 24시간 안에 입금해 주세요. 입금이 확인되면 알림을 보내 드려요.</div></div>
+    <label class="f" style="margin-top:8px">입금자명<input maxlength="40" value="${esc(ckDraft.depositor||ckDraft.name)}" placeholder="받는 분과 다르면 적어 주세요" oninput="ckDraft.depositor=this.value"></label>
+    <div style="margin-top:14px"><div class="sumrow"><span>상품 합계 (${s.n}볼)</span><span>${won(s.sub)}</span></div><div class="sumrow"><span>배송비</span><span>${s.fee?won(s.fee):'무료'}</span></div><div class="sumrow tot"><span>입금할 금액</span><span>${won(s.tot)}</span></div></div>
+    <p class="muted" style="font-size:.75rem">배송지는 주문 처리에만 쓰고 발송 30일 뒤 지워요. 지금은 예시 운영이라 실제 배송은 되지 않아요.</p>`, { label:'주문하기', fn:submitOrder });
+  subOnBack=()=>{ closeSub(); renderCart(); };
+}
+async function submitOrder(){ const d=ckDraft; if(!(d.name||'').trim()||!(d.phone||'').trim()||!(d.addr||'').trim()) return toast('받는 분·연락처·주소를 적어 주세요');
+  const b=$('#subAct'); b.disabled=true; const { data, error }=await sb.rpc('place_order', { p_ship:{ name:d.name.trim(), phone:d.phone.trim(), addr:d.addr.trim(), memo:(d.memo||'').trim(), depositor:(d.depositor||d.name).trim() } }); b.disabled=false;
+  if(error) return toast(error.message.replace(/^[^:]*: /,'')); await loadCart(); closeSub(); if(view==='store') renderStore();
+  openSheet(`<div style="text-align:center;padding:6px 0"><div style="font-size:2rem">🧶</div><b style="font-size:1.1rem">주문이 접수됐어요</b><div class="muted" style="margin-top:4px">주문번호 <b style="color:var(--ink)">${esc(data.no)}</b></div></div>
+    <div class="card soft" style="font-size:.9rem"><b>입금 안내</b><div class="sumrow"><span>입금 금액</span><b>${won(data.total)}</b></div><div class="sumrow"><span>계좌</span><span>${BANK_DEMO.bank} ${BANK_DEMO.no}</span></div><div class="sumrow"><span>예금주</span><span>${BANK_DEMO.holder}</span></div><div class="muted" style="font-size:.8rem;margin-top:4px">24시간 안에 입금해 주세요. 입금 확인 → 발송 → 완료 단계마다 알림이 와요.</div></div>
+    <button class="btn" onclick="closeSheet();openMyOrders()">내 주문 보기</button><button class="btn o" onclick="closeSheet()">닫기</button>`); }
+async function openMyOrders(){ const { data, error }=await sb.rpc('my_orders'); if(error) return toast(error.message);
+  openSub('내 주문', (data||[]).length?data.map(o=>{ const st=OSTAT[o.status]||[o.status,'']; return `<div class="card" style="margin-top:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>${esc(o.no)}</b><span class="ostat ${st[1]}">${st[0]}</span></div><div class="muted" style="font-size:.78rem">${fmtDT(o.created_at)}</div>
+      <div style="margin-top:6px;font-size:.9rem">${(o.items||[]).map(i=>`· ${esc(i.name)} ${i.color?esc(i.color)+' ':''}× ${i.qty} <span class="muted">${won(i.price*i.qty)}</span>`).join('<br>')}</div>
+      <div class="sumrow tot" style="font-size:.95rem"><span>결제 금액</span><span>${won(o.total)}</span></div>
+      ${o.status==='pending_payment'?`<div class="muted" style="font-size:.8rem">${BANK_DEMO.bank} ${BANK_DEMO.no} (${BANK_DEMO.holder})로 <b>${won(o.total)}</b> 입금해 주세요 · 입금자 ${esc(o.depositor||'')}</div><button class="btn o" style="margin-top:8px" onclick="cancelOrder('${o.id}')">주문 취소</button>`:''}
+      ${o.tracking?`<div class="muted" style="font-size:.8rem">송장 ${esc(o.tracking)}</div>`:''}</div>`; }).join(''):'<div class="empty">아직 주문이 없어요</div>', null); }
+async function cancelOrder(id){ if(!confirm('이 주문을 취소할까요?')) return; const { error }=await sb.rpc('cancel_my_order',{ p_id:id }); if(error) return toast(error.message); toast('취소했어요'); openMyOrders(); }
+// 도안 구매(무료 체험) · 돈 흐름(판매가 → 스토어 30% → 플랫폼 15% → 원천징수 3.3% → 작가 지급) — 서버 pattern_fee_calc 와 같은 식
+function feeFlow(price){ const s=Math.round(price*0.30), pf=Math.round((price-s)*0.15), t=Math.round((price-s-pf)*0.033); return { price, store:s, platform:pf, tax:t, author:price-s-pf-t }; }
+function flowHtml(price){ const f=feeFlow(price); return `<div class="flow"><span>판매가 <b>${won(f.price)}</b></span><i>→</i><span>스토어 30% −${won(f.store)}</span><i>→</i><span>플랫폼 15% −${won(f.platform)}</span><i>→</i><span>원천징수 3.3% −${won(f.tax)}</span><i>→</i><span>작가 지급 <b>${won(f.author)}</b></span></div>`; }
+async function buyPattern(id){ const { data, error }=await sb.rpc('purchase_pattern',{ p_pattern:id }); if(error) return toast(error.message);
+  openSheet(`<div style="text-align:center;padding:6px 0"><div style="font-size:2rem">🎁</div><b style="font-size:1.1rem">${data.already?'이미 구매한 도안이에요':'구매 완료 · 무료 체험'}</b><div class="muted" style="margin-top:4px">결제 없이 열렸어요. 정식 출시 후에는 아래 흐름으로 돈이 움직여요.</div></div>
+    ${data.price>0?`<div class="card soft">${flowHtml(data.price)}</div>`:''}
+    <button class="btn" onclick="closeSheet();openPattern('${id}')">도안으로 돌아가기</button>`); }
+async function openMyPurchases(){ const { data }=await sb.rpc('my_pattern_purchases'); const list=data||[];
+  openSheet(`<b style="font-size:1.05rem">구매한 도안</b><div class="patlist">${list.length?list.map(p=>patItem({ id:p.pattern_id, title:p.title, craft:p.craft, level:p.level, photos:p.photos, price:p.price, has_viewer:p.has_viewer, new_count:-1 })).join(''):'<div class="empty">아직 구매한 도안이 없어요</div>'}</div>`); }
+async function openSettlement(){ const { data:s, error }=await sb.rpc('author_settlement'); if(error) return toast(error.message); const t=s.total||{};
+  openSheet(`<b style="font-size:1.05rem">도안 판매 · 정산</b>
+    <div class="wk" style="margin:0"><div><b>${t.n||0}</b><span>판매</span></div><div><b>${won(t.gross||0)}</b><span>매출</span></div><div><b>${won(t.author_amt||0)}</b><span>작가 지급</span></div></div>
+    <div class="card soft" style="font-size:.85rem"><b>정산 방식</b> 판매가 5,000원 기준 예시${flowHtml(5000)}<div class="muted" style="margin-top:6px">지급은 판매 다음 달 15일 · 다음 지급일 ${esc(s.payout_day||'')}</div></div>
+    ${(s.months||[]).length?`<div class="cfl">월별</div>${s.months.map(m=>`<div class="sumrow"><span>${esc(m.month)} · ${m.n}건</span><span>매출 ${won(m.gross)} → <b>${won(m.author_amt)}</b></span></div>`).join('')}`:''}
+    ${(s.by_pattern||[]).length?`<div class="cfl">도안별</div>${s.by_pattern.map(p=>`<div class="sumrow"><span>${esc(p.title)} <span class="muted">${won(p.price)}</span></span><span>${p.n}건 · ${won(p.author_amt)}</span></div>`).join('')}`:''}
+    ${(s.recent||[]).length?`<div class="cfl">최근 판매</div>${s.recent.map(r=>`<div class="sumrow" style="font-size:.85rem"><span>${esc(r.title)}<br><span class="muted">${esc(r.buyer||'회원')} · ${ago(r.created_at)}${/demo/.test(r.via||'')?' · 무료 체험':''}</span></span><span>${won(r.author_amt)}</span></div>`).join('')}`:'<div class="empty">아직 판매 기록이 없어요</div>'}
+    <p class="muted" style="font-size:.75rem">지금은 무료 체험이라 실제 입금은 없어요. 숫자는 정식 결제 때 이 비율로 계산돼요.</p>`); }
+// 실함 → 이 실로 뜰 수 있는 도안(patterns_for_stash: 같은 실 > 굵기 ±20% > 게이지 ±15% > 굵기 분류)
+async function openStashPatterns(stashId){ const { data, error }=await sb.rpc('patterns_for_stash', { p_stash: stashId||null }); if(error) return toast(error.message);
+  const M={ same:'같은 실', similar:'굵기 비슷', gauge:'게이지 비슷', weight:'굵기 분류 같음' }; const list=data||[];
+  openSheet(`<b style="font-size:1.05rem">${stashId?'이 실로 뜰 수 있는 도안':'내 실로 뜰 수 있는 도안'}</b><p class="muted" style="margin:0;font-size:.82rem">실 사전의 규격(100g당 길이·게이지)으로 맞춰 봤어요. 도안을 열고 뷰어의 'AI에게 묻기'에서 크기 변화까지 확인할 수 있어요.</p>
+    <div class="patlist">${list.length?list.map(p=>`<div class="pat" onclick="closeSheet();openPattern('${p.id}')">${patThumb(p)}<div style="min-width:0;flex:1"><div class="tt">${esc(p.title)}</div><div class="mt">${CRAFT_KO[p.craft]||''} ${p.level}단계 · ${priceKo(p)}</div><div class="nw"><span class="ostat">${M[p.match]||''}</span> ${esc(p.reason||'')}${stashId?'':' · '+esc(p.yarn_name||'')}</div></div></div>`).join(''):'<div class="empty">맞는 도안을 못 찾았어요. 실함의 실을 실 사전과 연결하면 더 잘 찾아요</div>'}</div>`); }
+
 // ===== 작가 =====
 // 외부 링크는 바로 열지 않고 어디로 가는지(도메인) 보여 준 뒤 연다(2026-09-28 보안 점검: 리다이렉트 피싱 예방)
 function openExt(u, what){
@@ -1928,9 +2046,9 @@ async function sendAuthorApply(){
 }
 async function cancelAuthorApply(id){ if(!confirm('신청을 취소할까요?')) return; const {error}=await sb.from('author_applications').delete().eq('id',id); if(error) return toast(error.message); closeSheet(); toast('신청을 취소했어요'); }
 async function openMyPatterns(){   // 작가 대시보드(2026-10-10): 도안별 찜·뜨기 시작·완성 수(my_pattern_stats, 서버 집계)
-  const [{ data }, { data:st }] = await Promise.all([sb.from('patterns').select('id,title,craft,level,photos,price,is_published,hidden').eq('author_id', me.id).order('created_at',{ascending:false}), sb.rpc('my_pattern_stats')]);
-  const S=st||{}; const tot=k=>(data||[]).reduce((n,p)=>n+((S[p.id]||{})[k]||0),0);
-  openSheet(`<b style="font-size:1.05rem">내 도안</b><div style="margin:6px 0 2px"><button type="button" class="btn o" style="width:auto;font-size:.85rem;padding:6px 12px" onclick="studioCodeSheet()">✦ knitup Studio 에서 가져오기</button></div>${(data||[]).length?`<div class="wk" style="margin-top:-4px"><div><b>${data.length}</b><span>도안</span></div><div><b>${tot('saves')}</b><span>찜</span></div><div><b>${tot('started')}</b><span>뜨는 중</span></div><div><b>${tot('done')}</b><span>완성</span></div></div>`:''}<button class="btn" onclick="openPatternForm()">도안 등록</button>
+  const [{ data }, { data:st }, { data:stl }] = await Promise.all([sb.from('patterns').select('id,title,craft,level,photos,price,is_published,hidden').eq('author_id', me.id).order('created_at',{ascending:false}), sb.rpc('my_pattern_stats'), sb.rpc('author_settlement')]);
+  const S=st||{}; const tot=k=>(data||[]).reduce((n,p)=>n+((S[p.id]||{})[k]||0),0); const ST=(stl&&stl.total)||{};
+  openSheet(`<b style="font-size:1.05rem">내 도안</b><div style="margin:6px 0 2px"><button type="button" class="btn o" style="width:auto;font-size:.85rem;padding:6px 12px" onclick="studioCodeSheet()">✦ knitup Studio 에서 가져오기</button></div>${(data||[]).length?`<div class="wk" style="margin-top:-4px"><div><b>${data.length}</b><span>도안</span></div><div><b>${tot('saves')}</b><span>찜</span></div><div><b>${tot('started')}</b><span>뜨는 중</span></div><div><b>${tot('done')}</b><span>완성</span></div></div><div class="card soft" style="margin-top:8px;font-size:.88rem;cursor:pointer" onclick="openSettlement()"><b>판매·정산</b> ${ST.n||0}건 · 매출 ${won(ST.gross||0)} · 작가 지급 <b>${won(ST.author_amt||0)}</b> <span class="muted">자세히 ›</span></div>`:''}<button class="btn" onclick="openPatternForm()">도안 등록</button>
     <div class="patlist">${(data||[]).length?data.map(p=>{ const x=S[p.id]||{}; return `<div class="pat" onclick="openPatternForm('${p.id}')">${patThumb(p)}<div style="min-width:0;flex:1"><div class="tt">${esc(p.title)}</div><div class="mt">${CRAFT_KO[p.craft]} ${p.level}단계 · ${priceKo(p)}${p.hidden?' · 운영진이 숨김':p.is_published?'':' · 비공개'}</div><div class="mt">찜 ${x.saves||0} · 뜨는 중 ${x.started||0} · 완성 ${x.done||0}</div></div></div>`; }).join(''):'<div class="empty">아직 등록한 도안이 없어요</div>'}</div>`);
 }
 let pfSel=new Set(), pfPhotos=[], pfKeep=[], pfPkg=null, pfPkgClear=false;
@@ -2049,8 +2167,9 @@ async function openPattern(id){
   await loadTech();
   const { data:p, error } = await sb.from('patterns').select('*, author:profiles!patterns_author_id_fkey(id,nickname,avatar_url)').eq('id',id).maybeSingle();
   if(error||!p) return toast('도안을 찾을 수 없어요');
-  const [{ data:sv }, { data:pg }] = await Promise.all([sb.from('pattern_saves').select('pattern_id').eq('pattern_id',id).eq('profile_id',me.id), sb.from('pattern_progress').select('prog,done_at').eq('pattern_id',id).eq('profile_id',me.id).maybeSingle()]);
+  const [{ data:sv }, { data:pg }, { data:pp }] = await Promise.all([sb.from('pattern_saves').select('pattern_id').eq('pattern_id',id).eq('profile_id',me.id), sb.from('pattern_progress').select('prog,done_at').eq('pattern_id',id).eq('profile_id',me.id).maybeSingle(), FULL ? sb.from('pattern_purchases').select('pattern_id').eq('pattern_id',id).eq('profile_id',me.id) : Promise.resolve({ data:[] })]);
   const saved = !!(sv&&sv.length); const mine = new Set(myProfile?.skills||[]);
+  const purchased = !!(pp&&pp.length); const owned = p.price===0 || p.author_id===me.id || purchased;   // 커머스 데모(Lab): 구매하면 유료 도안도 열림
   const techs = (p.techniques||[]).map(t=>TECH.find(x=>x.id===t)).filter(Boolean);
   const mylv = p.craft==='crochet' ? (myProfile?.level_crochet||0) : (myProfile?.level_knit||0);
   const fit = p.level<=mylv ? '내 단계에 맞아요' : p.level===mylv+1 ? '한 단계 도전이에요' : '조금 어려울 수 있어요';
@@ -2062,9 +2181,11 @@ async function openPattern(id){
     ${techs.length?`<div><div class="muted" style="font-size:.8rem;margin-bottom:6px">쓰이는 기법 · <b style="color:var(--ink)">굵은 테두리</b>는 아직 체크 안 한 기법 · 누르면 설명</div><div class="patchips">${techs.map(t=>`<span class="${mine.has(t.id)?'':'new'}" style="cursor:pointer" onclick="openTechPanel('${t.id}')">${esc(t.name_ko)}</span>`).join('')}</div>
       <div class="card soft" style="font-size:.85rem;margin:8px 0 0">${(()=>{ const nw=techs.filter(t=>!mine.has(t.id)); return nw.length ? `이 도안으로 새로 배우는 기법 <b>${nw.length}개</b> — ${nw.slice(0,3).map(t=>esc(t.name_ko)).join(' · ')}${nw.length>3?' 외':''}` : '쓰이는 기법을 모두 할 수 있어요 — 바로 뜰 수 있어요'; })()}</div></div>`:''}
     ${p.yarn_weight||p.needle_size||p.gauge?`<div class="muted">${[p.yarn_weight&&'실 '+esc(p.yarn_weight), p.needle_size&&'바늘 '+esc(p.needle_size), p.gauge&&p.gauge.sts&&`게이지 ${+p.gauge.sts}코×${+p.gauge.rows}단`].filter(Boolean).join(' · ')}</div>`:''}
-    ${p.has_viewer ? ((p.price===0 || p.author_id===me.id) ? `<button class="btn" onclick="openPatternViewer('${p.id}')">${pg?.done_at?'다시 열기 · 완성한 도안':pg?.prog>0?`이어뜨기 · ${pg.prog}단까지 떴어요`:'도안 열기 · 단별 진도 저장'}</button>` : `<div class="card soft muted" style="font-size:.85rem">앱 안에서 열리는 도안이에요. 앱 내 구매는 준비 중이에요.</div>`) : ''}
-    <div style="display:flex;gap:8px"><button class="btn o" style="flex:1" onclick="toggleSavePattern('${p.id}',${!saved})">${saved?'찜 해제':'찜하기'}</button>${p.buy_url?`<a class="btn" style="flex:2;text-align:center;text-decoration:none" href="#" onclick="event.preventDefault();openExt(${JSON.stringify(p.buy_url)}, '작가가 등록한 판매 링크')">${priceKo(p)} · 도안 보러 가기</a>`:`<span class="btn" style="flex:2;text-align:center;opacity:.5">${priceKo(p)} · 링크 준비 중</span>`}</div>
-    <div class="muted" style="font-size:.78rem">도안 구매·결제는 작가의 판매 페이지에서 이뤄져요. 뜨개동네는 거래에 관여하지 않아요.</div>`);
+    ${p.has_viewer && owned ? `<button class="btn" onclick="openPatternViewer('${p.id}')">${pg?.done_at?'다시 열기 · 완성한 도안':pg?.prog>0?`이어뜨기 · ${pg.prog}단까지 떴어요`:'도안 열기 · 단별 진도 저장'}</button>` : ''}
+    ${FULL && !owned ? `<div class="card soft" style="font-size:.85rem"><b>${priceKo(p)}</b> · 지금은 무료 체험 — 결제 없이 열려요${p.price>0?flowHtml(p.price):''}</div><button class="btn" onclick="buyPattern('${p.id}')">구매하기 · 무료 체험</button>` : (!FULL && p.has_viewer && !owned ? `<div class="card soft muted" style="font-size:.85rem">앱 안에서 열리는 도안이에요. 앱 내 구매는 준비 중이에요.</div>` : '')}
+    ${FULL && purchased ? `<div class="muted" style="font-size:.8rem"><span class="ostat">구매한 도안</span> 무료 체험으로 구매했어요${p.has_viewer?'':' · 앱 뷰어 패키지가 없는 도안이라 작가 판매 페이지에서 받아요'}</div>` : ''}
+    <div style="display:flex;gap:8px"><button class="btn o" style="flex:1" onclick="toggleSavePattern('${p.id}',${!saved})">${saved?'찜 해제':'찜하기'}</button>${p.buy_url?`<a class="btn${FULL?' o':''}" style="flex:2;text-align:center;text-decoration:none" href="#" onclick="event.preventDefault();openExt(${JSON.stringify(p.buy_url)}, '작가가 등록한 판매 링크')">${FULL?'작가 판매 페이지':priceKo(p)+' · 도안 보러 가기'}</a>`:(FULL?'':`<span class="btn" style="flex:2;text-align:center;opacity:.5">${priceKo(p)} · 링크 준비 중</span>`)}</div>
+    <div class="muted" style="font-size:.78rem">${FULL?'지금은 무료 체험 기간이라 결제 없이 열려요. 정식 출시 후에는 앱 내 결제(스토어 결제)로 바뀌고, 작가 정산은 판매 다음 달 15일에 지급돼요.':'도안 구매·결제는 작가의 판매 페이지에서 이뤄져요. 뜨개동네는 거래에 관여하지 않아요.'}</div>`);
 }
 async function toggleSavePattern(id, on){
   const r = on ? await sb.from('pattern_saves').insert({profile_id:me.id, pattern_id:id}) : await sb.from('pattern_saves').delete().eq('profile_id',me.id).eq('pattern_id',id);
@@ -2342,7 +2463,7 @@ async function openLink(l){
     if(l.type==='pattern') return typeof openPattern==='function' ? openPattern(l.id) : go('comm');
     if(l.type==='class'||l.type==='class_manage'){ const { data:p } = await sb.from('shop_posts').select('id,shop_id,author_id').eq('id', l.id).single(); if(!p) return go('comm'); if(p.shop_id) await openShop(p.shop_id); else { myTab='classes'; if(p.author_id===me.id) goMy('thread','classes'); else { await openProfile(p.author_id); const b=document.querySelector('#profTabs [data-t="classes"]'); if(b) b.click(); } } if(l.type==='class_manage') setTimeout(()=>openClassApplicants(l.id), 400); return; }
     if(l.type==='profile'){ if(l.id===me.id){ return goMy(l.tab?'thread':'dash', l.tab); } await openProfile(l.id); if(l.tab){ const b=document.querySelector('#profTabs [data-t=+l.tab+]'); if(b) b.click(); } return; }
-    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='cert') return openCert(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(['map','comm','chats','my'].includes(v)) return go(v); }
+    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='orders') return openMyOrders(); if(v==='settlement') return openSettlement(); if(v==='store') return openStore(); if(v==='cert') return openCert(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(['map','comm','chats','my'].includes(v)) return go(v); }
   }catch(e){}
   return openSupportRoom();
 }
@@ -3679,7 +3800,7 @@ function renderStash(){
   const has=stashRows.filter(s=>+s.left_balls>0), done=stashRows.filter(s=>!(+s.left_balls>0));
   const list=(stashFilter==='left'?has:stashFilter==='done'?done:stashRows).slice().sort((a,b)=>(b.read_status==='pending')-(a.read_status==='pending'));
   $('#stashBody').innerHTML=`<div class="ssum"><div><b>${stashRows.length}</b><span>보유 실</span></div><div><b>${fmtBalls(has.reduce((t,s)=>t+(+s.left_balls),0))}</b><span>남은 볼</span></div><div><b>${done.length}</b><span>다 쓴 실</span></div></div>
-    <div style="padding:0 16px"><button class="btn" style="width:100%" onclick="openStashAdd()">${ico('camera')} 볼밴드 찍어서 추가</button></div>
+    <div style="padding:0 16px"><button class="btn" style="width:100%" onclick="openStashAdd()">${ico('camera')} 볼밴드 찍어서 추가</button>${FULL&&has.length?`<button class="btn o" style="width:100%;margin-top:8px" onclick="openStashPatterns(null)">내 실로 뜰 수 있는 도안 찾기</button>`:''}</div>
     <div class="seg" style="padding:12px 16px 4px">${[['all','전체'],['left','남은 실'],['done','다 쓴 실']].map(([k,l])=>`<button type="button" class="${stashFilter===k?'on':''}" onclick="stashFilter='${k}';renderStash()">${l}</button>`).join('')}</div>
     <div class="list">${list.map(s=>`<div class="item" onclick="openStashItem('${s.id}')">${stashThumbHtml(s)}<div class="tx"><b>${esc(stashName(s))}</b><span>${esc(s.read_status==='pending'?'잠시 뒤 이름·규격이 채워져요':stashSpec(s)||(s.read_status==='failed'?'볼밴드를 읽지 못했어요 · 눌러서 직접 적기':''))}</span></div><span class="sleft ${+s.left_balls>0?'':'end'}">${+s.left_balls>0?fmtBalls(s.left_balls)+'볼 남음':'다 씀'}</span></div>`).join('')||`<div class="empty">아직 담은 실이 없어요.<br>산 실의 볼밴드를 찍어 두면 작품 인증 때 한 번에 들어가요</div>`}</div>`;
 }
@@ -3737,7 +3858,8 @@ async function openStashItem(id, draft){
     <div class="cfl">남은 볼 <span class="muted">잃어버렸거나 나눠 줬으면 직접 고쳐 주세요</span></div>
     <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button type="button" onclick="siStep(-1)">−</button><input id="siLeft" inputmode="decimal" maxlength="6" value="${fmtBalls(s.left_balls)}" onfocus="this.select()" oninput="siRow.left_balls=this.value.replace(',', '.')"><button type="button" onclick="siStep(1)">＋</button></div><span class="muted">산 볼 ${fmtBalls(s.bought_balls)}</span></div>
     ${works.length?`<div class="cfl">이 실로 뜬 내 작품</div>${works.map(w=>`<div class="muted" style="padding:3px 0">· ${esc(w.title||'')}</div>`).join('')}`:''}
-    <button type="button" class="btn r" style="width:100%;margin-top:22px" onclick="stashDelete('${s.id}')">실함에서 지우기</button>`, { label:'저장', fn:stashItemSave });
+    ${FULL&&!draft?`<button type="button" class="btn o" style="width:100%;margin-top:18px" onclick="openStashPatterns('${s.id}')">이 실로 뜰 수 있는 도안 찾기</button>`:''}
+    <button type="button" class="btn r" style="width:100%;margin-top:${FULL&&!draft?'10':'22'}px" onclick="stashDelete('${s.id}')">실함에서 지우기</button>`, { label:'저장', fn:stashItemSave });
 }
 function siSet(k,v){ siRow[k]=v; (siRow._ed=siRow._ed||new Set()).add(k==='mix'?'fibers':k); if(k==='raw_name') siRow.catalog_id=null; }
 // 실 이름 자동완성(실 사전 yarn_suggest) — 고르면 표준 이름·규격·혼용률을 채우고 catalog_id 로 연결
@@ -4292,6 +4414,7 @@ async function renderMy(){
     <div class="mepro" onclick="openOnboard(true)"><div class="av">${avatar(p,true)}</div><div style="flex:1;min-width:0"><div class="nm">${esc(p.nickname||'')}${lvBadge(p)}${idxChip(p)}</div><div class="sub">${esc(handle)}${p.mbti?' · '+esc(p.mbti):''}</div></div><span class="car">›</span></div>
     <div id="myLv">${myLvCard()}</div>
     <div class="shopcard" id="myStashCard" onclick="openStash()"><div class="sq">${ico('yarn')}</div><div style="flex:1;min-width:0"><b>내 실함</b><div class="muted" id="myStashSub">볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요</div></div><span style="color:var(--ink3)">›</span></div>
+    ${FULL?`<div class="shopcard" onclick="openStore()"><div class="sq">🧺</div><div style="flex:1;min-width:0"><b>뜨개 상점 <span class="authbadge" style="background:var(--sel)">Lab</span></b><div class="muted">실 사전의 실 사기 · 도안 사기(무료 체험) · 내 주문</div></div><span style="color:var(--ink3)">›</span></div>`:''}
     <div id="myTodo"></div>
     <div id="myWeek"></div>
     <div id="myRecs">${recCard(0)}</div>
@@ -4420,7 +4543,10 @@ function openSettingsInner(){
       ${PushN?`<button class="srow" onclick="closeSheet();pushSettingsRow()"><span>앱 알림 <span class="muted" id="pushStat"></span></span><span class="car">›</span></button>`:''}
       <button class="srow" onclick="closeSheet();openSkills()"><span>내 뜨개 단계 <span class="muted">${lvShort(p)||'아직 없음'}</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openSlides()"><span>뜨개 단계 설명</span><span class="car">›</span></button>
-      ${FULL?`<button class="srow" onclick="openSavedPatterns()"><span>찜한 도안</span><span class="car">›</span></button>`:''}
+      ${FULL?`<button class="srow" onclick="openSavedPatterns()"><span>찜한 도안</span><span class="car">›</span></button>
+      <button class="srow" onclick="closeSheet();openStore()"><span>뜨개 상점 <span class="authbadge" style="background:var(--sel)">Lab</span><br><span class="muted">실 사기(무통장) · 도안(무료 체험)</span></span><span class="car">›</span></button>
+      <button class="srow" onclick="closeSheet();openMyOrders()"><span>내 주문</span><span class="car">›</span></button>
+      <button class="srow" onclick="openMyPurchases()"><span>구매한 도안</span><span class="car">›</span></button>${p.is_author?`<button class="srow" onclick="openSettlement()"><span>도안 판매·정산 <span class="authbadge">작가</span></span><span class="car">›</span></button>`:''}`:''}
       ${p.is_author?`<button class="srow" onclick="openStudio()"><span>knitup Studio <span class="authbadge">작가</span><br><span class="muted">도안 제작 도구 — 차트·지시문·인쇄·패키지 (패드·노트북 권장)</span></span><span class="car">›</span></button>${FULL?`<button class="srow" onclick="openMyPatterns()"><span>내 도안 <span class="authbadge">작가</span><br><span class="muted">도안 등록·수정</span></span><span class="car">›</span></button>`:''}<button class="srow" onclick="closeSheet();openClassForm()"><span>클래스 열기 <span class="authbadge">작가</span><br><span class="muted">일정·인원·비용·환불 규정까지 양식으로 · 마이 › 클래스 탭에 보여요</span></span><span class="car">›</span></button><button class="srow" onclick="openAuthorLink()"><span>작가 링크 ${FULL?'':'<span class="authbadge">작가</span>'}<br><span class="muted">${p.author_link?esc(p.author_link.replace(/^https?:\/\//,'').slice(0,40)):'인스타그램·블로그 등을 프로필에 보여 줘요'}</span></span><span class="car">›</span></button>`:`<button class="srow" onclick="openAuthorApply()"><span>작가 신청<br><span class="muted">상급 이상 기법 작품 인증 ${AUTHOR_MIN_CERTS}개부터 · 클래스 열기${FULL?'·도안 등록':''} · 지도에 작가로 표시</span></span><span class="car">›</span></button>`}
       <button class="srow" onclick="relocateNow()"><span>현위치로 동네 다시 설정<br><span class="muted">지금 ${esc(p.dong_name||'미설정')} · 가입한 위치로 고정돼 있어요</span></span><span class="car">›</span></button>
       <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 200m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>

@@ -128,6 +128,7 @@ pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow
     <a href="#broadcast" data-v="broadcast">공지·알림 보내기</a>
     <a href="#shops" data-v="shops">파트너 가게</a>
     <a href="#patterns" data-v="patterns">도안</a>
+    <a href="#store" data-v="store">상점 (Lab 커머스)</a>
     <a href="#authors" data-v="authors">작가 신청</a>
     <div class="grp">AI 데이터</div>
     <a href="#ai-photos" data-v="ai-photos">사진↔기법 라벨</a>
@@ -1375,6 +1376,48 @@ async function decideClaim(id, ok, docPath){
   toast(ok?'승인했어요. 좌표를 넣고 공개로 바꿔 주세요':'반려했어요'); await route(); if(ok&&sid) openShopForm(sid);
 }
 // ===== 로그·설정 =====
+// ===== 상점 (Lab 커머스 데모, 2026-10-19): 가격·수수료·재고·주문 금액은 서버 함수가 계산 =====
+const won=n=>(Math.round(+n||0)).toLocaleString()+'원';
+const OST={ pending_payment:'입금 대기', paid:'입금 확인', shipped:'발송', done:'완료', cancelled:'취소' };
+let stTab='orders', stFilter='';
+VIEWS.store = async(arg)=>{ if(arg) stTab=arg;
+  const [{ data:st }, { data:od, error:oe }, { data:pr }, { data:ps }] = await Promise.all([sb.rpc('shop_stats',{ p_days:30 }), sb.rpc('admin_orders',{ p_status:stFilter||null, p_limit:200 }), sb.from('shop_products').select('*').order('sort').order('created_at'), sb.rpc('admin_pattern_sales')]);
+  if(oe) toast(oe.message); const S=st||{};
+  $('#main').innerHTML=`<h1>상점 <small>Lab 커머스 데모 — 실 판매(무통장) · 도안 판매·정산. 가격·수수료·재고·주문 금액은 서버 함수가 계산해요</small></h1>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:10px 0 4px">${[['30일 주문',S.orders||0,'건'],['30일 매출 (입금 확인 기준)',won(S.revenue||0),''],['입금 대기',S.pending||0,'건'],['발송 대기',S.to_ship||0,'건'],['발송 중',S.shipped||0,'건'],['판매 볼 수',S.balls||0,'볼']].map(([l,v,u])=>`<div style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff"><div class="muted" style="font-size:12px">${l}</div><b style="font-size:1.25rem">${v}</b> <span class="muted">${u}</span></div>`).join('')}</div>
+  <div class="row" style="margin-top:12px">${[['orders','주문'],['products','상품'],['patterns','도안 판매·정산']].map(([k,l])=>`<button class="${stTab===k?'p':''}" onclick="stTab='${k}';VIEWS.store()">${l}</button>`).join('')}</div>
+  ${stTab==='orders'?renderAdminOrders(od||[]):stTab==='products'?renderAdminProducts(pr||[]):renderAdminPatternSales(ps||[])}`;
+};
+function renderAdminOrders(rows){ return `<div class="row"><select onchange="stFilter=this.value;VIEWS.store()">${[['','전체'],['pending_payment','입금 대기'],['paid','입금 확인'],['shipped','발송'],['done','완료'],['cancelled','취소']].map(([k,l])=>`<option value="${k}" ${stFilter===k?'selected':''}>${l}</option>`).join('')}</select><span class="muted">배송지 열람은 접근 기록(access_logs)에 남아요 · 무통장: 입금 확인 → 발송(송장) → 완료</span></div>
+  <table><tr><th>주문</th><th>회원</th><th>상태</th><th>상품</th><th>금액</th><th>입금자</th><th>배송지</th><th>날짜</th><th></th></tr>${rows.map(o=>`<tr><td><b>${esc(o.no)}</b>${o.tracking?`<br><span class="muted">송장 ${esc(o.tracking)}</span>`:''}</td><td>${esc(o.nickname||'')}</td><td>${OST[o.status]||esc(o.status)}</td><td>${(o.items||[]).map(i=>`${esc(i.name)} ${esc(i.color||'')} ×${i.qty}`).join('<br>')}</td><td>${won(o.total)}${o.shipping_fee?`<br><span class="muted">배송 ${won(o.shipping_fee)}</span>`:''}</td><td>${esc(o.depositor||'')}</td><td class="muted">${esc(o.ship_name||'')} ${esc(o.ship_phone||'')}<br>${esc(o.ship_addr||'')}${o.ship_memo?'<br>'+esc(o.ship_memo):''}</td><td class="muted">${new Date(o.created_at).toLocaleString('ko-KR')}</td><td style="white-space:nowrap">${o.status==='pending_payment'?`<button onclick="orderSet('${o.id}','paid')">입금 확인</button> <button onclick="orderSet('${o.id}','cancelled')">취소</button>`:o.status==='paid'?`<button onclick="orderShip('${o.id}')">발송</button> <button onclick="orderSet('${o.id}','cancelled')">취소</button>`:o.status==='shipped'?`<button onclick="orderSet('${o.id}','done')">완료</button>`:''}</td></tr>`).join('')||'<tr><td colspan="9" class="muted">주문이 없어요</td></tr>'}</table>`; }
+async function orderSet(id, st, tr){ if(st==='cancelled'&&!confirm('주문을 취소할까요? 재고가 복원되고 회원에게 알림이 가요')) return; const { error }=await sb.rpc('admin_order_set',{ p_id:id, p_status:st, p_tracking:tr||null, p_note:null }); if(error) return toast(error.message); toast('처리했어요 — 회원에게 알림을 보냈어요'); VIEWS.store(); }
+function orderShip(id){ const tr=prompt('송장 번호(택배사 포함)를 적어 주세요. 비워 두면 송장 없이 발송 처리돼요'); if(tr===null) return; orderSet(id,'shipped',tr.trim()||null); }
+function renderAdminProducts(rows){ return `<div class="row"><button class="p" onclick="openProductForm()">상품 추가</button><span class="muted">실 사전의 실을 골라 가격·재고를 정하면 색 옵션(실물 사진)은 자동으로 채워져요 · 앱에는 '제휴' 표시 없음</span></div>
+  <table><tr><th>상품</th><th>가격 / 볼</th><th>재고</th><th>색</th><th>상태</th></tr>${rows.map(p=>`<tr class="clk" onclick="openProductForm('${p.id}')"><td><b>${esc(p.name)}</b> <span class="muted">${esc(p.brand||'')}</span></td><td>${won(p.price)}</td><td>${p.stock}</td><td>${(p.colors||[]).length}</td><td>${p.is_active?'<span class="chip g">판매 중</span>':'<span class="chip">숨김</span>'}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">상품이 없어요</td></tr>'}</table>`; }
+let pfRow={};
+async function openProductForm(id){ pfRow={ price:0, stock:0, is_active:true, colors:[] }; if(id){ const { data }=await sb.from('shop_products').select('*').eq('id',id).single(); pfRow=data||pfRow; }
+  openPanel(`<h2 style="margin-top:0">${id?'상품 수정':'상품 추가'}</h2>
+    <div class="row"><input id="spQ" placeholder="실 사전에서 찾기 (브랜드·제품명)" style="flex:1"><button onclick="spSearch()">찾기</button></div><div id="spRes" class="muted" style="margin:4px 0"></div>
+    <div class="muted" id="spCur">${pfRow.catalog_id?'연결된 실: '+esc((pfRow.brand||'')+' '+(pfRow.name||'')):'연결된 실 없음 — 찾아서 고르면 이름·규격·색 사진이 채워져요'}</div>
+    <input id="spName" placeholder="상품 이름" value="${esc(pfRow.name||'')}" style="width:100%;margin:6px 0"><input id="spBrand" placeholder="브랜드" value="${esc(pfRow.brand||'')}" style="width:100%;margin-bottom:6px">
+    <div class="row"><input id="spPrice" type="number" min="0" placeholder="가격(원/볼)" value="${pfRow.price||0}"><input id="spStock" type="number" min="0" placeholder="재고(볼)" value="${pfRow.stock||0}"><input id="spSort" type="number" placeholder="정렬" value="${pfRow.sort||0}"></div>
+    <textarea id="spDescr" placeholder="설명" style="min-height:60px;width:100%">${esc(pfRow.descr||'')}</textarea>
+    <input id="spPhoto" placeholder="대표 사진 (yarn-colors 경로 또는 URL · 비우면 첫 색 사진)" value="${esc(pfRow.photo||'')}" style="width:100%;margin:6px 0">
+    <div class="row"><label><input type="checkbox" id="spActive" ${pfRow.is_active?'checked':''}> 판매 중</label><label><input type="checkbox" id="spFill" ${id?'':'checked'}> 색 옵션을 실 사전 사진으로 채우기 (지금 ${(pfRow.colors||[]).length}개)</label></div>
+    <div class="row"><button class="p" onclick="saveProduct('${id||''}')">저장</button>${id?`<button onclick="deleteProduct('${id}')">삭제</button>`:''}</div>`); }
+async function spSearch(){ const q=$('#spQ').value.trim(); if(!q) return; const { data }=await sb.from('yarn_catalog').select('id,brand,product,ball_g,ball_m').is('merged_into',null).or(`product.ilike.%${q.replace(/[%,]/g,'')}%,brand.ilike.%${q.replace(/[%,]/g,'')}%`).limit(12);
+  $('#spRes').innerHTML=(data||[]).map(y=>`<button data-id="${y.id}" data-b="${esc(y.brand||'')}" data-p="${esc(y.product)}" data-g="${y.ball_g||''}" data-m="${y.ball_m||''}" onclick="spPick(this)">${esc(y.brand||'')} ${esc(y.product)} <span class="muted">${y.ball_g||'?'}g·${y.ball_m||'?'}m</span></button>`).join(' ')||'<span class="muted">없음</span>'; }
+function spPick(b){ pfRow.catalog_id=b.dataset.id; pfRow.ball_g=b.dataset.g||null; pfRow.ball_m=b.dataset.m||null; $('#spCur').textContent='연결된 실: '+b.dataset.b+' '+b.dataset.p; if(!$('#spName').value) $('#spName').value=b.dataset.p; if(!$('#spBrand').value) $('#spBrand').value=b.dataset.b; $('#spFill').checked=true; }
+async function saveProduct(id){ const p={ id:id||null, catalog_id:pfRow.catalog_id||null, name:$('#spName').value.trim(), brand:$('#spBrand').value.trim()||null, descr:$('#spDescr').value.trim()||null, price:+$('#spPrice').value||0, stock:+$('#spStock').value||0, sort:+$('#spSort').value||0, ball_g:pfRow.ball_g||null, ball_m:pfRow.ball_m||null, photo:$('#spPhoto').value.trim()||null, is_active:$('#spActive').checked, fill_colors:$('#spFill').checked, colors:pfRow.colors||[] };
+  if(!p.name) return toast('상품 이름을 적어 주세요'); const { data, error }=await sb.rpc('admin_product_upsert',{ p }); if(error) return toast(error.message);
+  if(!p.photo){ const { data:r }=await sb.from('shop_products').select('colors').eq('id',data).single(); const c=(r?.colors||[]).find(x=>x.photo); if(c) await sb.from('shop_products').update({ photo:c.photo }).eq('id',data); }
+  toast('저장했어요'); closePanel(); VIEWS.store(); }
+async function deleteProduct(id){ if(!confirm('상품을 삭제할까요? (주문 기록은 남아요)')) return; const { error }=await sb.rpc('admin_product_delete',{ p_id:id }); if(error) return toast(error.message); closePanel(); VIEWS.store(); }
+function renderAdminPatternSales(rows){ const tot=rows.reduce((a,r)=>({ n:a.n+(+r.n), gross:a.gross+(+r.gross), store:a.store+(+r.store_fee), pf:a.pf+(+r.platform_fee), tax:a.tax+(+r.tax), au:a.au+(+r.author_amt) }),{ n:0, gross:0, store:0, pf:0, tax:0, au:0 });
+  return `<p class="muted">작가 정산 = 판매가 − 스토어 수수료 30% − 플랫폼 15%(스토어 공제 후) − 원천징수 3.3%. 지급은 판매 다음 달 15일. 지금은 무료 체험(demo_free)이라 실제 입금은 없고 비율만 보여 줘요.</p>
+  <table><tr><th>작가</th><th>판매</th><th>매출</th><th>스토어 30%</th><th>플랫폼 15%</th><th>원천징수 3.3%</th><th>작가 지급</th></tr>${rows.map(r=>`<tr><td><b>${esc(r.author||'(작가 없음)')}</b></td><td>${r.n}</td><td>${won(r.gross)}</td><td>${won(r.store_fee)}</td><td>${won(r.platform_fee)}</td><td>${won(r.tax)}</td><td><b>${won(r.author_amt)}</b></td></tr>`).join('')||'<tr><td colspan="7" class="muted">판매 기록이 없어요</td></tr>'}
+  ${rows.length?`<tr><th>합계</th><th>${tot.n}</th><th>${won(tot.gross)}</th><th>${won(tot.store)}</th><th>${won(tot.pf)}</th><th>${won(tot.tax)}</th><th>${won(tot.au)}</th></tr>`:''}</table>`; }
+
 VIEWS.logs = async()=>{
   const {data}=await sb.from('admin_logs').select('*').order('created_at',{ascending:false}).limit(300);
   const ids=[...new Set((data||[]).map(l=>l.admin_id))]; const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);

@@ -16,7 +16,10 @@
     +'#knGauge #kgGo{border-color:var(--accent);color:var(--accent)}'
     +'#knGauge .kg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#knGauge .kg-chips button{font-weight:500;border-radius:999px;padding:6px 11px;text-align:left}'
     +'#knGauge .kg-chips button small{color:var(--sub)}'
-    +'#knGauge #kgOut{margin-top:12px;padding:12px;border-radius:12px;background:var(--accent-soft);font-size:13px;line-height:1.65}#knGauge #kgOut:empty{display:none}';
+    +'#knGauge #kgOut{margin-top:12px;padding:12px;border-radius:12px;background:var(--accent-soft);font-size:13px;line-height:1.65}#knGauge #kgOut:empty{display:none}'
+    +'#knGauge .kg-ai{margin-top:14px;border-top:1px dashed #ddd;padding-top:12px}#knGauge .kg-ai h3{font-size:14px;margin:0 0 8px}#knGauge .kg-ai .kg-chips button{border-color:#c9d6c2}'
+    +'#knGauge #kgAiQ{width:100%;box-sizing:border-box;margin-top:8px}#knGauge #kgAiOut{margin-top:10px;padding:12px;border-radius:12px;background:#f3f1ea;font-size:13px;line-height:1.65;white-space:pre-wrap}#knGauge #kgAiOut:empty{display:none}'
+    +'#knGauge .kg-ai .kg-note{display:block;margin-top:6px}';
   document.head.appendChild(st);
   var card=document.createElement('div'); card.className='card'; card.id='knGauge'; card.style.display='none';
   var wrap=document.querySelector('.wrap'), main=document.querySelector('.main'); if(!wrap||!main) return; wrap.insertBefore(card, main);
@@ -54,7 +57,11 @@
       +'<div class="kg-note" style="margin-top:6px">스와치를 떠서 10cm 안의 코·단을 세어 적으면 가장 정확해요. 단을 비우면 도안 비율로 추정해요.</div>'
       +'<div class="kg-chips" id="kgMine"></div>'
       +'<input id="kgQ" placeholder="뜨려는 실 이름으로 찾기 (게이지가 등록된 실)" autocomplete="off" maxlength="40"><div class="kg-chips" id="kgRes"></div>'
-      +'<div id="kgOut"></div>';
+      +'<div id="kgOut"></div>'
+      +'<div class="kg-ai"><h3>AI에게 묻기 <small class="kg-note" style="display:inline">— 내 실함·실 사전을 보고 답해요</small></h3>'
+      +'<div class="kg-chips" id="kgAiQuick"><button type="button" data-q="내 실함의 실로 이 도안을 뜨면 크기가 어떻게 되고, 어떤 실이 가장 맞아요?">내 실로 뜨면?</button><button type="button" data-q="이 도안에 맞는 실을 추천해 주세요. 대신 쓸 수 있는 실도 알려 주세요.">맞는 실 추천</button><button type="button" data-q="이 도안을 뜨려면 실이 대략 얼마나 필요해요?">실 소요량</button></div>'
+      +'<input id="kgAiQ" placeholder="직접 물어보기 (예: 10% 크게 뜨려면?)" maxlength="200" autocomplete="off"><button id="kgAiGo" style="margin-top:8px">물어보기</button>'
+      +'<div id="kgAiOut"></div><div class="kg-chips" id="kgAiYarns"></div><span class="kg-note">AI 답은 참고용이에요 — 스와치로 확인하세요. 한 시간에 30번까지.</span></div>';
     document.getElementById('kgGo').onclick=function(){ var s=num(document.getElementById('kgS').value), r=num(document.getElementById('kgR').value);
       if(!(s>=3&&s<=80)) return toast('10cm 안의 코 수를 적어 주세요');
       if(r&&!(r>=2&&r<=150)) return toast('단 수를 다시 확인해 주세요');
@@ -65,6 +72,11 @@
       if(q.length<2){ found=[]; chips('kgRes', found, ''); return; }
       qT=setTimeout(function(){ parent.postMessage({type:'kn-yarn-q', q:q, craft:(CTX&&CTX.craft)||'crochet'}, '*'); }, 400); };
     chips('kgMine', (CTX&&CTX.mine)||[], '내 실함');
+    function aiAsk(q){ q=(q||'').trim(); if(!q) return; var o=document.getElementById('kgAiOut'); o.textContent='생각하는 중…'; document.getElementById('kgAiYarns').innerHTML='';
+      var s=shape(); parent.postMessage({type:'kn-ai-q', q:q, ctx:{ title:(pkgState.pkg&&pkgState.pkg.title)||'', chart:pkgState.chart.part||'', maxC:s.maxC, rows:s.n, round:s.round, base:BASE?{gx:BASE.gx,gy:BASE.gy,stitch:BASE.stitch,needle:BASE.needle}:null, my:MY||null }}, '*'); }
+    Array.prototype.forEach.call(document.querySelectorAll('#kgAiQuick button'), function(b){ b.onclick=function(){ aiAsk(b.getAttribute('data-q')); }; });
+    document.getElementById('kgAiGo').onclick=function(){ aiAsk(document.getElementById('kgAiQ').value); };
+    document.getElementById('kgAiQ').onkeydown=function(e){ if(e.key==='Enter') aiAsk(this.value); };
     paint();
   }
   function chips(id, rows, head){
@@ -103,6 +115,11 @@
     var d=e.data; if(!d) return;
     if(d.type==='knitup-pkg'){ if(!pkgState) return; CTX=d.gauge||{};
       try{ setBase(); build(); card.style.display=''; }catch(err){ card.style.display='none'; }
+      return; }
+    if(d.type==='kn-ai-r'){ var o=document.getElementById('kgAiOut'); if(!o) return; o.textContent=d.error?('답하지 못했어요: '+d.error):(d.answer||'');
+      var ys=(d.yarns||[]).filter(function(y){ return y&&y.name; }); var el=document.getElementById('kgAiYarns');
+      if(el){ el.innerHTML=ys.length?'<span class="kg-note" style="width:100%">추천 실 — 게이지가 있으면 눌러서 적용</span>':'';
+        ys.forEach(function(y){ var b=document.createElement('button'); b.type='button'; b.innerHTML=esc(y.name)+(y.sts?' <small>'+f1(y.sts)+'코'+(y.rows?'×'+f1(y.rows)+'단':'')+'</small>':'')+(y.reason?'<br><small>'+esc(y.reason)+'</small>':''); if(y.sts) b.onclick=function(){ useYarn({name:y.name, sts:y.sts, rows:y.rows, stitch:y.stitch, needle:y.needle}); }; else b.disabled=true; el.appendChild(b); }); }
       return; }
     if(d.type==='kn-yarn-r'){ var q=document.getElementById('kgQ'); if(!q||q.value.trim()!==d.q) return;
       found=(d.rows||[]).slice(0,8); chips('kgRes', found, found.length?'':'');

@@ -1431,3 +1431,18 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   Studio: [뜨개동네에 등록] 시트 ② '앱으로 보내기' 코드 입력 → studio_submit. 원본 SQL: supabase/studio_inbox.sql. 권한 점검 P1·P4 네 줄
 -- ---------------------------------------------------------------
 
+
+-- ---------------------------------------------------------------
+-- 75. 커머스 데모(Lab) (마이그레이션 commerce_demo_v1, 원본 supabase/commerce_demo.sql) — 2026-10-19 대표 지시: 작가 설명회용 "도안이 붙고 이렇게 영업한다"
+--   실 판매(무통장): shop_products(실 사전 연결 catalog_id·가격/볼·재고·colors[{no,name,photo,hex}]=yarn_colors 실물 사진) · cart_items(본인) · orders(no 'KNyymmdd-nnnn', status pending_payment→paid→shipped→done | cancelled, items jsonb 스냅샷, 배송지=1급)
+--     place_order(p_ship) 가 장바구니→가격·재고·배송비(3만 원 미만 3,000) 계산·재고 차감·주문 생성(rate_hit 5/10분) · cancel_my_order(입금 전만, 재고 복원) · my_orders()
+--     관리자: admin_orders(상태, n)(log_access 'orders') · admin_order_set(id, 상태, 송장, 메모)(알림 kind notice + link view:orders, 취소 시 재고 복원, admin_log) · admin_product_upsert(jsonb, fill_colors=실 사전 색 사진 12개) · shop_stats(days)
+--   도안 구매(임시 무료): pattern_purchases(profile, pattern, price·store_fee·platform_fee·tax·author_amt 스냅샷, via demo_free|demo_seed) · pattern_fee_calc(price)=판매가−스토어 30%−플랫폼 15%(스토어 공제 후)−원천징수 3.3% → 작가 지급
+--     purchase_pattern(p)(공개 도안만, 중복 무시, 작가에게 알림 link view:settlement) · pattern_contents_select 정책에 '구매한 회원' 추가 · my_pattern_purchases() · author_settlement()(월별·도안별·최근 10건·다음 지급일=다음 달 15일) · admin_pattern_sales(월)
+--   실함→도안: patterns_for_stash(p_stash|null) — 같은 실(catalog) > 100g당 m ±20% > 게이지 코 ±15% > 굵기 분류 이름, 도안당 최선 1건 + reason
+--   Edge Function pattern-ai(verify_jwt=false, 자체 JWT 검사 + rate_hit pattern_ai 30/시간): 뷰어 'AI에게 묻기' — 도안·기준 실(yarn_spec)·내 실함(본인)·yarn_similar 후보를 <자료>로 Claude haiku 에 주고 {answer, yarns[]} 응답. 뷰어 메시지 kn-ai-q{q, ctx} → 앱 → kn-ai-r{answer, yarns, error}
+--   예시 데이터: archive.demo_2026_10_09 의 도안 14개·패키지 2개 복원(표지 docs/patterns/demo-*.svg 복구, 기준 실 catalog_id 연결), demo2·demo3 작가(온보딩 완료), 상품 8개(낙양모사 꽁뜨·동화·아임울2·세븐이지·어울림·데이트·이프·Lux 5Ply, 예시 가격·재고 30), 주문 3건(demo4 입금 확인·demo5 발송·demo6 입금 대기), 도안 구매 6건(demo_seed), demo1 실함 2개(꽁뜨·세븐이지). 앱 어디에도 '제휴' 표시 없음
+--   앱(Lab FULL 만): 마이 카드·설정 '뜨개 상점' → v-store(실 탭: 상품 그리드→색 사진 칩·수량→장바구니→주문·결제(무통장 안내)→주문 접수 시트 / 도안 탭) · 내 주문(취소) · 구매한 도안 · 도안 상세 [구매하기·무료 체험]+돈 흐름 띠 · 내 도안 '판매·정산' 카드 → 정산 시트 · 실함 '내 실로/이 실로 뜰 수 있는 도안' · 뷰어 카드 'AI에게 묻기'(tools/viewer-gauge.js)
+--   콘솔 › 상점: 30일 지표 · 주문 표(입금 확인/발송(송장)/완료/취소) · 상품(실 사전 검색→색 자동) · 도안 판매·정산(작가별 수수료 분해)
+--   보안: 금액·수수료·재고 서버 계산, 배송지 본인·관리자(접근 기록), anon 전부 차단. 권한 테스트에 cart/orders/purchases/products/admin 함수 줄 추가
+-- ---------------------------------------------------------------

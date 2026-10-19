@@ -40,6 +40,9 @@ begin
   select count(*) into n from public.jigi_reminders; out := pg_temp.chk(out, 'jigi_reminders', n, 0);
   select count(*) into n from public.studio_inbox where profile_id = d2; out := pg_temp.chk(out, 'studio_inbox(other)', n, 0);   -- schema 74
   begin select count(*) into n from public.cheer_log; exception when others then n := 0; end; out := pg_temp.chk(out, 'cheer_log', n, 0);   -- schema 72
+  select count(*) into n from public.orders where profile_id = d2; out := pg_temp.chk(out, 'orders(other)', n, 0);   -- schema 75
+  select count(*) into n from public.pattern_purchases where profile_id = d2; out := pg_temp.chk(out, 'purchases(other)', n, 0);
+  select count(*) into n from public.cart_items where profile_id = d2; out := pg_temp.chk(out, 'cart(other)', n, 0);
   select count(*) into n from public.yarn_catalog; out := pg_temp.chk(out, 'yarn_catalog(asset)', n, 0);
   select count(*) into n from public.yarn_colors; out := pg_temp.chk(out, 'yarn_colors(asset)', n, 0);
   select count(*) into n from public.yarn_sellers; out := pg_temp.chk(out, 'yarn_sellers(asset)', n, 0);
@@ -100,6 +103,13 @@ begin
   out := pg_temp.must_fail(out, 'cheer_send', format('select public.cheer_send(%L, ''x'', ''x'')', d1));   -- schema 72
   out := pg_temp.must_fail(out, 'support_msg', format('select public.support_msg(%L, ''x'', ''x'')', d1));
   out := pg_temp.must_fail(out, 'cheer_daily', 'select public.cheer_daily()');
+  out := pg_temp.must_fail(out, 'admin_orders', 'select public.admin_orders(null, 5)');   -- schema 75
+  out := pg_temp.must_fail(out, 'admin_order_set', 'select public.admin_order_set(gen_random_uuid(), ''paid'')');
+  out := pg_temp.must_fail(out, 'admin_product_upsert', 'select public.admin_product_upsert(''{"name":"x","price":1}''::jsonb)');
+  out := pg_temp.must_fail(out, 'shop_stats', 'select public.shop_stats(30)');
+  out := pg_temp.must_fail(out, 'admin_pattern_sales', 'select public.admin_pattern_sales(null)');
+  out := pg_temp.must_fail(out, 'update shop_products', 'update public.shop_products set price = 1 where true');
+  out := pg_temp.must_fail(out, 'insert orders direct', format('insert into public.orders(no, profile_id, items, subtotal, total) values (''X1'', %L, ''[]'', 0, 0)', d1));
   out := pg_temp.must_fail(out, 'admin_yarn_set_gauge', 'select public.admin_yarn_set_gauge(gen_random_uuid(), null, null, true)');   -- schema 68
   out := pg_temp.must_fail(out, 'admin_event_apps', 'select * from public.admin_event_apps(gen_random_uuid())');
   begin v := public.admin_stash_search('a', 0); out := out || ' | ' || case when v is null then 'admin_stash_search hidden' else 'FAIL admin_stash_search visible' end; exception when others then out := out || ' | admin_stash_search blocked'; end;
@@ -140,6 +150,9 @@ begin
   out := pg_temp.cnt(out, 'my_patterns_in_progress(anon)', 'select jsonb_array_length(public.my_patterns_in_progress())', 0);   -- schema 71
   out := pg_temp.cnt(out, 'my_pattern_stats(anon)', 'select case when public.my_pattern_stats() = ''{}''::jsonb then 0 else 1 end', 0);
   out := pg_temp.cnt(out, 'yarn_spec(anon)', 'select case when public.yarn_spec(gen_random_uuid()) is null then 0 else 1 end', 0);   -- schema 68
+  out := pg_temp.cnt(out, 'shop_products', 'select count(*) from public.shop_products', 0);   -- schema 75
+  out := pg_temp.cnt(out, 'orders', 'select count(*) from public.orders', 0);
+  out := pg_temp.cnt(out, 'purchase_pattern(anon)', 'select case when public.purchase_pattern(gen_random_uuid()) is null then 0 else 1 end', 0);
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;
