@@ -1442,6 +1442,7 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   실함→도안: patterns_for_stash(p_stash|null) — 같은 실(catalog) > 100g당 m ±20% > 게이지 코 ±15% > 굵기 분류 이름, 도안당 최선 1건 + reason
 --   Edge Function pattern-ai(verify_jwt=false, 자체 JWT 검사 + rate_hit pattern_ai 30/시간): 뷰어 'AI에게 묻기' — 도안·기준 실(yarn_spec)·내 실함(본인)·yarn_similar 후보를 <자료>로 Claude haiku 에 주고 {answer, yarns[]} 응답. 뷰어 메시지 kn-ai-q{q, ctx} → 앱 → kn-ai-r{answer, yarns, error}
 --   예시 데이터: archive.demo_2026_10_09 의 도안 14개·패키지 2개 복원(표지 docs/patterns/demo-*.svg 복구, 기준 실 catalog_id 연결), demo2·demo3 작가(온보딩 완료), 상품 8개(낙양모사 꽁뜨·동화·아임울2·세븐이지·어울림·데이트·이프·Lux 5Ply, 예시 가격·재고 30), 주문 3건(demo4 입금 확인·demo5 발송·demo6 입금 대기), 도안 구매 6건(demo_seed), demo1 실함 2개(꽁뜨·세븐이지). 앱 어디에도 '제휴' 표시 없음
+--   예시 도안 뷰어 패키지(2026-10-20): 14개 전부 pattern_contents 보유 — 원래 2개(코스터·수세미)뿐이라 구매해도 열 게 없던 문제. 나머지 12개는 tools/gen-demo-packages.py 가 생성(resources/plans/demo_packages.sql, 차트 kind round/row·기호 키는 PKG_SYM_TECHS 범위)
 --   앱(Lab FULL 만): 마이 카드·설정 '뜨개 상점' → v-store(실 탭: 상품 그리드→색 사진 칩·수량→장바구니→주문·결제(무통장 안내)→주문 접수 시트 / 도안 탭) · 내 주문(취소) · 구매한 도안 · 도안 상세 [구매하기·무료 체험]+돈 흐름 띠 · 내 도안 '판매·정산' 카드 → 정산 시트 · 실함 '내 실로/이 실로 뜰 수 있는 도안' · 뷰어 카드 'AI에게 묻기'(tools/viewer-gauge.js)
 --   콘솔 › 상점: 30일 지표 · 주문 표(입금 확인/발송(송장)/완료/취소) · 상품(실 사전 검색→색 자동) · 도안 판매·정산(작가별 수수료 분해)
 --   보안: 금액·수수료·재고 서버 계산, 배송지 본인·관리자(접근 기록), anon 전부 차단. 권한 테스트에 cart/orders/purchases/products/admin 함수 줄 추가
