@@ -1447,3 +1447,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   콘솔 › 상점: 30일 지표 · 주문 표(입금 확인/발송(송장)/완료/취소) · 상품(실 사전 검색→색 자동) · 도안 판매·정산(작가별 수수료 분해)
 --   보안: 금액·수수료·재고 서버 계산, 배송지 본인·관리자(접근 기록), anon 전부 차단. 권한 테스트에 cart/orders/purchases/products/admin 함수 줄 추가
 -- ---------------------------------------------------------------
+
+-- ---------------------------------------------------------------
+-- 76. 보안 점검 2026-10-23 (마이그레이션 security_lint_2026_10_23) — 과기정통부 PHP 취약점(CVE-2026-109618/109619) 보도자료 검토 계기, 정리 문서 resources/security/advisory_2026-10_php.md
+--   뜨개동네는 PHP 를 쓰지 않아 직접 영향 없음(정적 Pages + Supabase Postgres/Deno + Capacitor). 보도자료의 대응 수칙 8개를 우리 앱에 옮긴 표·사고 대응 카드는 위 문서
+--   Supabase 보안 어드바이저: 오류 0. 처리한 경고 — 트리거 함수 cheer_on_*(5) 의 anon/authenticated execute 회수, search_path 미고정 함수 5개(yarn_parse_gauge·gauge_clean·cheer_quiet·lv_name·pattern_fee_calc) 고정
+--   남은 경고(의도): authenticated 가 부를 수 있는 SECURITY DEFINER 함수 139개(안에서 is_admin()/auth.uid() 검사) · anon 허용 2개(studio_submit·studio_yarn_search) · pg_net 이 public 스키마 · Leaked password protection(대시보드에서 대표가 켜기)
+--   npm audit fix: brace-expansion(고위험, 빌드 도구) 해결. uuid(중간, @capacitor/cli 경유)는 Capacitor 메이저 업데이트 때
+-- ---------------------------------------------------------------

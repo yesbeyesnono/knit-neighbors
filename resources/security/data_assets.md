@@ -70,3 +70,15 @@
 - 마이그레이션마다: `permissions_test.sql` 4블록, Supabase 어드바이저(security).
 - 매달: access_logs 이상 여부(누가 몇 번), admins 목록, Secrets 목록, 협업자 목록.
 - 출시 전: 이 표를 회원 안내 페이지(공개)·내부 관리 지침(비공개)으로 옮김.
+
+
+## 실행 환경(런타임) 목록 — 취약점 공지가 나오면 여기부터 대조 (2026-10-23)
+| 구성 | 실행 환경 | 패치 주체 | 우리가 할 일 |
+|---|---|---|---|
+| 앱·콘솔·법적 문서(docs/) | GitHub Pages 정적 파일 | GitHub | 없음(서버 코드 없음) |
+| DB·인증·Storage | Supabase Postgres 17 (서울) | Supabase | 어드바이저 월 1회(`get_advisors`), 권한 테스트 4블록 |
+| 서버 로직 5개(jigi·jigi-remind·read-band·push-send·pattern-ai) | Supabase Edge Functions(Deno) | Supabase(런타임) / 우리(코드·의존성 jsr) | 의존성 버전 고정, rate_hit·본문 크기 제한 |
+| iOS·Android | Capacitor 8 + WebView | 우리(npm) | `npm audit` 월 1회·빌드 전 |
+| 빌드 | Codemagic | Codemagic | 2단계 인증 |
+| PHP | **사용하지 않음** | — | 회사 홈페이지·외주 쇼핑몰은 호스팅사에 확인 |
+외부 공지 추적: KISA 보호나라 보안공지(https://www.boho.or.kr) · GitHub Advisory(supabase-js·capacitor) · Supabase status. 참고 사례: resources/security/advisory_2026-10_php.md
