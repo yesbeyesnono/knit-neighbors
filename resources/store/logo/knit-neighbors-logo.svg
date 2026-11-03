@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<rect width="1024" height="1024" fill="#F3F1EA"/>
+<defs><clipPath id="c"><circle cx="512" cy="512" r="316"/></clipPath></defs>
+<circle cx="512" cy="512" r="330" fill="#3E6B48"/>
+<g clip-path="url(#c)"><ellipse cx="512" cy="512" rx="323.4" ry="138.6" transform="rotate(-28 512 512)" fill="none" stroke="#F3F1EA" stroke-width="30" stroke-linecap="round"/>
+<ellipse cx="512" cy="512" rx="323.4" ry="257.4" transform="rotate(-28 512 512)" fill="none" stroke="#F3F1EA" stroke-width="30" stroke-linecap="round"/>
+<ellipse cx="512" cy="512" rx="323.4" ry="132.0" transform="rotate(38 512 512)" fill="none" stroke="#F3F1EA" stroke-width="30" stroke-linecap="round"/>
+<ellipse cx="512" cy="512" rx="323.4" ry="250.8" transform="rotate(38 512 512)" fill="none" stroke="#F3F1EA" stroke-width="30" stroke-linecap="round"/>
+<ellipse cx="512" cy="512" rx="323.4" ry="181.5" transform="rotate(85 512 512)" fill="none" stroke="#F3F1EA" stroke-width="30" stroke-linecap="round"/>
+<ellipse cx="512" cy="512" rx="323.4" ry="313.5" transform="rotate(5 512 512)" fill="none" stroke="#F3F1EA" stroke-width="30" stroke-linecap="round"/></g>
+<circle cx="512" cy="512" r="330" fill="none" stroke="#22362A" stroke-width="34"/>
+<path d="M 717 769 C 826 849, 892 858, 948 796" fill="none" stroke="#22362A" stroke-width="34" stroke-linecap="round"/>
+</svg>
