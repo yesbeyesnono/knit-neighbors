@@ -142,6 +142,7 @@
 - 예전 남은 것(위에서 해결): 심사용 계정+이메일 로그인 입구, 이벤트 화면 'Apple과 무관' 문구(5.3), 내 실함 AI 처리 고지, 버전 1.0.0, 개인정보 라벨 표, 심사 메모(영문), 최종 아이콘·스크린샷(대표)
 
 ## 남은 일
+- **상표(2026-11-04 대표 전달)**: `knitup` 상표 출원함 — 09(앱·소프트웨어)·16(인쇄물·도안)·35(광고·판매)·41(교육·클래스)·42(SaaS)류. `뜨개동네`·`KOAP`는 미출원(스토어 등록 = 공개 사용이므로 출시 전 09·42·35·41류 출원 권고, 상표는 선출원주의라 특허 같은 유예 없음)
 - 대표: 2단계 인증(구글·Supabase·GitHub·Apple·Codemagic), knitup.official 구글 계정 복구 → 'My First Project' IAM 에 yesbeyesnono 소유자 추가·옛 OAuth 클라이언트 삭제, 로고 검증 제출(인증 센터), Play Console에 versionCode 2 .aab 업로드·데이터 보안 설문, App Store 테스트 정보 입력, 앱 아이콘(1024 PNG) 전달
 - **앱 푸시 알림 APNs(2026-09-29 구현, schema 57)**: 앱 `pushSetup`(온보딩 끝난 회원에게 안내 시트 1회 → iOS 권한 → `register_device_token`), 설정 › 앱 알림(상태·테스트 발송), 알림 누르면 활동 화면. 서버는 notifications insert 트리거 → `push-send`(APNs JWT). **대표가 넣을 것**: ① developer.apple.com › Keys 에서 APNs 키(.p8) 1개 발급 → Supabase Secrets `APNS_KEY`(.p8 내용 전체) · `APNS_KEY_ID` · `APNS_TEAM_ID`=M59979ZT3A ② Identifiers › App ID 둘 다(…knitneighbors, …knitneighbors.lab) Push Notifications 체크. 키 없으면 발송만 조용히 실패. Codemagic 은 npm ci + cap sync 로 플러그인 자동 포함, 프로파일은 fetch-signing-files 가 다시 만듦
 - **안드로이드(2026-10-03 대표: 다음 주 공개, 공개판만, Play 법인 계정이라 비공개 테스트 불필요)**: 빌드는 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk) → .aab 를 대표가 Play Console 에 업로드. 올릴 때마다 `versionCode` +1(현재 8 · 1.0.1, 2026-11-04 스토어 제출용 빌드). 푸시는 FCM(schema 70): `android/app/google-services.json`(gitignore, 이 PC 에만) + Supabase 시크릿 `FCM_SERVICE_ACCOUNT`(서비스 계정 JSON 전체, 대표가 입력)
