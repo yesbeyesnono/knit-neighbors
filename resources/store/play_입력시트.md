@@ -11,7 +11,7 @@
 | 자세한 설명 (4000자) | `resources/store/appstore_입력시트.md` 3절 '설명' 그대로 (Apple 문장만 "Apple·Google과는 관련이 없어요"로) |
 | 앱 아이콘 (512×512 PNG) | `resources/store/logo/knit-neighbors-logo-512.png` |
 | 그래픽 이미지 (1024×500) | `resources/store/play/feature-graphic.png` |
-| 휴대전화 스크린샷 (2~8장) | `resources/store/screenshots/android/*.png` (1080×2340) |
+| 휴대전화 스크린샷 (2~8장) | `resources/store/screenshots/android/01~06.png` (1080×2340) 6장, 번호 순서대로: ① 지도(이웃·공방·모임) ② 손 들기 ③ 커뮤니티 홈 ④ 공방 클래스 ⑤ 친구·모임·클래스 대화 ⑥ 내 실함. 예비 2장(작품 인증·마이)은 `_extra/android/` |
 | 카테고리 | 앱 › 소셜 |
 | 태그 | 취미, 소셜 네트워킹, 커뮤니티 |
 | 연락처 이메일 | `knitup.official@gmail.com` |
