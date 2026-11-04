@@ -1469,3 +1469,7 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 
 -- 79. 콘솔 글·모임·인증 삭제 (마이그레이션 admin_delete_work_meetup, 2026-11-04 대표 "삭제 버튼이 없다") — admin_delete_work(p_work, p_reason): 연결 인증 글·yarn_entries 삭제, event_applications.work_id null · admin_delete_meetup(p_meetup, p_reason): 모임 글·후기 삭제, notifications.meetup_id null, 채팅방은 유지. 둘 다 is_admin + admin_log. 콘솔 글·모임·인증 세 탭에 [삭제] 열
 -- ---------------------------------------------------------------
+
+-- 80. 관리자 삭제 알림 (마이그레이션 admin_delete_notify, 2026-11-04 대표 지시) — admin_delete_post/work/meetup(uuid, text, p_notify boolean) 3인수 판: 삭제 전 mod_notify_delete(작성자, '글|답글|작품 인증|모임', 사유) 가 🔔 알림(kind notice, actor=지기, link view support) 삽입. 사유 비면 '커뮤니티 가이드라인에 맞지 않는 내용' 문구, 본인 것이면 알림 없음, 콘솔 삭제 흐름 = 확인 → 사유 → '작성자에게 알릴까요?' confirm. 2인수 옛 판은 남아 있음(알림 없음). mod_notify_delete 는 authenticated 에도 execute 없음(서버 함수 안에서만)
+--   같은 날 admin_find_users 캐스트 수정(마이그레이션 admin_find_users_cast_fix): auth.users.email 이 varchar 라 'structure of query does not match function result type' — 콘솔 › 사용자 복구
+-- ---------------------------------------------------------------
