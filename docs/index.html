@@ -481,7 +481,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 body.icons .item.support .ava .ico{filter:invert(1);width:24px;height:24px}
 .item.support .tx b .tag{display:inline-block;width:auto;font-size:.7rem;background:var(--sel);color:#fff;border-radius:999px;padding:1px 7px;margin-left:6px;font-weight:600;vertical-align:1px}
 .notice{margin:4px 0 10px;background:var(--bg2);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.5;color:var(--ink2)}
-.notice b{color:var(--ink);display:block;margin-bottom:3px}
+.notice b{color:var(--ink)}.notice b.tt{display:block;margin-bottom:3px}
 /* 아이콘 시스템: 기본은 이모지, body.icons 이면 docs/icons/<key>.svg 이미지로 교체 (ICON_IMAGES 상수) */
 .ico{font-style:normal;display:inline-block;line-height:1}
 .ico>b{font-weight:inherit}
@@ -2736,7 +2736,7 @@ async function openRoom(id){
   if(r.kind==='group') sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(id,nickname)').eq('room_id', id).order('starts_at',{ascending:false}).limit(1).then(({data})=>{ if(roomId!==id || !data?.[0]) return; roomMeetup=data[0]; const end=meetEnded(roomMeetup); const b=$('#roomBadge'); b.hidden=false; b.textContent=end?'모임 종료':'모임'; b.classList.toggle('end', end); $('#meetInfoBtn').hidden=false; const st=$('#roomStrip'); st.hidden=end; st.innerHTML=`${ico('location')} ${esc(fmtWhen(roomMeetup.starts_at))} · ${esc(roomMeetup.place_name)} · ${roomMeetup.participant_count||r.room_members.length}명`; });
   show('room');
   const { data:msgs } = await sb.from('messages').select('*').eq('room_id',id).order('created_at').limit(200);
-  $('#msgs').innerHTML = (isSupportRoom(r) && me.id!==SUPPORT_ID) ? `<div class="notice"><b>뜨개동네 지기 · 운영진</b>${SUPPORT_NOTICE}</div>` : ''; (msgs||[]).forEach(appendMsg); scrollMsgs();
+  $('#msgs').innerHTML = (isSupportRoom(r) && me.id!==SUPPORT_ID) ? `<div class="notice"><b class="tt">뜨개동네 지기 · 운영진</b>${SUPPORT_NOTICE}</div>` : ''; (msgs||[]).forEach(appendMsg); scrollMsgs();
   await sb.from('room_members').update({last_read_at:new Date().toISOString()}).eq('room_id',id).eq('profile_id',me.id);
   if(roomChan) sb.removeChannel(roomChan);
   roomChan = sb.channel('room:'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`room_id=eq.${id}`},p=>{ appendMsg(p.new); scrollMsgs(); }).subscribe();
