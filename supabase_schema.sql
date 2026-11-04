@@ -1463,3 +1463,6 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   크론 account-purge(18:30 UTC=03:30 KST): 유예 끝난 계정 있을 때만 jigi_remind_call('purge') → Edge jigi-remind route purge: Storage 6버킷 파일 정리 + auth.admin.deleteUser(cascade) + 텔레그램 보고
 --   앱: 설정 › 계정 삭제 = 앱 안 시트("삭제" 입력 → 빨간 버튼) / 로그인 때 deleted_at 이면 복구 시트(복구 / 그대로 두기). privacy.html·delete-account.html 20일 보관 문구
 -- ---------------------------------------------------------------
+
+-- 78. 1기 서포터즈 중단 (2026-11-04 대표 지시, 마이그레이션 없음) — 앱 SUPPORTERS=false, 크론 supporters-finalize·supporters-room-report unschedule. 테이블·함수·트리거는 유지(다시 열 때: 스위치 true + cron.schedule 재등록 — 절 47 참고)
+-- ---------------------------------------------------------------

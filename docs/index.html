@@ -1625,7 +1625,7 @@ function openOnboard(edit, step){
   $('#obOval').style.backgroundImage = p.avatar_url?`url(${p.avatar_url})`:'';
   segSet('#f_exp',p.experience); segSet('#f_avail',p.available||[]);
   $('#f_bio').value=p.bio||''; $('#f_mbti').value=p.mbti||'';
-  if(!edit) $('#f_agree').checked = !!p.terms_agreed_at; $('#refWrap').hidden = !!edit || !!p.referred_by; $('#f_ref').value='';
+  if(!edit) $('#f_agree').checked = !!p.terms_agreed_at; $('#refWrap').hidden = !SUPPORTERS || !!edit || !!p.referred_by; $('#f_ref').value='';
   show('onboard');
   if(edit){ document.querySelectorAll('#v-onboard .obs').forEach(el=>el.classList.remove('on')); $('#obFoot').classList.remove('on'); renderDong(); if(!loc.dong_name) detectLocation(); }
   else obShow(step || (p.dong_name && p.nickname && p.terms_agreed_at ? 4 : 1));
@@ -2548,16 +2548,18 @@ async function wEventPicked(){   // 이벤트에 실 사전의 실이 연결돼 
 }
 
 // ============ 1기 서포터즈 (supporters_spec.md) — 점수는 전부 서버(DB)에서 계산, 앱은 보여 주기만 ============
+// 2026-11-04 대표: 지금은 감당이 안 되니 서포터즈는 접는다 → SUPPORTERS=false 로 앱에서 전부 숨김(띠·초대·설정 줄·추천인 칸·배지). DB·콘솔·코드는 남겨 둠(다시 열 때 true)
+const SUPPORTERS=false;
 let supStatus=null;
 const SUP_KIND={attendance:'출석',work_verified:'작품 인증',post:'게시글',comment:'댓글',survey:'설문',bug_accepted:'버그 제보 채택',referral:'친구 초대'};
 const SUP_TIER={basic:'기본',excellent:'우수',mvp:'MVP',none:'미달'};
 function supKindLabel(k){ return k.endsWith('_revoke') ? SUP_KIND[k.replace('_revoke','')]+' 취소' : (SUP_KIND[k]||k); }
 async function supCheckIn(){   // 앱 실행(로그인) 시 1회: 출석 + 초대 확인
-  if(!me) return; try{ const { data } = await sb.rpc('check_in'); supStatus=data||null; }catch(e){}
+  if(!me || !SUPPORTERS) return renderBeta(); try{ const { data } = await sb.rpc('check_in'); supStatus=data||null; }catch(e){}
   renderBeta();
 }
 function renderBeta(){
-  const bar=$('#betaBar'); if(!bar) return; bar.hidden=!me || !myProfile?.onboarded_at;
+  const bar=$('#betaBar'); if(!bar) return; bar.hidden=!SUPPORTERS || !me || !myProfile?.onboarded_at; if(!SUPPORTERS) return;
   const s=supStatus||{};
   bar.innerHTML = `<b>베타 운영 중</b>` + (s.supporter ? ` · <span onclick="openSupporters()">1기 서포터 활동 중 · ${s.segment||1}구간 ${s['seg'+(s.segment||1)]||0}점 ›</span>`
     : s.is_open ? ` · <span onclick="openSupporterIntro()">1기 서포터 모집 중 · 잔여 ${s.remaining??'-'}명 ›</span>`
@@ -2568,6 +2570,7 @@ const SUP_INTRO = `<div class="supcard"><b style="font-size:1.1rem">뜨개동네
   <div class="suprule"><b>점수 모으기</b><ul><li>출석 1점 (하루 1번)</li><li>작품 인증 10점 (하루 1개)</li><li>글 3점 (하루 1개) · 댓글 1점 (하루 2개, 내 글 댓글은 제외)</li><li>격주 설문 10점 (60일 동안 4회)</li><li>버그 제보 채택 10점 · 친구 초대 20점 (제한 없음 — 친구가 가입하면 지기에게 닉네임을 알려 주세요)</li></ul></div>
   <div class="suprule"><b>보상 (60일 뒤)</b><ul><li>기본: 두 구간 모두 100점 → 1기 서포터 뱃지 + 니트업 매거진</li><li>우수: 기본 + 누적 300점 → 레벨업 쿠션 추가</li><li>MVP: 우수 중 상위 5명 → 실 키트 추가</li></ul></div></div>`;
 async function openSupporterIntro(){
+  if(!SUPPORTERS) return toast('서포터즈는 지금 운영하지 않아요');
   if(!me || !myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
   if(!supStatus){ const { data } = await sb.rpc('get_supporter_status'); supStatus=data; }
   const s=supStatus||{};
@@ -2576,6 +2579,7 @@ async function openSupporterIntro(){
   openSheet(`${SUP_INTRO}<p class="muted" style="margin:0;font-size:.85rem">정원 100명 · 잔여 ${s.remaining??'-'}명 · 신청 즉시 시작돼요.</p><button class="btn" onclick="joinSupporters()">시작하기</button><button class="btn o" onclick="closeSheet()">다음에 할게요</button>`);
 }
 async function joinSupporters(){
+  if(!SUPPORTERS) return toast('서포터즈는 지금 운영하지 않아요');
   const { data, error } = await sb.rpc('join_supporters'); if(error) return toast(error.message);
   if(data?.error==='FULL'){ supStatus={...(supStatus||{}), is_open:false}; renderBeta(); return openSupporterIntro(); }
   supStatus=data; renderBeta(); closeSheet(); toast('1기 서포터가 됐어요! 오늘 출석 1점부터 시작해요'); openSupporters();
@@ -2583,11 +2587,13 @@ async function joinSupporters(){
 async function joinWaitlist(){ const { error } = await sb.rpc('join_waitlist'); if(error) return toast(error.message); supStatus={...(supStatus||{}), waitlisted:true}; renderBeta(); closeSheet(); toast('2기 모집이 열리면 알려 드릴게요'); }
 // 모집 팝업: 가입 후 첫 활동 직후 1회만
 function maybeSupporterPrompt(){
+  if(!SUPPORTERS) return;
   try{ if(me && !(supStatus||{}).supporter) sb.rpc('supporter_invite_notice').then(r=>{ if(r.data && view==='activity') renderActivity(); }); }catch(e){}
   try{ const k='kn_sup_prompt_'+(me?.id||''); if(!me || localStorage.getItem(k)) return; const s=supStatus||{}; if(s.supporter || !s.is_open) return; localStorage.setItem(k,'1');
     setTimeout(()=>openSheet(`<b style="font-size:1.05rem">1기 서포터즈에 초대해요</b><p class="muted" style="margin:0">뜨개동네를 함께 키워 주실 100분을 모셔요. 60일 동안 활동하고 뱃지·매거진을 받아 가세요.</p><button class="btn" onclick="closeSheet();openSupportRoom().then(()=>setTimeout(()=>sendMsg('서포터즈 할래요'),400))">지기에게 물어보기</button><button class="btn o" onclick="closeSheet();openSupporterIntro()">바로 신청 내용 보기</button><div class="oblink" onclick="closeSheet()">다음에</div>`), 600); }catch(e){}
 }
 async function openSupporters(){
+  if(!SUPPORTERS) return toast('서포터즈는 지금 운영하지 않아요');
   const { data, error } = await sb.rpc('get_supporter_status'); if(error) return toast(error.message); supStatus=data; renderBeta();
   const s=data||{}; if(!s.supporter) return openSupporterIntro();
   if(!['supporters'].includes(view)) supBack=view;
@@ -2655,6 +2661,7 @@ async function supRoom(){ const { data, error } = await sb.rpc('join_supporter_r
 // 추천인: 링크(?ref=CODE)는 접속 때 기억해 뒀다가 가입 저장 뒤 기록. 링크 없으면 가입 화면의 닉네임 칸
 (()=>{ try{ const r=new URLSearchParams(location.search).get('ref'); if(r) localStorage.setItem('kn_ref', r.toUpperCase().slice(0,12)); }catch(e){} })();
 async function applyReferrer(){
+  if(!SUPPORTERS) return;
   try{ const code=localStorage.getItem('kn_ref')||''; const nick=($('#f_ref')?.value||'').trim(); if(!code && !nick) return;
     const { data } = await sb.rpc('set_referrer', { p_code:code||null, p_nickname:code?null:nick });
     if(data?.ok){ toast(`${data.inviter}님과 연결됐어요`); localStorage.removeItem('kn_ref'); }
@@ -3334,7 +3341,7 @@ async function openMeetup(id){
     <div class="muted">참여 ${m.participant_count||0}명</div>
     ${past? reviewHtml + (joined?`<button class="btn o" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>`:'') : joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">참여 취소</button>`:`<button class="btn r" onclick="askCancelMeetup('${m.id}', ${m.participant_count||1})">모임 취소 (주최자)</button>`}` : full ? '<button class="btn o" disabled>정원이 찼어요</button>' : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
 }
-function lvBadge(a){ return (a&&a.act_level>0?`<span class="lvb" title="활동 레벨 · 작품 인증을 올린 날마다 +1">Lv.${a.act_level}</span>`:'') + (a&&a.supporter_badge?`<span class="supbadge">${esc(a.supporter_badge)}</span>`:''); }
+function lvBadge(a){ return (a&&a.act_level>0?`<span class="lvb" title="활동 레벨 · 작품 인증을 올린 날마다 +1">Lv.${a.act_level}</span>`:'') + (SUPPORTERS&&a&&a.supporter_badge?`<span class="supbadge">${esc(a.supporter_badge)}</span>`:''); }
 function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
 function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
 function postCard(p, opts={}){

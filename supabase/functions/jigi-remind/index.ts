@@ -1,4 +1,4 @@
-// 지기 알림 — ① 예약 알림(jigi_reminders)을 시간이 되면 대표 텔레그램으로 보낸다 ② 텔레그램 웹훅이 우리 주소에서 바뀌었는지 지킨다(토큰 도용 대비).
+// 지기 알림 — ① 예약 알림(jigi_reminders)을 시간이 되면 대표 텔레그램으로 보낸다 ② 텔레그램 웹훅이 우리 주소에서 바뀌었는지 지킨다(토큰 도용 대비) ③ 계정 삭제 유예(20일) 종료 정리(route purge, schema 77).
 // 호출: DB 크론(pg_net) 만. 헤더 x-jigi-secret = jigi_config.hook_secret
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -40,11 +40,7 @@ Deno.serve(async (req: Request) => {
         } catch (e) { fails.push(`${r.user_id.slice(0, 8)}…: ${String((e as Error).message).slice(0, 80)}`); }
       }
       if ((n || fails.length) && env("TG_BOT_TOKEN") && env("TG_ADMIN_CHAT_ID")) {
-        await send(`🗑 계정 삭제 유예(20일)가 끝난 계정을 정리했어요.
-완전히 지운 계정: ${n}건 (프로필·글·사진·채팅·모임 기록·Storage 파일 전부, 복구 불가)` + (fails.length ? `
-
-실패 ${fails.length}건 — 내일 같은 시간에 다시 시도해요. 계속 실패하면 Supabase › Authentication › Users 에서 직접 삭제해 주세요.
-` + fails.join("\n") : ""));
+        await send(`🗑 계정 삭제 유예(20일)가 끝난 계정을 정리했어요.\n완전히 지운 계정: ${n}건 (프로필·글·사진·채팅·모임 기록·Storage 파일 전부, 복구 불가)` + (fails.length ? `\n\n실패 ${fails.length}건 — 내일 같은 시간에 다시 시도해요. 계속 실패하면 Supabase › Authentication › Users 에서 직접 삭제해 주세요.\n` + fails.join("\n") : ""));
       }
       return json({ purged: n, failed: fails });
     }
