@@ -2461,7 +2461,7 @@ function openActivity(){ show('activity'); renderActivity(); }
 async function renderActivity(){
   const { data, error } = await sb.from('notifications').select('*, actor:profiles!notifications_actor_id_fkey(id,nickname,avatar_url), shop:shops(name)').eq('recipient_id', me.id).order('created_at',{ascending:false}).limit(100);
   if(error){ $('#actBody').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
-  actRows = data||[];
+  actRows = (data||[]).filter(n=>SUPPORTERS || n.kind!=='supporter');   // 서포터즈 중단 뒤 옛 초대 알림은 숨김
   $('#actBody').innerHTML = actRows.length ? actRows.map((n,i)=>{ const a=n.kind==='supporter'?{nickname:'서포터즈'}:(n.actor||{nickname:(n.kind||'').startsWith('event_')?'뜨개동네 이벤트':'(탈퇴한 사용자)'}); const who = n.kind==='shop_post' && n.shop ? {nickname:n.shop.name} : a; const txt = n.kind==='shop_post' && n.shop ? '에 새 소식이 올라왔어요' : (NTF_TEXT[n.kind]||''); return `<div class="ntf ${n.read_at?'':'unread'}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${n.kind==='shop_post'?`<div class="ava">${SHOP_SVG}</div>`:avatar(a)}<div class="tx"><b>${esc(who.nickname)}</b>${txt}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}</div><time>${agoShort(n.created_at)}</time></div>`; }).join('')
     : '<div class="empty">아직 활동이 없어요<br>글을 쓰거나 이웃에게 먼저 인사해 보세요</div>';
   if(actRows.some(n=>!n.read_at)){ await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',me.id).is('read_at',null); refreshBadge(); }
