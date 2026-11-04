@@ -141,7 +141,7 @@
 ## App Store 신청 준비 (2026-09-21~)
 - 입력 시트: `resources/store/appstore_입력시트.md`(이름·부제·설명·키워드·홍보 문구·URL·스크린샷 구성·연령 등급 답, 글자 수 검증함). 지원 URL = `docs/support.html`
 - **iPhone 전용**으로 변경(`TARGETED_DEVICE_FAMILY = 1`) — iPad 스크린샷·레이아웃 심사를 피함. 출시 뒤에는 iPad 지원을 뺄 수 없으니 넣을 때 신중히
-- **2026-11-04 제출 준비 완료(대표 "오늘까지 완료된 것으로 앱 등록")**: 심사용 이메일 로그인 입구(로그인 화면 제목 5번 탭 → `#revLogin`, `loginEmail()`, 계정 demo1@knit.local) · 이벤트 시트 'Apple·Google 무관' 문구 · 실 추가 화면 AI 처리 고지 · 버전 1.0.1 통일(iOS MARKETING_VERSION·Android versionName·APP_VERSION) · 입력시트 7절 심사 메모(영문)·8절 App Privacy 표 · `resources/store/play_입력시트.md`(Play 등록정보·앱 콘텐츠·데이터 보안 답) · 스크린샷 `resources/store/screenshots/{ios(1290×2796),android(1080×2340)}` 6장씩(라이브 사이트+demo1, puppeteer `scratchpad/shots/store.mjs`) · Play 그래픽 `resources/store/play/feature-graphic.png`·`icon-512.png`. 제출 버튼은 대표가 누름
+- **2026-11-04 제출 준비 완료(대표 "오늘까지 완료된 것으로 앱 등록")**: 심사용 이메일 로그인 입구(로그인 화면 제목 5번 탭 → `#revLogin`, `loginEmail()`, 계정 demo1@knit.local) · 이벤트 시트 'Apple·Google 무관' 문구 · 실 추가 화면 AI 처리 고지 · 버전 1.0.1 통일(iOS MARKETING_VERSION·Android versionName·APP_VERSION) · 입력시트 7절 심사 메모(영문)·8절 App Privacy 표 · `resources/store/play_입력시트.md`(Play 등록정보·앱 콘텐츠·데이터 보안 답) · 스크린샷 `resources/store/screenshots/{ios(1290×2796),android(1080×2340)}` 6장씩(라이브 사이트+demo1, puppeteer `scratchpad/shots/store.mjs`) · Play 그래픽 `resources/store/play/feature-graphic.png`·`icon-512.png`. 제출 버튼은 대표가 누름. **2026-11-04 심사 제출 완료**(빌드 2611040506, 무료 앱 계약 활성화, 개인정보 8유형 게시, 가격 ₩0·175개국, 수동 출시, 사전 주문 없음). 통과 뒤 대표가 '출시' 버튼을 눌러야 공개됨. 반려되면 Resolution Center 메시지를 Claude에게 전달
 - 예전 남은 것(위에서 해결): 심사용 계정+이메일 로그인 입구, 이벤트 화면 'Apple과 무관' 문구(5.3), 내 실함 AI 처리 고지, 버전 1.0.0, 개인정보 라벨 표, 심사 메모(영문), 최종 아이콘·스크린샷(대표)
 
 ## 남은 일
