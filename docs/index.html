@@ -1294,14 +1294,22 @@ if(isNative){
   });
   // 안드로이드 뒤로 가기: 화면 계층대로 처리
   CAP.Plugins.App.addListener('backButton', () => {
+    // 겹쳐 뜬 것부터: 시트 → 도안 뷰어 → 보조 화면(기법·실·장소 고르기) → 단계 슬라이드
     if($('#sheetwrap').classList.contains('on')) return closeSheet();
+    const pv=$('#pviewer'); if(pv && pv.classList.contains('on')) return closePatternViewer();
+    if(!$('#subpg').hidden) return subBack();
     if($('#slides').classList.contains('on')) return closeSlides();
+    // 화면별 ‹ 버튼과 같은 동작
     if(view==='room') return leaveRoom();
     if(view==='post') return closePost();
     if(view==='profile') return closeProfile();
-    if(view==='compose') return closeCompose();
+    if(['compose','cert','meetform','shopform','classform'].includes(view)) return closeCompose();
     if(view==='skills') return leaveSkills();
-    if(view==='friends') return go('my');
+    if(view==='stash') return closeStash();
+    if(view==='shop') return closeShop();
+    if(view==='supporters') return closeSupporters();
+    if(['friends','activity','store','onboard'].includes(view)){ if(view==='onboard' && !myProfile?.onboarded_at) return; return go('my'); }
+    if(view==='my' && myPage==='thread') return goMy('dash');
     if(view!=='map' && view!=='login') return go('map');
     CAP.Plugins.App.exitApp();
   });
