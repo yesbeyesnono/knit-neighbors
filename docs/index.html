@@ -1148,8 +1148,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <div class="slide">
         <div class="big"><i class="ico" data-ico="yarn"><b>🧶</b></i></div>
         <h2>내 뜨개는 어디쯤일까요?</h2>
-        <p>knitup이 정리한 뜨개 기법 60가지를 5단계로 나눴어요. 할 수 있는 기법을 누르기만 하면 지금 내 단계가 보여요.</p>
-        <div class="ex">코바늘 30가지 · 대바늘 30가지<br><span class="muted">둘 다 하시면 두 단계가 따로 표시돼요</span></div>
+        <p>knitup이 정리한 뜨개 기법 <span class="tcnt" data-k="all">66</span>가지를 5단계로 나눴어요. 할 수 있는 기법을 누르기만 하면 지금 내 단계가 보여요.</p>
+        <div class="ex">코바늘 <span class="tcnt" data-k="crochet">38</span>가지 · 대바늘 <span class="tcnt" data-k="knitting">28</span>가지<br><span class="muted">둘 다 하시면 두 단계가 따로 표시돼요</span></div>
       </div>
       <div class="slide">
         <div class="big"><i class="ico" data-ico="signal"><b>📶</b></i></div>
@@ -3471,9 +3471,9 @@ function openTechSub(){
   openSub('기법 고르기', `<div class="tsel" style="margin-top:8px"><div class="tabs" id="wCraftTabs"></div><div id="wTechList"></div></div>
     <div class="cfl">목록에 없는 기법 <span class="muted">(직접 입력, 쉼표로 구분)</span></div>
     <input id="wCustom" maxlength="200" placeholder="예: 브리오슈 2색, 튀니지안 심플 스티치"><div class="tchips" id="wCustomChips" style="margin-top:8px"></div>
-    <p class="muted" style="font-size:.78rem">기법을 누르면 골라져요(여러 개). 기본 목록은 60종이에요. 여기 적어 주신 기법은 모아서 목록에 추가할게요.</p>`, { label:'완료', fn:()=>{ commitWCustom(); closeSub(); renderCertTech(); } });
+    <p class="muted" style="font-size:.78rem">기법을 누르면 골라져요(여러 개). 기본 목록은 <span class="tcnt" data-k="all">66</span>종이에요. 여기 적어 주신 기법은 모아서 목록에 추가할게요.</p>`, { label:'완료', fn:()=>{ commitWCustom(); closeSub(); renderCertTech(); } });
   subOnBack=()=>{ commitWCustom(); closeSub(); renderCertTech(); };
-  loadTech().then(()=>{ renderWTech(); renderWCustom(); });
+  loadTech().then(()=>{ renderWTech(); renderWCustom(); fillTechCounts(); });
 }
 async function submitCert(){
   const b=$('#certPost'); certCheck.busy=true; b.disabled=true;
@@ -4221,7 +4221,8 @@ async function loadBanned(){ if(BANNED.length) return; const { data } = await sb
 function hasBanned(t){ const l=(t||'').toLowerCase(); return BANNED.some(w=>l.includes(w)); }
 let TECH = [], skills = new Set(), skillCraft = 'crochet', skillTimer = null, openLv = null, skillsDirty = false, slideAfter = null;
 
-async function loadTech(){ if(TECH.length) return; const { data, error } = await sb.from('techniques').select('*').order('sort'); if(error) toast('기법 목록 로드 실패: '+error.message); TECH = (data||[]).filter(t=>!t.hidden); }
+async function loadTech(){ if(TECH.length) return; const { data, error } = await sb.from('techniques').select('*').order('sort'); if(error) toast('기법 목록 로드 실패: '+error.message); TECH = (data||[]).filter(t=>!t.hidden); fillTechCounts(); }
+function fillTechCounts(){ const n={crochet:techOf('crochet').length, knitting:techOf('knitting').length}; n.all=n.crochet+n.knitting; if(!n.all) return; document.querySelectorAll('.tcnt').forEach(el=>{ el.textContent=n[el.dataset.k]||''; }); }
 function techOf(craft){ return TECH.filter(t=>t.craft===craft); }
 function lvStats(craft, set){ // 단계별 {done,total}
   const s = {}; techOf(craft).forEach(t=>{ s[t.level] = s[t.level]||{done:0,total:0}; s[t.level].total++; if(set.has(t.id)) s[t.level].done++; }); return s;
