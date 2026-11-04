@@ -24,7 +24,7 @@ html,body{height:100%;margin:0}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 button,a,.item,.post,.pin,.upin{touch-action:manipulation}
 @media (max-width:479px){ input,select,textarea{font-size:16px} }
-body{background:var(--bg2);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);font-size:15px;line-height:1.4;letter-spacing:-0.01em;word-break:keep-all}
+body{background:var(--bg2);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);font-size:15px;line-height:1.4;letter-spacing:-0.01em;word-break:keep-all;overflow-wrap:anywhere}
 #app{max-width:430px;height:100%;margin:0 auto;background:var(--bg);position:relative;display:flex;flex-direction:column;overflow:hidden}
 @supports (height:100dvh){ @media (max-width:479px){ #app{height:100dvh} } }
 @media (min-width:480px){#app{height:calc(100% - 32px);margin-top:16px;border-radius:28px;box-shadow:0 20px 60px rgba(0,0,0,.18);border:6px solid var(--color-primary-dark)}}
@@ -257,7 +257,7 @@ details .seg{margin-top:8px;justify-content:center}
 .rpost .who b{font-weight:700;font-size:15px;white-space:nowrap;cursor:pointer}
 .rpost .who time{font-size:13px;color:var(--ink3)}
 .rpost .who .menu{margin-left:auto;background:none;border:0;color:var(--ink);font-size:1rem;padding:0 0 0 8px;cursor:pointer;letter-spacing:1px}
-.rpost .txt{font-size:15px;margin:1px 0 2px;white-space:pre-wrap;word-break:break-word}
+.rpost .txt{font-size:15px;margin:1px 0 2px;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
 .rpost .acts{gap:10px;margin:0}
 .rpost .acts button{padding:4px 6px 4px 0;font-size:13px}
 .rpost .acts button svg{width:18px;height:18px}
@@ -363,7 +363,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .post .who b{cursor:pointer}
 .post .who .lvchip{font-size:.68rem;padding:1px 7px}
 .post .who time{margin-left:auto;font-size:.75rem;color:var(--ink3)}
-.post .txt{white-space:pre-wrap;margin:4px 0 6px;font-size:.95rem;word-break:break-word}
+.post .txt{white-space:pre-wrap;margin:4px 0 6px;font-size:.95rem;word-break:keep-all;overflow-wrap:anywhere}
 .pgrid{display:grid;gap:4px;border-radius:12px;overflow:hidden;margin:6px 0}
 .pgrid.n1{grid-template-columns:1fr}.pgrid.n2,.pgrid.n4{grid-template-columns:1fr 1fr}.pgrid.n3{grid-template-columns:2fr 1fr}
 .pgrid img{width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:1}
@@ -380,7 +380,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .fab{display:none}
 /* ===== 커뮤니티·글·채팅 화면 스타일 ===== */
 #app{--tbg:var(--surface);--tink:var(--ink);--tmute:var(--ink3);--tline:var(--line);--tred:#ff3040;
-  background:var(--tbg);color:var(--tink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:16px;line-height:1.35;letter-spacing:-0.01em;word-break:break-word}
+  background:var(--tbg);color:var(--tink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:16px;line-height:1.35;letter-spacing:-0.01em;word-break:keep-all;overflow-wrap:anywhere}
 .top,.top,.top,.top{background:var(--hdr);color:var(--hdr-ink);border-bottom:0;padding:14px 16px 10px;gap:12px}
 .top h1,.top h1,.top h1,.top h1{font-family:inherit;font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;text-align:center;flex:1}
 .top .back + h1{text-align:left;font-size:1.05rem;font-weight:700}   /* 뒤로가기가 있는 화면만 왼쪽 정렬, 탭 화면(커뮤니티·채팅·마이)은 가운데 굵게 */
