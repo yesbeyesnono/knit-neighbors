@@ -1473,3 +1473,6 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 -- 80. 관리자 삭제 알림 (마이그레이션 admin_delete_notify, 2026-11-04 대표 지시) — admin_delete_post/work/meetup(uuid, text, p_notify boolean) 3인수 판: 삭제 전 mod_notify_delete(작성자, '글|답글|작품 인증|모임', 사유) 가 🔔 알림(kind notice, actor=지기, link view support) 삽입. 사유 비면 '커뮤니티 가이드라인에 맞지 않는 내용' 문구, 본인 것이면 알림 없음, 콘솔 삭제 흐름 = 확인 → 사유 → '작성자에게 알릴까요?' confirm. 2인수 옛 판은 남아 있음(알림 없음). mod_notify_delete 는 authenticated 에도 execute 없음(서버 함수 안에서만)
 --   같은 날 admin_find_users 캐스트 수정(마이그레이션 admin_find_users_cast_fix): auth.users.email 이 varchar 라 'structure of query does not match function result type' — 콘솔 › 사용자 복구
 -- ---------------------------------------------------------------
+
+-- 81. 서포터즈 서버 스위치 (마이그레이션 supporters_off_switch, 2026-11-04) — app_config.supporters_enabled=false → supporter_of() 가 빈 행 → award_points/supporter_cheer/claim_referral/설문 점수 전부 무시(트리거는 남아 있지만 0점). supporter_cohorts.is_open=false(지기 AI '마감'). 다시 열 때: supporters_enabled='true' + is_open=true + 앱 SUPPORTERS=true + 크론 2개 재등록
+-- ---------------------------------------------------------------

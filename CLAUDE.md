@@ -109,7 +109,7 @@
 - 선정 참고: 신청자 목록에 지난 이벤트 '완료/선정' 수 표시(인증 안 한 회원은 다음 선정에서 후순위)
 
 ## 1기 서포터즈 (2026-09-26, 지시서 knitup/docs/supporters_spec.md)
-- **중단(2026-11-04 대표: "지금은 내가 감당이 안 된다, 서포터즈는 지우자")**: 앱은 `SUPPORTERS=false` 스위치로 전부 숨김(상단 띠·초대 시트·설정 줄·온보딩 추천인 칸·이름 옆 배지·activity 링크는 안내 토스트). 크론 `supporters-finalize`·`supporters-room-report` 는 unschedule. DB 테이블·함수·트리거·콘솔 탭·jigi 의 supporters/referral 액션은 그대로 둠(데이터 보존, 다시 열 때 스위치만 true + 크론 재등록). 서포터 행 1건(대표 본인 계정)은 손대지 않음. 아래 설명은 다시 열 때를 위한 기록
+- **중단(2026-11-04 대표: "지금은 내가 감당이 안 된다, 서포터즈는 지우자")**: 앱은 `SUPPORTERS=false` 스위치로 전부 숨김(상단 띠·초대 시트·설정 줄·온보딩 추천인 칸·이름 옆 배지·activity 링크는 안내 토스트). 크론 `supporters-finalize`·`supporters-room-report` 는 unschedule. DB 테이블·함수·트리거·콘솔 탭·jigi 의 supporters/referral 액션은 그대로 둠(데이터 보존). **서버 스위치 `app_config.supporters_enabled=false`(schema 81)** 로 트리거 점수·응원 메시지도 정지(supporter_of 가 빈 행), 모집 is_open=false. 다시 열 때: 앱 SUPPORTERS=true + supporters_enabled='true' + is_open=true + 크론 재등록. 서포터 행 1건(대표 본인 계정)은 손대지 않음. 아래 설명은 다시 열 때를 위한 기록
 - 점수는 **DB 함수·트리거만** 계산(`award_points`, 클라이언트 경로 없음). 규칙·구간·등급·초대 조건은 supabase_schema.sql 47. 대표 결정: 작품 인증은 올린 시점에 10점(승인 단계 없음), 마이그레이션은 운영 DB에 추가만
 - 앱: `supCheckIn()`(로그인 시 출석+초대 확인) · 상단 `#betaBar` · `openSupporterIntro`/`joinSupporters` · `v-supporters`(`openSupporters`) · 초대 링크 `?ref=코드`→localStorage `kn_ref`→가입 저장 뒤 `applyReferrer()` · 온보딩 3단계 `#f_ref` 추천인 닉네임 · 팝업 1회 `maybeSupporterPrompt`(localStorage) · 지기 카드 `messages.card`
 - 지기 AI: action `supporters` → 안내 카드(등록은 버튼 → `join_supporters`) · 텔레그램: 버그 제보 [채택]/[반려](`feedback_decide` 단계) · 브리핑에 `supporter_stats` · 콘솔 › 1기 서포터즈
