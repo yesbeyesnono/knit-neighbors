@@ -42,6 +42,7 @@ begin
   begin select count(*) into n from public.cheer_log; exception when others then n := 0; end; out := pg_temp.chk(out, 'cheer_log', n, 0);   -- schema 72
   select count(*) into n from public.orders where profile_id = d2; out := pg_temp.chk(out, 'orders(other)', n, 0);   -- schema 75
   select count(*) into n from public.pattern_purchases where profile_id = d2; out := pg_temp.chk(out, 'purchases(other)', n, 0);
+  select count(*) into n from public.account_deletions where user_id = d2; out := pg_temp.chk(out, 'account_deletions(other)', n, 0);   -- schema 77
   select count(*) into n from public.cart_items where profile_id = d2; out := pg_temp.chk(out, 'cart(other)', n, 0);
   select count(*) into n from public.yarn_catalog; out := pg_temp.chk(out, 'yarn_catalog(asset)', n, 0);
   select count(*) into n from public.yarn_colors; out := pg_temp.chk(out, 'yarn_colors(asset)', n, 0);
@@ -76,6 +77,7 @@ begin
   out := pg_temp.must_fail(out, 'own act_level', format('update public.profiles set act_level = 99 where id = %L', d1));
   out := pg_temp.must_fail(out, 'own level_crochet', format('update public.profiles set level_crochet = 5 where id = %L', d1));
   out := pg_temp.must_fail(out, 'own suspended_at', format('update public.profiles set suspended_at = null where id = %L', d1));
+  out := pg_temp.must_fail(out, 'own deleted_at', format('update public.profiles set deleted_at = null where id = %L', d1));   -- schema 77
   out := pg_temp.must_fail(out, 'insert post as other', format('insert into public.posts(author_id, body) values (%L, ''spoof'')', d2));
   out := pg_temp.must_fail(out, 'insert admins', format('insert into public.admins(profile_id) values (%L)', d1));
   out := pg_temp.must_fail(out, 'insert notification to other', format('insert into public.notifications(recipient_id, actor_id, kind, snippet) values (%L, %L, ''notice'', ''spam'')', d2, d1));
@@ -84,6 +86,7 @@ begin
   out := pg_temp.must_fail(out, 'insert admin_logs', 'insert into public.admin_logs(admin_id, action, target_type, target_id) values (null, ''x'', ''y'', ''z'')');
   out := pg_temp.must_fail(out, 'insert point_events', format('insert into public.point_events(supporter_id, user_id, kind, points, ref_table, ref_id, kst_date, segment) values (1, %L, ''hack'', 100, ''x'', ''y'', current_date, 1)', d1));
   out := pg_temp.must_fail(out, 'insert messages to other room', format('insert into public.messages(room_id, sender_id, body) values (%L, %L, ''x'')', r2, d1));
+  out := pg_temp.must_fail(out, 'insert account_deletions direct', format('insert into public.account_deletions(user_id, purge_after) values (%L, now())', d1));   -- schema 77
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;
@@ -153,6 +156,8 @@ begin
   out := pg_temp.cnt(out, 'shop_products', 'select count(*) from public.shop_products', 0);   -- schema 75
   out := pg_temp.cnt(out, 'orders', 'select count(*) from public.orders', 0);
   out := pg_temp.cnt(out, 'purchase_pattern(anon)', 'select case when public.purchase_pattern(gen_random_uuid()) is null then 0 else 1 end', 0);
+  out := pg_temp.cnt(out, 'account_deletions(anon)', 'select count(*) from public.account_deletions', 0);   -- schema 77
+  out := pg_temp.cnt(out, 'request_account_deletion(anon)', 'select case when public.request_account_deletion() is null then 0 else 1 end', 0);
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;

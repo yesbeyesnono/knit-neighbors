@@ -21,10 +21,35 @@ Deno.serve(async (req: Request) => {
   try {
     const { data: cfg } = await db.from("jigi_config").select("value").eq("key", "hook_secret").single();
     if (!cfg?.value || req.headers.get("x-jigi-secret") !== cfg.value) return json({ error: "forbidden" }, 403);
-    if (!env("TG_BOT_TOKEN") || !env("TG_ADMIN_CHAT_ID")) return json({ error: "no_telegram" });
     const body = await req.json().catch(() => ({}));
     const out: Record<string, unknown> = {};
 
+    if (body.route === "purge") {   // 계정 삭제 유예(20일) 종료: 파일 정리 + 계정 삭제(cascade). schema 77
+      const { data: due } = await db.from("account_deletions").select("user_id").is("purged_at", null).lte("purge_after", new Date().toISOString()).limit(20);
+      let n = 0; const fails: string[] = [];
+      for (const r of due ?? []) {
+        try {
+          for (const bucket of ["posts", "avatars", "works", "chat-photos", "shop-docs", "bands"]) {
+            const { data: files } = await db.storage.from(bucket).list(r.user_id, { limit: 1000 });
+            const names = (files ?? []).filter((f) => f.name).map((f) => `${r.user_id}/${f.name}`);
+            if (names.length) await db.storage.from(bucket).remove(names);
+          }
+          const { error } = await db.auth.admin.deleteUser(r.user_id);
+          if (error) throw error;
+          n++;
+        } catch (e) { fails.push(`${r.user_id.slice(0, 8)}…: ${String((e as Error).message).slice(0, 80)}`); }
+      }
+      if ((n || fails.length) && env("TG_BOT_TOKEN") && env("TG_ADMIN_CHAT_ID")) {
+        await send(`🗑 계정 삭제 유예(20일)가 끝난 계정을 정리했어요.
+완전히 지운 계정: ${n}건 (프로필·글·사진·채팅·모임 기록·Storage 파일 전부, 복구 불가)` + (fails.length ? `
+
+실패 ${fails.length}건 — 내일 같은 시간에 다시 시도해요. 계속 실패하면 Supabase › Authentication › Users 에서 직접 삭제해 주세요.
+` + fails.join("\n") : ""));
+      }
+      return json({ purged: n, failed: fails });
+    }
+
+    if (!env("TG_BOT_TOKEN") || !env("TG_ADMIN_CHAT_ID")) return json({ error: "no_telegram" });
     if (body.route === "guard") {   // 웹훅 주소가 바뀌었으면 되돌리고 알린다
       const info = await tg("getWebhookInfo", {});
       if (info && info.url !== HOOK && env("TG_WEBHOOK_SECRET")) {

@@ -57,7 +57,7 @@ nav .badge{position:absolute;top:6px;right:calc(50% - 18px);background:#ff3040;c
 .btn.r{background:transparent;color:#ff3040;border:1px solid var(--line)}
 .btn.m{background:var(--btn);color:var(--btn-ink)}
 .btn.sm{padding:7px 14px;font-size:.85rem;width:auto;border-radius:999px}
-.btn:disabled{opacity:.5;cursor:default}
+.btn:disabled{opacity:.5;cursor:default}.btn.danger{background:#b3261e;color:#fff}
 .btn[hidden]{display:none}
 .g{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px}
 .g img{width:18px;height:18px}
@@ -1490,6 +1490,7 @@ sb.auth.onAuthStateChange(async (ev, session) => {
   if(initStarted) return;   // TOKEN_REFRESHED·탭 복귀·OAuth 중복 이벤트: 보던 화면 유지
   initStarted=true;
   await loadMe();
+  if(myProfile?.deleted_at){ initStarted=false; openRestoreSheet(); return; }   // 삭제 유예 중(schema 77)
   if(!myProfile?.onboarded_at){ openOnboard(false); }
   else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); else setTimeout(pushSetup, 1500); setTimeout(studioImportCheck, 900); }
 });
@@ -4588,20 +4589,36 @@ function openSettingsInner(){
     <div class="devbar">뜨개동네 ${APP_VERSION}${FULL?' Lab':''} · ${esc(me?.email||'')}</div>`);
   if(me.id!==SUPPORT_ID) fetchRooms().then(rs=>{ const sup=rs.find(isSupportRoom), el=$('#supHint'); if(sup?.last && el) el.textContent=(sup.last.sender_id===me.id?'나: ':'지기: ')+(sup.last.body||'사진')+' · '+ago(sup.last.created_at); }).catch(()=>{});
 }
-async function deleteAccount(){
-  if(!confirm('계정을 삭제하면 프로필·글·사진·채팅·모임 참여 기록이 모두 지워지고 복구할 수 없어요. 계속할까요?')) return;
-  const word = prompt('확인을 위해 "삭제"라고 입력해 주세요'); if(word !== '삭제') return;
-  // 1) 내가 올린 파일 삭제 (Storage API), 2) 계정·데이터 삭제 (서버 함수, cascade)
-  try{
-    for(const bucket of ['posts','avatars','works','chat-photos','shop-docs']){
-      const { data:files } = await sb.storage.from(bucket).list(me.id, { limit:1000 });
-      const names=(files||[]).filter(f=>f.name && !f.id?.endsWith('/')).map(f=>`${me.id}/${f.name}`);
-      if(names.length) await sb.storage.from(bucket).remove(names);
-    }
-  }catch(e){ console.warn('storage cleanup', e); }
-  const { error } = await sb.rpc('delete_my_account');
-  if(error) return toast('삭제 실패: '+error.message);
-  toast('계정이 삭제됐어요'); await sb.auth.signOut();
+const DEL_DAYS=20;
+const kdate=d=>new Date(d).toLocaleDateString('ko-KR',{month:'long',day:'numeric'});
+function deleteAccount(){   // 앱 안 시트(2026-11-04) — 20일 유예, 같은 계정으로 다시 로그인하면 복구
+  openSheet(`<b style="font-size:1.05rem;color:#b3261e">계정을 삭제할까요?</b>
+    <div class="card soft" style="font-size:.9rem;line-height:1.55"><div>삭제하면 <b>프로필·글·사진·채팅·모임 참여 기록</b>이 다른 회원에게 더 이상 보이지 않아요.</div>
+    <div style="margin-top:8px">마음이 바뀌면 <b>${DEL_DAYS}일 안에 같은 계정으로 다시 로그인</b>하세요. 그대로 복구돼요. ${DEL_DAYS}일이 지나면 완전히 지워지고 되돌릴 수 없어요.</div></div>
+    <label class="f">확인을 위해 "삭제"라고 적어 주세요<input id="delWord" placeholder="삭제" autocomplete="off" oninput="$('#delBtn').disabled=this.value.trim()!=='삭제'"></label>
+    <button class="btn danger" id="delBtn" disabled onclick="submitDeleteAccount()">삭제하기</button>
+    <button class="btn o" onclick="closeSheet()">그만두기</button>`);
+}
+async function submitDeleteAccount(){
+  const b=$('#delBtn'); b.disabled=true; b.textContent='처리 중…';
+  const { data, error } = await sb.rpc('request_account_deletion');
+  if(error){ b.disabled=false; b.textContent='삭제하기'; return toast('삭제 실패: '+error.message); }
+  closeSheet(); toast(`계정 삭제를 접수했어요 · ${kdate(data)}까지 다시 로그인하면 복구돼요`);
+  try{ await pushUnregister(); }catch(e){} await sb.auth.signOut();
+}
+async function openRestoreSheet(){
+  const { data:d } = await sb.from('account_deletions').select('purge_after').eq('user_id', me.id).maybeSingle();
+  const until=d?.purge_after?new Date(d.purge_after):null; const days=until?Math.max(0, Math.ceil((until-Date.now())/864e5)):0;
+  show('login');
+  openSheet(`<b style="font-size:1.05rem">삭제 예정인 계정이에요</b>
+    <div class="card soft" style="font-size:.9rem;line-height:1.55">${until?`<b>${kdate(until)}</b>에 완전히 지워져요 (${days}일 남음). `:''}지금 복구하면 글·사진·친구·채팅이 그대로 돌아와요.</div>
+    <button class="btn" onclick="restoreAccount()">복구하고 계속 쓰기</button>
+    <button class="btn o" onclick="logout()">그대로 두기 (로그아웃)</button>`);
+}
+async function restoreAccount(){
+  const { error } = await sb.rpc('restore_my_account'); if(error) return toast('복구 실패: '+error.message);
+  closeSheet(); toast('계정을 복구했어요'); await loadMe();
+  if(!myProfile?.onboarded_at){ openOnboard(false); } else { go('map'); watchFriends(); loadMyRooms(); setTimeout(pushSetup, 1500); }
 }
 async function shareProfile(){ const p=myProfile||{}; const text=`뜨개동네 · ${p.nickname} (${p.dong_name||''}) ${lvShort(p)}`; try{ if(navigator.share) await navigator.share({title:'뜨개동네',text}); else { await navigator.clipboard.writeText(text); toast('프로필 정보를 복사했어요'); } }catch(e){} }
 async function toggleVisible(v){ await sb.from('profiles').update({is_visible:v}).eq('id',me.id); myProfile.is_visible=v; toast(v?'지도에 보여요':'지도에서 숨겼어요'); }

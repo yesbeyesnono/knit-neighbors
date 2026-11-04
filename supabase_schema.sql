@@ -1455,3 +1455,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   남은 경고(의도): authenticated 가 부를 수 있는 SECURITY DEFINER 함수 139개(안에서 is_admin()/auth.uid() 검사) · anon 허용 2개(studio_submit·studio_yarn_search) · pg_net 이 public 스키마 · Leaked password protection(대시보드에서 대표가 켜기)
 --   npm audit fix: brace-expansion(고위험, 빌드 도구) 해결. uuid(중간, @capacitor/cli 경유)는 Capacitor 메이저 업데이트 때
 -- ---------------------------------------------------------------
+
+-- 77. 계정 삭제 유예 20일 (마이그레이션 account_deletion_grace, 원본 supabase/account_deletion_grace.sql) — 2026-11-04 대표 지시
+--   profiles.deleted_at · account_deletions(user_id pk, requested_at, purge_after=+20일, hidden_post_ids, friendships jsonb, was_visible, wave_until, purged_at) — 본인 select 만, service_role 전체
+--   request_account_deletion(): 글 hidden=true(목록 보관)·친구 관계 jsonb 보관 후 삭제·지도 핀 끔·deleted_at — 즉시 다른 회원에게 안 보임, 반환 = 완전 삭제 예정일
+--   restore_my_account(): 20일 안에 같은 계정으로 로그인 → 앱 복구 시트 → 글·친구·핀 원상복구. 옛 delete_my_account()(즉시 삭제)는 남겨 둠(앱은 더 이상 안 부름)
+--   크론 account-purge(18:30 UTC=03:30 KST): 유예 끝난 계정 있을 때만 jigi_remind_call('purge') → Edge jigi-remind route purge: Storage 6버킷 파일 정리 + auth.admin.deleteUser(cascade) + 텔레그램 보고
+--   앱: 설정 › 계정 삭제 = 앱 안 시트("삭제" 입력 → 빨간 버튼) / 로그인 때 deleted_at 이면 복구 시트(복구 / 그대로 두기). privacy.html·delete-account.html 20일 보관 문구
+-- ---------------------------------------------------------------
