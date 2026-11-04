@@ -1466,3 +1466,6 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 
 -- 78. 1기 서포터즈 중단 (2026-11-04 대표 지시, 마이그레이션 없음) — 앱 SUPPORTERS=false, 크론 supporters-finalize·supporters-room-report unschedule. 테이블·함수·트리거는 유지(다시 열 때: 스위치 true + cron.schedule 재등록 — 절 47 참고)
 -- ---------------------------------------------------------------
+
+-- 79. 콘솔 글·모임·인증 삭제 (마이그레이션 admin_delete_work_meetup, 2026-11-04 대표 "삭제 버튼이 없다") — admin_delete_work(p_work, p_reason): 연결 인증 글·yarn_entries 삭제, event_applications.work_id null · admin_delete_meetup(p_meetup, p_reason): 모임 글·후기 삭제, notifications.meetup_id null, 채팅방은 유지. 둘 다 is_admin + admin_log. 콘솔 글·모임·인증 세 탭에 [삭제] 열
+-- ---------------------------------------------------------------

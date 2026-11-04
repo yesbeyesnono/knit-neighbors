@@ -120,6 +120,8 @@ begin
   out := pg_temp.must_fail(out, 'admin_set_author', format('select public.admin_set_author(%L, true)', d1));
   out := pg_temp.must_fail(out, 'admin_yarn_bulk_upsert', 'select public.admin_yarn_bulk_upsert(''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'admin_delete_post', 'select public.admin_delete_post(gen_random_uuid(), ''x'')');
+  out := pg_temp.must_fail(out, 'admin_delete_work', 'select public.admin_delete_work(gen_random_uuid(), ''x'')');   -- schema 79
+  out := pg_temp.must_fail(out, 'admin_delete_meetup', 'select public.admin_delete_meetup(gen_random_uuid(), ''x'')');
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
   out := pg_temp.must_fail(out, 'jigi_on_shop_claim', 'select public.jigi_on_shop_claim()');
   out := pg_temp.must_fail(out, 'yarn_add_alias', 'select public.yarn_add_alias(gen_random_uuid(), ''x'')');
