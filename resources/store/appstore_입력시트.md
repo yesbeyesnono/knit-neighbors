@@ -50,11 +50,11 @@
 
 ■ 작품 인증과 내 뜨개 단계
 · 완성한 작품 사진과 사용한 기법, 실, 바늘을 기록해요
-· 인증한 기법은 '내 뜨개 단계' 기법 맵에 표시돼요. 코바늘·대바늘 60가지 기법을 단계별로 한눈에
+· 인증한 기법은 '내 뜨개 단계' 기법 맵에 표시돼요. 코바늘·대바늘 66가지 기법을 단계별로 한눈에
 · 작품 인증을 올린 날마다 활동 레벨이 올라가요
 
 ■ 내 실함
-· 산 실의 볼밴드를 찍어 두면 이름·색·규격을 읽어 정리해 줘요
+· 산 실의 볼밴드를 찍어 두면 AI가 이름·색·규격을 읽어 정리해 줘요 (이름을 직접 적어도 돼요)
 · 작품 인증 때 실함에서 고르면 한 번에 입력되고, 쓴 만큼 남은 볼이 줄어요
 · 내 실함은 다른 회원에게 보이지 않아요
 
@@ -71,7 +71,7 @@
 · 모든 글·사용자를 신고하고 차단할 수 있어요. 신고는 24시간 안에 확인해요
 · 욕설·광고·사기로 보이는 글은 임시로 가려지고 운영자가 확인해요
 · 만 14세 이상만 이용할 수 있어요
-· 계정은 앱 안에서 언제든 바로 삭제할 수 있어요 (마이 › 설정 › 계정 삭제)
+· 계정은 앱 안에서 언제든 삭제할 수 있어요 (마이 › 설정 › 계정 삭제). 삭제 후 20일 안에는 다시 로그인해 복구할 수 있어요
 
 문의: 앱의 마이 › 설정 › 지기에게 말하기, 또는 knitup.official@gmail.com
 ```
@@ -130,8 +130,8 @@ TestFlight 앱에서 찍습니다(아이폰 Pro Max 계열이면 그대로 규�
 |---|---|
 | 번들 ID | `kr.co.firmtech.knitneighbors` |
 | SKU | 기존 값 유지 |
-| 버전 | `1.0.0` `[제가 앱 버전을 1.0.0으로 맞춘 빌드를 올린 뒤 선택]` |
-| 앱 아이콘 | 빌드에 포함된 아이콘이 자동 사용됨. 지금 들어 있는 것은 **임시 아이콘(실타래, 흑백)** — 최종 1024×1024 PNG(투명 배경 없음) `[대표]` |
+| 버전 | `1.0.1` (iOS MARKETING_VERSION·Android versionName·앱 APP_VERSION 모두 1.0.1 로 통일, 2026-11-04) |
+| 앱 아이콘 | 빌드에 포함된 아이콘이 자동 사용됨(올리브 털실 공). 숲 그린 버전 1024 PNG 는 `resources/store/logo/knit-neighbors-logo-1024.png` — 바꾸려면 ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png 교체 후 빌드 |
 | 수출 규정(암호화) | "표준 암호화(HTTPS)만 사용" → 면제 |
 | 콘텐츠 권한·광고 식별자(IDFA) | 사용 안 함 |
 | 회사 연락처 | 이름·전화·이메일 `[대표]` |
@@ -153,7 +153,51 @@ Knit Neighbors connects people who knit and crochet in the same neighborhood.
 • Project log: record finished projects with photos, techniques, yarn and needles. Verified techniques appear on your skill map.
 • Yarn stash: snap a ball band and the app reads the name, color and specs for you. Used yarn is deducted automatically.
 • Community & chat: share works in progress, ask questions, and chat with friends.
-• Safety: report and block anywhere, reports reviewed within 24 hours, suspicious posts are temporarily hidden for review. Ages 14+. Delete your account anytime in Settings.
+• Safety: report and block anywhere, reports reviewed within 24 hours, suspicious posts are temporarily hidden for review. Ages 14+. Delete your account anytime in Settings (restorable within 20 days).
 
 Events in the app are run by Firmtech Co., Ltd. and are not affiliated with Apple.
 ```
+
+---
+
+## 7. 심사 정보 (App Review Information) — 2026-11-04
+
+| 칸 | 값 |
+|---|---|
+| 로그인 필요 | **예** |
+| 사용자 이름 | `demo1@knit.local` |
+| 비밀번호 | `knit1234` |
+| 연락처 | 이름·전화·이메일 `[대표]` |
+
+### 메모 (Notes) — 그대로 복사
+```
+Sign-in: the app offers Google and Apple sign-in. For review, an email/password entry is available: on the login screen, tap the app title "뜨개동네" five times to reveal the "이메일로 로그인 (심사용)" form, then use the demo account above. The demo account is pre-onboarded (profile, skill level, yarn stash) so every screen is reachable.
+
+Location: used only to show nearby knitters/meetups/shops on the map. The exact location is never stored; only a ~200 m grid center is kept and the user can hide the pin anytime (Settings > 지도에 내 핀 보이기).
+
+Camera/Photos: profile photo, project photos, chat photos, and ball-band photos for the yarn stash (ball-band text is read by an AI service; photos are private to the user).
+
+Account deletion: Settings > 계정 삭제 (in-app). Data is hidden immediately and permanently erased after 20 days (restorable by signing in again within 20 days), as stated in the privacy policy.
+
+Events (Guideline 5.3): events in the app are run by Firmtech Co., Ltd.; the app states that Apple is not a sponsor or involved in any way.
+
+User-generated content (1.2): every post/user can be reported and blocked; reports are reviewed within 24 hours; flagged content is hidden automatically pending review; users must agree to the terms and community guidelines at onboarding.
+
+No in-app purchases. Commerce screens are not included in this public edition.
+```
+
+## 8. App Privacy (개인정보 라벨) — "데이터 수집" 예
+
+| 데이터 | 사용 목적 | 사용자와 연결 | 추적 |
+|---|---|---|---|
+| 이메일 주소 | 앱 기능(계정) | 예 | 아니요 |
+| 이름(닉네임) | 앱 기능 | 예 | 아니요 |
+| 대략적 위치 | 앱 기능(근처 이웃·모임) | 예 | 아니요 |
+| 사진 또는 비디오 | 앱 기능(글·작품·채팅·볼밴드) | 예 | 아니요 |
+| 사용자 콘텐츠(기타: 글·채팅·기록) | 앱 기능 | 예 | 아니요 |
+| 기기 ID(푸시 토큰) | 앱 기능(알림) | 예 | 아니요 |
+| 사용 데이터(제품 상호작용) | 앱 기능(활동 레벨·성향 지수) | 예 | 아니요 |
+
+- 정확한 위치·연락처·건강·금융·검색 기록·진단: **수집 안 함**
+- 제3자 추적(IDFA·광고): **없음** → "추적 안 함"
+- 이벤트 선정자의 배송지(이름·전화·주소)는 이벤트에 선정된 회원만 입력 → "실제 주소·전화번호 — 앱 기능(배송) — 사용자와 연결 — 추적 안 함"으로 추가

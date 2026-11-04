@@ -822,8 +822,9 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 
   <!-- 로그인 -->
   <section class="view login" id="v-login">
-    <h1>뜨개동네</h1>
+    <h1 onclick="revTap()">뜨개동네</h1>
     <p>우리 동네에서 같이 뜰 사람을 지도에서 찾아요</p>
+    <form id="revLogin" hidden onsubmit="event.preventDefault();loginEmail()" style="display:none;flex-direction:column;gap:8px;width:100%"><input id="revEmail" type="email" autocomplete="username" placeholder="심사용 이메일"><input id="revPw" type="password" autocomplete="current-password" placeholder="비밀번호"><button class="btn o" type="submit">이메일로 로그인 (심사용)</button></form>
     <button class="btn g" onclick="loginGoogle()"><img alt="" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">Google로 계속하기</button>
     <button class="btn" onclick="loginApple()" style="background:#000;color:#fff"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.6 1.3 10.1.9 1.2 1.9 2.6 3.2 2.5 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.2 3.1-2.5.9-1.4 1.3-2.7 1.4-2.8-.1 0-2.9-1.1-2.9-4zM14 5.2c.7-.8 1.2-2 1-3.2-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.5 2.9-1.3z"/></svg>Apple로 계속하기</button>
     <p class="muted" style="font-size:.78rem;line-height:1.5">계속하면 <a href="terms.html" target="_blank" style="color:inherit">이용약관</a>과 <a href="privacy.html" target="_blank" style="color:inherit">개인정보처리방침</a>에 동의하는 것으로 봅니다.</p>
@@ -1357,6 +1358,12 @@ function segVal(id, multi){ const on=[...$(id).querySelectorAll('.on')].map(b=>b
 function segSet(id, val){ const vals=Array.isArray(val)?val:[val]; [...$(id).children].forEach(b=>b.classList.toggle('on',vals.includes(b.dataset.k))); }
 
 // ============ 인증 ============
+let revTaps=0;
+function revTap(){ revTaps++; if(revTaps>=5){ const f=$('#revLogin'); f.hidden=false; f.style.display='flex'; } }   // 심사용 입구: 제목 5번 탭
+async function loginEmail(){
+  const email=($('#revEmail').value||'').trim(), password=$('#revPw').value||''; if(!email||!password) return toast('이메일과 비밀번호를 입력해 주세요');
+  const { error } = await sb.auth.signInWithPassword({ email, password }); if(error) toast('로그인 오류: '+error.message);
+}
 async function loginGoogle(){
   if(isNative) return nativeOAuth('google');
   const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.href.split('#')[0] } });
@@ -2526,7 +2533,7 @@ async function openEvent(id){
       act+=`<div class="mtitle" style="font-size:.9rem">받으실 곳 ${lock?'<span class="muted">(발송됨)</span>':''}</div><input id="shName" maxlength="30" placeholder="받는 분 이름" value="${v('name')}" ${lock?'disabled':''}><input id="shPhone" maxlength="20" inputmode="tel" placeholder="연락처" value="${v('phone')}" ${lock?'disabled':''}><input id="shZip" maxlength="10" inputmode="numeric" placeholder="우편번호" value="${v('zip')}" ${lock?'disabled':''}><input id="shAddr" maxlength="200" placeholder="주소" value="${v('addr')}" ${lock?'disabled':''}><input id="shMemo" maxlength="100" placeholder="배송 메모 (선택)" value="${v('memo')}" ${lock?'disabled':''}><p class="muted" style="font-size:.78rem;margin:0">배송지는 이 이벤트 발송에만 쓰고, 운영진만 볼 수 있어요. 발송 30일 뒤 자동으로 지워요.</p>${lock?'':`<button class="btn ${ship?'o':''}" onclick="saveEventShip('${e.id}')">${ship?'배송지 고치기':'배송지 저장'}</button>`}`; }
     act+=`<button class="btn" onclick="closeSheet();wEventPre='${e.id}';openCompose('work')">이벤트 작품 인증하기</button><button class="btn o" onclick="cancelEventApp('${e.id}')">참여 취소</button>`; }
   else act=`<div class="empty" style="padding:14px 0">${EV_STATE_TXT[st]||''}</div>`;
-  openSheet(`${e.photo?`<img class="evphoto" src="${esc(e.photo)}" alt="">`:''}<div class="muted" style="font-size:.8rem;font-weight:700">${EV_KIND[e.kind]||'이벤트'}</div><b style="font-size:1.1rem">${esc(e.title)}</b><div class="muted" style="font-size:.85rem">${esc(cond)}</div>${e.body?`<p style="white-space:pre-wrap;margin:4px 0">${esc(e.body)}</p>`:''}${act}`);
+  openSheet(`${e.photo?`<img class="evphoto" src="${esc(e.photo)}" alt="">`:''}<div class="muted" style="font-size:.8rem;font-weight:700">${EV_KIND[e.kind]||'이벤트'}</div><b style="font-size:1.1rem">${esc(e.title)}</b><div class="muted" style="font-size:.85rem">${esc(cond)}</div>${e.body?`<p style="white-space:pre-wrap;margin:4px 0">${esc(e.body)}</p>`:''}${act}<p class="muted" style="font-size:.72rem;margin:8px 0 0;line-height:1.4">이 이벤트는 펌테크주식회사가 진행하며 Apple·Google과 무관해요. Apple·Google은 후원·보증·관리하지 않아요.</p>`);
 }
 async function applyEvent(id){ const { data, error } = await sb.rpc('apply_event', { p_event:id, p_note:$('#evNote')?.value.trim()||null }); if(error) return toast(error.message.replace(/^.*?: /,'')); toast(data==='selected'?'선착순으로 선정됐어요!':'신청했어요'); await loadEvents(); openEvent(id); }
 async function cancelEventApp(id){ if(!confirm('이 이벤트 신청을 취소할까요?')) return; const { error } = await sb.rpc('cancel_event_application', { p_event:id }); if(error) return toast(error.message); toast('취소했어요'); closeSheet(); loadEvents(); }
@@ -3828,8 +3835,9 @@ function openStashAdd(){
 }
 function renderStashAdd(){
   openSub('실 추가', `${saDraft.length?`<p class="muted" style="font-size:.85rem;margin:8px 0">볼밴드를 찍고 볼 수만 적으세요. 여러 개를 연달아 찍어도 돼요.</p>`:`<p class="muted" style="font-size:.85rem;margin:8px 0">어떻게 넣을까요?</p>
-    <div class="saopt"><button type="button" class="pri" onclick="$('#saFile').click()">${ico('camera')}<b>볼밴드 찍기</b><span>앨범에서 골라도 돼요<br>이름·규격은 사진에서 읽어요</span></button><button type="button" onclick="stashAddManual()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg><b>이름으로 적기</b><span>실 이름을 검색하거나<br>직접 적어요</span></button></div>`}
+    <div class="saopt"><button type="button" class="pri" onclick="$('#saFile').click()">${ico('camera')}<b>볼밴드 찍기</b><span>앨범에서 골라도 돼요<br>이름·규격은 AI가 사진에서 읽어요</span></button><button type="button" onclick="stashAddManual()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg><b>이름으로 적기</b><span>실 이름을 검색하거나<br>직접 적어요</span></button></div>`}
     <input id="saFile" type="file" accept="image/*" multiple hidden onchange="stashPickBands(this.files)">
+    ${saDraft.length?'':'<p class="muted" style="font-size:.74rem;margin:2px 0 6px;line-height:1.45">볼밴드 사진은 글자를 읽기 위해 AI(외부 처리)로 분석되고 내 실함에만 비공개로 저장돼요. 다른 회원에게는 보이지 않아요.</p>'}
     <div id="saList">${saDraft.map((d,i)=>{ const s=stashRows.find(x=>x.id===d.id)||{}; const st=s.read_status;
       return `<div class="sacard"><div class="sthumb lg" style="background-image:url(${d.url})"></div><div class="tx"><b>${st==='done'?'✓ 읽기 완료':st==='failed'?'읽지 못했어요':'읽는 중…'}</b><span>${esc(st==='done'?[s.raw_name, stashSpec(s)].filter(Boolean).join(' · '):st==='failed'?'저장한 뒤 실함에서 이름을 직접 적어 주세요':'볼 수만 먼저 적어 두세요 · 이름·규격은 자동으로 채워져요')}</span>
         <div class="cfl" style="margin:8px 0 4px">몇 볼 샀나요?</div><div class="stepper"><button type="button" onclick="saStep(${i},-1)">−</button><input inputmode="decimal" maxlength="6" value="${fmtBalls(d.balls)}" onfocus="this.select()" oninput="saDraft[${i}].balls=this.value.replace(',', '.')"><button type="button" onclick="saStep(${i},1)">＋</button></div></div></div>`; }).join('')}</div>
