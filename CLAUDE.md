@@ -11,6 +11,9 @@
 - **플랫폼 우선순위(2026-09-18 대표 지시)**: 지금은 아이폰(iOS·TestFlight) 위주로 진행. Android 빌드·Play 업로드는 iOS가 어느 정도 다듬어진 뒤 한 번에 진행 — 그 전에는 Android 빌드/업로드를 제안하거나 실행하지 않는다.
 - 패치는 파이썬 스크립트를 **파일로 저장해 실행**(Bash heredoc은 역슬래시·따옴표가 깨짐).
 
+## 이름 (2026-11-04 대표 확정)
+- **앱·브랜드 이름 = `knitup`** (출원 상표 09·16·35·41·42류, 뉴스레터 구독자 1만+ 인지도). **`뜨개동네`는 knitup 앱 안의 동네 커뮤니티 이름**(스토어 부제·키워드·앱 안 탭 제목에 유지). 스토어 이름·iOS CFBundleDisplayName·Android app_name·capacitor appName·로그인 첫 화면 h1 = knitup, 법적 문서 제목 `knitup(뜨개동네) …` + 이름 설명 한 줄. KOAP 는 안 씀(App Store Connect 레코드 이름만 KOAP 였던 것). 저장소·Bundle ID(kr.co.firmtech.knitneighbors)·코드 안 'knit-neighbors' 는 그대로
+
 ## 에디션 — V1(full) / V2(meet) (2026-09-19 대표 확정)
 - **코드는 하나**, `docs/edition.js`의 `KN_EDITION`으로 나눈다. index.html의 `FULL` 상수로 분기. 브랜치를 가르지 말 것.
   - **meet = V2 공개 앱**(App Store, 뉴스레터 구독자 대상, 만남 중심). full에서 뺀 것: ① '다음에 떠보면 좋아요' 추천 카드(피드·마이·작품 인증 후) ② 설정 › 찜한 도안 ③ 도안 등록 과정(＋ › 도안, 설정 › 내 도안, 프로필 도안 탭) ④ 내 뜨개 단계 아래 '내 단계에 맞는 도안'. **작가 신청·지도 작가 핀·작가 링크(프로필의 인스타그램 등)는 meet에도 있음**
@@ -145,7 +148,7 @@
 - **상표(2026-11-04 대표 전달)**: `knitup` 상표 출원함 — 09(앱·소프트웨어)·16(인쇄물·도안)·35(광고·판매)·41(교육·클래스)·42(SaaS)류. `뜨개동네`·`KOAP`는 미출원(스토어 등록 = 공개 사용이므로 출시 전 09·42·35·41류 출원 권고, 상표는 선출원주의라 특허 같은 유예 없음)
 - 대표: 2단계 인증(구글·Supabase·GitHub·Apple·Codemagic), knitup.official 구글 계정 복구 → 'My First Project' IAM 에 yesbeyesnono 소유자 추가·옛 OAuth 클라이언트 삭제, 로고 검증 제출(인증 센터), Play Console에 versionCode 2 .aab 업로드·데이터 보안 설문, App Store 테스트 정보 입력, 앱 아이콘(1024 PNG) 전달
 - **앱 푸시 알림 APNs(2026-09-29 구현, schema 57)**: 앱 `pushSetup`(온보딩 끝난 회원에게 안내 시트 1회 → iOS 권한 → `register_device_token`), 설정 › 앱 알림(상태·테스트 발송), 알림 누르면 활동 화면. 서버는 notifications insert 트리거 → `push-send`(APNs JWT). **대표가 넣을 것**: ① developer.apple.com › Keys 에서 APNs 키(.p8) 1개 발급 → Supabase Secrets `APNS_KEY`(.p8 내용 전체) · `APNS_KEY_ID` · `APNS_TEAM_ID`=M59979ZT3A ② Identifiers › App ID 둘 다(…knitneighbors, …knitneighbors.lab) Push Notifications 체크. 키 없으면 발송만 조용히 실패. Codemagic 은 npm ci + cap sync 로 플러그인 자동 포함, 프로파일은 fetch-signing-files 가 다시 만듦
-- **안드로이드(2026-10-03 대표: 다음 주 공개, 공개판만, Play 법인 계정이라 비공개 테스트 불필요)**: 빌드는 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk) → .aab 를 대표가 Play Console 에 업로드. 올릴 때마다 `versionCode` +1(현재 8 · 1.0.1, 2026-11-04 스토어 제출용 빌드). 푸시는 FCM(schema 70): `android/app/google-services.json`(gitignore, 이 PC 에만) + Supabase 시크릿 `FCM_SERVICE_ACCOUNT`(서비스 계정 JSON 전체, 대표가 입력)
+- **안드로이드(2026-10-03 대표: 다음 주 공개, 공개판만, Play 법인 계정이라 비공개 테스트 불필요)**: 빌드는 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk) → .aab 를 대표가 Play Console 에 업로드. 올릴 때마다 `versionCode` +1(현재 9 · 1.0.1, 2026-11-04 knitup 이름 빌드). 푸시는 FCM(schema 70): `android/app/google-services.json`(gitignore, 이 PC 에만) + Supabase 시크릿 `FCM_SERVICE_ACCOUNT`(서비스 계정 JSON 전체, 대표가 입력)
 - **knitup v9 이식(2026-10-10, schema 71)**: ① 기법 패널 `openTechPanel`(기법 맵 ⓘ/기호 N 배지·도안 상세 기법 칩 → 상태·설명·선행/다음 기법·변형 기호·영상(유튜브 검색, 외부 링크 확인 시트)·이 기법으로 인증) — 공개판도 ② 이어뜨기(마이 '지금 할 일' 맨 위, `my_patterns_in_progress`) + 완성 모멘트(`openPatternDone` → 인증 폼 자동 채움 / 다음 도전=추천 도안) — Lab ③ 도안 상세 '새로 배우는 기법 N개' ④ 설정 › 내 도안에 찜·뜨는 중·완성 수(`my_pattern_stats`). 클래스 신청·수강생 관리는 이미 있었음(schema 53). 후순위: 진도 뷰어 보강(노트·체크리스트·배색 바), 자체 영상 주소
 - **응원 메시지 체계(2026-10-10 구현, schema 72)**: `resources/plans/encourage_messages.md` 의 표대로 — kind `cheer`(이정표·응원: 푸시 X·하루 1건·종류별 1회·21~08시 큐·7일 삭제) / `remind`(실무: 푸시 O) / 지기 채팅 4개(A1·B5·D3·E3, `support_msg`). 트리거 5개 + 크론 3개(`cheer-daily` 08:30 KST·`remind-daily` 18:00 KST·`remind-tick` 30분). 문구는 DB 함수 안에 있음(바꾸려면 마이그레이션). D5 입금 기한은 클래스 폼의 '결제 방법 › 입금 기한'(extra.pay_days)을 써서 확정일+N일 전날 알림
 - 개발 후보: 이상 접근 감지·사고 대응 문서, PITR 백업, 스토어 스크린샷·설명, 공유 링크, 고유 아이디(@handle), '지금 이 근처' 임시 위치, 관리자 PNG 내보내기
