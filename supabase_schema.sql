@@ -1476,3 +1476,6 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 
 -- 81. 서포터즈 서버 스위치 (마이그레이션 supporters_off_switch, 2026-11-04) — app_config.supporters_enabled=false → supporter_of() 가 빈 행 → award_points/supporter_cheer/claim_referral/설문 점수 전부 무시(트리거는 남아 있지만 0점). supporter_cohorts.is_open=false(지기 AI '마감'). 다시 열 때: supporters_enabled='true' + is_open=true + 앱 SUPPORTERS=true + 크론 2개 재등록
 -- ---------------------------------------------------------------
+
+-- 82. 콘솔 회원 완전 삭제 (마이그레이션 admin_delete_user, 2026-11-04 대표 "정지 말고 아예 삭제") — admin_delete_user(p_user, p_reason): 관리자·본인 불가, admin_log, request_account_deletion 과 같은 즉시 숨김 + account_deletions(purge_after=now) + jigi_remind_call('purge') 로 몇 초 안에 Storage·auth 삭제(실패 시 03:30 크론 재시도). 콘솔 › 사용자 › 패널 [계정 삭제]('삭제' 입력 확인). 공지·알림 보내기 화면은 세로 3단계(누구에게 탭형 조건 / 무엇을 / 언제·보내기)로 재구성
+-- ---------------------------------------------------------------

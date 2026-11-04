@@ -123,6 +123,7 @@ begin
   out := pg_temp.must_fail(out, 'admin_delete_work', 'select public.admin_delete_work(gen_random_uuid(), ''x'')');   -- schema 79
   out := pg_temp.must_fail(out, 'admin_delete_meetup', 'select public.admin_delete_meetup(gen_random_uuid(), ''x'')');
   out := pg_temp.must_fail(out, 'admin_delete_post(notify)', 'select public.admin_delete_post(gen_random_uuid(), ''x'', true)');   -- schema 80
+  out := pg_temp.must_fail(out, 'admin_delete_user', format('select public.admin_delete_user(%L, ''x'')', d2));   -- schema 82
   out := pg_temp.must_fail(out, 'mod_notify_delete', format('select public.mod_notify_delete(%L, ''글'', ''x'')', d2));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
   out := pg_temp.must_fail(out, 'jigi_on_shop_claim', 'select public.jigi_on_shop_claim()');
