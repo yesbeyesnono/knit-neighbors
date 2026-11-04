@@ -1,6 +1,6 @@
 # Google Play Console 입력 시트 — knitup 뜨개동네 (패키지 `kr.co.firmtech.knitneighbors`) — 2026-11-04
 
-그대로 복사해 붙이면 되는 값. `[대표]` 는 대표가 채우거나 결정할 곳. 올리는 파일: `knitneighbors-1.0.1-vc8-play.aab`(올릴 때마다 versionCode +1).
+그대로 복사해 붙이면 되는 값. `[대표]` 는 대표가 채우거나 결정할 곳. 올리는 파일: `knitup-1.0.1-vc9-play.aab`(올릴 때마다 versionCode +1).
 
 ## 1. 기본 스토어 등록정보 (스토어 설정 › 기본 스토어 등록정보)
 
@@ -58,8 +58,8 @@
 
 ## 4. 출시 (테스트 및 출시 › 프로덕션 › 새 버전 만들기)
 
-- App Bundle: `knitneighbors-1.0.1-vc8-play.aab`
-- 출시명: 자동(`8 (1.0.1)`)
+- App Bundle: `knitup-1.0.1-vc9-play.aab`
+- 출시명: 자동(`9 (1.0.1)`)
 - 출시 노트:
 ```
 <ko-KR>
