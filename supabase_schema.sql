@@ -1479,3 +1479,7 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 
 -- 82. 콘솔 회원 완전 삭제 (마이그레이션 admin_delete_user, 2026-11-04 대표 "정지 말고 아예 삭제") — admin_delete_user(p_user, p_reason): 관리자·본인 불가, admin_log, request_account_deletion 과 같은 즉시 숨김 + account_deletions(purge_after=now) + jigi_remind_call('purge') 로 몇 초 안에 Storage·auth 삭제(실패 시 03:30 크론 재시도). 콘솔 › 사용자 › 패널 [계정 삭제]('삭제' 입력 확인). 공지·알림 보내기 화면은 세로 3단계(누구에게 탭형 조건 / 무엇을 / 언제·보내기)로 재구성
 -- ---------------------------------------------------------------
+
+-- 83. 실 사전 삭제 (마이그레이션 admin_yarn_delete, 2026-11-04) — admin_yarn_delete(p_ids uuid[], p_reason) → 삭제 수. 색·판매처 cascade, 실함·입력 원문·도안·상품·이벤트의 catalog_id 는 set null, merged_into 참조 해제, admin_log(이름 목록). 콘솔 › 실 사전: 상세 패널 [이 실 삭제] + 목록 행 체크박스 → 하단 '선택한 실 삭제' 띠
+-- 84. 실 검색 순위 (마이그레이션 yarn_suggest_brand_rank, 2026-11-04 대표 "앵콜스 검색에 앵콜스 실이 안 나옴") — 원인: 쇼핑몰 수집 때 '판매처+제품명' 키(앵콜스아임울4 등)가 norm_keys 에 들어가 398종이 '앵콜스'에 걸리고 uses 순이라 낙양모사가 앞섰음. yarn_suggest·yarn_suggest_page 정렬을 '브랜드(또는 브랜드 별칭) 일치 → 확정 → 사용 수'로. 키는 유지(판매처 이름으로도 찾히게)
+-- ---------------------------------------------------------------
