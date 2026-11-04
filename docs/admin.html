@@ -305,6 +305,50 @@ async function delMeetup(id, btn){ if(!confirm('모임과 모임 글·후기를 
 async function delPost(id){ if(!confirm('글과 답글·좋아요를 완전히 삭제해요. 되돌릴 수 없어요. 계속할까요?')) return; const reason=prompt('삭제 사유(선택)')??null; const {error}=await sb.rpc('admin_delete_post',{p_post:id,p_reason:reason}); if(error) return toast(error.message); toast('삭제했어요'); refreshBadges(); route(); }
 async function suspendUser(id, suspend){ const reason=suspend?prompt('정지 사유(선택). 정지되면 지도·글·채팅에서 보이지 않고 활동이 막혀요'):null; if(suspend&&reason===null) return; const {error}=await sb.rpc('admin_suspend_user',{p_user:id,p_suspend:suspend,p_reason:reason}); if(error) return toast(error.message); toast(suspend?'정지했어요':'정지를 해제했어요'); refreshBadges(); route(); }
 async function resolveReport(kind, id){ const {error}=await sb.rpc('admin_resolve_report',{p_kind:kind,p_id:String(id)}); if(error) return toast(error.message); toast('처리됨으로 옮겼어요'); refreshBadges(); route(); }
+async function openMeetupPanel(id){
+  const {data:m} = await sb.from('meetups').select('*, creator:profiles!meetups_created_by_fkey(id,nickname,dong_name)').eq('id',id).single();
+  if(!m) return toast('모임을 찾을 수 없어요');
+  const [{data:mem},{data:posts}] = await Promise.all([
+    m.room_id ? sb.from('room_members').select('profile_id, p:profiles!room_members_profile_id_fkey(nickname)').eq('room_id', m.room_id) : Promise.resolve({data:[]}),
+    sb.from('posts').select('id,body,review_of,meetup_id,created_at,author:profiles!posts_author_id_fkey(nickname)').or(`meetup_id.eq.${id},review_of.eq.${id}`).order('created_at')
+  ]);
+  const techs=(m.technique_ids||[]).map(t=>TECH[t]?.name_ko||t);
+  const row=(k,v)=>v?`<div class="muted" style="margin:2px 0"><b style="color:var(--ink)">${k}</b> · ${v}</div>`:'';
+  openPanel(`<h2 style="margin-top:0">모임 상세 ${m.is_public?'':'<span class="chip y">비공개</span>'}</h2>
+    <div class="muted"><a href="#" onclick="openUserPanel('${m.created_by}');return false">${esc(m.creator?.nickname||'')}</a> · ${esc(m.creator?.dong_name||'')} · 만든 날 ${fmt(m.created_at)}</div>
+    <h3 style="margin:10px 0 4px">${esc(m.title)}</h3>
+    ${row('종류', esc([m.kind, m.craft].filter(Boolean).join(' · ')))}
+    ${row('일시', fmt(m.starts_at)+(m.duration_min?` · ${m.duration_min}분`:'')+(m.repeat?` · ${esc(m.repeat)}`:''))}
+    ${row('장소', esc([m.place_name, m.address].filter(Boolean).join(' · ')))}
+    ${row('인원', `${m.participant_count||0}${m.capacity?'/'+m.capacity:''}명`)}
+    ${row('단계', (m.level_min||m.level_max)?`${m.level_min||1}~${m.level_max||5}단계`:'')}
+    ${row('배울 기법', esc(techs.join(', ')))}
+    ${row('비용', esc(m.fee||''))}${row('준비물', esc(m.bring||''))}
+    ${m.descr?`<p style="white-space:pre-wrap;margin:10px 0">${esc(m.descr)}</p>`:'<div class="muted">소개 없음</div>'}
+    <div class="row"><button class="r" onclick="delMeetup('${m.id}')">모임 삭제</button></div>
+    <h2>참여자 ${(mem||[]).length}</h2><div>${(mem||[]).map(x=>`<span class="chip">${esc(x.p?.nickname||'')}</span>`).join(' ')||'<span class="muted">없음</span>'}</div>
+    <h2>모임 글·후기 ${(posts||[]).length}</h2>${(posts||[]).map(r=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><b>${esc(r.author?.nickname||'')}</b> <span class="chip">${r.review_of?'후기':'모임 글'}</span> <span class="muted">${fmt(r.created_at)}</span><div style="white-space:pre-wrap">${esc(r.body||'')}</div><div class="row" style="margin-top:4px"><button onclick="openPostPanel('${r.id}')">글 열기</button></div></div>`).join('')||'<div class="muted">없음</div>'}`);
+}
+async function openWorkPanel(id){
+  const [{data:w},{data:posts}] = await Promise.all([
+    sb.from('works').select('*, owner:profiles!works_profile_id_fkey(id,nickname,dong_name)').eq('id',id).single(),
+    sb.from('posts').select('id,body,created_at,like_count,reply_count').eq('work_id',id)
+  ]);
+  if(!w) return toast('작품을 찾을 수 없어요');
+  const techs=(w.techniques||[]).map(t=>TECH[t]?.name_ko||t).concat(w.custom_techniques||[]);
+  const yarns=(w.yarns||[]).map(y=>[y.name||y.raw_name, y.color, y.amount?`${y.amount}${y.unit||'볼'}`:'' ].filter(Boolean).join(' · '));
+  const row=(k,v)=>v?`<div class="muted" style="margin:2px 0"><b style="color:var(--ink)">${k}</b> · ${v}</div>`:'';
+  openPanel(`<h2 style="margin-top:0">작품 인증 상세 ${w.sponsored?'<span class="chip y">샘플 제공</span>':''}</h2>
+    <div class="muted"><a href="#" onclick="openUserPanel('${w.profile_id}');return false">${esc(w.owner?.nickname||'')}</a> · ${esc(w.owner?.dong_name||'')} · ${fmt(w.created_at)}</div>
+    <h3 style="margin:10px 0 4px">${esc(w.title||'')}</h3>
+    <div class="ph">${(w.photos||[]).map(u=>`<a href="${esc(u)}" target="_blank"><img src="${esc(u)}"></a>`).join('')}</div>
+    ${row('종류', esc(w.item_type||''))}${row('기법', esc(techs.join(', ')))}
+    ${row('실', esc(yarns.join(' / ')||w.yarn_info||w.yarn_name||''))}${row('바늘', esc((w.needles||[]).map(n=>n.size||n).join(', ')||w.needle_size||''))}
+    ${row('게이지', esc(w.gauge||''))}${row('완성 크기', esc(w.finished_size||''))}${row('도안', esc(w.pattern_source||''))}
+    ${w.note?`<p style="white-space:pre-wrap;margin:10px 0">${esc(w.note)}</p>`:''}
+    <div class="row"><button class="r" onclick="delWork('${w.id}')">인증 삭제</button></div>
+    <h2>인증 글 ${(posts||[]).length}</h2>${(posts||[]).map(r=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="muted">${fmt(r.created_at)} · 좋아요 ${r.like_count||0} · 답글 ${r.reply_count||0}</span><div style="white-space:pre-wrap">${esc(r.body||'')}</div><div class="row" style="margin-top:4px"><button onclick="openPostPanel('${r.id}')">글 열기</button></div></div>`).join('')||'<div class="muted">없음</div>'}`);
+}
 async function openPostPanel(id){
   const [{data:p},{data:replies},{data:reps}] = await Promise.all([
     sb.from('posts').select('*, author:profiles!posts_author_id_fkey(id,nickname,dong_name,suspended_at)').eq('id',id).single(),
@@ -578,9 +622,9 @@ VIEWS.content = async()=>{
   if(contentTab==='posts'){ const {data}=await sb.from('posts').select('id,body,photos,hidden,created_at,like_count,reply_count,parent_id,meetup_id,work_id, author:profiles!posts_author_id_fkey(nickname)').is('parent_id',null).order('created_at',{ascending:false}).limit(100);
     body=`<table><tr><th>글</th><th>작성자</th><th>반응</th><th>시각</th><th></th></tr>${(data||[]).map(p=>`<tr class="clk" onclick="openPostPanel('${p.id}')"><td>${p.hidden?'<span class="chip y">숨김</span>':''}${p.meetup_id?'<span class="chip">모임</span>':''}${p.work_id?'<span class="chip y">인증</span>':''}${esc((p.body||'').slice(0,90))||'<span class="muted">(사진)</span>'} ${(p.photos||[]).length?`<span class="muted">📷${p.photos.length}</span>`:''}</td><td>${esc(p.author?.nickname)}</td><td class="muted">♥${p.like_count||0} 💬${p.reply_count||0}</td><td class="muted">${fmt(p.created_at)}</td><td><button class="r" onclick="event.stopPropagation();delPost('${p.id}')">삭제</button></td></tr>`).join('')}</table>`; }
   else if(contentTab==='meetups'){ const {data}=await sb.from('meetups').select('id,title,place_name,starts_at,participant_count,capacity,kind,craft,review_count,is_public,created_at, creator:profiles!meetups_created_by_fkey(nickname)').order('starts_at',{ascending:false}).limit(100);
-    body=`<table><tr><th>모임</th><th>장소</th><th>일시</th><th>참여</th><th>개설자</th><th></th></tr>${(data||[]).map(m=>`<tr><td><b>${esc(m.title)}</b> <span class="chip">${esc(m.kind||'')}</span>${m.is_public?'':'<span class="chip y">비공개</span>'}</td><td>${esc(m.place_name||'')}</td><td class="muted">${fmt(m.starts_at)}</td><td>${m.participant_count||0}${m.capacity?'/'+m.capacity:''} · 후기 ${m.review_count||0}</td><td>${esc(m.creator?.nickname||'')}</td><td><button class="r" onclick="delMeetup('${m.id}', this)">삭제</button></td></tr>`).join('')}</table>`; }
+    body=`<table><tr><th>모임</th><th>장소</th><th>일시</th><th>참여</th><th>개설자</th><th></th></tr>${(data||[]).map(m=>`<tr class="clk" onclick="openMeetupPanel('${m.id}')"><td><b>${esc(m.title)}</b> <span class="chip">${esc(m.kind||'')}</span>${m.is_public?'':'<span class="chip y">비공개</span>'}</td><td>${esc(m.place_name||'')}</td><td class="muted">${fmt(m.starts_at)}</td><td>${m.participant_count||0}${m.capacity?'/'+m.capacity:''} · 후기 ${m.review_count||0}</td><td>${esc(m.creator?.nickname||'')}</td><td><button class="r" onclick="event.stopPropagation();delMeetup('${m.id}', this)">삭제</button></td></tr>`).join('')}</table>`; }
   else { const {data}=await sb.from('works').select('id,title,photos,techniques,custom_techniques,yarn_info,created_at, owner:profiles!works_profile_id_fkey(nickname)').order('created_at',{ascending:false}).limit(100);
-    body=`<table><tr><th>사진</th><th>작품</th><th>기법</th><th>실</th><th>작성자</th><th></th></tr>${(data||[]).map(w=>`<tr><td><div class="ph">${(w.photos||[]).slice(0,2).map(u=>`<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" style="width:56px;height:56px"></a>`).join('')}</div></td><td><b>${esc(w.title)}</b><div class="muted">${fmtd(w.created_at)}</div></td><td>${(w.techniques||[]).map(t=>`<span class="chip">${esc(TECH[t]?.name_ko||t)}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="chip y">${esc(t)}</span>`).join('')}</td><td class="muted">${esc(w.yarn_info||'')}</td><td>${esc(w.owner?.nickname||'')}</td><td><button class="r" onclick="delWork('${w.id}', this)">삭제</button></td></tr>`).join('')}</table>`; }
+    body=`<table><tr><th>사진</th><th>작품</th><th>기법</th><th>실</th><th>작성자</th><th></th></tr>${(data||[]).map(w=>`<tr class="clk" onclick="openWorkPanel('${w.id}')"><td><div class="ph">${(w.photos||[]).slice(0,2).map(u=>`<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" style="width:56px;height:56px"></a>`).join('')}</div></td><td><b>${esc(w.title)}</b><div class="muted">${fmtd(w.created_at)}</div></td><td>${(w.techniques||[]).map(t=>`<span class="chip">${esc(TECH[t]?.name_ko||t)}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="chip y">${esc(t)}</span>`).join('')}</td><td class="muted">${esc(w.yarn_info||'')}</td><td>${esc(w.owner?.nickname||'')}</td><td><button class="r" onclick="event.stopPropagation();delWork('${w.id}', this)">삭제</button></td></tr>`).join('')}</table>`; }
   $('#main').innerHTML=`<h1>글·모임·인증</h1><div class="tabs">${[['posts','글'],['meetups','모임'],['works','작품 인증']].map(([k,l])=>`<button class="${contentTab===k?'on':''}" onclick="contentTab='${k}';route()">${l}</button>`).join('')}</div>${body}`;
 };
 // ===== AI 데이터 =====
