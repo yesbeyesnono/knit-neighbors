@@ -6,10 +6,12 @@
 
 ## 1. 앱 정보 (App Information)
 
+> **KOAP 검색 노출(2026-11-04 대표)**: App Store 는 이름·부제·키워드, Play 는 이름·간단한 설명을 검색에 씁니다. 두 스토어 모두 이름을 `뜨개동네 KOAP`로 두고 키워드/간단한 설명에 `KOAP`를 넣으면 'koap'·'뜨개동네' 둘 다로 검색됩니다. 영어 현지화를 추가하면 이름 `KOAP - Knit Neighbors`. 기기 홈 화면의 앱 이름은 그대로 `뜨개동네`(짧아야 잘리지 않음).
+
 | 칸 | 값 | 비고 |
 |---|---|---|
-| 이름 (30자) | `뜨개동네` | 지금 레코드 이름이 KOAP이면 여기서 바꿉니다. 이미 쓰는 이름이라고 나오면 → `뜨개동네 - 동네 뜨개 모임` |
-| 부제 (30자) | `동네 뜨개 이웃과 모임, 작품 인증` | |
+| 이름 (30자) | `뜨개동네 KOAP` | 대표 지시(2026-11-04): 회원이 'koap'·'뜨개동네' 어느 쪽으로 검색해도 나오게. 이름에 둘 다 넣는 게 가장 확실(App Store 검색은 이름 > 부제 > 키워드 순 가중). 이미 쓰는 이름이면 → `KOAP 뜨개동네` |
+| 부제 (30자) | `동네 뜨개 이웃·모임·작품 인증` | |
 | 기본 언어 | 한국어 | |
 | 카테고리 (기본) | 소셜 네트워킹 | 앱의 중심이 이웃 찾기·모임·채팅이라 심사 기준(1.2 사용자 콘텐츠)과도 맞음 |
 | 카테고리 (보조) | 라이프스타일 | |
@@ -78,7 +80,7 @@
 
 ### 키워드 (100자 · 쉼표로 구분, 띄어쓰기 없이)
 ```
-뜨개질,코바늘,대바늘,뜨개,손뜨개,니팅,크로셰,뜨개모임,동네친구,취미모임,실,수세미,인형뜨기,가방뜨기,공방,원데이클래스,knit,crochet,yarn,뜨개친구,핸드메이드
+koap,코압,뜨개질,코바늘,대바늘,뜨개,손뜨개,니팅,크로셰,뜨개모임,동네친구,취미모임,실,수세미,인형뜨기,가방뜨기,공방,원데이클래스,knit,crochet,yarn핸드메이드
 ```
 
 ### 이 버전의 새로운 기능 (첫 출시)
@@ -140,10 +142,10 @@ TestFlight 앱에서 찍습니다(아이폰 Pro Max 계열이면 그대로 규�
 
 ## English (선택 — 한국에서만 판매하면 한국어만으로 충분. 영어 현지화를 추가할 때 사용)
 
-- Name: `Knit Neighbors`
+- Name: `KOAP - Knit Neighbors`
 - Subtitle (30): `Knitting friends & meetups`
 - Promotional text: `Is anyone knitting near you? Find knitters and crocheters in your neighborhood, join local meetups, and log your finished projects.`
-- Keywords: `knitting,crochet,yarn,knit,meetup,craft,stash,pattern,community,amigurumi,local,friends`
+- Keywords: `koap,knitting,crochet,yarn,knit,meetup,craft,stash,pattern,community,amigurumi,local`
 - Description:
 ```
 Knit Neighbors connects people who knit and crochet in the same neighborhood.

@@ -6,8 +6,8 @@
 
 | 칸 | 값 |
 |---|---|
-| 앱 이름 (30자) | `뜨개동네` |
-| 간단한 설명 (80자) | `우리 동네 뜨개 이웃과 모임을 지도에서 찾고, 완성작을 인증하고, 내 실함을 정리해요` |
+| 앱 이름 (30자) | `뜨개동네 KOAP` |
+| 간단한 설명 (80자) | `KOAP 뜨개동네 — 우리 동네 뜨개 이웃·모임을 지도에서 찾고, 완성작을 인증하고, 내 실함을 정리해요` |
 | 자세한 설명 (4000자) | `resources/store/appstore_입력시트.md` 3절 '설명' 그대로 (Apple 문장만 "Apple·Google과는 관련이 없어요"로) |
 | 앱 아이콘 (512×512 PNG) | `resources/store/logo/knit-neighbors-logo-512.png` |
 | 그래픽 이미지 (1024×500) | `resources/store/play/feature-graphic.png` |
