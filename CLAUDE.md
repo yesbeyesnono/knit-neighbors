@@ -14,7 +14,7 @@
 ## 이름 (2026-11-04 대표 확정)
 - **앱·브랜드 이름 = `knitup`** (출원 상표 09·16·35·41·42류, 뉴스레터 구독자 1만+ 인지도). **`뜨개동네`는 knitup 앱 안의 동네 커뮤니티 이름**(스토어 부제·키워드·앱 안 탭 제목에 유지). 스토어 이름·iOS CFBundleDisplayName·Android app_name·capacitor appName·로그인 첫 화면 h1 = knitup, 법적 문서 제목 `knitup(뜨개동네) …` + 이름 설명 한 줄. KOAP 는 안 씀(App Store Connect 레코드 이름만 KOAP 였던 것). 저장소·Bundle ID(kr.co.firmtech.knitneighbors)·코드 안 'knit-neighbors' 는 그대로
 
-- **회사 메일 = knitup.co.kr 도메인(2026-11-05 대표 전달)**: 웹메일 `http://webmail.knitup.co.kr/intro.php` — 관리자 계정 아이디 `knitup2026`, 대표 메일 `info@knitup.co.kr`(아이디 `info`). **비밀번호는 대표가 보관, 이 저장소(공개 repo)·채팅·파일 어디에도 적지 않는다.** knitup.official@gmail.com 은 구글 본인인증에 막혀 못 읽으므로, 스토어·법적 문서·아동 안전 담당 연락처는 대표 결정 뒤 `info@knitup.co.kr` 로 바꾸는 것을 권고(현재 docs/*.html·입력시트에 knitup.official 14곳)
+- **회사 메일 = knitup.co.kr 도메인(2026-11-05 대표 전달)**: 웹메일 `http://webmail.knitup.co.kr/intro.php` — 관리자 계정 아이디 `knitup2026`, 대표 메일 `info@knitup.co.kr`(아이디 `info`). **비밀번호는 대표가 보관, 이 저장소(공개 repo)·채팅·파일 어디에도 적지 않는다.** `info@` 는 뉴스레터 발송용. **knitup.official@gmail.com 은 메일 수신·확인 가능**(막힌 것은 그 계정의 Google Cloud 콘솔 로그인뿐) — 스토어·법적 문서 연락처로 계속 써도 됨. 앱 전용 주소를 만들면 docs/*.html·입력시트의 knitup.official 14곳을 바꿀 것
 
 ## 에디션 — V1(full) / V2(meet) (2026-09-19 대표 확정)
 - **코드는 하나**, `docs/edition.js`의 `KN_EDITION`으로 나눈다. index.html의 `FULL` 상수로 분기. 브랜치를 가르지 말 것.
