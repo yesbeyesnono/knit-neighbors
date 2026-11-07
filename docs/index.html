@@ -2292,7 +2292,25 @@ async function openShopEdit(){
     <label class="f">네이버 지도·플레이스<input id="lkN" maxlength="200" inputmode="url" value="${esc(L.naver||'')}"></label>
     <label class="f">카카오 채널<input id="lkK" maxlength="200" inputmode="url" value="${esc(L.kakao||'')}"></label>
     <p class="muted" style="margin:0;font-size:.8rem">지도 공개 상태: <b>${x.is_active?'공개':'숨김'}</b>${x.is_active?'':' · 위치가 정해지면 지기가 확인하고 공개해요'}</p>
-    <button class="btn" id="seSave" onclick="saveShopEdit()">저장</button>`);
+    <button class="btn" id="seSave" onclick="saveShopEdit()">저장</button>
+    <button type="button" class="btn o" style="color:#b3261e;border-color:#e6c2be;margin-top:4px" onclick="deleteMyShop()">가게 삭제</button>`);
+}
+function deleteMyShop(){   // 오너 본인 삭제(schema 85) — 소식·클래스·팔로워·사진이 함께 지워지고 되돌릴 수 없음
+  if(!myShop) return;
+  openSheet(`<b style="font-size:1.05rem;color:#b3261e">${esc(myShop.name)} 가게를 삭제할까요?</b>
+    <div class="card soft" style="font-size:.9rem;line-height:1.55"><div>가게 페이지와 <b>소식·클래스·신청 내역·팔로워·사진</b>이 모두 지워지고 지도에서 사라져요. <b>되돌릴 수 없어요.</b></div>
+    <div style="margin-top:8px">확정된 수강생이 있는 클래스가 있으면 먼저 마무리하거나 확정을 취소해야 해요. 다시 등록하려면 설정 › 우리 가게 등록 신청으로 새로 신청해요.</div></div>
+    <label class="f">확인을 위해 "삭제"라고 적어 주세요<input id="sdWord" placeholder="삭제" autocomplete="off" oninput="$('#sdBtn').disabled=this.value.trim()!=='삭제'"></label>
+    <button class="btn danger" id="sdBtn" disabled onclick="submitDeleteMyShop()">가게 삭제하기</button>
+    <button class="btn o" onclick="closeSheet();openShopEdit()">그만두기</button>`);
+}
+async function submitDeleteMyShop(){
+  const b=$('#sdBtn'); b.disabled=true; b.textContent='삭제 중…';
+  try{ const { data:files } = await sb.storage.from('shops').list(myShop.id); if(files?.length) await sb.storage.from('shops').remove(files.map(f=>`${myShop.id}/${f.name}`)); }catch(e){}   // 사진은 가게 행이 있을 때만 지울 수 있어 먼저
+  const { data, error } = await sb.rpc('delete_my_shop', { p_shop: myShop.id });
+  if(error){ b.disabled=false; b.textContent='가게 삭제하기'; return toast(error.message); }
+  closeSheet(); toast(`${data?.name||'가게'}를 삭제했어요`); myShop=null;
+  await loadMe(); go('my'); if(MapAdapter.ready) loadPins();
 }
 function seAddrInput(v){
   clearTimeout(seTimer); sePick=null; const q=v.trim(); if(q.length<2){ seRows=[]; $('#seAddrList').innerHTML=''; return; }

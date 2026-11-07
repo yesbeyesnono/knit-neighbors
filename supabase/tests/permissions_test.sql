@@ -126,6 +126,8 @@ begin
   out := pg_temp.must_fail(out, 'admin_delete_post(notify)', 'select public.admin_delete_post(gen_random_uuid(), ''x'', true)');   -- schema 80
   out := pg_temp.must_fail(out, 'admin_delete_user', format('select public.admin_delete_user(%L, ''x'')', d2));   -- schema 82
   out := pg_temp.must_fail(out, 'mod_notify_delete', format('select public.mod_notify_delete(%L, ''글'', ''x'')', d2));
+  out := pg_temp.must_fail(out, 'admin_delete_shop', 'select public.admin_delete_shop(gen_random_uuid(), ''x'', false)');   -- schema 85
+  out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
   out := pg_temp.must_fail(out, 'jigi_on_shop_claim', 'select public.jigi_on_shop_claim()');
   out := pg_temp.must_fail(out, 'yarn_add_alias', 'select public.yarn_add_alias(gen_random_uuid(), ''x'')');

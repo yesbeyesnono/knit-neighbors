@@ -1483,3 +1483,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 -- 83. 실 사전 삭제 (마이그레이션 admin_yarn_delete, 2026-11-04) — admin_yarn_delete(p_ids uuid[], p_reason) → 삭제 수. 색·판매처 cascade, 실함·입력 원문·도안·상품·이벤트의 catalog_id 는 set null, merged_into 참조 해제, admin_log(이름 목록). 콘솔 › 실 사전: 상세 패널 [이 실 삭제] + 목록 행 체크박스 → 하단 '선택한 실 삭제' 띠
 -- 84. 실 검색 순위 (마이그레이션 yarn_suggest_brand_rank, 2026-11-04 대표 "앵콜스 검색에 앵콜스 실이 안 나옴") — 원인: 쇼핑몰 수집 때 '판매처+제품명' 키(앵콜스아임울4 등)가 norm_keys 에 들어가 398종이 '앵콜스'에 걸리고 uses 순이라 낙양모사가 앞섰음. yarn_suggest·yarn_suggest_page 정렬을 '브랜드(또는 브랜드 별칭) 일치 → 확정 → 사용 수'로. 키는 유지(판매처 이름으로도 찾히게)
 -- ---------------------------------------------------------------
+
+-- 85. 가게 삭제 (마이그레이션 shop_delete, 2026-11-07 대표 "가게를 삭제하는 기능이 빠졌다")
+--   delete_my_shop(p_shop): 오너 본인. 모집 중(마감 전·시작 전)인 클래스에 확정 수강생이 있으면 거부.
+--     가게·소식·클래스·신청·팔로우·열람·알림(shop_id) cascade, shop_claims.shop_id 는 set null.
+--     Storage 'shops/<id>/…' 는 함수가 못 지움(Supabase protect_delete: storage.objects 직접 delete 금지) → 앱·콘솔이 rpc 전에 Storage API 로 list→remove(보강 shop_delete_fix).
+--     반환 {ok,name}. 앱: 내 가게 관리 시트 맨 아래 [가게 삭제] → '삭제' 입력 확인.
+--   admin_delete_shop(p_shop, p_reason, p_notify): 관리자. admin_log 'delete_shop', p_notify 면 오너에게 mod_notify_delete.
+--     콘솔 › 파트너 가게 › 가게 패널 [가게 삭제]. storage 정책 shops_bucket_del_admin(관리자가 shops 버킷 삭제 가능).
