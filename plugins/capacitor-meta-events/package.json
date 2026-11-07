@@ -1,0 +1,11 @@
+{
+  "name": "capacitor-meta-events",
+  "version": "1.0.0",
+  "description": "knitup 전용 Meta(Facebook) 앱 이벤트 측정 플러그인 — 설치·실행 자동 기록 + JS 에서 logEvent",
+  "main": "index.js",
+  "private": true,
+  "license": "UNLICENSED",
+  "files": ["android/src/main/", "android/build.gradle", "ios/Sources", "Package.swift", "CapacitorMetaEvents.podspec", "index.js"],
+  "capacitor": { "ios": { "src": "ios" }, "android": { "src": "android" } },
+  "peerDependencies": { "@capacitor/core": ">=8.0.0" }
+}

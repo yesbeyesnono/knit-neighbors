@@ -4,4 +4,7 @@
     <string name="title_activity_main">knitup</string>
     <string name="package_name">kr.co.firmtech.knitneighbors</string>
     <string name="custom_url_scheme">kr.co.firmtech.knitneighbors</string>
+    <!-- Meta 앱 이벤트(광고 측정). 앱 ID·클라이언트 토큰은 앱에 들어가는 공개 값(앱 시크릿 아님) -->
+    <string name="facebook_app_id">1103713162273239</string>
+    <string name="facebook_client_token">24f259d02aea06e22ce7a87c66d6ff81</string>
 </resources>

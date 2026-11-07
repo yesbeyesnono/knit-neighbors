@@ -10,3 +10,6 @@ project(':capacitor-browser').projectDir = new File('../node_modules/@capacitor/
 
 include ':capacitor-push-notifications'
 project(':capacitor-push-notifications').projectDir = new File('../node_modules/@capacitor/push-notifications/android')
+
+include ':capacitor-meta-events'
+project(':capacitor-meta-events').projectDir = new File('../plugins/capacitor-meta-events/android')
