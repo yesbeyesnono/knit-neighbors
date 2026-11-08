@@ -1491,3 +1491,5 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     반환 {ok,name}. 앱: 내 가게 관리 시트 맨 아래 [가게 삭제] → '삭제' 입력 확인.
 --   admin_delete_shop(p_shop, p_reason, p_notify): 관리자. admin_log 'delete_shop', p_notify 면 오너에게 mod_notify_delete.
 --     콘솔 › 파트너 가게 › 가게 패널 [가게 삭제]. storage 정책 shops_bucket_del_admin(관리자가 shops 버킷 삭제 가능).
+
+-- 86. cheer_daily 서포터 알림 정지 (마이그레이션 cheer_daily_supporters_gate, 2026-11-08) — 서포터즈 중단(81) 때 점수만 막히고 밤 크론의 B2·B5·B7·B8·B10 루프는 남아 있었음(대표 계정이 active 서포터라 11-22 에 2구간 B5 발송 예정이었음). 루프 전체를 app_config.supporters_enabled 로 감쌈. 다시 열 때는 스위치만 켜면 됨
