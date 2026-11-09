@@ -1500,3 +1500,9 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   A1 환영(cheer_on_profile): 동네 이웃 0명이면 '{동네}의 첫 뜨개 이웃이 되셨어요 …' · E3 복귀(check_in): 모임 0개면 '다시 오셔서 반가워요 …'
 --   E1 14일 미접속(cheer_daily): 새 이웃·새 모임 둘 다/이웃만/모임만/둘 다 0 네 가지 문구 · D3 참여자 0 모임: 같은 종목 이웃 0명이면 그 문장 생략
 --   잠복 버그 수정: D3 의 `x.craft = r.craft` 가 enum(craft_type) = text(meetups.craft) 비교라, 3일 뒤 모임에 참여자가 0명인 날 cheer_daily 전체가 오류로 실패했을 것(지금까지 해당 사례 없어 실패 0회). `x.craft::text` 비교 + both·knitting 처리
+
+-- 89. 첫 화면 공지: 처음 한 번은 시트 + 버튼 (마이그레이션 home_notice_sheet, 2026-11-09 대표 확정: 시안 6종 중 ③ 시트 → ① 카드)
+--   app_config.home_notice 에 키 추가만: sheet(bool, 처음 한 번 아래에서 올라오는 시트) · btn(버튼 글자 20자) · link({type:'post',id} | {type:'view',view})
+--   admin_set_home_notice(p): btn 이 있으면 link 필수 — view 는 map·comm·chats·my·skills·stash·cert·support 만, post 는 실제 있는 원글만(임의 URL 불가). id 는 제목·내용이 바뀔 때만 새로
+--   옛 앱(1.0.2 이하)은 home_notice 자체를 안 읽고, 1.0.3 웹 초판은 새 키를 무시(카드만)
+--   개시 인사 값: id 20261109-hello, 버튼 '인사 남기러 가기' → 지기 환영 글(40885c1e…). '사진 한 장 올리기'는 성급하다는 대표 의견으로 인사 답글 유도로 바꿈
