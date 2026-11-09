@@ -2364,7 +2364,7 @@ async function openProfile(id){
   else if(r.status==='pending') action = `<button class="btn primary" onclick="respond('${id}','accepted')">수락</button><button class="btn o" onclick="respond('${id}','declined')">거절</button>`;
   else if(r.status==='blocked') action = `<button class="btn o" disabled>차단됨</button>`;
   else action = `<button class="btn o" disabled>거절됨 · 30일 후 재신청</button>`;
-  const handle=[p.dong_name?`${p.dong_name}${p.dong_verified_at?' ✓':''}`:'', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
+  const handle= p.id===SUPPORT_ID ? '운영진' : [p.dong_name?`${p.dong_name}${p.dong_verified_at?' ✓':''}`:'', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
   const bio = p.bio || [p.now_making?`지금 뜨는 것: ${p.now_making}`:'', p.stuck_on?`요즘 막히는 부분: ${p.stuck_on}`:''].filter(Boolean).join('\n');
   const meta = [simBadge(p), p.experience?`<span class="chip">${EXP[p.experience]}</span>`:'', p.mbti?`<span class="chip">${esc(p.mbti)}</span>`:'', p.trait&&p.trait!=='new'?`<span class="chip" style="background:var(--chip);color:var(--olive);font-weight:700">${traitLabel(p.trait)}</span>`:'', p.available?.length?`<span class="chip">${p.available.map(a=>AVAIL[a]).join(' · ')}</span>`:''].filter(Boolean).join('');
   $('#profTitle').textContent = p.nickname; if(!openProfile.scrollBound){ openProfile.scrollBound=true; $('#v-profile').addEventListener('scroll', e=>$('#profTitle').classList.toggle('show', e.target.scrollTop>70)); } $('#profTitle').classList.remove('show');
@@ -2966,7 +2966,7 @@ function mentionInput(inp, key){
   clearTimeout(mentionTimer);
   mentionTimer=setTimeout(async()=>{
     const list=await mentionCandidates(key, t.q); if(!list.length){ pop.hidden=true; return; }
-    pop.innerHTML=list.map(p=>`<div class="mi" onmousedown="event.preventDefault()" onclick="pickMention('${key}','${p.id}',this.dataset.n)" data-n="${esc(p.nickname)}">${avatar(p)}<div><b>@${esc(p.nickname)}</b><span>${esc([p.dong_name,lvShort(p)].filter(Boolean).join(' · '))}</span></div></div>`).join('');
+    pop.innerHTML=list.map(p=>`<div class="mi" onmousedown="event.preventDefault()" onclick="pickMention('${key}','${p.id}',this.dataset.n)" data-n="${esc(p.nickname)}">${avatar(p)}<div><b>@${esc(p.nickname)}</b><span>${esc((p.id===SUPPORT_ID?['운영진']:[p.dong_name,lvShort(p)]).filter(Boolean).join(' · '))}</span></div></div>`).join('');
     pop.hidden=false;
   }, 120);
 }
@@ -3387,7 +3387,7 @@ function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방
 function postCard(p, opts={}){
   const a = p.author||{}; const mine = p.author_id===me.id;
   const n = (p.photos||[]).length;
-  const sub = [a.dong_name, lvShort(a)].filter(Boolean).join(' · ');
+  const sub = p.author_id===SUPPORT_ID ? '운영진' : [a.dong_name, lvShort(a)].filter(Boolean).join(' · ');   // 지기 계정은 동네·단계 대신 '운영진'
   const showLine = opts.line || (!opts.noLine && p.reply_count>0);
   return `<div class="post ${opts.cls||''}" onclick="openPost('${p.id}')">
     <div class="avacol"><div onclick="event.stopPropagation();openProfile('${a.id}')">${avatar(a)}</div>${showLine?'<div class="tline"></div>':''}</div>
