@@ -733,7 +733,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .bub .card-btns{display:flex;flex-direction:column;gap:6px;margin-top:8px}.bub .card-btns button{font:inherit;font-size:.88rem;padding:9px;border-radius:10px;border:0;background:var(--btn);color:var(--btn-ink);font-weight:600;cursor:pointer}.bub .card-btns button.o{background:var(--chip);color:var(--olive)}
 .supbadge{display:inline-block;white-space:nowrap;flex:none;font-size:.66rem;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--yarn-soft);color:var(--color-primary-dark);vertical-align:middle;margin-left:4px}
 .evstrip{display:flex;gap:10px;overflow-x:auto;padding:10px 16px 2px;scrollbar-width:none}.evstrip::-webkit-scrollbar{display:none}.evstrip:empty{display:none}
-.hnotice{position:relative;margin:10px 16px 2px;background:var(--chip);color:var(--chip-ink);border-radius:14px;padding:12px 40px 12px 14px;font-size:.9rem;line-height:1.55;white-space:pre-line;word-break:keep-all;overflow-wrap:anywhere}.hnotice b{display:block;margin-bottom:4px;font-size:.95rem}.hnotice .x{position:absolute;right:4px;top:4px;width:34px;height:34px;border:0;background:none;color:inherit;opacity:.6;font-size:1.1rem;line-height:1;cursor:pointer}.hnotice .go{display:inline-block;margin-top:6px;padding:0;border:0;background:none;color:inherit;font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}.hnotice[hidden]{display:none}
+.hnotice{position:relative;margin:10px 16px 4px;background:var(--chip);color:var(--chip-ink);border-radius:16px;padding:15px 16px}.hnotice b{display:block;margin:0 26px 6px 0;font-size:1rem;font-weight:700;line-height:1.42;letter-spacing:-.01em;word-break:keep-all;text-wrap:balance}.hnotice p{margin:0;font-size:.875rem;line-height:1.62;color:var(--color-text-muted);word-break:keep-all;overflow-wrap:anywhere;text-wrap:pretty}.hnotice p+p{margin-top:6px}.hnotice .x{position:absolute;right:6px;top:6px;width:32px;height:32px;border:0;background:none;color:inherit;opacity:.5;font-size:.95rem;line-height:1;cursor:pointer}.hnotice[hidden]{display:none}
 .evcard{flex:0 0 auto;width:min(78vw,300px);border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg,#fff);cursor:pointer}
 .evcard .ek{font-size:.72rem;font-weight:700;color:var(--acc)}.evcard b{display:block;margin:3px 0 4px;font-size:.98rem}.evcard .em{font-size:.8rem;color:var(--ink2,#6A6E73)}.evcard .es{margin-top:6px;font-size:.8rem;font-weight:600}
 .evcard.lock{opacity:.62}
@@ -2533,17 +2533,17 @@ function evDate(t){ const d=new Date(t); return `${d.getMonth()+1}/${d.getDate()
 function evState(e){ const a=evApps[e.id]; if(a && a.status!=='cancelled') return a.status; const now=Date.now(); if(now>new Date(e.apply_until)) return 'ended'; if(now<new Date(e.apply_from)) return 'soon'; if((myProfile?.act_level||0)<e.min_level) return 'lock'; return 'can'; }
 const EV_STATE_TXT = { applied:'신청 완료 · 발표를 기다려 주세요', selected:'선정됐어요! 눌러서 확인', done:'인증 완료', rejected:'이번엔 함께하지 못했어요', ended:'신청 마감', soon:'곧 열려요', can:'신청할 수 있어요' };
 // ---- 첫 화면 공지(schema 87·89): app_config.home_notice {id,active,title,body,sheet,btn,link}
-//      sheet=true 면 처음 한 번은 아래에서 올라오는 시트로, 닫은 뒤에는 커뮤니티 맨 위 카드로 남는다. 카드는 ✕로 닫으면 id 로 기기에 기억(id 가 바뀌면 다시 보임)
-//      버튼(btn)은 서버가 정해 준 link 만 연다(openLink — 정해진 종류만)
+//      sheet=true 면 처음 한 번은 아래에서 올라오는 시트로, 닫은 뒤에는 커뮤니티 맨 위 카드로 남는다(카드에는 버튼 없음 — 2026-11-09 대표). 카드는 ✕로 닫으면 id 로 기기에 기억(id 가 바뀌면 다시 보임)
+//      시트의 버튼(btn)은 서버가 정해 준 link 만 연다(openLink — 정해진 종류만)
 let homeNoticeCur=null;
 function hnSeen(k, id){ try{ return localStorage.getItem(k)===id; }catch(e){ return true; } }
 async function loadHomeNotice(){
   const box=$('#homeNotice'); if(!box) return;
   try{ const { data } = await sb.from('app_config').select('value').eq('key','home_notice').maybeSingle(); const n=data?.value;
     if(!n || !n.active || !n.body){ homeNoticeCur=null; box.hidden=true; return; }
-    homeNoticeCur=n; const id=String(n.id), hasGo=!!(n.btn && n.link && typeof n.link==='object');
+    homeNoticeCur=n; const id=String(n.id);
     if(hnSeen('kn_notice_x', id)) box.hidden=true;
-    else { box.innerHTML=`${n.title?`<b>${esc(n.title)}</b>`:''}${esc(n.body)}${hasGo?`\n<button type="button" class="go" onclick="homeNoticeGo()">${esc(n.btn)} ›</button>`:''}<button type="button" class="x" aria-label="공지 닫기" onclick="closeHomeNotice('${esc(id)}')">✕</button>`; box.hidden=false; }
+    else { box.innerHTML=`${n.title?`<b>${esc(n.title)}</b>`:''}${String(n.body).split(/\n\s*\n/).map(t=>`<p>${esc(t.replace(/\s*\n\s*/g,' ').trim())}</p>`).join('')}<button type="button" class="x" aria-label="공지 닫기" onclick="closeHomeNotice('${esc(id)}')">✕</button>`; box.hidden=false; }
     homeNoticeSheet();
   }catch(e){ box.hidden=true; }
 }
@@ -2555,7 +2555,7 @@ function homeNoticeSheet(){
   if(!['map','comm'].includes(view) || $('#sheetwrap').classList.contains('on')) return;
   try{ localStorage.setItem('kn_notice_s', id); }catch(e){ return; }
   const hasGo=!!(n.btn && n.link && typeof n.link==='object');
-  openSheet(`<b style="font-size:1.1rem;line-height:1.4">${esc(n.title||'알려 드려요')}</b><p class="muted" style="margin:0;font-size:.92rem;line-height:1.6;white-space:pre-line">${esc(n.body)}</p>
+  openSheet(`<b style="font-size:1.12rem;line-height:1.42;letter-spacing:-.01em;word-break:keep-all;text-wrap:balance">${esc(n.title||'알려 드려요')}</b><p style="margin:0 0 4px;font-size:.92rem;line-height:1.65;color:var(--color-text-muted);white-space:pre-line;word-break:keep-all;text-wrap:pretty">${esc(n.body)}</p>
     ${hasGo?`<button class="btn" onclick="closeSheet();homeNoticeGo()">${esc(n.btn)}</button><button class="btn o" onclick="closeSheet()">먼저 둘러볼게요</button>`:`<button class="btn" onclick="closeSheet()">확인했어요</button>`}`);
 }
 function homeNoticeGo(){ const n=homeNoticeCur; if(n && n.link && typeof n.link==='object') openLink(n.link); }
