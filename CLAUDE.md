@@ -91,7 +91,7 @@
 - **새 테이블 GRANT 필수(Supabase 공지, 2026-10-30부터)**: public 스키마에 새 테이블을 만들면 Data API 권한이 자동으로 붙지 않는다. 테이블을 만드는 **같은 마이그레이션 안에** 반드시 `grant select on public.<t> to anon;` `grant select, insert, update, delete on public.<t> to authenticated;` `grant select, insert, update, delete on public.<t> to service_role;`를 넣을 것(비로그인이 볼 필요 없는 테이블은 anon 생략, RLS는 별도로 켬). 기존 테이블은 영향 없음. 빠뜨리면 API가 permission denied.
 - 원칙: 모든 테이블 RLS. SECURITY DEFINER 함수는 만들 때 `revoke ... from public, anon` 후 필요한 역할에만 grant(기본 권한도 PUBLIC 차단으로 바꿔 둠). 관리자 기능은 `is_admin()` 검사 + `admin_log` 기록. profiles는 **컬럼 단위 UPDATE grant**(서버 계산값·is_author 위조 방지) — 컬럼을 추가하면 사용자가 고칠 것만 grant.
 - **계정 삭제 = 20일 유예(2026-11-04 대표 확정, schema 77)**: 설정 › 계정 삭제는 앱 안 시트("삭제" 입력 → 빨간 버튼) → `request_account_deletion()`(글 숨김·친구 보관 후 제거·핀 끔·`profiles.deleted_at`) → 로그아웃. 20일 안에 같은 계정으로 로그인하면 복구 시트 → `restore_my_account()`. 20일 지나면 크론 `account-purge`(03:30 KST) → Edge `jigi-remind` route `purge` 가 Storage 파일 정리 + auth 삭제(cascade) + 텔레그램 보고. 옛 `delete_my_account()`(즉시)는 DB 에 남아 있지만 앱은 안 부름. 다른 앱 관행: 인스타·X·페이스북 30일, 디스코드 14일, 구글 약 20일, 카카오·네이버는 즉시 — 20일은 중간값. 실제 판매 시작 시 주문 기록은 전자상거래법 5년 보존이라 삭제와 분리해야 함
-- 지기(운영진) 계정 = knitup.official 프로필 `e120eb67-b254-4008-92d8-08c95c821e9e`(닉네임 '뜨개동네 지기'). 앱 `SUPPORT_ID`.
+- 지기(운영진) 계정 = knitup.official 프로필 `e120eb67-b254-4008-92d8-08c95c821e9e`(닉네임 '뜨개동네 지기'). 앱 `SUPPORT_ID`. 프로필 사진 = knitup 로고(2026-11-09, `docs/icons/jigi-avatar.png` 를 Pages 주소로 `profiles.avatar_url` 에 연결 — Storage 업로드 권한이 없어 Pages 에 둠. 이 파일을 옮기거나 지우면 지기 사진이 깨짐).
 - 파트너 가게: 없음(2026-10-11 대표 지시로 쎄비하우스 가게 레코드·팔로우·열람 기록 삭제. 실 사전의 판매처·브랜드 별칭 데이터는 유지)
 
 ## 앱 기능 요약
