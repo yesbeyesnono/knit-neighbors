@@ -1493,3 +1493,5 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --     콘솔 › 파트너 가게 › 가게 패널 [가게 삭제]. storage 정책 shops_bucket_del_admin(관리자가 shops 버킷 삭제 가능).
 
 -- 86. cheer_daily 서포터 알림 정지 (마이그레이션 cheer_daily_supporters_gate, 2026-11-08) — 서포터즈 중단(81) 때 점수만 막히고 밤 크론의 B2·B5·B7·B8·B10 루프는 남아 있었음(대표 계정이 active 서포터라 11-22 에 2구간 B5 발송 예정이었음). 루프 전체를 app_config.supporters_enabled 로 감쌈. 다시 열 때는 스위치만 켜면 됨
+
+-- 87. 첫 화면 고정 공지 카드 (마이그레이션 home_notice, 2026-11-09 대표 지시) — app_config.home_notice {id, active, title, body}(anon·authenticated 읽기는 기존 정책). admin_set_home_notice(p jsonb): 관리자만, title 60·body 400자, 본문이 바뀌면 id 자동 갱신(회원이 닫은 카드가 다시 보임), admin_log 'set_home_notice'. 앱: 커뮤니티 맨 위 #homeNotice(loadHomeNotice, 닫기 = localStorage kn_notice_x). 콘솔: 공지·알림 보내기 화면 맨 위 '첫 화면 고정 공지 카드' 칸. 초기값 = 2026-11-09 개시 인사

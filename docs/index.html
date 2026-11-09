@@ -733,6 +733,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .bub .card-btns{display:flex;flex-direction:column;gap:6px;margin-top:8px}.bub .card-btns button{font:inherit;font-size:.88rem;padding:9px;border-radius:10px;border:0;background:var(--btn);color:var(--btn-ink);font-weight:600;cursor:pointer}.bub .card-btns button.o{background:var(--chip);color:var(--olive)}
 .supbadge{display:inline-block;white-space:nowrap;flex:none;font-size:.66rem;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--yarn-soft);color:var(--color-primary-dark);vertical-align:middle;margin-left:4px}
 .evstrip{display:flex;gap:10px;overflow-x:auto;padding:10px 16px 2px;scrollbar-width:none}.evstrip::-webkit-scrollbar{display:none}.evstrip:empty{display:none}
+.hnotice{position:relative;margin:10px 16px 2px;background:var(--chip);color:var(--chip-ink);border-radius:14px;padding:12px 40px 12px 14px;font-size:.9rem;line-height:1.55;white-space:pre-line;word-break:keep-all;overflow-wrap:anywhere}.hnotice b{display:block;margin-bottom:4px;font-size:.95rem}.hnotice .x{position:absolute;right:4px;top:4px;width:34px;height:34px;border:0;background:none;color:inherit;opacity:.6;font-size:1.1rem;line-height:1;cursor:pointer}.hnotice[hidden]{display:none}
 .evcard{flex:0 0 auto;width:min(78vw,300px);border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg,#fff);cursor:pointer}
 .evcard .ek{font-size:.72rem;font-weight:700;color:var(--acc)}.evcard b{display:block;margin:3px 0 4px;font-size:.98rem}.evcard .em{font-size:.8rem;color:var(--ink2,#6A6E73)}.evcard .es{margin-top:6px;font-size:.8rem;font-weight:600}
 .evcard.lock{opacity:.62}
@@ -899,6 +900,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
         </div>
       </div>
     </div>
+    <div class="hnotice" id="homeNotice" hidden></div>
     <div class="evstrip" id="evStrip"></div>
     <div class="feed" id="feed"></div>
     <div class="feedmore" style="padding:12px 16px"><button class="btn" id="feedMore" onclick="loadFeed(true)" hidden>더 보기</button></div>
@@ -1208,7 +1210,7 @@ const isNative = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
 function metaEvent(name, params){ try{ const M = isNative && CAP.Plugins && CAP.Plugins.MetaEvents; if(M) M.logEvent({ name, params: params||{} }).catch(()=>{}); }catch(e){} }
 // ===== 아이콘 =====
 // 키 → 이모지(기본 표시). 디자인 이미지가 docs/icons/<key>.svg 로 들어오면 ICON_IMAGES=true 로 바꿔 일괄 교체
-const APP_VERSION = '1.0.2';
+const APP_VERSION = '1.0.3';
 const ICON_IMAGES = true;
 const EMOJI = { wave:'🙋', location:'📍', yarn:'🧶', cert:'🏅', check:'✓', close:'✕', handshake:'🤝', report:'🚩', camera:'📷', heart:'♥', reply:'💬', party:'🎉', review:'📝', group:'👥', learn:'📚', teach:'🧑‍🏫', at:'@', signal:'📶', tap:'👆', ruler:'📏' };
 function ico(k){ return `<i class="ico" data-ico="${k}"><b>${EMOJI[k]||''}</b></i>`; }
@@ -2528,6 +2530,15 @@ let evRows=[], evApps={}, wEventPre='';
 function evDate(t){ const d=new Date(t); return `${d.getMonth()+1}/${d.getDate()}`; }
 function evState(e){ const a=evApps[e.id]; if(a && a.status!=='cancelled') return a.status; const now=Date.now(); if(now>new Date(e.apply_until)) return 'ended'; if(now<new Date(e.apply_from)) return 'soon'; if((myProfile?.act_level||0)<e.min_level) return 'lock'; return 'can'; }
 const EV_STATE_TXT = { applied:'신청 완료 · 발표를 기다려 주세요', selected:'선정됐어요! 눌러서 확인', done:'인증 완료', rejected:'이번엔 함께하지 못했어요', ended:'신청 마감', soon:'곧 열려요', can:'신청할 수 있어요' };
+// ---- 첫 화면 고정 공지 카드(schema 87): app_config.home_notice {id,active,title,body}. 닫으면 id 로 기기에 기억, id 가 바뀌면 다시 보임
+async function loadHomeNotice(){
+  const box=$('#homeNotice'); if(!box) return;
+  try{ const { data } = await sb.from('app_config').select('value').eq('key','home_notice').maybeSingle(); const n=data?.value;
+    if(!n || !n.active || !n.body || localStorage.getItem('kn_notice_x')===String(n.id)){ box.hidden=true; return; }
+    box.innerHTML=`${n.title?`<b>${esc(n.title)}</b>`:''}${esc(n.body)}<button type="button" class="x" aria-label="공지 닫기" onclick="closeHomeNotice('${esc(String(n.id))}')">✕</button>`; box.hidden=false;
+  }catch(e){ box.hidden=true; }
+}
+function closeHomeNotice(id){ try{ localStorage.setItem('kn_notice_x', id); }catch(e){} const b=$('#homeNotice'); if(b) b.hidden=true; }
 async function loadEvents(){
   const box=$('#evStrip'); if(!box||!me) return;
   const [{ data:evs }, { data:apps }] = await Promise.all([
@@ -2866,7 +2877,7 @@ bindTabSwipe('#v-comm', '#commTabs');   // 커뮤니티 탭도 좌우 스와이�
 async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); $('#cboxName').textContent = myProfile?.nickname||''; loadTech(); loadFeed(); }
 async function friendIds(){ const rows=await fetchFriendships(); return rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee_id:r.requester_id); }
 async function loadFeed(more){
-  if(!more){ feedRows=[]; feedCursor=null; feedOffset=0; $('#feed').innerHTML='<div class="empty">불러오는 중…</div>'; loadEvents(); loadRecs().then(r=>{ if(r.length && feedRows.length && !['meetup','work'].includes(commFilter) && !$('#feed .reccard')) renderFeed(); }); }
+  if(!more){ feedRows=[]; feedCursor=null; feedOffset=0; $('#feed').innerHTML='<div class="empty">불러오는 중…</div>'; loadHomeNotice(); loadEvents(); loadRecs().then(r=>{ if(r.length && feedRows.length && !['meetup','work'].includes(commFilter) && !$('#feed .reccard')) renderFeed(); }); }
   if(commFilter==='rank'){
     // 추천: 서버 점수순 (반응 × 거리 × 관계 × 질문 ÷ 시간)
     const { data, error } = await sb.rpc('feed_ranked', { p_limit: FEED_PAGE, p_offset: feedOffset });
