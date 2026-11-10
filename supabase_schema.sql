@@ -1526,3 +1526,16 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   _news_from_home_notice() + 트리거 news_from_home_notice(app_config) : 첫 화면 공지(home_notice)를 '보이기'로 저장하면
 --       src='home:<공지 id>' 로 같은 글이 목록에 남음(같은 id 는 한 줄, 제목·내용이 바뀌어 id 가 새로 생기면 새 줄)
 --   처음 넣은 글 4건: 개시 공지(home:20261109-hello) + 업데이트 1.0.1 · 1.0.3 · 1.0.4(홈페이지 소식과 같은 문구·이미지)
+
+-- 92. 관리자 콘솔 › 모임 관리 (마이그레이션 admin_meetups, 2026-11-10 대표 확정 시안)
+--   meetups.hidden boolean default false : 운영진 숨김. 트리거 meetup_hidden_guard 가 관리자 아닌 회원의 변경을 되돌림(개설자가 API 로 풀지 못함)
+--   정책 meetups_select 변경: (not hidden and (is_public or is_room_member(room_id))) or created_by = auth.uid()
+--       → 숨긴 모임은 개설자와 관리자(meetups_admin_select)에게만 보임. 참여·리마인더 함수는 그대로라 숨김은 '목록에서 안 보임'까지
+--   _admin_meetup_base() / _admin_meetup_filter(p) : 모임 한 줄 + 묶음 판정(내부용, grant 없음)
+--       f_upcoming 예정 · f_empty 3일 안에 열리는데 참여 1명 이하(개설자뿐) · f_noreview 끝난 지 2일 지났는데 후기 0 · f_flag 숨김 또는 열린 mod_items
+--       조건: seg · q(제목·장소·개설자) · region(개설자 dong_code 첫 칸) · when(week|month|past30)
+--   admin_meetup_stats() : 예정 · 이번 주 · 평균 참여(최근 90일) · 끝난 모임 중 후기 비율 + 묶음 건수 + 지역 목록
+--   admin_meetups(p) : 목록(정렬 starts|title|dong|joined × asc|desc, 50개씩 page)
+--   admin_meetup_edit(meetup, action, p, notify) : title · starts · place(이름만, 좌표 그대로) · hidden(모임 글 posts.hidden 도 함께)
+--       — notify 면 제목·일시·장소는 참여자(room_members)에게, 숨김은 개설자에게 🔔. admin_log('meetup_edit')
+--   admin_meetups_notify(p, body, meetup, dry) : meetup 이 있으면 그 모임 참여자, 없으면 조건에 맞는 모임들의 개설자에게 🔔(정지·탈퇴 대기·본인 제외, 최대 2,000). admin_log('meetups_notify')

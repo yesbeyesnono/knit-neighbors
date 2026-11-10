@@ -137,6 +137,11 @@ begin
   out := pg_temp.must_fail(out, 'update news_posts', 'update public.news_posts set title = ''x''');
   out := pg_temp.must_fail(out, 'admin_news_save', 'select public.admin_news_save(''{"title":"x","body":"y"}''::jsonb)');
   out := pg_temp.must_fail(out, 'admin_news_list', 'select count(*) from public.admin_news_list()');
+  out := pg_temp.must_fail(out, 'admin_meetup_stats', 'select public.admin_meetup_stats()');   -- schema 92
+  out := pg_temp.must_fail(out, 'admin_meetups', 'select public.admin_meetups(''{}''::jsonb)');
+  out := pg_temp.must_fail(out, 'admin_meetup_edit', 'select public.admin_meetup_edit(gen_random_uuid(), ''hidden'', ''{}''::jsonb, false)');
+  out := pg_temp.must_fail(out, 'admin_meetups_notify', 'select public.admin_meetups_notify(''{}''::jsonb, ''x'', null, false)');
+  out := pg_temp.must_fail(out, '_admin_meetup_base(내부용)', 'select count(*) from public._admin_meetup_base()');
   out := pg_temp.must_fail(out, 'update app_config direct', 'do $x$ declare n int; begin update public.app_config set value = ''{}''::jsonb where key = ''home_notice''; get diagnostics n = row_count; if n = 0 then raise exception ''no rows''; end if; end $x$');
   out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));

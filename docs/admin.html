@@ -91,6 +91,14 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
 .chatbox{display:flex;gap:8px;align-items:center;margin-top:8px}.chatbox input{flex:1}
 .st{display:flex;align-items:center;gap:8px;font-size:13px}.st i{width:9px;height:9px;border-radius:50%;display:inline-block;background:#ccc}.st i.on{background:var(--green)}.st i.off{background:var(--red)}
 @media(max-width:900px){.hero3{grid-template-columns:1fr}}
+/* 위쪽 가로 메뉴(2026-11-10 C안): 묶음 8개 + 그 아래 탭. 760px 이하는 예전처럼 ☰ 서랍(aside) */
+#topnav{display:none;position:sticky;top:0;z-index:40;background:var(--color-primary-dark);height:54px;align-items:center;padding:0 22px;gap:2px;color:#C9D3C4;overflow-x:auto;scrollbar-width:none}
+#topnav .brand{color:#F3F1EA;font-weight:800;font-size:15px;margin-right:18px;white-space:nowrap}#topnav a{padding:8px 14px;border-radius:999px;font-size:13.5px;text-decoration:none;color:#C9D3C4;white-space:nowrap}#topnav a:hover{background:#34493B}#topnav a.on{background:#F3F1EA;color:var(--color-primary-dark);font-weight:700}
+#topnav a i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#E86A58;margin-left:5px;vertical-align:middle}#topnav .who{margin-left:auto;font-size:12px;color:#9FB09A;white-space:nowrap;padding-left:16px}#topnav button{margin-left:10px;background:#34493B;border:0;color:#E6ECE2;border-radius:8px;height:30px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+#navtabs{display:none;padding:14px 34px 0;max-width:1180px}#navtabs .t{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}#navtabs .t a{padding:10px 16px;font-weight:700;color:var(--ink2);font-size:14.5px;text-decoration:none;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}#navtabs .t a.on{color:var(--ink);border-color:var(--olive)}
+#navtabs .t a .n{background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:0 7px;margin-left:4px;font-weight:700}#navtabs .p{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}#navtabs .p a{padding:5px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;text-decoration:none;color:var(--ink2)}#navtabs .p a.on{background:var(--olive);border-color:var(--olive);color:#fff;font-weight:700}
+@media(min-width:761px){#app{grid-template-columns:1fr !important;grid-template-rows:auto auto 1fr;align-content:start}aside{display:none}#topnav{display:flex}#navtabs{display:block;max-width:1400px}main{padding-top:18px;max-width:1400px}}
+.mtseg{grid-template-columns:repeat(5,1fr)}
 #mtop{display:none;position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;align-items:center;gap:10px}
 #mtop b{font-size:15px;flex:1}#mtop button{width:40px;height:36px;font-size:18px;padding:0}#mtop .n{background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px}
 #drawerScrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:45}
@@ -120,41 +128,48 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
   <div id="mtop"><button type="button" onclick="drawer(true)" aria-label="메뉴">☰</button><b id="mtopTitle">뜨개동네 관리자</b><span class="n" id="nModTop" hidden></span></div>
   <aside>
     <div class="brand">뜨개동네 관리자<small id="who"></small></div>
-    <div class="grp">현황</div>
+    <div class="grp">매일 보는 것</div>
     <a href="#today" data-v="today">오늘 (지기 AI) <span class="n" id="nMod" hidden></span></a>
-    <a href="#rules" data-v="rules">규칙</a>
-    <a href="#modlog" data-v="modlog">기록 · 되돌리기</a>
-    <a href="#techcand" data-v="techcand">기법 후보</a>
-    <a href="#badwords" data-v="badwords">욕설 사전</a>
-    <a href="#dash" data-v="dash">대시보드</a>
-    <a href="#dong" data-v="dong">동네 분포</a>
-    <a href="#content" data-v="content">글·모임·인증</a>
-    <div class="grp">운영</div>
     <a href="#reports" data-v="reports">신고함 <span class="n" id="nRep" hidden></span></a>
-    <a href="#users" data-v="users">회원</a>
     <a href="#support" data-v="support">지기 문의함 <span class="n" id="nSup" hidden></span></a>
-    <a href="#kb" data-v="kb">지식 창고 (상담 학습)</a>
-    <a href="#banned" data-v="banned">금칙어</a>
+    <div class="grp">회원·커뮤니티</div>
+    <a href="#users" data-v="users">회원</a>
+    <a href="#content" data-v="content">글·인증</a>
+    <a href="#meetups" data-v="meetups">모임</a>
+    <div class="grp">알리기</div>
     <a href="#broadcast" data-v="broadcast">공지·알림 보내기</a>
+    <a href="#events" data-v="events">이벤트 (레벨 초대·체험단)</a>
+    <div class="grp">가게·작가·도안</div>
     <a href="#shops" data-v="shops">파트너 가게</a>
+    <a href="#authors" data-v="authors">작가 신청</a>
     <a href="#patterns" data-v="patterns">도안</a>
     <a href="#store" data-v="store">상점 (Lab 커머스)</a>
-    <a href="#authors" data-v="authors">작가 신청</a>
-    <div class="grp">AI 데이터</div>
-    <a href="#ai-photos" data-v="ai-photos">사진↔기법 라벨</a>
-    <a href="#ai-path" data-v="ai-path">학습 경로</a>
-    <a href="#ai-qa" data-v="ai-qa">질문·해결 답글</a>
-    <a href="#ai-yarn" data-v="ai-yarn">실·바늘 통계</a>
-    <a href="#supporters" data-v="supporters">1기 서포터즈</a>
-    <a href="#events" data-v="events">이벤트 (레벨 초대·체험단)</a>
+    <div class="grp">실 데이터</div>
     <a href="#yarns" data-v="yarns">실 사전 (표준화)</a>
     <a href="#stash" data-v="stash">회원 실함</a>
+    <div class="grp">현황·분석</div>
+    <a href="#dash" data-v="dash">대시보드</a>
+    <a href="#dong" data-v="dong">동네 분포</a>
+    <a href="#ai-photos" data-v="ai-photos">AI 데이터 · 사진↔기법 라벨</a>
+    <a href="#ai-path" data-v="ai-path">AI 데이터 · 학습 경로</a>
+    <a href="#ai-qa" data-v="ai-qa">AI 데이터 · 질문·해결 답글</a>
+    <a href="#ai-yarn" data-v="ai-yarn">AI 데이터 · 실·바늘 통계</a>
     <a href="#export" data-v="export">내보내기</a>
+    <div class="grp">지기 AI 관리</div>
+    <a href="#rules" data-v="rules">규칙</a>
+    <a href="#modlog" data-v="modlog">기록 · 되돌리기</a>
+    <a href="#kb" data-v="kb">지식 창고 (상담 학습)</a>
+    <a href="#badwords" data-v="badwords">금지어 · 욕설 사전</a>
+    <a href="#banned" data-v="banned">금지어 · 금칙어</a>
+    <a href="#techcand" data-v="techcand">기법 후보</a>
     <div class="grp">시스템</div>
     <a href="#logs" data-v="logs">관리자 로그</a>
     <a href="#settings" data-v="settings">설정</a>
+    <a href="#supporters" data-v="supporters">1기 서포터즈 (중단)</a>
     <div style="padding:14px 16px"><button onclick="logout()" style="width:100%">로그아웃</button></div>
   </aside>
+  <header id="topnav"></header>
+  <div id="navtabs"></div>
   <main id="main"></main>
 </div>
 <div id="scrim" onclick="closePanel()"></div>
@@ -196,7 +211,27 @@ async function refreshBadges(){
   const {count:un}=await sb.from('support_tickets').select('id',{count:'exact',head:true}).in('status',['open','waiting_admin']); $('#nSup').hidden=!un; $('#nSup').textContent=un||'';
 }
 const VIEWS={};
-function route(){ const [v,arg]=(location.hash||'#today').slice(1).split(':'); document.querySelectorAll('aside a').forEach(a=>{ a.classList.toggle('on',a.dataset.v===v); if(a.dataset.v===v){ const t=$('#mtopTitle'); if(t) t.textContent=a.textContent.replace(/\s*\d+\s*$/,'').trim(); } }); closePanel(); window.scrollTo(0,0); $('#main').innerHTML='<div class="muted">불러오는 중…</div>'; sb.from('mod_items').select('id',{count:'exact',head:true}).eq('status','open').then(({count})=>{ const n=$('#nMod'); if(n){ n.hidden=!count; n.textContent=count||''; } const n2=$('#nModTop'); if(n2){ n2.hidden=!count; n2.textContent=count?count+'건':''; } }); (VIEWS[v]||VIEWS.today)(arg).catch(e=>{ $('#main').innerHTML='<div class="muted">오류: '+esc(e.message)+'</div>'; }); }
+function route(){ const [v,arg]=(location.hash||'#today').slice(1).split(':'); document.querySelectorAll('aside a').forEach(a=>{ a.classList.toggle('on',a.dataset.v===v); if(a.dataset.v===v){ const t=$('#mtopTitle'); if(t) t.textContent=a.textContent.replace(/\s*\d+\s*$/,'').trim(); } }); renderNav(VIEWS[v]?v:'today'); closePanel(); window.scrollTo(0,0); $('#main').innerHTML='<div class="muted">불러오는 중…</div>'; sb.from('mod_items').select('id',{count:'exact',head:true}).eq('status','open').then(({count})=>{ const n=$('#nMod'); if(n){ n.hidden=!count; n.textContent=count||''; } const n2=$('#nModTop'); if(n2){ n2.hidden=!count; n2.textContent=count?count+'건':''; } }); (VIEWS[v]||VIEWS.today)(arg).catch(e=>{ $('#main').innerHTML='<div class="muted">오류: '+esc(e.message)+'</div>'; }); }
+// 위쪽 가로 메뉴: 묶음 → 탭 → (있으면) 작은 알약. 숫자 배지는 서랍 메뉴(aside)의 #nMod·#nRep·#nSup 값을 그대로 읽는다
+const NAV=[
+  {l:'오늘', items:[['today','오늘 (지기 AI)'],['reports','신고함'],['support','지기 문의함']]},
+  {l:'회원·커뮤니티', items:[['users','회원'],['content','글·인증'],['meetups','모임']]},
+  {l:'알리기', items:[['broadcast','공지·알림 보내기'],['events','이벤트']]},
+  {l:'가게·작가·도안', items:[['shops','파트너 가게'],['authors','작가 신청'],['patterns','도안'],['store','상점 (Lab)']]},
+  {l:'실 데이터', items:[['yarns','실 사전'],['stash','회원 실함']]},
+  {l:'현황·분석', items:[['dash','대시보드'],['dong','동네 분포'],['ai-photos','AI 데이터',[['ai-photos','사진↔기법 라벨'],['ai-path','학습 경로'],['ai-qa','질문·해결 답글'],['ai-yarn','실·바늘 통계']]],['export','내보내기']]},
+  {l:'지기 AI 관리', items:[['rules','규칙'],['modlog','기록·되돌리기'],['kb','지식 창고'],['badwords','금지어',[['badwords','욕설 사전 (지기 AI 감지)'],['banned','금칙어 (글쓰기 차단)']]],['techcand','기법 후보']]},
+  {l:'시스템', items:[['logs','관리자 로그'],['settings','설정'],['supporters','1기 서포터즈 (중단)']]}
+];
+let navCur='today';
+function navBadge(k){ const e=document.querySelector(`aside a[data-v="${k}"] .n`); return e&&!e.hidden&&e.textContent.trim()?e.textContent.trim():''; }
+function renderNav(v){ if(v) navCur=v; v=navCur; const has=(it,k)=>it[0]===k||(it[2]||[]).some(x=>x[0]===k);
+  const g=NAV.find(G=>G.items.some(it=>has(it,v)))||NAV[0], cur=g.items.find(it=>has(it,v))||g.items[0];
+  const tn=$('#topnav'); if(!tn) return;
+  tn.innerHTML=`<span class="brand">뜨개동네 관리자</span>`+NAV.map(G=>`<a href="#${G.items[0][0]}" class="${G===g?'on':''}">${G.l}${G!==g&&G.items.some(it=>navBadge(it[0]))?'<i></i>':''}</a>`).join('')+`<span class="who">${esc((me&&me.email)||'')}</span><button onclick="logout()">로그아웃</button>`;
+  $('#navtabs').innerHTML=`<div class="t">${g.items.map(it=>`<a href="#${it[0]}" class="${it===cur?'on':''}">${it[1]}${navBadge(it[0])?`<span class="n">${navBadge(it[0])}</span>`:''}</a>`).join('')}</div>`+(cur[2]?`<div class="p">${cur[2].map(x=>`<a href="#${x[0]}" class="${x[0]===v?'on':''}">${x[1]}</a>`).join('')}</div>`:'');
+}
+new MutationObserver(()=>renderNav()).observe(document.querySelector('aside'),{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden']});
 function drawer(on){ document.querySelector('aside').classList.toggle('open', on); $('#drawerScrim').classList.toggle('on', on); }
 document.addEventListener('click', e=>{ const l=e.target.closest('aside a'); if(l) drawer(false); });
 function openPanel(html){ $('#panelBody').innerHTML=html; $('#panel').classList.add('on'); $('#scrim').classList.add('on'); }
@@ -329,7 +364,9 @@ async function openMeetupPanel(id){
   ]);
   const techs=(m.technique_ids||[]).map(t=>TECH[t]?.name_ko||t);
   const row=(k,v)=>v?`<div class="muted" style="margin:2px 0"><b style="color:var(--ink)">${k}</b> · ${v}</div>`:'';
-  openPanel(`<h2 style="margin-top:0">모임 상세 ${m.is_public?'':'<span class="chip y">비공개</span>'}</h2>
+  const {data:mlog}=await sb.from('admin_logs').select('action,detail,created_at').eq('target_type','meetup').eq('target_id',id).order('created_at',{ascending:false}).limit(8);
+  const q=x=>esc(JSON.stringify(x||''));
+  openPanel(`<h2 style="margin-top:0">모임 상세 ${m.is_public?'':'<span class="chip y">비공개</span>'}${m.hidden?'<span class="chip r">숨김</span>':''}</h2>
     <div class="muted"><a href="#" onclick="openUserPanel('${m.created_by}');return false">${esc(m.creator?.nickname||'')}</a> · ${esc(m.creator?.dong_name||'')} · 만든 날 ${fmt(m.created_at)}</div>
     <h3 style="margin:10px 0 4px">${esc(m.title)}</h3>
     ${row('종류', esc([m.kind, m.craft].filter(Boolean).join(' · ')))}
@@ -340,8 +377,14 @@ async function openMeetupPanel(id){
     ${row('배울 기법', esc(techs.join(', ')))}
     ${row('비용', esc(m.fee||''))}${row('준비물', esc(m.bring||''))}
     ${m.descr?`<p style="white-space:pre-wrap;margin:10px 0">${esc(m.descr)}</p>`:'<div class="muted">소개 없음</div>'}
-    <div class="row"><button class="r" onclick="delMeetup('${m.id}')">모임 삭제</button></div>
-    <h2>참여자 ${(mem||[]).length}</h2><div>${(mem||[]).map(x=>`<span class="chip">${esc(x.p?.nickname||'')}</span>`).join(' ')||'<span class="muted">없음</span>'}</div>
+    <h2>정보 고치기</h2>
+    <div class="mbrows"><div class="mbr"><span>제목</span><b>${esc(m.title||'')}</b><a href="#" onclick='event.preventDefault();mtTitle("${m.id}", ${q(m.title)})'>고치기</a></div>
+      <div class="mbr"><span>일시</span><b>${fmt(m.starts_at)}</b><a href="#" onclick='event.preventDefault();mtStarts("${m.id}", ${q(m.starts_at)})'>바꾸기</a></div>
+      <div class="mbr"><span>장소</span><b>${esc(m.place_name||'—')}</b><a href="#" onclick='event.preventDefault();mtPlace("${m.id}", ${q(m.place_name)})'>바꾸기</a></div>
+      <div class="mbr"><span>공개</span><b>${m.hidden?'숨김 (개설자·운영진만 보임)':'보이는 중'}</b><a href="#" onclick="event.preventDefault();mtHide('${m.id}', ${m.hidden?'false':'true'})">${m.hidden?'다시 보이기':'숨기기'}</a></div></div>
+    <div class="mbacts"><button onclick="mtNotify('${m.id}')">참여자 안내</button><button onclick="mtHide('${m.id}', ${m.hidden?'false':'true'})">${m.hidden?'다시 보이기':'숨기기'}</button><button class="r" onclick="delMeetup('${m.id}')">삭제</button></div>
+    <h2>참여자 ${(mem||[]).length}${m.capacity?' / '+m.capacity:''}</h2><div>${(mem||[]).map(x=>`<span class="chip">${esc(x.p?.nickname||'')}${x.profile_id===m.created_by?' · 개설':''}</span>`).join(' ')||'<span class="muted">없음</span>'}</div>
+    <h2>관리 기록</h2>${(mlog||[]).map(l=>`<div class="muted" style="padding:3px 0">${fmt(l.created_at)} · ${esc(l.action==='meetup_edit'?({title:'제목 고침',starts:'일시 바꿈',place:'장소 바꿈',hidden:(l.detail?.p?.hidden?'숨김':'다시 보이기')}[l.detail?.action]||'고침'):l.action==='meetups_notify'?'참여자 안내':l.action)}</div>`).join('')||'<div class="muted">아직 없어요</div>'}
     <h2>모임 글·후기 ${(posts||[]).length}</h2>${(posts||[]).map(r=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><b>${esc(r.author?.nickname||'')}</b> <span class="chip">${r.review_of?'후기':'모임 글'}</span> <span class="muted">${fmt(r.created_at)}</span><div style="white-space:pre-wrap">${esc(r.body||'')}</div><div class="row" style="margin-top:4px"><button onclick="openPostPanel('${r.id}')">글 열기</button></div></div>`).join('')||'<div class="muted">없음</div>'}`);
 }
 async function openWorkPanel(id){
@@ -728,15 +771,58 @@ async function bcPolish(variant){ const text=$('#bcBody').value.trim(); if(!text
 async function broadcastTo(id, nick){ const b=prompt(nick+'님에게 보낼 알림 내용'); if(!b) return; const {error}=await sb.rpc('admin_broadcast',{p_body:b,p_user:id}); if(error) return toast(error.message); toast('보냈어요'); }
 // ===== 글·모임·인증 =====
 let contentTab='posts';
+// ===== 모임 관리(schema 92): 묶음 → 좁히기·정렬 → 50개씩. 정렬·좁히기는 서버(admin_meetups) =====
+let MT={seg:'all',q:'',when:'',region:'',sort:'starts',dir:'desc',page:1};
+const MT_SEGS=[['all','전체'],['upcoming','예정'],['empty','참여자 없음'],['noreview','후기 없음'],['flag','신고·숨김']];
+const MT_SORT={starts:'일시 최신순',title:'이름순',dong:'동네순',joined:'참여 많은 순'};
+function mtFilter(){ return {seg:MT.seg,q:MT.q,when:MT.when,region:MT.region}; }
+function mtSet(k,v){ MT[k]=v; if(k!=='page') MT.page=1; route(); }
+function mtSort(k){ if(MT.sort===k) MT.dir=MT.dir==='desc'?'asc':'desc'; else { MT.sort=k; MT.dir=(k==='starts'||k==='joined')?'desc':'asc'; } MT.page=1; route(); }
+VIEWS.meetups = async()=>{
+  const [{data:st,error:e1},{data:ls,error:e2}] = await Promise.all([sb.rpc('admin_meetup_stats'), sb.rpc('admin_meetups',{p:{...mtFilter(),sort:MT.sort,dir:MT.dir,page:MT.page}})]); if(e1||e2) throw (e1||e2);
+  const c=st.counts||{}, rows=ls.rows||[], pages=Math.max(1,Math.ceil(ls.total/ls.size)), n=x=>Number(x||0).toLocaleString();
+  const th=(k,l)=>`<th class="s ${MT.sort===k?'on':''}" onclick="mtSort('${k}')">${l}<i>${MT.sort===k?(MT.dir==='desc'?'↓':'↑'):'↕'}</i></th>`;
+  const wd=['일','월','화','수','목','금','토'], dt=t=>{ const d=new Date(t); return `${d.getMonth()+1}.${d.getDate()} (${wd[d.getDay()]}) ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+  const stt=m=>m.hidden?'<span class="chip r">숨김</span>':m.f_empty?'<span class="chip y">참여자 없음</span>':m.f_upcoming?`<span class="chip">예정${m.capacity&&m.joined>=m.capacity?' · 마감':''}</span>`:m.f_noreview?'<span class="chip y">후기 없음</span>':`<span class="muted">끝남 · 후기 ${m.reviews}</span>`;
+  const pg=[]; for(let i=1;i<=pages;i++){ if(i===1||i===pages||Math.abs(i-MT.page)<=1) pg.push(i); else if(pg[pg.length-1]!=='…') pg.push('…'); }
+  const from=ls.total?(MT.page-1)*ls.size+1:0, to=Math.min(MT.page*ls.size, ls.total);
+  $('#main').innerHTML=`<h1>모임</h1>
+  <div class="mbtiles"><div class="mbtile"><b>${n(st.upcoming)}</b><span>예정된 모임</span></div><div class="mbtile"><b>${n(st.week)}</b><span>이번 주에 열려요</span></div><div class="mbtile"><b>${st.avg_join}명</b><span>모임당 평균 참여 (최근 90일)</span></div><div class="mbtile"><b>${st.review_pct}%</b><span>끝난 모임 중 후기 있음</span></div></div>
+  <div class="mbseg mtseg">${MT_SEGS.map(([k,l])=>`<button class="${MT.seg===k?'on':''}" onclick="mtSet('seg','${k}')">${l} <em>${n(c[k])}</em></button>`).join('')}</div>
+  <div class="mbtool"><input placeholder="모임 이름·장소·개설자 검색 후 Enter" value="${esc(MT.q)}" onkeydown="if(event.key==='Enter')mtSet('q',this.value.trim())">
+    <select onchange="mtSet('when',this.value)">${[['','기간 전체'],['week','앞으로 7일'],['month','앞으로 30일'],['past30','지난 30일']].map(([v,l])=>`<option value="${v}"${MT.when===v?' selected':''}>${l}</option>`).join('')}</select>
+    <select onchange="mtSet('region',this.value)"><option value="">지역 전체</option>${(st.regions||[]).map(r=>`<option value="${esc(r.name)}"${MT.region===r.name?' selected':''}>${esc(r.name)} (${r.n})</option>`).join('')}</select>
+    <button onclick="mtNotify()">안내 보내기</button></div>
+  <table class="mbtable"><colgroup><col style="width:27%"><col style="width:23%"><col style="width:16%"><col style="width:8%"><col style="width:12%"><col style="width:14%"></colgroup>
+  <tr>${th('title','모임')}${th('dong','동네 · 장소')}${th('starts','일시')}${th('joined','참여')}<th>개설자</th><th>상태</th></tr>
+  ${rows.map(m=>`<tr class="clk" onclick="openMeetupPanel('${m.id}')"><td><b>${esc(m.title||'(제목 없음)')}</b> <span class="muted" style="font-size:12px">${esc(m.kind||'')}</span>${m.is_public?'':' <span class="chip y">비공개</span>'}</td><td>${esc([m.dong,m.place_name].filter(Boolean).join(' · ')||'—')}</td><td class="muted">${dt(m.starts_at)}</td><td>${m.joined}${m.capacity?'/'+m.capacity:''}</td><td class="muted">${esc(m.host||'')}</td><td>${stt(m)}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">조건에 맞는 모임이 없어요</td></tr>'}</table>
+  <div class="mbpg"><span>${n(from)}–${n(to)}번째 · 조건에 맞는 모임 ${n(ls.total)}개 · ${MT_SORT[MT.sort]}${MT.dir===((MT.sort==='starts'||MT.sort==='joined')?'asc':'desc')?' (거꾸로)':''}</span>
+    <div><button ${MT.page<=1?'disabled':''} onclick="mtSet('page',${MT.page-1})">‹</button>${pg.map(i=>i==='…'?'<span>…</span>':`<button class="${i===MT.page?'on':''}" onclick="mtSet('page',${i})">${i}</button>`).join('')}<button ${MT.page>=pages?'disabled':''} onclick="mtSet('page',${MT.page+1})">›</button></div></div>
+  <p class="muted" style="margin-top:14px;font-size:12.5px">참여자 없음 = 3일 안에 열리는데 개설자 말고 신청한 사람이 없는 모임 · 후기 없음 = 끝난 지 2일이 지났는데 후기가 없는 모임</p>`;
+};
+// 안내: id 가 있으면 그 모임 참여자에게, 없으면 지금 좁힌 묶음의 개설자 전체에게 🔔 (인원 먼저 세고 한 번 더 묻는다)
+async function mtNotify(id){
+  const f=mtFilter(); const {data:cnt,error}=await sb.rpc('admin_meetups_notify',{p:f,p_body:'',p_meetup:id||null,p_dry:true}); if(error) return toast(error.message); if(!cnt) return toast('보낼 사람이 없어요');
+  const who=id?`이 모임 참여자 ${cnt}명`:`「${MT_SEGS.find(x=>x[0]===MT.seg)[1]}」 묶음의 개설자 ${cnt}명`;
+  const body=prompt(`${who}에게 보낼 안내 (200자)`, !id&&MT.seg==='noreview'?'모임은 즐거우셨나요? 후기를 한 줄 남겨 주시면 다음 이웃에게 큰 도움이 돼요.':!id&&MT.seg==='empty'?'모임이 곧 열려요. 커뮤니티에 한 번 더 소개 글을 올리면 이웃이 찾아오기 쉬워요.':''); if(!body||!body.trim()) return;
+  if(!confirm(`${who}에게 보냅니다.\n\n${body.trim()}\n\n보낼까요?`)) return;
+  const r=await sb.rpc('admin_meetups_notify',{p:f,p_body:body.trim(),p_meetup:id||null,p_dry:false}); if(r.error) return toast(r.error.message); toast(`${r.data}명에게 보냈어요`);
+}
+async function mtEdit(id, action, p, okMsg){ const ask=action==='hidden'?'개설자에게 알림을 보낼까요?':'참여자에게 바뀐 내용을 알릴까요?'; const notify=confirm(ask+'\n\n[확인] 알리고 고치기 · [취소] 알리지 않고 고치기');
+  const {data,error}=await sb.rpc('admin_meetup_edit',{p_meetup:id,p_action:action,p,p_notify:notify}); if(error) return toast(error.message); toast(okMsg+(data&&data.notified?` · ${data.notified}명에게 알렸어요`:'')); await openMeetupPanel(id); if((location.hash||'').slice(1).split(':')[0]==='meetups') VIEWS.meetups().catch(()=>{}); }
+function mtTitle(id, cur){ const v=prompt('모임 제목 (60자)', cur||''); if(v==null||!v.trim()||v.trim()===cur) return; mtEdit(id,'title',{title:v.trim()},'제목을 고쳤어요'); }
+function mtPlace(id, cur){ const v=prompt('장소 이름 (지도 위치는 바뀌지 않아요 · 80자)', cur||''); if(v==null||!v.trim()||v.trim()===cur) return; mtEdit(id,'place',{place:v.trim()},'장소를 고쳤어요'); }
+function mtStarts(id, cur){ const d=new Date(cur), z=x=>String(x).padStart(2,'0'), def=`${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`; const v=prompt('모임 일시 (예: 2026-11-15 14:00)', def); if(v==null||!v.trim()||v.trim()===def) return; const m=v.trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})$/); if(!m) return toast('2026-11-15 14:00 처럼 적어 주세요'); const nd=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]); if(isNaN(nd)) return toast('날짜를 다시 확인해 주세요'); mtEdit(id,'starts',{starts_at:nd.toISOString()},'일시를 바꿨어요'); }
+function mtHide(id, hide){ if(!confirm(hide?'이 모임과 모임 글을 숨길까요? 개설자와 운영진에게만 보이고, 삭제되지는 않아요.':'이 모임을 다시 보이게 할까요?')) return; mtEdit(id,'hidden',{hidden:hide}, hide?'숨겼어요':'다시 보이게 했어요'); }
 VIEWS.content = async()=>{
-  let body='';
+  let body=''; if(contentTab==='meetups') contentTab='posts';
   if(contentTab==='posts'){ const {data}=await sb.from('posts').select('id,body,photos,hidden,created_at,like_count,reply_count,parent_id,meetup_id,work_id, author:profiles!posts_author_id_fkey(nickname)').is('parent_id',null).order('created_at',{ascending:false}).limit(100);
     body=`<table><tr><th>글</th><th>작성자</th><th>반응</th><th>시각</th><th></th></tr>${(data||[]).map(p=>`<tr class="clk" onclick="openPostPanel('${p.id}')"><td>${p.hidden?'<span class="chip y">숨김</span>':''}${p.meetup_id?'<span class="chip">모임</span>':''}${p.work_id?'<span class="chip y">인증</span>':''}${esc((p.body||'').slice(0,90))||'<span class="muted">(사진)</span>'} ${(p.photos||[]).length?`<span class="muted">📷${p.photos.length}</span>`:''}</td><td>${esc(p.author?.nickname)}</td><td class="muted">♥${p.like_count||0} 💬${p.reply_count||0}</td><td class="muted">${fmt(p.created_at)}</td><td><button class="r" onclick="event.stopPropagation();delPost('${p.id}')">삭제</button></td></tr>`).join('')}</table>`; }
   else if(contentTab==='meetups'){ const {data}=await sb.from('meetups').select('id,title,place_name,starts_at,participant_count,capacity,kind,craft,review_count,is_public,created_at, creator:profiles!meetups_created_by_fkey(nickname)').order('starts_at',{ascending:false}).limit(100);
     body=`<table><tr><th>모임</th><th>장소</th><th>일시</th><th>참여</th><th>개설자</th><th></th></tr>${(data||[]).map(m=>`<tr class="clk" onclick="openMeetupPanel('${m.id}')"><td><b>${esc(m.title)}</b> <span class="chip">${esc(m.kind||'')}</span>${m.is_public?'':'<span class="chip y">비공개</span>'}</td><td>${esc(m.place_name||'')}</td><td class="muted">${fmt(m.starts_at)}</td><td>${m.participant_count||0}${m.capacity?'/'+m.capacity:''} · 후기 ${m.review_count||0}</td><td>${esc(m.creator?.nickname||'')}</td><td><button class="r" onclick="event.stopPropagation();delMeetup('${m.id}', this)">삭제</button></td></tr>`).join('')}</table>`; }
   else { const {data}=await sb.from('works').select('id,title,photos,techniques,custom_techniques,yarn_info,created_at, owner:profiles!works_profile_id_fkey(nickname)').order('created_at',{ascending:false}).limit(100);
     body=`<table><tr><th>사진</th><th>작품</th><th>기법</th><th>실</th><th>작성자</th><th></th></tr>${(data||[]).map(w=>`<tr class="clk" onclick="openWorkPanel('${w.id}')"><td><div class="ph">${(w.photos||[]).slice(0,2).map(u=>`<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" style="width:56px;height:56px"></a>`).join('')}</div></td><td><b>${esc(w.title)}</b><div class="muted">${fmtd(w.created_at)}</div></td><td>${(w.techniques||[]).map(t=>`<span class="chip">${esc(TECH[t]?.name_ko||t)}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="chip y">${esc(t)}</span>`).join('')}</td><td class="muted">${esc(w.yarn_info||'')}</td><td>${esc(w.owner?.nickname||'')}</td><td><button class="r" onclick="event.stopPropagation();delWork('${w.id}', this)">삭제</button></td></tr>`).join('')}</table>`; }
-  $('#main').innerHTML=`<h1>글·모임·인증</h1><div class="tabs">${[['posts','글'],['meetups','모임'],['works','작품 인증']].map(([k,l])=>`<button class="${contentTab===k?'on':''}" onclick="contentTab='${k}';route()">${l}</button>`).join('')}</div>${body}`;
+  $('#main').innerHTML=`<h1>글·인증</h1><div class="tabs">${[['posts','글'],['works','작품 인증']].map(([k,l])=>`<button class="${contentTab===k?'on':''}" onclick="contentTab='${k}';route()">${l}</button>`).join('')}</div>${body}`;
 };
 // ===== AI 데이터 =====
 async function fetchWorksAll(){ const {data}=await sb.from('works').select('id,profile_id,title,photos,techniques,custom_techniques,yarn_info,yarn_name,yarn_weight,needle_size,note,created_at').order('created_at').limit(5000); return (data||[]).map(w=>({...w, technique_names:(w.techniques||[]).map(t=>TECH[t]?.name_ko||t), craft:[...new Set((w.techniques||[]).map(t=>TECH[t]?.craft).filter(Boolean))]})); }
