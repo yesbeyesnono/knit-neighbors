@@ -1516,3 +1516,13 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_member_edit(user, action, p, notify) : dong(동네·지도 핀, 200m 격자) · visible · clear_nick(뜨개이웃0000) · clear_bio — admin_log('member_edit') + (선택) 회원 🔔
 --   admin_members_notify(p, body, dry) : 조건에 맞는 회원 전체에게 🔔(정지·탈퇴 대기·본인 제외, 최대 5,000) — dry=true 는 인원만 셈. admin_log('members_notify')
 --   기존 admin_find_users 는 그대로(가게·도안의 오너 찾기, CSV 내보내기)
+
+-- 91. 앱 안 '공지·새 소식' 목록 (마이그레이션 news_posts, 2026-11-10 대표 확정 시안)
+--   news_posts(id, kind notice|update, version, title 60, body 1000, image_url, src unique, active, published_at, created_by)
+--       RLS: authenticated 는 active 이고 published_at <= now() 인 글만 select. anon 권한 없음. 쓰기는 관리자 함수로만
+--       image_url 은 https://app.knitup.co.kr/images/ 의 jpg·png·webp 파일만(check 제약 + 함수 + 앱 NEWS_IMG 세 곳에서 확인)
+--   admin_news_list() : 관리자용 전체 목록(숨김 포함, 최근 200)
+--   admin_news_save(p) : id 없으면 새 글, 있으면 고침(kind·version·title·body·image_url·active·published_at) — admin_log('news_save')
+--   _news_from_home_notice() + 트리거 news_from_home_notice(app_config) : 첫 화면 공지(home_notice)를 '보이기'로 저장하면
+--       src='home:<공지 id>' 로 같은 글이 목록에 남음(같은 id 는 한 줄, 제목·내용이 바뀌어 id 가 새로 생기면 새 줄)
+--   처음 넣은 글 4건: 개시 공지(home:20261109-hello) + 업데이트 1.0.1 · 1.0.3 · 1.0.4(홈페이지 소식과 같은 문구·이미지)

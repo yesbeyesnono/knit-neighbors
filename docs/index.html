@@ -655,6 +655,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .stepper b,.stepper input{width:84px!important;text-align:center;font-size:1.15rem;font-weight:700;border:0!important;border-radius:0!important;padding:0!important;height:46px;line-height:46px;background:var(--surface)}.stepper b{display:flex;align-items:center;justify-content:center}
 .subpg{position:absolute;inset:0;z-index:1050;background:var(--bg);display:flex;flex-direction:column}
 .subbody{flex:1;overflow-y:auto;padding:4px 16px 28px}
+.nwdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#C8402F;margin-left:7px;vertical-align:middle}.nwdot[hidden]{display:none}
+.nwc{background:var(--color-surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:12px;cursor:pointer}
+.nwc .nwm{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--ink3);margin-bottom:5px}.nwc .nwm .cv{margin-left:auto;font-size:.9rem}
+.nwtag{background:var(--chip);color:var(--chip-ink);font-weight:700;font-size:.72rem;border-radius:999px;padding:2px 9px}.nwtag.n{background:var(--color-primary-dark);color:#fff}
+.nwc b{display:block;font-size:1rem;line-height:1.4;text-wrap:balance}.nwc .nws{color:var(--color-text-muted);font-size:.86rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nwc .nwx{color:var(--color-text-muted);font-size:.9rem;line-height:1.6;margin-top:8px;white-space:pre-line}.nwc img{display:block;width:100%;border-radius:12px;margin-top:12px}
 .subbody .seg{margin:10px 0}
 .plist{display:flex;flex-direction:column}
 .plist>button{display:flex;align-items:center;gap:12px;width:100%;padding:13px 2px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
@@ -4694,7 +4700,27 @@ async function pushSettingsRow(){
   else pushAsk();
 }
 async function pushTest(){ closeSheet(); const { data, error } = await sb.functions.invoke('push-send', { body:{ route:'test' } }); if(error) return toast(error.message); toast(data?.sent ? '보냈어요 · 잠시 뒤 알림이 와요' : (/^(no|bad)_/.test(data?.error||'') ? '서버에 푸시 키가 아직 없어요' : data?.tried ? '보내지 못했어요 · 잠시 뒤 다시 해 주세요' : '등록된 기기가 없어요')); }
-function openSettings(){ openSettingsInner(); pushStatusText().then(t=>{ const e=$('#pushStat'); if(e) e.textContent=t; }); }
+function openSettings(){ openSettingsInner(); newsDot(); pushStatusText().then(t=>{ const e=$('#pushStat'); if(e) e.textContent=t; }); }
+// 공지·새 소식 (schema 91): 설정 › 도움 맨 위. 운영 공지 + 업데이트 소식을 날짜순으로. 안 읽은 글은 점·'새 글'(localStorage kn_news_seen = 마지막으로 본 글의 시각)
+const NEWS_IMG=/^https:\/\/app\.knitup\.co\.kr\/images\/[A-Za-z0-9._-]+\.(jpg|jpeg|png|webp)$/;
+let newsRows=[], newsOpen=null;
+function newsSeen(){ try{ return +localStorage.getItem('kn_news_seen')||0; }catch(e){ return 0; } }
+async function newsDot(){ try{ const {data}=await sb.from('news_posts').select('published_at').order('published_at',{ascending:false}).limit(1); const t=data&&data[0]?Date.parse(data[0].published_at):0; const e=$('#newsDot'); if(e) e.hidden=!(t>newsSeen()); }catch(e){} }
+async function openNews(){
+  openSub('공지·새 소식','<p class="muted" style="margin-top:16px">불러오는 중…</p>');
+  const {data,error}=await sb.from('news_posts').select('id,kind,version,title,body,image_url,published_at').order('published_at',{ascending:false}).limit(50);
+  if(error){ $('#subBody').innerHTML='<p class="muted" style="margin-top:16px">소식을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.</p>'; return; }
+  const seen=newsSeen(); newsRows=(data||[]).map(r=>({...r, t:Date.parse(r.published_at), isNew:Date.parse(r.published_at)>seen})); if(!seen) newsRows.forEach((r,i)=>{ r.isNew=i===0; }); newsOpen=null; renderNews();
+  if(newsRows[0]) try{ localStorage.setItem('kn_news_seen', String(newsRows[0].t)); }catch(e){}
+}
+function renderNews(){
+  const el=$('#subBody'); if(!el) return;
+  if(!newsRows.length){ el.innerHTML='<p class="muted" style="margin-top:16px">아직 올라온 소식이 없어요.</p>'; return; }
+  el.innerHTML=newsRows.map(r=>{ const d=new Date(r.t), day=String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0'), on=newsOpen===r.id;
+    const tag=r.kind==='update'?('업데이트'+(r.version?' · '+esc(r.version):'')):'공지';
+    return `<div class="nwc" onclick="newsToggle('${r.id}')"><div class="nwm"><span class="nwtag">${tag}</span>${r.isNew?'<span class="nwtag n">새 글</span>':''}<span>${day}</span><span class="cv">${on?'⌃':'⌄'}</span></div><b>${esc(r.title)}</b>${on?`<div class="nwx">${esc(r.body)}</div>${r.image_url&&NEWS_IMG.test(r.image_url)?`<img src="${esc(r.image_url)}" alt="" loading="lazy" onerror="this.remove()">`:''}`:`<div class="nws">${esc(String(r.body).replace(/\s+/g,' '))}</div>`}</div>`; }).join('');
+}
+function newsToggle(id){ newsOpen=newsOpen===id?null:id; renderNews(); }
 function openSettingsInner(){
   const p=myProfile||{};
   const handle=[p.dong_name||'동네 미설정', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
@@ -4727,6 +4753,7 @@ function openSettingsInner(){
     <div class="sgrp">도움</div>
     <div class="slist">
       ${supStatus?.supporter?`<button class="srow" onclick="closeSheet();openSupporters()"><span>${ico('party')} 1기 서포터즈 <span class="muted">${supStatus.segment||''}구간 ${supStatus['seg'+(supStatus.segment||1)]||0}점 · 누적 ${supStatus.total||0}</span></span><span class="car">›</span></button>`:''}
+      <button class="srow" onclick="closeSheet();openNews()"><span>공지·새 소식<span class="nwdot" id="newsDot" hidden></span><br><span class="muted">운영 공지와 업데이트 내용을 모아 봐요</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openSupportRoom()"><span>${ico('yarn')} 뜨개동네 지기에게 말하기 <span class="authbadge" style="background:var(--sel)">운영진</span><br><span class="muted" id="supHint">궁금한 점·불편한 점·바라는 기능을 채팅으로 남겨 주세요</span></span><span class="car">›</span></button>
       <a class="srow" href="mailto:knitup.official@gmail.com"><span>이메일 문의</span><span class="car">›</span></a>
     </div>
