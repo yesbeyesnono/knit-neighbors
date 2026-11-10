@@ -34,8 +34,9 @@ android {
     buildTypes {
         release {
             if (keystorePropsFile.exists()) { signingConfig signingConfigs.release }
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // R8 코드 축소·난독화(Play 'DEX 코드 최적화' 요구, 기한 2027-02). 지우면 안 되는 것은 proguard-rules.pro
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
