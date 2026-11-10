@@ -1667,19 +1667,29 @@ async function dongSearch(){
     if(!hits.length) hits=list.filter(d=>d.dong.startsWith(base));
     const rank=d=>(d.dong===tok?0:1); hits.sort((x,y)=>rank(x)-rank(y)||x.sgg.localeCompare(y.sgg,'ko')||x.dong.localeCompare(y.dong,'ko'));
   }
-  // 동 이름으로 못 찾았으면(주소·건물 이름 등) 위치를 찾아 가장 가까운 동을 보여 준다. 적은 주소 글자는 저장하지 않는다
+  // 동 이름으로 못 찾았으면(도로명 주소·건물 이름 등) 행정안전부 도로명주소 검색(Edge Function juso-search — 승인키는 서버 시크릿)으로 찾는다.
+  // 결과의 행정동 이름을 우리 동 목록에 맞춰 그 동의 중심 좌표를 쓴다. 적은 주소 글자는 어디에도 저장하지 않는다
+  let roads=[];
   if(!hits.length && list.length){
+    try{ const { data } = await sb.functions.invoke('juso-search', { body:{ q } }); const sq=x=>String(x||'').replace(/\s/g,''); const nd=x=>sq(x).replace(/제(\d)/g,'$1');
+      for(const r of (data?.rows||[])){
+        const want=nd(r.hemd); let d = want ? list.find(x=>nd(x.sgg+x.dong)===want) : null;
+        if(!d){ const area=sq(r.si+r.sgg), b2=String(r.emd||'').replace(/[0-9]*(동|읍|면|리|가)$/,'').replace(/동?[0-9]+가?$/,''); if(b2.length>=2) d=list.find(x=>sq(x.sgg)===area && x.dong.startsWith(b2)); }
+        if(d) roads.push({ d, road:r.road });
+      } }catch(e){}
+  }
+  if(!hits.length && !roads.length && list.length){
     try{ await loadGoogleMaps(); }catch(e){}
     let found=[]; try{ found=await geocodePlace(q); }catch(e){}
     const seen=new Set();
     for(const c of found.slice(0,3)){ const best=nearestDong(list, c.lat, c.lng); if(best && !seen.has(best)){ seen.add(best); hits.push(best); } }
   }
   if(!$('#dongRes')) return;
-  dongCands=hits.slice(0,30).map(d=>({ lat:d.lat, lng:d.lng, dong_name:d.dong, dong_code:dongCode(d), sgg:d.sgg }));
+  dongCands = roads.length ? roads.slice(0,10).map(({d,road})=>({ lat:d.lat, lng:d.lng, dong_name:d.dong, dong_code:dongCode(d), sgg:d.sgg, road })) : hits.slice(0,30).map(d=>({ lat:d.lat, lng:d.lng, dong_name:d.dong, dong_code:dongCode(d), sgg:d.sgg }));
   if(!dongCands.length){
     box.innerHTML=`<div class="muted" style="padding:10px 2px;line-height:1.5">찾지 못했어요. 「○○동」처럼 동 이름으로 찾거나, 아래 「지도에서 직접 고르기」를 눌러 주세요.</div>${tok&&!list.length?`<button class="btn o" onclick="dongPickText('${esc(tok)}')">「${esc(tok)}」(으)로 정하기 · 지도 핀은 나중에</button>`:''}`; return;
   }
-  box.innerHTML=`<div style="max-height:44vh;overflow-y:auto">${dongCands.map((c,i)=>`<button type="button" class="btn o" style="text-align:left;margin-top:8px" onclick="dongPick(${i})"><b>${esc(c.dong_name)}</b> <span class="muted">${esc(c.sgg)}</span></button>`).join('')}</div>${hits.length>30?'<div class="muted" style="padding:8px 2px">더 있어요 — 「분당 수내동」처럼 시·구 이름을 함께 적어 보세요</div>':''}<div class="muted" style="padding:10px 2px 0;font-size:.72rem">동네 목록 출처: 통계청 SGIS 행정동 경계 · vuski/admdongkor</div>`;
+  box.innerHTML=`<div style="max-height:44vh;overflow-y:auto">${dongCands.map((c,i)=>`<button type="button" class="btn o" style="text-align:left;margin-top:8px" onclick="dongPick(${i})">${c.road?`<b style="display:block;font-size:.92rem;line-height:1.4">${esc(c.road)}</b><span class="muted" style="font-size:.82rem">우리 동네 → </span><span class="chip" style="font-size:.8rem;padding:2px 9px">${esc(c.dong_name)}</span>`:`<b>${esc(c.dong_name)}</b> <span class="muted">${esc(c.sgg)}</span>`}</button>`).join('')}</div>${hits.length>30?'<div class="muted" style="padding:8px 2px">더 있어요 — 「분당 수내동」처럼 시·구 이름을 함께 적어 보세요</div>':''}<div class="muted" style="padding:10px 2px 0;font-size:.72rem">${roads.length?'주소 검색: 행정안전부 도로명주소 · ':''}동네 목록 출처: 통계청 SGIS 행정동 경계 · vuski/admdongkor</div>`;
 }
 function dongPick(i){ const c=dongCands[i]; if(!c) return; loc={ lat:c.lat, lng:c.lng, dong_name:c.dong_name, dong_code:c.dong_code, verified:false, manual:true }; closeSheet(); renderDong(); }
 function dongPickText(name){ if(!name) return; loc.dong_name=name; loc.dong_code=name; loc.verified=false; closeSheet(); renderDong(); if(!loc.lat) toast('지도 핀은 위치 확인 후 표시돼요'); }
