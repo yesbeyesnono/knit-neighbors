@@ -2414,7 +2414,7 @@ async function cancelShopClaim(id){
   if(c?.doc_path) await sb.storage.from('shop-docs').remove([c.doc_path]);
   closeSheet(); toast('신청을 취소했어요');
 }
-async function openProfile(id){
+async function openProfile(id, back){
   if(id===me.id) return go('my');
   const [{data:p},{data:rel}] = await Promise.all([
     sb.from('profiles').select('*').eq('id',id).single(),
@@ -2422,7 +2422,8 @@ async function openProfile(id){
   ]);
   if(!p) return toast('프로필을 불러올 수 없어요');
   closeSheet();
-  if(view!=='profile'){ profBack = view; profTab='posts'; }
+  if(!back && !(view==='profile' && profId===id)) navPush();
+  if(view!=='profile' || profId!==id){ profBack = view; profTab='posts'; }
   profId=id; profData=p;
   const r = rel?.[0];
   let action;
@@ -2452,7 +2453,7 @@ async function openProfile(id){
   show('profile'); bindTabSwipe('#v-profile', '#profTabs');
   loadUserFeed(id, profTab, $('#profFeed'));
 }
-function closeProfile(){ const b=profBack||'map'; profBack=null; if(b==='post' && curPost) return openPost(curPost.id); if(['map','comm','chats','my','friends'].includes(b)) go(b); else go('map'); }
+function closeProfile(){ profBack=null; navBack('map'); }
 function profileMenu(){ const id=profId; openSheet(`<button class="btn o" onclick="closeSheet();reportUser('${id}')">${ico('report')} 신고</button><button class="btn r" onclick="closeSheet();blockUser('${id}')">차단</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
 async function shareUser(){ const p=profData||{}; const text=`뜨개동네 · ${p.nickname} (${p.dong_name||''}) ${lvShort(p)}`; try{ if(navigator.share) await navigator.share({title:'뜨개동네',text}); else { await navigator.clipboard.writeText(text); toast('프로필 정보를 복사했어요'); } }catch(e){} }
 // 특정 사용자 글 목록 (마이·프로필 공용)
@@ -2860,7 +2861,7 @@ async function openDirectRoom(otherId){
   openRoom(r.id);
 }
 let roomInfo=null;
-function closePost(){ const b=postBack||'comm'; postBack=null; if(b==='profile' && profId) return openProfile(profId); if(b==='activity') return openActivity(); go(['comm','my','map','chats'].includes(b)?b:'comm'); }
+function closePost(){ postBack=null; navBack('comm'); }
 async function openRoom(id){
   if(['comm','my','profile','map','chats','post'].includes(view)) roomBack=view;
   roomId=id; closeSheet();
@@ -2912,7 +2913,7 @@ async function resolveChatPhoto(img, ref){
   const { data } = await sb.storage.from('chat-photos').createSignedUrl(ref, 3600);
   if(data?.signedUrl) img.src=data.signedUrl;
 }
-function leaveRoom(){ if(roomChan){ sb.removeChannel(roomChan); roomChan=null; } roomId=null; const b=roomBack||'chats'; roomBack=null; if(b==='profile' && profId) return openProfile(profId); if(b==='post' && curPost) return openPost(curPost.id); go(['comm','my','map','chats'].includes(b)?b:'chats'); }
+function leaveRoom(){ if(roomChan){ sb.removeChannel(roomChan); roomChan=null; } roomId=null; const b=roomBack||'chats'; roomBack=null; if(b==='profile' && profId) return openProfile(profId, true); if(b==='post' && curPost) return openPost(curPost.id); go(['comm','my','map','chats'].includes(b)?b:'chats'); }
 
 // 단체방
 async function openGroupForm(){
@@ -4336,8 +4337,26 @@ async function cancelMeetup(mid, note){
   if(view==='map') loadPins(); else if(view==='my') renderMy(); else if(view==='post') go('comm'); else loadFeed();
 }
 let postBack=null, roomBack=null;
-async function openPost(id){
-  if(['comm','my','profile','map','chats','activity'].includes(view)) postBack=view;
+// ---- 글 상세 ↔ 프로필 뒤로 가기(2026-11-10): 예전엔 '어디서 왔는지'를 화면마다 한 칸(postBack·profBack)만 기억해서
+//      글 → 글쓴이 프로필 → 뒤로 → 글 → 뒤로 가 서로를 가리키며 끝없이 돌았다(탈출 불가). 지나온 길을 차례로 쌓아 두고 하나씩 되돌아간다
+let navStack=[];
+function navPush(){
+  if(view==='post' && curPost) navStack.push({ v:'post', id:curPost.id });
+  else if(view==='profile' && profId) navStack.push({ v:'profile', id:profId });
+  else if(['map','comm','chats','my'].includes(view)) navStack=[{ v:view }];   // 탭 화면에서 출발하면 새로 시작
+  else navStack.push({ v:view });
+  if(navStack.length>40) navStack.splice(1, navStack.length-40);
+}
+function navBack(def){
+  const e=navStack.pop();
+  if(!e) return go(def);
+  if(e.v==='post') return openPost(e.id, true);
+  if(e.v==='profile') return openProfile(e.id, true);
+  if(e.v==='activity') return openActivity();
+  go(['map','comm','chats','my','friends'].includes(e.v) ? e.v : def);
+}
+async function openPost(id, back){
+  if(!back && !(view==='post' && curPost?.id===id)) navPush();   // 같은 글을 새로 고치는 경우(답글 뒤)는 쌓지 않는다
   const [{data:p},{data:replies}] = await Promise.all([
     sb.from('posts').select('*, '+AUTHOR_SEL).eq('id', id).single(),
     sb.from('posts').select('*, '+AUTHOR_SEL).eq('parent_id', id).order('created_at')
