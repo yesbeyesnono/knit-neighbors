@@ -22,6 +22,7 @@ h1 small{font-size:12px;color:var(--ink3);font-weight:400}
 h2{font-size:15px;margin:22px 0 8px}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
 .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 1px 2px rgba(60,64,67,.04)}
+.mbtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}.mbtile{background:#fff;border:1px solid var(--line);border-radius:12px;height:88px;padding:16px 20px}.mbtile b{display:block;font-size:26px;line-height:32px}.mbtile span{font-size:13px;color:var(--ink3)}.mbseg{display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border:1px solid var(--line);border-radius:12px;height:48px;overflow:hidden;margin-bottom:16px}.mbseg button{border:0;border-right:1px solid var(--line);border-radius:0;height:100%;font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 6px;white-space:nowrap}.mbseg button:last-child{border-right:0}.mbseg em{font-style:normal;font-size:12px;min-width:24px;text-align:center;background:var(--chip);border-radius:99px;padding:1px 7px}.mbseg button.on{background:var(--ink);color:#fff}.mbseg button.on em{background:#fff;color:var(--ink)}.mbtool{display:grid;grid-template-columns:1fr 132px 132px auto;gap:16px;margin-bottom:16px}.mbtool>*{height:40px;margin:0}.mbdates{display:flex;gap:8px;align-items:center;margin:-4px 0 16px}.mbdates input{width:150px}.mbtable{table-layout:fixed}.mbtable th{height:40px;padding:0 20px;white-space:nowrap}.mbtable th.s{cursor:pointer;user-select:none}.mbtable th.s.on{color:var(--ink);font-weight:700}.mbtable th i{font-style:normal;color:#C9C5B8;margin-left:4px}.mbtable th.on i{color:var(--olive)}.mbtable td{height:48px;padding:0 20px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mbpg{display:grid;grid-template-columns:1fr auto;align-items:center;margin-top:16px;color:var(--ink3);font-size:13px}.mbpg div{display:flex;gap:8px;align-items:center}.mbpg button{width:32px;height:32px;padding:0;font-weight:700}.mbpg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}.mbpg button:disabled{opacity:.35;cursor:default}.mbrows{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:8px 0 20px}.mbr{display:grid;grid-template-columns:88px 1fr auto;align-items:center;gap:8px;min-height:48px;padding:0 16px;border-bottom:1px solid var(--line)}.mbr:last-child{border-bottom:0}.mbr>span:first-child{color:var(--ink3);font-size:13px}.mbr>b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mbr a{color:var(--olive);font-weight:700;font-size:13px;cursor:pointer}.mblab{font-size:12.5px;color:var(--ink3);margin-top:16px}.mbdong{border:1.5px solid var(--olive);border-radius:12px;padding:12px;margin:-12px 0 20px;background:var(--bg2)}.mbdong .res button{display:block;width:100%;text-align:left;margin-top:6px}.mbacts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0 16px}.mbacts button{height:40px}@media (max-width:760px){.mbtiles{grid-template-columns:1fr 1fr;gap:10px}.mbseg{display:flex;overflow-x:auto;height:44px}.mbseg button{flex:none;padding:0 14px}.mbtool{grid-template-columns:1fr 1fr;gap:10px}.mbtool input{grid-column:1/-1}.mbtable{table-layout:auto}}
 .card .l{font-size:12px;color:var(--ink3)}.card .v{font-size:24px;font-weight:800;margin-top:2px;letter-spacing:-.01em}
 .card .s{font-size:12px;color:var(--ink2)}
 table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:13px}
@@ -130,7 +131,7 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
     <a href="#content" data-v="content">글·모임·인증</a>
     <div class="grp">운영</div>
     <a href="#reports" data-v="reports">신고함 <span class="n" id="nRep" hidden></span></a>
-    <a href="#users" data-v="users">사용자</a>
+    <a href="#users" data-v="users">회원</a>
     <a href="#support" data-v="support">지기 문의함 <span class="n" id="nSup" hidden></span></a>
     <a href="#kb" data-v="kb">지식 창고 (상담 학습)</a>
     <a href="#banned" data-v="banned">금칙어</a>
@@ -377,31 +378,88 @@ async function openPostPanel(id){
     <h2>신고 ${(reps||[]).length}</h2>${(reps||[]).map(r=>`<div class="muted">${esc(r.reporter?.nickname)} · ${esc(r.reason)} ${r.detail?'· '+esc(r.detail):''} · ${fmt(r.created_at)} ${r.reviewed_at?'· 처리됨':''}</div>`).join('')||'<div class="muted">없음</div>'}
     <h2>답글 ${(replies||[]).length}</h2>${(replies||[]).map(r=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><b>${esc(r.author?.nickname)}</b> <span class="muted">${fmt(r.created_at)}</span><div>${esc(r.body||'')}</div></div>`).join('')}`);
 }
-// ===== 사용자 =====
-let userQ='';
+// ===== 회원 (schema 90, 2026-11-10 대표 확정 시안) =====
+// 위 4칸 = 가입 현황 · 가운데 5칸 = 챙길 회원 묶음 · 정렬(표 머리)·가입일·지역·검색은 서버에서(admin_members), 한 번에 50명
+let MEMROWS={};
+let MEM={seg:'all',q:'',days:'',from:'',to:'',region:'',sort:'created',dir:'desc',page:1};
+const MEM_SEGS=[['all','전체'],['incomplete','프로필 미완료'],['dong','동네 확인 필요'],['inactive','오래 안 옴'],['flag','신고·정지']];
+const MEM_SORT={created:'가입 최신순',nick:'닉네임순',dong:'동네순',seen:'최근 접속순'};
+function memFilter(){ const f={seg:MEM.seg,q:MEM.q,region:MEM.region}; if(MEM.days==='custom'){ f.from=MEM.from; f.to=MEM.to; } else f.days=MEM.days; return f; }
+function memSet(k,v){ MEM[k]=v; if(k!=='page') MEM.page=1; route(); }
+function memSort(k){ if(MEM.sort===k) MEM.dir = MEM.dir==='desc'?'asc':'desc'; else { MEM.sort=k; MEM.dir=(k==='created'||k==='seen')?'desc':'asc'; } MEM.page=1; route(); }
 VIEWS.users = async()=>{
-  const { data, error } = await sb.rpc('admin_find_users',{p_q:userQ,p_limit:100}); if(error) throw error;
-  $('#main').innerHTML=`<h1>사용자 <small>${data.length}명 표시</small></h1>
-  <div class="row"><input id="uq" placeholder="닉네임·이메일·동네 검색" value="${esc(userQ)}" style="width:280px" onkeydown="if(event.key==='Enter'){userQ=this.value;route()}"><button onclick="userQ=$('#uq').value;route()">검색</button><button onclick="downloadUsers()">CSV 내보내기</button></div>
-  <table><tr><th>닉네임</th><th>이메일</th><th>동네</th><th>단계</th><th>인증</th><th>가입</th><th>최근 로그인</th><th>상태</th></tr>
-  ${data.map(u=>`<tr class="clk" onclick="openUserPanel('${u.id}')"><td><b>${esc(u.nickname)}</b>${u.wave_until&&new Date(u.wave_until)>new Date()?' <span class="chip g">친구 찾는 중</span>':''}</td><td class="muted">${esc(u.email)}</td><td>${esc(u.dong_name||'')}</td><td>${lv(u)||'<span class="muted">없음</span>'}</td><td>${u.cert_count||0}</td><td class="muted">${fmtd(u.created_at)}</td><td class="muted">${u.last_sign_in_at?ago(u.last_sign_in_at):''}</td><td>${u.suspended_at?'<span class="chip r">정지</span>':u.onboarded_at?'<span class="chip g">활동</span>':'<span class="chip">미완료</span>'}</td></tr>`).join('')}</table>`;
+  const [{data:st,error:e1},{data:ls,error:e2}] = await Promise.all([sb.rpc('admin_member_stats'), sb.rpc('admin_members',{p:{...memFilter(),sort:MEM.sort,dir:MEM.dir,page:MEM.page}})]); if(e1||e2) throw (e1||e2);
+  const md=t=>{ const d=new Date(t); return (d.getFullYear()===new Date().getFullYear()?'':d.getFullYear()+'.')+(d.getMonth()+1)+'.'+d.getDate(); }; MEMROWS={}; (ls.rows||[]).forEach(u=>MEMROWS[u.id]=u); const c=st.counts||{}, rows=ls.rows||[], pages=Math.max(1,Math.ceil(ls.total/ls.size)), n=x=>Number(x||0).toLocaleString();
+  const th=(k,l)=>`<th class="s ${MEM.sort===k?'on':''}" onclick="memSort('${k}')">${l}<i>${MEM.sort===k?(MEM.dir==='desc'?'↓':'↑'):'↕'}</i></th>`;
+  const stt=u=>u.suspended_at?'<span class="chip r">정지</span>':u.deleted_at?'<span class="chip">탈퇴 대기</span>':u.f_incomplete?'<span class="chip">미완료</span>':u.f_dong?'<span class="chip y">동네 확인</span>':u.f_flag?'<span class="chip r">신고</span>':'';
+  const pg=[]; for(let i=1;i<=pages;i++){ if(i===1||i===pages||Math.abs(i-MEM.page)<=1) pg.push(i); else if(pg[pg.length-1]!=='…') pg.push('…'); }
+  const from=ls.total?(MEM.page-1)*ls.size+1:0, to=Math.min(MEM.page*ls.size, ls.total);
+  $('#main').innerHTML=`<h1>회원</h1>
+  <div class="mbtiles"><div class="mbtile"><b>${n(st.today)}</b><span>오늘 가입</span></div><div class="mbtile"><b>${n(st.total)}</b><span>전체 회원</span></div><div class="mbtile"><b>${st.onboard_pct}%</b><span>프로필 완료</span></div><div class="mbtile"><b>${st.map_pct}%</b><span>지도에 보임</span></div></div>
+  <div class="mbseg">${MEM_SEGS.map(([k,l])=>`<button class="${MEM.seg===k?'on':''}" onclick="memSet('seg','${k}')">${l} <em>${n(c[k])}</em></button>`).join('')}</div>
+  <div class="mbtool"><input id="mbq" placeholder="닉네임·이메일·동네 검색 후 Enter" value="${esc(MEM.q)}" onkeydown="if(event.key==='Enter')memSet('q',this.value.trim())">
+    <select onchange="memSet('days',this.value)">${[['','가입일 전체'],['1','오늘'],['7','최근 7일'],['30','최근 30일'],['custom','직접 고르기']].map(([v,l])=>`<option value="${v}"${MEM.days===v?' selected':''}>${l}</option>`).join('')}</select>
+    <select onchange="memSet('region',this.value)"><option value="">지역 전체</option>${(st.regions||[]).map(r=>`<option value="${esc(r.name)}"${MEM.region===r.name?' selected':''}>${esc(r.name)} (${r.n})</option>`).join('')}</select>
+    <button onclick="memNotify()">안내 보내기</button></div>
+  ${MEM.days==='custom'?`<div class="mbdates"><input type="date" value="${esc(MEM.from)}" onchange="memSet('from',this.value)"><span class="muted">부터</span><input type="date" value="${esc(MEM.to)}" onchange="memSet('to',this.value)"><span class="muted">까지</span></div>`:''}
+  <table class="mbtable"><colgroup><col style="width:26%"><col style="width:30%"><col style="width:14%"><col style="width:14%"><col style="width:16%"></colgroup>
+  <tr>${th('nick','닉네임')}${th('dong','동네')}${th('created','가입')}${th('seen','최근 접속')}<th>상태</th></tr>
+  ${rows.map(u=>`<tr class="clk" onclick="openUserPanel('${u.id}')"><td><b>${esc(u.nickname||'(이름 없음)')}</b></td><td>${esc(u.dong_name||'—')}</td><td class="muted">${md(u.created_at)}</td><td class="muted">${u.seen?ago(u.seen):''}</td><td>${stt(u)}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">조건에 맞는 회원이 없어요</td></tr>'}</table>
+  <div class="mbpg"><span>${n(from)}–${n(to)}번째 · 조건에 맞는 회원 ${n(ls.total)}명 · ${MEM_SORT[MEM.sort]}${MEM.sort!=='created'&&MEM.dir==='desc'?'(거꾸로)':MEM.sort==='created'&&MEM.dir==='asc'?' → 오래된 순':''} · <a href="#" onclick="event.preventDefault();downloadUsers()">CSV</a></span>
+    <div><button ${MEM.page<=1?'disabled':''} onclick="memSet('page',${MEM.page-1})">‹</button>${pg.map(i=>i==='…'?'<span>…</span>':`<button class="${i===MEM.page?'on':''}" onclick="memSet('page',${i})">${i}</button>`).join('')}<button ${MEM.page>=pages?'disabled':''} onclick="memSet('page',${MEM.page+1})">›</button></div></div>`;
 };
-async function downloadUsers(){ const { data } = await sb.rpc('admin_find_users',{p_q:'',p_limit:10000}); download('users.csv', csv(data||[], ['id','nickname','email','dong_name','level_crochet','level_knit','cert_count','created_at','last_sign_in_at','suspended_at'])); }
+async function downloadUsers(){ if(!confirm('전체 회원의 이메일이 담긴 파일을 내려받아요. 개인정보이니 꼭 필요할 때만 받고, 쓰고 나면 지워 주세요. 계속할까요?')) return; const { data } = await sb.rpc('admin_find_users',{p_q:'',p_limit:10000}); download('users.csv', csv(data||[], ['id','nickname','email','dong_name','level_crochet','level_knit','cert_count','created_at','last_sign_in_at','suspended_at'])); }
+// 지금 좁혀 놓은 조건에 맞는 회원 전체에게 🔔 안내(화면의 50명만이 아님). 먼저 인원을 세고 한 번 더 묻는다
+async function memNotify(){
+  const f=memFilter(); const {data:cnt,error}=await sb.rpc('admin_members_notify',{p:f,p_body:'',p_dry:true}); if(error) return toast(error.message); if(!cnt) return toast('보낼 회원이 없어요');
+  const seg=MEM_SEGS.find(x=>x[0]===MEM.seg)[1]; const body=prompt(`「${seg}」 조건의 회원 ${cnt}명에게 보낼 안내 (200자)`, MEM.seg==='incomplete'?'프로필을 마저 만들어 주시면 우리 동네 뜨개 이웃을 지도에서 만날 수 있어요.':MEM.seg==='dong'?'동네가 정확히 정해지지 않았어요. 프로필 편집에서 동네를 다시 정해 주시면 지도에서 이웃을 만날 수 있어요.':''); if(!body||!body.trim()) return;
+  if(!confirm(`${cnt}명에게 보냅니다.\n\n${body.trim()}\n\n보낼까요?`)) return;
+  const r=await sb.rpc('admin_members_notify',{p:f,p_body:body.trim(),p_dry:false}); if(r.error) return toast(r.error.message); toast(`${r.data}명에게 보냈어요`);
+}
+// ---- 회원 정보 고치기(admin_member_edit): 동네·지도 공개·닉네임·소개. 모두 관리자 기록에 남고, 회원에게 알림을 보낼지 고른다
+async function memEdit(id, action, p, notify){ const {error}=await sb.rpc('admin_member_edit',{p_user:id,p_action:action,p:p||{},p_notify:notify}); if(error){ toast(error.message); return false; } toast('고쳤어요'); await openUserPanel(id); if(location.hash==='#users') route(); return true; }
+function memVisible(id, on){ const notify=confirm(`지도 공개를 ${on?'켭니다':'끕니다'}.\n\n확인 = 회원에게 알림도 보냄 · 취소 = 알림 없이`); memEdit(id,'visible',{on},notify); }
+function memClear(id, what){ if(!confirm(what==='nick'?'닉네임을 지우고 임시 닉네임(뜨개이웃0000)으로 바꿔요. 회원에게 알림이 가요. 계속할까요?':'소개 글을 지워요. 회원에게 알림이 가요. 계속할까요?')) return; memEdit(id, what==='nick'?'clear_nick':'clear_bio', {}, true); }
+let mbDongList=null, mbDongCands=[];
+function memDongOpen(id){ const box=$('#mbDongBox'); if(!box) return; box.innerHTML=`<div class="mbdong"><b>동네 바꾸기</b> <span class="muted">동 이름이나 도로명 주소로 찾기</span><div class="row"><input id="mbDongQ" placeholder="예: 역삼동, 테헤란로 152" style="flex:1" onkeydown="if(event.key==='Enter')memDongSearch('${id}')"><button onclick="memDongSearch('${id}')">찾기</button><button onclick="$('#mbDongBox').innerHTML=''">닫기</button></div><div class="res" id="mbDongRes"></div><label style="display:block;margin-top:10px;font-size:13px"><input type="checkbox" id="mbDongNotify" checked> 회원에게 "운영진이 동네를 고쳐 드렸어요" 알림 보내기</label></div>`; $('#mbDongQ').focus(); }
+async function memDongSearch(id){
+  const q=($('#mbDongQ')?.value||'').trim(), box=$('#mbDongRes'); if(!box) return; if(q.length<2) return toast('두 글자 이상 적어 주세요'); box.innerHTML='<div class="muted">찾는 중…</div>';
+  if(!mbDongList){ try{ const j=await (await fetch('kr-dongs.json')).json(); mbDongList=j.rows.map(([sgg,dong,lat,lng])=>({sgg,dong,lat,lng})); }catch(e){ mbDongList=[]; } }
+  const list=mbDongList, toks=q.split(/[\s,]+/).filter(Boolean), tok=toks.filter(t=>/^[가-힣0-9]{2,12}(동|읍|면|리|가)$/.test(t)).pop()||'';
+  const base=(tok||toks[toks.length-1]).replace(/[0-9]*(동|읍|면|리|가)$/,'').replace(/[0-9·.]+$/,''), rest=q.replace(tok,''), isAddr=/[0-9]/.test(rest)||/(로|길)(\s|$|[0-9])/.test(rest);
+  let hits=[], roads=[];
+  if(base.length>=2 && !isAddr){ const others=toks.filter(t=>t!==tok).map(t=>t.replace(/(특별시|광역시|특별자치시|특별자치도|시|군|구|도)$/,'')).filter(t=>t.length>=2); hits=list.filter(d=>d.dong.startsWith(base)&&others.every(o=>d.sgg.includes(o))); if(!hits.length) hits=list.filter(d=>d.dong.startsWith(base)); hits.sort((x,y)=>(x.dong===tok?0:1)-(y.dong===tok?0:1)||x.sgg.localeCompare(y.sgg,'ko')||x.dong.localeCompare(y.dong,'ko')); }
+  if(!hits.length && /[가-힣]{2,}/.test(q)){ try{ const {data}=await sb.functions.invoke('juso-search',{body:{q}}); const sq=x=>String(x||'').replace(/\s/g,''), nd=x=>sq(x).replace(/제(\d)/g,'$1');
+    for(const r of (data?.rows||[])){ const want=nd(r.hemd); let d=want?list.find(x=>nd(x.sgg+x.dong)===want):null; if(!d){ const area=sq(r.si+r.sgg), b2=String(r.emd||'').replace(/[0-9]*(동|읍|면|리|가)$/,'').replace(/동?[0-9]+가?$/,''); if(b2.length>=2) d=list.find(x=>sq(x.sgg)===area&&x.dong.startsWith(b2)); } if(d) roads.push({d,road:r.road}); } }catch(e){} }
+  mbDongCands = roads.length ? roads.slice(0,10).map(({d,road})=>({...d,road})) : hits.slice(0,20);
+  if(!$('#mbDongRes')) return;
+  $('#mbDongRes').innerHTML = mbDongCands.length ? mbDongCands.map((c,i)=>`<button onclick="memDongPick('${id}',${i})">${c.road?esc(c.road)+' → ':''}<b>${esc(c.dong)}</b> <span class="muted">${esc(c.sgg)}</span></button>`).join('') : '<div class="muted">찾지 못했어요. 「○○동」처럼 동 이름으로 찾아 보세요</div>';
+}
+function memDongPick(id, i){ const c=mbDongCands[i]; if(!c) return; const sp=c.sgg.split(' '); const code=[sp[0], sp.slice(1).join(' '), c.dong].filter(Boolean).join('|'); if(!confirm(`동네를 「${c.dong}」(${c.sgg})(으)로 바꾸고 지도 핀을 그 동네 가운데로 옮겨요. 계속할까요?`)) return; memEdit(id,'dong',{dong_name:c.dong,dong_code:code,lat:c.lat,lng:c.lng}, !!$('#mbDongNotify')?.checked); }
 async function openUserPanel(id){
-  const [{data:p},{data:posts},{data:works},{data:reps},{data:ev},{data:adm}] = await Promise.all([
+  const [{data:p},{data:posts},{data:works},{data:reps},{data:ev},{data:adm},{data:mlog}] = await Promise.all([
     sb.from('profiles').select('*').eq('id',id).single(),
     sb.from('posts').select('id,body,parent_id,hidden,created_at,like_count,reply_count').eq('author_id',id).order('created_at',{ascending:false}).limit(30),
     sb.from('works').select('id,title,photos,techniques,custom_techniques,yarn_info,created_at').eq('profile_id',id).order('created_at',{ascending:false}),
     sb.from('reports').select('reason,detail,created_at,reviewed_at,reporter:profiles!reports_reporter_id_fkey(nickname)').eq('reported_id',id).order('created_at',{ascending:false}),
     sb.from('skill_events').select('kind,technique_id,craft,level,source,created_at').eq('profile_id',id).order('created_at',{ascending:false}).limit(60),
-    sb.from('admins').select('profile_id').eq('profile_id',id)
+    sb.from('admins').select('profile_id').eq('profile_id',id),
+    sb.from('admin_logs').select('action,detail,created_at').eq('target_id',id).order('created_at',{ascending:false}).limit(8)
   ]);
   if(!p) return toast('사용자를 찾을 수 없어요');
   const isAdm=!!(adm&&adm.length);
   openPanel(`<h2 style="margin-top:0">${esc(p.nickname)} ${p.suspended_at?'<span class="chip r">정지 중</span>':''} ${isAdm?'<span class="chip">관리자</span>':''}</h2>
-    <div class="muted">${esc(p.dong_name||'동네 미설정')} · ${lv(p)||'단계 없음'} · 가입 ${fmtd(p.created_at)} · 인증 ${p.cert_count||0} · Lv.${p.act_level||0} · MBTI ${esc(p.mbti||'-')}</div>
+    <div class="muted">${MEMROWS[id]?.email?esc(MEMROWS[id].email)+' · ':''}${esc(p.dong_name||'동네 미설정')} · ${lv(p)||'단계 없음'} · 가입 ${fmtd(p.created_at)} · 인증 ${p.cert_count||0} · Lv.${p.act_level||0} · MBTI ${esc(p.mbti||'-')}</div>
     <p style="white-space:pre-wrap">${esc(p.bio||'')}${p.now_making?'\n지금 뜨는 것: '+esc(p.now_making):''}${p.stuck_on?'\n막히는 부분: '+esc(p.stuck_on):''}</p>
-    <div class="row"><button onclick="suspendUser('${id}',${!p.suspended_at})">${p.suspended_at?'정지 해제':'정지'}</button><button onclick="broadcastTo('${id}','${esc(p.nickname)}')">이 사용자에게 알림</button><button onclick="setAdmin('${id}',${!isAdm})">${isAdm?'관리자 해제':'관리자로 지정'}</button>${isAdm?'':`<button class="r" onclick="deleteUser('${id}','${esc(p.nickname)}')">계정 삭제</button>`}</div>
+    <div class="mblab">정보 고치기</div>
+    <div class="mbrows"><div class="mbr"><span>동네</span><b>${esc(p.dong_name||'미설정')}${p.location?'':' <span class="chip y">지도 핀 없음</span>'}</b><a onclick="memDongOpen('${id}')">바꾸기</a></div>
+      <div class="mbr"><span>지도 공개</span><b>${p.is_visible===false?'꺼짐':'켜짐'}</b><a onclick="memVisible('${id}',${p.is_visible===false})">${p.is_visible===false?'켜기':'끄기'}</a></div>
+      <div class="mbr"><span>닉네임</span><b>${esc(p.nickname||'')}</b><a onclick="memClear('${id}','nick')">지우기</a></div>
+      <div class="mbr"><span>소개</span><b style="font-weight:400">${esc((p.bio||'').slice(0,40))||'<span class="muted">없음</span>'}</b>${p.bio?`<a onclick="memClear('${id}','bio')">지우기</a>`:'<span></span>'}</div></div>
+    <div id="mbDongBox"></div>
+    <div class="mbacts"><button onclick="broadcastTo('${id}','${esc(p.nickname)}')">알림 보내기</button><button onclick="suspendUser('${id}',${!p.suspended_at})">${p.suspended_at?'정지 해제':'정지'}</button>${isAdm?'<button disabled>계정 삭제</button>':`<button class="r" onclick="deleteUser('${id}','${esc(p.nickname)}')">계정 삭제</button>`}</div>
+    <div class="muted"><a href="#" onclick="event.preventDefault();setAdmin('${id}',${!isAdm})">${isAdm?'관리자 해제':'관리자로 지정'}</a></div>
+    <div class="mblab">관리 기록</div>${(mlog||[]).map(l=>`<div class="muted">${fmt(l.created_at)} · ${esc(({member_edit:'정보 고침',suspend_user:'정지',unsuspend_user:'정지 해제',broadcast:'알림 보냄',set_admin:'관리자 지정'})[l.action]||l.action)}${l.detail?.action?' ('+esc(({dong:'동네',visible:'지도 공개',clear_nick:'닉네임',clear_bio:'소개'})[l.detail.action]||l.detail.action)+(l.detail.to!=null?' → '+esc(String(l.detail.to)):'')+')':''}</div>`).join('')||'<div class="muted">아직 없어요</div>'}
     <h2>기법 (${(p.skills||[]).length}) · 인증된 기법 (${(p.verified_skills||[]).length})</h2><div>${(p.skills||[]).map(t=>`<span class="chip ${(p.verified_skills||[]).includes(t)?'y':''}">${esc(TECH[t]?.name_ko||t)}</span>`).join('')||'<span class="muted">없음</span>'}</div>
     <h2>받은 신고 ${(reps||[]).length}</h2>${(reps||[]).map(r=>`<div class="muted">${esc(r.reporter?.nickname)} · ${esc(r.reason)} ${r.detail?'· '+esc(r.detail):''} · ${fmt(r.created_at)} ${r.reviewed_at?'· 처리됨':''}</div>`).join('')||'<div class="muted">없음</div>'}
     <h2>작품 인증 ${(works||[]).length}</h2>${(works||[]).map(w=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><b>${esc(w.title)}</b> <span class="muted">${fmtd(w.created_at)} · ${esc(w.yarn_info||'')}</span><div class="ph" style="margin:4px 0">${(w.photos||[]).slice(0,4).map(u=>`<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" style="width:64px;height:64px"></a>`).join('')}</div><div>${(w.techniques||[]).map(t=>`<span class="chip">${esc(TECH[t]?.name_ko||t)}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="chip y">${esc(t)}</span>`).join('')}</div></div>`).join('')}

@@ -128,6 +128,11 @@ begin
   out := pg_temp.must_fail(out, 'mod_notify_delete', format('select public.mod_notify_delete(%L, ''글'', ''x'')', d2));
   out := pg_temp.must_fail(out, 'admin_delete_shop', 'select public.admin_delete_shop(gen_random_uuid(), ''x'', false)');   -- schema 85
   out := pg_temp.must_fail(out, 'admin_set_home_notice', 'select public.admin_set_home_notice(''{"title":"x","body":"x","active":true}''::jsonb)');   -- schema 87
+  out := pg_temp.must_fail(out, 'admin_member_stats', 'select public.admin_member_stats()');   -- schema 90
+  out := pg_temp.must_fail(out, 'admin_members', 'select public.admin_members(''{}''::jsonb)');
+  out := pg_temp.must_fail(out, 'admin_member_edit', 'select public.admin_member_edit(gen_random_uuid(), ''clear_bio'', ''{}''::jsonb, false)');
+  out := pg_temp.must_fail(out, 'admin_members_notify', 'select public.admin_members_notify(''{}''::jsonb, ''x'', false)');
+  out := pg_temp.must_fail(out, '_admin_member_base(내부용)', 'select count(*) from public._admin_member_base()');
   out := pg_temp.must_fail(out, 'update app_config direct', 'do $x$ declare n int; begin update public.app_config set value = ''{}''::jsonb where key = ''home_notice''; get diagnostics n = row_count; if n = 0 then raise exception ''no rows''; end if; end $x$');
   out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));

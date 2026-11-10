@@ -1506,3 +1506,13 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_set_home_notice(p): btn 이 있으면 link 필수 — view 는 map·comm·chats·my·skills·stash·cert·support 만, post 는 실제 있는 원글만(임의 URL 불가). id 는 제목·내용이 바뀔 때만 새로
 --   옛 앱(1.0.2 이하)은 home_notice 자체를 안 읽고, 1.0.3 웹 초판은 새 키를 무시(카드만)
 --   개시 인사 값: id 20261109-hello, 버튼 '인사 남기러 가기' → 지기 환영 글(40885c1e…). '사진 한 장 올리기'는 성급하다는 대표 의견으로 인사 답글 유도로 바꿈
+
+-- 90. 관리자 콘솔 › 회원 관리 (마이그레이션 admin_members, 2026-11-10 대표 확정 시안)
+--   _admin_member_base() : 회원 한 줄 + 묶음 판정(내부용, 누구에게도 grant 안 함). @knit.local 테스트 계정 제외. seen = greatest(last_seen_at, auth.last_sign_in_at)
+--       f_incomplete 프로필 미완료 · f_dong 동네 확인 필요(지도 위치 없음 또는 동네 칸이 주소 모양) · f_inactive 3일 넘게 미접속 · f_flag 정지 또는 미처리 신고
+--   _admin_member_filter(p) : 조건(seg·q·days|from/to·region=dong_code 첫 칸)에 맞는 회원 id (내부용)
+--   admin_member_stats() : 오늘 가입·전체·프로필 완료율·지도에 보이는 비율 + 묶음 건수 + 지역 목록
+--   admin_members(p) : 목록(정렬 created|nick|dong|seen × asc|desc, 50명씩 page) — 이메일 포함이라 log_access('members')
+--   admin_member_edit(user, action, p, notify) : dong(동네·지도 핀, 200m 격자) · visible · clear_nick(뜨개이웃0000) · clear_bio — admin_log('member_edit') + (선택) 회원 🔔
+--   admin_members_notify(p, body, dry) : 조건에 맞는 회원 전체에게 🔔(정지·탈퇴 대기·본인 제외, 최대 5,000) — dry=true 는 인원만 셈. admin_log('members_notify')
+--   기존 admin_find_users 는 그대로(가게·도안의 오너 찾기, CSV 내보내기)
