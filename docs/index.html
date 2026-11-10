@@ -1626,14 +1626,31 @@ function detectLocation(){
 // 동네 직접 입력 = 동네 검색(2026-11-10). 예전엔 글자만 받아 좌표가 없었고(지도에 핀이 안 생김) 집 주소를 적는 회원도 있었다.
 // 검색 결과에서 고르면 그 위치의 '동 이름'과 좌표(서버가 200m 격자로 흐림)를 쓴다. 주소 글자는 저장하지 않는다. 위치 확인(✓)은 붙지 않는다.
 function manualDong(){
-  openSheet(`<b style="font-size:1.05rem">동네 찾기</b><p class="muted" style="margin:0;font-size:.88rem;line-height:1.5">동 이름으로 찾아 주세요. 예: 역삼동, 분당 수내동</p>
-    <div style="display:flex;gap:8px"><input id="dongQ" maxlength="40" placeholder="동네 이름" enterkeyhint="search" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter'){event.preventDefault();dongSearch()}"><button class="btn" style="flex:none;width:auto;padding:0 18px" onclick="dongSearch()">찾기</button></div>
-    <div id="dongRes"></div>`);
+  openSheet(`<b style="font-size:1.05rem">동네 찾기</b><p class="muted" style="margin:0;font-size:.88rem;line-height:1.5">동 이름이나 도로명 주소로 찾아 주세요.</p>
+    <div style="display:flex;gap:8px"><input id="dongQ" maxlength="40" placeholder="예: 역삼동, 테헤란로 152" enterkeyhint="search" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter'){event.preventDefault();dongSearch()}"><button class="btn" style="flex:none;width:auto;padding:0 18px" onclick="dongSearch()">찾기</button></div>
+    <div id="dongRes"></div>
+    <button type="button" class="btn o" onclick="dongMapPick()">${ico('location')} 지도에서 직접 고르기</button>
+    <p class="muted" style="margin:0;font-size:.78rem;line-height:1.5">적으신 주소는 저장하지 않아요. 동 이름만 프로필에 보여요.</p>`);
   setTimeout(()=>{ const i=$('#dongQ'); if(i) i.focus(); }, 150);
 }
 let dongCands=[], dongList=null;
 // 전국 행정동 이름+중심 좌표(docs/kr-dongs.json, 3,559개 · 출처: 통계청 SGIS 행정동 경계 · vuski/admdongkor). 처음 찾을 때 한 번만 읽는다
 async function loadDongList(){ if(dongList) return dongList; const r=await fetch('kr-dongs.json'); const j=await r.json(); dongList=j.rows.map(([sgg,dong,lat,lng])=>({ sgg, dong, lat, lng })); return dongList; }
+function nearestDong(list, lat, lng){ let best=null, bd=1e9; for(const d of list){ const dx=(d.lng-lng)*0.8, dy=d.lat-lat, dd=dx*dx+dy*dy; if(dd<bd){ bd=dd; best=d; } } return bd<0.0025 ? best : null; }   // 약 5km 안에 동이 없으면(바다·국외) 없음
+// 지도에서 직접 고르기: 지도를 움직이면 가운데 핀이 가리키는 동 이름이 바로 보인다. 저장하는 것은 그 동의 중심(누른 지점이 아님)
+let dongMap=null, dongMapCur=null;
+async function dongMapPick(){
+  closeSheet(); dongMap=null; dongMapCur=null;
+  const c = (loc.lat&&loc.lng) ? {lat:loc.lat,lng:loc.lng} : (myProfile?._c || {lat:37.5665,lng:126.9780});
+  openSub('지도에서 동네 고르기', `<p class="muted" style="font-size:.85rem;margin:8px 0 0">지도를 움직여 핀을 우리 동네에 맞춰 주세요. 정확한 집 위치가 아니어도 괜찮아요.</p><div class="pickmap"><div class="mm" id="dongMapEl"></div><div class="cpin">${SVG_PIN}</div></div><div id="dongMapName" style="text-align:center;font-weight:700;min-height:1.6em;margin:2px 0 10px">동네를 찾는 중…</div><button class="btn" id="dongMapBtn" style="width:100%" disabled onclick="dongMapDone()">이 동네로 정하기</button>`);
+  subOnBack=()=>{ closeSub(); manualDong(); };
+  let list=[]; try{ list=await loadDongList(); }catch(e){}
+  const m = await miniMap($('#dongMapEl'), c, true); if(!m || !$('#dongMapEl')){ const n=$('#dongMapName'); if(n) n.textContent='지도를 불러오지 못했어요. 동 이름으로 찾아 주세요'; return; }
+  dongMap=m; m.setZoom(14);
+  const upd=()=>{ const el=$('#dongMapName'); if(!el || dongMap!==m) return; const ct=m.getCenter(); dongMapCur=nearestDong(list, ct.lat(), ct.lng()); el.innerHTML = dongMapCur ? `${esc(dongMapCur.dong)} <span class="muted" style="font-weight:400">${esc(dongMapCur.sgg)}</span>` : '<span class="muted" style="font-weight:400">이 근처에는 동네가 없어요</span>'; const b=$('#dongMapBtn'); if(b) b.disabled=!dongMapCur; };
+  m.addListener('idle', upd); upd();
+}
+function dongMapDone(){ const d=dongMapCur; if(!d) return; loc={ lat:d.lat, lng:d.lng, dong_name:d.dong, dong_code:dongCode(d), verified:false, manual:true }; dongMap=null; subOnBack=null; closeSub(); renderDong(); }
 function dongCode(d){ const p=d.sgg.split(' '); return [p[0], p.slice(1).join(' '), d.dong].filter(Boolean).join('|'); }
 async function dongSearch(){
   const q=($('#dongQ')?.value||'').trim(); const box=$('#dongRes'); if(!box) return; if(q.length<2) return toast('동네 이름을 두 글자 이상 적어 주세요');
@@ -1655,12 +1672,12 @@ async function dongSearch(){
     try{ await loadGoogleMaps(); }catch(e){}
     let found=[]; try{ found=await geocodePlace(q); }catch(e){}
     const seen=new Set();
-    for(const c of found.slice(0,3)){ let best=null, bd=1e9; for(const d of list){ const dx=(d.lng-c.lng)*0.8, dy=d.lat-c.lat, dd=dx*dx+dy*dy; if(dd<bd){ bd=dd; best=d; } } if(best && bd<0.0025 && !seen.has(best)){ seen.add(best); hits.push(best); } }
+    for(const c of found.slice(0,3)){ const best=nearestDong(list, c.lat, c.lng); if(best && !seen.has(best)){ seen.add(best); hits.push(best); } }
   }
   if(!$('#dongRes')) return;
   dongCands=hits.slice(0,30).map(d=>({ lat:d.lat, lng:d.lng, dong_name:d.dong, dong_code:dongCode(d), sgg:d.sgg }));
   if(!dongCands.length){
-    box.innerHTML=`<div class="muted" style="padding:10px 2px;line-height:1.5">찾지 못했어요. 「○○동」처럼 동 이름만 적어 보세요.</div>${tok&&!list.length?`<button class="btn o" onclick="dongPickText('${esc(tok)}')">「${esc(tok)}」(으)로 정하기 · 지도 핀은 나중에</button>`:''}`; return;
+    box.innerHTML=`<div class="muted" style="padding:10px 2px;line-height:1.5">찾지 못했어요. 「○○동」처럼 동 이름으로 찾거나, 아래 「지도에서 직접 고르기」를 눌러 주세요.</div>${tok&&!list.length?`<button class="btn o" onclick="dongPickText('${esc(tok)}')">「${esc(tok)}」(으)로 정하기 · 지도 핀은 나중에</button>`:''}`; return;
   }
   box.innerHTML=`<div style="max-height:44vh;overflow-y:auto">${dongCands.map((c,i)=>`<button type="button" class="btn o" style="text-align:left;margin-top:8px" onclick="dongPick(${i})"><b>${esc(c.dong_name)}</b> <span class="muted">${esc(c.sgg)}</span></button>`).join('')}</div>${hits.length>30?'<div class="muted" style="padding:8px 2px">더 있어요 — 「분당 수내동」처럼 시·구 이름을 함께 적어 보세요</div>':''}<div class="muted" style="padding:10px 2px 0;font-size:.72rem">동네 목록 출처: 통계청 SGIS 행정동 경계 · vuski/admdongkor</div>`;
 }
