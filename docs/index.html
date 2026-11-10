@@ -1336,7 +1336,7 @@ let me = null, myProfile = null, view = 'map', pins = [], filter = {mode:'all'},
 // ============ 유틸 ============
 function uuid4(){ if(crypto.randomUUID) return crypto.randomUUID(); const b=crypto.getRandomValues(new Uint8Array(16)); b[6]=(b[6]&0x0f)|0x40; b[8]=(b[8]&0x3f)|0x80; const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join(''); return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`; }
 function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2200); }
-function avatar(p, lg){ const ini=(p?.nickname||'?').slice(0,1); return `<div class="ava${lg?' lg':''}">${p?.avatar_url?`<img src="${esc(p.avatar_url)}" alt="">`:esc(ini)}</div>`; }
+function avatar(p, lg){ const ini=(p?.nickname||'?').slice(0,1); return `<div class="ava${lg?' lg':''}">${p?.avatar_url?`<img src="${esc(p.avatar_url)}" alt="" referrerpolicy="no-referrer" data-i="${esc(ini)}" onerror="this.replaceWith(this.dataset.i||'?')">`:esc(ini)}</div>`; }
 function ago(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분 전'; if(d<86400)return Math.floor(d/3600)+'시간 전'; return Math.floor(d/86400)+'일 전'; }
 function hhmm(t){ return new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}); }
 function chips(p){ return [p.craft&&`<span class="chip y">${CRAFT[p.craft]}</span>`, p.experience&&`<span class="chip">${EXP[p.experience]}</span>`, p.mbti&&`<span class="chip">${esc(p.mbti)}</span>`].filter(Boolean).join(' '); }
@@ -1720,7 +1720,7 @@ const SHOP_SVG = '<svg viewBox="0 0 24 24"><path d="M3.5 9.5 5 4.5h14l1.5 5"/><p
 const BELL_SVG = '<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
 function pinHtml({label, sub, avatar, cls, wave, bell}){
   const ini = (label||'?').slice(0,1);
-  const face = `<div class="face">${cls==='meet'?'모임':cls==='shop'?SHOP_SVG:(avatar?`<img src="${esc(avatar)}" alt="">`:esc(ini))}</div>`;
+  const face = `<div class="face">${cls==='meet'?'모임':cls==='shop'?SHOP_SVG:(avatar?`<img src="${esc(avatar)}" alt="" referrerpolicy="no-referrer" data-i="${esc(ini)}" onerror="this.replaceWith(this.dataset.i||'?')">`:esc(ini))}</div>`;
   const badge = wave ? `<div class="hand" title="뜨개 친구를 찾고 있어요">${ico('wave')}</div>` : bell ? `<div class="bell" title="새 소식">${BELL_SVG}</div>` : '';
   return `<div class="upin ${cls||''}"><div class="lbl">${esc(label)}</div>${badge?`<div class="facewrap">${face}${badge}</div>`:face}<div class="tail"></div></div>`;
 }
