@@ -849,7 +849,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <div class="dcard" id="locCard"><div id="locStatus"></div>
         <div class="muted" style="margin-top:12px;font-size:.8rem">정확한 위치는 저장하지 않아요. 약 200m 격자로 흐려진 좌표만 저장돼요.</div></div>
       <div class="obspacer"></div>
-      <button class="btn obnext" onclick="obGo(3)">이 동네로 정하기</button><div class="oblink"><span onclick="detectLocation()">다시 확인</span> · <span onclick="manualDong()">직접 입력</span></div>
+      <button class="btn obnext" onclick="obGo(3)">이 동네로 정하기</button><div class="oblink"><span onclick="detectLocation()">다시 확인</span> · <span onclick="manualDong()">동네 찾기</span></div>
     </div>
     <div class="body form obs" data-s="3">
       <h2 class="obttl l">뭐라고 부를까요?</h2><p class="obsub l">지도와 글에 보이는 이름이에요.</p>
@@ -1547,12 +1547,12 @@ function setLocStatus(html){ $('#locStatus').innerHTML = html; }
 // 동네 카드(2단계) — loc 상태를 카드로 그린다. 동네가 잡히기 전엔 안내 문구
 function renderDong(){
   const el=$('#locStatus'); if(!el) return;
-  if(loc.dong_name){ const parts=(loc.dong_code||'').split('|'); const sub = loc.verified ? parts.slice(0,-1).join(' ') : '직접 입력'; el.innerHTML=`<div class="dname">${esc(loc.dong_name)}</div><div class="dsub">${esc(sub)}</div><div style="margin-top:10px"><span class="chip">${ico('location')} 우리 동네</span></div>`; }
+  if(loc.dong_name){ const parts=(loc.dong_code||'').split('|'); const sub = (loc.verified||loc.manual) ? parts.slice(0,-1).join(' ') : '직접 입력'; el.innerHTML=`<div class="dname">${esc(loc.dong_name)}</div><div class="dsub">${esc(sub)}</div><div style="margin-top:10px"><span class="chip">${ico('location')} 우리 동네</span></div>`; }
   else el.innerHTML=`<div class="dwait">${ico('location')} 위치 확인 중…<br><span class="muted" style="font-size:.8rem">위치 권한을 허용하면 동네를 자동으로 찾아요</span></div>`;
 }
 let obStep=1, obReturn=false;
 function obGo(n){
-  if(n===3 && !loc.dong_name) return toast('동네를 확인해 주세요 (다시 확인 또는 직접 입력)');
+  if(n===3 && !loc.dong_name) return toast('동네를 확인해 주세요 (다시 확인 또는 동네 찾기)');
   if(n===4){ return saveProfile().then(ok=>{ if(ok) obShow(4); }); }
   obShow(n);
 }
@@ -1610,7 +1610,7 @@ async function reverseGeocode(lat, lng){
   return { dong_name: dong, dong_code: [si,gu,dong].filter(Boolean).join('|') };
 }
 function detectLocation(){
-  if(!navigator.geolocation){ setLocStatus('이 브라우저는 위치를 지원하지 않아요. 직접 입력해 주세요.'); return; }
+  if(!navigator.geolocation){ setLocStatus('이 브라우저는 위치를 지원하지 않아요. 「동네 찾기」를 눌러 주세요.'); return; }
   renderDong();
   navigator.geolocation.getCurrentPosition(async pos=>{
     const { latitude:lat, longitude:lng } = pos.coords;
@@ -1618,17 +1618,54 @@ function detectLocation(){
       const d = await reverseGeocode(lat, lng);
       loc = { lat, lng, dong_name:d.dong_name, dong_code:d.dong_code, verified:true };
       renderDong();
-    }catch(e){ loc = { lat, lng, dong_name:null, dong_code:null, verified:true }; setLocStatus('<div class="dwait">위치는 잡았지만 동네 이름을 찾지 못했어요.<br>아래 「직접 입력」을 눌러 주세요.</div>'); }
+    }catch(e){ loc = { lat, lng, dong_name:null, dong_code:null, verified:true }; setLocStatus('<div class="dwait">위치는 잡았지만 동네 이름을 찾지 못했어요.<br>아래 「동네 찾기」를 눌러 주세요.</div>'); }
   }, err=>{
-    setLocStatus('<div class="dwait">'+(err.code===1 ? '위치 권한이 거부됐어요.<br>설정에서 허용하거나 「직접 입력」을 눌러 주세요.' : '위치를 가져오지 못했어요.<br>「다시 확인」하거나 「직접 입력」을 눌러 주세요.')+'</div>');
+    setLocStatus('<div class="dwait">'+(err.code===1 ? '위치 권한이 거부됐어요.<br>설정에서 허용하거나 「동네 찾기」를 눌러 주세요.' : '위치를 가져오지 못했어요.<br>「다시 확인」하거나 「동네 찾기」를 눌러 주세요.')+'</div>');
   }, { enableHighAccuracy:false, timeout:10000, maximumAge:300000 });
 }
+// 동네 직접 입력 = 동네 검색(2026-11-10). 예전엔 글자만 받아 좌표가 없었고(지도에 핀이 안 생김) 집 주소를 적는 회원도 있었다.
+// 검색 결과에서 고르면 그 위치의 '동 이름'과 좌표(서버가 200m 격자로 흐림)를 쓴다. 주소 글자는 저장하지 않는다. 위치 확인(✓)은 붙지 않는다.
 function manualDong(){
-  const v = prompt('동네 이름을 입력해 주세요 (예: 역삼동)', loc.dong_name||''); if(v===null) return;
-  const name = v.trim(); if(!name) return;
-  loc.dong_name = name; loc.dong_code = loc.dong_code || name; loc.verified = false;
-  renderDong(); if(!loc.lat) toast('지도 핀은 위치 확인 후 표시돼요');
+  openSheet(`<b style="font-size:1.05rem">동네 찾기</b><p class="muted" style="margin:0;font-size:.88rem;line-height:1.5">동 이름으로 찾아 주세요. 예: 역삼동, 분당 수내동</p>
+    <div style="display:flex;gap:8px"><input id="dongQ" maxlength="40" placeholder="동네 이름" enterkeyhint="search" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter'){event.preventDefault();dongSearch()}"><button class="btn" style="flex:none;width:auto;padding:0 18px" onclick="dongSearch()">찾기</button></div>
+    <div id="dongRes"></div>`);
+  setTimeout(()=>{ const i=$('#dongQ'); if(i) i.focus(); }, 150);
 }
+let dongCands=[], dongList=null;
+// 전국 행정동 이름+중심 좌표(docs/kr-dongs.json, 3,559개 · 출처: 통계청 SGIS 행정동 경계 · vuski/admdongkor). 처음 찾을 때 한 번만 읽는다
+async function loadDongList(){ if(dongList) return dongList; const r=await fetch('kr-dongs.json'); const j=await r.json(); dongList=j.rows.map(([sgg,dong,lat,lng])=>({ sgg, dong, lat, lng })); return dongList; }
+function dongCode(d){ const p=d.sgg.split(' '); return [p[0], p.slice(1).join(' '), d.dong].filter(Boolean).join('|'); }
+async function dongSearch(){
+  const q=($('#dongQ')?.value||'').trim(); const box=$('#dongRes'); if(!box) return; if(q.length<2) return toast('동네 이름을 두 글자 이상 적어 주세요');
+  box.innerHTML='<div class="muted" style="padding:10px 2px">찾는 중…</div>';
+  let list=[]; try{ list=await loadDongList(); }catch(e){}
+  const toks=q.split(/[\s,]+/).filter(Boolean);
+  const tok=toks.filter(t=>/^[가-힣0-9]{2,12}(동|읍|면|리|가)$/.test(t)).pop()||'';
+  const base=(tok||toks[toks.length-1]).replace(/[0-9]*(동|읍|면|리|가)$/,'').replace(/[0-9·.]+$/,'');
+  const isAddr=/[0-9]/.test(q.replace(tok,'')) || /(로|길)(\s|$|[0-9])/.test(q.replace(tok,''));   // 도로명·번지처럼 적은 경우
+  let hits=[];
+  if(list.length && base.length>=2 && !isAddr){
+    const others=toks.filter(t=>t!==tok && t!==toks[toks.length-1] || (tok && t!==tok)).map(t=>t.replace(/(특별시|광역시|특별자치시|특별자치도|시|군|구|도)$/,'')).filter(t=>t.length>=2);
+    hits=list.filter(d=>d.dong.startsWith(base) && others.every(o=>d.sgg.includes(o)));
+    if(!hits.length) hits=list.filter(d=>d.dong.startsWith(base));
+    const rank=d=>(d.dong===tok?0:1); hits.sort((x,y)=>rank(x)-rank(y)||x.sgg.localeCompare(y.sgg,'ko')||x.dong.localeCompare(y.dong,'ko'));
+  }
+  // 동 이름으로 못 찾았으면(주소·건물 이름 등) 위치를 찾아 가장 가까운 동을 보여 준다. 적은 주소 글자는 저장하지 않는다
+  if(!hits.length && list.length){
+    try{ await loadGoogleMaps(); }catch(e){}
+    let found=[]; try{ found=await geocodePlace(q); }catch(e){}
+    const seen=new Set();
+    for(const c of found.slice(0,3)){ let best=null, bd=1e9; for(const d of list){ const dx=(d.lng-c.lng)*0.8, dy=d.lat-c.lat, dd=dx*dx+dy*dy; if(dd<bd){ bd=dd; best=d; } } if(best && bd<0.0025 && !seen.has(best)){ seen.add(best); hits.push(best); } }
+  }
+  if(!$('#dongRes')) return;
+  dongCands=hits.slice(0,30).map(d=>({ lat:d.lat, lng:d.lng, dong_name:d.dong, dong_code:dongCode(d), sgg:d.sgg }));
+  if(!dongCands.length){
+    box.innerHTML=`<div class="muted" style="padding:10px 2px;line-height:1.5">찾지 못했어요. 「○○동」처럼 동 이름만 적어 보세요.</div>${tok&&!list.length?`<button class="btn o" onclick="dongPickText('${esc(tok)}')">「${esc(tok)}」(으)로 정하기 · 지도 핀은 나중에</button>`:''}`; return;
+  }
+  box.innerHTML=`<div style="max-height:44vh;overflow-y:auto">${dongCands.map((c,i)=>`<button type="button" class="btn o" style="text-align:left;margin-top:8px" onclick="dongPick(${i})"><b>${esc(c.dong_name)}</b> <span class="muted">${esc(c.sgg)}</span></button>`).join('')}</div>${hits.length>30?'<div class="muted" style="padding:8px 2px">더 있어요 — 「분당 수내동」처럼 시·구 이름을 함께 적어 보세요</div>':''}<div class="muted" style="padding:10px 2px 0;font-size:.72rem">동네 목록 출처: 통계청 SGIS 행정동 경계 · vuski/admdongkor</div>`;
+}
+function dongPick(i){ const c=dongCands[i]; if(!c) return; loc={ lat:c.lat, lng:c.lng, dong_name:c.dong_name, dong_code:c.dong_code, verified:false, manual:true }; closeSheet(); renderDong(); }
+function dongPickText(name){ if(!name) return; loc.dong_name=name; loc.dong_code=name; loc.verified=false; closeSheet(); renderDong(); if(!loc.lat) toast('지도 핀은 위치 확인 후 표시돼요'); }
 function openOnboard(edit, step){
   const p = myProfile||{};
   $('#obTitle').textContent = edit?'프로필 수정':'프로필 만들기'; $('#obBack').hidden=!edit; $('#v-onboard').classList.toggle('edit', !!edit);
@@ -1644,7 +1681,7 @@ function openOnboard(edit, step){
 }
 async function saveProfile(){
   const edit = !$('#obBack').hidden;
-  if(!loc.dong_name){ toast('동네를 확인해 주세요 (자동 인식 또는 직접 입력)'); return false; }
+  if(!loc.dong_name){ toast('동네를 확인해 주세요 (자동 인식 또는 동네 찾기)'); return false; }
   if(!$('#f_nick').value.trim()){ toast('닉네임을 적어 주세요'); return false; }
   if(!edit && !$('#f_agree').checked){ toast('이용약관과 개인정보처리방침에 동의해 주세요'); return false; }
   const mbti = $('#f_mbti').value.trim().toUpperCase();
@@ -1654,7 +1691,7 @@ async function saveProfile(){
   const { error } = await sb.from('profiles').update(row).eq('id', me.id);
   if(error){ toast('저장 실패: '+error.message); return false; }
   // 위치: 새로 잡은 GPS만 흐려서 저장 (원본은 서버에 남지 않음). 직접 입력만 했으면 기존 좌표 유지
-  if(loc.lat && loc.verified){ const r = await sb.rpc('set_fuzzy_location', { p_lat:loc.lat, p_lng:loc.lng }); if(r.error) toast('위치 저장 실패: '+r.error.message); }
+  if(loc.lat && (loc.verified || loc.manual)){ const r = await sb.rpc('set_fuzzy_location', { p_lat:loc.lat, p_lng:loc.lng }); if(r.error) toast('위치 저장 실패: '+r.error.message); }
   await loadMe(); toast('저장했어요'); watchFriends(); loadMyRooms();
   if(!edit) applyReferrer();
   if(!edit){ try{ if(!localStorage.getItem('kn_meta_reg')){ localStorage.setItem('kn_meta_reg','1'); metaEvent('fb_mobile_complete_registration', { fb_registration_method:'app' }); } }catch(e){} }
@@ -1777,7 +1814,7 @@ function relocateNow(){
   navigator.geolocation.getCurrentPosition(async pos=>{
     const { latitude:lat, longitude:lng } = pos.coords;
     let d=null; try{ d = await reverseGeocode(lat, lng); }catch(e){}
-    if(!d?.dong_name) return toast('동네 이름을 찾지 못했어요. 프로필 편집에서 직접 입력해 주세요');
+    if(!d?.dong_name) return toast('동네 이름을 찾지 못했어요. 프로필 편집의 「동네 찾기」를 이용해 주세요');
     if(!confirm(`내 동네를 "${d.dong_name}"(으)로 바꿀까요?
 지도의 내 핀도 이 위치(200m 격자)로 옮겨져요.`)) return;
     const r = await sb.rpc('set_fuzzy_location', { p_lat:lat, p_lng:lng }); if(r.error) return toast('위치 저장 실패: '+r.error.message);
