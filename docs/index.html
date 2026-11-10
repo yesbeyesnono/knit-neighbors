@@ -1537,7 +1537,11 @@ function parseGeo(hex){
 const NAV_OF = { supporters:'my', stash:'my', friends:'chats', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my','activity','shop'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
 function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
-document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(a && isNative){ e.preventDefault(); CAP.Plugins.Browser.open({ url: new URL(a.getAttribute('href'), 'https://yesbeyesnono.github.io/knit-neighbors/').href }); } });
+// 약관·개인정보처리방침 등 문서 5개는 홈페이지 주소(app.knitup.co.kr)로 연다 — 보이는 주소 통일(2026-11-10). 원본은 이 저장소 docs/, 홈페이지가 매일 가져감
+const DOC_BASE='https://app.knitup.co.kr/', DOC_RE=/^(privacy|terms|guidelines|support|delete-account)\.html(#.*)?$/;
+document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(!a) return; const h=a.getAttribute('href')||''; const doc=DOC_RE.test(h);
+  if(isNative){ e.preventDefault(); CAP.Plugins.Browser.open({ url: new URL(h, doc?DOC_BASE:'https://yesbeyesnono.github.io/knit-neighbors/').href }); }
+  else if(doc){ e.preventDefault(); window.open(DOC_BASE+h, '_blank', 'noopener'); } });
 $('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openPlusSheet(); return; } go(b.dataset.v); };
 
 // ============ 온보딩 ============

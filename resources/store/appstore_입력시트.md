@@ -91,9 +91,9 @@ knitup,니트업,뜨개동네,뜨개질,코바늘,대바늘,뜨개,손뜨개,니
 ### URL
 | 칸 | 값 |
 |---|---|
-| 지원 URL | `https://yesbeyesnono.github.io/knit-neighbors/support.html` |
+| 지원 URL | `https://app.knitup.co.kr/support.html` |
 | 마케팅 URL (선택) | 비워 둠 (또는 뉴스레터 주소 `[대표]`) |
-| 개인정보 처리방침 URL | `https://yesbeyesnono.github.io/knit-neighbors/privacy.html` |
+| 개인정보 처리방침 URL | `https://app.knitup.co.kr/privacy.html` |
 | 저작권 | `© 2026 Firmtech Co., Ltd.` |
 
 ## 4. 스크린샷 (2026-11-04 확정 6장)

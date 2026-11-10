@@ -15,13 +15,13 @@
 | 카테고리 | 앱 › 소셜 |
 | 태그 | 취미, 소셜 네트워킹, 커뮤니티 |
 | 연락처 이메일 | `knitup.official@gmail.com` |
-| 웹사이트 | `https://yesbeyesnono.github.io/knit-neighbors/` |
+| 웹사이트 | `https://app.knitup.co.kr/` |
 
 ## 2. 앱 콘텐츠 (정책 › 앱 콘텐츠) — 질문별 답
 
 | 항목 | 답 |
 |---|---|
-| 개인정보처리방침 URL | `https://yesbeyesnono.github.io/knit-neighbors/privacy.html` |
+| 개인정보처리방침 URL | `https://app.knitup.co.kr/privacy.html` |
 | 광고 | 광고 없음 |
 | 앱 액세스 권한 | "모든 기능 또는 일부 기능이 제한됨" → 안내 추가: 이름 `심사용 로그인`, 사용자 이름 `demo1@knit.local`, 비밀번호 `knit1234`, 기타 안내: "로그인 화면의 앱 제목 'knitup'을 5번 탭하면 이메일 로그인 칸이 나타납니다. 데모 계정은 프로필·단계·실함이 미리 채워져 있습니다." |
 | 콘텐츠 등급 설문 | 카테고리: 소셜 네트워킹·커뮤니케이션. 폭력·성·욕설·약물·도박: 없음. 사용자 간 콘텐츠 공유·채팅: **예**. 위치 공유: **예(대략적 위치, 사용자가 끌 수 있음)**. 사용자 생성 콘텐츠 신고·차단: 예 |
@@ -38,7 +38,7 @@
 **수집·공유 개요**
 - 데이터 수집: **예** · 제3자와 공유: **예**(볼밴드 사진·게시글의 AI 처리 — Anthropic/OpenRouter, 운영 목적) — 공유를 '아니요'로 답하면 정책 위반이 될 수 있으니 '예'
 - 모든 데이터는 전송 중 암호화(HTTPS): **예**
-- 사용자가 데이터 삭제를 요청할 수 있음: **예** — 삭제 요청 URL `https://yesbeyesnono.github.io/knit-neighbors/delete-account.html`
+- 사용자가 데이터 삭제를 요청할 수 있음: **예** — 삭제 요청 URL `https://app.knitup.co.kr/delete-account.html`
 - 계정 생성 방식: Google 계정·Apple 계정(이메일 로그인은 심사용만)
 
 **데이터 유형별**
