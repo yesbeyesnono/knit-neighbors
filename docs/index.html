@@ -462,6 +462,10 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 #skillsBody .lvsec .techs{gap:6px;padding:4px 12px 12px}
 #skillsBody .tech{font-size:.82rem;padding:6px 11px}
 #skillsBody .lvhead{padding:4px 2px 2px}
+/* 내 뜨개 단계의 코바늘|대바늘 탭(2026-11-11 대표 확정 A안): 고른 쪽 초록 채움, 안 고른 쪽 초록 테두리 — 안 고른 쪽도 누를 수 있다는 것이 보이게. 이 화면에서만 */
+#skillsBody .tabs{background:transparent;padding:0;gap:8px}
+#skillsBody .tabs button{border:1.5px solid var(--color-primary);color:var(--color-primary);background:var(--color-surface);font-weight:700;border-radius:10px;padding:10px}
+#skillsBody .tabs button.on{background:var(--color-primary);color:#fff;box-shadow:none}
 /* 새 글 상단바: 제목 정확히 가운데, 게시는 검정 알약 버튼 */
 #v-compose .top{display:grid;grid-template-columns:64px 1fr 64px;align-items:center;padding-left:8px;padding-right:12px}
 #v-compose .top .back{width:auto;justify-self:start;padding:4px 8px}
