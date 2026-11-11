@@ -1586,3 +1586,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   chat_warns(room) : 앱이 받는 사람에게 붙일 주의 문구(메시지 id·종류만, 보낸 사람 본인은 못 봄)
 --   콘솔: admin_chat_flags(목록·오늘 숫자) · admin_chat_flag_ctx(걸린 메시지 ±5줄, log_access) · admin_chat_flag_resolve(ok|warn|restrict|suspended|caution)
 --       · admin_chat_room_open(room, 사유 5자 이상 — log_access + admin_log) · admin_chat_scan_set
+
+-- 97. 해시태그 (마이그레이션 post_tags · post_tags_guard, 2026-11-11 대표 확정 시안)
+--   posts.tags text[] (GIN) : 서버가 본문에서 뽑는다 — 트리거 posts_tags(before insert or update of body, work_id, tags) → posts_set_tags()
+--       post_tags(body) : 공백(또는 글 맨 앞) 뒤의 #한글/영문/숫자/_ 1~20자, 소문자, 최대 10개(주소의 /#x 는 태그가 아님)
+--       작품 인증 글(work_id, 최상위)은 _work_tags(work) 도 합침: 작품 종류(가방·파우치 → 가방, 파우치) · 종목(코바늘/대바늘) · 기법 이름(띄어쓰기 없이). 최대 20개
+--       회원이 tags 를 직접 넣거나 고쳐도 트리거가 본문 기준으로 다시 계산(위조 불가)
+--   tag_hidden(tag) : 운영진이 숨긴 태그(추천·인기·함께 쓰는 태그에서 빠짐, 글은 그대로). authenticated 는 읽기만
+--   tag_popular(limit) : 최근 60일, **회원이 본문에 직접 쓴 태그만**, 글 2개 이상(작품 인증의 자동 태그가 인기 줄을 채우지 않게)
+--   tag_suggest(q, limit) : 입력 추천(자동 태그 포함, 글 수 많은 순) · tag_info(tag) : 글 수·이번 주·함께 쓰는 태그 5개
+--       세 함수 모두 SECURITY INVOKER — 회원이 볼 수 있는 글만 센다(RLS 그대로)
+--   admin_tags() · admin_tag_hide(tag, hide) : 콘솔 › 글·인증 › 태그

@@ -660,6 +660,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .subpg{position:absolute;inset:0;z-index:1050;background:var(--bg);display:flex;flex-direction:column}
 .subbody{flex:1;overflow-y:auto;padding:4px 16px 28px}
 #nav button{position:relative}.navdot{position:absolute;top:9px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#C8402F;box-shadow:0 0 0 2px var(--color-surface)}.navdot[hidden]{display:none}
+/* 해시태그(schema 97) */
+.tagrow{display:flex;gap:6px;overflow-x:auto;padding:6px 16px 2px;scrollbar-width:none}.tagrow::-webkit-scrollbar{display:none}.tagrow[hidden]{display:none}
+.tagchip{flex:none;border:0;background:var(--chip);color:var(--chip-ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}.tagchip i{font-style:normal;font-weight:400;opacity:.7;margin-left:3px}
+.tagbar{margin:10px 16px 4px;background:var(--color-surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}.tagbar[hidden]{display:none}.tagbar .h{display:flex;align-items:center;gap:8px}.tagbar .h b{font-size:1.25rem;color:var(--color-primary)}.tagbar .h button{margin-left:auto;border:1px solid var(--line);background:var(--color-surface);border-radius:999px;padding:5px 12px;font:inherit;font-size:.78rem;color:var(--color-text-muted);cursor:pointer}.tagbar small{display:block;color:var(--color-text-muted);font-size:.82rem;margin-top:2px}.tagbar .rel{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+#v-comm.tagmode #commTabs,#v-comm.tagmode #cbox,#v-comm.tagmode #homeNotice,#v-comm.tagmode #evStrip,#v-comm.tagmode #tagRow{display:none !important}
+.tagpop{background:var(--color-surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.14);margin-top:6px;overflow:hidden;max-height:220px;overflow-y:auto}.tagpop[hidden]{display:none}.tagpop .ti{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;font-size:.92rem}.tagpop .ti:last-child{border-bottom:0}.tagpop .ti b{color:var(--color-primary)}.tagpop .ti span{color:var(--ink3);font-size:.75rem}
 .cau{align-self:flex-start;max-width:86%;font-size:.75rem;line-height:1.45;color:#8A4B12;background:#FBF1E3;border-radius:10px;padding:6px 10px;margin-top:-2px}
 .nwdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#C8402F;margin-left:7px;vertical-align:middle}.nwdot[hidden]{display:none}
 .nwc{background:var(--color-surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:12px;cursor:pointer}
@@ -914,6 +920,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
     </div>
     <div class="hnotice" id="homeNotice" hidden></div>
     <div class="evstrip" id="evStrip"></div>
+    <div class="tagrow" id="tagRow" hidden></div>
+    <div class="tagbar" id="tagBar" hidden></div>
     <div class="feed" id="feed"></div>
     <div class="feedmore" style="padding:12px 16px"><button class="btn" id="feedMore" onclick="loadFeed(true)" hidden>더 보기</button></div>
   </section>
@@ -1554,7 +1562,7 @@ const DOC_BASE='https://app.knitup.co.kr/', DOC_RE=/^(privacy|terms|guidelines|s
 document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(!a) return; const h=a.getAttribute('href')||''; const doc=DOC_RE.test(h);
   if(isNative){ e.preventDefault(); CAP.Plugins.Browser.open({ url: new URL(h, doc?DOC_BASE:'https://yesbeyesnono.github.io/knit-neighbors/').href }); }
   else if(doc){ e.preventDefault(); window.open(DOC_BASE+h, '_blank', 'noopener'); } });
-$('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openPlusSheet(); return; } go(b.dataset.v); };
+$('#nav').onclick = e => { const b=e.target.closest('button'); if(!b) return; if(b.dataset.v==='comm') commTag=null; if(b.dataset.v==='plus'){ if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요'); openPlusSheet(); return; } go(b.dataset.v); };
 
 // ============ 온보딩 ============
 seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
@@ -2990,6 +2998,18 @@ async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); $('#
 async function friendIds(){ const rows=await fetchFriendships(); return rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee_id:r.requester_id); }
 async function loadFeed(more){
   if(!more){ feedRows=[]; feedCursor=null; feedOffset=0; $('#feed').innerHTML='<div class="empty">불러오는 중…</div>'; loadHomeNotice(); loadEvents(); loadRecs().then(r=>{ if(r.length && feedRows.length && !['meetup','work'].includes(commFilter) && !$('#feed .reccard')) renderFeed(); }); }
+  if(!more) tagUi();
+  if(commTag){   // #태그 모아 보기: 탭과 상관없이 그 태그가 달린 글만, 최신순
+    let tq = sb.from('posts').select('*, '+AUTHOR_SEL).is('parent_id', null).eq('hidden', false).contains('tags', [commTag]).order('created_at',{ascending:false}).limit(FEED_PAGE);
+    if(feedCursor) tq = tq.lt('created_at', feedCursor);
+    const { data, error } = await tq;
+    if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
+    feedRows = feedRows.concat(data||[]); feedCursor = data?.length ? data[data.length-1].created_at : feedCursor;
+    $('#feedMore').hidden = !(data && data.length===FEED_PAGE);
+    await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), attachWorks(data||[])]);
+    if(!feedRows.length){ $('#feed').innerHTML=`<div class="empty">#${esc(commTag)} 글이 아직 없어요.<br>글에 #${esc(commTag)} 를 넣어 첫 글을 올려 보세요</div>`; return; }
+    renderFeed(); return;
+  }
   if(commFilter==='rank'){
     // 추천: 서버 점수순 (반응 × 거리 × 관계 × 질문 ÷ 시간)
     const { data, error } = await sb.rpc('feed_ranked', { p_limit: FEED_PAGE, p_offset: feedOffset });
@@ -3049,14 +3069,37 @@ async function loadMentionNames(rows){
 // 본문의 @닉네임을 링크로. 닉네임이 바뀌었으면 현재 닉네임으로 바꿔 보여줌(저장된 id 기준)
 function bodyHtml(p){
   let html = esc(p.body||'');
-  const ids = p.mentions||[]; if(!ids.length) return html;
+  const ids = p.mentions||[]; if(!ids.length) return tagHtml(html);
   const used = new Set();
   ids.forEach(id=>{ const n=MENTION_NAMES[id]?.nickname; if(!n) return; const tok='@'+esc(n); if(html.includes(tok)){ html = html.split(tok).join(`<span class="mention" onclick="event.stopPropagation();openProfile('${id}')">${tok}</span>`); used.add(id); } });
   // 저장 당시 닉네임이 바뀐 경우: 아직 링크되지 않은 @토큰을 순서대로 현재 닉네임으로 교체
   const rest = ids.filter(id=>!used.has(id) && MENTION_NAMES[id]?.nickname);
   if(rest.length) html = html.replace(/(^|[^">])@([^\s@<]+)/g, (m,pre,tok)=>{ const id=rest.shift(); if(!id) return m; const n=esc(MENTION_NAMES[id].nickname); return `${pre}<span class="mention" onclick="event.stopPropagation();openProfile('${id}')">@${n}</span>`; });
-  return html;
+  return tagHtml(html);
 }
+// ===== 해시태그(schema 97): 글의 #낱말은 서버가 posts.tags 로 뽑아 둔다. 앱은 초록 글자로 보여 주고, 누르면 커뮤니티가 그 태그의 글만 모아 보는 상태(commTag)가 된다 =====
+let commTag=null, tagInp=null, tagTimer=null;
+const TAG_RE=/(^|\s)#([가-힣A-Za-z0-9_]{1,20})/g;
+function tagHtml(html){ return html.replace(TAG_RE, (m,pre,t)=>`${pre}<span class="mention" onclick="event.stopPropagation();openTag('${t.toLowerCase()}')">#${t}</span>`); }
+function openTag(t){ commTag=String(t||'').toLowerCase().replace(/[^가-힣a-z0-9_]/g,'').slice(0,20)||null; if(view==='comm'){ loadFeed(); const v=$('#v-comm'); if(v) v.scrollTop=0; window.scrollTo(0,0); } else go('comm'); }
+function closeTag(){ commTag=null; loadFeed(); }
+async function tagUi(){
+  const v=$('#v-comm'), bar=$('#tagBar'), row=$('#tagRow'); if(!v||!bar||!row) return; v.classList.toggle('tagmode', !!commTag);
+  if(commTag){ const t=commTag; bar.hidden=false; bar.innerHTML=`<div class="h"><b>#${esc(t)}</b><button onclick="closeTag()">✕ 전체 글 보기</button></div>`;
+    try{ const {data}=await sb.rpc('tag_info',{p_tag:t}); if(commTag!==t || !data) return; bar.innerHTML=`<div class="h"><b>#${esc(t)}</b><button onclick="closeTag()">✕ 전체 글 보기</button></div><small>글 ${data.n||0}개${data.week?` · 이번 주 ${data.week}개`:''}</small>${(data.related||[]).length?`<div class="rel">${data.related.map(x=>`<button class="tagchip" onclick="openTag('${esc(x)}')">#${esc(x)}</button>`).join('')}</div>`:''}`; }catch(e){}
+    return; }
+  bar.hidden=true;
+  try{ const {data}=await sb.rpc('tag_popular',{p_limit:8}); if(commTag) return; const L=data||[]; row.hidden=!L.length; row.innerHTML=L.map(x=>`<button class="tagchip" onclick="openTag('${esc(x.tag)}')">#${esc(x.tag)}<i>${x.n}</i></button>`).join(''); }catch(e){ row.hidden=true; }
+}
+// 글을 쓰다가 #을 치면 이웃들이 쓰는 태그를 추천(새 태그를 그대로 써도 됨). 대상: 커뮤니티 글쓰기 칸 · 글쓰기 페이지 · 작품 인증 한 줄 소감
+function tagToken(inp){ const v=inp.value.slice(0, inp.selectionStart??inp.value.length); const m=v.match(/(^|\s)#([가-힣A-Za-z0-9_]{0,20})$/); return m ? {q:m[2], start:v.length-m[2].length-1} : null; }
+function tagPopEl(inp){ let pop=$('#tagPop'); if(!pop){ pop=document.createElement('div'); pop.id='tagPop'; pop.className='tagpop'; pop.hidden=true; } if(pop.previousElementSibling!==inp) inp.insertAdjacentElement('afterend', pop); return pop; }
+function tagInput(inp){ const t=tagToken(inp); const pop=tagPopEl(inp); if(!t){ pop.hidden=true; return; } tagInp=inp; clearTimeout(tagTimer);
+  tagTimer=setTimeout(async()=>{ try{ const {data}=await sb.rpc('tag_suggest',{p_q:t.q,p_limit:6}); const L=(data||[]).filter(x=>x.tag!==t.q.toLowerCase()); if(!L.length || !tagToken(inp)){ pop.hidden=true; return; }
+    pop.innerHTML=L.map(x=>`<div class="ti" onmousedown="event.preventDefault()" onclick="pickTag(this.dataset.t)" data-t="${esc(x.tag)}"><b>#${esc(x.tag)}</b><span>글 ${x.n}개</span></div>`).join(''); pop.hidden=false; }catch(e){ pop.hidden=true; } }, 150); }
+function pickTag(tag){ const inp=tagInp, pop=$('#tagPop'); if(!inp) return; const t=tagToken(inp); const caret=inp.selectionStart??inp.value.length; const before=t?inp.value.slice(0,t.start):inp.value, after=t?inp.value.slice(caret):''; inp.value=before+'#'+tag+' '+after; if(pop) pop.hidden=true; inp.focus(); const pos=(before+'#'+tag+' ').length; try{ inp.setSelectionRange(pos,pos); }catch(e){} inp.dispatchEvent(new Event('input',{bubbles:true})); }
+document.addEventListener('input', e=>{ const t=e.target; if(t && (t.id==='cText'||t.id==='sText'||t.id==='wNote')) tagInput(t); });
+document.addEventListener('focusout', e=>{ const t=e.target; if(t && (t.id==='cText'||t.id==='sText'||t.id==='wNote')) setTimeout(()=>{ const pop=$('#tagPop'); if(pop) pop.hidden=true; }, 200); });
 const mentionMap = {};                        // key(글 id | 'detail') → {닉네임: id}
 let mentionFriends = null, mentionTimer = null;
 function mentionInputEl(key){ return key==='detail' ? $('#replyIn') : vEl('rin-'+key); }

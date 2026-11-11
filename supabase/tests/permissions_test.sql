@@ -164,6 +164,10 @@ begin
   out := pg_temp.must_fail(out, 'chat_flag_ai_payload(서버 전용)', 'select public.chat_flag_ai_payload(1)');
   out := pg_temp.must_fail(out, 'chat_flag_ai_apply(서버 전용)', 'select public.chat_flag_ai_apply(1, null)');
   out := pg_temp.must_fail(out, 'own chat_restricted_until', format('update public.profiles set chat_restricted_until = null where id = %L', d1));
+  out := pg_temp.must_fail(out, 'admin_tags', 'select public.admin_tags()');   -- schema 97
+  out := pg_temp.must_fail(out, 'admin_tag_hide', 'select public.admin_tag_hide(''x'', true)');
+  out := pg_temp.must_fail(out, 'insert tag_hidden', 'insert into public.tag_hidden(tag) values (''x'')');
+  out := pg_temp.must_fail(out, '_work_tags(내부용)', 'select public._work_tags(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'update app_config direct', 'do $x$ declare n int; begin update public.app_config set value = ''{}''::jsonb where key = ''home_notice''; get diagnostics n = row_count; if n = 0 then raise exception ''no rows''; end if; end $x$');
   out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
