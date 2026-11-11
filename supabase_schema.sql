@@ -1559,3 +1559,15 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --       숫자만 돌려준다(누가 누구와 뜨친인지는 없음)
 --   friend_milestone_check() + 트리거 friendships_milestone : 성사될 때 쌍 수가 고비에 닿으면 jigi_reminders 에 한 번 넣어 텔레그램으로 알림
 --       (마지막으로 알린 고비는 jigi_config.friend_milestone)
+
+-- 95. 콘솔 › 지기 문의함 '대화' (마이그레이션 admin_talk, 2026-11-11 대표 확정 시안 — 대표: 회원과의 소통이 제일 중요)
+--   member_notes(profile_id pk → profiles on delete cascade, memo 1000, tags text[] 최대 8개·12자, updated_at, updated_by)
+--       운영 메모·꼬리표. 관리자 함수로만 읽고 씀(authenticated 권한 없음). 회원이 탈퇴하면 함께 지워짐
+--   _admin_talk_base() : 지기 1:1 방 한 줄 + 묶음 판정(내부용). 테스트 계정(@knit.local) 제외
+--       지기 계정이 보낸 메시지 중 by_ai = 자동(환영·응원·AI 답), by_ai 아님 = 운영진이 직접 쓴 것
+--       f_need 답장 필요(마지막 말이 회원 것 또는 waiting_admin 티켓) · f_wait 내가 보내고 기다리는 중 · f_talk 대화가 있었음(아니면 '환영 인사만') · f_unread 회원이 아직 안 읽음(last_read_at < 마지막 직접 답장)
+--   admin_talk_list(p) : seg(need|wait|all|auto) · q(닉네임·동네·대화 내용) · tag · 50개씩 → counts·rows·전체 꼬리표
+--   admin_talk_member(user) : 상태(손 들기·지도 공개·앱 알림·작가·정지) · 활동 12가지 수 · 모임(연 것/참여)·가게·클래스를 이름으로 · 최근 한 일 14줄(가입·기법 체크·글·댓글·인증·뜨친·모임·가게 소식·신청, ref 로 상세 연결) · 메모·꼬리표
+--   admin_member_note_save(user, memo, tags) : admin_log('member_note', 꼬리표만 — 메모 내용은 로그에 남기지 않음)
+--   admin_talk_send(room, body, photo, bell) : admin_reply_support 로 보내고(채팅 푸시), bell 이면 🔔 활동 알림 한 줄(link view support, push '0' = 알림 쪽 푸시는 끔)
+--   admin_talk_remind(user, days) : jigi_reminders 에 넣어 N일 뒤 텔레그램으로 알림(닉네임·마지막 말·메모·콘솔 주소)

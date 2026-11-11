@@ -99,6 +99,22 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
 #navtabs .t a .n{background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:0 7px;margin-left:4px;font-weight:700}#navtabs .p{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}#navtabs .p a{padding:5px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;text-decoration:none;color:var(--ink2)}#navtabs .p a.on{background:var(--olive);border-color:var(--olive);color:#fff;font-weight:700}
 @media(min-width:761px){#app{grid-template-columns:1fr !important;grid-template-rows:auto auto 1fr;align-content:start}aside{display:none}#topnav{display:flex}#navtabs{display:block;max-width:1400px}main{padding-top:18px;max-width:1400px}}
 .mtseg{grid-template-columns:repeat(5,1fr)}
+/* 지기 문의함 › 대화(schema 95): 왼쪽 목록 · 가운데 대화 · 오른쪽 회원 */
+.tkpills{display:flex;gap:6px;margin:0 0 16px}.tkpills button{border-radius:999px;padding:5px 14px;font-size:13px;height:auto}.tkpills button.on{background:var(--olive);border-color:var(--olive);color:#fff;font-weight:700}
+.tkbox{display:grid;grid-template-columns:320px minmax(0,1fr) 380px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;height:calc(100vh - 330px);min-height:600px}
+.tkl{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}.tkl input{margin:14px 14px 10px;width:auto}.tkseg{display:flex;gap:6px;padding:0 14px 12px;flex-wrap:wrap;border-bottom:1px solid var(--line);align-items:center}.tkseg button{border:0;border-radius:999px;background:var(--soft);font-size:12.5px;font-weight:700;color:var(--ink2);padding:4px 10px;height:auto}.tkseg button.on{background:var(--color-primary-dark);color:#fff}.tkseg button em{font-style:normal;font-weight:400;margin-left:3px}.tkseg select{height:26px;font-size:12.5px;padding:0 6px;border-radius:999px;width:auto}
+.tklist{flex:1;overflow-y:auto;min-height:0}.tkcv{padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;border-left:3px solid transparent}.tkcv:hover{background:#FAF9F4}.tkcv.on{background:#F2F6EE;border-left-color:var(--olive)}.tkcv .h{display:flex;align-items:baseline;gap:6px}.tkcv .h b{font-size:14.5px;white-space:nowrap}.tkcv .h small{color:var(--ink3);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tkcv .h time{margin-left:auto;color:var(--ink3);font-size:12px;white-space:nowrap}.tkcv p{color:var(--ink2);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 0 0}
+.tkt{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;margin:5px 4px 0 0;background:var(--chip)}.tkt.y{background:#F4EBC8}.tkt.rd{background:#F3D9D5;color:#8E2F26}.tkt.g{background:var(--soft);color:var(--ink2);font-weight:400}.tkt.k{background:var(--color-primary-dark);color:#fff}.tkt.x{cursor:pointer}
+.tkfold{padding:11px 14px;color:var(--ink2);font-size:13px;border-top:1px solid var(--line);background:var(--soft);cursor:pointer;display:flex;justify-content:space-between}
+.tkm{display:flex;flex-direction:column;border-right:1px solid var(--line);background:#FBFAF6;min-height:0;min-width:0}.tkmh{min-height:56px;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid var(--line);background:#fff}.tkmh b{font-size:16px}.tkmh small{color:var(--ink3)}
+.tkth{flex:1;padding:18px;overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:8px}.tkth .msg{max-width:80%;font-size:14px;padding:9px 13px;margin:0;white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid var(--line);align-self:flex-start}.tkth .msg.sup{align-self:flex-end;background:var(--olive);color:#fff;border:0}.tkth .msg.sup.auto{background:#E4E9DF;color:var(--ink2)}.tkth .meta{font-size:11.5px;color:var(--ink3);margin-top:-4px;align-self:flex-start}.tkth .meta.s{align-self:flex-end}.tkth .meta b{color:#B4443A}.tkth .meta i{font-style:normal;color:var(--olive);font-weight:700}
+.tkcmp{border-top:1px solid var(--line);background:#fff;padding:14px 16px}.tkcmp textarea{min-height:64px;margin:0}.tkcmp .cb{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--ink2);flex-wrap:wrap}.tkcmp .cb label{display:flex;align-items:center;gap:5px;margin-right:auto}
+.tkr{padding:18px;overflow-y:auto;min-height:0}.tkr h3{margin:0;font-size:16px}.tkr .sub{color:var(--ink2);font-size:13px;margin:2px 0 10px}.tkst{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}.tkst span{font-size:11.5px;border-radius:999px;padding:2px 9px;background:var(--chip);font-weight:700}.tkst .off{background:var(--soft);color:var(--ink3);font-weight:400}.tkst .rd{background:#F3D9D5;color:#8E2F26}
+.tklab{font-size:12px;color:var(--ink3);margin:0 0 6px}.tkact{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:10px}.tkact div{display:flex;align-items:center;justify-content:space-between;height:34px;padding:0 12px;border-bottom:1px solid var(--line);font-size:13px}.tkact div:nth-child(odd){border-right:1px solid var(--line)}.tkact div:nth-last-child(-n+2){border-bottom:0}.tkact span{color:var(--ink2)}.tkact b{font-size:14px}.tkact .z b{color:#C4C0B4;font-weight:400}.tkact .z span{color:var(--ink3)}.tkact small{font-size:11.5px;color:var(--ink3);font-weight:400;margin-left:4px}.tkact .c{cursor:pointer}.tkact .c:hover{background:#FAF9F4}
+.tkitem{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:13px;cursor:pointer}.tkitem:hover{background:#F2F6EE;border-color:var(--olive)}.tkitem>span:first-child{font-size:11.5px;color:var(--ink3)}.tkitem b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tkitem small{color:var(--ink2);font-size:12px}.tkitem i{font-style:normal;color:var(--olive);font-weight:700}
+.tktl{font-size:12.5px;color:var(--ink2);border-left:2px solid var(--line);padding-left:10px;margin-bottom:14px}.tktl div{padding:2px 0;display:flex;gap:6px}.tktl time{color:var(--ink3);flex:none;width:74px}.tktl span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tktl a{color:var(--olive);font-weight:700;margin-left:auto;flex:none;font-size:12px;text-decoration:none}
+.tkr textarea{min-height:58px;background:#FFFDF4;font-size:13px;margin:0 0 8px}.tkacts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.tkempty{margin:auto;color:var(--ink3);font-size:13.5px;text-align:center;padding:24px}
+@media(max-width:1100px){.tkbox{grid-template-columns:1fr;height:auto}.tkl,.tkm{border-right:0;border-bottom:1px solid var(--line)}.tklist{max-height:320px}.tkth{max-height:420px}}
 /* 대시보드 '뜨친' 칸(schema 94) */
 .frsec{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:16px}.frsec>h2{margin:0 0 16px;font-size:17px}
 .frrow1{display:grid;grid-template-columns:300px 1fr;gap:24px;margin-bottom:24px}.frbig{background:var(--chip);border-radius:14px;padding:22px 24px}.frbig small{font-size:13.5px;color:var(--ink2)}.frbig>b{display:block;font-size:54px;line-height:64px;letter-spacing:-1px}.frbig>b i{font-style:normal;font-size:22px;margin-left:4px}.frbig .s{font-size:13.5px;margin-top:6px}.frbig .s em{font-style:normal;font-weight:700;color:var(--olive)}
@@ -550,24 +566,115 @@ async function supportRooms(){
   const { data } = await sb.from('room_members').select('room_id, room:rooms(id,kind,created_at, room_members(profile_id, profiles(id,nickname,dong_name)), messages(id,body,photo_url,sender_id,created_at))').eq('profile_id',SUPPORT_ID).order('created_at',{foreignTable:'room.messages',ascending:false}).limit(1,{foreignTable:'room.messages'});
   return (data||[]).map(x=>x.room).filter(r=>r&&r.kind==='direct').map(r=>{ r.user=(r.room_members||[]).map(m=>m.profiles).find(p=>p&&p.id!==SUPPORT_ID); r.last=r.messages?.[0]; r.unanswered=!!(r.last && r.last.sender_id!==SUPPORT_ID); return r; }).filter(r=>r.last).sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
 }
+// ===== 지기 문의함(schema 95): 대화(기본) · AI가 정리한 문의 · 통계. 대화 = 왼쪽 목록(답장 필요/기다리는 중/대화 전체, 환영 인사만 간 회원은 접어 둠) · 가운데 대화 · 오른쪽 회원 활동 =====
+let TK={tab:'talk', seg:null, q:'', tag:'', sel:null, rows:[], mem:null, n:0};
+const TK_SEGS=[['need','답장 필요'],['wait','기다리는 중'],['all','대화 전체']];
+function talkSet(k,v){ TK[k]=v; if(k==='seg'||k==='q'||k==='tag') TK.sel=null; route(); }
 VIEWS.support = async(arg)=>{
-  const [{data:tks},{data:st},rooms] = await Promise.all([
+  if(arg) TK.tab='tickets';
+  const [{data:tks},{data:st}] = await Promise.all([
     sb.from('support_tickets').select('*, who:profiles!support_tickets_profile_id_fkey(id,nickname,dong_name)').order('created_at',{ascending:false}).limit(200),
-    sb.rpc('admin_support_stats',{p_days:30}), supportRooms() ]);
+    sb.rpc('admin_support_stats',{p_days:30}) ]);
   const T=tks||[]; const wait=T.filter(t=>t.status==='waiting_admin'), open=T.filter(t=>t.status==='open'), ans=T.filter(t=>t.status==='answered'), done=T.filter(t=>t.status==='closed');
-  const S={open:'AI가 파악 중',waiting_admin:'답변 대기',answered:'답변함 · 확인 대기',closed:'종료'}, U={urgent:'긴급',today:'오늘',info:'참고'};
-  const row=t=>`<tr class="clk" onclick="openTicket(${t.id})"><td>#${t.id}<div class="muted">${fmt(t.created_at)}</div></td><td><b>${esc(t.who?.nickname||'(탈퇴)')}</b><div class="muted">${esc(t.who?.dong_name||'')}</div></td><td><span class="chip">${esc(t.category)}</span>${t.urgency==='urgent'?' <span class="chip r">긴급</span>':''}</td><td>${esc(t.summary)}</td><td><span class="chip ${t.status==='waiting_admin'?'r':t.status==='closed'?'':'g'}">${S[t.status]}</span></td></tr>`;
-  const stat=st||{}; const cats=Object.entries(stat.by_category||{});
-  $('#main').innerHTML=`<h1>지기 문의함 <small>지기 AI가 먼저 응대하고 정리한 문의 · 답변 대기 ${wait.length}</small></h1>
-  <div class="cards" style="margin-bottom:12px"><div class="card"><div class="l">30일 문의</div><div class="v">${stat.total??0}</div></div><div class="card"><div class="l">평균 답변 시간</div><div class="v">${stat.avg_answer_hours!=null?stat.avg_answer_hours+'h':'–'}</div></div><div class="card"><div class="l">FAQ 직접 답변</div><div class="v">${stat.faq_direct??0}</div></div><div class="card"><div class="l">재문의</div><div class="v">${stat.reopened??0}</div></div></div>
-  ${cats.length?`<p class="muted">분류별(30일): ${cats.map(([k,v])=>`${esc(k)} ${v}`).join(' · ')}</p>`:''}
-  <table><tr><th>#</th><th>회원</th><th>분류</th><th>요약</th><th>상태</th></tr>${[...wait,...open,...ans].map(row).join('')||'<tr><td colspan="5" class="muted">처리할 문의가 없어요</td></tr>'}</table>
-  ${done.length?`<h2>종료 ${done.length}</h2><table>${done.slice(0,30).map(row).join('')}</table>`:''}
-  <h2>대화방 전체 <small class="muted">티켓 없이 직접 답장할 때</small></h2>
-  <table><tr><th>사용자</th><th>마지막 메시지</th><th style="width:120px">시각</th></tr>
-  ${rooms.map(r=>`<tr class="clk" onclick="openRoomPanel('${r.id}')"><td><b>${esc(r.user?.nickname||'(탈퇴)')}</b></td><td>${r.last.sender_id===SUPPORT_ID?'<span class="muted">지기: </span>':''}${esc(r.last.body||(r.last.photo_url?'(사진)':''))}</td><td class="muted">${fmt(r.last.created_at)}</td></tr>`).join('')||'<tr><td colspan="3" class="muted">없음</td></tr>'}</table>`;
-  if(arg) openTicket(+arg);
+  const liveN=wait.length+open.length+ans.length;
+  const pills=`<div class="tkpills">${[['talk','대화'],['tickets',`AI가 정리한 문의${liveN?' '+liveN:''}`],['stats','통계']].map(([k,l])=>`<button class="${TK.tab===k?'on':''}" onclick="talkSet('tab','${k}')">${l}</button>`).join('')}</div>`;
+  const head=`<h1>지기 문의함 <small>회원과 나누는 대화 · 답장은 '뜨개동네 지기' 이름으로 전달돼요</small></h1>${pills}`;
+  if(TK.tab==='tickets'){
+    const S={open:'AI가 파악 중',waiting_admin:'답변 대기',answered:'답변함 · 확인 대기',closed:'종료'};
+    const row=t=>`<tr class="clk" onclick="openTicket(${t.id})"><td>#${t.id}<div class="muted">${fmt(t.created_at)}</div></td><td><b>${esc(t.who?.nickname||'(탈퇴)')}</b><div class="muted">${esc(t.who?.dong_name||'')}</div></td><td><span class="chip">${esc(t.category)}</span>${t.urgency==='urgent'?' <span class="chip r">긴급</span>':''}</td><td>${esc(t.summary)}</td><td><span class="chip ${t.status==='waiting_admin'?'r':t.status==='closed'?'':'g'}">${S[t.status]}</span></td></tr>`;
+    $('#main').innerHTML=`${head}<p class="muted">지기 AI가 먼저 응대하고 정리한 문의예요 · 답변 대기 ${wait.length}</p>
+    <table><tr><th>#</th><th>회원</th><th>분류</th><th>요약</th><th>상태</th></tr>${[...wait,...open,...ans].map(row).join('')||'<tr><td colspan="5" class="muted">처리할 문의가 없어요</td></tr>'}</table>
+    ${done.length?`<h2>종료 ${done.length}</h2><table>${done.slice(0,30).map(row).join('')}</table>`:''}`;
+    if(arg) openTicket(+arg); return;
+  }
+  if(TK.tab==='stats'){
+    const stat=st||{}; const cats=Object.entries(stat.by_category||{});
+    $('#main').innerHTML=`${head}<div class="cards" style="margin-bottom:12px"><div class="card"><div class="l">30일 문의</div><div class="v">${stat.total??0}</div></div><div class="card"><div class="l">평균 답변 시간</div><div class="v">${stat.avg_answer_hours!=null?stat.avg_answer_hours+'h':'–'}</div></div><div class="card"><div class="l">FAQ 직접 답변</div><div class="v">${stat.faq_direct??0}</div></div><div class="card"><div class="l">재문의</div><div class="v">${stat.reopened??0}</div></div></div>
+    ${cats.length?`<p class="muted">분류별(30일): ${cats.map(([k,v])=>`${esc(k)} ${v}`).join(' · ')}</p>`:'<p class="muted">아직 분류된 문의가 없어요</p>'}`; return;
+  }
+  let {data:ls,error}=await sb.rpc('admin_talk_list',{p:{seg:TK.seg||'all',q:TK.q,tag:TK.tag}}); if(error) throw error;
+  if(!TK.seg){ const c0=ls.counts||{}; TK.seg=c0.need>0?'need':c0.wait>0?'wait':'all'; if(TK.seg!=='all'){ const r2=await sb.rpc('admin_talk_list',{p:{seg:TK.seg,q:TK.q,tag:TK.tag}}); if(r2.error) throw r2.error; ls=r2.data; } }
+  const c=ls.counts||{}, n=x=>Number(x||0).toLocaleString(); TK.rows=ls.rows||[];
+  const tm=t=>{ const d=new Date(t), now=new Date(); return d.toDateString()===now.toDateString()?`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:`${d.getMonth()+1}.${d.getDate()}`; };
+  const isNew=t=>Date.now()-new Date(t).getTime()<86400e3;
+  const cv=r=>`<div class="tkcv ${TK.sel===r.room?'on':''}" data-room="${r.room}" onclick="talkOpen('${r.room}')"><div class="h"><b>${esc(r.nick||'(이름 없음)')}</b><small>${esc(r.dong||'동네 미설정')}${isNew(r.joined)?' · 새 회원':''}</small><time>${tm(r.at)}</time></div>
+    <p>${r.from_member?'':'<span class="muted">지기: </span>'}${esc(r.body||(r.photo?'(사진)':''))}</p>${r.need?'<span class="tkt rd">답장 필요</span>':r.unread?'<span class="tkt rd">안 읽음</span>':r.wait?'<span class="tkt g">읽음</span>':''}${r.human_msgs>0&&!r.push_on?'<span class="tkt g">앱 알림 꺼짐</span>':''}${(r.tags||[]).map(t=>`<span class="tkt y">${esc(t)}</span>`).join('')}</div>`;
+  $('#main').innerHTML=`${head}
+  <div class="mbtiles"><div class="mbtile"><b style="${c.need?'color:var(--red)':''}">${n(c.need)}</b><span>답장이 필요한 회원</span></div><div class="mbtile"><b>${n(c.wait)}</b><span>내가 보내고 답을 기다리는 중 · 안 읽음 ${n(c.wait_unread)}</span></div><div class="mbtile"><b>${n(c.talked)}</b><span>대화가 오간 회원</span></div><div class="mbtile"><b>${n(c.auto)}</b><span>환영 인사만 간 회원 (아직 대화 없음)</span></div></div>
+  <div class="tkbox">
+    <div class="tkl"><input placeholder="닉네임·동네·대화 내용 검색 후 Enter" value="${esc(TK.q)}" onkeydown="if(event.key==='Enter')talkSet('q',this.value.trim())">
+      <div class="tkseg">${TK_SEGS.map(([k,l])=>`<button class="${TK.seg===k?'on':''}" onclick="talkSet('seg','${k}')">${l}<em>${n(c[k])}</em></button>`).join('')}${(ls.tags||[]).length?`<select onchange="talkSet('tag',this.value)"><option value="">꼬리표</option>${ls.tags.map(t=>`<option${TK.tag===t?' selected':''}>${esc(t)}</option>`).join('')}</select>`:''}</div>
+      <div class="tklist" id="tkList">${TK.rows.map(cv).join('')||`<div class="tkempty">${TK.seg==='need'?'답장을 기다리는 회원이 없어요':TK.seg==='wait'?'답을 기다리는 대화가 없어요':'조건에 맞는 대화가 없어요'}</div>`}${ls.total>TK.rows.length?`<div class="tkempty">${n(ls.total-TK.rows.length)}명 더 있어요 · 검색으로 좁혀 보세요</div>`:''}</div>
+      <div class="tkfold" onclick="talkSet('seg','${TK.seg==='auto'?'all':'auto'}')"><span>환영 인사만 간 회원 ${n(c.auto)}명</span><span>${TK.seg==='auto'?'접기':'펼치기'}</span></div></div>
+    <div class="tkm" id="tkMid"><div class="tkempty">왼쪽에서 대화를 골라 주세요</div></div>
+    <div class="tkr" id="tkRight"></div>
+  </div>`;
+  if(TK.sel && TK.rows.some(r=>r.room===TK.sel)) talkOpen(TK.sel); else if(TK.rows.length && innerWidth>1100) talkOpen(TK.rows[0].room);
 };
+async function talkOpen(room){
+  const r=TK.rows.find(x=>x.room===room); if(!r) return; TK.sel=room; const my=++TK.n;
+  document.querySelectorAll('.tkcv').forEach(e=>e.classList.toggle('on', e.dataset.room===room));
+  const [{data:msgs},{data:mem,error}] = await Promise.all([ sb.from('messages').select('id,body,photo_url,sender_id,by_ai,created_at').eq('room_id',room).order('created_at').limit(300), sb.rpc('admin_talk_member',{p_user:r.uid}) ]);
+  if(my!==TK.n || !$('#tkMid')) return; TK.mem=mem;
+  const M=msgs||[]; const lastHuman=[...M].reverse().find(m=>m.sender_id===SUPPORT_ID && !m.by_ai);
+  const hm=t=>{ const d=new Date(t); return `${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+  const lv=mem?[mem.lc?`코바늘 ${mem.lc}단계`:'', mem.lk?`대바늘 ${mem.lk}단계`:''].filter(Boolean).join(' · '):'';
+  $('#tkMid').innerHTML=`<div class="tkmh"><b>${esc(r.nick||'(이름 없음)')}</b><small>${esc([r.dong, lv].filter(Boolean).join(' · '))}</small></div>
+    <div class="tkth" id="tkMsgs">${M.map(m=>{ const sup=m.sender_id===SUPPORT_ID; const read=lastHuman&&m.id===lastHuman.id ? (r.member_read && new Date(r.member_read)>=new Date(m.created_at) ? ' · <i>읽음</i>' : ' · <b>아직 안 읽음</b>') : '';
+      return `<div class="msg ${sup?'sup':''} ${sup&&m.by_ai?'auto':''}">${esc(m.body||'')}${m.photo_url?`<img class="cph" data-ref="${esc(m.photo_url)}" alt="사진 불러오는 중…" style="display:block;max-width:240px;width:100%;border-radius:10px;margin-top:4px;background:#e9e9e9;min-height:60px;cursor:pointer" onclick="window.open(this.src,'_blank')">`:''}</div><div class="meta ${sup?'s':''}">${sup?(m.by_ai?'자동':'대표님이 보냄')+' · ':''}${hm(m.created_at)}${read}</div>`; }).join('')||'<div class="tkempty">메시지 없음</div>'}</div>
+    <div class="tkcmp"><textarea id="tkReply" placeholder="답장 내용 (Enter = 줄바꿈, Ctrl+Enter = 보내기)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))talkSend()"></textarea>
+      <div class="cb"><label><input type="checkbox" id="tkBell" checked> 🔔 앱 안 알림도 함께 보내기</label><button onclick="talkPolish()">AI로 다듬기</button><button onclick="$('#tkFile').click()">사진</button><input id="tkFile" type="file" accept="image/*" hidden onchange="talkPhoto(this.files[0]); this.value=''"><button class="p" onclick="talkSend()">보내기</button></div></div>`;
+  const box=$('#tkMsgs'); box.scrollTop=box.scrollHeight;
+  box.querySelectorAll('img.cph').forEach(async img=>{ const ref=img.dataset.ref; if(/^https?:/.test(ref)){ img.src=ref; return; } const {data}=await sb.storage.from('chat-photos').createSignedUrl(ref,3600); if(data?.signedUrl){ img.src=data.signedUrl; img.onload=()=>{ box.scrollTop=box.scrollHeight; }; } else img.alt='사진을 불러올 수 없어요'; });
+  talkRight(error?null:mem, error);
+}
+function talkRight(m, error){
+  const el=$('#tkRight'); if(!el) return; if(!m){ el.innerHTML=`<div class="tkempty">회원 정보를 불러오지 못했어요${error?'<br>'+esc(error.message):''}</div>`; return; }
+  const f=m.flags||{}, c=m.counts||{}, d=new Date(m.joined), md=t=>{ const x=new Date(t); return `${x.getMonth()+1}.${x.getDate()}`; }, hm=t=>{ const x=new Date(t); return x.toDateString()===new Date().toDateString()?`${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`:`${x.getMonth()+1}.${x.getDate()} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`; };
+  const cell=(label,val,extra,click)=>`<div class="${val?'':'z'} ${click&&val?'c':''}" ${click&&val?`onclick="${click}"`:''}><span>${label}</span><b>${val||0}${extra||''}</b></div>`;
+  const shop=(m.shops||[])[0];
+  const items=[...(m.meetups||[]).map(x=>`<div class="tkitem" onclick="talkRef('meetup','${x.id}')"><span>${x.host?'연 모임':'참여'}</span><div><b>${esc(x.title||'(제목 없음)')}</b><small>${fmt(x.starts_at)} · ${x.joined}${x.capacity?'/'+x.capacity:''}명${x.upcoming?' · 예정':''}${x.hidden?' · 숨김':''}</small></div><i>›</i></div>`),
+    ...(m.shops||[]).map(x=>`<div class="tkitem" onclick="talkRef('shop','${x.id}')"><span>가게</span><div><b>${esc(x.name)}</b><small>팔로워 ${x.followers}${x.active?'':' · 비공개'}</small></div><i>›</i></div>`),
+    ...(m.classes||[]).map(x=>`<div class="tkitem" onclick="talkRef('class','${x.id}')"><span>클래스</span><div><b>${esc(x.title||'(제목 없음)')}</b><small>신청 ${x.applicants}명${x.hidden?' · 숨김':''}</small></div><i>›</i></div>`)];
+  const tags=(m.note?.tags)||[];
+  el.innerHTML=`<h3>${esc(m.nick||'(이름 없음)')} ${shop?'<span class="tkt k" style="margin:0">가게 오너</span>':''}${f.author?'<span class="tkt k" style="margin:0 0 0 4px">작가</span>':''}</h3>
+    <div class="sub">${d.toDateString()===new Date().toDateString()?'오늘 '+hm(m.joined):md(m.joined)} 가입${m.provider?' · '+esc(({google:'구글',apple:'애플',email:'이메일'})[m.provider]||m.provider)+' 계정':''}${m.dong?' · '+esc(m.dong):''}${m.seen?' · 최근 접속 '+ago(m.seen):''}</div>
+    <div class="tkst">${f.suspended?'<span class="rd">정지</span>':''}${f.leaving?'<span class="rd">탈퇴 대기</span>':''}${f.onboarded?'':'<span class="rd">프로필 미완료</span>'}<span class="${f.waving?'':'off'}">${f.waving?'손 들기 켜짐':'손 들기 꺼짐'}</span><span class="${f.visible?'':'off'}">${f.visible?'지도 공개':'지도 비공개'}</span><span class="${f.push?'':'off'}">${f.push?'앱 알림 켜짐':'앱 알림 꺼짐'}</span></div>
+    <div class="tklab">활동 · 숫자를 누르면 회원 상세가 열려요</div>
+    <div class="tkact">${cell('글',c.posts,'',`openUserPanel('${m.id}')`)}${cell('댓글',c.replies,'',`openUserPanel('${m.id}')`)}${cell('작품 인증',c.works,'',`openUserPanel('${m.id}')`)}${cell('뜨친',c.friends,c.friend_pending?`<small>대기 ${c.friend_pending}</small>`:'')}${cell('연 모임',c.meet_host)}${cell('참여한 모임',c.meet_join)}${cell('연 클래스',c.classes)}${cell('신청한 클래스',c.class_apps)}<div class="${shop?'':'z'}"><span>가게</span><b>${shop?esc(shop.name):'없음'}</b></div>${cell('팔로우한 가게',c.shop_follows)}${cell('내 실함',c.stash)}${cell('이벤트 신청',c.events)}</div>
+    ${items.length?`<div class="tklab" style="margin-top:12px">모임 · 가게 · 클래스 — 누르면 상세가 열려요</div>${items.join('')}`:''}
+    <div class="tklab" style="margin-top:14px">최근 한 일</div>
+    <div class="tktl">${(m.timeline||[]).map(t=>`<div><time>${hm(t.at)}</time><span>${esc(t.text)}</span>${t.ref&&t.ref.id?`<a href="#" onclick="event.preventDefault();talkRef('${t.ref.type}','${t.ref.id}')">열기</a>`:''}</div>`).join('')||'<div>아직 없어요</div>'}</div>
+    <div class="tklab">운영 메모 (관리자만 봄) · 꼬리표</div>
+    <textarea id="tkMemo" maxlength="1000" placeholder="이 회원에 대해 기억해 둘 것. 칸을 벗어나면 저장돼요" onblur="talkNoteSave()">${esc(m.note?.memo||'')}</textarea>
+    <div id="tkTags">${tags.map(t=>`<span class="tkt y x" style="margin-top:0" title="눌러서 떼기" onclick="talkTag('${esc(t).replace(/'/g,'')}',false)">${esc(t)} ✕</span>`).join('')}<span class="tkt g x" style="margin-top:0" onclick="talkTag()">＋ 붙이기</span></div>
+    <div class="tkacts"><button onclick="talkRemind()">3일 뒤 다시 알려줘</button><button onclick="openUserPanel('${m.id}')">회원 상세 열기</button></div>`;
+}
+function talkRef(type,id){ if(type==='meetup') return openMeetupPanel(id); if(type==='post') return openPostPanel(id); if(type==='work') return openWorkPanel(id); if(type==='shop') return openShopForm(id); if(type==='class') return talkClass(id); }
+async function talkClass(id){
+  const {data:c,error}=await sb.from('shop_posts').select('id,title,body,extra,created_at,hidden,shop_id,author_id').eq('id',id).maybeSingle(); if(error||!c) return toast('클래스를 불러오지 못했어요');
+  const {data:ap}=await sb.from('class_applications').select('profile_id,status,created_at').eq('post_id',id).order('created_at'); const ids=[...new Set((ap||[]).map(a=>a.profile_id))];
+  const {data:ps}=ids.length?await sb.from('profiles').select('id,nickname').in('id',ids):{data:[]}; const nm={}; (ps||[]).forEach(p=>nm[p.id]=p.nickname);
+  const x=c.extra||{}, ST={pending:'신청',accepted:'확정',rejected:'거절',cancelled:'취소'};
+  openPanel(`<h2 style="margin-top:0">클래스 ${c.hidden?'<span class="chip y">숨김</span>':''}</h2><h3 style="margin:6px 0">${esc(c.title||'(제목 없음)')}</h3>
+    <div class="muted">올린 날 ${fmt(c.created_at)}${x.when?' · 일시 '+esc(String(x.when)):''}${x.fee?' · 수강료 '+esc(String(x.fee)):''}${x.max?' · 정원 '+esc(String(x.max)):''}</div>
+    ${c.body?`<p style="white-space:pre-wrap;margin:10px 0">${esc(c.body)}</p>`:''}
+    <h2>신청자 ${(ap||[]).length}</h2>${(ap||[]).map(a=>`<div style="padding:5px 0;border-bottom:1px solid var(--line)"><a href="#" onclick="openUserPanel('${a.profile_id}');return false">${esc(nm[a.profile_id]||'(탈퇴)')}</a> <span class="chip">${ST[a.status]||esc(a.status)}</span> <span class="muted">${fmt(a.created_at)}</span></div>`).join('')||'<div class="muted">아직 없어요</div>'}
+    ${c.shop_id?`<div class="row" style="margin-top:12px"><button onclick="openShopForm('${c.shop_id}')">가게 열기</button></div>`:''}`);
+}
+async function talkSend(photoPath){
+  const r=TK.rows.find(x=>x.room===TK.sel); if(!r) return; const t=$('#tkReply').value.trim(); if(!t && !photoPath) return toast('내용을 입력하세요');
+  const {error}=await sb.rpc('admin_talk_send',{p_room:r.room,p_body:t||null,p_photo:photoPath||null,p_bell:$('#tkBell').checked}); if(error) return toast(error.message);
+  toast(r.push_on?'보냈어요 · 푸시도 가요':'보냈어요 · 이 회원은 앱 알림이 꺼져 있어요'); refreshBadges(); route();
+}
+async function talkPhoto(file){ const r=TK.rows.find(x=>x.room===TK.sel); if(!file||!r) return; toast('사진 보내는 중…');
+  try{ const blob=await shrinkImage(file,1280); const path=`${me.id}/${r.room}/${Date.now()}.jpg`; const up=await sb.storage.from('chat-photos').upload(path, blob, {contentType:'image/jpeg', upsert:false}); if(up.error) throw new Error(up.error.message); await talkSend(path); }catch(e){ toast('사진 전송 실패: '+e.message); } }
+async function talkPolish(){ const t=$('#tkReply').value.trim(); if(!t) return toast('답장을 먼저 적어 주세요'); toast('다듬는 중…'); try{ const r=await jigi('polish',{text:t}); if(r.text) $('#tkReply').value=r.text; else toast('다듬지 못했어요'+(r.error?': '+r.error:'')); }catch(e){ toast(e.message); } }
+async function talkNoteSave(tags){ const m=TK.mem; if(!m) return; const memo=$('#tkMemo')?$('#tkMemo').value.trim():(m.note?.memo||''); const tg=tags||m.note?.tags||[]; if(!tags && memo===(m.note?.memo||'')) return;
+  const {data,error}=await sb.rpc('admin_member_note_save',{p_user:m.id,p_memo:memo,p_tags:tg}); if(error) return toast(error.message); m.note={memo:memo||null,tags:data.tags||[]}; const r=TK.rows.find(x=>x.uid===m.id); if(r) r.tags=m.note.tags; toast(tags?'꼬리표를 고쳤어요':'메모를 저장했어요'); if(tags) talkRight(m); }
+function talkTag(t, add){ const m=TK.mem; if(!m) return; let tg=[...((m.note?.tags)||[])]; if(add===false){ tg=tg.filter(x=>x!==t); } else { const v=prompt('붙일 꼬리표 (12자 · 예: 불편 제보, 해외, 작가 후보)'); if(!v||!v.trim()) return; tg.push(v.trim().slice(0,12)); } talkNoteSave(tg); }
+async function talkRemind(){ const m=TK.mem; if(!m) return; const v=prompt(`${m.nick} 님 건을 며칠 뒤에 텔레그램으로 다시 알려 드릴까요? (1~60)`, '3'); if(v==null) return; const days=parseInt(v,10); if(!(days>=1&&days<=60)) return toast('1에서 60 사이 숫자로 적어 주세요');
+  const {data,error}=await sb.rpc('admin_talk_remind',{p_user:m.id,p_days:days}); if(error) return toast(error.message); toast(`${fmtd(data)}에 텔레그램으로 알려 드릴게요`); }
 async function openTicket(id){
   const {data:t}=await sb.from('support_tickets').select('*, who:profiles!support_tickets_profile_id_fkey(id,nickname,dong_name,act_level)').eq('id',id).maybeSingle(); if(!t) return toast('티켓이 없어요');
   const [{data:msgs},{data:ev}]=await Promise.all([ sb.from('messages').select('id,body,photo_url,sender_id,by_ai,created_at').eq('room_id',t.room_id).order('id',{ascending:false}).limit(40), sb.from('support_events').select('*').eq('ticket_id',id).order('id') ]);

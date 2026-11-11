@@ -148,6 +148,13 @@ begin
   out := pg_temp.must_fail(out, 'admin_friend_stats', 'select public.admin_friend_stats()');   -- schema 94
   out := pg_temp.must_fail(out, '_friend_real(내부용)', 'select count(*) from public._friend_real()');
   out := pg_temp.must_fail(out, '_friend_pairs(내부용)', 'select public._friend_pairs()');
+  out := pg_temp.must_fail(out, 'admin_talk_list', 'select public.admin_talk_list(''{}''::jsonb)');   -- schema 95
+  out := pg_temp.must_fail(out, 'admin_talk_member', format('select public.admin_talk_member(%L)', d2));
+  out := pg_temp.must_fail(out, 'admin_member_note_save', format('select public.admin_member_note_save(%L, ''x'', ''{}'')', d2));
+  out := pg_temp.must_fail(out, 'admin_talk_send', 'select public.admin_talk_send(gen_random_uuid(), ''x'', null, true)');
+  out := pg_temp.must_fail(out, 'admin_talk_remind', format('select public.admin_talk_remind(%L, 3)', d2));
+  out := pg_temp.must_fail(out, 'read member_notes', 'select count(*) from public.member_notes');
+  out := pg_temp.must_fail(out, '_admin_talk_base(내부용)', 'select count(*) from public._admin_talk_base()');
   out := pg_temp.must_fail(out, 'update app_config direct', 'do $x$ declare n int; begin update public.app_config set value = ''{}''::jsonb where key = ''home_notice''; get diagnostics n = row_count; if n = 0 then raise exception ''no rows''; end if; end $x$');
   out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
