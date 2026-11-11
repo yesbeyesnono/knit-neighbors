@@ -1550,3 +1550,12 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_reply_support · admin_support_answer · support_deliver : 운영진이 직접 쓴 답장은 끝에서 chat_push(mid) — 회원에게 '뜨개동네 지기' 이름으로 푸시
 --   my_unread_rooms() : 안 읽은 대화방 수(지기 채팅 제외) — 앱 채팅 탭 빨간 점
 --   Edge Function push-send v9: route chat(훅 시크릿으로만) · 푸시 data 에 kind=chat, room, support — 1.0.5 앱은 눌렀을 때 그 대화방을 엶(이전 버전은 활동 화면)
+
+-- 94. 콘솔 대시보드 '뜨친' 칸 + 고비 알림 (마이그레이션 admin_friend_stats · …_fix_and_milestone · friend_real_region_fix, 2026-11-11 대표 확정 시안)
+--   _friend_real() : 실제 회원(@knit.local 테스트 · 지기 · 관리자 제외) + 지역 표기(시·구 단위, dong_code 가 2칸/3칸/'시|구|동' 등 섞여 있어 여기서 맞춤). 내부용
+--   _friend_pairs() : 실제 회원끼리 성사(accepted)된 쌍 수. _friend_next_goal(n) : 다음 고비(10·50·100·200·300·500·1000, 그 뒤 1000마다). 내부용
+--   admin_friend_stats() : pairs · week(7일) · members(뜨친 있는 회원) · waving(손 든 회원) · requests · pending · accept_pct
+--       · chatted(1:1 방에서 두 사람 모두 말한 쌍) · chat_pct · same_meetup(같은 모임 방에 함께 있는 쌍) · same_dong · daily(14일) · regions(신청한 회원 기준) · next_goal
+--       숫자만 돌려준다(누가 누구와 뜨친인지는 없음)
+--   friend_milestone_check() + 트리거 friendships_milestone : 성사될 때 쌍 수가 고비에 닿으면 jigi_reminders 에 한 번 넣어 텔레그램으로 알림
+--       (마지막으로 알린 고비는 jigi_config.friend_milestone)

@@ -99,6 +99,16 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
 #navtabs .t a .n{background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:0 7px;margin-left:4px;font-weight:700}#navtabs .p{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}#navtabs .p a{padding:5px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;text-decoration:none;color:var(--ink2)}#navtabs .p a.on{background:var(--olive);border-color:var(--olive);color:#fff;font-weight:700}
 @media(min-width:761px){#app{grid-template-columns:1fr !important;grid-template-rows:auto auto 1fr;align-content:start}aside{display:none}#topnav{display:flex}#navtabs{display:block;max-width:1400px}main{padding-top:18px;max-width:1400px}}
 .mtseg{grid-template-columns:repeat(5,1fr)}
+/* 대시보드 '뜨친' 칸(schema 94) */
+.frsec{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:16px}.frsec>h2{margin:0 0 16px;font-size:17px}
+.frrow1{display:grid;grid-template-columns:300px 1fr;gap:24px;margin-bottom:24px}.frbig{background:var(--chip);border-radius:14px;padding:22px 24px}.frbig small{font-size:13.5px;color:var(--ink2)}.frbig>b{display:block;font-size:54px;line-height:64px;letter-spacing:-1px}.frbig>b i{font-style:normal;font-size:22px;margin-left:4px}.frbig .s{font-size:13.5px;margin-top:6px}.frbig .s em{font-style:normal;font-weight:700;color:var(--olive)}
+.frgoal{margin-top:16px;font-size:12.5px;color:var(--ink2)}.frgoal div{height:8px;border-radius:99px;background:#fff;margin-top:6px;overflow:hidden}.frgoal div i{display:block;height:100%;background:var(--olive)}
+.frfun{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);border-radius:14px;overflow:hidden;align-self:start}.frfun>div{padding:18px 18px 16px;border-right:1px solid var(--line)}.frfun>div:last-child{border-right:0}.frfun small{font-size:12.5px;color:var(--ink3);display:block}.frfun b{font-size:30px;line-height:40px;display:block}.frfun b i{font-style:normal;font-size:14px;margin-left:3px;font-weight:400;color:var(--ink2)}.frfun span{font-size:12.5px;color:var(--ink2)}.frfun .hl{background:#F2F6EE}.frfun .weak b{color:#B4443A}
+.frrow2{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:24px}.frbox{border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}.frbox h3{margin:0 0 12px;font-size:14px}.frbox h3 small{font-weight:400;color:var(--ink3);margin-left:6px}.frbox p{font-size:12.5px;color:var(--ink2);margin:10px 0 0}
+.frbars{display:flex;align-items:flex-end;gap:6px;height:110px;border-bottom:1px solid var(--line);padding-top:18px}.frbars i{flex:1;background:var(--chip);border-radius:4px 4px 0 0;min-height:2px;position:relative}.frbars i.on{background:var(--olive)}.frbars i em{position:absolute;top:-18px;left:0;right:0;text-align:center;font-style:normal;font-size:11.5px;font-weight:700}.frdays{display:flex;gap:6px;font-size:10.5px;color:var(--ink3);margin-top:4px}.frdays span{flex:1;text-align:center}
+.frhb{display:grid;grid-template-columns:110px 1fr 30px;gap:8px;align-items:center;min-height:28px;font-size:13px}.frhb i{height:10px;border-radius:99px;background:var(--olive);display:block}.frhb span:last-child{text-align:right;color:var(--ink2)}
+.frcopy{background:var(--soft);border:0;border-radius:10px;padding:12px 14px;font-size:13.5px;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%;text-align:left;cursor:pointer;font-family:inherit;color:inherit}.frcopy u{text-decoration:none;color:var(--olive);font-weight:700;font-size:12.5px;white-space:nowrap}
+@media(max-width:1000px){.frrow1,.frrow2{grid-template-columns:1fr}.frfun{grid-template-columns:repeat(2,1fr)}.frfun>div{border-bottom:1px solid var(--line)}}
 #mtop{display:none;position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;align-items:center;gap:10px}
 #mtop b{font-size:15px;flex:1}#mtop button{width:40px;height:36px;font-size:18px;padding:0}#mtop .n{background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px}
 #drawerScrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:45}
@@ -243,8 +253,32 @@ const csv=(rows,cols)=>[cols.join(',')].concat(rows.map(r=>cols.map(c=>'"'+Strin
 async function stats(force){ if(STATS&&!force) return STATS; const { data, error } = await sb.rpc('admin_stats'); if(error) throw error; STATS=data; return data; }
 
 // ===== 대시보드 =====
+// 대시보드 '뜨친' 칸(schema 94): 성사된 쌍 → 맺어지는 길 5단계 → 날짜·동네·홍보 문구. 숫자만(누가 누구와 뜨친인지는 안 나옴), 테스트·운영 계정 제외
+function friendBox(f){ if(!f) return ''; const n=x=>Number(x||0).toLocaleString(), mx=Math.max(1,...(f.daily||[]).map(d=>d.n)), rmx=Math.max(1,...(f.regions||[]).map(r=>r.n));
+  const prev=[0,10,50,100,200,300,500,1000].filter(g=>g<f.next_goal).pop()||Math.max(0,f.next_goal-1000), pct=Math.max(4,Math.min(100,Math.round((f.pairs-prev)/(f.next_goal-prev)*100)));
+  const lines=[`지금까지 뜨친 ${n(f.pairs)}쌍이 맺어졌어요`, `이번 주에만 뜨친 ${n(f.week)}쌍이 새로 생겼어요`].concat(f.same_dong?[`같은 동네에서 만난 뜨친이 ${n(f.same_dong)}쌍이에요`]:[]);
+  const weak=f.pairs>=5 && f.chat_pct<30;
+  return `<section class="frsec"><h2>뜨친 <small>신청을 상대가 수락한 쌍 · 테스트·운영 계정 제외</small></h2>
+  <div class="frrow1">
+    <div class="frbig"><small>성사된 뜨친</small><b>${n(f.pairs)}<i>쌍</i></b><div class="s">이번 주 <em>+${n(f.week)}</em> · 뜨친이 있는 회원 ${n(f.members)}명</div>
+      <div class="frgoal">다음 고비 ${n(f.next_goal)}쌍까지 ${n(f.next_goal-f.pairs)}쌍 남았어요<div><i style="width:${pct}%"></i></div></div></div>
+    <div class="frfun">
+      <div><small>① 손 든 회원</small><b>${n(f.waving)}<i>명</i></b><span>지금 뜨친을 찾는 중</span></div>
+      <div><small>② 뜨친 신청</small><b>${n(f.requests)}<i>건</i></b><span>대기 중 ${n(f.pending)}건</span></div>
+      <div class="hl"><small>③ 성사 (수락)</small><b>${n(f.pairs)}<i>쌍</i></b><span>수락률 ${f.accept_pct}%</span></div>
+      <div class="${weak?'weak':''}"><small>④ 채팅까지</small><b>${n(f.chatted)}<i>쌍</i></b><span>성사된 쌍의 ${f.chat_pct}%</span></div>
+      <div><small>⑤ 같은 모임 참여</small><b>${n(f.same_meetup)}<i>쌍</i></b><span>실제로 만난 뜨친</span></div>
+    </div>
+  </div>
+  <div class="frrow2">
+    <div class="frbox"><h3>날짜별 성사 <small>최근 14일</small></h3><div class="frbars">${(f.daily||[]).map(d=>`<i class="${d.n?'on':''}" style="height:${d.n?Math.max(8,Math.round(d.n/mx*100)):0}%" title="${d.d} · ${d.n}쌍">${d.n?`<em>${d.n}</em>`:''}</i>`).join('')}</div><div class="frdays">${(f.daily||[]).map(d=>`<span>${+d.d.slice(3)}</span>`).join('')}</div></div>
+    <div class="frbox"><h3>어느 동네에서 <small>신청한 회원 기준</small></h3>${(f.regions||[]).slice(0,6).map(r=>`<div class="frhb"><span>${esc(r.name)}</span><i style="width:${Math.round(r.n/rmx*100)}%"></i><span>${r.n}</span></div>`).join('')||'<div class="muted">아직 없어요</div>'}<p>같은 동네끼리 맺어진 뜨친 <b>${n(f.same_dong)}쌍</b></p></div>
+    <div class="frbox"><h3>홍보에 쓸 문구 <small>눌러서 복사</small></h3>${lines.map(l=>`<button class="frcopy" onclick="frCopy(this)"><span>${esc(l)}</span><u>복사</u></button>`).join('')}<p>10·50·100쌍을 넘으면 텔레그램으로 알려 드려요.</p></div>
+  </div>
+  <p class="muted" style="margin:14px 0 0;font-size:12.5px">채팅까지 = 두 사람이 모두 한 번 이상 말한 쌍 · 같은 모임 = 두 사람이 같은 모임에 참여한 쌍</p></section>`; }
+function frCopy(b){ const t=b.querySelector('span').textContent; const done=()=>toast('복사했어요'); if(navigator.clipboard?.writeText) navigator.clipboard.writeText(t).then(done).catch(()=>prompt('복사해 쓰세요', t)); else prompt('복사해 쓰세요', t); }
 VIEWS.dash = async()=>{
-  const s=await stats(true); const t=s.totals;
+  const s=await stats(true); const t=s.totals; const {data:fs}=await sb.rpc('admin_friend_stats');
   const bar=(key,label)=>{ const max=Math.max(1,...s.daily.map(d=>d[key])); return `<div class="card"><div class="l">${label} · 최근 30일 (합계 ${s.daily.reduce((a,d)=>a+d[key],0)})</div><div class="bar">${s.daily.map(d=>`<i style="height:${Math.round(d[key]/max*100)}%" data-t="${d.d.slice(5)} · ${d[key]}"></i>`).join('')}</div></div>`; };
   const lvRow=(obj,label)=>`<div class="hbar"><span>${label}</span><span class="w">${[1,2,3,4,5].map(l=>`<span class="chip">${l}단계 ${obj[l]||0}</span>`).join('')}</span><span class="muted">${obj[0]||0} 없음</span></div>`;
   $('#main').innerHTML=`<h1>대시보드 <small>${new Date().toLocaleString('ko-KR')}</small></h1>
@@ -258,6 +292,7 @@ VIEWS.dash = async()=>{
     <div class="card"><div class="l">친구 찾는 중(손 들기)</div><div class="v">${t.waving}</div></div>
     <div class="card" style="${t.reports_open?'border-color:#c9303f':''}"><div class="l">미처리 신고</div><div class="v" style="${t.reports_open?'color:#c9303f':''}">${t.reports_open}</div><div class="s"><a href="#reports">신고함 열기</a></div></div>
   </div>
+  ${friendBox(fs)}
   <div class="cards">${bar('signups','가입')}${bar('posts','글·답글')}${bar('works','작품 인증')}${bar('messages','채팅 메시지')}</div>
   <h2>뜨개 단계 분포</h2><div class="card">${lvRow(s.levels.crochet,'코바늘')}${lvRow(s.levels.knit,'대바늘')}</div>`;
 };

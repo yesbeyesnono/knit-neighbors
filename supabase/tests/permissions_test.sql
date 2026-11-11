@@ -145,6 +145,9 @@ begin
   out := pg_temp.must_fail(out, 'push_chat_payload(서버 전용)', 'select public.push_chat_payload(1)');   -- schema 93
   out := pg_temp.must_fail(out, 'chat_push(내부용)', 'select public.chat_push(1)');
   out := pg_temp.must_fail(out, 'read chat_push_log', 'select count(*) from public.chat_push_log');
+  out := pg_temp.must_fail(out, 'admin_friend_stats', 'select public.admin_friend_stats()');   -- schema 94
+  out := pg_temp.must_fail(out, '_friend_real(내부용)', 'select count(*) from public._friend_real()');
+  out := pg_temp.must_fail(out, '_friend_pairs(내부용)', 'select public._friend_pairs()');
   out := pg_temp.must_fail(out, 'update app_config direct', 'do $x$ declare n int; begin update public.app_config set value = ''{}''::jsonb where key = ''home_notice''; get diagnostics n = row_count; if n = 0 then raise exception ''no rows''; end if; end $x$');
   out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
