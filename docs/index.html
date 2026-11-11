@@ -1230,7 +1230,7 @@ const isNative = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
 function metaEvent(name, params){ try{ const M = isNative && CAP.Plugins && CAP.Plugins.MetaEvents; if(M) M.logEvent({ name, params: params||{} }).catch(()=>{}); }catch(e){} }
 // ===== 아이콘 =====
 // 키 → 이모지(기본 표시). 디자인 이미지가 docs/icons/<key>.svg 로 들어오면 ICON_IMAGES=true 로 바꿔 일괄 교체
-const APP_VERSION = '1.0.4';
+const APP_VERSION = '1.0.5';
 const ICON_IMAGES = true;
 const EMOJI = { wave:'🙋', location:'📍', yarn:'🧶', cert:'🏅', check:'✓', close:'✕', handshake:'🤝', report:'🚩', camera:'📷', heart:'♥', reply:'💬', party:'🎉', review:'📝', group:'👥', learn:'📚', teach:'🧑‍🏫', at:'@', signal:'📶', tap:'👆', ruler:'📏' };
 function ico(k){ return `<i class="ico" data-ico="${k}"><b>${EMOJI[k]||''}</b></i>`; }
