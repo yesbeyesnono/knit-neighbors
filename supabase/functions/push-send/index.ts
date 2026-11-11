@@ -3,6 +3,7 @@
 //   시크릿(Android): FCM_SERVICE_ACCOUNT = Firebase › 프로젝트 설정 › 서비스 계정 › 새 비공개 키 로 받은 JSON 파일 내용 전체
 //   토픽 = 기기 토큰이 등록될 때 앱이 보낸 bundle(KOAP: kr.co.firmtech.knitneighbors / Lab: ...lab). 410·BadDeviceToken·UNREGISTERED 는 토큰 비활성화
 //   한쪽 키가 없어도 다른 쪽은 발송된다(기기별로 따로 처리)
+//   route chat = 채팅 메시지 푸시(messages insert 트리거 push_on_message → chat_push → 여기). 알림을 누르면 앱이 data.room 의 대화방을 엶(1.0.5 부터)
 //   호출 인증: x-jigi-secret(jigi_config.hook_secret) 또는 관리자 JWT(테스트 발송 route 'test')
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -14,7 +15,7 @@ const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...cors, "Content-Type": "application/json" } });
 const b64url = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const pemDer = (pem: string) => Uint8Array.from(atob(pem.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "")), (c) => c.charCodeAt(0));
-type Msg = { title: string; body: string; badge?: number; kind: string; nid?: string };
+type Msg = { title: string; body: string; badge?: number; kind: string; nid?: string; room?: string; support?: boolean };
 
 // ---- APNs 제공자 토큰(JWT ES256), 50분마다 갱신
 let jwtCache: { t: string; at: number } | null = null;
@@ -29,7 +30,7 @@ async function apnsJwt(): Promise<string> {
   jwtCache = { t: `${head}.${payload}.${b64url(sig)}`, at: Date.now() }; return jwtCache.t;
 }
 async function sendApns(token: string, bundle: string, m: Msg) {
-  const payload = { aps: { alert: { title: m.title, body: m.body }, ...(m.badge != null ? { badge: m.badge } : {}), sound: "default", "thread-id": m.kind }, kind: m.kind, nid: m.nid };
+  const payload = { aps: { alert: { title: m.title, body: m.body }, ...(m.badge != null ? { badge: m.badge } : {}), sound: "default", "thread-id": m.room ? "chat-" + m.room : m.kind }, kind: m.kind, nid: m.nid, room: m.room, support: m.support ? "1" : undefined };
   const host = env("APNS_SANDBOX") === "1" ? "https://api.sandbox.push.apple.com" : "https://api.push.apple.com";
   const r = await fetch(`${host}/3/device/${token}`, { method: "POST", headers: { authorization: `bearer ${await apnsJwt()}`, "apns-topic": bundle, "apns-push-type": "alert", "apns-priority": "10", "apns-expiration": String(Math.floor(Date.now() / 1000) + 86400) }, body: JSON.stringify(payload) });
   const txt = r.ok ? "" : await r.text();
@@ -58,7 +59,7 @@ async function fcmAccess(): Promise<{ t: string; pid: string }> {
 }
 async function sendFcm(token: string, m: Msg) {
   const a = await fcmAccess();
-  const message = { token, notification: { title: m.title, body: m.body }, data: { kind: String(m.kind ?? ""), nid: String(m.nid ?? "") }, android: { priority: "HIGH", ttl: "86400s", notification: { sound: "default", tag: m.nid ? String(m.nid) : undefined } } };
+  const message = { token, notification: { title: m.title, body: m.body }, data: { kind: String(m.kind ?? ""), nid: String(m.nid ?? ""), room: String(m.room ?? ""), support: m.support ? "1" : "" }, android: { priority: "HIGH", ttl: "86400s", notification: { sound: "default", tag: m.room ? "chat-" + m.room : m.nid ? String(m.nid) : undefined } } };
   const r = await fetch(`https://fcm.googleapis.com/v1/projects/${a.pid}/messages:send`, { method: "POST", headers: { authorization: `Bearer ${a.t}`, "content-type": "application/json" }, body: JSON.stringify({ message }) });
   const txt = r.ok ? "" : await r.text();
   const dead = r.status === 404 || /UNREGISTERED/.test(txt);
@@ -90,6 +91,15 @@ Deno.serve(async (req: Request) => {
       const out = []; for (const t of toks ?? []) out.push(await sendTo(t, { title: "뜨개동네", body: "푸시 알림이 잘 도착했어요 🧶", kind: "test" }));
       const err = out.find((o) => o.status !== 200)?.err ?? "";
       return json({ sent: out.filter((o) => o.status === 200).length, tried: out.length, error: /^no_|^bad_/.test(err) ? err : undefined, results: out });
+    }
+    if (body.route === "chat") {   // 채팅 메시지 푸시(DB 트리거만 호출): 누구에게 보낼지·60초 묶음·차단 제외는 push_chat_payload 가 정함. 🔔 활동 목록에는 쌓지 않음
+      if (!viaHook) return json({ error: "forbidden" }, 403);
+      const mid = Number(body.message_id ?? 0); if (!mid) return json({ error: "no_id" }, 400);
+      const { data: c } = await db.rpc("push_chat_payload", { p_msg: mid });
+      if (!c || !(c.tokens ?? []).length) return json({ sent: 0 });
+      const cm: Msg = { title: c.title, body: c.body, kind: "chat", room: c.room, support: !!c.support };
+      const res = []; for (const t of c.tokens) res.push(await sendTo(t, cm));
+      return json({ sent: res.filter((o) => o.status === 200).length });
     }
     if (!viaHook && !isAdmin) return json({ error: "forbidden" }, 403);
     const id = String(body.notification_id ?? ""); if (!id) return json({ error: "no_id" }, 400);

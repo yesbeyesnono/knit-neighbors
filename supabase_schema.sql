@@ -1539,3 +1539,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_meetup_edit(meetup, action, p, notify) : title · starts · place(이름만, 좌표 그대로) · hidden(모임 글 posts.hidden 도 함께)
 --       — notify 면 제목·일시·장소는 참여자(room_members)에게, 숨김은 개설자에게 🔔. admin_log('meetup_edit')
 --   admin_meetups_notify(p, body, meetup, dry) : meetup 이 있으면 그 모임 참여자, 없으면 조건에 맞는 모임들의 개설자에게 🔔(정지·탈퇴 대기·본인 제외, 최대 2,000). admin_log('meetups_notify')
+
+-- 93. 채팅 푸시 알림 (마이그레이션 chat_push · chat_push_support_replies, 2026-11-11 대표 지시)
+--   그 전까지는 채팅 메시지에 알림이 전혀 없었다(대화방을 열어 둔 사람만 실시간으로 봄). 🔔 활동 목록(notifications)에는 쌓지 않고 푸시만 보낸다
+--   chat_push_log(room_id, profile_id, sent_at) : 같은 방·같은 사람에게 60초에 한 번만 보내기 위한 기록(service_role 전용)
+--   push_chat_payload(msg) : 제목(1:1 = 보낸 사람, 단체 = 방/모임 이름 + '닉네임: ')·본문 80자(사진·장소는 문구)·받을 기기 토큰. service_role 전용
+--       제외: 보낸 사람 · 지기 계정 · 정지/탈퇴 대기 · 차단 관계(friendships blocked) · 20초 안에 그 방을 읽은 사람(보고 있는 중) · 60초 안에 이미 보낸 사람 · 기기 토큰 없는 사람
+--   chat_push(msg) : 받을 기기가 있을 때만 pg_net 으로 Edge Function push-send {route:'chat', message_id} 호출(내부용, grant 없음). 실패해도 메시지 저장은 그대로
+--   push_on_message() + 트리거 messages_push : 회원이 보낸 메시지마다 chat_push. 지기 계정이 보낸 것(환영·응원·AI 답)은 보내지 않음
+--   admin_reply_support · admin_support_answer · support_deliver : 운영진이 직접 쓴 답장은 끝에서 chat_push(mid) — 회원에게 '뜨개동네 지기' 이름으로 푸시
+--   my_unread_rooms() : 안 읽은 대화방 수(지기 채팅 제외) — 앱 채팅 탭 빨간 점
+--   Edge Function push-send v9: route chat(훅 시크릿으로만) · 푸시 data 에 kind=chat, room, support — 1.0.5 앱은 눌렀을 때 그 대화방을 엶(이전 버전은 활동 화면)

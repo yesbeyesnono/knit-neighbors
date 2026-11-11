@@ -655,6 +655,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .stepper b,.stepper input{width:84px!important;text-align:center;font-size:1.15rem;font-weight:700;border:0!important;border-radius:0!important;padding:0!important;height:46px;line-height:46px;background:var(--surface)}.stepper b{display:flex;align-items:center;justify-content:center}
 .subpg{position:absolute;inset:0;z-index:1050;background:var(--bg);display:flex;flex-direction:column}
 .subbody{flex:1;overflow-y:auto;padding:4px 16px 28px}
+#nav button{position:relative}.navdot{position:absolute;top:9px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#C8402F;box-shadow:0 0 0 2px var(--color-surface)}.navdot[hidden]{display:none}
 .nwdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#C8402F;margin-left:7px;vertical-align:middle}.nwdot[hidden]{display:none}
 .nwc{background:var(--color-surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:12px;cursor:pointer}
 .nwc .nwm{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--ink3);margin-bottom:5px}.nwc .nwm .cv{margin-left:auto;font-size:.9rem}
@@ -1147,7 +1148,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
     <button data-v="comm" title="커뮤니티"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 10.4 12 3.6l7.8 6.8v9.4a1.6 1.6 0 0 1-1.6 1.6H5.8a1.6 1.6 0 0 1-1.6-1.6Z"></path><path d="M9.6 21.4v-5.6h4.8v5.6"></path></svg></button>
     <button data-v="map" title="지도"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.4S5 15.7 5 10.2a7 7 0 0 1 14 0c0 5.5-7 11.2-7 11.2Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></button>
     <button data-v="plus" title="글쓰기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></button>
-    <button data-v="chats" title="채팅"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2.5 11.3 12.7"></path><path d="M21.5 2.5 14.9 21.3l-3.6-8.6-8.6-3.6Z"></path></svg></button>
+    <button data-v="chats" title="채팅"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2.5 11.3 12.7"></path><path d="M21.5 2.5 14.9 21.3l-3.6-8.6-8.6-3.6Z"></path></svg><span class="navdot" id="chatDot" hidden></span></button>
     <button data-v="my" title="마이" onclick="myPage='dash'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.9" r="3.9"></circle><path d="M4.6 20.4c.6-4 3.6-6.2 7.4-6.2s6.8 2.2 7.4 6.2"></path></svg><span class="badge" id="badgeFriends" hidden></span></button>
   </nav>
 
@@ -1501,7 +1502,7 @@ sb.auth.onAuthStateChange(async (ev, session) => {
   me = session?.user || null;
   if(!me){
     initStarted=false; closeSheet(); $('#slides').classList.remove('on'); show('login'); myProfile=null;
-    if(friendChan){ sb.removeChannel(friendChan); friendChan=null; } if(roomChan){ sb.removeChannel(roomChan); roomChan=null; }
+    if(friendChan){ sb.removeChannel(friendChan); friendChan=null; } if(chatChan){ sb.removeChannel(chatChan); chatChan=null; } { const cd=$('#chatDot'); if(cd) cd.hidden=true; } if(roomChan){ sb.removeChannel(roomChan); roomChan=null; }
     likedSet=new Set(); repostSet=new Set(); feedRows=[]; myRoomIds=new Set(); curPost=null; roomId=null; expandedReplies=new Set();
     return;
   }
@@ -1542,7 +1543,7 @@ function parseGeo(hex){
 // ============ 화면 전환 ============
 const NAV_OF = { supporters:'my', stash:'my', friends:'chats', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my','activity','shop'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
-function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats') renderChats(); if(v==='my') renderMy(); }
+function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats'){ renderChats(); chatDot(); } if(v==='my') renderMy(); }
 // 약관·개인정보처리방침 등 문서 5개는 홈페이지 주소(app.knitup.co.kr)로 연다 — 보이는 주소 통일(2026-11-10). 원본은 이 저장소 docs/, 홈페이지가 매일 가져감
 const DOC_BASE='https://app.knitup.co.kr/', DOC_RE=/^(privacy|terms|guidelines|support|delete-account)\.html(#.*)?$/;
 document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(!a) return; const h=a.getAttribute('href')||''; const doc=DOC_RE.test(h);
@@ -2547,7 +2548,14 @@ async function renderFriends(){
   else body = friends.length ? friends.map(r=>{ const p=(r.requester_id===me.id?r.addressee:r.requester)||{}; const id=r.requester_id===me.id?r.addressee_id:r.requester_id; return row(p, `<button class="btn sm o" onclick="openDirectRoom('${id}')">메시지</button>`, '', `openProfile('${id}')`); }).join('') : `<div class="empty">아직 친구가 없어요<br><span class="muted">지도에서 ${ico('wave')} 손 든 이웃에게 먼저 인사해 보세요</span><br><br><button class="btn sm" onclick="go('map')">지도에서 이웃 찾기</button></div>`;
   $('#friendsBody').innerHTML = `<div class="fseg"><button class="${friendTab==='friends'?'on':''}" onclick="friendTab='friends';renderFriends()">친구 ${friends.length}</button><button class="${friendTab==='inbox'?'on':''}" onclick="friendTab='inbox';renderFriends()">받은 신청${inbox.length?` <span class="chip r">${inbox.length}</span>`:''}</button><button class="${friendTab==='sent'?'on':''}" onclick="friendTab='sent';renderFriends()">보낸 신청${sent.length?' '+sent.length:''}</button></div><div class="list">${body}</div>`;
 }
+// 채팅 탭 빨간 점(schema 93): 안 읽은 대화방이 있으면 표시. 새 메시지(실시간)·앱을 다시 켰을 때·채팅 탭에 들어갈 때 다시 셈
+let chatChan=null, roomSeenAt=0, chatDotT=null;
+function chatDot(){ if(!me) return; clearTimeout(chatDotT); chatDotT=setTimeout(async()=>{ try{ const {data}=await sb.rpc('my_unread_rooms'); const e=$('#chatDot'); if(e) e.hidden=!(data>0); }catch(e){} }, 400); }
+function roomSeen(id){ if(view!=='room' || roomId!==id || document.hidden) return; const now=Date.now(); if(now-roomSeenAt<5000) return; roomSeenAt=now; sb.from('room_members').update({last_read_at:new Date().toISOString()}).eq('room_id',id).eq('profile_id',me.id).then(()=>{}); }
+function watchChats(){ if(chatChan || !me) return; chatChan = sb.channel('chat-dot').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},p=>{ const m=p.new||{}; if(m.sender_id===me.id) return; if(view==='room' && roomId===m.room_id) return; chatDot(); if(view==='chats') renderChats(); }).subscribe(); chatDot(); }
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && me) chatDot(); });
 function watchFriends(){
+  watchChats();
   if(friendChan) return;
   friendChan = sb.channel('friend-inbox').on('postgres_changes',{event:'*',schema:'public',table:'friendships',filter:`addressee_id=eq.${me.id}`},payload=>{
     if(payload.eventType==='INSERT') toast('새 친구 신청이 왔어요');
@@ -2830,8 +2838,8 @@ if(PushN){
     if(error) console.warn('push token', error.message);
   });
   PushN.addListener('registrationError', e => console.warn('push reg error', e));
-  PushN.addListener('pushNotificationReceived', n => { refreshBadge(); if(n?.body) toast(n.body); });   // 앱을 보고 있을 때 온 알림
-  PushN.addListener('pushNotificationActionPerformed', () => { setTimeout(()=>{ if(me && myProfile?.onboarded_at) openActivity(); }, 300); });   // 알림을 눌러 앱이 열렸을 때
+  PushN.addListener('pushNotificationReceived', n => { const d=n?.data||{}; if(d.kind==='chat'){ if(view==='room' && roomId===d.room) return; chatDot(); if(n?.body) toast((n.title?n.title+': ':'')+n.body); return; } refreshBadge(); if(n?.body) toast(n.body); });   // 앱을 보고 있을 때 온 알림
+  PushN.addListener('pushNotificationActionPerformed', a => { const d=a?.notification?.data||{}; setTimeout(()=>{ if(!(me && myProfile?.onboarded_at)) return; if(d.kind==='chat' && /^[0-9a-f-]{36}$/.test(d.room||'')){ if(d.support==='1') openSupportRoom(); else openRoom(d.room); } else openActivity(); }, 300); });   // 알림을 눌러 앱이 열렸을 때
 }
 async function pushUnregister(){ if(!PushN || !pushToken) return; try{ await sb.rpc('unregister_device_token', { p_token:pushToken }); }catch(e){} }
 async function pushStatusText(){ if(!PushN) return ''; try{ const p = await PushN.checkPermissions(); return p.receive==='granted' ? '켜짐' : p.receive==='denied' ? `꺼짐 · ${PUSH_OS} 설정에서 켤 수 있어요` : '아직 안 정함'; }catch(e){ return ''; } }
@@ -2882,7 +2890,8 @@ async function openRoom(id){
   $('#msgs').innerHTML = (isSupportRoom(r) && me.id!==SUPPORT_ID) ? `<div class="notice"><b class="tt">뜨개동네 지기 · 운영진</b>${SUPPORT_NOTICE}</div>` : ''; (msgs||[]).forEach(appendMsg); scrollMsgs();
   await sb.from('room_members').update({last_read_at:new Date().toISOString()}).eq('room_id',id).eq('profile_id',me.id);
   if(roomChan) sb.removeChannel(roomChan);
-  roomChan = sb.channel('room:'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`room_id=eq.${id}`},p=>{ appendMsg(p.new); scrollMsgs(); }).subscribe();
+  roomChan = sb.channel('room:'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`room_id=eq.${id}`},p=>{ appendMsg(p.new); scrollMsgs(); if(p.new.sender_id!==me.id) roomSeen(id); }).subscribe();
+  chatDot();
 }
 function nameOf(uid){ const m=roomInfo?.room_members.find(m=>m.profile_id===uid); return m?.profiles?.nickname||'알 수 없음'; }
 function appendMsg(m){
