@@ -155,6 +155,15 @@ begin
   out := pg_temp.must_fail(out, 'admin_talk_remind', format('select public.admin_talk_remind(%L, 3)', d2));
   out := pg_temp.must_fail(out, 'read member_notes', 'select count(*) from public.member_notes');
   out := pg_temp.must_fail(out, '_admin_talk_base(내부용)', 'select count(*) from public._admin_talk_base()');
+  out := pg_temp.must_fail(out, 'read chat_flags', 'select count(*) from public.chat_flags');   -- schema 96
+  out := pg_temp.must_fail(out, 'admin_chat_flags', 'select public.admin_chat_flags()');
+  out := pg_temp.must_fail(out, 'admin_chat_flag_ctx', 'select public.admin_chat_flag_ctx(1)');
+  out := pg_temp.must_fail(out, 'admin_chat_flag_resolve', 'select public.admin_chat_flag_resolve(1, ''ok'')');
+  out := pg_temp.must_fail(out, 'admin_chat_room_open', 'select public.admin_chat_room_open(gen_random_uuid(), ''테스트 사유입니다'')');
+  out := pg_temp.must_fail(out, 'admin_chat_scan_set', 'select public.admin_chat_scan_set(false)');
+  out := pg_temp.must_fail(out, 'chat_flag_ai_payload(서버 전용)', 'select public.chat_flag_ai_payload(1)');
+  out := pg_temp.must_fail(out, 'chat_flag_ai_apply(서버 전용)', 'select public.chat_flag_ai_apply(1, null)');
+  out := pg_temp.must_fail(out, 'own chat_restricted_until', format('update public.profiles set chat_restricted_until = null where id = %L', d1));
   out := pg_temp.must_fail(out, 'update app_config direct', 'do $x$ declare n int; begin update public.app_config set value = ''{}''::jsonb where key = ''home_notice''; get diagnostics n = row_count; if n = 0 then raise exception ''no rows''; end if; end $x$');
   out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));

@@ -656,6 +656,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .subpg{position:absolute;inset:0;z-index:1050;background:var(--bg);display:flex;flex-direction:column}
 .subbody{flex:1;overflow-y:auto;padding:4px 16px 28px}
 #nav button{position:relative}.navdot{position:absolute;top:9px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#C8402F;box-shadow:0 0 0 2px var(--color-surface)}.navdot[hidden]{display:none}
+.cau{align-self:flex-start;max-width:86%;font-size:.75rem;line-height:1.45;color:#8A4B12;background:#FBF1E3;border-radius:10px;padding:6px 10px;margin-top:-2px}
 .nwdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#C8402F;margin-left:7px;vertical-align:middle}.nwdot[hidden]{display:none}
 .nwc{background:var(--color-surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:12px;cursor:pointer}
 .nwc .nwm{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--ink3);margin-bottom:5px}.nwc .nwm .cv{margin-left:auto;font-size:.9rem}
@@ -2890,12 +2891,15 @@ async function openRoom(id){
   $('#msgs').innerHTML = (isSupportRoom(r) && me.id!==SUPPORT_ID) ? `<div class="notice"><b class="tt">뜨개동네 지기 · 운영진</b>${SUPPORT_NOTICE}</div>` : ''; (msgs||[]).forEach(appendMsg); scrollMsgs();
   await sb.from('room_members').update({last_read_at:new Date().toISOString()}).eq('room_id',id).eq('profile_id',me.id);
   if(roomChan) sb.removeChannel(roomChan);
-  roomChan = sb.channel('room:'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`room_id=eq.${id}`},p=>{ appendMsg(p.new); scrollMsgs(); if(p.new.sender_id!==me.id) roomSeen(id); }).subscribe();
-  chatDot();
+  roomChan = sb.channel('room:'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`room_id=eq.${id}`},p=>{ appendMsg(p.new); scrollMsgs(); if(p.new.sender_id!==me.id){ roomSeen(id); setTimeout(()=>chatWarns(id), 600); } }).subscribe();
+  chatDot(); chatWarns(id);
 }
+// 채팅 안전 점검(schema 96): 기계가 위험 신호를 찾은 메시지 아래에, 받는 사람에게만 주의 문구를 작게 붙인다(보낸 사람에게는 안 보임). 점검이 꺼져 있으면 아무것도 안 옴
+const CAU_TEXT={money:'⚠ 돈을 먼저 보내 달라는 요청은 사기일 수 있어요. 불안하면 신고해 주세요.', offapp:'⚠ 앱 밖으로 연락을 옮기자는 요청은 조심해 주세요. 불안하면 신고해 주세요.'};
+async function chatWarns(room){ try{ const {data}=await sb.rpc('chat_warns',{p_room:room}); if(roomId!==room) return; (data||[]).forEach(w=>{ const el=document.querySelector(`#msgs .bub[data-mid="${w.message_id}"]`); if(!el || !CAU_TEXT[w.warn] || el.nextElementSibling?.classList.contains('cau')) return; const c=document.createElement('div'); c.className='cau'; c.textContent=CAU_TEXT[w.warn]; el.after(c); }); }catch(e){} }
 function nameOf(uid){ const m=roomInfo?.room_members.find(m=>m.profile_id===uid); return m?.profiles?.nickname||'알 수 없음'; }
 function appendMsg(m){
-  const mine=m.sender_id===me.id; const el=document.createElement('div'); el.className='bub'+(mine?' me':'');
+  const mine=m.sender_id===me.id; const el=document.createElement('div'); el.className='bub'+(mine?' me':''); if(m.id!=null) el.dataset.mid=m.id;
   let body = m.body?esc(m.body):''; if(m.place) body += `<div>${ico('location')} ${esc(m.place.name)}${m.place.address?`<div class="muted">${esc(m.place.address)}</div>`:''}</div>`; if(m.photo_url){ body+=`<img class="chatph" alt="" onclick="openPhoto(this.src)">`; if(!m.body) el.classList.add('ph'); }
   if(m.card?.type==='supporters') body += `<div class="card-btns"><button onclick="joinSupporters()">시작하기</button><button class="o" onclick="openSupporterIntro()">자세히 보기</button></div>`; else if(m.card?.type==='supporters_full') body += `<div class="card-btns"><button onclick="joinWaitlist()">2기 알림 신청</button></div>`;
   el.innerHTML = `${!mine&&roomInfo?.kind==='group'?`<span class="who">${esc(nameOf(m.sender_id))}</span>`:''}${!mine&&m.sender_id===SUPPORT_ID?`<span class="who">${m.by_ai?'지기 AI':'뜨개동네 지기'}</span>`:''}${body}<time>${hhmm(m.created_at)}</time>`;

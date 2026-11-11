@@ -1571,3 +1571,18 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_member_note_save(user, memo, tags) : admin_log('member_note', 꼬리표만 — 메모 내용은 로그에 남기지 않음)
 --   admin_talk_send(room, body, photo, bell) : admin_reply_support 로 보내고(채팅 푸시), bell 이면 🔔 활동 알림 한 줄(link view support, push '0' = 알림 쪽 푸시는 끔)
 --   admin_talk_remind(user, days) : jigi_reminders 에 넣어 N일 뒤 텔레그램으로 알림(닉네임·마지막 말·메모·콘솔 주소)
+
+-- 96. 채팅 자동 점검 (마이그레이션 chat_scan · chat_scan_rules_fix, 2026-11-11 대표 확정 — 기본 꺼짐, 시작 절차는 resources/plans/chat_scan_rollout.md)
+--   원칙: 사람은 평소에 채팅을 읽지 않는다. 규칙에 걸린 메시지만 chat_flags 에 남고, 콘솔에서는 그 메시지와 앞뒤 5줄만 열린다. 대화 전체는 사유를 적어야 열리고 기록에 남는다
+--   스위치: jigi_config.chat_scan = 'on' (admin_chat_scan_set). 꺼져 있으면 트리거가 아무것도 하지 않는다
+--   profiles.chat_restricted_until : 운영진의 채팅 제한. 트리거 messages_chat_restrict(before insert)가 막음(지기 채팅방은 계속 가능). 회원이 고칠 수 없음(컬럼 grant 없음)
+--   chat_flags(message_id unique → messages on delete cascade, room_id, sender_id, level urgent|check|info, rules[], warn money|offapp, ai, status open|ok|actioned, resolution…)
+--       service_role 전용(회원·관리자 모두 함수로만 접근)
+--   _chat_rules(body, sender, room) : 돈 요구·계좌번호·앱 밖 연락·전화번호·외부 링크·성적 표현·위협·위험 표현·미성년자 보호·같은 내용 반복·욕설(bad_words)
+--       가입 3일 이내면 한 단계 올림, 모임을 연 사람이 모임방에 올린 계좌는 참고, 참고가 7일에 3번 쌓이면 확인 필요
+--   chat_scan_message() + 트리거 messages_chat_scan(after insert) : 지기 계정·지기 채팅방 제외. 확인 필요 이상이면 Edge Function chat-scan 호출
+--   Edge Function chat-scan(verify_jwt=false, 훅 시크릿으로만) : chat_flag_ai_payload(걸린 메시지+앞 2줄, 숫자·연락처는 _chat_mask 로 가림, 닉네임 없음) → AI 위험도
+--       → chat_flag_ai_apply(낮음: 확인 필요→참고·주의 문구 뗌 / 높음: 확인 필요→긴급 / 긴급이고 아직 안 알렸으면 텔레그램 문구 반환)
+--   chat_warns(room) : 앱이 받는 사람에게 붙일 주의 문구(메시지 id·종류만, 보낸 사람 본인은 못 봄)
+--   콘솔: admin_chat_flags(목록·오늘 숫자) · admin_chat_flag_ctx(걸린 메시지 ±5줄, log_access) · admin_chat_flag_resolve(ok|warn|restrict|suspended|caution)
+--       · admin_chat_room_open(room, 사유 5자 이상 — log_access + admin_log) · admin_chat_scan_set
