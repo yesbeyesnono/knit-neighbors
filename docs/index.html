@@ -2694,12 +2694,12 @@ async function openDdeuchin(){
     ${ddFriends.length?`<div class="muted" style="font-size:.82rem">누구와 함께 떴나요? 고르면 글에 미리 적어 드려요</div><div class="ddfr">${ddFriends.map((f,i)=>`<button type="button" onclick="ddSel(${i},this)">${esc(f.nickname)}</button>`).join('')}</div>`:`<div class="empty" style="padding:6px 0">아직 뜨친이 없어요. 지도에서 이웃에게 먼저 뜨친 신청을 해 보세요</div>`}
     <button class="btn" onclick="ddWrite()">인증 글 쓰러 가기</button>
     <b style="font-size:.92rem">꼭 확인해 주세요</b>
-    <ul class="ddrule"><li>${until?until+'까지 올린 글이 대상이에요':'이벤트 기간에 올린 글이 대상이에요'}</li><li>앱에서 뜨친이 된 두 분이 직접 만나 뜬 사진이어야 해요</li><li>@ 뒤에는 뜨친의 <b>닉네임</b>을 적어요</li><li>두 분 중 한 분만 올리면 두 분 모두 받아요</li><li>같은 두 분은 한 번만 참여할 수 있어요</li><li>다른 뜨친과 만나 함께 뜨면 또 참여할 수 있어요</li><li>이벤트 전부터 뜨친이던 분들도 참여할 수 있어요</li><li>쿠폰은 이벤트가 끝난 뒤 <b>12월 1일~4일</b>에 지기 채팅으로 한꺼번에 보내 드려요</li><li>뜨개가 보이지 않는 사진이나 퍼온 사진은 제외될 수 있어요(사진은 확인을 위해 AI가 한 번 살펴봐요)</li><li>함께 뜬 적이 없는데 내 이름이 적혔다면 지기에게 알려 주세요</li></ul>
+    <ul class="ddrule"><li>${until?until+'까지 올린 글이 대상이에요':'이벤트 기간에 올린 글이 대상이에요'}</li><li>앱에서 뜨친이 된 두 분이 직접 만나 뜬 사진이어야 해요</li><li>@ 를 치면 뜨친을 고를 수 있어요(닉네임을 직접 적어도 돼요)</li><li>두 분 중 한 분만 올리면 두 분 모두 받아요</li><li>같은 두 분은 한 번만 참여할 수 있어요</li><li>다른 뜨친과 만나 함께 뜨면 또 참여할 수 있어요</li><li>이벤트 전부터 뜨친이던 분들도 참여할 수 있어요</li><li>쿠폰은 이벤트가 끝난 뒤 <b>12월 1일~4일</b>에 지기 채팅으로 한꺼번에 보내 드려요</li><li>뜨개가 보이지 않는 사진이나 퍼온 사진은 제외될 수 있어요(사진은 확인을 위해 AI가 한 번 살펴봐요)</li><li>함께 뜬 적이 없는데 내 이름이 적혔다면 지기에게 알려 주세요</li></ul>
     <p class="muted" style="font-size:.72rem;margin:4px 0 0;line-height:1.4">이 이벤트는 펌테크주식회사가 진행하며 Apple·Google과 무관해요. Apple·Google은 후원·보증·관리하지 않아요.</p>`);
 }
 function ddSel(i, el){ ddPick = ddPick===i ? null : i; document.querySelectorAll('.ddfr button').forEach((b,k)=>b.classList.toggle('on', k===ddPick)); }
 async function ddWrite(){ const f=ddPick!=null?ddFriends[ddPick]:null; closeSheet(); await openCompose('post');
-  const t=$('#sText'); if(!t) return; t.value=(f?`@${f.nickname} 님과 함께 떴어요 `:'@뜨친닉네임 ')+'#뜨친인증'; try{ autoGrow(t); }catch(e){} toast(f?'함께 뜬 사진을 넣고 게시해 주세요':'@ 뒤에 뜨친의 닉네임을 적고, 사진을 넣어 주세요'); }
+  const t=$('#sText'); if(!t) return; t.value=(f?`@${f.nickname} 님과 함께 떴어요 `:'@')+(f?'#뜨친인증':' #뜨친인증'); if(f) (mentionMap.compose ||= {})[f.nickname]=f.id; else { try{ t.focus(); t.setSelectionRange(1,1); atInput(t); }catch(e){} } try{ autoGrow(t); }catch(e){} toast(f?'함께 뜬 사진을 넣고 게시해 주세요':'@ 뒤에서 뜨친을 고르고, 사진을 넣어 주세요'); }
 async function openEvent(id){
   const [{ data:e }, { data:a }] = await Promise.all([ sb.from('events').select('*').eq('id', id).maybeSingle(), sb.from('event_applications').select('*').eq('event_id', id).eq('profile_id', me.id).maybeSingle() ]);
   if(!e) return toast('이벤트를 찾을 수 없어요');
@@ -3132,7 +3132,15 @@ function tagInput(inp){ const t=tagToken(inp); const pop=tagPopEl(inp); if(!t){ 
   tagTimer=setTimeout(async()=>{ try{ const {data}=await sb.rpc('tag_suggest',{p_q:t.q,p_limit:6}); const L=(data||[]).filter(x=>x.tag!==t.q.toLowerCase()); if(!L.length || !tagToken(inp)){ pop.hidden=true; return; }
     pop.innerHTML=L.map(x=>`<div class="ti" onmousedown="event.preventDefault()" onclick="pickTag(this.dataset.t)" data-t="${esc(x.tag)}"><b>#${esc(x.tag)}</b><span>글 ${x.n}개</span></div>`).join(''); pop.hidden=false; }catch(e){ pop.hidden=true; } }, 150); }
 function pickTag(tag){ const inp=tagInp, pop=$('#tagPop'); if(!inp) return; const t=tagToken(inp); const caret=inp.selectionStart??inp.value.length; const before=t?inp.value.slice(0,t.start):inp.value, after=t?inp.value.slice(caret):''; inp.value=before+'#'+tag+' '+after; if(pop) pop.hidden=true; inp.focus(); const pos=(before+'#'+tag+' ').length; try{ inp.setSelectionRange(pos,pos); }catch(e){} inp.dispatchEvent(new Event('input',{bubbles:true})); }
-document.addEventListener('input', e=>{ const t=e.target; if(t && (t.id==='cText'||t.id==='sText'||t.id==='wNote')) tagInput(t); });
+// 새 글 쓰기(커뮤니티 칸·글쓰기 페이지)에서 @를 치면 뜨친·이웃을 고를 수 있다(2026-11-12) — 답글 칸의 @와 같은 후보, 같은 저장(mentions). 팝업은 # 추천과 같은 자리
+let atInp=null, atTimer=null;
+function atInput(inp){ const t=mentionToken(inp); const pop=tagPopEl(inp); if(!t || t.q.length>20 || t.q.includes('#') || (t.q.match(/\s/g)||[]).length>1 || Object.keys(mentionMap.compose||{}).some(n=>t.q.startsWith(n+' '))){ return false; } atInp=inp; clearTimeout(atTimer); clearTimeout(tagTimer);
+  atTimer=setTimeout(async()=>{ try{ const list=await mentionCandidates('compose', t.q); if(!list.length || !mentionToken(inp)){ pop.hidden=true; return; }
+    pop.innerHTML=list.map(p=>`<div class="ti" onmousedown="event.preventDefault()" onclick="pickAt('${p.id}',this.dataset.n)" data-n="${esc(p.nickname)}"><b>@${esc(p.nickname)}</b><span>${esc((p.id===SUPPORT_ID?['운영진']:[p.dong_name]).filter(Boolean).join(' · '))}</span></div>`).join(''); pop.hidden=false; }catch(e){ pop.hidden=true; } }, 120);
+  return true; }
+function pickAt(id, nick){ const inp=atInp, pop=$('#tagPop'); if(!inp) return; const t=mentionToken(inp); const caret=inp.selectionStart??inp.value.length; const before=t?inp.value.slice(0,t.start):inp.value, after=t?inp.value.slice(caret):'';
+  inp.value=before+'@'+nick+' '+after; (mentionMap.compose ||= {})[nick]=id; if(pop) pop.hidden=true; inp.focus(); const pos=(before+'@'+nick+' ').length; try{ inp.setSelectionRange(pos,pos); }catch(e){} try{ autoGrow(inp); }catch(e){} }
+document.addEventListener('input', e=>{ const t=e.target; if(!t) return; if((t.id==='cText'||t.id==='sText') && atInput(t)) return; if(t.id==='cText'||t.id==='sText'||t.id==='wNote') tagInput(t); });
 document.addEventListener('focusout', e=>{ const t=e.target; if(t && (t.id==='cText'||t.id==='sText'||t.id==='wNote')) setTimeout(()=>{ const pop=$('#tagPop'); if(pop) pop.hidden=true; }, 200); });
 const mentionMap = {};                        // key(글 id | 'detail') → {닉네임: id}
 let mentionFriends = null, mentionTimer = null;
@@ -4334,7 +4342,7 @@ async function openCompose(kind, meetupId){
   if(kind==='work') return openCert();
   if(kind==='meetup') return openMeetForm();
   if(kind==='shop') return openShopNewsForm();
-  sPhotos=[]; composeKind = kind||'post'; reviewMeetup=null;
+  sPhotos=[]; composeKind = kind||'post'; reviewMeetup=null; delete mentionMap.compose;
   if(kind==='review' && meetupId){ const { data:m } = await sb.from('meetups').select('id,title,place_name,starts_at').eq('id', meetupId).single(); reviewMeetup=m; }
   if(!['compose','cert','meetform','classform','shopform'].includes(view)) composeBack = view;
   $('#sAva').innerHTML = avatar(myProfile||{}); $('#sName').textContent = myProfile?.nickname||'';
@@ -4400,7 +4408,7 @@ async function submitCompose(){
     } else {
       if(!body && !sPhotos.length) throw new Error('내용이나 사진을 넣어 주세요');
       const photos = await uploadPhotos(sPhotos);
-      const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos });
+      const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos, mentions: mentionsFor('compose', body||'') });
       if(error) throw new Error(error.message);
       sPhotos=[]; toast('게시했어요'); maybeSupporterPrompt();
     }
@@ -4428,9 +4436,9 @@ async function submitPost(){
   $('#cPost').disabled = true;
   try{
     const photos = await uploadPhotos(cPhotos);
-    const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos });
+    const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos, mentions: mentionsFor('compose', body||'') });
     if(error) throw new Error(error.message);
-    $('#cText').value=''; autoGrow($('#cText')); updateCnt(); cPhotos=[]; renderPv();
+    delete mentionMap.compose; $('#cText').value=''; autoGrow($('#cText')); updateCnt(); cPhotos=[]; renderPv();
     toast('게시했어요'); loadFeed();
   }catch(e){ toast(e.message); }
   $('#cPost').disabled = false;
