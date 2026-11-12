@@ -1597,3 +1597,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   tag_suggest(q, limit) : 입력 추천(자동 태그 포함, 글 수 많은 순) · tag_info(tag) : 글 수·이번 주·함께 쓰는 태그 5개
 --       세 함수 모두 SECURITY INVOKER — 회원이 볼 수 있는 글만 센다(RLS 그대로)
 --   admin_tags() · admin_tag_hide(tag, hide) : 콘솔 › 글·인증 › 태그
+
+-- 98. 혹시 이 실인가요? (마이그레이션 yarn_guess · yarn_guess_confirm, 2026-11-12 대표: "1번 만들어봐")
+--   _bigram_dice(a, b) : 두 글자 묶음 겹침(0~1) — 띄어쓰기·기호를 뺀 이름끼리 비교
+--   yarn_guess(p_name, p_ball_g, p_ball_m, p_color_no, p_limit=3)
+--       회원이 직접 적은 이름과 비슷한 **확정(verified) 실만** 최대 3개(점수 0.45 이상). 1볼 g·m·색번호가 오면 점수에 반영
+--       → id, name, ball_g, ball_m, weight, fiber, fibers, uses, verified, score, photo, color_hex   (authenticated 만, 사전 테이블 직접 조회 없음)
+--   yarn_guess_log(user_id, name_key, catalog_id(null = '다른 실'), created_at) : 회원이 고른 답. 회원·anon 권한 없음(service_role 만)
+--   yarn_guess_confirm(p_name, p_catalog) : 답을 기록. **서로 다른 회원 2명이 같은 이름 → 같은 실**을 고르면 그 표기를 별칭으로 저장(다음부터 자동 연결). 하루 40회 제한

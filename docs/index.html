@@ -660,6 +660,10 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .subpg{position:absolute;inset:0;z-index:1050;background:var(--bg);display:flex;flex-direction:column}
 .subbody{flex:1;overflow-y:auto;padding:4px 16px 28px}
 #nav button{position:relative}.navdot{position:absolute;top:9px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#C8402F;box-shadow:0 0 0 2px var(--color-surface)}.navdot[hidden]{display:none}
+/* 혹시 이 실인가요?(schema 98) */
+.ygrow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;background:var(--color-surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;cursor:pointer}.ygrow:active{border-color:var(--color-primary);background:#F2F6EE}
+.ygrow .sw{width:44px;height:44px;border-radius:10px;background:var(--chip) center/cover}.ygrow b{display:block;font-size:.92rem;line-height:1.35}.ygrow small{color:var(--color-text-muted);font-size:.75rem}.ygrow i{font-style:normal;color:var(--color-primary);font-weight:700;font-size:.8rem}
+.ygno{display:block;width:100%;border:0;background:none;font:inherit;color:var(--color-text-muted);font-size:.86rem;padding:14px 0 4px;cursor:pointer}
 /* 해시태그(schema 97) */
 .tagrow{display:flex;gap:6px;overflow-x:auto;padding:6px 16px 2px;scrollbar-width:none}.tagrow::-webkit-scrollbar{display:none}.tagrow[hidden]{display:none}
 .tagchip{flex:none;border:0;background:var(--chip);color:var(--chip-ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}.tagchip i{font-style:normal;font-weight:400;opacity:.7;margin-left:3px}
@@ -3935,7 +3939,19 @@ async function ypPick(i){
   if(r._recent){ const { data } = await sb.rpc('yarn_suggest', { p_q:r.name }); const hit=(data||[]).find(x=>x.name===r.name); if(hit) r=hit; }   // 최근 쓴 실도 사전에 있으면 색 목록을 쓴다
   ydOpen(await yarnFromDict(r), ypIdx);
 }
-function ypDirect(){ const q=($('#ypQ')?.value||'').trim(); if(!q) return; const y=wyBlank(); y.name=q.slice(0,60); ydOpen(y, ypIdx, true); }
+// 직접 입력: 사전에 딱 맞는 실이 없어도 비슷한 확정 실이 있으면 "혹시 이 실인가요?"로 먼저 묻는다(schema 98). 고르면 사전 실로 연결, '다른 실'이면 적은 이름 그대로
+let ygRows=[], ygName='';
+function ypDirectGo(q){ const y=wyBlank(); y.name=q.slice(0,60); ydOpen(y, ypIdx, true); }
+async function ypDirect(){ const q=($('#ypQ')?.value||'').trim(); if(!q) return;
+  let L=[]; try{ const {data}=await sb.rpc('yarn_guess',{p_name:q}); L=data||[]; }catch(e){}
+  if(!L.length) return ypDirectGo(q);
+  ygRows=L; ygName=q;
+  const sw=r=>r.photo&&/^https:\/\//.test(r.photo)?`style="background-image:url('${esc(r.photo)}')"`:(r.color_hex&&/^#[0-9a-fA-F]{6}$/.test(r.color_hex)?`style="background:${r.color_hex}"`:'');
+  openSheet(`<b style="font-size:1.05rem">혹시 이 실인가요?</b><p class="muted" style="margin:2px 0 4px;font-size:.84rem">「${esc(q)}」와 비슷한 실을 찾았어요. 맞는 것이 있으면 골라 주세요.</p>
+    ${L.map((r,i)=>`<button type="button" class="ygrow" onclick="ygPick(${i})"><span class="sw" ${sw(r)}></span><span><b>${esc(r.name)}</b><small>${esc([r.ball_g?r.ball_g+'g':'', r.ball_m?r.ball_m+'m':'', r.fibers?Object.keys(r.fibers).join('·'):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</small></span><i>이 실</i></button>`).join('')}
+    <button type="button" class="ygno" onclick="ygPick(-1)">아니에요, 다른 실이에요</button>`);
+}
+async function ygPick(i){ const r=ygRows[i], q=ygName; closeSheet(); sb.rpc('yarn_guess_confirm',{p_name:q,p_catalog:r?r.id:null}).then(()=>{},()=>{}); if(!r) return ypDirectGo(q); ydOpen(await yarnFromDict(r), ypIdx); }
 
 // ----- 색·사용량
 let yd=null, ydIdx=-1, ydFam='', ydSpecOpen=false;
