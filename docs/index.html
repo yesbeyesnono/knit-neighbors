@@ -883,7 +883,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
     </div>
     <div class="body form obs" data-s="3">
       <h2 class="obttl l">뭐라고 부를까요?</h2><p class="obsub l">지도와 글에 보이는 이름이에요.</p>
-      <label class="f">닉네임<input id="f_nick" maxlength="20" placeholder="지도와 글에 보이는 이름"></label>
+      <label class="f">닉네임<input id="f_nick" maxlength="20" placeholder="지도와 글에 보이는 이름" onblur="nickCheck()"><small id="f_nick_msg" style="display:block;margin-top:4px;font-size:.78rem;color:var(--ink3)">다른 분과 겹치지 않는 이름으로 정해 주세요. 정한 뒤에는 30일에 한 번 바꿀 수 있어요</small></label>
       <div class="f">뜨개 경력<div class="seg" id="f_exp"></div></div>
       <div class="f">만나기 좋은 시간<div class="seg" id="f_avail"></div></div>
       <label class="f"><span>소개 <span class="muted">(선택, 300자)</span></span><textarea id="f_bio" maxlength="300" placeholder="예: 퇴근 후 코바늘. 가디건 완성이 목표. 같이 뜨실 분 환영"></textarea></label>
@@ -1742,11 +1742,16 @@ function openOnboard(edit, step){
   if(edit){ document.querySelectorAll('#v-onboard .obs').forEach(el=>el.classList.remove('on')); $('#obFoot').classList.remove('on'); renderDong(); if(!loc.dong_name) detectLocation(); }
   else obShow(step || (p.dong_name && p.nickname && p.terms_agreed_at ? 4 : 1));
 }
+// 닉네임(schema 101): 이미 쓰는 이름·30일 제한을 서버에 물어 칸 아래에 알려 준다. 막힌 이유가 있으면 그 글자를 돌려준다(없으면 null). 최종 판정은 서버 트리거
+const NICK_HINT='다른 분과 겹치지 않는 이름으로 정해 주세요. 정한 뒤에는 30일에 한 번 바꿀 수 있어요';
+async function nickCheck(){ const el=$('#f_nick'), m=$('#f_nick_msg'); const v=(el?.value||'').trim(); if(!m||!v||!me) return null;
+  try{ const {data,error}=await sb.rpc('nickname_check',{p_nick:v}); if(error) return null; m.textContent=data||NICK_HINT; m.style.color=data?'#b3261e':'var(--ink3)'; return data||null; }catch(e){ return null; } }
 async function saveProfile(){
   const edit = !$('#obBack').hidden;
   if(!loc.dong_name){ toast('동네를 확인해 주세요 (자동 인식 또는 동네 찾기)'); return false; }
   if(!$('#f_nick').value.trim()){ toast('닉네임을 적어 주세요'); return false; }
   if(!edit && !$('#f_agree').checked){ toast('이용약관과 개인정보처리방침에 동의해 주세요'); return false; }
+  if(await nickCheck()){ toast($('#f_nick_msg').textContent); return false; }
   const mbti = $('#f_mbti').value.trim().toUpperCase();
   if(mbti && !/^[EI][NS][TF][JP]$/.test(mbti)){ toast('MBTI 형식을 확인해 주세요'); return false; }
   const row = { nickname:$('#f_nick').value.trim()||'뜨개인', dong_code:loc.dong_code, dong_name:loc.dong_name, dong_verified_at: loc.verified ? new Date().toISOString() : null, experience:segVal('#f_exp'),

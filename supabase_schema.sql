@@ -1623,3 +1623,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   트리거 friendships_ddeuchin(after insert or update of status) → ddeuchin_on_friend(): 이벤트 중에 뜨친이 성사되면 두 사람에게 안내 알림(link = 안내 글)
 --   콘솔: admin_ddeuchin_list() · admin_ddeuchin_decide(id, pass, reason) · admin_ddeuchin_rooms(id)(두 사람의 지기 채팅방 — 쿠폰 사진을 올릴 경로) ·
 --         admin_ddeuchin_send(id, photo_a, photo_b)(서로 다른 사진 2장, admin_talk_send 로 각자의 지기 채팅 + 🔔, 상태 sent) · _support_room(user)(내부용)
+
+-- 101. 닉네임 규칙 (마이그레이션 nickname_rules, 2026-11-12 대표 확정)
+--   profiles.nickname_changed_at (서버만 기록 — 회원 UPDATE grant 없음) · _nick_key(text) = 소문자 + 띄어쓰기 제거 · 인덱스 profiles_nick_key
+--   트리거 profiles_nickname_guard(before update of nickname): **본인이 바꿀 때만** 검사
+--       ① 가입을 마친 다른 회원(onboarded, 탈퇴 유예 아님)이 같은 키의 닉네임을 쓰면 거절  ② 가입을 마친 뒤에는 30일에 한 번(가입 과정의 첫 설정은 횟수에 안 들어감)
+--       운영진·서버가 고치는 경우(auth.uid() 가 본인이 아님)는 통과. 이미 겹치던 닉네임은 그대로(바꿀 때부터 적용). 유일 제약은 아님(동시에 같은 이름을 정하는 드문 경우는 통과될 수 있음)
+--   nickname_check(p_nick) → 쓸 수 있으면 null, 아니면 회원에게 보여 줄 이유(앱이 칸 아래에 표시)
