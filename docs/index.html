@@ -667,7 +667,22 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 /* 답글 입력칸: 여러 줄(엔터 = 줄바꿈, 등록은 게시 버튼만) — 2026-11-12 */
 .compose textarea,.rrow textarea{flex:1;min-width:0;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:inherit;padding:9px 14px;font-family:inherit;font-size:16px;line-height:1.4;height:42px;min-height:42px;max-height:112px;width:auto;resize:none;overflow-y:auto;outline:0;display:block}
 .compose textarea:focus,.rrow textarea:focus{border-color:var(--color-primary)}.compose textarea::placeholder,.rrow textarea::placeholder{color:var(--ink3)}
-#v-post #postBody{min-height:0}#v-post .compose{flex:none}#v-post .compose,.rrow{align-items:flex-end}.rrow .ava{margin-bottom:5px}#v-post .compose .ava{margin-bottom:3px}
+#v-post #postBody{min-height:0;background:var(--color-bg)}#v-post .compose{flex:none}#v-post .compose,.rrow{align-items:flex-end}.rrow .ava{margin-bottom:5px}#v-post .compose .ava{margin-bottom:3px}
+/* 글 상세(2026-11-12 대표 확정 시안): 본문은 흰 카드에 크게 · 댓글은 작게 · 대댓글은 한 단계 들여쓰기 · 댓글 사진 1장 · 링크는 확인 시트로 */
+#postBody .post.dpost{background:var(--color-surface);border-bottom:1px solid var(--line);cursor:default}#postBody .post.dpost .txt{font-size:1.06rem;line-height:1.6}
+.cmt-head{padding:14px 16px 4px;font-size:.88rem;font-weight:700;color:var(--color-text-muted)}
+.cmt{display:flex;gap:8px;padding:8px 16px}.cmt.on{background:#F2F6EE}.cmt .ava{width:28px;height:28px;font-size:.68rem;flex:none}.cmt .cb{flex:1;min-width:0}
+.cmt .cw{display:flex;align-items:center;gap:6px;font-size:.84rem}.cmt .cw b{font-weight:700;cursor:pointer}.cmt .cw time{color:var(--ink3);font-size:.76rem}.cmt .cw .menu{margin-left:auto;border:0;background:none;color:var(--ink3);padding:0 2px;cursor:pointer;font:inherit}
+.cmt .ct{font-size:.92rem;line-height:1.5;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+.cmt .cph{display:block;width:132px;height:132px;object-fit:cover;border-radius:12px;margin-top:6px;cursor:pointer;border:1px solid var(--line)}
+.cmt .ca{display:flex;gap:14px;margin-top:3px}.cmt .ca button{border:0;background:none;font:inherit;font-size:.78rem;font-weight:700;color:var(--color-text-muted);padding:2px 0;cursor:pointer;display:inline-flex;align-items:center;gap:3px}.cmt .ca button.on{color:var(--rose)}.cmt .ca button svg{width:14px;height:14px}
+.csub{margin-left:52px;border-left:2px solid var(--line);padding-left:2px}.csub .cmt{padding:6px 16px 6px 8px}.csub .cmt .ava{width:22px;height:22px;font-size:.6rem}
+.cmore{display:block;margin:0 0 6px 62px;border:0;background:none;font:inherit;font-size:.78rem;font-weight:700;color:var(--color-primary);padding:2px 0;cursor:pointer}
+.opbadge{font-size:.62rem;font-weight:700;background:var(--color-primary-dark);color:#fff;border-radius:999px;padding:0 6px;line-height:1.6}
+.lnk{color:var(--color-primary);text-decoration:underline;text-underline-offset:2px;cursor:pointer;word-break:break-all}
+#replyBar{flex:none;background:var(--color-surface)}#replyTo{display:flex;justify-content:space-between;align-items:center;background:var(--chip);color:var(--chip-ink,var(--color-primary-dark));font-size:.8rem;font-weight:700;padding:6px 14px}#replyTo button{border:0;background:none;font:inherit;color:inherit;padding:0 4px;cursor:pointer}
+#replyPv{display:flex;align-items:center;gap:8px;padding:8px 14px 0}#replyPv img{width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}#replyPv button{border:0;background:none;font:inherit;color:var(--color-text-muted);font-size:.8rem;cursor:pointer}
+#v-post .compose .rph{border:0;background:none;color:var(--color-primary);width:36px;height:40px;display:grid;place-items:center;flex:none;padding:0;cursor:pointer}#v-post .compose .rph svg{width:22px;height:22px}
 /* 혹시 이 실인가요?(schema 98) */
 .ygrow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;background:var(--color-surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;cursor:pointer}.ygrow:active{border-color:var(--color-primary);background:#F2F6EE}
 .ygrow .sw{width:44px;height:44px;border-radius:10px;background:var(--chip) center/cover}.ygrow b{display:block;font-size:.92rem;line-height:1.35}.ygrow small{color:var(--color-text-muted);font-size:.75rem}.ygrow i{font-style:normal;color:var(--color-primary);font-weight:700;font-size:.8rem}
@@ -946,7 +961,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
   <section class="view" id="v-post">
     <div class="top"><button class="back" onclick="closePost()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>글</h1></div>
     <div class="feed" id="postBody"></div>
-    <div class="compose"><div id="replyAva"></div><div class="mpop" id="mpop-detail" hidden></div><textarea id="replyIn" rows="1" placeholder="답글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'detail')"></textarea><button class="btn" disabled onclick="submitReply()">게시</button></div>
+    <div id="replyBar"><div id="replyTo" hidden><span id="replyToTxt"></span><button type="button" aria-label="답글 대상 지우기" onclick="setReplyTo(null)">✕</button></div><div id="replyPv" hidden><img id="replyPvImg" alt=""><button type="button" onclick="rpPhotoClear()">사진 빼기</button></div>
+    <div class="compose"><div id="replyAva"></div><div class="mpop" id="mpop-detail" hidden></div><button type="button" class="rph" title="사진" aria-label="사진 넣기" onclick="$('#rFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5" width="17.2" height="14" rx="2"></rect><circle cx="8.6" cy="9.4" r="1.4"></circle><path d="M20.6 15.2l-4.4-4.4-7.6 8.2"></path></svg></button><input id="rFile" type="file" accept="image/*" hidden onchange="rpPhotoPick(this.files)"><textarea id="replyIn" rows="1" placeholder="댓글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'detail')"></textarea><button class="btn" id="replyBtn" disabled onclick="submitReply()">게시</button></div></div>
   </section>
 
   <!-- 친구 -->
@@ -3111,7 +3127,10 @@ async function loadMentionNames(rows){
   (data||[]).forEach(p=>MENTION_NAMES[p.id]=p); ids.forEach(id=>{ if(!MENTION_NAMES[id]) MENTION_NAMES[id]={nickname:null}; });
 }
 // 본문의 @닉네임을 링크로. 닉네임이 바뀌었으면 현재 닉네임으로 바꿔 보여줌(저장된 id 기준)
-function bodyHtml(p){
+// 글 속 주소(http/https)는 초록 글자로 — 누르면 '외부 사이트로 이동해요' 확인 시트(openExt)를 거친다. 앱이 바로 열지 않는다
+function linkify(html){ return html.replace(/(^|[\s(>])(https?:\/\/[^\s<]{4,300})/g, (m,pre,u)=>{ const tail=(u.match(/(&amp;|&quot;|&#39;|[.,!?)\]}:;])+$/)||[''])[0]; const url=tail?u.slice(0,-tail.length):u; if(url.length<10) return m; const show=url.replace(/^https?:\/\//,''); return `${pre}<span class="lnk" data-u="${url}" onclick="event.stopPropagation();openExt(this.dataset.u,'회원이 올린 링크')">${show.length>46?show.slice(0,44)+'…':show}</span>${tail}`; }); }
+function bodyHtml(p){ return linkify(bodyHtml0(p)); }
+function bodyHtml0(p){
   let html = esc(p.body||'');
   const ids = p.mentions||[]; if(!ids.length) return tagHtml(html);
   const used = new Set();
@@ -3234,7 +3253,7 @@ async function toggleReplies(id){
   setTimeout(()=>{ const g=vEl('pg-'+id); const i=g?.querySelector('textarea'); if(g && (p.replies||[]).length===0) i?.focus(); }, 50);
 }
 // 답글 칸: 내용에 맞춰 4줄까지 늘어나고, 비어 있으면 게시 버튼이 흐려짐
-function rpIn(el){ if(!el) return; el.style.height='42px'; el.style.height=Math.min(112, Math.max(42, el.scrollHeight+2))+'px'; const b=el.parentElement?.querySelector('button.btn'); if(b) b.disabled=!el.value.trim(); }
+function rpIn(el){ if(!el) return; el.style.height='42px'; el.style.height=Math.min(112, Math.max(42, el.scrollHeight+2))+'px'; const b=el.parentElement?.querySelector('button.btn'); if(b) b.disabled=!el.value.trim() && !(el.id==='replyIn' && rpPhoto); }
 function rpText(v){ return (v||'').trim().replace(/\n{3,}/g,'\n\n'); }
 async function submitInlineReply(pid){
   const inp=vEl('rin-'+pid); const t=rpText(inp?.value); if(!t) return;
@@ -4495,20 +4514,53 @@ async function openPost(id, back){
     sb.from('posts').select('*, '+AUTHOR_SEL).eq('parent_id', id).order('created_at')
   ]);
   if(!p) return toast('글을 찾을 수 없어요');
+  if(curPost?.id!==id){ replyTarget=null; subOpen.clear(); if(typeof rpPhotoClear==='function') rpPhotoClear(); }
   curPost = p; curPost.replies = replies||[];
   await Promise.all([loadLikes([p, ...curPost.replies]), attachMeetups([p]), attachWorks([p])]);
   show('post');
-  $('#postBody').innerHTML = postCard(p,{noLine:true}) + `<div class="thread-head">답글</div>` + (curPost.replies.length ? curPost.replies.map(r=>postCard(r,{noLine:true})).join('') : '<div class="empty">첫 답글을 남겨 보세요</div>');
+  renderPostDetail();
   $('#replyAva').innerHTML = avatar(myProfile||{});
   $('#replyIn').value=''; rpIn($('#replyIn'));
+  if(replyTarget && !curPost.replies.some(r=>r.id===replyTarget.id)) setReplyTo(null); else setReplyTo(replyTarget);
 }
+// ---- 글 상세: 본문 카드 + 댓글(작게) + 대댓글(그 댓글 아래 한 단계). posts.reply_to(schema 103) = 어느 댓글에 단 답글인지. 옛 댓글·옛 앱의 댓글은 reply_to 가 없어 일반 댓글로 보인다
+let replyTarget=null, rpPhoto=null; const subOpen=new Set();
+function cmtCard(r){
+  const a=r.author||{}; const op=curPost && r.author_id===curPost.author_id; const ph=(r.photos||[])[0];
+  return `<div class="cmt ${replyTarget&&replyTarget.at===r.id?'on':''}" id="cm-${r.id}"><div onclick="openProfile('${a.id}')">${avatar(a)}</div><div class="cb">
+    <div class="cw"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b>${op?'<span class="opbadge">글쓴이</span>':''}${r.author_id===SUPPORT_ID&&!op?'<span class="opbadge">운영진</span>':''}<time>${agoShort(r.created_at)}</time><button class="menu" aria-label="더 보기" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
+    ${r.body?`<div class="ct">${bodyHtml(r)}</div>`:''}${ph?`<img class="cph" src="${esc(ph)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`:''}
+    <div class="ca"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button><button onclick="setReplyTo('${r.id}')">답글 달기</button></div></div></div>`;
+}
+function renderPostDetail(){
+  const p=curPost; if(!p) return; const rs=p.replies||[]; const ids=new Set(rs.map(r=>r.id));
+  const tops=rs.filter(r=>!r.reply_to || !ids.has(r.reply_to)); const kids={}; rs.forEach(r=>{ if(r.reply_to && ids.has(r.reply_to)) (kids[r.reply_to] ||= []).push(r); });
+  const sub=t=>{ const k=kids[t.id]||[]; if(!k.length) return ''; const open=subOpen.has(t.id) || k.length<=2; const show=open?k:k.slice(0,1);
+    return `<div class="csub">${show.map(cmtCard).join('')}</div>${open?'':`<button type="button" class="cmore" onclick="subOpen.add('${t.id}');renderPostDetail()">답글 ${k.length-1}개 더 보기</button>`}`; };
+  $('#postBody').innerHTML = postCard(p,{noLine:true, cls:'dpost'}) + `<div class="cmt-head">댓글 ${rs.length||''}</div>` + (rs.length ? tops.map(t=>cmtCard(t)+sub(t)).join('') : '<div class="empty">첫 댓글을 남겨 보세요</div>');
+}
+// [답글 달기]: 대상 댓글을 기억하고 입력칸 위에 '○○ 님에게 답글 다는 중'. 대댓글에 답하면 같은 윗댓글 아래로 가고 @닉네임을 미리 적어 준다
+function setReplyTo(x){
+  if(typeof x==='string'){ const r=(curPost?.replies||[]).find(v=>v.id===x); if(!r) return; replyTarget={ id:r.reply_to||r.id, at:r.id, nick:r.author?.nickname||'' };
+    if(r.reply_to && r.author?.id && r.author_id!==me.id) prefillMention('detail', r.author.id, r.author.nickname); $('#replyIn')?.focus(); }
+  else replyTarget = x||null;
+  const bar=$('#replyTo'); if(bar){ bar.hidden=!replyTarget; if(replyTarget) $('#replyToTxt').textContent=`${replyTarget.nick||'이 댓글'} 님에게 답글 다는 중`; }
+  document.querySelectorAll('#postBody .cmt.on').forEach(e=>e.classList.remove('on')); if(replyTarget){ const el=vEl('cm-'+replyTarget.at); if(el) el.classList.add('on'); }
+}
+async function rpPhotoPick(files){ const f=files&&files[0]; $('#rFile').value=''; if(!f) return; try{ const blob=await shrinkImage(f,1280); rpPhotoClear(); rpPhoto={ blob, url:URL.createObjectURL(blob) }; $('#replyPvImg').src=rpPhoto.url; $('#replyPv').hidden=false; rpIn($('#replyIn')); }catch(e){ toast(e.message||'사진을 불러오지 못했어요'); } }
+function rpPhotoClear(){ if(rpPhoto){ try{ URL.revokeObjectURL(rpPhoto.url); }catch(e){} } rpPhoto=null; const pv=$('#replyPv'); if(pv) pv.hidden=true; const t=$('#replyIn'); if(t) rpIn(t); }
 async function submitReply(){
-  const t=rpText($('#replyIn').value); if(!t||!curPost) return;
-  const { error } = await sb.from('posts').insert({ author_id: me.id, parent_id: curPost.id, body: t, mentions: mentionsFor('detail', t) });
-  if(!error) delete mentionMap.detail;
-  if(error) return toast('실패: '+error.message);
-  $('#replyIn').value=''; rpIn($('#replyIn')); openPost(curPost.id);
-  const f=feedRows.find(x=>x.id===curPost.id); if(f) f.reply_count=(f.reply_count||0)+1;
+  const t=rpText($('#replyIn').value); if((!t && !rpPhoto) || !curPost) return;
+  const btn=$('#replyBtn'); if(btn) btn.disabled=true;
+  try{
+    await loadBanned(); if(hasBanned(t)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+    const photos = rpPhoto ? await uploadPhotos([rpPhoto]) : [];
+    const row={ author_id: me.id, parent_id: curPost.id, body: t||null, mentions: mentionsFor('detail', t) }; if(photos.length) row.photos=photos; if(replyTarget) row.reply_to=replyTarget.id;
+    const { error } = await sb.from('posts').insert(row); if(error) throw new Error('실패: '+error.message);
+    delete mentionMap.detail; if(replyTarget) subOpen.add(replyTarget.id); replyTarget=null; rpPhotoClear();
+    $('#replyIn').value=''; rpIn($('#replyIn')); openPost(curPost.id);
+    const f=feedRows.find(x=>x.id===curPost.id); if(f) f.reply_count=(f.reply_count||0)+1;
+  }catch(e){ toast(e.message); if(btn) btn.disabled=false; }
 }
 
 // ============ 뜨개 단계 자가진단 ============

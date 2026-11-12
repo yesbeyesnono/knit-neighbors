@@ -1635,3 +1635,9 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   nearby_profiles(...) 본문만 바꿈(반환 모양 그대로 → 모든 앱 버전에 즉시 적용): 반경 안 회원 200명 + **반경 밖 작가(is_author) 300명까지** 함께 돌려준다
 --       보이는 조건(지도 공개·정지 아님·가입 완료·차단 아님)은 작가도 같다. distance_m 은 지도 가운데에서의 실제 거리
 
+-- 103. 대댓글 (마이그레이션 posts_reply_to, 2026-11-12 대표 확정 시안)
+--   posts.reply_to uuid (posts.id, on delete set null) : 이 댓글이 어느 댓글에 단 답글인지. 한 단계만 쓴다
+--   트리거 posts_reply_to_guard(before insert): 원글이면 비움 · 같은 글의 댓글이 아니면 비움(일반 댓글이 됨) · 대댓글에 단 답글은 그 윗댓글로 바꿔 저장
+--   트리거 posts_notify_reply_to(after insert) → notify_on_reply_to(): 답글을 받은 댓글 작성자에게 'reply' 알림(글쓴이·본인·@로 불린 사람은 기존 알림이 있어 제외)
+--   옛 앱은 reply_to 를 보내지 않아 지금처럼 일반 댓글. 댓글 사진은 기존 posts.photos 를 그대로 쓴다(새 칸 없음)
+
