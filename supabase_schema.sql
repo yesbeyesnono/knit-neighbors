@@ -1610,3 +1610,16 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   yarn_web_lookup(catalog_id pk, checked_at, result filled|partial|not_found|merged|skipped, filled jsonb, source_url, note)
 --       대표 PC 의 Claude 앱 예약 작업(yarn-web-lookup-weekly, 매주 수요일 14시)이 쓴다. 회원·anon 권한 없음(service_role 만)
 --       못 찾은 실(not_found·skipped)은 90일 뒤에 다시 대상이 된다
+
+-- 100. 뜨친 생겼다 축하 이벤트 — #뜨친인증 (마이그레이션 ddeuchin_event · ddeuchin_event_log_fix · ddeuchin_event_nick_match, 2026-11-12 대표 확정 시안)
+--   app_config.ddeuchin_event {active, from, until, post_id(안내용 지기 글)} : 기본 꺼짐. _ddeuchin_cfg() 가 '켜짐 + 기간 안'일 때만 값을 돌려준다
+--   ddeuchin_claims(id, post_id unique, author_id, friend_id, pair, status review|ok|sent|excluded, reason, ai pass|unsure, ai_note, created_at, decided_at, sent_at)
+--       pair = 두 회원 id 를 작은 것:큰 것 — 제외가 아닌 건 중에서 유일(같은 두 사람은 한 번). 회원·anon 권한 없음
+--   트리거 posts_ddeuchin(after insert) → ddeuchin_on_post(): 원글 + 태그 '뜨친인증' + 이벤트 중일 때만
+--       후보 = 글쓴이의 뜨친 중 (mentions 로 고른 사람) 또는 (본문에 '@닉네임'이 적힌 사람) — 새 글 쓰기 칸에는 멘션 고르기가 없어서 닉네임 글자로 맞춘다(대소문자 무시, 긴 닉네임 먼저)
+--       사진 없음 / @ 없음 / 뜨친 아님 / 같은 두 분 → excluded + 글쓴이에게 이유 알림(푸시 없음). 통과하면 review + 적힌 뜨친에게 알림(누르면 지기 채팅 = '저 아니에요' 창구)
+--       → pg_net 으로 Edge ddeuchin-check 호출(사진 최대 2장을 AI 가 pass/unsure 만 판별; 닉네임·id 는 안 보냄) → ddeuchin_ai_apply: pass 면 ok, 아니면 review 유지 + 텔레그램(jigi_reminders)
+--       글 올리기는 어떤 경우에도 막지 않는다(exception when others then null)
+--   트리거 friendships_ddeuchin(after insert or update of status) → ddeuchin_on_friend(): 이벤트 중에 뜨친이 성사되면 두 사람에게 안내 알림(link = 안내 글)
+--   콘솔: admin_ddeuchin_list() · admin_ddeuchin_decide(id, pass, reason) · admin_ddeuchin_rooms(id)(두 사람의 지기 채팅방 — 쿠폰 사진을 올릴 경로) ·
+--         admin_ddeuchin_send(id, photo_a, photo_b)(서로 다른 사진 2장, admin_talk_send 로 각자의 지기 채팅 + 🔔, 상태 sent) · _support_room(user)(내부용)

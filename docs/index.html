@@ -763,6 +763,9 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .evcard{flex:0 0 auto;width:min(78vw,300px);border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg,#fff);cursor:pointer}
 .evcard .ek{font-size:.72rem;font-weight:700;color:var(--acc)}.evcard b{display:block;margin:3px 0 4px;font-size:.98rem}.evcard .em{font-size:.8rem;color:var(--ink2,#6A6E73)}.evcard .es{margin-top:6px;font-size:.8rem;font-weight:600}
 .evcard.lock{opacity:.62}
+.evcard.dd{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;align-items:center;background:var(--chip);border-color:transparent}.evcard.dd img{width:52px;height:52px;border-radius:10px;object-fit:cover;object-position:50% 12%}.evcard.dd b{margin:1px 0 2px}
+.ddposter{display:block;width:100%;border-radius:14px}.ddhow{margin:0;padding-left:1.2em;font-size:.92rem;line-height:1.7}.ddhow b{color:var(--color-primary)}
+.ddfr{display:flex;flex-wrap:wrap;gap:6px}.ddfr button{border:1px solid var(--line);background:var(--color-surface);border-radius:999px;padding:7px 12px;font:inherit;font-size:.86rem;cursor:pointer}.ddfr button.on{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
 .evphoto{width:100%;max-height:220px;object-fit:cover;border-radius:12px}
 .spon{display:inline-block;font-size:.7rem;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid var(--ink2,#6A6E73);color:var(--ink2,#6A6E73);margin-left:6px;vertical-align:middle}
 .tmnode .vn{position:absolute;right:6px;bottom:3px;font-size:.62rem;font-weight:600;color:var(--ink3);padding:1px 5px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
@@ -2610,7 +2613,7 @@ async function openLink(l){
     if(l.type==='pattern') return typeof openPattern==='function' ? openPattern(l.id) : go('comm');
     if(l.type==='class'||l.type==='class_manage'){ const { data:p } = await sb.from('shop_posts').select('id,shop_id,author_id').eq('id', l.id).single(); if(!p) return go('comm'); if(p.shop_id) await openShop(p.shop_id); else { myTab='classes'; if(p.author_id===me.id) goMy('thread','classes'); else { await openProfile(p.author_id); const b=document.querySelector('#profTabs [data-t="classes"]'); if(b) b.click(); } } if(l.type==='class_manage') setTimeout(()=>openClassApplicants(l.id), 400); return; }
     if(l.type==='profile'){ if(l.id===me.id){ return goMy(l.tab?'thread':'dash', l.tab); } await openProfile(l.id); if(l.tab){ const b=document.querySelector('#profTabs [data-t=+l.tab+]'); if(b) b.click(); } return; }
-    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='orders') return openMyOrders(); if(v==='settlement') return openSettlement(); if(v==='store') return openStore(); if(v==='cert') return openCert(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(['map','comm','chats','my'].includes(v)) return go(v); }
+    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='orders') return openMyOrders(); if(v==='settlement') return openSettlement(); if(v==='store') return openStore(); if(v==='cert') return openCert(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(v==='ddeuchin'){ await loadEvents(); return ddOn()?openDdeuchin():go('comm'); } if(['map','comm','chats','my'].includes(v)) return go(v); }
   }catch(e){}
   return openSupportRoom();
 }
@@ -2671,9 +2674,30 @@ async function loadEvents(){
   evApps={}; (apps||[]).forEach(a=>evApps[a.event_id]=a);
   const now=Date.now();
   evRows=(evs||[]).filter(e=>{ const st=evApps[e.id]?.status; if(st==='selected'||st==='applied') return true; return e.status==='open' && new Date(e.apply_until)>now; });
-  box.innerHTML = evRows.map(e=>{ const st=evState(e); const lv=myProfile?.act_level||0;
+  try{ const { data:dc } = await sb.from('app_config').select('value').eq('key','ddeuchin_event').maybeSingle(); ddCfg=dc?.value||null; }catch(e){ ddCfg=null; }
+  box.innerHTML = (ddOn()?`<div class="evcard dd" onclick="openDdeuchin()"><img src="${DD_POSTER}" alt=""><div><div class="ek">기간 한정 이벤트</div><b>뜨친 생겼다 축하 이벤트</b><div class="em">뜨친과 함께 뜨면 두 분 모두 커피 쿠폰${ddCfg.until?` · ~${evDate(new Date(new Date(ddCfg.until).getTime()-60000))}`:''}</div></div></div>`:'') + evRows.map(e=>{ const st=evState(e); const lv=myProfile?.act_level||0;
     return `<div class="evcard ${st==='lock'?'lock':''}" onclick="openEvent('${e.id}')"><div class="ek">${EV_KIND[e.kind]||'이벤트'}${e.min_level>0?` · Lv.${e.min_level} 이상`:''}</div><b>${esc(e.title)}</b><div class="em">${[e.capacity?`${e.capacity}명`:'', EV_MODE[e.select_mode], `~${evDate(e.apply_until)} 신청`].filter(Boolean).join(' · ')}</div><div class="es">${st==='lock'?`작품 인증 ${e.min_level-lv}번 더 하면 신청할 수 있어요`:EV_STATE_TXT[st]||''}</div></div>`; }).join('');
 }
+// ---- 뜨친 생겼다 축하 이벤트(schema 100): app_config.ddeuchin_event {active, from, until, post_id}
+//      사진 + @뜨친 닉네임 + #뜨친인증 글을 올리면 서버가 확인(뜨친·기간·같은 쌍 한 번) → 대표가 지기 채팅으로 쿠폰을 보낸다. 앱은 안내와 글쓰기 채움만 한다
+const DD_POSTER='events/ddeuchin-poster.jpg';
+let ddCfg=null, ddFriends=[], ddPick=null;
+function ddOn(){ const c=ddCfg; if(!c||!c.active) return false; const n=Date.now(); return (!c.from||n>=new Date(c.from)) && (!c.until||n<new Date(c.until)); }
+async function openDdeuchin(){
+  ddFriends=[]; ddPick=null;
+  try{ const ids=await friendIds(); if(ids.length){ const { data } = await sb.from('profiles').select('id,nickname').in('id', ids.filter(x=>x!==SUPPORT_ID)).limit(100); ddFriends=(data||[]).filter(p=>p.nickname); } }catch(e){}
+  const until=ddCfg?.until?evDate(new Date(new Date(ddCfg.until).getTime()-60000)):'';
+  openSheet(`<img class="ddposter" src="${DD_POSTER}" alt="뜨친 생겼다 축하 이벤트 — 뜨친과 만나 함께 뜨면 두 분 모두 커피 쿠폰">
+    <b style="font-size:1.05rem">참여 방법${until?` <span class="muted" style="font-weight:400;font-size:.82rem">· ${until}까지</span>`:''}</b>
+    <ol class="ddhow"><li>뜨친과 만나 함께 떠요</li><li>함께 뜬 사진을 올리며 <b>@뜨친 닉네임</b> 과 <b>#뜨친인증</b> 을 적어요</li><li>확인되면 두 분 모두에게 지기가 채팅으로 커피 쿠폰을 보내요</li></ol>
+    ${ddFriends.length?`<div class="muted" style="font-size:.82rem">누구와 함께 떴나요? 고르면 글에 미리 적어 드려요</div><div class="ddfr">${ddFriends.map((f,i)=>`<button type="button" onclick="ddSel(${i},this)">${esc(f.nickname)}</button>`).join('')}</div>`:`<div class="empty" style="padding:6px 0">아직 뜨친이 없어요. 지도에서 이웃에게 먼저 뜨친 신청을 해 보세요</div>`}
+    <button class="btn" onclick="ddWrite()">인증 글 쓰러 가기</button>
+    <p class="muted" style="font-size:.78rem;margin:0;line-height:1.5">한 쌍에 한 번 참여할 수 있어요(다른 뜨친과는 또 참여할 수 있어요). 쿠폰은 확인 뒤 지기 채팅으로 보내 드려요. 인증 글의 사진은 확인을 위해 AI가 한 번 살펴봐요.</p>
+    <p class="muted" style="font-size:.72rem;margin:4px 0 0;line-height:1.4">이 이벤트는 펌테크주식회사가 진행하며 Apple·Google과 무관해요. Apple·Google은 후원·보증·관리하지 않아요.</p>`);
+}
+function ddSel(i, el){ ddPick = ddPick===i ? null : i; document.querySelectorAll('.ddfr button').forEach((b,k)=>b.classList.toggle('on', k===ddPick)); }
+async function ddWrite(){ const f=ddPick!=null?ddFriends[ddPick]:null; closeSheet(); await openCompose('post');
+  const t=$('#sText'); if(!t) return; t.value=(f?`@${f.nickname} 님과 함께 떴어요 `:'@뜨친닉네임 ')+'#뜨친인증'; try{ autoGrow(t); }catch(e){} toast(f?'함께 뜬 사진을 넣고 게시해 주세요':'@ 뒤에 뜨친의 닉네임을 적고, 사진을 넣어 주세요'); }
 async function openEvent(id){
   const [{ data:e }, { data:a }] = await Promise.all([ sb.from('events').select('*').eq('id', id).maybeSingle(), sb.from('event_applications').select('*').eq('event_id', id).eq('profile_id', me.id).maybeSingle() ]);
   if(!e) return toast('이벤트를 찾을 수 없어요');

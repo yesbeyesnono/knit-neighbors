@@ -1348,11 +1348,45 @@ VIEWS.events = async()=>{
   const {data}=await sb.from('events').select('*, apps:event_applications(status)').order('created_at',{ascending:false}).limit(200);
   const cnt=(e,st)=>(e.apps||[]).filter(x=>st.includes(x.status)).length;
   $('#main').innerHTML=`<h1>이벤트 <small>레벨 조건으로 초대·체험단 모집</small></h1>
+  <div id="ddBox"></div>
   <div class="row"><button class="p" onclick="openEventForm()">이벤트 추가</button></div>
   <table><tr><th>이벤트</th><th>종류</th><th>조건</th><th>신청 기간</th><th>신청</th><th>선정</th><th>인증 완료</th><th>상태</th></tr>
   ${(data||[]).map(e=>`<tr class="clk" onclick="openEventForm('${e.id}')"><td><b>${esc(e.title)}</b></td><td>${EV_KIND[e.kind]}</td><td>Lv.${e.min_level}+ · ${e.capacity||'무제한'}명 · ${EV_MODE[e.select_mode]}</td><td class="muted">${fmtd(e.apply_from)} ~ ${fmtd(e.apply_until)}${e.cert_due?`<br>인증 마감 ${e.cert_due}`:''}</td><td>${cnt(e,['applied','selected','done','rejected'])}</td><td>${cnt(e,['selected','done'])}</td><td>${cnt(e,['done'])}</td><td>${e.status==='open'?'<span class="chip g">공개</span>':e.status==='closed'?'<span class="chip">종료</span>':'<span class="chip r">준비 중</span>'}</td></tr>`).join('')||'<tr><td colspan="8" class="muted">아직 이벤트가 없어요</td></tr>'}</table>
   <p class="muted">'공개'로 처음 저장하는 순간, 최소 레벨 이상인 회원 모두에게 앱 알림이 한 번 가요. 배송지는 선정된 회원만 입력하고 발송 처리 30일 뒤 자동 삭제돼요.</p>`;
+  ddLoad();
 };
+// ---- 뜨친 인증 이벤트(schema 100): 서버가 확인한 인증 글 목록 → 쿠폰 이미지 2장을 골라 두 사람의 지기 채팅으로 보낸다
+let DD={tab:'ok', d:null};
+const DD_ST={ok:'쿠폰 보낼 쌍', review:'직접 볼 것', sent:'보냄', excluded:'제외'};
+async function ddLoad(){ const box=$('#ddBox'); if(!box) return; const {data,error}=await sb.rpc('admin_ddeuchin_list'); if(error){ box.innerHTML=''; return; } DD.d=data; ddDraw(); }
+function ddDraw(){ const box=$('#ddBox'), d=DD.d; if(!box||!d) return; const st=d.stats||{}, c=d.cfg||{};
+  const on=c.active && (!c.until||Date.now()<new Date(c.until));
+  if(!on && !st.all){ box.innerHTML=''; return; }
+  const rows=(d.rows||[]).filter(r=>r.status===DD.tab);
+  const ai=r=>r.ai==='pass'?'<span class="chip g">통과</span>':r.ai==='unsure'?`<span class="chip y">애매함${r.ai_note?' — '+esc(r.ai_note):''}</span>`:(r.status==='excluded'&&!r.ai?'—':`<span class="chip">판별 전${r.ai_note?' — '+esc(r.ai_note):''}</span>`);
+  const act=r=>`<button onclick="event.stopPropagation();ddPost('${r.post_id}')">글 보기</button> `+(r.status==='ok'?`<button class="p" onclick="event.stopPropagation();ddSendOpen(${r.id})">두 분에게 쿠폰 보내기</button> <button onclick="event.stopPropagation();ddDecide(${r.id},false)">제외</button>`:r.status==='review'?`<button class="p" onclick="event.stopPropagation();ddDecide(${r.id},true)">통과</button> <button onclick="event.stopPropagation();ddDecide(${r.id},false)">제외</button>`:(r.status==='excluded'&&r.friend_id&&/사진에서|확인하지/.test(r.reason||'')?`<button onclick="event.stopPropagation();ddDecide(${r.id},true)">다시 통과</button>`:''));
+  box.innerHTML=`<div class="card" style="margin-bottom:24px"><h3 style="margin:0 0 4px">뜨친 인증 <small class="muted" style="font-weight:400">뜨친 생겼다 축하 이벤트 · ${on?`진행 중${c.until?' (~'+fmtd(new Date(new Date(c.until).getTime()-60000))+')':''}`:'꺼짐·종료'}</small></h3>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:12px 0 16px">${[['인증 글',st.all||0],['확인 완료 (쿠폰 보낼 쌍)',st.ok||0],['직접 볼 것',st.review||0],['쿠폰 보냄',`${st.sent||0}쌍 · ${(st.sent||0)*2}장`]].map(x=>`<div style="border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-height:88px"><div class="muted" style="font-size:12.5px">${x[0]}</div><b style="font-size:24px">${x[1]}</b></div>`).join('')}</div>
+    <div class="row" style="gap:8px;margin-bottom:8px">${Object.keys(DD_ST).map(k=>`<button class="${DD.tab===k?'p':''}" style="border-radius:999px" onclick="DD.tab='${k}';ddDraw()">${DD_ST[k]} ${st[k]||0}</button>`).join('')}<button onclick="ddLoad()" style="margin-left:auto">새로 고침</button></div>
+    ${rows.length?`<table><tr><th></th><th>올린 회원 · 뜨친</th><th>올린 날</th><th>글</th><th>사진(AI)</th><th>${DD.tab==='excluded'?'제외 이유':'상태'}</th><th></th></tr>${rows.map(r=>`<tr><td>${r.photo?`<img src="${esc(r.photo)}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;display:block" loading="lazy">`:''}</td><td><b>${esc(r.author||'?')}</b> · ${esc(r.friend||'—')}</td><td class="muted">${fmtd(r.created_at)}</td><td class="muted" style="max-width:260px">${esc((r.body||'').slice(0,60))}</td><td>${ai(r)}</td><td>${r.status==='excluded'?esc(r.reason||''):r.status==='sent'?'보냄 '+fmtd(r.sent_at):DD_ST[r.status]}</td><td style="white-space:nowrap">${act(r)}</td></tr>`).join('')}</table>`:`<p class="muted" style="margin:8px 0 0">${DD.tab==='ok'?'쿠폰을 보낼 쌍이 아직 없어요.':'해당하는 글이 없어요.'}</p>`}
+    <p class="muted" style="margin:10px 0 0;font-size:12.5px">서버가 확인하는 것: #뜨친인증 글 · 사진 있음 · 적힌 @닉네임이 실제 뜨친 · 기간 안 · 같은 두 분은 한 번. 사진은 AI 가 통과/애매함만 나눠요. 쿠폰은 한 장에 한 번만 쓸 수 있으니 두 분에게 서로 다른 이미지를 보내 주세요.</p></div>`; }
+function ddPost(id){ openPostPanel(id); }
+async function ddDecide(id, pass){ let reason=null; if(!pass){ reason=prompt('제외하는 이유를 적어 주세요(회원에게 알림으로 가요)', '사진에서 함께 뜬 모습을 확인하지 못했어요'); if(reason===null) return; } else if(!confirm('이 글을 통과로 바꿀까요?')) return;
+  const {error}=await sb.rpc('admin_ddeuchin_decide',{p_id:id,p_pass:pass,p_reason:reason}); if(error) return toast(error.message); toast(pass?'통과로 바꿨어요':'제외했어요'); ddLoad(); }
+function ddSendOpen(id){ const r=(DD.d?.rows||[]).find(x=>x.id===id); if(!r) return;
+  openPanel(`<h2 style="margin-top:0">쿠폰 보내기</h2><p class="muted">두 분의 지기 채팅으로 쿠폰 이미지를 한 장씩 보내요. 🔔 알림과 푸시도 함께 가요. 보낸 뒤에는 되돌릴 수 없어요.</p>
+    <div style="display:grid;gap:16px;margin:16px 0"><label><b>${esc(r.author||'올린 회원')}</b> 님에게 보낼 쿠폰<br><input type="file" id="ddFa" accept="image/*" style="margin-top:6px"></label><label><b>${esc(r.friend||'뜨친')}</b> 님에게 보낼 쿠폰<br><input type="file" id="ddFb" accept="image/*" style="margin-top:6px"></label></div>
+    <p class="muted" style="font-size:12.5px">함께 가는 말: "뜨친 인증 축하드려요! ☕ 약속드린 커피 쿠폰을 보내 드려요. 뜨친과 함께 따뜻한 시간 보내세요 🧶"</p>
+    <button class="p" id="ddSendBtn" onclick="ddSend(${id})">두 분에게 보내기</button>`); }
+async function ddSend(id){ const fa=$('#ddFa').files[0], fb=$('#ddFb').files[0]; if(!fa||!fb) return toast('쿠폰 이미지 2장을 모두 골라 주세요');
+  if(fa.name===fb.name && fa.size===fb.size) return toast('두 분에게 서로 다른 쿠폰을 보내야 해요');
+  const btn=$('#ddSendBtn'); btn.disabled=true; toast('보내는 중…');
+  try{ const rm=await sb.rpc('admin_ddeuchin_rooms',{p_id:id}); if(rm.error) throw new Error(rm.error.message);
+    const up=async(file,room)=>{ const path=`${me.id}/${room}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`; const u=await sb.storage.from('chat-photos').upload(path, await shrinkImage(file,1600), {contentType:'image/jpeg', upsert:false}); if(u.error) throw new Error(u.error.message); return path; };
+    const pa=await up(fa, rm.data.a), pb=await up(fb, rm.data.b);
+    const r=await sb.rpc('admin_ddeuchin_send',{p_id:id,p_photo_a:pa,p_photo_b:pb}); if(r.error) throw new Error(r.error.message);
+    toast('두 분에게 쿠폰을 보냈어요'); closePanel(); DD.tab='sent'; ddLoad();
+  }catch(e){ toast('보내지 못했어요: '+e.message); btn.disabled=false; } }
 async function openEventForm(id){
   let e={kind:'sample',min_level:3,select_mode:'admin',status:'draft',needs_shipping:true}, apps=[], yarn=null;
   if(id){ const r=await sb.from('events').select('*').eq('id',id).single(); e=r.data||e; const r2=await sb.rpc('admin_event_apps',{p_event:id}); if(r2.error) toast(r2.error.message); apps=r2.data||[]; if(e.catalog_id){ const y=await sb.from('yarn_catalog').select('id,brand,product').eq('id',e.catalog_id).maybeSingle(); yarn=y.data; } }

@@ -171,6 +171,14 @@ begin
   out := pg_temp.must_fail(out, 'read yarn_guess_log', 'select 1 from public.yarn_guess_log limit 1');   -- schema 98
   out := pg_temp.must_fail(out, 'insert yarn_guess_log', 'insert into public.yarn_guess_log(user_id, name_key) values (auth.uid(), ''x'')');
   out := pg_temp.must_fail(out, 'read yarn_web_lookup', 'select 1 from public.yarn_web_lookup limit 1');   -- schema 99
+  out := pg_temp.must_fail(out, 'read ddeuchin_claims', 'select 1 from public.ddeuchin_claims limit 1');   -- schema 100
+  out := pg_temp.must_fail(out, 'admin_ddeuchin_list', 'select public.admin_ddeuchin_list()');
+  out := pg_temp.must_fail(out, 'admin_ddeuchin_decide', 'select public.admin_ddeuchin_decide(1, true)');
+  out := pg_temp.must_fail(out, 'admin_ddeuchin_rooms', 'select public.admin_ddeuchin_rooms(1)');
+  out := pg_temp.must_fail(out, 'admin_ddeuchin_send', 'select public.admin_ddeuchin_send(1, ''a'', ''b'')');
+  out := pg_temp.must_fail(out, 'ddeuchin_ai_apply(내부용)', 'select public.ddeuchin_ai_apply(1, ''pass'', null)');
+  out := pg_temp.must_fail(out, '_support_room(내부용)', 'select public._support_room(auth.uid())');
+  out := pg_temp.must_fail(out, 'update ddeuchin_event', 'update public.app_config set value = ''{"active":true}'' where key = ''ddeuchin_event'' returning 1');
   out := pg_temp.must_fail(out, 'update app_config direct', 'do $x$ declare n int; begin update public.app_config set value = ''{}''::jsonb where key = ''home_notice''; get diagnostics n = row_count; if n = 0 then raise exception ''no rows''; end if; end $x$');
   out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
