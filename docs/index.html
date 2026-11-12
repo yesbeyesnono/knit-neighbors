@@ -631,9 +631,13 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .compose input{border:1px solid var(--tline);border-radius:999px;background:var(--tbg);padding:10px 16px;font-family:inherit;font-size:16px}
 .compose input::placeholder{color:var(--tmute)}
 .compose .btn{background:transparent;color:var(--tink);font-weight:600;padding:8px 4px 8px 8px;width:auto}
-.upin.author .face{border-color:var(--color-primary-dark)}
-.upin.author .tail{border-top-color:var(--color-primary-dark)}
-.upin.author .lbl{background:var(--color-primary-dark)}
+/* 작가 핀(2026-11-12 대표): 황금색 + 왕관처럼 얹은 '작가' 표시, 다른 핀보다 위에·조금 크게. 작가는 지도 어디서나 보인다(schema 102) */
+.upin.author{z-index:6;filter:drop-shadow(0 2px 4px rgba(120,84,0,.5))}
+.upin.author .face{width:48px;height:48px;border:3px solid #E2A91C;box-shadow:0 0 0 2px #FFF3C4 inset}
+.upin.author .tail{border-top-color:#E2A91C}
+.upin.author .lbl{background:#E2A91C;color:#3A2A00}
+.upin .crown{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(180deg,#FFD95A,#E2A91C);color:#3A2A00;font-size:10.5px;font-weight:800;letter-spacing:.02em;padding:2px 8px 2px 6px;border-radius:999px;border:1.5px solid #FFF3C4;margin-bottom:2px;white-space:nowrap}
+.upin .crown svg{width:12px;height:10px;display:block}
 .authlink{display:flex;align-items:center;gap:6px;margin:10px 16px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none;font-size:.9rem;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.authlink span{margin-left:auto;color:var(--ink3)}
 /* ===== Phase 1 (2026-09-20 시안): ＋ 팝업 · 작품 인증/모임 새 페이지 · 보조 화면 · 모임 채팅 ===== */
 .plusrow{display:flex;align-items:center;gap:14px;width:100%;padding:14px 4px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
@@ -1827,7 +1831,8 @@ function pinHtml({label, sub, avatar, cls, wave, bell}){
   const ini = (label||'?').slice(0,1);
   const face = `<div class="face">${cls==='meet'?'모임':cls==='shop'?SHOP_SVG:(avatar?`<img src="${esc(avatar)}" alt="" referrerpolicy="no-referrer" data-i="${esc(ini)}" onerror="this.replaceWith(this.dataset.i||'?')">`:esc(ini))}</div>`;
   const badge = wave ? `<div class="hand" title="뜨개 친구를 찾고 있어요">${ico('wave')}</div>` : bell ? `<div class="bell" title="새 소식">${BELL_SVG}</div>` : '';
-  return `<div class="upin ${cls||''}"><div class="lbl">${esc(label)}</div>${badge?`<div class="facewrap">${face}${badge}</div>`:face}<div class="tail"></div></div>`;
+  const crown = cls==='author' ? `<div class="crown"><svg viewBox="0 0 24 20" fill="#3A2A00"><path d="M2 18h20l1.5-12-6 5L12 1 6.500 11l-6-5z"/></svg>작가</div>` : '';
+  return `<div class="upin ${cls||''}">${crown}<div class="lbl">${esc(label)}</div>${badge?`<div class="facewrap">${face}${badge}</div>`:face}<div class="tail"></div></div>`;
 }
 function isWaving(p){ return !!(p && p.wave_until && new Date(p.wave_until) > new Date()); }
 const LMap = {

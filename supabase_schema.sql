@@ -1630,3 +1630,8 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --       ① 가입을 마친 다른 회원(onboarded, 탈퇴 유예 아님)이 같은 키의 닉네임을 쓰면 거절  ② 가입을 마친 뒤에는 30일에 한 번(가입 과정의 첫 설정은 횟수에 안 들어감)
 --       운영진·서버가 고치는 경우(auth.uid() 가 본인이 아님)는 통과. 이미 겹치던 닉네임은 그대로(바꿀 때부터 적용). 유일 제약은 아님(동시에 같은 이름을 정하는 드문 경우는 통과될 수 있음)
 --   nickname_check(p_nick) → 쓸 수 있으면 null, 아니면 회원에게 보여 줄 이유(앱이 칸 아래에 표시)
+
+-- 102. 작가는 지도 어디서나 보인다 (마이그레이션 nearby_profiles_authors_everywhere, 2026-11-12 대표 지시)
+--   nearby_profiles(...) 본문만 바꿈(반환 모양 그대로 → 모든 앱 버전에 즉시 적용): 반경 안 회원 200명 + **반경 밖 작가(is_author) 300명까지** 함께 돌려준다
+--       보이는 조건(지도 공개·정지 아님·가입 완료·차단 아님)은 작가도 같다. distance_m 은 지도 가운데에서의 실제 거리
+

@@ -23,3 +23,5 @@ __pycache__/
 # Firebase 설정(키 포함) — 빌드하는 PC 에만 둔다
 android/app/google-services.json
 *firebase-adminsdk*.json
+
+resources/author-guide/
