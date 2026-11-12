@@ -1605,3 +1605,8 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --       → id, name, ball_g, ball_m, weight, fiber, fibers, uses, verified, score, photo, color_hex   (authenticated 만, 사전 테이블 직접 조회 없음)
 --   yarn_guess_log(user_id, name_key, catalog_id(null = '다른 실'), created_at) : 회원이 고른 답. 회원·anon 권한 없음(service_role 만)
 --   yarn_guess_confirm(p_name, p_catalog) : 답을 기록. **서로 다른 회원 2명이 같은 이름 → 같은 실**을 고르면 그 표기를 별칭으로 저장(다음부터 자동 연결). 하루 40회 제한
+
+-- 99. 실 규격 온라인 보충 기록 (마이그레이션 yarn_web_lookup, 2026-11-12)
+--   yarn_web_lookup(catalog_id pk, checked_at, result filled|partial|not_found|merged|skipped, filled jsonb, source_url, note)
+--       대표 PC 의 Claude 앱 예약 작업(yarn-web-lookup-weekly, 매주 수요일 14시)이 쓴다. 회원·anon 권한 없음(service_role 만)
+--       못 찾은 실(not_found·skipped)은 90일 뒤에 다시 대상이 된다

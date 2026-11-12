@@ -170,6 +170,7 @@ begin
   out := pg_temp.must_fail(out, '_work_tags(내부용)', 'select public._work_tags(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'read yarn_guess_log', 'select 1 from public.yarn_guess_log limit 1');   -- schema 98
   out := pg_temp.must_fail(out, 'insert yarn_guess_log', 'insert into public.yarn_guess_log(user_id, name_key) values (auth.uid(), ''x'')');
+  out := pg_temp.must_fail(out, 'read yarn_web_lookup', 'select 1 from public.yarn_web_lookup limit 1');   -- schema 99
   out := pg_temp.must_fail(out, 'update app_config direct', 'do $x$ declare n int; begin update public.app_config set value = ''{}''::jsonb where key = ''home_notice''; get diagnostics n = row_count; if n = 0 then raise exception ''no rows''; end if; end $x$');
   out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
