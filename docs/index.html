@@ -1091,7 +1091,14 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       </div>
       <div class="ccard"><div class="cfl">인원·비용</div>
         <div class="cfl" style="margin-top:0">정원 <span class="muted">0이면 제한 없음</span></div><div style="display:flex;justify-content:center"><div class="stepper"><button type="button" onclick="mCapStep(-1)">−</button><b id="mCapVal">0</b><button type="button" onclick="mCapStep(1)">＋</button></div></div>
-        <div class="cfl">참가비</div><div class="seg" id="mFeeSeg"></div><input id="mFee" maxlength="40" placeholder="예: 5,000원" hidden style="margin-top:8px">
+        <div class="cfl">참가비</div><div class="seg" id="mFeeSeg"></div><input id="mFee" maxlength="40" placeholder="금액 (예: 15,000원)" hidden style="margin-top:8px">
+        <div id="mPaidBox" hidden>
+          <div class="cfl">어디에 쓰나요? <span class="muted">(한 줄)</span></div><input id="mFeeNote" maxlength="80" placeholder="예: 대관비 1만 원 + 음료·다과">
+          <div class="cfl">참여 방식</div><div class="seg" id="mJoinSeg"></div>
+          <p class="muted" id="mJoinHint" style="font-size:.78rem;margin:6px 0 0"></p>
+          <div class="cfl">취소·환불 안내 <span class="muted">(한 줄)</span></div><input id="mRefund" maxlength="80" placeholder="예: 모임 2일 전까지 전액 환불">
+          <p class="muted" style="font-size:.78rem;margin:8px 0 0">계좌번호는 여기에 적지 않아요. 확정 뒤 모임 채팅방에서 안내해 주세요.</p>
+        </div>
         <div class="cfl">준비물 <span class="muted">(선택)</span></div><input id="mBring" maxlength="120" placeholder="예: 뜨던 작품, 실, 바늘">
       </div>
       <div class="ccard"><div class="cfl">소개 <span class="muted">(선택)</span></div>
@@ -3694,6 +3701,7 @@ async function joinMeetup(id){
   const { data:m } = await sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(nickname)').eq('id', id).single();
   if(!m) return toast('모임을 찾을 수 없어요');
   if(myRoomIds.has(m.room_id)) return openRoom(m.room_id);
+  if(m.join_mode==='apply') return openMeetup(id);   // 신청 → 확정 모임은 모임 화면에서 신청
   const info=[fmtWhen(m.starts_at)+(m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''), m.place_name+(m.address?` (${m.address})`:''), m.fee?`참가비 ${m.fee}`:'', m.bring?`준비물 ${m.bring}`:'', `참여 ${m.participant_count||0}명${m.capacity?' / 정원 '+m.capacity+'명':''}`].filter(Boolean);
   openSheet(`<b style="font-size:1.1rem">「${esc(m.title)}」에 참여할까요?</b>
     <div class="card soft" style="font-size:.92rem;line-height:1.6">${info.map(x=>esc(x)).join('<br>')}</div>
@@ -3757,6 +3765,7 @@ async function openMeetup(id){
   const { data:m } = await sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(id,nickname,avatar_url,dong_name,level_crochet,level_knit)').eq('id', id).single();
   if(!m) return toast('모임을 찾을 수 없어요');
   const joined = myRoomIds.has(m.room_id), past = new Date(m.starts_at) < new Date(), full = m.capacity && (m.participant_count||0) >= m.capacity;
+  let app=null; if(m.join_mode==='apply' && !past){ const { data:sm } = await sb.rpc('meetup_app_summary', { p_meetup:id }); app=sm||{}; }
   let reviews=[], myReviewed=false;
   if(past){ const { data:rv } = await sb.from('posts').select('*, '+AUTHOR_SEL).eq('review_of', id).order('created_at'); reviews=rv||[]; myReviewed = reviews.some(r=>r.author_id===me.id); }
   const reviewHtml = past ? `<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700;margin-top:4px">${ico('yarn')} 후기 ${reviews.length}</div>
@@ -3766,11 +3775,32 @@ async function openMeetup(id){
     <b style="font-size:1.25rem">${esc(m.title)}</b>
     <div>${esc(m.place_name)}${m.address?`<div class="muted" style="font-size:.88rem">${esc(m.address)}${(()=>{ const g=parseGeo(m.location); return g?` · <a href="https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">길찾기</a>`:''; })()}</div>`:''}${m.created_by===me.id&&!past?`<div><a href="#" onclick="openMeetupLocEdit('${m.id}', this.dataset.p);return false" data-p="${esc(m.place_name)}" style="font-size:.85rem;color:var(--ink2);text-decoration:underline">${m.address?'장소 위치 수정':'지도 핀을 모임 장소로 옮기기'}</a></div>`:''}</div><div class="muted">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}${m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''}</div>
     <div class="mcard" style="margin:0"><div class="mtags" style="margin:0">${meetupTags(m)}</div>${m.bring?`<div class="ml" style="margin-top:8px">준비물: ${esc(m.bring)}</div>`:''}</div>
+    ${(m.fee_note||m.refund_note||m.join_mode==='apply')?`<div class="card soft" style="font-size:.9rem;line-height:1.6">${m.fee?`<b>참가비 ${esc(m.fee)}</b>`:''}${m.fee_note?`<div class="muted">${esc(m.fee_note)}</div>`:''}${m.refund_note?`<div>취소·환불 · ${esc(m.refund_note)}</div>`:''}${m.join_mode==='apply'?'<div class="muted">신청하면 개설자가 확정해요. 확정된 분만 채팅방에 들어와요.</div>':''}</div>`:''}
     ${m.descr?`<div style="white-space:pre-wrap">${esc(m.descr)}</div>`:''}
     <div class="row" style="cursor:pointer" onclick="closeSheet();openProfile('${m.host?.id}')">${avatar(m.host||{})}<div><b>${esc(m.host?.nickname||'')}</b><div class="muted">주최 · ${esc(m.host?.dong_name||'')}</div></div></div>
     <div class="muted">참여 ${m.participant_count||0}명</div>
-    ${past? reviewHtml + (joined?`<button class="btn o" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>`:'') : joined ? `<button class="btn" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">참여 취소</button>`:`<button class="btn r" onclick="askCancelMeetup('${m.id}', ${m.participant_count||1})">모임 취소 (주최자)</button>`}` : full ? '<button class="btn o" disabled>정원이 찼어요</button>' : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
+    ${past? reviewHtml + (joined?`<button class="btn o" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>`:'') : joined ? `${m.join_mode==='apply'&&m.created_by===me.id?`<button class="btn" onclick="openMeetApplicants('${m.id}')">신청자 관리${app?.waiting?` · ${app.waiting}명 대기`:''}</button>`:''}<button class="btn${m.join_mode==='apply'&&m.created_by===me.id?' o':''}" onclick="closeSheet();openRoom('${m.room_id}')">단체 채팅 열기</button>${m.created_by!==me.id?`<button class="btn o" onclick="leaveMeetup('${m.id}')">참여 취소</button>`:`<button class="btn r" onclick="askCancelMeetup('${m.id}', ${m.participant_count||1})">모임 취소 (주최자)</button>`}` : full ? '<button class="btn o" disabled>정원이 찼어요</button>' : m.join_mode==='apply' ? meetApplyBtn(m, app) : `<button class="btn" onclick="joinMeetup('${m.id}')">참여하기</button>`}`);
 }
+// 참가비가 있는 모임(schema 109): 신청 → 개설자 확정
+function meetApplyBtn(m, app){ const st=app?.mine;
+  if(st==='applied') return `<button class="btn o" disabled>신청했어요 · 개설자 확정을 기다리는 중</button><button class="btn o" onclick="cancelMeetApply('${m.id}')">신청 취소</button>`;
+  if(st==='rejected') return `<button class="btn o" disabled>이번 모임은 참여가 어려워요</button>`;
+  return `<button class="btn" onclick="applyMeetup('${m.id}')">참여 신청</button><div class="muted" style="text-align:center;font-size:.82rem">개설자가 확정하면 채팅방이 열려요</div>`; }
+function applyMeetup(id){ openSheet(`<b style="font-size:1.1rem">참여를 신청할까요?</b>
+    <div class="muted" style="font-size:.88rem;line-height:1.55">개설자에게 신청 알림이 가요. 개설자가 확정하면 알림이 오고 모임 채팅방이 열려요. 참가비 안내는 채팅방에서 받아요.</div>
+    <label class="f">개설자에게 한마디 (선택)<input id="maNote" maxlength="200" placeholder="예: 안녕하세요, 같이 뜨고 싶어요"></label>
+    <button class="btn" id="maGo" onclick="confirmApplyMeetup('${id}')">신청하기</button><button class="btn o" onclick="openMeetup('${id}')">다시 볼게요</button>`); }
+async function confirmApplyMeetup(id){ const note=$('#maNote').value.trim(); await loadBanned(); if(hasBanned(note)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+  $('#maGo').disabled=true; const { error } = await sb.rpc('meetup_apply', { p_meetup:id, p_note:note||null });
+  if(error){ const b=$('#maGo'); if(b) b.disabled=false; return toast(error.message.replace(/^.*?: /,'')); }
+  toast('신청했어요 · 개설자가 확정하면 알려 드릴게요'); openMeetup(id); }
+async function cancelMeetApply(id){ const { error } = await sb.rpc('meetup_cancel_apply', { p_meetup:id }); if(error) return toast(error.message.replace(/^.*?: /,'')); toast('신청을 취소했어요'); openMeetup(id); }
+async function openMeetApplicants(id){ const { data, error } = await sb.rpc('meetup_applicants', { p_meetup:id }); if(error) return toast(error.message.replace(/^.*?: /,''));
+  const rows=data||[]; const wait=rows.filter(r=>r.status==='applied').length;
+  openSheet(`<b style="font-size:1.05rem">신청자 관리</b><p class="muted" style="margin:0;font-size:.82rem">기다리는 신청 ${wait}명 · 확정한 분만 모임 채팅방에 들어와요.</p>
+    ${rows.length?rows.map(r=>`<div class="archit"><div onclick="closeSheet();openProfile('${r.profile_id}')" style="cursor:pointer">${avatar(r)}</div><div class="tx" style="cursor:default"><b>${esc(r.nickname||'')}</b><span>${r.note?esc(r.note):(r.status==='accepted'?'확정됨':'한마디 없음')}</span></div>${r.status==='applied'?`<button type="button" style="background:var(--sel);color:#fff;border-color:var(--sel)" onclick="decideMeetApp('${id}','${r.profile_id}',true)">확정</button><button type="button" onclick="decideMeetApp('${id}','${r.profile_id}',false)">거절</button>`:'<span class="muted" style="font-size:.8rem">확정</span>'}</div>`).join(''):'<div class="empty">아직 신청한 분이 없어요</div>'}
+    <button class="btn o" onclick="openMeetup('${id}')">모임으로 돌아가기</button>`); }
+async function decideMeetApp(id, pid, ok){ const { error } = await sb.rpc('meetup_decide', { p_meetup:id, p_profile:pid, p_accept:ok }); if(error) return toast(error.message.replace(/^.*?: /,'')); toast(ok?'확정했어요 · 채팅방에 들어왔어요':'거절했어요'); openMeetApplicants(id); }
 function lvBadge(a){ return (a&&a.act_level>0?`<span class="lvb" title="활동 레벨 · 작품 인증을 올린 날마다 +1">Lv.${a.act_level}</span>`:'') + (SUPPORTERS&&a&&a.supporter_badge?`<span class="supbadge">${esc(a.supporter_badge)}</span>`:''); }
 function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
 function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
@@ -3863,9 +3893,9 @@ function openPlusSheet(){
   openSheet(`<b style="font-size:1.05rem">무엇을 올릴까요?</b><div>
     ${row("closeSheet();openCompose('post')", SVG_PEN, '글', '동네 이웃에게 소식·질문 남기기')}
     ${row("closeSheet();openCert()", ico('cert'), '작품 인증', '완성작 사진과 기법·실 기록 · 활동 레벨이 올라요')}
-    ${row("closeSheet();openMeetForm()", ico('location'), '모임 만들기', '장소·일시를 정해 이웃 모으기', certified?'':'<span class="lock">작품 인증 1개부터 열 수 있어요</span>')}
+    ${row("closeSheet();openMeetForm()", ico('location'), '모임 · 같이 떠요', '가르치지 않고 함께 뜨는 자리 · 참가비를 받을 수 있어요', certified?'':'<span class="lock">작품 인증 1개부터 열 수 있어요</span>')}
     ${myShop?row("closeSheet();openCompose('shop')", ico('signal'), '가게 소식', esc(myShop.name)+' 팔로워에게 알리기'):''}
-    ${myShop||myProfile?.is_author?row("closeSheet();openClassForm()", ico('cert'), '클래스 열기', myShop?'일정·인원·비용·환불 규정까지 양식으로':'작가 클래스 · 마이 › 클래스 탭에 보여요'):''}
+    ${myShop||myProfile?.is_author?row("closeSheet();openClassForm()", ico('cert'), '클래스 · 가르쳐요', '배울 기법·완성작이 있는 수업 · 수강료·환불 규정'):''}
     ${FULL && myProfile?.is_author?row("closeSheet();openPatternForm()", ico('ruler'), '도안', '내 도안 등록하기'):''}
   </div><button class="btn o" onclick="closeSheet()">닫기</button>`);
 }
@@ -4378,7 +4408,8 @@ async function stashAddFromDict(y){   // 실 사전·직접 입력으로 고른 
 }
 
 // ----- 모임 만들기 페이지
-const M_DUR={60:'1시간',90:'1시간 30분',120:'2시간',180:'3시간',240:'반나절'}, M_REP={once:'한 번',weekly:'매주',biweekly:'격주',monthly:'매월'}, M_FEE={free:'무료',drink:'각자 음료',custom:'직접 입력'};
+const M_DUR={60:'1시간',90:'1시간 30분',120:'2시간',180:'3시간',240:'반나절'}, M_REP={once:'한 번',weekly:'매주',biweekly:'격주',monthly:'매월'}, M_FEE={free:'무료',drink:'각자 음료',custom:'참가비 있음'}, M_JOIN={open:'바로 참여',apply:'신청 → 내가 확정'}, M_JOIN_HINT={open:'누르면 바로 참여돼요. 참가비는 채팅방에서 안내해 주세요.',apply:'신청한 분 가운데 내가 확정한 분만 채팅방에 들어와요. 입금을 확인하고 확정할 수 있어요.'};
+let meetApplyOK=null;   // 서버에 '신청 → 확정' 기능(schema 109)이 있을 때만 새 칸을 보여 준다
 let mCap=0, mTechSel=new Set(), mTechCraft='crochet';
 function renderMTech(){ const el=$('#mTechChips'); if(!el) return; el.innerHTML=[...mTechSel].map(id=>`<span class="tech on">${esc(techName(id))}<b onclick="mTechSel.delete('${id}');renderMTech()" style="cursor:pointer;margin-left:2px">×</b></span>`).join(''); const p=$('#mTechPicked'); if(p) p.textContent=`${mTechSel.size}개 선택 ›`; renderMeetChips(); }
 function openMTechSub(){
@@ -4424,16 +4455,18 @@ async function openMeetForm(){
   closeSub(); composeKind='meetup'; sPhotos=[]; renderMeetPhotos();
   if(!['compose','cert','meetform','classform'].includes(view)) composeBack=view;
   if(!$('#mKind').children.length){
-    seg('#mKind', MKIND); seg('#mCraft', MCRAFT); seg('#mDurSeg', M_DUR); seg('#mRepeatSeg', M_REP); seg('#mFeeSeg', M_FEE);
+    seg('#mKind', MKIND); seg('#mCraft', MCRAFT); seg('#mDurSeg', M_DUR); seg('#mRepeatSeg', M_REP); seg('#mFeeSeg', M_FEE); seg('#mJoinSeg', M_JOIN);
+    $('#mJoinSeg').addEventListener('click', ()=>{ $('#mJoinHint').textContent = M_JOIN_HINT[segVal('#mJoinSeg')||'open']; });
     const lvOpts = `<option value="">제한 없음</option>` + [1,2,3,4,5].map(l=>`<option value="${l}">${l}단계 ${LVNAME[l]}</option>`).join('');
     $('#mLvMin').innerHTML = lvOpts; $('#mLvMax').innerHTML = lvOpts;
     $('#mKind').addEventListener('click', ()=>{ $('#mTechWrap').hidden = segVal('#mKind')!=='workshop'; });
-    $('#mFeeSeg').addEventListener('click', ()=>{ const c=segVal('#mFeeSeg')==='custom'; $('#mFee').hidden=!c; if(c) $('#mFee').focus(); });
+    $('#mFeeSeg').addEventListener('click', ()=>{ const c=segVal('#mFeeSeg')==='custom'; $('#mFee').hidden=!c; $('#mPaidBox').hidden=!(c && meetApplyOK); if(c) $('#mFee').focus(); });
     loadTech();
   }
   const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7||7));
   const pad=n=>String(n).padStart(2,'0'); $('#mDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#mDate').min=(t=>`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`)(new Date()); $('#mClock').value='14:00';
-  segSet('#mKind','free'); segSet('#mCraft','both'); segSet('#mDurSeg','120'); segSet('#mRepeatSeg','once'); segSet('#mFeeSeg','free');
+  segSet('#mKind','free'); segSet('#mCraft','both'); segSet('#mDurSeg','120'); segSet('#mRepeatSeg','once'); segSet('#mFeeSeg','free'); segSet('#mJoinSeg','open'); $('#mJoinHint').textContent=M_JOIN_HINT.open; $('#mPaidBox').hidden=true; $('#mFeeNote').value=''; $('#mRefund').value='';
+  if(meetApplyOK===null) sb.from('meetups').select('join_mode').limit(1).then(r=>{ meetApplyOK=!r.error; });
   $('#mTechWrap').hidden=true; $('#mLvMin').value=''; $('#mLvMax').value=''; $('#mFee').hidden=true; $('#mFee').value=''; $('#mBring').value=''; $('#mTitle').value=''; $('#mDesc').value=''; $('#mPlaceDetail').value=''; $('#mPublic').checked=true; $('#meetPost').disabled=false;
   mCap=0; $('#mCapVal').textContent='0'; placePick.m=null; mTechSel=new Set(); renderMTech(); renderMeetPlace(); renderMeetPub(); renderMeetChips();
   show('meetform'); $('#v-meetform').scrollTop=0;
@@ -4462,6 +4495,8 @@ async function submitMeet(){
     await loadBanned(); if(hasBanned(title) || hasBanned($('#mDesc').value) || hasBanned(place)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     if([title, $('#mDesc').value, $('#mBring').value, $('#mPlaceDetail').value, $('#mFee').value].some(t=>ACCT_RE.test(t||''))) throw new Error('계좌번호는 모임 글에 적을 수 없어요. 참가비 안내는 모임 채팅방에서 해 주세요');
     if([title, $('#mDesc').value, $('#mBring').value, $('#mPlaceDetail').value].some(t=>LINK_RE.test(t||''))) throw new Error('모임 안내에는 링크를 넣을 수 없어요. 참여 신청은 앱 안에서 이루어져요');
+    if([$('#mFeeNote').value, $('#mRefund').value].some(t=>ACCT_RE.test(t||'')||LINK_RE.test(t||''))) throw new Error('참가비 안내에는 계좌번호·링크를 적을 수 없어요. 확정 뒤 채팅방에서 안내해 주세요');
+    if(hasBanned($('#mFeeNote').value) || hasBanned($('#mRefund').value)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const lmin=$('#mLvMin').value, lmax=$('#mLvMax').value; if(lmin && lmax && +lmin > +lmax) throw new Error('권장 단계 범위를 확인해 주세요');
     const kind = segVal('#mKind')||'free'; if(kind==='workshop' && !mTechSel.size) throw new Error('배울 기법을 골라 주세요');
     const feeK=segVal('#mFeeSeg'); const fee = feeK==='custom' ? ($('#mFee').value.trim()||null) : (M_FEE[feeK]||null);
@@ -4470,6 +4505,10 @@ async function submitMeet(){
     const photos = await uploadPhotos(sPhotos);
     const { error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:when.toISOString(), p_is_public:$('#mPublic').checked, p_body: $('#mDesc').value.trim()||null, p_lat:c.lat, p_lng:c.lng, p_photos:photos, p_extra: extra });
     if(error) throw new Error(error.message.replace(/^.*?: /,''));
+    if(feeK==='custom' && meetApplyOK){ const fn=$('#mFeeNote').value.trim(), rf=$('#mRefund').value.trim(), jm=segVal('#mJoinSeg')||'open';
+      if(fn || rf || jm==='apply'){ const { data:mm } = await sb.from('meetups').select('id').eq('created_by', me.id).order('created_at',{ascending:false}).limit(1);
+        const r2 = mm?.[0] ? await sb.rpc('meetup_set_terms', { p_meetup:mm[0].id, p_fee_note:fn||null, p_mode:jm, p_refund:rf||null }) : { error:{ message:'모임을 찾지 못했어요' } };
+        if(r2.error) alert('모임은 열렸지만 참가비 안내를 저장하지 못했어요: '+r2.error.message.replace(/^.*?: /,'')); } }
     sPhotos=[]; await loadMyRooms(); toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
     composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
   }catch(e){ toast(e.message); b.disabled=false; }
