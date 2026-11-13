@@ -686,7 +686,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 /* 댓글 입력칸: 여러 줄(엔터 = 줄바꿈, 등록은 게시 버튼만) — 2026-11-12 */
 .compose textarea,.rrow textarea{flex:1;min-width:0;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:inherit;padding:9px 14px;font-family:inherit;font-size:16px;line-height:1.4;height:42px;min-height:42px;max-height:112px;width:auto;resize:none;overflow-y:auto;outline:0;display:block}
 .compose textarea:focus,.rrow textarea:focus{border-color:var(--color-primary)}.compose textarea::placeholder,.rrow textarea::placeholder{color:var(--ink3)}
-#v-post #postBody{min-height:0;background:var(--color-bg)}#v-post .compose{flex:none}#v-post .compose,.rrow{align-items:flex-end}.rrow .ava{margin-bottom:5px}#v-post .compose .ava{margin-bottom:3px}
+#v-post{overflow:hidden}#v-post #postBody{flex:1 1 0;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--color-bg)}#v-post .compose{flex:none}#v-post .compose,.rrow{align-items:flex-end}.rrow .ava{margin-bottom:5px}#v-post .compose .ava{margin-bottom:3px}
 /* 글 상세(2026-11-12 대표 확정 시안): 본문은 흰 카드에 크게 · 댓글은 작게 · 대댓글은 한 단계 들여쓰기 · 댓글 사진 1장 · 링크는 확인 시트로 */
 #postBody .post.dpost{background:var(--color-surface);border-bottom:1px solid var(--line);cursor:default}#postBody .post.dpost .txt{font-size:1.06rem;line-height:1.6}
 .cmt-head{padding:14px 16px 4px;font-size:.88rem;font-weight:700;color:var(--color-text-muted)}
