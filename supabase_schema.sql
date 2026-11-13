@@ -1658,3 +1658,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 -- 107. 대시보드 '채팅' 칸 (마이그레이션 admin_stats_member_chat, 2026-11-13)
 --   admin_stats() totals 에 키 추가: rooms_member · messages_member(지기 채팅방 제외 = 회원끼리) · rooms_support(지기 채팅방 수). 기존 rooms·messages 는 그대로
 
+-- 108. 공방·작가 화면 개편 (마이그레이션 shop_author_page_columns · _helpers · _follow_inquiry · _notify, 2026-11-13 대표 확정 시안. 원본 supabase/shop_author_page.sql)
+--   shops.cover_url · profiles.cover_url : 화면 맨 위 사진(매장 사진 / 대표작). 우리 Storage(avatars·shops 버킷) 주소만 — _own_storage_url() 검사
+--       shops 는 오너가 직접 update(check 제약), profiles.cover_url 은 컬럼 grant 없이 set_author_cover(p_url) 로만(작가만)
+--   profiles.author_links jsonb : 작가 링크 최대 3개(주소 배열). set_author_links(p_links) 로만 — 첫 번째는 옛 앱이 보는 author_link 에도 넣는다
+--   author_follows(profile_id, author_id) : 작가 팔로우(수락 없음). RLS: 본인만 넣고 지움 · 작가(is_author)만 팔로우 가능 · 차단 관계면 불가 · 작가는 자기 팔로워를 봄
+--   follower_count(kind 'shop'|'author', id) : 숫자만 돌려줌(누가 팔로우했는지는 안 나감)
+--   rooms.inquiry boolean : 문의로 열린 1:1 방 표시. open_inquiry_room(kind 'shop'|'author', id) → 방 id
+--       작가 또는 공개된 가게의 주인에게만 · 본인·차단·정지·탈퇴 대기 계정은 거절 · 두 사람의 1:1 방이 이미 있으면 그 방 · 새 문의방은 하루 10개까지
+--       앱은 상대가 아직 아무 말도 하지 않은 문의방을 받는 쪽 목록에 보이지 않게 한다(1.0.7 부터. 옛 앱은 빈 방이 보일 수 있음)
+--   notify_on_shop_post() : 작가가 클래스를 열면 팔로워에게도 'notice' 알림(뜨친은 기존 알림이 있어 제외)
+--   트리거 meetups_notify_followers → notify_followers_on_meetup() : 작가가 공개 모임을 열면 팔로워에게 'notice' 알림(link meetup)

@@ -407,6 +407,25 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 @keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(18deg)}30%{transform:rotate(-14deg)}45%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(0)}}
 /* 가게 페이지 */
 .shophead{padding:14px 16px 6px;display:flex;align-items:center;gap:12px}.shophead .logo{width:58px;height:58px;border-radius:16px;object-fit:cover;flex:none;border:1px solid var(--line)}
+.pgcover{height:132px;background:var(--bg2) center/cover no-repeat}.pgcover.ed{border-radius:14px;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink3);font-size:.8rem;height:110px}
+.shophead2.cv{padding-top:10px;align-items:flex-start}.shophead2.cv .lg{margin-top:-44px;width:78px;height:78px;border:3px solid #fff;position:relative}.shophead2.cv h2{margin-top:2px}
+.shophead2 .lg.au{border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2.5px #E2A91C}.shophead2 .ds{white-space:pre-line}
+.crownb{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(180deg,#FFD95A,#E2A91C);color:#3A2A00;font-size:.68rem;font-weight:800;padding:1px 8px;border-radius:999px;vertical-align:3px;margin-left:6px}
+.pgfol{font-size:.8rem;color:var(--ink3);margin-top:3px}.pgfol b{color:var(--ink)}
+.pgacts{display:flex;gap:8px;padding:10px 16px 4px}.pgacts .btn{flex:1;width:auto;height:36px;padding:0 10px;font-size:.88rem;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:4px}.pgacts .btn.main{flex:1.3}.pgacts .btn.on{background:var(--chip);color:var(--olive);border:1px solid var(--line)}
+.pglinks{margin:10px 16px 6px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--color-surface)}
+.pglinks a{display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-bottom:1px solid var(--line);font-size:.9rem;font-weight:700;color:var(--ink);text-decoration:none;white-space:nowrap}.pglinks a:last-child{border-bottom:0}
+.pglinks i{width:26px;height:26px;border-radius:8px;background:var(--chip);display:grid;place-items:center;flex:none}.pglinks i svg{width:16px;height:16px;stroke:var(--olive);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.pglinks small{flex:1;min-width:0;color:var(--ink3);font-weight:400;font-size:.76rem;overflow:hidden;text-overflow:ellipsis}.pglinks u{text-decoration:none;color:var(--olive);font-weight:400;flex:none}
+.pgsec{padding:16px 16px 4px}.pgst{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;font-size:1rem;margin-bottom:8px}.pgst button{background:none;border:0;color:var(--olive);font-weight:700;font-size:.8rem;cursor:pointer;padding:4px 0}
+.pgcard{background:var(--color-surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}.pgcard .empty{padding:18px 12px;font-size:.86rem}
+.pgli{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line);cursor:pointer}.pgcard>.pgli:first-child{border-top:0}
+.pgli>div{min-width:0}.pgli b{font-size:.9rem}.pgli .s{color:var(--ink2);font-size:.76rem;margin-top:1px}.pgli .go{color:var(--olive);font-weight:700;font-size:.8rem;flex:none}
+.pgli .th{width:54px;height:54px;border-radius:10px;object-fit:cover;flex:none;display:block}
+.pgk{display:inline-block;font-size:.66rem;font-weight:800;border-radius:6px;padding:0 6px;margin-right:5px;vertical-align:1px;background:var(--chip);color:var(--olive)}.pgk.c{background:#FFF3C4;color:#3A2A00}.pgk.n{background:var(--bg2);color:var(--ink2)}
+.pgfull{border-top:1px solid var(--line);background:var(--bg)}.pgfull .spost{border-top:0}
+.pggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}.pggrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;display:block;cursor:pointer}
+.pgchips{display:flex;gap:6px;padding:12px 16px 10px}.pgchips button{border:1px solid var(--line);background:var(--color-surface);border-radius:999px;padding:5px 14px;font-size:.82rem;font-weight:700;color:var(--ink2);cursor:pointer}.pgchips button.on{background:var(--chip);color:var(--olive);border-color:var(--chip)}
 .selogo{width:84px;height:84px;border-radius:20px;background:var(--bg2) center/cover no-repeat;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink3);font-size:.78rem}
 .shophead h2{margin:0;font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
 .shophead .kind{display:inline-block;font-size:.72rem;background:var(--sel);color:#fff;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:3px}
@@ -1979,30 +1998,135 @@ function centerMe(){ if(myProfile?._c) MapAdapter.setCenter(myProfile._c); else 
 
 // ============ 프로필 시트 ============
 let profBack=null, profId=null, profTab='posts', profData=null;
+// ===== 공방·작가 화면 공용(schema 108): 링크 목록 · 팔로워 수 · 문의 대화 · 접는 줄 =====
+const LINK_ICO = { instagram:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.6" cy="7.4" r=".6"/></svg>', store:'<svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>', youtube:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="4"/><path d="M10.5 9.5l4 2.5-4 2.5z"/></svg>', blog:'<svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"/></svg>', kakao:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>', map:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>', web:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/></svg>' };
+function linkInfo(u){ try{ const h=new URL(u); const host=h.hostname.replace(/^www\./,''); const seg=h.pathname.split('/').filter(Boolean); const full=host+(h.pathname.length>1?h.pathname:'');
+    if(host.endsWith('instagram.com')) return {k:'instagram', n:'인스타그램', d:seg[0]?'@'+seg[0]:host};
+    if(host==='smartstore.naver.com'||host==='brand.naver.com'||host==='shopping.naver.com') return {k:'store', n:'스마트스토어', d:full};
+    if(host.endsWith('youtube.com')||host==='youtu.be') return {k:'youtube', n:'유튜브', d:seg[0]||host};
+    if(host==='blog.naver.com'||host==='m.blog.naver.com') return {k:'blog', n:'네이버 블로그', d:seg[0]||host};
+    if(host==='pf.kakao.com'||host==='open.kakao.com') return {k:'kakao', n:'카카오 채널', d:full};
+    if(host==='map.naver.com'||host==='naver.me'||host==='m.place.naver.com'||host==='place.naver.com') return {k:'map', n:'네이버 지도', d:host};
+    return {k:'web', n:'홈페이지', d:full}; }catch(e){ return {k:'web', n:'링크', d:String(u||'')}; } }
+function linkList(items, what){   // items: [{u, n?}] — 이름·아이콘은 주소로 자동, 누르면 확인 시트(openExt)
+  const rows=(items||[]).filter(x=>x&&x.u); if(!rows.length) return '';
+  return `<div class="pglinks">${rows.map(x=>{ const i=linkInfo(x.u); return `<a href="#" data-u="${esc(x.u)}" onclick="event.preventDefault();openExt(this.dataset.u, '${what}')"><i>${LINK_ICO[i.k]||LINK_ICO.web}</i>${esc(i.k==='web'&&x.n?x.n:i.n)}<small>${esc(i.d.slice(0,60))}</small><u>↗</u></a>`; }).join('')}</div>`; }
+async function openInquiry(kind, id){
+  const { data, error } = await sb.rpc('open_inquiry_room', { p_kind:kind, p_id:id });
+  if(error || !data) return toast((error?.message||'지금은 문의할 수 없어요').replace(/^.*?: /,''));
+  if(typeof myRoomIds!=='undefined' && myRoomIds?.add) myRoomIds.add(data);
+  openRoom(data);
+}
+function pgToggle(id){ const e=document.getElementById('pgf-'+id); if(e) e.hidden=!e.hidden; }
+function clsTime(p){ const t=p?.extra?.starts_at||p?.ends_at||null; return t?new Date(t).getTime():Infinity; }
+function clsPast(p){ const t=clsTime(p); if(t===Infinity) return false; const x=p.extra||{}; const span = x.type==='course' ? Math.max(1,(x.sessions||1))*(x.cycle==='biweekly'?14:7)*864e5 : 6*3600e3; return t+span < Date.now(); }
+function spostCard(p, mine){ return `<div class="spost" id="sp-${p.id}"><span class="k ${p.kind}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`; }
+function pgClsRow(p, mine, label){ const x=p.extra||{}; const ap=classApps[p.id]||{}; const past=clsPast(p); const left = x.max ? Math.max(0, x.max-(ap.accepted||0)) : null;
+  const sub=[x.starts_at?fmtWhen(x.starts_at):'', past?'':(left===null?'':(left?`자리 ${left}개 남음`:'마감')), x.fee?won(x.fee):(p.extra?.v?'무료':'')].filter(Boolean).join(' · ');
+  return `<div class="pgli" onclick="pgToggle('${p.id}')"><div><b><span class="pgk ${past?'n':'c'}">${label||(past?'지난 클래스':'모집 중')}</span>${esc(p.title)}</b><div class="s">${esc(sub)}</div></div><span class="go">${past?'보기':'신청'} ›</span></div><div class="pgfull" id="pgf-${p.id}" hidden>${spostCard(p, mine)}</div>`; }
+function pgNewsRow(p, mine){ const ph=(p.photos||[])[0];
+  return `<div class="pgli" onclick="pgToggle('${p.id}')"><div style="display:flex;gap:10px;align-items:center">${ph?`<img class="th" src="${esc(ph)}" alt="" loading="lazy">`:''}<div style="min-width:0"><b><span class="pgk n">${SPOST_KIND[p.kind]||'소식'}</span>${esc(p.title)}</b><div class="s">${(a=>/\d\.\s*$/.test(a)?a:a+' 전')(agoShort(p.created_at))}</div></div></div><span class="go">보기 ›</span></div><div class="pgfull" id="pgf-${p.id}" hidden>${spostCard(p, mine)}</div>`; }
+let shopPg=null, authPg=null;
+function openShopPast(kind){ const g=shopPg||{}; const rows = kind==='class' ? (g.past||[]) : (g.news||[]);
+  openSub(kind==='class'?'지난 클래스':'소식 전체', `<div style="padding-bottom:24px">${rows.length?rows.map(p=>spostCard(p,false)).join(''):'<div class="empty">아직 없어요</div>'}</div>`); }
+function pgMeetRow(m, sub){ const past=meetEnded(m); const n=m.participant_count||0;
+  return `<div class="pgli" onclick="${sub?'closeSub();':''}openMeetup('${m.id}')"><div><b><span class="pgk ${past?'n':''}">모임</span>${esc(m.title)}</b><div class="s">${esc([fmtWhen(m.starts_at), m.place_name, n?`${n}명 참여`:'' , past&&m.review_count?`후기 ${m.review_count}`:''].filter(Boolean).join(' · '))}</div></div><span class="go">${past?'보기':'참여'} ›</span></div>`; }
+function openAuthorPast(f){ const g=authPg||{}; f=f||'all'; const all=g.past||[]; const rows=all.filter(x=>f==='all'||x.t===f); const nm=all.filter(x=>x.t==='m').length, nc=all.length-nm;
+  openSub(`${g.nick||'작가'} 님의 지난 모임·클래스`, `<div class="pgchips"><button class="${f==='all'?'on':''}" onclick="openAuthorPast('all')">전체 ${all.length}</button><button class="${f==='m'?'on':''}" onclick="openAuthorPast('m')">모임 ${nm}</button><button class="${f==='c'?'on':''}" onclick="openAuthorPast('c')">클래스 ${nc}</button></div><div style="padding:0 16px 24px"><div class="pgcard">${rows.length?rows.map(x=>x.t==='m'?pgMeetRow(x.o,true):pgClsRow(x.o,false,'클래스')).join(''):'<div class="empty">아직 없어요</div>'}</div></div>`); }
+async function toggleFollowAuthor(id, on){
+  const r = on ? await sb.from('author_follows').insert({ profile_id:me.id, author_id:id }) : await sb.from('author_follows').delete().eq('profile_id',me.id).eq('author_id',id);
+  if(r.error && r.error.code!=='23505') return toast('실패: '+r.error.message.replace(/^.*?: /,''));
+  toast(on?'팔로우했어요. 새 모임·클래스가 열리면 알림으로 와요':'팔로우를 취소했어요'); openProfile(id);
+}
+// 작가 화면(대표 확정 시안 2026-11-13): 맨 위 사진 → 원형 사진·이름·소개·팔로워 → 동네 → [팔로우][문의] → 링크 → 작가와 함께 → 작품 → 탭
+async function renderAuthorPage(p, r, own){
+  const id=p.id;
+  const [fc, fol, mt, cl, wk] = await Promise.all([
+    sb.rpc('follower_count', { p_kind:'author', p_id:id }),
+    own ? Promise.resolve({data:[]}) : sb.from('author_follows').select('author_id').eq('author_id',id).eq('profile_id',me.id),
+    sb.from('meetups').select('id,title,place_name,starts_at,duration_min,repeat,participant_count,review_count,hidden').eq('created_by',id).eq('is_public',true).order('starts_at',{ascending:false}).limit(60),
+    sb.from('shop_posts').select('*').eq('author_id',id).is('shop_id',null).eq('kind','class').order('created_at',{ascending:false}).limit(40),
+    sb.from('posts').select('id,photos').eq('author_id',id).is('parent_id',null).not('work_id','is',null).order('created_at',{ascending:false}).limit(30)
+  ]);
+  const meets=(mt.data||[]).filter(m=>!m.hidden), classes=cl.data||[]; await loadClassApps(classes);
+  const items=[...meets.map(o=>({t:'m', o, at:new Date(o.starts_at).getTime(), past:meetEnded(o)})), ...classes.map(o=>({t:'c', o, at:clsTime(o), past:clsPast(o)}))];
+  const up=items.filter(x=>!x.past).sort((a,b)=>a.at-b.at), past=items.filter(x=>x.past).sort((a,b)=>b.at-a.at);
+  authPg={ past, nick:p.nickname };
+  const following=!!(fol.data&&fol.data.length); const works=(wk.data||[]).filter(w=>(w.photos||[]).length);
+  const dc=(p.dong_code||'').split('|').map(x=>x.trim()).filter(Boolean); const loc = dc.length>=2 ? dc.join(' ') : (p.dong_name||'');
+  const links=(Array.isArray(p.author_links)&&p.author_links.length ? p.author_links : (p.author_link?[p.author_link]:[])).map(u=>({u}));
+  const ini=esc((p.nickname||'?').trim().slice(0,1));
+  let acts;
+  if(own) acts=`<button class="btn o" onclick="openAuthorPageEdit()">작가 화면 꾸미기</button>`;
+  else if(r?.status==='blocked') acts=`<button class="btn o" disabled>차단됨</button>`;
+  else acts=`<button class="btn main ${following?'on':''}" onclick="toggleFollowAuthor('${id}',${!following})">${following?ico('check')+' 팔로우 중':'팔로우'}</button><button class="btn o" onclick="openInquiry('author','${id}')">문의</button>`;
+  $('#profTitle').textContent = p.nickname; if(!openProfile.scrollBound){ openProfile.scrollBound=true; $('#v-profile').addEventListener('scroll', e=>$('#profTitle').classList.toggle('show', e.target.scrollTop>70)); } $('#profTitle').classList.remove('show');
+  $('#profBody').innerHTML = `
+    ${p.cover_url?`<div class="pgcover" style="background-image:url('${esc(p.cover_url)}')"></div>`:''}
+    <div class="shophead2${p.cover_url?' cv':''}"><div class="lg au">${p.avatar_url?`<img src="${esc(p.avatar_url)}" alt="" referrerpolicy="no-referrer" data-i="${ini}" onerror="this.replaceWith(this.dataset.i||'?')">`:ini}</div><div style="flex:1;min-width:0"><h2>${esc(p.nickname)}<span class="crownb">♛ 작가</span></h2>${p.bio?`<div class="ds">${esc(p.bio)}</div>`:''}<div class="pgfol">팔로워 <b>${fc.data||0}</b></div></div></div>
+    ${loc?`<div class="shopmeta"><div><span class="ic">${ico('location')}</span><span>${esc(loc)}</span></div></div>`:''}
+    ${r?.status==='pending'&&r.addressee_id===me.id?`<div class="pbio">${r.message?`<div class="story">"${esc(r.message)}"</div>`:''}</div><div class="pbtns"><button class="btn primary" onclick="respond('${id}','accepted')">친구 신청 수락</button><button class="btn o" onclick="respond('${id}','declined')">거절</button></div>`:''}
+    <div class="pgacts">${acts}</div>
+    ${linkList(links, '작가가 등록한 링크')}
+    ${(up.length||past.length||own)?`<div class="pgsec"><div class="pgst"><span>작가와 함께</span>${past.length?`<button onclick="openAuthorPast()">지난 모임·클래스 ${past.length} ›</button>`:''}</div><div class="pgcard">${up.length?up.map(x=>x.t==='m'?pgMeetRow(x.o):pgClsRow(x.o, own, '클래스')).join(''):`<div class="empty">${own?'모임이나 클래스를 열면 여기에 보여요':'지금 예정된 모임·클래스가 없어요'}</div>`}</div></div>`:''}
+    ${works.length?`<div class="pgsec"><div class="pgst"><span>작품 ${works.length>=30?'30+':works.length}</span>${works.length>6?`<button onclick="const b=document.querySelector('#profTabs [data-t=works]'); if(b){ b.click(); b.scrollIntoView({block:'start'}); }">전체 ›</button>`:''}</div><div class="pggrid">${works.slice(0,6).map(w=>`<img src="${esc(w.photos[0])}" alt="" loading="lazy" onclick="openPost('${w.id}')">`).join('')}</div></div>`:''}
+    <div class="subtabs" id="profTabs" style="margin-top:14px"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${profTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button><button data-t="classes" class="${profTab==='classes'?'on':''}">클래스</button>${FULL?`<button data-t="patterns" class="${profTab==='patterns'?'on':''}">도안</button>`:''}</div>
+    <div class="feed" id="profFeed"><div class="empty">불러오는 중…</div></div>`;
+  $('#profTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; profTab=b.dataset.t; [...$('#profTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadUserFeed(profId, profTab, $('#profFeed')); };
+  show('profile'); bindTabSwipe('#v-profile', '#profTabs');
+  loadUserFeed(id, profTab, $('#profFeed'));
+}
+// 작가 화면 꾸미기(설정 › 작가): 맨 위 사진 + 링크 3개
+function openAuthorPageEdit(){ const p=myProfile||{}; const L=(Array.isArray(p.author_links)&&p.author_links.length?p.author_links:(p.author_link?[p.author_link]:[]));
+  openSheet(`<b style="font-size:1.05rem">작가 화면 꾸미기</b>
+    <div class="pgcover ed" id="apCover" style="${p.cover_url?`background-image:url('${esc(p.cover_url)}')`:''}">${p.cover_url?'':'맨 위 사진 (대표작)'}</div>
+    <div style="display:flex;gap:8px"><button type="button" class="btn o sm" style="width:auto;padding:8px 14px" onclick="$('#apFile').click()">사진 고르기</button>${p.cover_url?`<button type="button" class="btn o sm" style="width:auto;padding:8px 14px" onclick="apCoverSet(null)">사진 빼기</button>`:''}<input id="apFile" type="file" accept="image/*" hidden onchange="apCoverPick(this.files[0]);this.value=''"></div>
+    <p class="muted" style="margin:0;font-size:.8rem">가로로 긴 사진이 잘 어울려요. 넣지 않아도 돼요.</p>
+    ${[0,1,2].map(i=>`<label class="f">링크 ${i+1}<input id="apL${i}" maxlength="300" inputmode="url" placeholder="${['https://instagram.com/내계정','https://smartstore.naver.com/…','블로그·유튜브 등'][i]}" value="${esc(L[i]||'')}"></label>`).join('')}
+    <p class="muted" style="margin:0;font-size:.8rem">주소만 넣으면 이름과 아이콘은 자동으로 붙어요. 3개까지 넣을 수 있어요.</p>
+    <button class="btn" id="apSave" onclick="saveAuthorPage()">저장</button>
+    <button class="btn o" onclick="closeSheet();openProfile(me.id,false,true)">내 작가 화면 보기</button>`); }
+async function apCoverPick(file){ if(!file) return; toast('올리는 중…');
+  try{ const blob=await shrinkImage(file, 1400); const path=`${me.id}/cover-${Date.now()}.jpg`; const up=await sb.storage.from('avatars').upload(path, blob, { contentType:'image/jpeg', upsert:false }); if(up.error) throw new Error(up.error.message);
+    await apCoverSet(sb.storage.from('avatars').getPublicUrl(path).data.publicUrl); }catch(e){ toast('사진을 올리지 못했어요: '+(e.message||'')); } }
+async function apCoverSet(url){ const { error } = await sb.rpc('set_author_cover', { p_url:url }); if(error) return toast(error.message.replace(/^.*?: /,'')); myProfile.cover_url=url||null; toast(url?'사진을 넣었어요':'사진을 뺐어요'); openAuthorPageEdit(); if(view==='profile'&&profId===me.id) openProfile(me.id,false,true); }
+async function saveAuthorPage(){ const arr=[0,1,2].map(i=>{ let v=$('#apL'+i).value.trim(); if(v && !/^https?:\/\//i.test(v)) v='https://'+v; return v; }).filter(Boolean);
+  $('#apSave').disabled=true; const { data, error } = await sb.rpc('set_author_links', { p_links: arr }); if(error){ $('#apSave').disabled=false; return toast(error.message.replace(/^.*?: /,'')); }
+  myProfile.author_links=(data&&data.length)?data:null; myProfile.author_link=(data&&data[0])||null; closeSheet(); toast('저장했어요'); if(view==='profile'&&profId===me.id) openProfile(me.id,false,true); }
+async function seCoverPick(file){ if(!file || !myShop) return; toast('올리는 중…');
+  try{ const blob=await shrinkImage(file, 1400); const path=`${myShop.id}/cover-${Date.now()}.jpg`; const up=await sb.storage.from('shops').upload(path, blob, { contentType:'image/jpeg', upsert:false }); if(up.error) throw new Error(up.error.message);
+    await seCoverSet(sb.storage.from('shops').getPublicUrl(path).data.publicUrl); }catch(e){ toast('실패: '+(e.message||'')); } }
+async function seCoverSet(url){ const { error } = await sb.from('shops').update({ cover_url:url }).eq('id', myShop.id); if(error) return toast('실패: '+error.message); myShop.cover_url=url||null; const el=$('#seCover'); if(el){ el.style.backgroundImage=url?`url('${url}')`:''; el.textContent=url?'':'맨 위 사진 (매장 사진)'; } toast(url?'사진을 넣었어요':'사진을 뺐어요'); }
 // ===== 가게(파트너) =====
 let shopBack=null, curShop=null;
 const SHOP_KIND = { yarn:'실·부자재', studio:'공방', cafe:'카페', other:'가게' };
 const SPOST_KIND = { sale:'할인', new:'신상', meetup:'모임', class:'클래스', notice:'소식' };
 async function openShop(id){
   if(view!=='shop') shopBack = view; closeSheet();
-  const [{data:sh},{data:posts},{data:fol}] = await Promise.all([
+  const [{data:sh},{data:posts},{data:fol},{data:fcount}] = await Promise.all([
     sb.from('shops').select('*').eq('id',id).single(),
     sb.from('shop_posts').select('*').eq('shop_id',id).order('created_at',{ascending:false}).limit(50),
-    sb.from('shop_follows').select('shop_id').eq('shop_id',id).eq('profile_id',me.id)
+    sb.from('shop_follows').select('shop_id').eq('shop_id',id).eq('profile_id',me.id),
+    sb.rpc('follower_count', { p_kind:'shop', p_id:id })
   ]);
   if(!sh) return toast('가게를 찾을 수 없어요');
   curShop=sh; await loadClassApps(posts); const following=!!(fol&&fol.length); const mine = sh.owner_id===me.id;
-  const links=sh.links||{}; const L=[['instagram','인스타그램'],['store','스토어'],['web','홈페이지'],['naver','네이버'],['kakao','카카오']].filter(([k])=>links[k]).map(([k,l])=>`<a class="btn o" href="#" data-u="${esc(links[k])}" onclick="event.preventDefault();openExt(this.dataset.u, '가게가 등록한 링크')">${l} ↗</a>`).join('');
+  const links=sh.links||{}; const L=linkList([['instagram','인스타그램'],['store','스토어·예약'],['web','홈페이지'],['naver','네이버'],['kakao','카카오']].filter(([k])=>links[k]).map(([k,l])=>({u:links[k], n:l})), '가게가 등록한 링크');
+  const cls=(posts||[]).filter(p=>p.kind==='class'), news=(posts||[]).filter(p=>p.kind!=='class');
+  const clsUp=cls.filter(p=>!clsPast(p)).sort((a,b)=>clsTime(a)-clsTime(b)), clsOld=cls.filter(clsPast); shopPg={ past:clsOld, news };
   const c = sh.location ? parseGeo(sh.location) : null;
   $('#shopTitle').textContent = sh.name;
   $('#shopBody').innerHTML = `
-    <div class="shophead2"><div class="lg">${sh.logo_url?`<img src="${esc(sh.logo_url)}" alt="">`:esc((sh.name||'?').trim().slice(0,1))}</div><div style="flex:1;min-width:0"><h2>${esc(sh.name)}<span class="kind">${SHOP_KIND[sh.kind]||'가게'}</span></h2>${sh.descr?`<div class="ds">${esc(sh.descr)}</div>`:''}</div></div>
+    ${sh.cover_url?`<div class="pgcover" style="background-image:url('${esc(sh.cover_url)}')"></div>`:''}
+    <div class="shophead2${sh.cover_url?' cv':''}"><div class="lg">${sh.logo_url?`<img src="${esc(sh.logo_url)}" alt="">`:esc((sh.name||'?').trim().slice(0,1))}</div><div style="flex:1;min-width:0"><h2>${esc(sh.name)}<span class="kind">${SHOP_KIND[sh.kind]||'가게'}</span></h2>${sh.descr?`<div class="ds">${esc(sh.descr)}</div>`:''}<div class="pgfol">팔로워 <b>${fcount||0}</b></div></div></div>
     <div class="shopmeta">${sh.address?`<div><span class="ic">${ico('location')}</span><span>${esc(sh.address)}</span></div>`:''}${sh.hours?`<div><span class="lb">영업</span><span>${esc(sh.hours)}</span></div>`:''}${sh.phone?`<div><span class="lb">전화</span><a href="tel:${esc(sh.phone.replace(/[^\d+]/g,''))}" style="color:inherit;text-decoration:none">${esc(sh.phone)}</a></div>`:''}</div>
-    <div class="shopacts"><button class="btn main ${following?'on':''}" onclick="toggleFollowShop('${sh.id}',${!following})">${following?ico('check')+' 팔로우 중':'팔로우'}</button>${c?`<a class="btn o" href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}" target="_blank" rel="noopener">길찾기</a>`:''}${L}</div>
+    <div class="pgacts"><button class="btn main ${following?'on':''}" onclick="toggleFollowShop('${sh.id}',${!following})">${following?ico('check')+' 팔로우 중':'팔로우'}</button>${sh.owner_id&&!mine?`<button class="btn o" onclick="openInquiry('shop','${sh.id}')">문의</button>`:''}</div>
+    ${L}
     ${mine?`<div class="ownerbar"><b>내 가게</b><button onclick="openCompose('shop')">소식 올리기</button><button onclick="openClassForm()">클래스 열기</button><button onclick="openShopEdit()">가게 관리</button></div>`:''}
     ${mine&&!sh.is_active?`<div class="muted" style="padding:4px 16px 8px;font-size:.8rem">아직 지도에 공개되기 전이에요. ${sh.location?'지기가 확인하는 중이에요.':'가게 관리에서 주소를 검색해 위치를 정하면 공개할 수 있어요.'}</div>`:''}
     ${!sh.owner_id&&!myShop?`<div class="muted" style="padding:0 16px 8px;font-size:.8rem">이 가게 사장님이신가요? <a href="#" onclick="openShopClaim('${sh.id}', curShop.name);return false" style="color:inherit;text-decoration:underline">이 가게 주인이에요</a></div>`:''}
-    ${(posts||[]).length ? (posts||[]).map(p=>`<div class="spost" id="sp-${p.id}"><span class="k ${p.kind}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`).join('') : `<div class="shopempty"><div class="ok">${ico('signal')}</div><div><b>아직 올라온 소식이 없어요</b></div><div class="muted" style="margin-top:4px">${mine?'첫 소식이나 클래스를 올려 보세요. 팔로워에게 알림이 가요':'팔로우해 두면 새 소식이 활동 탭에 알림으로 와요'}</div></div>`}
+    ${(cls.length||mine)?`<div class="pgsec"><div class="pgst"><span>클래스</span>${clsOld.length?`<button onclick="openShopPast('class')">지난 클래스 ${clsOld.length} ›</button>`:''}</div><div class="pgcard">${clsUp.length?clsUp.map(p=>pgClsRow(p, mine)).join(''):`<div class="empty">${mine?'클래스를 열면 여기에 보여요':'지금 모집 중인 클래스가 없어요'}</div>`}</div></div>`:''}
+    ${news.length?`<div class="pgsec"><div class="pgst"><span>소식</span>${news.length>3?`<button onclick="openShopPast('news')">소식 전체 ${news.length} ›</button>`:''}</div><div class="pgcard">${news.slice(0,3).map(p=>pgNewsRow(p, mine)).join('')}</div></div>`:(cls.length?'':`<div class="shopempty"><div class="ok">${ico('signal')}</div><div><b>아직 올라온 소식이 없어요</b></div><div class="muted" style="margin-top:4px">${mine?'첫 소식이나 클래스를 올려 보세요. 팔로워에게 알림이 가요':'팔로우해 두면 새 소식이 활동 탭에 알림으로 와요'}</div></div>`)}
     <div class="shopfoot">가게 소식은 가게가 직접 올려요. 뜨개동네는 판매·예약에 관여하지 않아요. 문제가 있으면 설정 › 지기에게 알려 주세요.</div>`;
   show('shop');
   $('#v-shop').scrollTop=0;
@@ -2416,6 +2540,9 @@ async function openShopEdit(){
   const { data:sh } = await sb.from('shops').select('*').eq('id', myShop.id).single(); if(sh) myShop=sh; const x=myShop, L=x.links||{}; sePick=null; seRows=[];
   openSheet(`<b style="font-size:1.05rem">내 가게 관리</b>
     <div style="display:flex;align-items:center;gap:14px"><div class="selogo" id="seLogo" style="${x.logo_url?`background-image:url(${esc(x.logo_url)})`:''}">${x.logo_url?'':'로고·대표 사진'}</div><div><button type="button" class="btn o sm" style="width:auto;padding:8px 14px" onclick="$('#seFile').click()">사진 바꾸기</button><input id="seFile" type="file" accept="image/*" hidden onchange="seLogoPick(this.files[0]);this.value=''"><div class="muted" style="font-size:.78rem;margin-top:6px">가게 화면과 지도 카드에 보여요</div></div></div>
+    <div class="pgcover ed" id="seCover" style="${x.cover_url?`background-image:url('${esc(x.cover_url)}')`:''}">${x.cover_url?'':'맨 위 사진 (매장 사진)'}</div>
+    <div style="display:flex;gap:8px"><button type="button" class="btn o sm" style="width:auto;padding:8px 14px" onclick="$('#seCFile').click()">매장 사진 고르기</button><button type="button" class="btn o sm" style="width:auto;padding:8px 14px" onclick="seCoverSet(null)">사진 빼기</button><input id="seCFile" type="file" accept="image/*" hidden onchange="seCoverPick(this.files[0]);this.value=''"></div>
+    <p class="muted" style="margin:0;font-size:.78rem">가게 화면 맨 위에 가로로 길게 보여요. 넣지 않아도 돼요.</p>
     <label class="f">상호<input id="seName" maxlength="60" value="${esc(x.name||'')}"></label>
     <label class="f">종류<select id="seKind">${Object.entries(SHOP_KIND).map(([k,l])=>`<option value="${k}" ${x.kind===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class="f">소개<textarea id="seDescr" maxlength="500" style="min-height:80px" placeholder="어떤 가게인지, 무엇을 파는지, 클래스가 있는지">${esc(x.descr||'')}</textarea></label>
@@ -2478,8 +2605,8 @@ async function cancelShopClaim(id){
   if(c?.doc_path) await sb.storage.from('shop-docs').remove([c.doc_path]);
   closeSheet(); toast('신청을 취소했어요');
 }
-async function openProfile(id, back){
-  if(id===me.id) return go('my');
+async function openProfile(id, back, own){
+  if(id===me.id && !(own && myProfile?.is_author)) return go('my');
   const [{data:p},{data:rel}] = await Promise.all([
     sb.from('profiles').select('*').eq('id',id).single(),
     sb.from('friendships').select('*').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`)
@@ -2490,6 +2617,7 @@ async function openProfile(id, back){
   if(view!=='profile' || profId!==id){ profBack = view; profTab='posts'; }
   profId=id; profData=p;
   const r = rel?.[0];
+  if(p.is_author && id!==SUPPORT_ID) return renderAuthorPage(p, r, id===me.id);
   let action;
   const staff = id===SUPPORT_ID;   // 운영 계정: 친구 신청·비슷해요 칩·성향 삼각형을 숨기고 문의 버튼만
   if(staff) action = `<button class="btn primary" onclick="openSupportRoom()">지기에게 말하기</button>`;
@@ -2939,11 +3067,12 @@ function isSupportRoom(r){ return r?.kind==='direct' && (r.others||r.room_member
 // includeLeft: 나간 1:1 방도 돌려준다(친구 프로필에서 다시 대화를 열 때)
 async function fetchRooms(includeLeft){
   await loadMyRooms(); if(!myRoomIds.size) return [];
-  const { data, error } = await sb.from('rooms').select('id,kind,title,created_at, room_members(profile_id, profiles(id,nickname,avatar_url)), messages(body,photo_url,place,created_at,sender_id)').in('id',[...myRoomIds]).order('created_at',{foreignTable:'messages',ascending:false}).limit(1,{foreignTable:'messages'});
+  const { data, error } = await sb.from('rooms').select('id,kind,title,created_at,created_by,inquiry, room_members(profile_id, profiles(id,nickname,avatar_url)), messages(body,photo_url,place,created_at,sender_id)').in('id',[...myRoomIds]).order('created_at',{foreignTable:'messages',ascending:false}).limit(1,{foreignTable:'messages'});
   if(error){ toast('채팅 조회 실패: '+error.message); return []; }
   const { data:mts } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,duration_min,repeat').in('room_id',[...myRoomIds]); const mtBy={}; (mts||[]).forEach(m=>{ const o=mtBy[m.room_id]; if(!o || new Date(m.starts_at)>new Date(o.starts_at)) mtBy[m.room_id]=m; });
   return (data||[]).map(r=>{ r.meetup=mtBy[r.id]||null; r.others=r.room_members.map(m=>m.profiles).filter(p=>p&&p.id!==me.id); r.name=r.kind==='direct'?(r.others[0]?.nickname||'(나간 사용자)'):(r.title||r.others.map(p=>p.nickname).join(', ')); r.last=r.messages?.[0]; return r; })
     .filter(r=>{ const st=myRoomState[r.id]||{}; const lt=r.last?new Date(r.last.created_at).getTime():0;
+      if(r.inquiry && !r.last && r.created_by!==me.id) return false;   // 문의방: 상대가 아직 아무 말도 안 했으면 받는 쪽 목록에 안 보임
       if(st.left_at){ if(r.kind!=='direct') return false; if(!includeLeft && !(lt>new Date(st.left_at).getTime())) return false; if(!(lt>new Date(st.left_at).getTime())) r.last=null; }   // 나간 방: 모임·클래스는 안 보임, 1:1 은 그 뒤 새 메시지가 왔을 때만
       const D30=30*864e5; const autoArch = r.kind!=='direct' && r.meetup && meetEnded(r.meetup) && Date.now()-new Date(r.meetup.starts_at).getTime()>D30 && Date.now()-lt>D30;   // 끝난 지 30일 넘은 모임 방은 저절로 보관
       r.archManual = !!(st.archived_at && !(lt>new Date(st.archived_at).getTime())); r.arch = r.archManual || autoArch; return true; })
@@ -2953,7 +3082,7 @@ async function renderChats(){
   const rooms = await fetchRooms();
   const sup = rooms.find(isSupportRoom); const rest = rooms.filter(r=>r!==sup); const main = rest.filter(r=>!r.arch); chArch = rest.filter(r=>r.arch); chSwipeBind();
   const supRow = me.id===SUPPORT_ID ? '' : `<div class="item support" onclick="${sup?`openRoom('${sup.id}')`:'openSupportRoom()'}"><div class="ava">${ico('yarn')}</div><div class="tx"><b>뜨개동네 지기<span class="tag">운영진</span></b><span>${esc(sup?.last?.body||'궁금한 점·불편한 점을 편하게 남겨 주세요')}</span></div><span class="muted">${sup?.last?ago(sup.last.created_at):''}</span></div>`;
-  $('#chatsBody').innerHTML = `<div class="pfriends" id="pfriends" onclick="go('friends')"><span class="fic">${ico('handshake')}</span><span class="ft"><b>친구</b><span>불러오는 중…</span></span><span class="car">›</span></div>` + (main.length ? `<div class="list">${main.map(r=>`<div class="swrow" data-r="${r.id}"><div class="item" onclick="chRowTap('${r.id}')" oncontextmenu="event.preventDefault();chMenu('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):r.meetup?'<div class="ava meet">'+ico('location')+'</div>':'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)}${r.meetup?(meetEnded(r.meetup)?'<span class="mbadge end">모임 종료</span>':'<span class="mbadge">모임</span>'):''} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b>${r.meetup&&!meetEnded(r.meetup)?`<span class="when">${esc(fmtWhen(r.meetup.starts_at)+' · '+r.meetup.place_name)}</span>`:''}<span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div><div class="swacts"><button type="button" class="a1" onclick="chArchive('${r.id}')">보관</button><button type="button" class="a2" onclick="chLeave('${r.id}')">나가기</button></div></div>`).join('')}</div>` : `<div class="empty">${chArch.length?'지금 이어지는 대화가 없어요':'친구가 되면 채팅방이 자동으로 열려요'}</div>`) + (chArch.length?`<button type="button" class="archrow" onclick="openArchived()"><span>${ico('group')} 보관한 대화 ${chArch.length}</span><span>›</span></button>`:'');
+  $('#chatsBody').innerHTML = `<div class="pfriends" id="pfriends" onclick="go('friends')"><span class="fic">${ico('handshake')}</span><span class="ft"><b>친구</b><span>불러오는 중…</span></span><span class="car">›</span></div>` + (main.length ? `<div class="list">${main.map(r=>`<div class="swrow" data-r="${r.id}"><div class="item" onclick="chRowTap('${r.id}')" oncontextmenu="event.preventDefault();chMenu('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):r.meetup?'<div class="ava meet">'+ico('location')+'</div>':'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)}${r.inquiry?'<span class="mbadge">문의</span>':''}${r.meetup?(meetEnded(r.meetup)?'<span class="mbadge end">모임 종료</span>':'<span class="mbadge">모임</span>'):''} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b>${r.meetup&&!meetEnded(r.meetup)?`<span class="when">${esc(fmtWhen(r.meetup.starts_at)+' · '+r.meetup.place_name)}</span>`:''}<span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div><div class="swacts"><button type="button" class="a1" onclick="chArchive('${r.id}')">보관</button><button type="button" class="a2" onclick="chLeave('${r.id}')">나가기</button></div></div>`).join('')}</div>` : `<div class="empty">${chArch.length?'지금 이어지는 대화가 없어요':'친구가 되면 채팅방이 자동으로 열려요'}</div>`) + (chArch.length?`<button type="button" class="archrow" onclick="openArchived()"><span>${ico('group')} 보관한 대화 ${chArch.length}</span><span>›</span></button>`:'');
   renderMyFriends();
 }
 // ---- 채팅 목록 정리(schema 106): 왼쪽으로 밀어 [보관][나가기]. 둘 다 내 목록에서만 — 대화 기록은 서버에 남는다. 지기 채팅 줄은 대상이 아니다
@@ -4954,7 +5083,7 @@ function openSettingsInner(){
       <button class="srow" onclick="closeSheet();openStore()"><span>뜨개 상점 <span class="authbadge" style="background:var(--sel)">Lab</span><br><span class="muted">실 사기(무통장) · 도안(무료 체험)</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openMyOrders()"><span>내 주문</span><span class="car">›</span></button>
       <button class="srow" onclick="openMyPurchases()"><span>구매한 도안</span><span class="car">›</span></button>${p.is_author?`<button class="srow" onclick="openSettlement()"><span>도안 판매·정산 <span class="authbadge">작가</span></span><span class="car">›</span></button>`:''}`:''}
-      ${p.is_author?`<button class="srow" onclick="openStudio()"><span>knitup Studio <span class="authbadge">작가</span><br><span class="muted">도안 제작 도구 — 차트·지시문·인쇄·패키지 (패드·노트북 권장)</span></span><span class="car">›</span></button>${FULL?`<button class="srow" onclick="openMyPatterns()"><span>내 도안 <span class="authbadge">작가</span><br><span class="muted">도안 등록·수정</span></span><span class="car">›</span></button>`:''}<button class="srow" onclick="closeSheet();openClassForm()"><span>클래스 열기 <span class="authbadge">작가</span><br><span class="muted">일정·인원·비용·환불 규정까지 양식으로 · 마이 › 클래스 탭에 보여요</span></span><span class="car">›</span></button><button class="srow" onclick="openAuthorLink()"><span>작가 링크 ${FULL?'':'<span class="authbadge">작가</span>'}<br><span class="muted">${p.author_link?esc(p.author_link.replace(/^https?:\/\//,'').slice(0,40)):'인스타그램·블로그 등을 프로필에 보여 줘요'}</span></span><span class="car">›</span></button>`:`<button class="srow" onclick="openAuthorApply()"><span>작가 신청<br><span class="muted">상급 이상 기법 작품 인증 ${AUTHOR_MIN_CERTS}개부터 · 클래스 열기${FULL?'·도안 등록':''} · 지도에 작가로 표시</span></span><span class="car">›</span></button>`}
+      ${p.is_author?`<button class="srow" onclick="openStudio()"><span>knitup Studio <span class="authbadge">작가</span><br><span class="muted">도안 제작 도구 — 차트·지시문·인쇄·패키지 (패드·노트북 권장)</span></span><span class="car">›</span></button>${FULL?`<button class="srow" onclick="openMyPatterns()"><span>내 도안 <span class="authbadge">작가</span><br><span class="muted">도안 등록·수정</span></span><span class="car">›</span></button>`:''}<button class="srow" onclick="closeSheet();openClassForm()"><span>클래스 열기 <span class="authbadge">작가</span><br><span class="muted">일정·인원·비용·환불 규정까지 양식으로 · 마이 › 클래스 탭에 보여요</span></span><span class="car">›</span></button><button class="srow" onclick="openAuthorPageEdit()"><span>작가 화면 꾸미기 ${FULL?'':'<span class="authbadge">작가</span>'}<br><span class="muted">맨 위 사진 · 인스타그램·스토어 링크(3개까지)</span></span><span class="car">›</span></button><button class="srow" onclick="closeSheet();openProfile(me.id,false,true)"><span>내 작가 화면 보기<br><span class="muted">다른 회원에게 보이는 모습</span></span><span class="car">›</span></button>`:`<button class="srow" onclick="openAuthorApply()"><span>작가 신청<br><span class="muted">상급 이상 기법 작품 인증 ${AUTHOR_MIN_CERTS}개부터 · 클래스 열기${FULL?'·도안 등록':''} · 지도에 작가로 표시</span></span><span class="car">›</span></button>`}
       <button class="srow" onclick="relocateNow()"><span>현위치로 동네 다시 설정<br><span class="muted">지금 ${esc(p.dong_name||'미설정')} · 가입한 위치로 고정돼 있어요</span></span><span class="car">›</span></button>
       <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 200m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
     </div>

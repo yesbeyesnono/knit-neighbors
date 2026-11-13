@@ -174,6 +174,13 @@ begin
   out := pg_temp.must_fail(out, 'own nickname_changed_at', 'update public.profiles set nickname_changed_at = null where id = auth.uid()');   -- schema 101
   out := pg_temp.must_fail(out, 'sync_last_seen(내부용)', 'select public.sync_last_seen()');   -- schema 104
   out := pg_temp.must_fail(out, 'room_leave(남의 방)', 'select public.room_leave(gen_random_uuid())');   -- schema 106
+  out := pg_temp.must_fail(out, 'own cover_url', format('update public.profiles set cover_url = ''https://x.example/a.jpg'' where id = %L', d1));   -- schema 108
+  out := pg_temp.must_fail(out, 'own author_links', format('update public.profiles set author_links = ''[]''::jsonb where id = %L', d1));
+  out := pg_temp.must_fail(out, 'set_author_links(작가 아님)', 'select public.set_author_links(''["https://instagram.com/x"]''::jsonb)');
+  out := pg_temp.must_fail(out, 'set_author_cover(작가 아님)', 'select public.set_author_cover(null)');
+  out := pg_temp.must_fail(out, 'follow non-author', format('insert into public.author_follows(profile_id, author_id) values (%L, %L)', d1, d2));
+  out := pg_temp.must_fail(out, 'follow as other', format('insert into public.author_follows(profile_id, author_id) values (%L, %L)', d2, d1));
+  out := pg_temp.must_fail(out, 'open_inquiry_room(작가 아님)', format('select public.open_inquiry_room(''author'', %L)', d2));
   out := pg_temp.must_fail(out, 'read ddeuchin_claims', 'select 1 from public.ddeuchin_claims limit 1');   -- schema 100
   out := pg_temp.must_fail(out, 'admin_ddeuchin_list', 'select public.admin_ddeuchin_list()');
   out := pg_temp.must_fail(out, 'admin_ddeuchin_decide', 'select public.admin_ddeuchin_decide(1, true)');
