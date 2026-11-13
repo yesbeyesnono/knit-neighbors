@@ -1123,15 +1123,14 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
   <section class="view" id="v-shopform">
     <div class="top"><button class="tbtn" onclick="closeCompose()">취소</button><h1>가게 소식</h1><button class="btn sm" id="shopPost" onclick="submitShopNews()">게시</button></div>
     <div class="body">
-      <div class="mhero" id="nHero" onclick="$('#nFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">대표 사진 · 신상·할인이 잘 보이게</span></div>
+      <div class="mhero" id="nHero" onclick="$('#nFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">대표 사진 · 소식이 잘 보이게</span></div>
       <div class="cfphotos" id="nfPhotos" style="justify-content:center"></div><input id="nFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
       <div class="ccard"><div class="cfl">기본 <span class="req">필수</span> <span class="muted" id="nShopName"></span></div>
-        <div class="cfl" style="margin-top:0">종류</div><div class="seg" id="nKind"></div>
-        <input id="nTitle" maxlength="60" placeholder="제목 (예: 가을 신상 실 입고 · 10% 할인)" style="margin-top:10px">
-        <div class="cfl">마감일 <span class="muted">(선택 · 할인·행사 끝나는 날)</span></div><input id="nEnds" type="date">
+        <input id="nTitle" maxlength="60" placeholder="제목 (예: 가을 신상 실 입고 · 10% 할인)">
+        <div class="cfl">마감일 <span class="muted">(선택 · 행사가 끝나는 날)</span></div><input id="nEnds" type="date">
       </div>
       <div class="ccard"><div class="cfl">내용</div><textarea id="nBody" maxlength="500" placeholder="예: 이번 주 토요일까지 전 상품 10% 할인. 새로 들어온 실도 구경 오세요" style="min-height:110px"></textarea>
-        <p class="muted" style="font-size:.78rem;margin:8px 0 0">팔로워에게 알림이 가고, 근처 이웃의 지도 핀에 종이 울려요. 클래스는 '종류'에서 클래스를 고르면 전용 양식으로 넘어가요.</p></div>
+        <p class="muted" style="font-size:.78rem;margin:8px 0 0">팔로워에게 알림이 가고, 근처 이웃의 지도 핀에 종이 울려요. 클래스는 가게 화면의 [클래스 열기]에서 따로 열어요.</p></div>
     </div>
   </section>
 
@@ -2020,7 +2019,7 @@ async function openInquiry(kind, id){
 function pgToggle(id){ const e=document.getElementById('pgf-'+id); if(e) e.hidden=!e.hidden; }
 function clsTime(p){ const t=p?.extra?.starts_at||p?.ends_at||null; return t?new Date(t).getTime():Infinity; }
 function clsPast(p){ const t=clsTime(p); if(t===Infinity) return false; const x=p.extra||{}; const span = x.type==='course' ? Math.max(1,(x.sessions||1))*(x.cycle==='biweekly'?14:7)*864e5 : 6*3600e3; return t+span < Date.now(); }
-function spostCard(p, mine){ return `<div class="spost" id="sp-${p.id}"><span class="k ${p.kind}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`; }
+function spostCard(p, mine){ return `<div class="spost" id="sp-${p.id}"><span class="k ${p.kind==='class'?'class':''}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`; }
 function pgClsRow(p, mine, label){ const x=p.extra||{}; const ap=classApps[p.id]||{}; const past=clsPast(p); const left = x.max ? Math.max(0, x.max-(ap.accepted||0)) : null;
   const sub=[x.starts_at?fmtWhen(x.starts_at):'', past?'':(left===null?'':(left?`자리 ${left}개 남음`:'마감')), x.fee?won(x.fee):(p.extra?.v?'무료':'')].filter(Boolean).join(' · ');
   return `<div class="pgli" onclick="pgToggle('${p.id}')"><div><b><span class="pgk ${past?'n':'c'}">${label||(past?'지난 클래스':'모집 중')}</span>${esc(p.title)}</b><div class="s">${esc(sub)}</div></div><span class="go">${past?'보기':'신청'} ›</span></div><div class="pgfull" id="pgf-${p.id}" hidden>${spostCard(p, mine)}</div>`; }
@@ -2100,7 +2099,7 @@ async function seCoverSet(url){ const { error } = await sb.from('shops').update(
 // ===== 가게(파트너) =====
 let shopBack=null, curShop=null;
 const SHOP_KIND = { yarn:'실·부자재', studio:'공방', cafe:'카페', other:'가게' };
-const SPOST_KIND = { sale:'할인', new:'신상', meetup:'모임', class:'클래스', notice:'소식' };
+const SPOST_KIND = { sale:'소식', new:'소식', meetup:'소식', class:'클래스', notice:'소식' };   // 2026-11-13 대표: 가게 글은 소식·클래스 둘뿐(할인·신상은 제목에 적는다). 옛 글의 종류도 '소식'으로 보인다
 async function openShop(id){
   if(view!=='shop') shopBack = view; closeSheet();
   const [{data:sh},{data:posts},{data:fol},{data:fcount}] = await Promise.all([
@@ -3955,8 +3954,7 @@ function openShopNewsForm(){
   if(!myShop) return toast('가게 계정만 올릴 수 있어요');
   closeSub(); closeSheet(); composeKind='shop'; sPhotos=[];
   if(!['compose','cert','meetform','classform','shopform'].includes(view)) composeBack=view;
-  if(!$('#nKind').children.length){ seg('#nKind', N_KIND); $('#nKind').addEventListener('click', ()=>{ if(segVal('#nKind')==='class'){ segSet('#nKind','notice'); openClassForm(); } }); }
-  segSet('#nKind','notice'); $('#nTitle').value=''; $('#nEnds').value=''; $('#nBody').value=''; $('#nShopName').textContent='· '+myShop.name; $('#shopPost').disabled=false;
+  $('#nTitle').value=''; $('#nEnds').value=''; $('#nBody').value=''; $('#nShopName').textContent='· '+myShop.name; $('#shopPost').disabled=false;
   renderShopNewsPhotos(); show('shopform'); $('#v-shopform .body').scrollTop=0;
 }
 async function submitShopNews(){
@@ -3968,7 +3966,7 @@ async function submitShopNews(){
     await loadBanned(); if(hasBanned(title)||hasBanned(body)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const photos = await uploadPhotos(sPhotos);
     const ends = $('#nEnds').value ? new Date($('#nEnds').value+'T23:59:59').toISOString() : null;
-    const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind: segVal('#nKind')||'notice', title, body: body||null, photos, ends_at: ends });
+    const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind: 'notice', title, body: body||null, photos, ends_at: ends });
     if(error) throw new Error(error.message);
     sPhotos=[]; toast('소식을 올렸어요. 팔로워에게 알림이 갔어요'); composeBack=null; return openShop(myShop.id);
   }catch(e){ toast(e.message); }
