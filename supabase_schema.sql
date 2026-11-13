@@ -1641,3 +1641,7 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   트리거 posts_notify_reply_to(after insert) → notify_on_reply_to(): 답글을 받은 댓글 작성자에게 'reply' 알림(글쓴이·본인·@로 불린 사람은 기존 알림이 있어 제외)
 --   옛 앱은 reply_to 를 보내지 않아 지금처럼 일반 댓글. 댓글 사진은 기존 posts.photos 를 그대로 쓴다(새 칸 없음)
 
+-- 104. 접속 기록 보완 (마이그레이션 sync_last_seen, 2026-11-13)
+--   sync_last_seen() : auth.sessions 의 가장 최근 갱신 시각(refreshed_at·updated_at·created_at)으로 profiles.last_seen_at 을 채운다(10분 넘게 차이 날 때만). service_role 전용
+--   크론 last-seen-sync (매시 12분). 앱의 check_in() 이 불리지 않는 옛 버전(1.0.1~1.0.6)도 접속 시각이 맞게 된다
+

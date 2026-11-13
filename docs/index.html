@@ -2770,8 +2770,12 @@ let supStatus=null;
 const SUP_KIND={attendance:'출석',work_verified:'작품 인증',post:'게시글',comment:'댓글',survey:'설문',bug_accepted:'버그 제보 채택',referral:'친구 초대'};
 const SUP_TIER={basic:'기본',excellent:'우수',mvp:'MVP',none:'미달'};
 function supKindLabel(k){ return k.endsWith('_revoke') ? SUP_KIND[k.replace('_revoke','')]+' 취소' : (SUP_KIND[k]||k); }
+let checkInAt=0;
+// 앱을 다시 화면에 올렸을 때도 접속을 남긴다(30분에 한 번까지 — 서버는 1시간 단위로만 고쳐 쓴다)
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && me && myProfile?.onboarded_at && Date.now()-checkInAt>30*60*1000){ checkInAt=Date.now(); sb.rpc('check_in').then(()=>{},()=>{}); } });
 async function supCheckIn(){   // 앱 실행(로그인) 시 1회: 출석 + 초대 확인
-  if(!me || !SUPPORTERS) return renderBeta(); try{ const { data } = await sb.rpc('check_in'); supStatus=data||null; }catch(e){}
+  // 접속 기록(check_in)은 서포터즈와 상관없이 항상 남긴다(2026-11-13 — 서포터즈 스위치에 묶여 11-06 부터 멈춰 있었음: 최근 접속·첫 인증 안내·복귀 환영이 같은 함수). 서포터즈 화면 값만 스위치를 따른다
+  if(!me) return renderBeta(); checkInAt=Date.now(); try{ const { data } = await sb.rpc('check_in'); if(SUPPORTERS) supStatus=data||null; }catch(e){}
   renderBeta();
 }
 function renderBeta(){
