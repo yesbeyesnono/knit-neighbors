@@ -891,6 +891,35 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .flow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:.78rem;margin-top:6px}.flow span{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px 7px}.flow b{color:var(--olive)}.flow i{font-style:normal;color:var(--ink3)}
 .ostat{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--chip-ink);vertical-align:middle}.ostat.p{background:#fff3e0;color:#9a5a00}.ostat.x{background:var(--bg2);color:var(--ink3)}
 .cartbtn{position:relative}.cartbtn .n{position:absolute;top:-2px;right:-4px;background:var(--btn);color:#fff;font-size:.62rem;font-weight:700;border-radius:999px;padding:0 5px;min-width:16px;height:16px;line-height:16px;text-align:center}
+/* ===== 쓰레드처럼 다듬기(2026-11-14 대표 확정): 왼쪽 여백 8 · 사진 44 · 사진→글 9 (쓰레드 실측), 글씨 한 단계 작게, 구분선 연하게 ===== */
+:root{--line2:#F0EEE8}
+.post,.post{padding:12px 13px 6px 8px;gap:9px;border-bottom:1px solid var(--line2)}
+.post.has-reply{border-bottom:0;padding-bottom:0}
+.post .ava,.cbox .ava{width:44px;height:44px;font-size:.95rem}
+.cbox{padding:12px 13px 10px 8px;gap:9px;border-bottom:1px solid var(--line2)}.cbox .cname{font-size:15px}.cbox textarea{font-size:15px}
+.post .who,.post .who{flex-wrap:wrap;overflow:visible;row-gap:0;line-height:1.3}
+.post .who b,.post .who b{font-size:15px;letter-spacing:-.1px}
+.post .who time,.post .who time{font-size:13.5px}
+.post .who .sub,.post .who .sub{order:9;flex-basis:100%;font-size:12.5px;margin-top:1px}
+.post .txt,.post .txt{font-size:15px;line-height:1.45;margin:3px 0 7px;letter-spacing:-.1px}
+#postBody .post.dpost .txt{font-size:15.5px;line-height:1.5}
+.pgrid,.pgrid{gap:6px;margin:6px -13px 8px 0;padding-right:13px}
+.pgrid img,.pgrid img{height:260px;border-radius:10px;border-color:var(--line2)}
+.acts,.acts{gap:16px;margin:2px 0 6px;color:var(--ink2)}
+.acts button,.acts button{font-size:13px;gap:4px;color:var(--ink2);font-weight:400}
+.acts button svg,.acts button svg{width:19px;height:19px;stroke-width:1.6}
+.post .wcard{padding:8px 12px;border-radius:12px;margin:2px 0 8px;border-color:var(--line)}
+.post .wcard .wh{display:inline;font-size:11.5px;margin:0 6px 0 0}.post .wcard b{display:inline;font-size:14px}
+.post .wcard .ml{font-size:12.5px;margin-top:2px}.post .wcard .tchips{margin-top:6px;gap:4px}.post .wcard .tchips span{font-size:11.5px;padding:2px 8px}
+.rthread{margin:0 0 0 61px;padding:0 13px 8px 0;border-left:0;border-bottom:1px solid var(--line2)}
+.rpost{gap:8px;padding:8px 0 2px}.rpost .ava.sm,.rrow .ava.sm{width:26px;height:26px;font-size:.66rem}
+.rpost .who b{font-size:14.5px}.rpost .who time{font-size:12.5px}.rpost .txt{font-size:14.5px;line-height:1.45}
+.rpost .acts{gap:14px}.rpost .acts button{font-size:12.5px;color:var(--ink2)}.rpost .acts button svg{width:16px;height:16px}
+.rpost .opbadge{align-self:center}
+.rsub{margin:0 0 4px 13px;border-left:2px solid var(--line);padding-left:12px}
+.rmore{background:none;border:0;font:inherit;font-size:12.5px;font-weight:700;color:var(--ink3);padding:4px 0 6px;cursor:pointer;display:block;width:auto}
+.rrow textarea{background:var(--bg);border-color:transparent;font-size:14.5px;height:38px;min-height:38px}.rrow textarea:focus{border-color:var(--color-primary);background:var(--surface)}
+.rfold{font-size:12px;padding:6px 0 0}
 </style>
 </head>
 <body>
@@ -1294,7 +1323,7 @@ const isNative = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
 function metaEvent(name, params){ try{ const M = isNative && CAP.Plugins && CAP.Plugins.MetaEvents; if(M) M.logEvent({ name, params: params||{} }).catch(()=>{}); }catch(e){} }
 // ===== 아이콘 =====
 // 키 → 이모지(기본 표시). 디자인 이미지가 docs/icons/<key>.svg 로 들어오면 ICON_IMAGES=true 로 바꿔 일괄 교체
-const APP_VERSION = '1.0.6';
+const APP_VERSION = '1.0.7';
 const ICON_IMAGES = true;
 const EMOJI = { wave:'🙋', location:'📍', yarn:'🧶', cert:'🏅', check:'✓', close:'✕', handshake:'🤝', report:'🚩', camera:'📷', heart:'♥', reply:'💬', party:'🎉', review:'📝', group:'👥', learn:'📚', teach:'🧑‍🏫', at:'@', signal:'📶', tap:'👆', ruler:'📏' };
 function ico(k){ return `<i class="ico" data-ico="${k}"><b>${EMOJI[k]||''}</b></i>`; }
@@ -3384,7 +3413,7 @@ function postGroup(p, opts={}){
   if(open){
     const rs = p.replies||[];
     html += `<div class="rthread">
-      ${rs.length ? (()=>{ const ids=new Set(rs.map(r=>r.id)); const tops=rs.filter(r=>!r.reply_to || !ids.has(r.reply_to)); const kids=t=>rs.filter(r=>r.reply_to===t.id); return tops.map(t=>{ const k=kids(t); return replyCard(t)+(k.length?`<div class="rsub">${k.map(r=>replyCard(r)).join('')}</div>`:''); }).join(''); })() : '<div class="rempty">첫 댓글을 남겨 보세요</div>'}
+      ${rs.length ? (()=>{ const ids=new Set(rs.map(r=>r.id)); const tops=rs.filter(r=>!r.reply_to || !ids.has(r.reply_to)); const kids=t=>rs.filter(r=>r.reply_to===t.id); return tops.map(t=>{ const k=kids(t); const fold = k.length>2 && !rsubOpen.has(t.id); return replyCard(t)+(k.length?`<div class="rsub">${(fold?k.slice(0,1):k).map(r=>replyCard(r)).join('')}${fold?`<button type="button" class="rmore" onclick="event.stopPropagation();rsubOpen.add('${t.id}');const g=findPost('${p.id}');if(g)vEl('pg-${p.id}').outerHTML=postGroup(g)">댓글 ${k.length-1}개 더 보기</button>`:''}</div>`:''); }).join(''); })() : '<div class="rempty">첫 댓글을 남겨 보세요</div>'}
       <div class="rto" id="rto-${p.id}" ${inlineTarget[p.id]?'':'hidden'}><span>${inlineTarget[p.id]?esc((inlineTarget[p.id].nick||'이 댓글')+' 님에게 댓글 다는 중'):''}</span><button type="button" aria-label="댓글 대상 지우기" onclick="inlineReplyTo('${p.id}', null)">✕</button></div>
       <div class="rrow">${avatar(myProfile||{}).replace('class="ava"','class="ava sm"')}<div class="mpop" id="mpop-${p.id}" hidden></div><textarea id="rin-${p.id}" rows="1" placeholder="댓글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'${p.id}')"></textarea><button class="btn sm" disabled onclick="submitInlineReply('${p.id}')">게시</button></div>
       <div class="rfold" onclick="toggleReplies('${p.id}')">댓글 접기 ▴</div>
@@ -3399,13 +3428,13 @@ function replyCard(r){
   return `<div class="rpost" id="rp-${r.id}">
     <div onclick="openProfile('${a.id}')">${avatar(a).replace('class="ava"','class="ava sm"')}</div>
     <div class="rb">
-      <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time>${solved?'<span class="chip m solvedchip">'+ico('check')+' 해결한 댓글</span>':''}<button class="menu" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
+      <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b>${root&&root.author_id===r.author_id?'<span class="opbadge">글쓴이</span>':''}<time>${agoShort(r.created_at)}</time>${solved?'<span class="chip m solvedchip">'+ico('check')+' 해결한 댓글</span>':''}<button class="menu" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
       ${r.body?`<div class="txt">${bodyHtml(r)}</div>`:''}
       <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button>${a.id?`<button onclick="inlineReplyTo('${r.parent_id}','${r.id}')">댓글 달기</button>`:''}</div>
     </div></div>`;
 }
 // 펼침에서 대댓글(2026-11-14): [댓글 달기] → 그 댓글(대댓글이면 그 윗댓글) 아래로 달림. 글 화면의 setReplyTo 와 같은 규칙
-let inlineTarget={};
+let inlineTarget={}, rsubOpen=new Set();   // rsubOpen: '더 보기'로 펼친 윗댓글
 function inlineReplyTo(pid, rid){
   const p=findPost(pid); const bar=vEl('rto-'+pid); const inp=vEl('rin-'+pid);
   document.querySelectorAll('#pg-'+CSS.escape(pid)+' .rpost.on').forEach(e=>e.classList.remove('on'));
@@ -3449,7 +3478,7 @@ async function submitInlineReply(pid){
   const inp=vEl('rin-'+pid); const t=rpText(inp?.value); if(!t) return;
   await loadBanned(); if(hasBanned(t)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
   const { data, error } = await sb.from('posts').insert({ author_id: me.id, parent_id: pid, body: t, mentions: mentionsFor(pid, t), ...(inlineTarget[pid]?{ reply_to: inlineTarget[pid].id }:{}) }).select('*, '+AUTHOR_SEL).single();
-  if(!error){ delete mentionMap[pid]; delete inlineTarget[pid]; }
+  if(!error){ if(inlineTarget[pid]) rsubOpen.add(inlineTarget[pid].id); delete mentionMap[pid]; delete inlineTarget[pid]; }
   if(error) return toast('실패: '+error.message);
   await loadMentionNames([data]);
   const p=findPost(pid); if(p){ p.replies=[...(p.replies||[]), data]; p.reply_count=(p.reply_count||0)+1; if(!p.firstReply) p.firstReply=data; }
