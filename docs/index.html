@@ -1992,7 +1992,7 @@ async function openShop(id){
   ]);
   if(!sh) return toast('가게를 찾을 수 없어요');
   curShop=sh; await loadClassApps(posts); const following=!!(fol&&fol.length); const mine = sh.owner_id===me.id;
-  const links=sh.links||{}; const L=[['instagram','인스타그램'],['store','스토어'],['web','홈페이지'],['naver','네이버'],['kakao','카카오']].filter(([k])=>links[k]).map(([k,l])=>`<a class="btn o" href="#" onclick="event.preventDefault();openExt(${JSON.stringify(links[k])}, '가게가 등록한 링크')">${l} ↗</a>`).join('');
+  const links=sh.links||{}; const L=[['instagram','인스타그램'],['store','스토어'],['web','홈페이지'],['naver','네이버'],['kakao','카카오']].filter(([k])=>links[k]).map(([k,l])=>`<a class="btn o" href="#" data-u="${esc(links[k])}" onclick="event.preventDefault();openExt(this.dataset.u, '가게가 등록한 링크')">${l} ↗</a>`).join('');
   const c = sh.location ? parseGeo(sh.location) : null;
   $('#shopTitle').textContent = sh.name;
   $('#shopBody').innerHTML = `
@@ -2339,7 +2339,7 @@ async function openPattern(id){
     ${p.has_viewer && owned ? `<button class="btn" onclick="openPatternViewer('${p.id}')">${pg?.done_at?'다시 열기 · 완성한 도안':pg?.prog>0?`이어뜨기 · ${pg.prog}단까지 떴어요`:'도안 열기 · 단별 진도 저장'}</button>` : ''}
     ${FULL && !owned ? `<div class="card soft" style="font-size:.85rem"><b>${priceKo(p)}</b> · 지금은 무료 체험 — 결제 없이 열려요${p.price>0?flowHtml(p.price):''}</div><button class="btn" onclick="buyPattern('${p.id}')">구매하기 · 무료 체험</button>` : (!FULL && p.has_viewer && !owned ? `<div class="card soft muted" style="font-size:.85rem">앱 안에서 열리는 도안이에요. 앱 내 구매는 준비 중이에요.</div>` : '')}
     ${FULL && purchased ? `<div class="muted" style="font-size:.8rem"><span class="ostat">구매한 도안</span> 무료 체험으로 구매했어요${p.has_viewer?'':' · 앱 뷰어 패키지가 없는 도안이라 작가 판매 페이지에서 받아요'}</div>` : ''}
-    <div style="display:flex;gap:8px"><button class="btn o" style="flex:1" onclick="toggleSavePattern('${p.id}',${!saved})">${saved?'찜 해제':'찜하기'}</button>${p.buy_url?`<a class="btn${FULL?' o':''}" style="flex:2;text-align:center;text-decoration:none" href="#" onclick="event.preventDefault();openExt(${JSON.stringify(p.buy_url)}, '작가가 등록한 판매 링크')">${FULL?'작가 판매 페이지':priceKo(p)+' · 도안 보러 가기'}</a>`:(FULL?'':`<span class="btn" style="flex:2;text-align:center;opacity:.5">${priceKo(p)} · 링크 준비 중</span>`)}</div>
+    <div style="display:flex;gap:8px"><button class="btn o" style="flex:1" onclick="toggleSavePattern('${p.id}',${!saved})">${saved?'찜 해제':'찜하기'}</button>${p.buy_url?`<a class="btn${FULL?' o':''}" style="flex:2;text-align:center;text-decoration:none" href="#" data-u="${esc(p.buy_url)}" onclick="event.preventDefault();openExt(this.dataset.u, '작가가 등록한 판매 링크')">${FULL?'작가 판매 페이지':priceKo(p)+' · 도안 보러 가기'}</a>`:(FULL?'':`<span class="btn" style="flex:2;text-align:center;opacity:.5">${priceKo(p)} · 링크 준비 중</span>`)}</div>
     <div class="muted" style="font-size:.78rem">${FULL?'지금은 무료 체험 기간이라 결제 없이 열려요. 정식 출시 후에는 앱 내 결제(스토어 결제)로 바뀌고, 작가 정산은 판매 다음 달 15일에 지급돼요.':'도안 구매·결제는 작가의 판매 페이지에서 이뤄져요. 뜨개동네는 거래에 관여하지 않아요.'}</div>`);
 }
 async function toggleSavePattern(id, on){
@@ -2509,7 +2509,7 @@ async function openProfile(id, back){
     ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:var(--color-primary-light);color:var(--color-primary-dark)">${ico('cert')} 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}</div>
-    ${p.is_author&&p.author_link?`<a class="authlink" href="#" onclick="event.preventDefault();openExt(${JSON.stringify(p.author_link)}, '작가가 등록한 링크')">${linkLabel(p.author_link)} <span>↗</span></a>`:''}
+    ${p.is_author&&p.author_link?`<a class="authlink" href="#" data-u="${esc(p.author_link)}" onclick="event.preventDefault();openExt(this.dataset.u, '작가가 등록한 링크')">${linkLabel(p.author_link)} <span>↗</span></a>`:''}
     ${staff?'':`<div style="padding:0 16px">${idxMini(p)}</div>`}
     <div class="subtabs" id="profTabs"><button data-t="posts" class="${profTab==='posts'?'on':''}">글</button><button data-t="reposts" class="${profTab==='reposts'?'on':''}">리포스트</button><button data-t="works" class="${profTab==='works'?'on':''}">인증</button>${p.is_author?`<button data-t="classes" class="${profTab==='classes'?'on':''}">클래스</button>`:''}${FULL&&p.is_author?`<button data-t="patterns" class="${profTab==='patterns'?'on':''}">도안</button>`:''}</div>
     <div class="feed" id="profFeed"><div class="empty">불러오는 중…</div></div>`;
