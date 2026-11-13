@@ -1127,7 +1127,6 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
       <div class="cfphotos" id="nfPhotos" style="justify-content:center"></div><input id="nFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
       <div class="ccard"><div class="cfl">기본 <span class="req">필수</span> <span class="muted" id="nShopName"></span></div>
         <input id="nTitle" maxlength="60" placeholder="제목 (예: 가을 신상 실 입고 · 10% 할인)">
-        <div class="cfl">마감일 <span class="muted">(선택 · 행사가 끝나는 날)</span></div><input id="nEnds" type="date">
       </div>
       <div class="ccard"><div class="cfl">내용</div><textarea id="nBody" maxlength="500" placeholder="예: 이번 주 토요일까지 전 상품 10% 할인. 새로 들어온 실도 구경 오세요" style="min-height:110px"></textarea>
         <p class="muted" style="font-size:.78rem;margin:8px 0 0">팔로워에게 알림이 가고, 근처 이웃의 지도 핀에 종이 울려요. 클래스는 가게 화면의 [클래스 열기]에서 따로 열어요.</p></div>
@@ -3954,7 +3953,7 @@ function openShopNewsForm(){
   if(!myShop) return toast('가게 계정만 올릴 수 있어요');
   closeSub(); closeSheet(); composeKind='shop'; sPhotos=[];
   if(!['compose','cert','meetform','classform','shopform'].includes(view)) composeBack=view;
-  $('#nTitle').value=''; $('#nEnds').value=''; $('#nBody').value=''; $('#nShopName').textContent='· '+myShop.name; $('#shopPost').disabled=false;
+  $('#nTitle').value=''; $('#nBody').value=''; $('#nShopName').textContent='· '+myShop.name; $('#shopPost').disabled=false;
   renderShopNewsPhotos(); show('shopform'); $('#v-shopform .body').scrollTop=0;
 }
 async function submitShopNews(){
@@ -3965,7 +3964,7 @@ async function submitShopNews(){
     const body=$('#nBody').value.trim(); if(!body && !sPhotos.length) throw new Error('내용이나 사진을 넣어 주세요');
     await loadBanned(); if(hasBanned(title)||hasBanned(body)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const photos = await uploadPhotos(sPhotos);
-    const ends = $('#nEnds').value ? new Date($('#nEnds').value+'T23:59:59').toISOString() : null;
+    const ends = null;   // 마감일 칸은 2026-11-13 대표 지시로 없앰
     const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind: 'notice', title, body: body||null, photos, ends_at: ends });
     if(error) throw new Error(error.message);
     sPhotos=[]; toast('소식을 올렸어요. 팔로워에게 알림이 갔어요'); composeBack=null; return openShop(myShop.id);
