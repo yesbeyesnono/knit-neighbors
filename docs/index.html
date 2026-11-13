@@ -683,6 +683,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #replyBar{flex:none;background:var(--color-surface)}#replyTo{display:flex;justify-content:space-between;align-items:center;background:var(--chip);color:var(--chip-ink,var(--color-primary-dark));font-size:.8rem;font-weight:700;padding:6px 14px}#replyTo button{border:0;background:none;font:inherit;color:inherit;padding:0 4px;cursor:pointer}
 #replyPv{display:flex;align-items:center;gap:8px;padding:8px 14px 0}#replyPv img{width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}#replyPv button{border:0;background:none;font:inherit;color:var(--color-text-muted);font-size:.8rem;cursor:pointer}
 #v-post .compose .rph{border:0;background:none;color:var(--color-primary);width:36px;height:40px;display:grid;place-items:center;flex:none;padding:0;cursor:pointer}#v-post .compose .rph svg{width:22px;height:22px}
+/* 채팅 목록 정리(schema 106): 왼쪽으로 밀면 [보관][나가기] · 맨 아래 '보관한 대화' · 되돌리기 띠 */
+.swrow{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:var(--color-surface)}.swrow .item{border-bottom:0;position:relative;z-index:1;transition:transform .18s ease;touch-action:pan-y}
+.swrow.open .item{transform:translateX(-136px)}.swacts{position:absolute;top:0;right:0;bottom:0;width:136px;display:flex}.swacts button{flex:1;border:0;color:#fff;font:inherit;font-weight:700;font-size:.85rem;cursor:pointer}.swacts .a1{background:var(--color-primary)}.swacts .a2{background:#b3261e}
+.archrow{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;border-top:8px solid var(--color-bg);background:var(--color-surface);padding:14px 16px;font:inherit;font-size:.86rem;font-weight:700;color:var(--color-text-muted);cursor:pointer}
+.archit{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.archit .tx{flex:1;min-width:0;cursor:pointer}.archit .tx b{display:block;font-size:.92rem}.archit .tx b .mbadge{display:inline-block;width:auto;margin-top:0}.archit .tx span{display:block;color:var(--ink3);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.archit button{flex:none;border:1px solid var(--line);background:var(--color-surface);border-radius:999px;font:inherit;font-size:.76rem;padding:5px 10px;cursor:pointer}
+#undoBar{position:fixed;left:16px;right:16px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:60;background:var(--color-primary-dark);color:#fff;border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:.86rem;box-shadow:0 6px 20px rgba(0,0,0,.25)}#undoBar[hidden]{display:none}#undoBar button{border:0;background:none;color:#CFE3C7;font:inherit;font-weight:700;cursor:pointer;padding:0 0 0 12px}
 /* 혹시 이 실인가요?(schema 98) */
 .ygrow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;background:var(--color-surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;cursor:pointer}.ygrow:active{border-color:var(--color-primary);background:#F2F6EE}
 .ygrow .sw{width:44px;height:44px;border-radius:10px;background:var(--chip) center/cover}.ygrow b{display:block;font-size:.92rem;line-height:1.35}.ygrow small{color:var(--color-text-muted);font-size:.75rem}.ygrow i{font-style:normal;color:var(--color-primary);font-weight:700;font-size:.8rem}
@@ -2930,23 +2936,45 @@ async function openSupportRoom(){
   openRoom(data);
 }
 function isSupportRoom(r){ return r?.kind==='direct' && (r.others||r.room_members?.map(m=>m.profiles)||[]).some(p=>p && p.id===SUPPORT_ID); }
-async function fetchRooms(){
+// includeLeft: 나간 1:1 방도 돌려준다(친구 프로필에서 다시 대화를 열 때)
+async function fetchRooms(includeLeft){
   await loadMyRooms(); if(!myRoomIds.size) return [];
   const { data, error } = await sb.from('rooms').select('id,kind,title,created_at, room_members(profile_id, profiles(id,nickname,avatar_url)), messages(body,photo_url,place,created_at,sender_id)').in('id',[...myRoomIds]).order('created_at',{foreignTable:'messages',ascending:false}).limit(1,{foreignTable:'messages'});
   if(error){ toast('채팅 조회 실패: '+error.message); return []; }
   const { data:mts } = await sb.from('meetups').select('id,room_id,title,place_name,starts_at,duration_min,repeat').in('room_id',[...myRoomIds]); const mtBy={}; (mts||[]).forEach(m=>{ const o=mtBy[m.room_id]; if(!o || new Date(m.starts_at)>new Date(o.starts_at)) mtBy[m.room_id]=m; });
   return (data||[]).map(r=>{ r.meetup=mtBy[r.id]||null; r.others=r.room_members.map(m=>m.profiles).filter(p=>p&&p.id!==me.id); r.name=r.kind==='direct'?(r.others[0]?.nickname||'(나간 사용자)'):(r.title||r.others.map(p=>p.nickname).join(', ')); r.last=r.messages?.[0]; return r; })
+    .filter(r=>{ const st=myRoomState[r.id]||{}; const lt=r.last?new Date(r.last.created_at).getTime():0;
+      if(st.left_at){ if(r.kind!=='direct') return false; if(!includeLeft && !(lt>new Date(st.left_at).getTime())) return false; if(!(lt>new Date(st.left_at).getTime())) r.last=null; }   // 나간 방: 모임·클래스는 안 보임, 1:1 은 그 뒤 새 메시지가 왔을 때만
+      const D30=30*864e5; const autoArch = r.kind!=='direct' && r.meetup && meetEnded(r.meetup) && Date.now()-new Date(r.meetup.starts_at).getTime()>D30 && Date.now()-lt>D30;   // 끝난 지 30일 넘은 모임 방은 저절로 보관
+      r.archManual = !!(st.archived_at && !(lt>new Date(st.archived_at).getTime())); r.arch = r.archManual || autoArch; return true; })
     .sort((a,b)=>new Date(b.last?.created_at||b.created_at)-new Date(a.last?.created_at||a.created_at));
 }
 async function renderChats(){
   const rooms = await fetchRooms();
-  const sup = rooms.find(isSupportRoom); const rest = rooms.filter(r=>r!==sup);
+  const sup = rooms.find(isSupportRoom); const rest = rooms.filter(r=>r!==sup); const main = rest.filter(r=>!r.arch); chArch = rest.filter(r=>r.arch); chSwipeBind();
   const supRow = me.id===SUPPORT_ID ? '' : `<div class="item support" onclick="${sup?`openRoom('${sup.id}')`:'openSupportRoom()'}"><div class="ava">${ico('yarn')}</div><div class="tx"><b>뜨개동네 지기<span class="tag">운영진</span></b><span>${esc(sup?.last?.body||'궁금한 점·불편한 점을 편하게 남겨 주세요')}</span></div><span class="muted">${sup?.last?ago(sup.last.created_at):''}</span></div>`;
-  $('#chatsBody').innerHTML = `<div class="pfriends" id="pfriends" onclick="go('friends')"><span class="fic">${ico('handshake')}</span><span class="ft"><b>친구</b><span>불러오는 중…</span></span><span class="car">›</span></div>` + (rest.length ? `<div class="list">${rest.map(r=>`<div class="item" onclick="openRoom('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):r.meetup?'<div class="ava meet">'+ico('location')+'</div>':'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)}${r.meetup?(meetEnded(r.meetup)?'<span class="mbadge end">모임 종료</span>':'<span class="mbadge">모임</span>'):''} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b>${r.meetup&&!meetEnded(r.meetup)?`<span class="when">${esc(fmtWhen(r.meetup.starts_at)+' · '+r.meetup.place_name)}</span>`:''}<span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div>`).join('')}</div>` : '<div class="empty">친구가 되면 채팅방이 자동으로 열려요</div>');
+  $('#chatsBody').innerHTML = `<div class="pfriends" id="pfriends" onclick="go('friends')"><span class="fic">${ico('handshake')}</span><span class="ft"><b>친구</b><span>불러오는 중…</span></span><span class="car">›</span></div>` + (main.length ? `<div class="list">${main.map(r=>`<div class="swrow" data-r="${r.id}"><div class="item" onclick="chRowTap('${r.id}')" oncontextmenu="event.preventDefault();chMenu('${r.id}')">${r.kind==='direct'?avatar(r.others[0]||{nickname:'?'}):r.meetup?'<div class="ava meet">'+ico('location')+'</div>':'<div class="ava">'+ico('group')+'</div>'}<div class="tx"><b>${esc(r.name)}${r.meetup?(meetEnded(r.meetup)?'<span class="mbadge end">모임 종료</span>':'<span class="mbadge">모임</span>'):''} ${r.kind==='group'?`<span class="muted">${r.room_members.length}</span>`:''}</b>${r.meetup&&!meetEnded(r.meetup)?`<span class="when">${esc(fmtWhen(r.meetup.starts_at)+' · '+r.meetup.place_name)}</span>`:''}<span>${r.last?.body?esc(r.last.body):(r.last?.photo_url?ico('camera')+' 사진':r.last?.place?ico('location')+' 장소':'대화를 시작해 보세요')}</span></div><span class="muted">${r.last?ago(r.last.created_at):''}</span></div><div class="swacts"><button type="button" class="a1" onclick="chArchive('${r.id}')">보관</button><button type="button" class="a2" onclick="chLeave('${r.id}')">나가기</button></div></div>`).join('')}</div>` : `<div class="empty">${chArch.length?'지금 이어지는 대화가 없어요':'친구가 되면 채팅방이 자동으로 열려요'}</div>`) + (chArch.length?`<button type="button" class="archrow" onclick="openArchived()"><span>${ico('group')} 보관한 대화 ${chArch.length}</span><span>›</span></button>`:'');
   renderMyFriends();
 }
+// ---- 채팅 목록 정리(schema 106): 왼쪽으로 밀어 [보관][나가기]. 둘 다 내 목록에서만 — 대화 기록은 서버에 남는다. 지기 채팅 줄은 대상이 아니다
+let chArch=[], swJust=0;
+function chCloseAll(){ document.querySelectorAll('#chatsBody .swrow.open').forEach(e=>e.classList.remove('open')); }
+function chRowTap(id){ if(Date.now()-swJust<350) return; if(document.querySelector('#chatsBody .swrow.open')){ chCloseAll(); return; } openRoom(id); }
+function chMenu(id){ openSheet(`<button class="btn o" onclick="closeSheet();chArchive('${id}')">보관</button><button class="btn r" onclick="closeSheet();chLeave('${id}')">나가기</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
+function chSwipeBind(){ const box=$('#chatsBody'); if(!box || box.dataset.sw) return; box.dataset.sw='1'; const W=136; let row=null, it=null, x0=0, y0=0, base=0, drag=null, tx=0;
+  box.addEventListener('touchstart', e=>{ row=e.touches.length===1?e.target.closest('.swrow'):null; if(!row){ chCloseAll(); return; } it=row.querySelector('.item'); x0=e.touches[0].clientX; y0=e.touches[0].clientY; base=row.classList.contains('open')?-W:0; drag=null; tx=base; document.querySelectorAll('#chatsBody .swrow.open').forEach(o=>{ if(o!==row) o.classList.remove('open'); }); }, {passive:true});
+  box.addEventListener('touchmove', e=>{ if(!row) return; const dx=e.touches[0].clientX-x0, dy=e.touches[0].clientY-y0; if(drag===null){ if(Math.abs(dx)>8 && Math.abs(dx)>Math.abs(dy)) drag=true; else if(Math.abs(dy)>8) drag=false; } if(!drag) return; tx=Math.max(-W, Math.min(0, base+dx)); it.style.transition='none'; it.style.transform=`translateX(${tx}px)`; }, {passive:true});
+  const end=()=>{ if(!row) return; if(drag){ it.style.transition=''; it.style.transform=''; row.classList.toggle('open', tx < -W*0.4); swJust=Date.now(); } row=null; drag=null; };
+  box.addEventListener('touchend', end); box.addEventListener('touchcancel', end);
+}
+function undoBar(text, fn){ let b=$('#undoBar'); if(!b){ b=document.createElement('div'); b.id='undoBar'; document.body.appendChild(b); } b.innerHTML=`<span>${esc(text)}</span><button type="button">되돌리기</button>`; b.hidden=false; b.querySelector('button').onclick=()=>{ b.hidden=true; fn(); }; clearTimeout(b._t); b._t=setTimeout(()=>{ b.hidden=true; }, 5000); }
+async function chArchive(id, on=true){ chCloseAll(); const { error } = await sb.rpc('room_archive', { p_room:id, p_on:on }); if(error) return toast(error.message.replace(/^.*?: /,'')); await renderChats(); if(on) undoBar('대화를 보관했어요', ()=>chArchive(id,false)); else toast('채팅 목록으로 옮겼어요'); }
+function chLeave(id){ chCloseAll(); openSheet(`<b style="font-size:1.05rem">이 대화방에서 나갈까요?</b><p class="muted" style="margin:0;font-size:.88rem;line-height:1.55">내 채팅 목록에서 사라지고, 지난 대화를 다시 볼 수 없어요. 다른 분들의 대화방에는 그대로 남아요.</p><button class="btn r" onclick="chLeaveGo('${id}')">나가기</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
+async function chLeaveGo(id){ closeSheet(); const { error } = await sb.rpc('room_leave', { p_room:id }); if(error) return toast(error.message.replace(/^.*?: /,'')); toast('대화방에서 나갔어요'); renderChats(); chatDot(); }
+function openArchived(){ if(!chArch.length) return renderChats();
+  openSheet(`<b style="font-size:1.05rem">보관한 대화 ${chArch.length}</b><p class="muted" style="margin:0 0 4px;font-size:.82rem">새 메시지가 오면 채팅 목록으로 다시 올라와요.</p>${chArch.map(r=>`<div class="archit"><div class="tx" onclick="closeSheet();openRoom('${r.id}')"><b>${esc(r.name)}${r.meetup&&meetEnded(r.meetup)?'<span class="mbadge end">모임 종료</span>':''}</b><span>${r.last?.body?esc(r.last.body):(r.last?'사진·장소':'대화 없음')}</span></div>${r.archManual?`<button type="button" onclick="closeSheet();chArchive('${r.id}',false)">목록으로</button>`:''}<button type="button" onclick="closeSheet();chLeave('${r.id}')">나가기</button></div>`).join('')}`); }
 async function openDirectRoom(otherId){
-  const rooms = await fetchRooms();
+  const rooms = await fetchRooms(true);
   const r = rooms.find(x=>x.kind==='direct'&&x.others.some(p=>p.id===otherId));
   if(!r) return toast('채팅방을 찾을 수 없어요');
   openRoom(r.id);
@@ -2963,7 +2991,8 @@ async function openRoom(id){
   roomMeetup=null; $('#roomBadge').hidden=true; $('#meetInfoBtn').hidden=true; $('#roomStrip').hidden=true;
   if(r.kind==='group') sb.from('meetups').select('*, host:profiles!meetups_created_by_fkey(id,nickname)').eq('room_id', id).order('starts_at',{ascending:false}).limit(1).then(({data})=>{ if(roomId!==id || !data?.[0]) return; roomMeetup=data[0]; const end=meetEnded(roomMeetup); const b=$('#roomBadge'); b.hidden=false; b.textContent=end?'모임 종료':'모임'; b.classList.toggle('end', end); $('#meetInfoBtn').hidden=false; const st=$('#roomStrip'); st.hidden=end; st.innerHTML=`${ico('location')} ${esc(fmtWhen(roomMeetup.starts_at))} · ${esc(roomMeetup.place_name)} · ${roomMeetup.participant_count||r.room_members.length}명`; });
   show('room');
-  const { data:msgs } = await sb.from('messages').select('*').eq('room_id',id).order('created_at').limit(200);
+  let mq = sb.from('messages').select('*').eq('room_id',id); const leftAt = myRoomState[id]?.left_at; if(leftAt) mq = mq.gt('created_at', leftAt);   // 나갔던 방은 그 뒤의 대화만
+  const { data:msgs } = await mq.order('created_at').limit(200);
   $('#msgs').innerHTML = (isSupportRoom(r) && me.id!==SUPPORT_ID) ? `<div class="notice"><b class="tt">뜨개동네 지기 · 운영진</b>${SUPPORT_NOTICE}</div>` : ''; (msgs||[]).forEach(appendMsg); scrollMsgs();
   await sb.from('room_members').update({last_read_at:new Date().toISOString()}).eq('room_id',id).eq('profile_id',me.id);
   if(roomChan) sb.removeChannel(roomChan);
@@ -3277,7 +3306,8 @@ const ICON = {
 };
 // 내가 속한 방 목록 (참여 여부 판단)
 let myRoomIds = new Set();
-async function loadMyRooms(){ if(!me) return; const { data } = await sb.from('room_members').select('room_id').eq('profile_id', me.id); myRoomIds = new Set((data||[]).map(r=>r.room_id)); }
+let myRoomState={};   // room_id → {archived_at, left_at} (schema 106)
+async function loadMyRooms(){ if(!me) return; let { data, error } = await sb.from('room_members').select('room_id,archived_at,left_at').eq('profile_id', me.id); if(error){ ({ data } = await sb.from('room_members').select('room_id').eq('profile_id', me.id)); } myRoomIds = new Set((data||[]).map(r=>r.room_id)); myRoomState={}; (data||[]).forEach(r=>{ myRoomState[r.room_id]={archived_at:r.archived_at||null, left_at:r.left_at||null}; }); }
 async function attachWorks(rows){
   const rids=[...new Set((rows||[]).map(r=>r.review_of).filter(Boolean))];
   if(rids.length){ const { data:ms } = await sb.from('meetups').select('id,title,place_name,starts_at').in('id', rids); const mm={}; (ms||[]).forEach(m=>mm[m.id]=m); rows.forEach(r=>{ if(r.review_of) r.review_meetup = mm[r.review_of]||null; }); }

@@ -1648,3 +1648,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 -- 105. 말 통일: '답글' → '댓글' (마이그레이션 wording_reply_to_comment, 2026-11-13 대표)
 --   push_payload · cheer_on_post · mark_solved · admin_delete_post 안의 회원에게 보이는 문구만 바꿈(동작 그대로)
 
+-- 106. 채팅 목록 정리: 보관 · 나가기 (마이그레이션 room_archive_leave, 2026-11-13 대표 확정 시안)
+--   room_members.archived_at : 보관한 시각. 그 뒤에 새 메시지가 오면 앱이 목록으로 다시 올린다(서버 값은 그대로 두고 앱이 비교)
+--   room_members.left_at     : 나간 시각. 모임·클래스 방은 다시 안 보이고 푸시도 안 감, 1:1 은 그 뒤 새 메시지가 오면 그때부터의 대화만 다시 보임
+--   room_archive(room, on) · room_leave(room) : 본인 것만. room_leave 는 지기 채팅 불가, 아직 끝나지 않은 모임(반복 모임 포함)·클래스 방은 거절
+--   my_unread_rooms() : 나간 방 제외(1:1 은 나간 뒤 새 메시지만 셈) · push_chat_payload : 모임·클래스 방에서 나간 사람 제외
+--   둘 다 '내 목록에서만' — room_members 행과 messages 는 지우지 않는다(신고·분쟁 확인용)
+

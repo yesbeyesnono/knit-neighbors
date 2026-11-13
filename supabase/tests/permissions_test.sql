@@ -173,6 +173,7 @@ begin
   out := pg_temp.must_fail(out, 'read yarn_web_lookup', 'select 1 from public.yarn_web_lookup limit 1');   -- schema 99
   out := pg_temp.must_fail(out, 'own nickname_changed_at', 'update public.profiles set nickname_changed_at = null where id = auth.uid()');   -- schema 101
   out := pg_temp.must_fail(out, 'sync_last_seen(내부용)', 'select public.sync_last_seen()');   -- schema 104
+  out := pg_temp.must_fail(out, 'room_leave(남의 방)', 'select public.room_leave(gen_random_uuid())');   -- schema 106
   out := pg_temp.must_fail(out, 'read ddeuchin_claims', 'select 1 from public.ddeuchin_claims limit 1');   -- schema 100
   out := pg_temp.must_fail(out, 'admin_ddeuchin_list', 'select public.admin_ddeuchin_list()');
   out := pg_temp.must_fail(out, 'admin_ddeuchin_decide', 'select public.admin_ddeuchin_decide(1, true)');
