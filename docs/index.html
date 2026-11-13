@@ -924,7 +924,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #phv .phtop{flex:none;display:flex;justify-content:space-between;padding:max(14px,env(safe-area-inset-top)) 14px 6px}#phv .phtop button{width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:1rem;cursor:pointer;padding:0}
 #phv .phtrack{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}#phv .phtrack::-webkit-scrollbar{display:none}
 #phv .phs{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;align-items:center;justify-content:center;min-width:0}#phv .phs img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-#phv .phdots{flex:none;display:flex;gap:5px;justify-content:center;min-height:6px;margin:10px 0 0}#phv .phdots i{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.4}#phv .phdots i.on{opacity:1}
+#phv .phdots{flex:none;display:flex;gap:6px;justify-content:center;min-height:6px;margin:12px 0 0;padding-bottom:max(22px,env(safe-area-inset-bottom))}#phv .phs{overflow:hidden}#phv .phs img{transform-origin:center center;will-change:transform}#phv .phtrack{touch-action:pan-x}#phv .phdots i{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.4}#phv .phdots i.on{opacity:1}
 #phv .phacts{flex:none;justify-content:center;gap:28px;margin:0;padding:12px 0 max(18px,env(safe-area-inset-bottom));color:#fff}#phv .phacts button{color:#fff;font-size:14px}#phv .phacts button.on{color:var(--tred,#e0245e)}#phv .phacts button svg{width:22px;height:22px}
 body.kb #nav{display:none!important}
 </style>
@@ -3919,6 +3919,22 @@ async function toggleRepost(id, btn){
   document.addEventListener('focusout', ()=>{ clearTimeout(t); t=setTimeout(()=>{ if(!isText(document.activeElement)) document.body.classList.remove('kb'); }, 120); }); })();
 // 사진 전체 화면: 누른 사진이 속한 묶음(같은 글의 사진들)을 옆으로 넘겨 본다. 글의 사진이면 아래에 좋아요·댓글
 let phvPost=null, phvDirty=false;
+// 확대: 두 손가락으로 벌리기(1~4배) · 두 번 누르기(2.5배 ↔ 원래) · 확대 중에는 한 손가락으로 옮기기. 다음 사진으로 넘기면 원래대로
+let phvZ={ s:0 };
+function phvZoomBind(tr){
+  let img=null, sc=1, tx=0, ty=0, d0=0, s0=1, px=0, py=0, mode='', lastTap=0;
+  const apply=()=>{ if(!img) return; const bw=tr.clientWidth, bh=tr.clientHeight, w=img.offsetWidth*sc, h=img.offsetHeight*sc; const mx=Math.max(0,(w-bw)/2), my=Math.max(0,(h-bh)/2); tx=Math.max(-mx,Math.min(mx,tx)); ty=Math.max(-my,Math.min(my,ty));
+    img.style.transform = sc>1 ? `translate(${tx}px,${ty}px) scale(${sc})` : ''; phvZ.s = sc>1 ? sc : 0; tr.style.overflowX = sc>1 ? 'hidden' : 'auto'; img.style.touchAction = sc>1 ? 'none' : ''; };
+  const reset=()=>{ sc=1; tx=0; ty=0; apply(); img=null; }; phvZ.reset=reset;
+  const cur=()=>{ const i=Math.round(tr.scrollLeft/Math.max(1,tr.clientWidth)); return tr.children[i]?.querySelector('img')||null; };
+  const dist=t=>Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY);
+  tr.addEventListener('touchstart', e=>{ if(e.touches.length===2){ if(!img) img=cur(); d0=dist(e.touches); s0=sc; mode='pinch'; }
+    else if(e.touches.length===1){ px=e.touches[0].clientX; py=e.touches[0].clientY; mode = sc>1 ? 'pan' : ''; } }, {passive:true});
+  tr.addEventListener('touchmove', e=>{ if(mode==='pinch' && e.touches.length===2){ e.preventDefault(); sc=Math.max(1, Math.min(4, s0*dist(e.touches)/Math.max(1,d0))); apply(); }
+    else if(mode==='pan' && e.touches.length===1){ e.preventDefault(); const c=e.touches[0]; tx+=c.clientX-px; ty+=c.clientY-py; px=c.clientX; py=c.clientY; apply(); } }, {passive:false});
+  tr.addEventListener('touchend', e=>{ if(e.touches.length) return; if(mode==='pinch'){ if(sc<1.08){ reset(); } mode=''; return; }
+    const now=Date.now(); const c=e.changedTouches[0]; if(Math.hypot(c.clientX-px, c.clientY-py)<12){ if(now-lastTap<300){ lastTap=0; if(sc>1) reset(); else { img=cur(); sc=2.5; tx=0; ty=0; apply(); } } else lastTap=now; } mode=''; }, {passive:true});
+}
 function openPhoto(u){
   const t = (typeof event!=='undefined' && event && event.target && event.target.tagName==='IMG') ? event.target : null;
   let list=[u], idx=0;
@@ -3927,15 +3943,15 @@ function openPhoto(u){
   const p = pid ? (findPost(pid) || (typeof curPost!=='undefined' && curPost && curPost.id===pid ? curPost : null)) : null; phvPost = p ? pid : null; phvDirty=false;
   let w=$('#phv'); if(!w){ w=document.createElement('div'); w.id='phv'; document.body.appendChild(w);
     let y0=null,x0=null; w.addEventListener('touchstart',e=>{ if(e.touches.length===1){ y0=e.touches[0].clientY; x0=e.touches[0].clientX; } else y0=null; },{passive:true});
-    w.addEventListener('touchend',e=>{ if(y0===null) return; const c=e.changedTouches[0]; const dy=c.clientY-y0, dx=Math.abs(c.clientX-x0); y0=null; if(dy>90 && dx<60) closePhoto(); },{passive:true});
+    w.addEventListener('touchend',e=>{ if(y0===null) return; const c=e.changedTouches[0]; const dy=c.clientY-y0, dx=Math.abs(c.clientX-x0); y0=null; if(dy>90 && dx<60 && !phvZ.s) closePhoto(); },{passive:true});
     document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('#phv')?.classList.contains('on')) closePhoto(); }); }
   w.innerHTML = `<div class="phtop"><button type="button" aria-label="닫기" onclick="closePhoto()">✕</button></div>
     <div class="phtrack" id="phTrack">${list.map(x=>`<div class="phs"><img src="${esc(x)}" alt="" referrerpolicy="no-referrer"></div>`).join('')}</div>
-    <div class="phdots" id="phDots">${list.length>1?list.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join(''):''}</div>
-    ${p?`<div class="acts phacts"><button class="${likedSet.has(p.id)?'on':''}" onclick="phvDirty=true;toggleLike('${p.id}',this)">${ICON.heart}<span>${p.like_count||''}</span></button><button onclick="phvReplies()">${ICON.reply}<span>${p.reply_count||''}</span></button></div>`:''}`;
+    <div class="phdots" id="phDots">${list.length>1?list.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join(''):''}</div>`;
   w.classList.add('on');
   const tr=$('#phTrack'); tr.scrollLeft = idx*tr.clientWidth;
   tr.onscroll=()=>{ const i=Math.round(tr.scrollLeft/Math.max(1,tr.clientWidth)); [...$('#phDots').children].forEach((d,k)=>d.classList.toggle('on',k===i)); };
+  phvZ={ s:0 }; phvZoomBind(tr);
 }
 function closePhoto(){ const w=$('#phv'); if(!w) return; w.classList.remove('on'); w.innerHTML='';
   if(phvDirty && phvPost){ const p=findPost(phvPost), g=vEl('pg-'+phvPost); if(p && g) g.outerHTML=postGroup(p); } phvPost=null; phvDirty=false; }
