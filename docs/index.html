@@ -927,7 +927,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #phv .phdots{flex:none;display:flex;gap:6px;justify-content:center;min-height:6px;margin:12px 0 0;padding-bottom:max(22px,env(safe-area-inset-bottom))}#phv .phs{overflow:hidden}#phv .phs img{transform-origin:center center;will-change:transform}#phv .phtrack{touch-action:pan-x}#phv .phdots i{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.4}#phv .phdots i.on{opacity:1}
 #phv .phacts{flex:none;justify-content:center;gap:28px;margin:0;padding:12px 0 max(18px,env(safe-area-inset-bottom));color:#fff}#phv .phacts button{color:#fff;font-size:14px}#phv .phacts button.on{color:var(--tred,#e0245e)}#phv .phacts button svg{width:22px;height:22px}
 body.kb #nav{display:none!important}
-.wcard .wtop{display:flex;align-items:flex-end;gap:8px}.wcard .wl{flex:1;min-width:0}.wcard .wtg{flex:none;font-size:12.5px;font-weight:700;color:var(--olive);background:var(--chip);border-radius:999px;padding:3px 10px;cursor:pointer;white-space:nowrap}.wcard .wtg i{font-style:normal;font-size:.7em;vertical-align:1px}.wcard .tchips{display:none}.wcard.open .tchips{display:flex}
+.wcard .wtop{display:flex;align-items:flex-end;gap:8px}.wcard .wl{flex:1;min-width:0}.wcard .wtg{flex:none;font-size:12.5px;font-weight:700;color:var(--olive);background:var(--chip);border-radius:999px;padding:3px 10px;cursor:pointer;white-space:nowrap}.wcard .wtg i{font-style:normal;font-size:.7em;vertical-align:1px}.wcard .tchips{display:none}.wcard.open .tchips{display:flex}.wcard .wyd{display:none}.wcard.open .wyd{display:block;margin-top:6px}.wcard .wyd summary{display:none}
 </style>
 </head>
 <body>
@@ -3704,10 +3704,11 @@ function wYarnPayload(){
 }
 function workCard(w){
   if(!w) return '';
-  // 기법 칩은 처음에 숨기고, 바늘·실 줄 오른쪽의 '기법 N ▾' 를 누르면 나온다(2026-11-14 대표 확정 A안)
+  // 기법 칩과 실·바늘 자세한 정보는 처음에 숨기고, 오른쪽 '자세히 ▾' 하나로 함께 펼친다(2026-11-14 대표 확정)
   const chips=[...(w.techniques||[]).map(id=>({t:techName(id)})), ...(w.custom_techniques||[]).map(t=>({t, c:1}))];
-  const tg = chips.length ? `<span class="wtg" onclick="event.stopPropagation();const c=this.closest('.wcard');const o=c.classList.toggle('open');this.querySelector('i').textContent=o?'▴':'▾'">기법 ${chips.length} <i>▾</i></span>` : '';
-  return `<div class="wcard"><div class="wtop"><div class="wl"><div class="wh">${ico('cert')} 작품 인증${w.sponsored?'<span class="spon">샘플 제공</span>':''}</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}</div>${tg}</div>${workYarnDetail(w)}${chips.length?`<div class="tchips">${chips.map(x=>`<span class="${x.c?'custom':''}">${esc(x.t)}</span>`).join('')}</div>`:''}</div>`;
+  const det = workYarnDetail(w);   // 실·바늘 자세한 정보(있을 때만) — 기법과 함께 '자세히' 하나로 펼친다
+  const tg = (chips.length || det) ? `<span class="wtg" onclick="event.stopPropagation();const c=this.closest('.wcard');const o=c.classList.toggle('open');this.querySelector('i').textContent=o?'▴':'▾'">자세히 <i>▾</i></span>` : '';
+  return `<div class="wcard"><div class="wtop"><div class="wl"><div class="wh">${ico('cert')} 작품 인증${w.sponsored?'<span class="spon">샘플 제공</span>':''}</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}</div>${tg}</div>${det}${chips.length?`<div class="tchips">${chips.map(x=>`<span class="${x.c?'custom':''}">${esc(x.t)}</span>`).join('')}</div>`:''}</div>`;
 }
 async function openYarnSimilar(name){
   const { data, error } = await sb.rpc('yarn_similar', { p_name:name, p_limit:8 });
@@ -3720,7 +3721,7 @@ function workYarnDetail(w){
   const yl=ys.map(y=>`<div>· ${FULL?`<a href="#" data-n="${esc(y.name)}" onclick="event.stopPropagation();openYarnSimilar(this.dataset.n);return false" style="color:inherit;text-decoration:underline">${esc(y.name)}</a>`:esc(y.name)}${y.color?` ${y.color_hex&&y.color_hex.length?`<i style="display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid var(--line);vertical-align:-1px;background:${colorCss(y.color_hex,y.color_mode)}"></i> `:''}<span class="muted">${esc(y.color)}</span>`:''}${y.amount?` · ${y.amount}${esc(y.unit||'')}`:''}${y.ball_g&&y.ball_m?` <span class="muted">(${y.ball_g}g·${y.ball_m}m)</span>`:''}${y.weight?` · ${esc(y.weight)}`:''}</div>`).join('');
   const nl=ns.length?`<div>· 바늘 ${ns.map(n=>esc((n.type?n.type+' ':'')+n.size)).join(', ')}</div>`:'';
   const ex=[w.gauge&&`게이지 ${esc(w.gauge)}`, w.finished_size&&`완성 ${esc(w.finished_size)}`].filter(Boolean).join(' · ');
-  return `<details class="wyd" onclick="event.stopPropagation()"><summary>실·바늘 자세히</summary><div class="ml" style="line-height:1.6">${yl}${nl}${ex?`<div>· ${ex}</div>`:''}</div></details>`;
+  return `<details class="wyd" open onclick="event.stopPropagation()"><summary>실·바늘 자세히</summary><div class="ml" style="line-height:1.6">${yl}${nl}${ex?`<div>· ${ex}</div>`:''}</div></details>`;
 }
 async function attachMeetups(rows){
   const ids=[...new Set((rows||[]).map(r=>r.meetup_id).filter(Boolean))]; if(!ids.length) return;
