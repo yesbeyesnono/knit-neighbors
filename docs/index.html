@@ -246,7 +246,7 @@ details .seg{margin-top:8px;justify-content:center}
 .rv .rvb .ph{display:flex;gap:6px;margin-top:6px;overflow-x:auto}
 .rv .rvb .ph img{height:84px;border-radius:8px;flex:none}
 .rvbanner{background:var(--color-primary-light);border-radius:14px;padding:12px 14px;font-size:14px}
-/* 인라인 답글: 본문 시작선(아바타 40 + 간격 12 + 여백 16 = 68px)에서 세로선과 함께 이어짐 */
+/* 인라인 댓글: 본문 시작선(아바타 40 + 간격 12 + 여백 16 = 68px)에서 세로선과 함께 이어짐 */
 .pgroup{display:contents}
 .post.has-reply{border-bottom:0;padding-bottom:0}
 .rthread{margin:0 0 0 62px;padding:2px 16px 10px 12px;border-left:2px solid var(--line);background:var(--surface);border-bottom:1px solid var(--line)}
@@ -604,7 +604,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .empty,.empty{color:var(--tmute);font-size:14px}
 .feedmore .btn{background:transparent;color:var(--tmute);border:1px solid var(--tline);border-radius:999px;font-size:.9rem}
 .thread-head{padding:12px 16px 8px;font-size:15px;font-weight:700;color:var(--tink);border-bottom:1px solid var(--tline)}
-/* 답글 입력 */
+/* 댓글 입력 */
 .compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 16px;align-items:center;gap:10px}
 .compose .ava{width:36px;height:36px}
 .compose input{border:1px solid var(--tline);border-radius:999px;background:var(--surface);padding:10px 14px;font-family:inherit;font-size:15px}
@@ -664,7 +664,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .subpg{position:absolute;inset:0;z-index:1050;background:var(--bg);display:flex;flex-direction:column}
 .subbody{flex:1;overflow-y:auto;padding:4px 16px 28px}
 #nav button{position:relative}.navdot{position:absolute;top:9px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#C8402F;box-shadow:0 0 0 2px var(--color-surface)}.navdot[hidden]{display:none}
-/* 답글 입력칸: 여러 줄(엔터 = 줄바꿈, 등록은 게시 버튼만) — 2026-11-12 */
+/* 댓글 입력칸: 여러 줄(엔터 = 줄바꿈, 등록은 게시 버튼만) — 2026-11-12 */
 .compose textarea,.rrow textarea{flex:1;min-width:0;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:inherit;padding:9px 14px;font-family:inherit;font-size:16px;line-height:1.4;height:42px;min-height:42px;max-height:112px;width:auto;resize:none;overflow-y:auto;outline:0;display:block}
 .compose textarea:focus,.rrow textarea:focus{border-color:var(--color-primary)}.compose textarea::placeholder,.rrow textarea::placeholder{color:var(--ink3)}
 #v-post #postBody{min-height:0;background:var(--color-bg)}#v-post .compose{flex:none}#v-post .compose,.rrow{align-items:flex-end}.rrow .ava{margin-bottom:5px}#v-post .compose .ava{margin-bottom:3px}
@@ -957,11 +957,11 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
     <div class="feedmore" style="padding:12px 16px"><button class="btn" id="feedMore" onclick="loadFeed(true)" hidden>더 보기</button></div>
   </section>
 
-  <!-- 글 상세 (원글 + 답글) -->
+  <!-- 글 상세 (원글 + 댓글) -->
   <section class="view" id="v-post">
     <div class="top"><button class="back" onclick="closePost()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>글</h1></div>
     <div class="feed" id="postBody"></div>
-    <div id="replyBar"><div id="replyTo" hidden><span id="replyToTxt"></span><button type="button" aria-label="답글 대상 지우기" onclick="setReplyTo(null)">✕</button></div><div id="replyPv" hidden><img id="replyPvImg" alt=""><button type="button" onclick="rpPhotoClear()">사진 빼기</button></div>
+    <div id="replyBar"><div id="replyTo" hidden><span id="replyToTxt"></span><button type="button" aria-label="댓글 대상 지우기" onclick="setReplyTo(null)">✕</button></div><div id="replyPv" hidden><img id="replyPvImg" alt=""><button type="button" onclick="rpPhotoClear()">사진 빼기</button></div>
     <div class="compose"><div id="replyAva"></div><div class="mpop" id="mpop-detail" hidden></div><textarea id="replyIn" rows="1" placeholder="댓글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'detail')"></textarea><button class="btn" id="replyBtn" disabled onclick="submitReply()">게시</button></div></div>
   </section>
 
@@ -2538,7 +2538,7 @@ async function loadUserFeed(uid, tab, el){
   if(pids.length){ const { data:parents } = await sb.from('posts').select('id, '+AUTHOR_SEL).in('id', pids); const byId={}; (parents||[]).forEach(x=>byId[x.id]=x); (data||[]).forEach(r=>{ r.parent = byId[r.parent_id]||null; }); }
   await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), attachWorks(data||[])]);
   const mine = uid===me.id;
-  const emptyMsg = { posts: mine?'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요':'아직 올린 글이 없어요', replies: mine?'아직 남긴 답글이 없어요':'아직 남긴 답글이 없어요', works: mine?'아직 인증한 작품이 없어요.\n＋ 버튼 › 작품 인증에서 올리면 여기에 모여요':'아직 인증한 작품이 없어요' }[tab];
+  const emptyMsg = { posts: mine?'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요':'아직 올린 글이 없어요', replies: mine?'아직 남긴 댓글이 없어요':'아직 남긴 댓글이 없어요', works: mine?'아직 인증한 작품이 없어요.\n＋ 버튼 › 작품 인증에서 올리면 여기에 모여요':'아직 인증한 작품이 없어요' }[tab];
   el.innerHTML = (data||[]).length ? data.map(p=> p.parent_id ? postCard(p,{noLine:true, replyTo: p.parent?.author?.nickname}) : postGroup(p)).join('') : `<div class="empty" style="white-space:pre-line">${emptyMsg}</div>`;
   if(uid!==me.id || true){ feedRows = (data||[]); }
 }
@@ -2614,14 +2614,14 @@ function watchFriends(){
   }).on('postgres_changes',{event:'UPDATE',schema:'public',table:'friendships',filter:`requester_id=eq.${me.id}`},payload=>{
     if(payload.new.status==='accepted') toast('친구 신청이 수락됐어요');
   }).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`recipient_id=eq.${me.id}`},payload=>{
-    const k=payload.new.kind; if(k==='mention') toast('누군가 회원님을 언급했어요 @'); else if(k==='reply') toast('내 글에 답글이 달렸어요'); else if(k==='like') toast('내 글을 좋아해요 ♥');
+    const k=payload.new.kind; if(k==='mention') toast('누군가 회원님을 언급했어요 @'); else if(k==='reply') toast('내 글에 댓글이 달렸어요'); else if(k==='like') toast('내 글을 좋아해요 ♥');
     refreshBadge(); if(view==='activity') renderActivity();
   }).subscribe();
   refreshBadge();
 }
 async function refreshBadge(){ if(!me) return; const {count}=await sb.from('notifications').select('*',{count:'exact',head:true}).eq('recipient_id',me.id).is('read_at',null); ['badgeFriends','badgeAct'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.hidden=!count; el.textContent=count||''; } }); }
 // ===== 활동(알림) =====
-const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 답글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 답글을 해결로 표시했어요', notice:'의 공지예요', shop_post:'의 가게에 새 소식이 올라왔어요', repost:'님이 회원님의 글을 리포스트했어요', meetup_leave:'님이 모임 참여를 취소했어요', meetup_cancel:'님이 모임을 취소했어요', event_open:' · 새 이벤트가 열렸어요', event_selected:'에 선정됐어요! 눌러서 확인해 주세요', event_rejected:' · 이번에는 함께하지 못했어요. 다음 이벤트에서 만나요', supporter:' · ', cheer:' · ', remind:' · ' };   // cheer=응원·이정표(schema 72) · remind=실무 알림
+const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 댓글을 남겼어요', like:'님이 좋아해요', friend_request:'님이 친구 신청을 보냈어요', friend_accept:'님이 친구 신청을 수락했어요', meetup_join:'님이 모임에 참여했어요', review:'님이 모임 후기를 남겼어요', solved:'님이 회원님의 댓글을 해결로 표시했어요', notice:'의 공지예요', shop_post:'의 가게에 새 소식이 올라왔어요', repost:'님이 회원님의 글을 리포스트했어요', meetup_leave:'님이 모임 참여를 취소했어요', meetup_cancel:'님이 모임을 취소했어요', event_open:' · 새 이벤트가 열렸어요', event_selected:'에 선정됐어요! 눌러서 확인해 주세요', event_rejected:' · 이번에는 함께하지 못했어요. 다음 이벤트에서 만나요', supporter:' · ', cheer:' · ', remind:' · ' };   // cheer=응원·이정표(schema 72) · remind=실무 알림
 const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn'), shop_post:ico('location'), repost:ico('reply'), meetup_leave:ico('yarn'), meetup_cancel:ico('yarn'), event_open:ico('party'), event_selected:ico('party'), event_rejected:ico('yarn'), supporter:ico('party'), cheer:ico('party'), remind:ico('location') };
 let actRows = [];
 function openActivity(){ show('activity'); renderActivity(); }
@@ -2902,7 +2902,7 @@ async function pushSetup(){
     if(perm.receive === 'denied') return;                       // 설정 앱에서 켜야 함 — 설정 화면에서 안내
     const asked = localStorage.getItem('kn_push_asked'); if(asked) return;   // 안내 시트는 한 번만
     localStorage.setItem('kn_push_asked', '1');
-    openSheet(`<b style="font-size:1.05rem">알림을 받아 볼까요?</b><p class="muted" style="margin:0;font-size:.9rem;line-height:1.5">답글·친구 신청·모임 소식·이벤트 선정처럼 놓치면 아쉬운 것만 보내요. 광고 알림은 없어요. ${PUSH_OS} 설정에서 언제든 끌 수 있어요.</p>
+    openSheet(`<b style="font-size:1.05rem">알림을 받아 볼까요?</b><p class="muted" style="margin:0;font-size:.9rem;line-height:1.5">댓글·친구 신청·모임 소식·이벤트 선정처럼 놓치면 아쉬운 것만 보내요. 광고 알림은 없어요. ${PUSH_OS} 설정에서 언제든 끌 수 있어요.</p>
       <button class="btn" onclick="closeSheet();pushAsk()">알림 받기</button><button class="btn o" onclick="closeSheet()">나중에</button>`);
   }catch(e){}
 }
@@ -3219,9 +3219,9 @@ function postGroup(p, opts={}){
   if(open){
     const rs = p.replies||[];
     html += `<div class="rthread">
-      ${rs.length ? rs.map(r=>replyCard(r)).join('') : '<div class="rempty">첫 답글을 남겨 보세요</div>'}
-      <div class="rrow">${avatar(myProfile||{}).replace('class="ava"','class="ava sm"')}<div class="mpop" id="mpop-${p.id}" hidden></div><textarea id="rin-${p.id}" rows="1" placeholder="답글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'${p.id}')"></textarea><button class="btn sm" disabled onclick="submitInlineReply('${p.id}')">게시</button></div>
-      <div class="rfold" onclick="toggleReplies('${p.id}')">답글 접기 ▴</div>
+      ${rs.length ? rs.map(r=>replyCard(r)).join('') : '<div class="rempty">첫 댓글을 남겨 보세요</div>'}
+      <div class="rrow">${avatar(myProfile||{}).replace('class="ava"','class="ava sm"')}<div class="mpop" id="mpop-${p.id}" hidden></div><textarea id="rin-${p.id}" rows="1" placeholder="댓글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'${p.id}')"></textarea><button class="btn sm" disabled onclick="submitInlineReply('${p.id}')">게시</button></div>
+      <div class="rfold" onclick="toggleReplies('${p.id}')">댓글 접기 ▴</div>
     </div>`;
   }
   return `<div class="pgroup" id="pg-${p.id}">${html}</div>`;
@@ -3233,16 +3233,16 @@ function replyCard(r){
   return `<div class="rpost" id="rp-${r.id}">
     <div onclick="openProfile('${a.id}')">${avatar(a).replace('class="ava"','class="ava sm"')}</div>
     <div class="rb">
-      <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time>${solved?'<span class="chip m solvedchip">'+ico('check')+' 해결한 답글</span>':''}<button class="menu" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
+      <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time>${solved?'<span class="chip m solvedchip">'+ico('check')+' 해결한 댓글</span>':''}<button class="menu" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
       ${r.body?`<div class="txt">${bodyHtml(r)}</div>`:''}
-      <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button>${!mine&&a.id?`<button onclick="replyTo('${r.parent_id}','${a.id}',this.dataset.n)" data-n="${esc(a.nickname||'')}">답글</button>`:''}</div>
+      <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button>${!mine&&a.id?`<button onclick="replyTo('${r.parent_id}','${a.id}',this.dataset.n)" data-n="${esc(a.nickname||'')}">댓글</button>`:''}</div>
     </div></div>`;
 }
 async function markSolved(rootId, replyId){
   const { error } = await sb.rpc('mark_solved', { p_post: rootId, p_reply: replyId||null });
   if(error) return toast('실패: '+error.message);
   const p=findPost(rootId); if(p){ p.solved_reply_id = replyId||null; const grp=vEl('pg-'+rootId); if(grp) grp.outerHTML=postGroup(p); }
-  toast(replyId ? '해결로 표시했어요. 답글 쓴 분에게 알림이 가요' : '해결 표시를 취소했어요');
+  toast(replyId ? '해결로 표시했어요. 댓글 쓴 분에게 알림이 가요' : '해결 표시를 취소했어요');
 }
 function vEl(id){ return document.querySelector('.view.on [id="'+id+'"]') || document.getElementById(id); }
 function findPost(id){ return [...feedRows, ...feedRows.flatMap(x=>x.replies||[]), curPost].filter(Boolean).find(x=>x.id===id); }
@@ -3625,7 +3625,7 @@ function postCard(p, opts={}){
   return `<div class="post ${opts.cls||''}" onclick="openPost('${p.id}')">
     <div class="avacol"><div onclick="event.stopPropagation();openProfile('${a.id}')">${avatar(a)}</div>${showLine?'<div class="tline"></div>':''}</div>
     <div class="col">
-      ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 답글</div>`:''}
+      ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 댓글</div>`:''}
       ${p.review_meetup?`<div class="rvtag" onclick="event.stopPropagation();openMeetup('${p.review_of}')">${ico('yarn')} 모임 후기 · ${esc(p.review_meetup.title)}</div>`:''}
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b>${lvBadge(a)}<time>${agoShort(p.created_at)}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}','${a.id}')">···</button></div>
       ${p.body?`<div class="txt">${bodyHtml(p)}</div>`:''}
@@ -4479,7 +4479,7 @@ async function submitPost(){
 async function deletePost(id){
   const p=[...feedRows, ...feedRows.flatMap(x=>x.replies||[]), curPost, ...(curPost?.replies||[])].find(x=>x&&x.id===id);
   if(p?.meetup_id && p.author_id===me.id) return askCancelMeetup(p.meetup_id, p.meetup?.participant_count||1);   // 모임 안내 글 삭제 = 모임 취소
-  if(!confirm('이 글을 삭제할까요? 답글도 함께 지워져요.')) return;
+  if(!confirm('이 글을 삭제할까요? 댓글도 함께 지워져요.')) return;
   const { error } = await sb.from('posts').delete().eq('id', id);
   if(error) return toast('실패: '+error.message);
   toast('삭제했어요');
@@ -4534,13 +4534,13 @@ function cmtCard(r){
   return `<div class="cmt ${replyTarget&&replyTarget.at===r.id?'on':''}" id="cm-${r.id}"><div onclick="openProfile('${a.id}')">${avatar(a)}</div><div class="cb">
     <div class="cw"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b>${op?'<span class="opbadge">글쓴이</span>':''}${r.author_id===SUPPORT_ID&&!op?'<span class="opbadge">운영진</span>':''}<time>${agoShort(r.created_at)}</time><button class="menu" aria-label="더 보기" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
     ${r.body?`<div class="ct">${bodyHtml(r)}</div>`:''}${ph?`<img class="cph" src="${esc(ph)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`:''}
-    <div class="ca"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button><button onclick="setReplyTo('${r.id}')">답글 달기</button></div></div></div>`;
+    <div class="ca"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button><button onclick="setReplyTo('${r.id}')">댓글 달기</button></div></div></div>`;
 }
 function renderPostDetail(){
   const p=curPost; if(!p) return; const rs=p.replies||[]; const ids=new Set(rs.map(r=>r.id));
   const tops=rs.filter(r=>!r.reply_to || !ids.has(r.reply_to)); const kids={}; rs.forEach(r=>{ if(r.reply_to && ids.has(r.reply_to)) (kids[r.reply_to] ||= []).push(r); });
   const sub=t=>{ const k=kids[t.id]||[]; if(!k.length) return ''; const open=subOpen.has(t.id) || k.length<=2; const show=open?k:k.slice(0,1);
-    return `<div class="csub">${show.map(cmtCard).join('')}</div>${open?'':`<button type="button" class="cmore" onclick="subOpen.add('${t.id}');renderPostDetail()">답글 ${k.length-1}개 더 보기</button>`}`; };
+    return `<div class="csub">${show.map(cmtCard).join('')}</div>${open?'':`<button type="button" class="cmore" onclick="subOpen.add('${t.id}');renderPostDetail()">댓글 ${k.length-1}개 더 보기</button>`}`; };
   $('#postBody').innerHTML = postCard(p,{noLine:true, cls:'dpost'}) + `<div class="cmt-head">댓글 ${rs.length||''}</div>` + (rs.length ? tops.map(t=>cmtCard(t)+sub(t)).join('') : '<div class="empty">첫 댓글을 남겨 보세요</div>');
 }
 // [답글 달기]: 대상 댓글을 기억하고 입력칸 위에 '○○ 님에게 답글 다는 중'. 대댓글에 답하면 같은 윗댓글 아래로 가고 @닉네임을 미리 적어 준다
@@ -4548,7 +4548,7 @@ function setReplyTo(x){
   if(typeof x==='string'){ const r=(curPost?.replies||[]).find(v=>v.id===x); if(!r) return; replyTarget={ id:r.reply_to||r.id, at:r.id, nick:r.author?.nickname||'' };
     if(r.reply_to && r.author?.id && r.author_id!==me.id) prefillMention('detail', r.author.id, r.author.nickname); $('#replyIn')?.focus(); }
   else replyTarget = x||null;
-  const bar=$('#replyTo'); if(bar){ bar.hidden=!replyTarget; if(replyTarget) $('#replyToTxt').textContent=`${replyTarget.nick||'이 댓글'} 님에게 답글 다는 중`; }
+  const bar=$('#replyTo'); if(bar){ bar.hidden=!replyTarget; if(replyTarget) $('#replyToTxt').textContent=`${replyTarget.nick||'이 댓글'} 님에게 댓글 다는 중`; }
   document.querySelectorAll('#postBody .cmt.on').forEach(e=>e.classList.remove('on')); if(replyTarget){ const el=vEl('cm-'+replyTarget.at); if(el) el.classList.add('on'); }
 }
 // 댓글 사진은 2026-11-13 대표 결정으로 뺌(목록의 답글 칸과 글 화면의 댓글 칸을 같게 — 사진 버튼 없음). 이미 올라온 댓글 사진은 그대로 보여 준다. 아래 함수는 남겨 둠
@@ -4792,7 +4792,7 @@ async function renderMy(){
   renderMyTop();
 }
 // ---- Connect / Host / Skill Index (2026-09-27 대표 확정) — 서버가 계산(compute_trait_index), 앱은 그리기만
-const IDX_DEF=[['connect','Connect','연결 — 답글·공감·모임 참여'],['host','Host','모임을 만들고 사람을 모으는 힘 — 새 글·모임·클래스 열기'],['skill','Skill','뜨개 숙련도 — 작품 인증·상급 기법·뜨개 단계']];
+const IDX_DEF=[['connect','Connect','연결 — 댓글·공감·모임 참여'],['host','Host','모임을 만들고 사람을 모으는 힘 — 새 글·모임·클래스 열기'],['skill','Skill','뜨개 숙련도 — 작품 인증·상급 기법·뜨개 단계']];
 const TRAIT_TXT={connect:'Connect Index가 높아요 — 이웃과 이어지는 사람',host:'Host Index가 높아요 — 판을 벌이고 사람을 모으는 사람',skill:'Skill Index가 높아요 — 손끝이 좋은 사람',balanced:'세 Index가 고르게 — 두루두루',new:'아직 알아가는 중 — 활동이 쌓이면 성향이 보여요'};
 function idxRadar(p, size){
   const v=[p.idx_connect||0, p.idx_host||0, p.idx_skill||0]; const W=size||96, H=Math.round(W*0.92), cx=W/2, cy=H*0.56, R=W*0.38;
@@ -4842,7 +4842,7 @@ async function renderMyTop(){
   const td=$('#myTodo'); if(td) td.innerHTML = items.length ? `<div class="todo"><div class="tt">지금 할 일</div>${items.slice(0,5).map(i=>`<button type="button" onclick="${i.fn}"><span class="ic">${i.ic}</span><span style="flex:1;min-width:0"><b>${i.t}</b><span>${i.s}</span></span><span class="ch">${i.ch}</span></button>`).join('')}</div>` : '';
   // ③ 이번 주
   const posts=(psts.data||[]).filter(x=>!x.parent_id).length, replies=(psts.data||[]).filter(x=>x.parent_id).length; const s=supStatus||{};
-  const wkEl=$('#myWeek'); if(wkEl){ const { data:ix } = await sb.rpc('refresh_my_index'); if(ix) Object.assign(myProfile, { idx_connect:ix.connect, idx_host:ix.host, idx_skill:ix.skill, trait:ix.trait }); wkEl.innerHTML = indexCard(myProfile, true) + (s.supporter&&s.status==='active'?`<div class="wk"><div><b>${wks.count||0}</b><span>이번 주 인증</span></div><div><b>${posts}</b><span>글</span></div><div><b>${replies}</b><span>답글</span></div><div class="sup" onclick="openSupporters()" style="cursor:pointer"><b>${s['seg'+(s.segment||1)]||0}점</b><span>서포터 ${s.segment||1}구간</span></div></div>`:''); }
+  const wkEl=$('#myWeek'); if(wkEl){ const { data:ix } = await sb.rpc('refresh_my_index'); if(ix) Object.assign(myProfile, { idx_connect:ix.connect, idx_host:ix.host, idx_skill:ix.skill, trait:ix.trait }); wkEl.innerHTML = indexCard(myProfile, true) + (s.supporter&&s.status==='active'?`<div class="wk"><div><b>${wks.count||0}</b><span>이번 주 인증</span></div><div><b>${posts}</b><span>글</span></div><div><b>${replies}</b><span>댓글</span></div><div class="sup" onclick="openSupporters()" style="cursor:pointer"><b>${s['seg'+(s.segment||1)]||0}점</b><span>서포터 ${s.segment||1}구간</span></div></div>`:''); }
   // ⑤ 실함 요약
   const st=stash.data||[]; const stEl=$('#myStashSub'); if(stEl) stEl.textContent = st.length ? `${st.length}종 보관 중 · 최근: ${st[0].raw_name||'이름 없는 실'}${st[0].left_balls!=null?` ${st[0].left_balls}볼`:''}` : '볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요';
   // ⑥ 가게/작가 배지

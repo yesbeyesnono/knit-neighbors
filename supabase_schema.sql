@@ -1645,3 +1645,6 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   sync_last_seen() : auth.sessions 의 가장 최근 갱신 시각(refreshed_at·updated_at·created_at)으로 profiles.last_seen_at 을 채운다(10분 넘게 차이 날 때만). service_role 전용
 --   크론 last-seen-sync (매시 12분). 앱의 check_in() 이 불리지 않는 옛 버전(1.0.1~1.0.6)도 접속 시각이 맞게 된다
 
+-- 105. 말 통일: '답글' → '댓글' (마이그레이션 wording_reply_to_comment, 2026-11-13 대표)
+--   push_payload · cheer_on_post · mark_solved · admin_delete_post 안의 회원에게 보이는 문구만 바꿈(동작 그대로)
+
