@@ -927,6 +927,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #phv .phdots{flex:none;display:flex;gap:6px;justify-content:center;min-height:6px;margin:12px 0 0;padding-bottom:max(22px,env(safe-area-inset-bottom))}#phv .phs{overflow:hidden}#phv .phs img{transform-origin:center center;will-change:transform}#phv .phtrack{touch-action:pan-x}#phv .phdots i{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.4}#phv .phdots i.on{opacity:1}
 #phv .phacts{flex:none;justify-content:center;gap:28px;margin:0;padding:12px 0 max(18px,env(safe-area-inset-bottom));color:#fff}#phv .phacts button{color:#fff;font-size:14px}#phv .phacts button.on{color:var(--tred,#e0245e)}#phv .phacts button svg{width:22px;height:22px}
 body.kb #nav{display:none!important}
+.wcard .tchips:not(.open) span.x,.wcard .tchips:not(.open) span.tless,.wcard .tchips.open span.tmore{display:none}.wcard .tchips span.tmore,.wcard .tchips span.tless{border-color:transparent;background:var(--chip);color:var(--olive);font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -3703,7 +3704,8 @@ function wYarnPayload(){
 }
 function workCard(w){
   if(!w) return '';
-  return `<div class="wcard"><div class="wh">${ico('cert')} 작품 인증${w.sponsored?'<span class="spon">샘플 제공</span>':''}</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}${workYarnDetail(w)}<div class="tchips">${(w.techniques||[]).map(id=>`<span>${esc(techName(id))}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="custom">${esc(t)}</span>`).join('')}</div></div>`;
+  return `<div class="wcard"><div class="wh">${ico('cert')} 작품 인증${w.sponsored?'<span class="spon">샘플 제공</span>':''}</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}${workYarnDetail(w)}${(()=>{ const chips=[...(w.techniques||[]).map(id=>({t:techName(id)})), ...(w.custom_techniques||[]).map(t=>({t, c:1}))]; const N=3; if(!chips.length) return '';   // 기법이 3개를 넘으면 한 줄만 보이고 '펼치기'
+    return `<div class="tchips">${chips.map((x,i)=>`<span class="${x.c?'custom':''}${i>=N?' x':''}">${esc(x.t)}</span>`).join('')}${chips.length>N?`<span class="tmore" onclick="event.stopPropagation();this.parentElement.classList.add('open')">+${chips.length-N} 펼치기</span><span class="tless" onclick="event.stopPropagation();this.parentElement.classList.remove('open')">접기</span>`:''}</div>`; })()}</div>`;
 }
 async function openYarnSimilar(name){
   const { data, error } = await sb.rpc('yarn_similar', { p_name:name, p_limit:8 });
