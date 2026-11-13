@@ -3409,6 +3409,14 @@ async function markSolved(rootId, replyId){
 }
 function vEl(id){ return document.querySelector('.view.on [id="'+id+'"]') || document.getElementById(id); }
 function findPost(id){ return [...feedRows, ...feedRows.flatMap(x=>x.replies||[]), curPost].filter(Boolean).find(x=>x.id===id); }
+// 글을 누르면 💬 와 똑같이 그 자리에서 댓글이 펼쳐진다(2026-11-14 대표: 어디를 눌러도 같은 모양). 이미 펼쳐져 있으면 그대로 두고, 접기는 💬·'댓글 접기'로
+function postTap(id){
+  if(view==='post') return;   // 글 화면 안의 본문 카드
+  const p=findPost(id), grp=vEl('pg-'+id);
+  if(!grp || !p || p.parent_id) return openPost(id);   // 목록 밖(댓글 줄 등)은 글 화면으로
+  if(expandedReplies.has(id) && Array.isArray(p.replies)) return;
+  toggleReplies(id);
+}
 async function toggleReplies(id){
   const grp = vEl('pg-'+id);
   const p = findPost(id);
@@ -3809,7 +3817,7 @@ function postCard(p, opts={}){
   const n = (p.photos||[]).length;
   const sub = p.author_id===SUPPORT_ID ? '운영진' : [a.dong_name, lvShort(a)].filter(Boolean).join(' · ');   // 지기 계정은 동네·단계 대신 '운영진'
   const showLine = opts.line || (!opts.noLine && p.reply_count>0);
-  return `<div class="post ${opts.cls||''}" onclick="openPost('${p.id}')">
+  return `<div class="post ${opts.cls||''}" onclick="postTap('${p.id}')">
     <div class="avacol"><div onclick="event.stopPropagation();openProfile('${a.id}')">${avatar(a)}</div>${showLine?'<div class="tline"></div>':''}</div>
     <div class="col">
       ${opts.replyTo?`<div class="replyto">${esc(opts.replyTo)}님에게 댓글</div>`:''}
