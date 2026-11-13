@@ -263,6 +263,8 @@ details .seg{margin-top:8px;justify-content:center}
 .rpost .acts button svg{width:18px;height:18px}
 .rempty{font-size:13px;color:var(--ink3);padding:8px 0}
 .rrow{display:flex;align-items:center;gap:8px;padding:8px 0 4px}
+.rsub{margin:0 0 4px 38px;border-left:2px solid var(--line);padding-left:10px}.rpost.on{background:var(--chip);border-radius:10px}
+.rto{display:flex;justify-content:space-between;align-items:center;background:var(--chip);color:var(--chip-ink,var(--color-primary-dark));font-size:.8rem;font-weight:700;padding:6px 12px;border-radius:10px;margin-top:6px}.rto[hidden]{display:none}.rto button{border:0;background:none;font:inherit;color:inherit;padding:0 4px;cursor:pointer;width:auto}
 .rrow input{flex:1;border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:9px 14px;font-size:16px;min-width:0}
 .rrow .btn{width:auto;border-radius:999px;padding:8px 14px;flex:none}
 .rfold{padding:8px 0 0;font-size:13px;color:var(--ink3);cursor:pointer}
@@ -3382,7 +3384,8 @@ function postGroup(p, opts={}){
   if(open){
     const rs = p.replies||[];
     html += `<div class="rthread">
-      ${rs.length ? rs.map(r=>replyCard(r)).join('') : '<div class="rempty">첫 댓글을 남겨 보세요</div>'}
+      ${rs.length ? (()=>{ const ids=new Set(rs.map(r=>r.id)); const tops=rs.filter(r=>!r.reply_to || !ids.has(r.reply_to)); const kids=t=>rs.filter(r=>r.reply_to===t.id); return tops.map(t=>{ const k=kids(t); return replyCard(t)+(k.length?`<div class="rsub">${k.map(r=>replyCard(r)).join('')}</div>`:''); }).join(''); })() : '<div class="rempty">첫 댓글을 남겨 보세요</div>'}
+      <div class="rto" id="rto-${p.id}" ${inlineTarget[p.id]?'':'hidden'}><span>${inlineTarget[p.id]?esc((inlineTarget[p.id].nick||'이 댓글')+' 님에게 댓글 다는 중'):''}</span><button type="button" aria-label="댓글 대상 지우기" onclick="inlineReplyTo('${p.id}', null)">✕</button></div>
       <div class="rrow">${avatar(myProfile||{}).replace('class="ava"','class="ava sm"')}<div class="mpop" id="mpop-${p.id}" hidden></div><textarea id="rin-${p.id}" rows="1" placeholder="댓글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'${p.id}')"></textarea><button class="btn sm" disabled onclick="submitInlineReply('${p.id}')">게시</button></div>
       <div class="rfold" onclick="toggleReplies('${p.id}')">댓글 접기 ▴</div>
     </div>`;
@@ -3398,8 +3401,20 @@ function replyCard(r){
     <div class="rb">
       <div class="who"><b onclick="openProfile('${a.id}')">${esc(a.nickname||'(탈퇴한 사용자)')}</b><time>${agoShort(r.created_at)}</time>${solved?'<span class="chip m solvedchip">'+ico('check')+' 해결한 댓글</span>':''}<button class="menu" onclick="postMenu('${r.id}','${a.id}')">···</button></div>
       ${r.body?`<div class="txt">${bodyHtml(r)}</div>`:''}
-      <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button>${!mine&&a.id?`<button onclick="replyTo('${r.parent_id}','${a.id}',this.dataset.n)" data-n="${esc(a.nickname||'')}">댓글</button>`:''}</div>
+      <div class="acts"><button class="${likedSet.has(r.id)?'on':''}" onclick="toggleLike('${r.id}',this)">${ICON.heart}<span>${r.like_count||''}</span></button>${a.id?`<button onclick="inlineReplyTo('${r.parent_id}','${r.id}')">댓글 달기</button>`:''}</div>
     </div></div>`;
+}
+// 펼침에서 대댓글(2026-11-14): [댓글 달기] → 그 댓글(대댓글이면 그 윗댓글) 아래로 달림. 글 화면의 setReplyTo 와 같은 규칙
+let inlineTarget={};
+function inlineReplyTo(pid, rid){
+  const p=findPost(pid); const bar=vEl('rto-'+pid); const inp=vEl('rin-'+pid);
+  document.querySelectorAll('#pg-'+CSS.escape(pid)+' .rpost.on').forEach(e=>e.classList.remove('on'));
+  if(!rid){ delete inlineTarget[pid]; if(bar) bar.hidden=true; return; }
+  const r=(p?.replies||[]).find(v=>v.id===rid); if(!r) return;
+  inlineTarget[pid]={ id:r.reply_to||r.id, at:r.id, nick:r.author?.nickname||'' };
+  if(bar){ bar.hidden=false; bar.querySelector('span').textContent=`${inlineTarget[pid].nick||'이 댓글'} 님에게 댓글 다는 중`; }
+  vEl('rp-'+rid)?.classList.add('on');
+  if(r.reply_to && r.author?.id && r.author_id!==me.id) prefillMention(pid, r.author.id, r.author.nickname); else inp?.focus();
 }
 async function markSolved(rootId, replyId){
   const { error } = await sb.rpc('mark_solved', { p_post: rootId, p_reply: replyId||null });
@@ -3433,8 +3448,8 @@ function rpText(v){ return (v||'').trim().replace(/\n{3,}/g,'\n\n'); }
 async function submitInlineReply(pid){
   const inp=vEl('rin-'+pid); const t=rpText(inp?.value); if(!t) return;
   await loadBanned(); if(hasBanned(t)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
-  const { data, error } = await sb.from('posts').insert({ author_id: me.id, parent_id: pid, body: t, mentions: mentionsFor(pid, t) }).select('*, '+AUTHOR_SEL).single();
-  if(!error) delete mentionMap[pid];
+  const { data, error } = await sb.from('posts').insert({ author_id: me.id, parent_id: pid, body: t, mentions: mentionsFor(pid, t), ...(inlineTarget[pid]?{ reply_to: inlineTarget[pid].id }:{}) }).select('*, '+AUTHOR_SEL).single();
+  if(!error){ delete mentionMap[pid]; delete inlineTarget[pid]; }
   if(error) return toast('실패: '+error.message);
   await loadMentionNames([data]);
   const p=findPost(pid); if(p){ p.replies=[...(p.replies||[]), data]; p.reply_count=(p.reply_count||0)+1; if(!p.firstReply) p.firstReply=data; }
