@@ -1655,3 +1655,6 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   my_unread_rooms() : 나간 방 제외(1:1 은 나간 뒤 새 메시지만 셈) · push_chat_payload : 모임·클래스 방에서 나간 사람 제외
 --   둘 다 '내 목록에서만' — room_members 행과 messages 는 지우지 않는다(신고·분쟁 확인용)
 
+-- 107. 대시보드 '채팅' 칸 (마이그레이션 admin_stats_member_chat, 2026-11-13)
+--   admin_stats() totals 에 키 추가: rooms_member · messages_member(지기 채팅방 제외 = 회원끼리) · rooms_support(지기 채팅방 수). 기존 rooms·messages 는 그대로
+

@@ -310,7 +310,7 @@ VIEWS.dash = async()=>{
     <div class="card"><div class="l">글 / 댓글</div><div class="v">${t.posts} / ${t.replies}</div><div class="s">좋아요·댓글 활동 포함</div></div>
     <div class="card"><div class="l">작품 인증</div><div class="v">${t.works}</div><div class="s">해결된 질문 ${s.solved.solved}/${s.solved.questions_with_replies}</div></div>
     <div class="card"><div class="l">모임</div><div class="v">${t.meetups}</div><div class="s">예정 ${t.upcoming}</div></div>
-    <div class="card"><div class="l">채팅</div><div class="v">${t.messages}</div><div class="s">방 ${t.rooms} · 친구 관계 ${t.friendships}</div></div>
+    <div class="card"><div class="l">회원끼리 채팅</div><div class="v">${t.messages_member??t.messages}</div><div class="s">방 ${t.rooms_member??t.rooms} · 친구 관계 ${t.friendships}${t.rooms_support!=null?` · 지기 채팅방 ${t.rooms_support}은 뺐어요`:''}</div></div>
     <div class="card"><div class="l">친구 찾는 중(손 들기)</div><div class="v">${t.waving}</div></div>
     <div class="card" style="${t.reports_open?'border-color:#c9303f':''}"><div class="l">미처리 신고</div><div class="v" style="${t.reports_open?'color:#c9303f':''}">${t.reports_open}</div><div class="s"><a href="#reports">신고함 열기</a></div></div>
   </div>
