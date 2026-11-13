@@ -181,6 +181,10 @@ begin
   out := pg_temp.must_fail(out, 'follow non-author', format('insert into public.author_follows(profile_id, author_id) values (%L, %L)', d1, d2));
   out := pg_temp.must_fail(out, 'follow as other', format('insert into public.author_follows(profile_id, author_id) values (%L, %L)', d2, d1));
   out := pg_temp.must_fail(out, 'open_inquiry_room(작가 아님)', format('select public.open_inquiry_room(''author'', %L)', d2));
+  out := pg_temp.must_fail(out, 'insert meetup_applications', format('insert into public.meetup_applications(meetup_id, profile_id) values (gen_random_uuid(), %L)', d1));   -- schema 109
+  out := pg_temp.must_fail(out, 'meetup_set_terms(남의 모임)', 'select public.meetup_set_terms(gen_random_uuid(), ''x'', ''apply'', null)');
+  out := pg_temp.must_fail(out, 'meetup_decide(남의 모임)', format('select public.meetup_decide(gen_random_uuid(), %L, true)', d2));
+  out := pg_temp.must_fail(out, 'meetup_applicants(남의 모임)', 'select count(*) from public.meetup_applicants(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'read ddeuchin_claims', 'select 1 from public.ddeuchin_claims limit 1');   -- schema 100
   out := pg_temp.must_fail(out, 'admin_ddeuchin_list', 'select public.admin_ddeuchin_list()');
   out := pg_temp.must_fail(out, 'admin_ddeuchin_decide', 'select public.admin_ddeuchin_decide(1, true)');

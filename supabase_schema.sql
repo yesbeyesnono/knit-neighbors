@@ -1669,3 +1669,12 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --       앱은 상대가 아직 아무 말도 하지 않은 문의방을 받는 쪽 목록에 보이지 않게 한다(1.0.7 부터. 옛 앱은 빈 방이 보일 수 있음)
 --   notify_on_shop_post() : 작가가 클래스를 열면 팔로워에게도 'notice' 알림(뜨친은 기존 알림이 있어 제외)
 --   트리거 meetups_notify_followers → notify_followers_on_meetup() : 작가가 공개 모임을 열면 팔로워에게 'notice' 알림(link meetup)
+
+-- 109. 참가비가 있는 모임: 신청 → 개설자 확정 (2026-11-13 대표 확정 시안. 원본 supabase/meetup_apply.sql, 테스트 supabase/tests/meetup_apply_test.sql)
+--   meetups.fee_note(참가비를 어디에 쓰는지 한 줄) · refund_note(취소·환불 안내 한 줄) · join_mode 'open'(바로 참여, 기본) | 'apply'(신청 → 개설자 확정)
+--   meetup_applications(meetup_id, profile_id, status applied|accepted|rejected|cancelled, note) : 본인·개설자·관리자만 읽음, 쓰기는 함수로만
+--   meetup_set_terms(meetup, fee_note, mode, refund) : 개설자만. 링크·계좌번호·금칙어 거절, 80자
+--   meetup_apply(meetup, note) / meetup_cancel_apply(meetup) : 신청·취소(취소 뒤 다시 신청 가능, 거절된 뒤에는 불가). 개설자에게 'notice' 알림
+--   meetup_app_summary(meetup) → {mine, waiting(개설자에게만)} · meetup_applicants(meetup) 개설자용 목록
+--   meetup_decide(meetup, profile, accept) : 개설자만. 정원 확인 → 확정이면 room_members 추가(채팅방 입장) + 신청자에게 알림
+--   트리거 room_members_meetup_gate(before insert) : join_mode='apply' 모임의 방에는 개설자와 확정된 사람만 들어온다(옛 앱의 join_meetup·친구 초대도 여기서 막힘)

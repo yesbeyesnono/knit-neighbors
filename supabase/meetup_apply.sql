@@ -1,5 +1,5 @@
 -- 109. 참가비가 있는 모임: 쓰임새·환불 안내 + '신청 → 개설자 확정' (2026-11-13 대표 확정 시안)
---   ※ 2026-11-13 작성 시점에 DB 연결이 끊겨 아직 적용하지 못함. 적용 뒤 supabase_schema.sql · permissions_test.sql 에 옮겨 적을 것.
+--   2026-11-13 밤 적용, 2026-11-14 tests/meetup_apply_test.sql 로 확인.
 --   앱은 meetups.join_mode 칸이 있는지 먼저 확인하고(없으면 새 칸을 숨김) 이 기능을 쓴다.
 alter table public.meetups add column if not exists fee_note text, add column if not exists refund_note text, add column if not exists join_mode text not null default 'open';
 alter table public.meetups drop constraint if exists meetups_join_mode_chk;
