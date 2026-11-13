@@ -926,6 +926,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #phv .phs{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;align-items:center;justify-content:center;min-width:0}#phv .phs img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 #phv .phdots{flex:none;display:flex;gap:5px;justify-content:center;min-height:6px;margin:10px 0 0}#phv .phdots i{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.4}#phv .phdots i.on{opacity:1}
 #phv .phacts{flex:none;justify-content:center;gap:28px;margin:0;padding:12px 0 max(18px,env(safe-area-inset-bottom));color:#fff}#phv .phacts button{color:#fff;font-size:14px}#phv .phacts button.on{color:var(--tred,#e0245e)}#phv .phacts button svg{width:22px;height:22px}
+body.kb #nav{display:none!important}
 </style>
 </head>
 <body>
@@ -3912,6 +3913,10 @@ async function toggleRepost(id, btn){
   if(btn){ btn.classList.toggle('on3',!on); const cnt=btn.querySelector('span'); const v=Math.max(0,(parseInt(cnt.textContent)||0)+bump); cnt.textContent = v||''; }
   toast(on?'리포스트를 취소했어요':'리포스트했어요. 내 프로필 › 리포스트에 모여요');
 }
+// 글자를 치는 동안(자판이 올라온 동안)에는 하단 메뉴를 숨긴다 — 자판 위에 메뉴가 떠서 입력칸을 가리던 문제(2026-11-14 대표 제보)
+(function(){ const isText=e=>e && (e.tagName==='TEXTAREA' || (e.tagName==='INPUT' && !/^(checkbox|radio|file|button|submit|range|color|date|time|datetime-local)$/i.test(e.type||'text')) || e.isContentEditable);
+  let t=null; document.addEventListener('focusin', e=>{ if(isText(e.target)){ clearTimeout(t); document.body.classList.add('kb'); } });
+  document.addEventListener('focusout', ()=>{ clearTimeout(t); t=setTimeout(()=>{ if(!isText(document.activeElement)) document.body.classList.remove('kb'); }, 120); }); })();
 // 사진 전체 화면: 누른 사진이 속한 묶음(같은 글의 사진들)을 옆으로 넘겨 본다. 글의 사진이면 아래에 좋아요·댓글
 let phvPost=null, phvDirty=false;
 function openPhoto(u){
