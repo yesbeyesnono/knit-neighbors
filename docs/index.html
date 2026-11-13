@@ -962,7 +962,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
     <div class="top"><button class="back" onclick="closePost()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>글</h1></div>
     <div class="feed" id="postBody"></div>
     <div id="replyBar"><div id="replyTo" hidden><span id="replyToTxt"></span><button type="button" aria-label="답글 대상 지우기" onclick="setReplyTo(null)">✕</button></div><div id="replyPv" hidden><img id="replyPvImg" alt=""><button type="button" onclick="rpPhotoClear()">사진 빼기</button></div>
-    <div class="compose"><div id="replyAva"></div><div class="mpop" id="mpop-detail" hidden></div><button type="button" class="rph" title="사진" aria-label="사진 넣기" onclick="$('#rFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5" width="17.2" height="14" rx="2"></rect><circle cx="8.6" cy="9.4" r="1.4"></circle><path d="M20.6 15.2l-4.4-4.4-7.6 8.2"></path></svg></button><input id="rFile" type="file" accept="image/*" hidden onchange="rpPhotoPick(this.files)"><textarea id="replyIn" rows="1" placeholder="댓글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'detail')"></textarea><button class="btn" id="replyBtn" disabled onclick="submitReply()">게시</button></div></div>
+    <div class="compose"><div id="replyAva"></div><div class="mpop" id="mpop-detail" hidden></div><textarea id="replyIn" rows="1" placeholder="댓글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'detail')"></textarea><button class="btn" id="replyBtn" disabled onclick="submitReply()">게시</button></div></div>
   </section>
 
   <!-- 친구 -->
@@ -4551,7 +4551,8 @@ function setReplyTo(x){
   const bar=$('#replyTo'); if(bar){ bar.hidden=!replyTarget; if(replyTarget) $('#replyToTxt').textContent=`${replyTarget.nick||'이 댓글'} 님에게 답글 다는 중`; }
   document.querySelectorAll('#postBody .cmt.on').forEach(e=>e.classList.remove('on')); if(replyTarget){ const el=vEl('cm-'+replyTarget.at); if(el) el.classList.add('on'); }
 }
-async function rpPhotoPick(files){ const f=files&&files[0]; $('#rFile').value=''; if(!f) return; try{ const blob=await shrinkImage(f,1280); rpPhotoClear(); rpPhoto={ blob, url:URL.createObjectURL(blob) }; $('#replyPvImg').src=rpPhoto.url; $('#replyPv').hidden=false; rpIn($('#replyIn')); }catch(e){ toast(e.message||'사진을 불러오지 못했어요'); } }
+// 댓글 사진은 2026-11-13 대표 결정으로 뺌(목록의 답글 칸과 글 화면의 댓글 칸을 같게 — 사진 버튼 없음). 이미 올라온 댓글 사진은 그대로 보여 준다. 아래 함수는 남겨 둠
+async function rpPhotoPick(files){ const f=files&&files[0]; if($('#rFile')) $('#rFile').value=''; if(!f) return; try{ const blob=await shrinkImage(f,1280); rpPhotoClear(); rpPhoto={ blob, url:URL.createObjectURL(blob) }; $('#replyPvImg').src=rpPhoto.url; $('#replyPv').hidden=false; rpIn($('#replyIn')); }catch(e){ toast(e.message||'사진을 불러오지 못했어요'); } }
 function rpPhotoClear(){ if(rpPhoto){ try{ URL.revokeObjectURL(rpPhoto.url); }catch(e){} } rpPhoto=null; const pv=$('#replyPv'); if(pv) pv.hidden=true; const t=$('#replyIn'); if(t) rpIn(t); }
 async function submitReply(){
   const t=rpText($('#replyIn').value); if((!t && !rpPhoto) || !curPost) return;
