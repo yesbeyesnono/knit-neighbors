@@ -711,6 +711,28 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .archit{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.archit .tx{flex:1;min-width:0;cursor:pointer}.archit .tx b{display:block;font-size:.92rem}.archit .tx b .mbadge{display:inline-block;width:auto;margin-top:0}.archit .tx span{display:block;color:var(--ink3);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.archit button{flex:none;border:1px solid var(--line);background:var(--color-surface);border-radius:999px;font:inherit;font-size:.76rem;padding:5px 10px;cursor:pointer}
 .wqsub{font-size:.72rem;font-weight:700;color:var(--ink3);margin:8px 0 5px}.wqk{display:flex;flex-wrap:wrap;gap:6px}.wqk button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:var(--color-surface);font:inherit;font-size:.8rem;font-weight:700;color:var(--ink);cursor:pointer;max-width:100%}.wqk button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wqk button i{width:14px;height:14px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.08)}.wqk button.on{background:var(--color-primary);border-color:var(--color-primary);color:#fff}.wqk button.s{border-style:dashed;background:var(--bg2);color:var(--color-text-muted)}#wQuick:not(:empty){margin-bottom:10px}
 .addy{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;border:1.5px dashed var(--color-primary);border-radius:12px;padding:8px 12px;font-size:.82rem;font-weight:700;color:var(--color-primary);cursor:pointer}.addy small{font-weight:400;font-size:.72rem;color:var(--ink3);flex:none}
+/* 뜨친 신청 팝업 — 이 팝업에서만 쓰는 축하 색(버터 옐로). 앱의 평소 색과 별개 (2026-11-15 대표 확정) */
+#fqpop{position:fixed;inset:0;z-index:75;background:rgba(20,20,20,.38);display:flex;align-items:center;justify-content:center;padding:24px;--fy:#FFD95C;--fi:#3B1D08;--fs:#8A4B12;--fl:#E08A1E;--fb:#E2572B;--fbs:#B03E1A}
+#fqpop .fqc{position:relative;width:100%;max-width:330px;border-radius:28px;background:var(--fy);color:var(--fi);text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.3);padding:20px 0 0;animation:fqin .32s cubic-bezier(.2,1.3,.4,1)}
+@keyframes fqin{from{transform:scale(.86) rotateY(50deg);opacity:0}to{transform:none;opacity:1}}
+#fqpop .fqc.tk{padding-top:104px;margin-top:70px}#fqpop .fqc.tk:before,#fqpop .fqc.tk:after{content:"";position:absolute;top:60%;width:26px;height:26px;border-radius:50%;background:#A6A5A0}#fqpop .fqc.tk:before{left:-13px}#fqpop .fqc.tk:after{right:-13px}
+#fqpop .fqpop-img{position:absolute;left:50%;transform:translateX(-50%);top:-94px;width:276px;height:198px;overflow:hidden;pointer-events:none}#fqpop .fqpop-img img{width:276px;display:block}
+#fqpop .fqx{position:absolute;right:8px;top:8px;width:36px;height:36px;border:0;background:none;font-size:20px;color:var(--fi);cursor:pointer}#fqpop .tk .fqx{top:100px}
+#fqpop .fqkick{display:inline-block;font-size:.94rem;font-weight:900;border-radius:999px;padding:3px 14px;transform:rotate(-4deg);background:var(--fi);color:var(--fy)}#fqpop .fqkick.c{background:var(--fb);color:#fff}
+#fqpop .fqbig{font-size:1.66rem;font-weight:900;line-height:1.22;letter-spacing:-.5px;margin-top:10px}#fqpop .fqbig.s{font-size:1.36rem;margin-top:0}
+#fqpop .fqsmall{font-size:.84rem;font-weight:700;margin-top:6px;color:var(--fs)}#fqpop .fqline{border-top:2.5px dashed var(--fl);margin:14px 22px 0}
+#fqpop .fqcta{display:block;width:calc(100% - 40px);height:52px;border-radius:999px;border:0;font:inherit;font-size:1.03rem;font-weight:900;margin:14px 20px 0;background:var(--fb);color:#fff;box-shadow:0 5px 0 var(--fbs);cursor:pointer}
+#fqpop .fqlater{display:block;width:100%;border:0;background:none;font:inherit;font-size:.78rem;text-decoration:underline;padding:12px 0 16px;color:var(--fi);opacity:.75;cursor:pointer}
+#fqpop .fqp{background:#fff;border-radius:22px;padding:14px;margin:54px 16px 0}#fqpop .fqp .ava{width:84px;height:84px;margin:-56px auto 6px;border:5px solid #fff;box-shadow:0 0 0 4px var(--fb);font-size:1.9rem}
+#fqpop .fqnm{font-size:1.2rem;font-weight:900}#fqpop .fqsub{font-size:.78rem;color:#6b5a4a}#fqpop .fqchips{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;margin-top:8px}#fqpop .fqchips span{font-size:.75rem;font-weight:800;border-radius:999px;padding:2px 10px;color:#fff;background:var(--fb)}#fqpop .fqchips span:nth-child(2){background:#5E8C3A}#fqpop .fqchips span:nth-child(3){background:var(--fi)}
+#fqpop .fqmsg{font-size:.82rem;color:#4a3a2a;background:#FFF6DA;border-radius:12px;padding:7px 10px;margin-top:8px}#fqpop .fqlk{display:inline-block;border:0;background:none;font:inherit;font-size:.78rem;text-decoration:underline;color:#6b5a4a;margin-top:10px;cursor:pointer}
+#fqpop .fqmore{margin-top:10px;border-top:1px dashed #e3d6b8;padding-top:10px;text-align:left;max-height:32vh;overflow-y:auto}#fqpop .fqmore .bio{font-size:.82rem;color:#4a3a2a;white-space:pre-line}#fqpop .fqmore .lab{font-size:.72rem;font-weight:800;color:var(--fs);margin:8px 0 5px}#fqpop .fqg3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}#fqpop .fqg3 img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;display:block}
+#fqpop .fqtwo{display:flex;gap:8px;margin:12px 16px 0}#fqpop .fqtwo button,.fqbar .fqtwo button{height:48px;border-radius:999px;font:inherit;font-weight:900;font-size:.95rem;cursor:pointer}#fqpop .fqtwo .a,.fqbar .fqtwo .a{flex:1.7;border:0;background:#E2572B;color:#fff;box-shadow:0 5px 0 #B03E1A}#fqpop .fqtwo .b,.fqbar .fqtwo .b{flex:1;border:2.5px solid #3B1D08;background:none;color:#3B1D08}
+#fqpop .fqdots{display:flex;justify-content:center;gap:6px;margin-top:12px}#fqpop .fqdots i{width:8px;height:8px;border-radius:50%;background:rgba(59,29,8,.3)}#fqpop .fqdots i.on{background:var(--fi);width:20px;border-radius:9px}
+#fqpop .fqpair{display:flex;justify-content:center;align-items:center;margin-top:12px}#fqpop .fqpair .ava{width:70px;height:70px;border:4px solid #fff;font-size:1.5rem}#fqpop .fqpair b{width:32px;height:32px;border-radius:50%;background:var(--fb);color:#fff;display:grid;place-items:center;margin:0 -8px;z-index:2;font-size:1rem;border:3px solid var(--fy)}
+#fqpop .fqcf i{position:absolute;display:block;animation:fqcf 1.1s ease-out both}@keyframes fqcf{from{transform:translateY(-60px) rotate(0);opacity:0}30%{opacity:1}to{transform:translateY(0) rotate(200deg);opacity:1}}
+.fqbar{position:sticky;bottom:0;z-index:5;background:#FFD95C;color:#3B1D08;padding:12px 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.14);margin-top:8px}.fqbar>b{display:block;font-size:.9rem;margin-bottom:8px}.fqbar .fqtwo{display:flex;gap:8px}
+#greetBar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--color-surface);border-top:1px solid var(--line)}#greetBar button{border:1.5px solid var(--color-primary);background:none;color:var(--color-primary);border-radius:999px;padding:5px 11px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
 .arcmore{display:flex;justify-content:space-between;align-items:center;width:calc(100% - 24px);margin:14px 12px;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:var(--color-surface);font:inherit;font-size:.9rem;font-weight:700;color:var(--ink);cursor:pointer}.arcmore small{font-weight:400;font-size:.78rem;color:var(--ink3)}
 #pmenuBg{position:fixed;inset:0;z-index:69}
 #pmenu{position:fixed;z-index:70;min-width:176px;background:var(--color-surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.22);overflow:hidden}
@@ -1674,7 +1696,7 @@ function parseGeo(hex){
 // ============ 화면 전환 ============
 const NAV_OF = { supporters:'my', stash:'my', friends:'chats', skills:'my', activity:'my', post:'comm', profile:'', compose:'', shop:'map' };
 function show(v){ view=v; document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on', s.id==='v-'+v)); const navOn=['map','comm','friends','chats','my','activity','shop'].includes(v); $('#nav').style.display=navOn?'flex':'none'; const hi=NAV_OF[v]||v; document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===hi)); }
-function go(v){ closeSheet(); show(v); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats'){ renderChats(); chatDot(); } if(v==='my') renderMy(); }
+function go(v){ closeSheet(); show(v); if(['map','comm','chats','my'].includes(v)) fqSoon(); if(v==='map') initMap(); if(v==='comm') openComm(); if(v==='friends') renderFriends(); if(v==='chats'){ renderChats(); chatDot(); } if(v==='my') renderMy(); }
 // 약관·개인정보처리방침 등 문서 5개는 홈페이지 주소(app.knitup.co.kr)로 연다 — 보이는 주소 통일(2026-11-10). 원본은 이 저장소 docs/, 홈페이지가 매일 가져감
 const DOC_BASE='https://app.knitup.co.kr/', DOC_RE=/^(privacy|terms|guidelines|support|delete-account)\.html(#.*)?$/;
 document.addEventListener('click', e => { const a=e.target.closest('a[target="_blank"]'); if(!a) return; const h=a.getAttribute('href')||''; const doc=DOC_RE.test(h);
@@ -2685,7 +2707,7 @@ async function openProfile(id, back, own){
   else if(!r) action = `<button class="btn primary" onclick="requestFriend('${id}')">친구 신청</button>`;
   else if(r.status==='accepted') action = `<button class="btn primary" onclick="openDirectRoom('${id}')">메시지</button>`;
   else if(r.status==='pending' && r.requester_id===me.id) action = `<button class="btn o" disabled>친구 신청 보냄 · 수락을 기다려요</button>`;
-  else if(r.status==='pending') action = `<button class="btn primary" onclick="respond('${id}','accepted')">수락</button><button class="btn o" onclick="respond('${id}','declined')">거절</button>`;
+  else if(r.status==='pending') action = '';   // 받은 신청: 화면 아래 노란 띠(.fqbar)에서 수락
   else if(r.status==='blocked') action = `<button class="btn o" disabled>차단됨</button>`;
   else action = `<button class="btn o" disabled>거절됨 · 30일 후 재신청</button>`;
   const handle= p.id===SUPPORT_ID ? '운영진' : [p.dong_name?`${p.dong_name}${p.dong_verified_at?' ✓':''}`:'', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
@@ -2705,6 +2727,7 @@ async function openProfile(id, back, own){
   $('#profTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; profTab=b.dataset.t; [...$('#profTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadUserFeed(profId, profTab, $('#profFeed')); };
   show('profile'); bindTabSwipe('#v-profile', '#profTabs');
   loadUserFeed(id, profTab, $('#profFeed'));
+  if(!staff && r && r.status==='pending' && r.addressee_id===me.id) $('#profBody').insertAdjacentHTML('beforeend', `<div class="fqbar" id="fqBar"><b>💌 ${esc(p.nickname)} 님이 뜨친을 신청했어요</b><div class="fqtwo"><button type="button" class="a" onclick="fqAccept('${id}')">뜨친 할래요! 🙌</button><button type="button" class="b" onclick="this.closest('.fqbar').remove()">다음에</button></div><button type="button" style="display:block;width:100%;border:0;background:none;font:inherit;font-size:.75rem;text-decoration:underline;color:#3B1D08;opacity:.7;padding-top:8px;cursor:pointer" onclick="fqDecline('${id}')">정중히 거절하기</button></div>`);
 }
 function closeProfile(){ profBack=null; navBack('map'); }
 function profileMenu(){ const id=profId; openSheet(`<button class="btn o" onclick="closeSheet();reportUser('${id}')">${ico('report')} 신고</button><button class="btn r" onclick="closeSheet();blockUser('${id}')">차단</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
@@ -2758,9 +2781,76 @@ async function sendRequest(id){
 async function respond(id, status){
   const { error } = await sb.from('friendships').update({ status }).eq('requester_id',id).eq('addressee_id',me.id);
   if(error) return toast('실패: '+error.message);
-  toast(status==='accepted'?'친구가 됐어요. 채팅방이 열렸어요':'거절했어요');
+  if(status!=='accepted') toast('거절했어요');
   if(view==='friends') renderFriends(); else if(view==='profile') openProfile(id); else closeSheet();
+  if(status==='accepted'){ refreshBadge(); fqCelebrate(id); }
 }
+// ===== 뜨친 신청 팝업 (2026-11-15 대표 확정: 버터 옐로 티켓 · 가운데 카드 · '뜨친 생겼다' 이벤트의 두 사람) =====
+// 앱을 열 때 받은 신청이 있으면 한 번 띄운다(신청마다 한 번, 기기 기억 kn_fq_seen). ① 도착 카드 → ② 보낸 사람 공개 → ③ 축하(하이파이브) → ④ 대화방 + 첫 인사
+let fq={ rows:[], i:0, open:false, extra:{} }, fqT=null, fqAt=0;
+function fqSeenGet(){ try{ return JSON.parse(localStorage.getItem('kn_fq_seen')||'{}'); }catch(e){ return {}; } }
+function fqSeenAdd(keys){ try{ const s=fqSeenGet(); keys.forEach(k=>s[k]=1); const ks=Object.keys(s); if(ks.length>300) ks.slice(0,ks.length-300).forEach(k=>delete s[k]); localStorage.setItem('kn_fq_seen', JSON.stringify(s)); }catch(e){} }
+function fqSoon(force){ clearTimeout(fqT); fqT=setTimeout(()=>fqCheck(force), force?900:1600); }
+async function fqCheck(force){
+  if(!me || !myProfile?.onboarded_at || $('#fqpop')) return;
+  if(!['map','comm','chats','my'].includes(view) || $('#sheetwrap').classList.contains('on') || $('#askdlg') || ($('#subpg') && !$('#subpg').hidden) || ($('#phv')&&$('#phv').classList.contains('on'))) return;
+  if(!force && Date.now()-fqAt<45000) return; fqAt=Date.now();
+  let rows=[]; try{ rows=(await fetchFriendships()).filter(r=>r.status==='pending' && r.addressee_id===me.id && r.requester && r.requester.nickname); }catch(e){ return; }
+  const seen=fqSeenGet(); const fresh=rows.filter(r=>!seen[r.requester_id+'|'+r.created_at]); if(!fresh.length || $('#fqpop')) return;
+  fqSeenAdd(fresh.map(r=>r.requester_id+'|'+r.created_at));
+  fq={ rows:fresh.slice(0,10), i:0, extra:{} }; fqDraw('intro');
+}
+function fqClose(){ $('#fqpop')?.remove(); }
+function fqWrap(html){ let w=$('#fqpop'); if(!w){ w=document.createElement('div'); w.id='fqpop'; w.onclick=e=>{ if(e.target===w) fqClose(); }; document.body.appendChild(w); } w.innerHTML=html; }
+function fqChips(p){ const my=myProfile||{}, c=[]; if(p.dong_name && p.dong_name===my.dong_name) c.push('같은 동네');
+  const near=(a,b)=>a>0&&b>0&&Math.abs(a-b)<=1; if(near(p.level_crochet,my.level_crochet)||near(p.level_knit,my.level_knit)) c.push('단계 비슷해요');
+  const ex=fq.extra[p.id]; if(ex && Array.isArray(ex.available) && Array.isArray(my.available)){ const k=ex.available.find(a=>my.available.includes(a)); if(k && AVAIL[k]) c.push(AVAIL[k]+'에 떠요'); }
+  return c.length?`<div class="fqchips">${c.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''; }
+function fqDraw(step){
+  const r=fq.rows[fq.i]; if(!r) return fqClose(); const p=r.requester, id=r.requester_id;
+  if(step==='intro') return fqWrap(`<div class="fqc tk"><div class="fqpop-img"><img src="events/ddeuchin-wave.webp" alt=""></div><button type="button" class="fqx" aria-label="닫기" onclick="fqClose()">✕</button>
+    <span class="fqkick">드디어!</span><div class="fqbig">뜨친 신청이<br>${fq.rows.length>1?fq.rows.length+'건 ':''}도착했어요</div><div class="fqsmall">누군가 나와 같이 뜨고 싶대요 💌</div><div class="fqline"></div>
+    <button type="button" class="fqcta" onclick="fqDraw('who')">누가 보냈는지 보기 →</button><button type="button" class="fqlater" onclick="fqClose()">나중에 볼게요</button></div>`);
+  if(step==='who'){ const ex=fq.extra[id]; const handle=[p.dong_name, lvShort(p)].filter(Boolean).join(' · ');
+    fqWrap(`<div class="fqc"><button type="button" class="fqx" aria-label="닫기" onclick="fqClose()">✕</button><div class="fqbig s">이분이 뜨친을<br>신청했어요!</div>
+      <div class="fqp">${avatar(p,true)}<div class="fqnm">${esc(p.nickname)}</div><div class="fqsub">${esc(handle||'동네 미설정')}</div>${fqChips(p)}${r.message?`<div class="fqmsg">"${esc(r.message)}"</div>`:''}
+        ${ex&&ex.open?`<div class="fqmore">${ex.bio?`<div class="bio">${esc(ex.bio)}</div>`:''}${ex.photos.length?`<div class="lab">최근 완성작</div><div class="fqg3">${ex.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join('')}</div>`:''}${!ex.bio&&!ex.photos.length?'<div class="bio" style="color:#8a7a6a">아직 소개나 완성작이 없어요</div>':''}<button type="button" class="fqlk" style="display:block;margin:10px auto 0" onclick="fqClose();openProfile('${id}')">프로필 전체 보기 ›</button></div>`:`<button type="button" class="fqlk" onclick="fqMore('${id}')">프로필 더 보기 ▾</button>`}</div>
+      ${fq.rows.length>1?`<div class="fqdots">${fq.rows.map((_,k)=>`<i class="${k===fq.i?'on':''}"></i>`).join('')}</div>`:''}
+      <div class="fqtwo"><button type="button" class="a" onclick="fqAccept('${id}')">뜨친 할래요! 🙌</button><button type="button" class="b" onclick="fqNext()">다음에</button></div>
+      <button type="button" class="fqlater" onclick="fqDecline('${id}')">정중히 거절하기</button></div>`);
+    if(!ex) fqLoadExtra(id).then(()=>{ if($('#fqpop') && fq.rows[fq.i]?.requester_id===id && !$('#fqpop .fqmore')) { const cur=$('#fqpop .fqchips'); const h=fqChips(p); if(h && !cur){ const sub=$('#fqpop .fqsub'); if(sub) sub.insertAdjacentHTML('afterend', h); } } });
+    return; }
+}
+async function fqLoadExtra(id){ if(fq.extra[id]) return fq.extra[id];
+  const ex={ open:false, bio:'', available:null, photos:[] }; fq.extra[id]=ex;
+  try{ const [{ data:pr }, { data:ws }] = await Promise.all([sb.from('profiles').select('bio,now_making,available').eq('id', id).maybeSingle(), sb.from('posts').select('photos').eq('author_id', id).is('parent_id', null).not('work_id','is',null).order('created_at',{ascending:false}).limit(3)]);
+    ex.bio = pr?.bio || (pr?.now_making?`지금 뜨는 것: ${pr.now_making}`:''); ex.available=pr?.available||null; ex.photos=(ws||[]).map(w=>(w.photos||[])[0]).filter(Boolean); }catch(e){}
+  return ex; }
+async function fqMore(id){ const ex=await fqLoadExtra(id); ex.open=true; if($('#fqpop') && fq.rows[fq.i]?.requester_id===id) fqDraw('who'); }
+function fqNext(){ if(fq.i < fq.rows.length-1){ fq.i++; fqDraw('who'); } else fqClose(); }
+async function fqAccept(id){
+  const { error } = await sb.from('friendships').update({ status:'accepted' }).eq('requester_id', id).eq('addressee_id', me.id);
+  if(error) return toast('실패: '+error.message);
+  refreshBadge(); $('#fqBar')?.remove(); if(view==='profile' && profId===id) openProfile(id, true); else if(view==='friends') renderFriends();
+  fqCelebrate(id);
+}
+function fqDecline(id){ askConfirm('이 신청을 거절할까요?', '상대에게 따로 알리지는 않아요. 30일 뒤에 다시 신청할 수 있어요.', '거절', async()=>{ const { error } = await sb.from('friendships').update({ status:'declined' }).eq('requester_id', id).eq('addressee_id', me.id); if(error) return toast('실패: '+error.message); refreshBadge(); $('#fqBar')?.remove(); if($('#fqpop')){ fq.rows.splice(fq.i,1); if(fq.i>=fq.rows.length) fq.i=fq.rows.length-1; if(fq.rows.length) fqDraw('who'); else fqClose(); } else if(view==='profile' && profId===id) openProfile(id, true); toast('거절했어요'); }); }
+// ③ 축하 카드: 팝업·프로필의 노란 띠·받은 신청 목록 어디서 수락하든 같은 카드
+async function fqCelebrate(id){
+  let p=(fq.rows.find(r=>r.requester_id===id)||{}).requester; if(!p){ try{ const { data } = await sb.from('profiles').select('id,nickname,avatar_url').eq('id', id).maybeSingle(); p=data; }catch(e){} } p=p||{ nickname:'뜨친' };
+  const left = fq.rows.filter(r=>r.requester_id!==id).length; fq.rows=fq.rows.filter(r=>r.requester_id!==id); if(fq.i>=fq.rows.length) fq.i=Math.max(0, fq.rows.length-1);
+  const cf=[['12%','118px','#E2572B','50%',10,10],['80%','150px','#5E8C3A','2px',8,16],['16%','214px','#fff','2px',8,16],['86%','232px','#fff','50%',10,10],['30%','104px','#5E8C3A','50%',8,8],['70%','108px','#E2572B','2px',8,14]];
+  fqWrap(`<div class="fqc tk"><div class="fqpop-img"><img src="events/ddeuchin-highfive.webp" alt=""></div><button type="button" class="fqx" aria-label="닫기" onclick="fqAfter()">✕</button>
+    <div class="fqcf">${cf.map(([l,t,c,rr,w,h],k)=>`<i style="left:${l};top:${t};width:${w}px;height:${h}px;background:${c};border-radius:${rr};animation-delay:${k*70}ms"></i>`).join('')}</div>
+    <span class="fqkick c">축하해요!</span><div class="fqbig">뜨친이<br>생겼어요 🎉</div>
+    <div class="fqpair">${avatar(myProfile||{},true)}<b>♥</b>${avatar(p,true)}</div><div class="fqsmall">${esc(myProfile?.nickname||'나')} · ${esc(p.nickname||'')}</div><div class="fqline"></div>
+    <button type="button" class="fqcta" onclick="fqGreet('${id}')">첫 인사 건네기 💬</button><button type="button" class="fqlater" onclick="fqAfter()">나중에 인사할게요</button></div>`);
+  fq._left=left;
+}
+function fqAfter(){ if(fq.rows.length){ fqDraw('who'); } else fqClose(); }
+const FQ_GREET=['안녕하세요! 반가워요 😊','요즘 뭐 뜨고 계세요?','같은 동네네요! 반가워요'];
+async function fqGreet(id){ fqClose(); await openDirectRoom(id);
+  setTimeout(()=>{ if(view!=='room') return; const inp=$('#msgIn'); if(inp && !inp.value) inp.value=FQ_GREET[0]; $('#greetBar')?.remove(); const bar=document.createElement('div'); bar.id='greetBar'; bar.innerHTML=FQ_GREET.map(t=>`<button type="button">${esc(t)}</button>`).join(''); bar.onclick=e=>{ const b=e.target.closest('button'); if(b){ $('#msgIn').value=b.textContent; $('#msgIn').focus(); } }; const c=$('#v-room .compose'); if(c) c.parentNode.insertBefore(bar, c); }, 900); }
 async function blockUser(id){
   if(!confirm('차단하면 지도와 채팅에서 서로 보이지 않아요. 차단할까요?')) return;
   const { data:rel } = await sb.from('friendships').select('requester_id,addressee_id').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`);
@@ -2802,12 +2892,12 @@ let chatChan=null, roomSeenAt=0, chatDotT=null;
 function chatDot(){ if(!me) return; clearTimeout(chatDotT); chatDotT=setTimeout(async()=>{ try{ const {data}=await sb.rpc('my_unread_rooms'); const e=$('#chatDot'); if(e) e.hidden=!(data>0); }catch(e){} }, 400); }
 function roomSeen(id){ if(view!=='room' || roomId!==id || document.hidden) return; const now=Date.now(); if(now-roomSeenAt<5000) return; roomSeenAt=now; sb.from('room_members').update({last_read_at:new Date().toISOString()}).eq('room_id',id).eq('profile_id',me.id).then(()=>{}); }
 function watchChats(){ if(chatChan || !me) return; chatChan = sb.channel('chat-dot').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},p=>{ const m=p.new||{}; if(m.sender_id===me.id) return; if(view==='room' && roomId===m.room_id) return; chatDot(); if(view==='chats') renderChats(); }).subscribe(); chatDot(); }
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && me) chatDot(); });
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && me){ chatDot(); fqSoon(); } });
 function watchFriends(){
   watchChats();
   if(friendChan) return;
   friendChan = sb.channel('friend-inbox').on('postgres_changes',{event:'*',schema:'public',table:'friendships',filter:`addressee_id=eq.${me.id}`},payload=>{
-    if(payload.eventType==='INSERT') toast('새 친구 신청이 왔어요');
+    if(payload.eventType==='INSERT'){ toast('새 뜨친 신청이 왔어요'); fqSoon(true); }
     refreshBadge(); if(view==='friends') renderFriends();
   }).on('postgres_changes',{event:'UPDATE',schema:'public',table:'friendships',filter:`requester_id=eq.${me.id}`},payload=>{
     if(payload.new.status==='accepted') toast('친구 신청이 수락됐어요');
@@ -3205,7 +3295,7 @@ function appendMsg(m){
   $('#msgs').appendChild(el);
 }
 function scrollMsgs(){ const v=$('#v-room'); v.scrollTop=v.scrollHeight; }
-async function sendMsg(txt){   // txt 를 주면 입력창 대신 그 글을 보낸다(서포터즈 신청·친구 초대 알리기)
+async function sendMsg(txt){ $('#greetBar')?.remove();   // txt 를 주면 입력창 대신 그 글을 보낸다(서포터즈 신청·친구 초대 알리기)
   const t=(typeof txt==='string'?txt:$('#msgIn').value).trim(); if(!t||!roomId)return;
   await loadBanned(); if(hasBanned(t)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
   if(typeof txt!=='string') $('#msgIn').value='';
