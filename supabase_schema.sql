@@ -1745,3 +1745,13 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   stash_apply_read : 띠지에 색 이름이 없으면 사진에서 본 색 이름(color_guess)을 쓰고, texture 를 허용 값만 골라 저장('texture' 를 회원이 고쳤으면 유지)
 --   read-band : 사진 한 장 또는 두 장을 한 번에 읽는다. 실 자체의 대표색(color_hex)·색 이름(color_guess)·질감(texture)을 새로 읽음
 
+
+-- ============================================================
+-- 118. 채팅방 배경 테마 (2026-11-15) — 테이블·함수 변경 없음, app_config 값 하나
+-- ============================================================
+-- app_config.chat_theme = {id, active, from, until, img, bg, dark}
+--   img  : 이 저장소 Pages 의 chat-themes/*.svg 만(앱 CT_IMG 가 검사 — 임의 URL 은 무시)
+--   from/until : 이 기간에만 적용(없으면 제한 없음). bg = 그림이 뜨기 전 바탕색(#rrggbb). dark = 어두운 배경(바깥 글자 밝게)
+-- 켜기/끄기·기간·그림 교체는 이 값만 바꾸면 됨(앱 심사 불필요, 앱은 30분에 한 번 다시 읽음)
+-- insert into public.app_config(key, value) values ('chat_theme', '{"id":"xmas2026","active":true,"from":"2026-11-20T00:00:00+09:00","until":"2027-01-01T00:00:00+09:00","img":"https://yesbeyesnono.github.io/knit-neighbors/chat-themes/xmas2026.svg","bg":"#22384A","dark":true}')
+--   on conflict (key) do update set value=excluded.value;

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>채팅 성탄 배경 시안</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:#E7E4DB;padding:28px 24px 36px;color:#22362A}
+h1{font-size:20px;margin-bottom:6px}
+.sub{font-size:13.5px;color:#55604F;margin-bottom:22px}
+.row{display:flex;gap:28px;flex-wrap:wrap}
+.col{width:390px}
+.cap{font-size:15px;font-weight:700;margin-bottom:4px}
+.cap2{font-size:12.5px;color:#55604F;margin-bottom:10px;min-height:34px;line-height:1.4}
+.ph{width:390px;height:760px;border-radius:28px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 28px rgba(0,0,0,.18);background:#fff}
+.top{background:#22362A;color:#F3F1EA;height:56px;display:flex;align-items:center;padding:0 16px;gap:10px;flex:none}
+.top b{font-size:17px}.top span{font-size:13px;opacity:.7}
+.room{flex:1;position:relative;overflow:hidden}
+.scene{position:absolute;left:0;right:0;bottom:0;width:100%;display:block}
+.snow{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.snow i{position:absolute;top:-12px;border-radius:50%;animation:fall linear infinite}
+@keyframes fall{0%{transform:translate(0,-10px)}50%{transform:translate(14px,330px)}100%{transform:translate(-6px,680px)}}
+.msgs{position:absolute;inset:0;padding:14px 12px;display:flex;flex-direction:column;gap:8px}
+.day{align-self:center;font-size:11.5px;padding:3px 10px;border-radius:10px;margin:2px 0 4px}
+.m{max-width:74%;font-size:14.5px;line-height:1.42;padding:8px 12px;border-radius:16px}
+.o{align-self:flex-start;background:#fff;color:#22362A;border-top-left-radius:5px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.me{align-self:flex-end;background:#3E6B48;color:#fff;border-top-right-radius:5px}
+.nm{font-size:11.5px;margin:4px 0 -4px 4px}
+.inp{flex:none;height:58px;background:#fff;border-top:1px solid #E2DFD5;display:flex;align-items:center;gap:10px;padding:0 12px}
+.inp .f{flex:1;height:38px;border-radius:19px;background:#F3F1EA;color:#8A9384;font-size:14px;display:flex;align-items:center;padding:0 14px}
+.inp .s{width:38px;height:38px;border-radius:50%;background:#3E6B48}
+.note{margin-top:22px;font-size:13.5px;line-height:1.6;color:#22362A;max-width:1220px}
+</style></head><body>
+<h1>채팅방 성탄 배경 — POST와 눈사람 둘, 내리는 눈 (4차)</h1>
+<div class="sub">대표 스케치 그대로: 그림은 오른쪽 아래, 위는 비워 두어 대화가 잘 읽히게. 빛 없이, 그림은 작게, 눈은 천천히(이 파일을 열면 움직여요).</div>
+<div class="row" id="row"></div>
+<div class="note">· 눈은 말풍선 <b>뒤</b>로만 내려 글자를 가리지 않아요. · 그림은 입력칸 바로 위에 붙어 있고, 대화가 길어지면 말풍선이 그 위로 지나갑니다. · 친구·모임·클래스 대화방 모두 같은 배경(지기 채팅 포함 여부는 선택).</div>
+<script>
+const V={
+ A:{name:'A안 · 밤', desc:'짙은 겨울 밤하늘에 흰 눈이 가장 잘 보여요.',
+    bg:'linear-gradient(#182838,#22384A 60%,#2B4458)', ground:'#EAF0F4', ground2:'#D5E0E8', pole:'#0F1B26', cone:'#FFD98A', coneOp:.55, glow:'#FFE7A8',
+    post:'#C8453A', postRoof:'#A8342B', stick:'#6B4A32', snowman:'#FFFFFF', sshade:'#DCE6EE', ink:'#22362A', hat:'#3E6B48', scarf:'#C8453A', nose:'#F08A3C',
+    flake:'#fff', flakeOp:.9, day:'background:rgba(255,255,255,.14);color:#DCE6EE', nm:'#C9D6E0', line:0},
+ B:{name:'B안 · 눈 오는 저녁', desc:'밝은 푸른 회색 하늘. 지금 앱의 밝은 느낌을 유지하면서 겨울 분위기.',
+    bg:'linear-gradient(#DCE5EA,#E6ECEE 55%,#EEF1EE)', ground:'#FFFFFF', ground2:'#E3EAEE', pole:'#3A4A52', cone:'#FFD27A', coneOp:.5, glow:'#FFE9B0',
+    post:'#C8453A', postRoof:'#A8342B', stick:'#7A5A40', snowman:'#FFFFFF', sshade:'#DDE6EC', ink:'#22362A', hat:'#3E6B48', scarf:'#C8453A', nose:'#F08A3C',
+    flake:'#fff', flakeOp:1, day:'background:rgba(34,54,42,.10);color:#55604F', nm:'#55604F', line:0},
+ C:{name:'C안 · 어스름', desc:'밤과 낮 사이. 하늘 위는 짙푸르게 저물고 지평선엔 노을빛이 조금 남은 때.',
+    bg:'linear-gradient(#34466B 0%,#56608A 34%,#8E7F9E 60%,#CFA19A 82%,#EFC6A2 100%)', ground:'#EEEAF2', ground2:'#D3CFE2', pole:'#1B2238', cone:'#FFD98A', coneOp:.5, glow:'#FFE7A8',
+    post:'#C8453A', postRoof:'#A8342B', stick:'#5E4233', snowman:'#FFFFFF', sshade:'#DAD6E8', ink:'#22362A', hat:'#3E6B48', scarf:'#C8453A', nose:'#F08A3C',
+    flake:'#fff', flakeOp:.95, day:'background:rgba(255,255,255,.18);color:#EEF0F6', nm:'#E3E6F0', line:0}
+};
+function scene(c,id){
+ const st=c.line?`stroke="${c.ink}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"`:'';
+ const postTxt=c.line?c.ink:'#fff';
+ return `<svg class="scene" viewBox="0 0 390 560" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <linearGradient id="cone${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.cone}" stop-opacity="0"/><stop offset=".5" stop-color="${c.cone}" stop-opacity="${c.coneOp*.55}"/><stop offset="1" stop-color="${c.cone}" stop-opacity="${c.coneOp*.75}"/></linearGradient>
+  <filter id="bl${id}" x="-30%" y="-5%" width="160%" height="110%"><feGaussianBlur stdDeviation="14"/></filter>
+ </defs>
+ <g transform="translate(0,260)">
+ ${c.line?`<line x1="18" y1="272" x2="378" y2="272" stroke="${c.ink}" stroke-width="1.4" stroke-linecap="round"/>`:
+ `<path d="M0 300 V268 Q60 258 130 266 T260 264 T390 262 V300Z" fill="${c.ground2}"/><path d="M0 300 V274 Q80 264 170 272 T320 270 T390 268 V300Z" fill="${c.ground}"/>`}
+ </g>
+ <g transform="translate(0,260) translate(378,272) scale(.62) translate(-378,-272)">
+ <!-- POST -->
+ <rect x="213" y="236" width="${c.line?0:5}" height="36" fill="${c.stick}"/>
+ ${c.line?`<path d="M213 238 V272 M219 238 V272" ${st} fill="none"/>`:''}
+ <rect x="192" y="210" width="48" height="28" rx="3" fill="${c.post}" ${st}/>
+ <path d="M187 211 L216 190 L245 211Z" fill="${c.postRoof}" ${st}/>
+ ${c.line?'':`<path d="M190 208 L216 189 L242 208 L236 208 L216 195 L196 208Z" fill="#fff"/>`}
+ <text x="216" y="229" text-anchor="middle" font-size="12" font-weight="800" letter-spacing="1" fill="${postTxt}" font-family="Arial,sans-serif">POST</text>
+ <!-- 작은 눈사람 -->
+ <circle cx="268" cy="254" r="18" fill="${c.snowman}" ${st}/>
+ <circle cx="268" cy="228" r="12" fill="${c.snowman}" ${st}/>
+ ${c.line?'':`<path d="M252 262 A18 18 0 0 0 284 262 A22 14 0 0 1 252 262Z" fill="${c.sshade}"/>`}
+ <path d="M257 220 H279 M261 220 V211 H275 V220" fill="${c.scarf}" ${c.line?st:`stroke="${c.scarf}" stroke-width="3" stroke-linejoin="round"`}/>
+ <circle cx="264" cy="227" r="1.4" fill="${c.ink}"/><circle cx="272" cy="227" r="1.4" fill="${c.ink}"/>
+ <path d="M268 230 l-7 2 7 1z" fill="${c.nose}" ${c.line?st:''}/>
+ <circle cx="268" cy="248" r="1.5" fill="${c.ink}"/><circle cx="268" cy="256" r="1.5" fill="${c.ink}"/>
+ <!-- 큰 눈사람 -->
+ <circle cx="338" cy="242" r="30" fill="${c.snowman}" ${st}/>
+ <circle cx="338" cy="198" r="20" fill="${c.snowman}" ${st}/>
+ ${c.line?'':`<path d="M311 255 A30 30 0 0 0 365 255 A36 22 0 0 1 311 255Z" fill="${c.sshade}"/>`}
+ <path d="M320 214 Q338 222 356 214 L356 220 Q338 229 320 220Z" fill="${c.scarf}" ${st}/>
+ <path d="M348 219 l4 20 -9 -1 1 -18z" fill="${c.scarf}" ${st}/>
+ <path d="M318 184 H358 M324 184 V166 H352 V184" fill="${c.hat}" ${c.line?st:`stroke="${c.hat}" stroke-width="4" stroke-linejoin="round"`}/>
+ ${c.line?'':`<rect x="324" y="176" width="28" height="4" fill="#C8453A"/>`}
+ <circle cx="331" cy="196" r="2" fill="${c.ink}"/><circle cx="345" cy="196" r="2" fill="${c.ink}"/>
+ <path d="M338 201 l-13 3 13 3z" fill="${c.nose}" ${c.line?st:''}/>
+ <path d="M330 208 Q338 213 346 208" fill="none" stroke="${c.ink}" stroke-width="1.4" stroke-linecap="round"/>
+ <circle cx="338" cy="232" r="2.2" fill="${c.ink}"/><circle cx="338" cy="244" r="2.2" fill="${c.ink}"/><circle cx="338" cy="256" r="2.2" fill="${c.ink}"/>
+ <path d="M309 236 l-18 -12 M366 234 l16 -14" stroke="${c.line?c.ink:'#6B4A32'}" stroke-width="2" stroke-linecap="round"/>
+ </g>
+ </svg>`;
+}
+let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+function snow(c){ let h=''; for(let i=0;i<46;i++){ const s=2+rnd()*4.5, d=24+rnd()*18; h+=`<i style="left:${(rnd()*100).toFixed(1)}%;width:${s.toFixed(1)}px;height:${s.toFixed(1)}px;background:${c.flake};opacity:${(c.flakeOp*(.45+rnd()*.55)).toFixed(2)};animation-duration:${d.toFixed(1)}s;animation-delay:-${(rnd()*d).toFixed(1)}s"></i>`; } return h; }
+const MS=[['day','12월 24일 수요일'],['nm','솔방울'],['o','오늘 눈 온대요 ☃️ 다들 뭐 뜨고 계세요?'],['me','저는 조카 줄 목도리 마무리 중이에요'],['nm','라떼'],['o','우와 성탄 선물이네요. 저는 양말 한 짝 남았어요 😂'],['me','토요일 모임에 들고 갈게요. 같이 떠요!'],['nm','솔방울'],['o','좋아요, 따뜻한 차 준비해 둘게요 🎄']];
+document.getElementById('row').innerHTML=Object.entries(V).map(([k,c])=>`<div class="col"><div class="cap">${c.name}</div><div class="cap2">${c.desc}</div>
+<div class="ph"><div class="top"><span style="font-size:22px;opacity:1">‹</span><b>토요 뜨개 모임</b><span>4</span></div>
+<div class="room" style="background:${c.bg}">${scene(c,k)}<div class="snow">${snow(c)}</div>
+<div class="msgs">${MS.map(([t,x])=>t==='day'?`<div class="day" style="${c.day}">${x}</div>`:t==='nm'?`<div class="nm" style="color:${c.nm}">${x}</div>`:`<div class="m ${t}">${x}</div>`).join('')}</div></div>
+<div class="inp"><div class="f">메시지 보내기</div><div class="s"></div></div></div></div>`).join('');
+</script></body></html>

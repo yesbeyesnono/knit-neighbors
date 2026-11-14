@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>채팅 성탄 배경 · 그림 모양 3가지</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:#E7E4DB;padding:28px 24px 36px;color:#22362A}
+h1{font-size:20px;margin-bottom:6px}
+.sub{font-size:13.5px;color:#55604F;margin-bottom:22px}
+.row{display:flex;gap:28px;flex-wrap:wrap}
+.col{width:390px}
+.cap{font-size:15px;font-weight:700;margin-bottom:4px}
+.cap2{font-size:12.5px;color:#55604F;margin-bottom:10px;min-height:34px;line-height:1.4}
+.ph{width:390px;height:760px;border-radius:28px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 28px rgba(0,0,0,.18);background:#fff}
+.top{background:#22362A;color:#F3F1EA;height:56px;display:flex;align-items:center;padding:0 16px;gap:10px;flex:none}
+.top b{font-size:17px}.top span{font-size:13px;opacity:.7}
+.room{flex:1;position:relative;overflow:hidden;background:linear-gradient(#34466B 0%,#56608A 34%,#8E7F9E 60%,#CFA19A 82%,#EFC6A2 100%)}
+.scene{position:absolute;left:0;right:0;bottom:0;width:100%;display:block}
+.snow{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.snow i{position:absolute;top:-12px;border-radius:50%;background:#fff;animation:fall linear infinite}
+@keyframes fall{0%{transform:translate(0,-10px)}50%{transform:translate(14px,330px)}100%{transform:translate(-6px,680px)}}
+.msgs{position:absolute;inset:0;padding:14px 12px;display:flex;flex-direction:column;gap:8px}
+.day{align-self:center;font-size:11.5px;padding:3px 10px;border-radius:10px;margin:2px 0 4px;background:rgba(255,255,255,.18);color:#EEF0F6}
+.m{max-width:74%;font-size:14.5px;line-height:1.42;padding:8px 12px;border-radius:16px}
+.o{align-self:flex-start;background:#fff;color:#22362A;border-top-left-radius:5px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.me{align-self:flex-end;background:#3E6B48;color:#fff;border-top-right-radius:5px}
+.nm{font-size:11.5px;margin:4px 0 -4px 4px;color:#E3E6F0}
+.inp{flex:none;height:58px;background:#fff;border-top:1px solid #E2DFD5;display:flex;align-items:center;gap:10px;padding:0 12px}
+.inp .f{flex:1;height:38px;border-radius:19px;background:#F3F1EA;color:#8A9384;font-size:14px;display:flex;align-items:center;padding:0 14px}
+.inp .s{width:38px;height:38px;border-radius:50%;background:#3E6B48}
+.big{margin-top:26px;display:flex;gap:28px;flex-wrap:wrap}
+.zoom{width:390px;height:230px;border-radius:18px;overflow:hidden;position:relative;background:linear-gradient(#8E7F9E,#CFA19A 60%,#EFC6A2)}
+.zoom svg{position:absolute;left:0;top:0;width:100%;height:100%}
+.note{margin-top:20px;font-size:13.5px;line-height:1.6;max-width:1220px}
+</style></head><body>
+<h1>채팅방 성탄 배경 — POST와 눈사람 모양 3가지</h1>
+<div class="sub">배경은 일단 '어스름'으로 통일해 모양만 비교합니다(밤·눈 오는 저녁 배경에도 그대로 얹을 수 있어요). 아래 줄은 그림만 크게 본 것.</div>
+<div class="row" id="row"></div>
+<div class="big" id="big"></div>
+<div class="note">· 유럽: 빨간 원통 우체통, 실크해트와 방울 털모자 · 동양: 기와지붕 우체통, 갓과 삿갓, 웃는 눈 · 동화: 지팡이 사탕 기둥의 둥근 우체통, 뾰족 요정 모자, 볼 터치, 편지를 든 작은 눈사람</div>
+<script>
+const INK='#22362A', SH='#DAD6E8';
+const balls=`<circle cx="268" cy="254" r="18" fill="#fff"/><circle cx="268" cy="228" r="12" fill="#fff"/><path d="M252 262 A18 18 0 0 0 284 262 A22 14 0 0 1 252 262Z" fill="${SH}"/>
+ <circle cx="338" cy="242" r="30" fill="#fff"/><circle cx="338" cy="198" r="20" fill="#fff"/><path d="M311 255 A30 30 0 0 0 365 255 A36 22 0 0 1 311 255Z" fill="${SH}"/>`;
+const arms=col=>`<path d="M309 236 l-18 -12 M366 234 l16 -14" stroke="${col}" stroke-width="2" stroke-linecap="round"/>`;
+const FIG={
+ eu:`<!-- 유럽: 원통 우체통 -->
+ <rect x="197" y="262" width="38" height="10" rx="2" fill="#1F1F24"/>
+ <rect x="200" y="206" width="32" height="57" fill="#C8372D"/>
+ <rect x="200" y="206" width="7" height="57" fill="#A82A22"/>
+ <path d="M196 207 Q216 180 236 207Z" fill="#B02E25"/><rect x="195" y="203" width="42" height="6" rx="3" fill="#8E221B"/>
+ <path d="M201 199 Q216 184 231 199 Q216 191 201 199Z" fill="#fff"/>
+ <text x="217" y="220" text-anchor="middle" font-size="7.5" font-weight="800" letter-spacing=".8" fill="#F6D98A" font-family="Georgia,serif">POST</text>
+ <rect x="208" y="224" width="18" height="4" rx="1" fill="#1F1F24"/>
+ <rect x="209" y="234" width="16" height="13" rx="1" fill="#F4EFE4"/><path d="M211 238h12M211 241h12M211 244h8" stroke="#8E221B" stroke-width=".9"/>
+ ${balls}${arms('#5E4233')}
+ <!-- 작은: 방울 털모자 -->
+ <path d="M256 221 Q268 198 280 221Z" fill="#C8372D"/><rect x="255" y="218" width="26" height="5" rx="2.5" fill="#fff"/><circle cx="268" cy="206" r="3.6" fill="#fff"/>
+ <circle cx="264" cy="228" r="1.4" fill="${INK}"/><circle cx="272" cy="228" r="1.4" fill="${INK}"/><path d="M268 231 l-7 2 7 1z" fill="#F08A3C"/>
+ <path d="M257 238 Q268 243 279 238 L279 242 Q268 247 257 242Z" fill="#2F4E7A"/>
+ <circle cx="268" cy="250" r="1.5" fill="${INK}"/><circle cx="268" cy="258" r="1.5" fill="${INK}"/>
+ <!-- 큰: 실크해트 -->
+ <rect x="316" y="180" width="44" height="5" rx="2.5" fill="#1F1F24"/><rect x="325" y="156" width="26" height="25" rx="1.5" fill="#1F1F24"/><rect x="325" y="173" width="26" height="5" fill="#C8372D"/>
+ <path d="M347 172 l3 -6 3 6z" fill="#3E6B48"/>
+ <circle cx="331" cy="196" r="2" fill="${INK}"/><circle cx="345" cy="196" r="2" fill="${INK}"/><path d="M338 201 l-13 3 13 3z" fill="#F08A3C"/>
+ <g fill="${INK}"><circle cx="330" cy="208" r="1.1"/><circle cx="334" cy="210.5" r="1.1"/><circle cx="338" cy="211.5" r="1.1"/><circle cx="342" cy="210.5" r="1.1"/><circle cx="346" cy="208" r="1.1"/></g>
+ <path d="M320 214 Q338 222 356 214 L356 221 Q338 230 320 221Z" fill="#3E6B48"/><path d="M347 220 l4 21 -9 -1 1 -19z" fill="#3E6B48"/>
+ <path d="M327 217.5 l0 7 M338 220.5 l0 7 M349 217.5 l0 7 M343.5 232 h7" stroke="#F6D98A" stroke-width="1.4"/>
+ <circle cx="338" cy="234" r="2.2" fill="${INK}"/><circle cx="338" cy="246" r="2.2" fill="${INK}"/><circle cx="338" cy="258" r="2.2" fill="${INK}"/>`,
+ as:`<!-- 동양: 기와지붕 우체통 -->
+ <rect x="213" y="236" width="6" height="36" fill="#5E4233"/><rect x="207" y="268" width="18" height="4" rx="1" fill="#4A3327"/>
+ <rect x="196" y="212" width="40" height="26" rx="2" fill="#B5352B"/><rect x="196" y="212" width="40" height="4" fill="#8E261F"/>
+ <rect x="205" y="219" width="22" height="3" rx="1" fill="#2A1512"/>
+ <text x="216" y="233" text-anchor="middle" font-size="8.5" font-weight="800" letter-spacing=".8" fill="#F6D98A" font-family="Arial,sans-serif">POST</text>
+ <path d="M178 208 Q200 211 216 192 Q232 211 254 208 Q250 215 242 215 H190 Q182 215 178 208Z" fill="#2E3440"/>
+ <path d="M190 215 h52" stroke="#4A5262" stroke-width="2"/>
+ <path d="M196 204 Q208 203 216 193 Q224 203 236 204 Q224 199 216 197.5 Q208 199 196 204Z" fill="#fff"/>
+ <circle cx="216" cy="191" r="2.4" fill="#2E3440"/>
+ ${balls}${arms('#5E4233')}
+ <!-- 작은: 삿갓 -->
+ <path d="M248 223 L268 203 L288 223 Q268 228 248 223Z" fill="#D9B36A"/><path d="M268 203 L258 224 M268 203 L268 226 M268 203 L278 224" stroke="#B48C45" stroke-width="1"/>
+ <path d="M262 229 q2.2 -2.6 4.4 0 M270 229 q2.2 -2.6 4.4 0" stroke="${INK}" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+ <circle cx="268" cy="233" r="1.5" fill="${INK}"/>
+ <path d="M258 239 Q268 243 278 239 L278 242.5 Q268 246.5 258 242.5Z" fill="#C8453A"/>
+ <circle cx="268" cy="251" r="1.5" fill="${INK}"/><circle cx="268" cy="259" r="1.5" fill="${INK}"/>
+ <!-- 큰: 갓 -->
+ <ellipse cx="338" cy="182" rx="31" ry="5" fill="#1F1F24" opacity=".88"/><path d="M328 181 L330 162 H346 L348 181Z" fill="#1F1F24"/><path d="M329 176 h18" stroke="#C8453A" stroke-width="1.6"/>
+ <path d="M322 186 Q320 204 330 216 M354 186 Q356 204 346 216" stroke="#1F1F24" stroke-width="1" fill="none"/>
+ <path d="M328 198 q3.5 -4 7 0 M341 198 q3.5 -4 7 0" stroke="${INK}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+ <circle cx="338" cy="204" r="2.2" fill="${INK}"/>
+ <path d="M332 209 Q338 213 344 209" fill="none" stroke="${INK}" stroke-width="1.4" stroke-linecap="round"/>
+ <circle cx="326" cy="205" r="3.2" fill="#F2A7A0" opacity=".7"/><circle cx="350" cy="205" r="3.2" fill="#F2A7A0" opacity=".7"/>
+ <path d="M320 215 Q338 223 356 215 L356 221 Q338 230 320 221Z" fill="#5A8F7B"/>
+ <path d="M338 224 q-9 4 -10 17 l6 -1 q1 -9 6 -13z M338 224 q7 5 7 22 l5 -2 q0 -14 -9 -21z" fill="#C8453A"/>
+ <circle cx="338" cy="250" r="2.2" fill="${INK}"/><circle cx="338" cy="260" r="2.2" fill="${INK}"/>`,
+ ft:`<!-- 동화: 지팡이 사탕 기둥 + 둥근 우체통 -->
+ <defs><pattern id="cane" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><rect width="8" height="8" fill="#fff"/><rect width="4" height="8" fill="#D9534F"/></pattern></defs>
+ <rect x="212" y="234" width="8" height="38" rx="3" fill="url(#cane)"/>
+ <path d="M192 237 V219 Q192 198 216 198 Q240 198 240 219 V237Z" fill="#D9534F"/>
+ <path d="M192 237 V219 Q192 198 216 198 Q205 200 203 219 V237Z" fill="#B9403C"/>
+ <path d="M195 210 Q202 196 216 196 Q230 196 237 210 Q228 202 216 203 Q204 202 195 210Z" fill="#fff"/>
+ <text x="219" y="221" text-anchor="middle" font-size="8.5" font-weight="800" letter-spacing=".6" fill="#fff" font-family="Georgia,serif">POST</text>
+ <path d="M219 226.5 c-2.6 -3.6 -7 -.2 -4 3 l4 3.6 4 -3.6 c3 -3.2 -1.4 -6.6 -4 -3z" fill="#FFE08A"/>
+ <path d="M241 222 V203" stroke="#6B4A32" stroke-width="1.8" stroke-linecap="round"/><path d="M241 203 l11 4 -11 4z" fill="#FFD25E"/>
+ <path d="M216 180 l2.6 5.6 6 .7 -4.5 4.1 1.2 6 -5.3 -3 -5.3 3 1.2 -6 -4.5 -4.1 6 -.7z" fill="#FFD25E"/>
+ ${balls}
+ <path d="M309 236 l-17 -8 M366 234 l15 -15" stroke="#6B4A32" stroke-width="2" stroke-linecap="round"/><circle cx="382" cy="218" r="4" fill="#D9534F"/>
+ <!-- 작은: 구부러진 빨간 요정 모자 + 편지 -->
+ <path d="M256 221 Q258 200 244 196 Q266 192 280 221Z" fill="#D9534F"/><rect x="254" y="218" width="28" height="6" rx="3" fill="#fff"/><circle cx="243" cy="196" r="4" fill="#fff"/>
+ <circle cx="263.5" cy="229" r="1.9" fill="${INK}"/><circle cx="272.5" cy="229" r="1.9" fill="${INK}"/><circle cx="264.1" cy="228.4" r=".6" fill="#fff"/><circle cx="273.1" cy="228.4" r=".6" fill="#fff"/>
+ <circle cx="259.5" cy="233" r="2.4" fill="#F7A6B4" opacity=".85"/><circle cx="276.5" cy="233" r="2.4" fill="#F7A6B4" opacity=".85"/>
+ <path d="M265 234 Q268 237 271 234" fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round"/>
+ <path d="M258 240 Q268 244 278 240 L278 243.5 Q268 247.5 258 243.5Z" fill="#3E6B48"/>
+ <path d="M252 250 l-10 -5" stroke="#6B4A32" stroke-width="1.6" stroke-linecap="round"/>
+ <g transform="rotate(-14 240 244)"><rect x="231" y="238" width="16" height="11" rx="1" fill="#fff"/><path d="M231 238 l8 6 8 -6" fill="none" stroke="#C9C3D6" stroke-width="1"/><circle cx="239" cy="245.5" r="1.8" fill="#D9534F"/></g>
+ <circle cx="268" cy="252" r="1.9" fill="#D9534F"/><circle cx="268" cy="260" r="1.9" fill="#D9534F"/>
+ <!-- 큰: 구부러진 초록 요정 모자 -->
+ <path d="M320 184 Q326 150 364 146 Q348 160 357 184Z" fill="#3E6B48"/><path d="M329 170 Q340 166 351 168 M333 160 Q342 156 352 157" stroke="#FFD25E" stroke-width="1.6" fill="none"/>
+ <rect x="316" y="179" width="44" height="8" rx="4" fill="#fff"/><circle cx="365" cy="145" r="5.5" fill="#fff"/>
+ <circle cx="330" cy="197" r="2.8" fill="${INK}"/><circle cx="346" cy="197" r="2.8" fill="${INK}"/><circle cx="331" cy="196" r=".9" fill="#fff"/><circle cx="347" cy="196" r=".9" fill="#fff"/>
+ <circle cx="324" cy="204" r="4" fill="#F7A6B4" opacity=".85"/><circle cx="352" cy="204" r="4" fill="#F7A6B4" opacity=".85"/>
+ <path d="M338 201 q-8 1 -11 4 q6 1 11 0z" fill="#F08A3C"/>
+ <path d="M331 208 Q338 215 345 208" fill="none" stroke="${INK}" stroke-width="1.5" stroke-linecap="round"/>
+ <path d="M320 214 Q338 222 356 214 L356 221 Q338 230 320 221Z" fill="#D9534F"/><path d="M328 218 l0 7 M338 221 l0 7 M348 218 l0 7" stroke="#fff" stroke-width="2.4"/>
+ <path d="M346 220 l5 20 -9 0 0 -19z" fill="#D9534F"/><path d="M343 231 h7.6" stroke="#fff" stroke-width="2.4"/>
+ <path d="M338 236 c-2 -2.8 -5.4 -.2 -3.1 2.3 l3.1 2.8 3.1 -2.8 c2.3 -2.5 -1.1 -5.1 -3.1 -2.3z M338 250 c-2 -2.8 -5.4 -.2 -3.1 2.3 l3.1 2.8 3.1 -2.8 c2.3 -2.5 -1.1 -5.1 -3.1 -2.3z" fill="#D9534F"/>`
+};
+const ground=`<path d="M0 300 V268 Q60 258 130 266 T260 264 T390 262 V300Z" fill="#D3CFE2"/><path d="M0 300 V274 Q80 264 170 272 T320 270 T390 268 V300Z" fill="#EEEAF2"/>`;
+const scene=k=>`<svg class="scene" viewBox="0 0 390 300" xmlns="http://www.w3.org/2000/svg">${ground}<g transform="translate(378,272) scale(.62) translate(-378,-272)">${FIG[k]}</g></svg>`;
+const zoom=k=>`<svg viewBox="140 138 255 150" xmlns="http://www.w3.org/2000/svg">${ground}${FIG[k]}</svg>`;
+let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+function snow(){ let h=''; for(let i=0;i<46;i++){ const s=2+rnd()*4.5, d=24+rnd()*18; h+=`<i style="left:${(rnd()*100).toFixed(1)}%;width:${s.toFixed(1)}px;height:${s.toFixed(1)}px;opacity:${(.45+rnd()*.5).toFixed(2)};animation-duration:${d.toFixed(1)}s;animation-delay:-${(rnd()*d).toFixed(1)}s"></i>`; } return h; }
+const MS=[['day','12월 24일 수요일'],['nm','솔방울'],['o','오늘 눈 온대요 ☃️ 다들 뭐 뜨고 계세요?'],['me','저는 조카 줄 목도리 마무리 중이에요'],['nm','라떼'],['o','우와 성탄 선물이네요. 저는 양말 한 짝 남았어요 😂'],['me','토요일 모임에 들고 갈게요. 같이 떠요!']];
+const S=[['eu','① 유럽 스타일','빨간 원통 우체통, 실크해트와 방울 털모자. 단정하고 클래식한 느낌.'],['as','② 동양 스타일','기와지붕 우체통, 갓과 삿갓을 쓴 눈사람. 웃는 눈과 볼 터치.'],['ft','③ 동화 스타일','지팡이 사탕 기둥, 뾰족 요정 모자, 편지를 든 작은 눈사람. 가장 귀여움.']];
+document.getElementById('row').innerHTML=S.map(([k,n,d])=>`<div class="col"><div class="cap">${n}</div><div class="cap2">${d}</div>
+<div class="ph"><div class="top"><span style="font-size:22px;opacity:1">‹</span><b>토요 뜨개 모임</b><span>4</span></div>
+<div class="room">${scene(k)}<div class="snow">${snow()}</div>
+<div class="msgs">${MS.map(([t,x])=>t==='day'?`<div class="day">${x}</div>`:t==='nm'?`<div class="nm">${x}</div>`:`<div class="m ${t}">${x}</div>`).join('')}</div></div>
+<div class="inp"><div class="f">메시지 보내기</div><div class="s"></div></div></div></div>`).join('');
+document.getElementById('big').innerHTML=S.map(([k])=>`<div class="zoom">${zoom(k)}</div>`).join('');
+</script></body></html>

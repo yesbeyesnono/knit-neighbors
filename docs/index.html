@@ -732,6 +732,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #fqpop .fqpair{display:flex;justify-content:center;align-items:center;margin-top:12px}#fqpop .fqpair .ava{width:70px;height:70px;border:4px solid #fff;font-size:1.5rem}#fqpop .fqpair b{width:32px;height:32px;border-radius:50%;background:var(--fb);color:#fff;display:grid;place-items:center;margin:0 -8px;z-index:2;font-size:1rem;border:3px solid var(--fy)}
 #fqpop .fqcf i{position:absolute;display:block;animation:fqcf 1.1s ease-out both}@keyframes fqcf{from{transform:translateY(-60px) rotate(0);opacity:0}30%{opacity:1}to{transform:translateY(0) rotate(200deg);opacity:1}}
 .fqbar{position:sticky;bottom:0;z-index:5;background:#FFD95C;color:#3B1D08;padding:12px 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.14);margin-top:8px}.fqbar>b{display:block;font-size:.9rem;margin-bottom:8px}.fqbar .fqtwo{display:flex;gap:8px}
+#v-room.cth .bub{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.10)}#v-room.cth .bub.ph{box-shadow:none}#v-room.cthd .bub.ph time{color:#C9D6E0}
 #greetBar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--color-surface);border-top:1px solid var(--line)}#greetBar button{border:1.5px solid var(--color-primary);background:none;color:var(--color-primary);border-radius:999px;padding:5px 11px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
 /* 실 촬영 화면 (2026-11-15 대표 확정 시안 6차) */
 #scap{position:fixed;inset:0;z-index:900;background:#fff;color:var(--ink);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
@@ -3300,7 +3301,19 @@ async function openDirectRoom(otherId){
 }
 let roomInfo=null;
 function closePost(){ postBack=null; navBack('comm'); }
+// 채팅방 배경 테마(schema 118, 2026-11-15): app_config.chat_theme {id, active, from, until, img, bg, dark}
+// 그림은 서버(Pages 의 chat-themes/)에 둔 SVG 한 장 — 하늘·내리는 눈·그림이 모두 그 안에 있다. 기간·켜기/끄기·그림 교체를 앱 심사 없이 서버에서 한다.
+// 주소는 이 저장소 Pages 의 chat-themes/*.svg 만 받는다(임의 URL 금지). 배경은 스크롤해도 제자리(스크롤 상자의 배경)
+const CT_IMG=/^https:\/\/yesbeyesnono\.github\.io\/knit-neighbors\/chat-themes\/[A-Za-z0-9_-]+\.svg$/;
+let chatTheme=null, chatThemeAt=0;
+async function chatThemeLoad(){ if(Date.now()-chatThemeAt<30*60*1000) return; chatThemeAt=Date.now(); try{ const { data } = await sb.from('app_config').select('value').eq('key','chat_theme').maybeSingle(); chatTheme=data?.value||null; }catch(e){} chatThemeApply(); }
+function chatThemeApply(){ const v=$('#v-room'); if(!v) return; const t=chatTheme, now=Date.now();
+  const ok = t && t.active && CT_IMG.test(String(t.img||'')) && (!t.from || now>=Date.parse(t.from)) && (!t.until || now<Date.parse(t.until));
+  if(!ok){ v.style.background=''; v.classList.remove('cth','cthd'); return; }
+  const bg=/^#[0-9a-fA-F]{6}$/.test(String(t.bg||''))?t.bg:'transparent';
+  v.style.background=`${bg} url("${t.img}") right bottom / cover no-repeat`; v.classList.add('cth'); v.classList.toggle('cthd', !!t.dark); }
 async function openRoom(id){
+  chatThemeApply(); chatThemeLoad();
   if(['comm','my','profile','map','chats','post'].includes(view)) roomBack=view;
   roomId=id; closeSheet();
   const { data:r } = await sb.from('rooms').select('id,kind,title,created_by, room_members(profile_id, profiles(id,nickname,avatar_url))').eq('id',id).single();

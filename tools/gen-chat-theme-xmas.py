@@ -1,0 +1,52 @@
+# 채팅방 배경 테마 SVG 생성 — 성탄(밤하늘 · 천천히 내리는 눈 · POST · 눈사람 둘). 대표 스케치(2026-11-15) 기준.
+# 실행: python tools/gen-chat-theme-xmas.py  →  docs/chat-themes/xmas2026.svg
+# 한 장에 하늘·눈(SVG 안 CSS 애니메이션)·그림이 모두 들어 있다. 앱은 app_config.chat_theme.img 로 이 파일을 배경(cover, 오른쪽 아래 맞춤)으로 깐다.
+import io, os, random
+random.seed(20261224)
+W, H = 390, 900          # 세로로 길게: 화면보다 길면 위가 잘린다(그림은 아래에 붙음)
+GY = 500                 # 그림 기준선 이동(원본 좌표의 땅 y=272 → 772). 그 아래 128px 은 눈밭 — 입력칸이 덮는 자리
+INK = '#22362A'
+flakes = []
+for i in range(44):
+    r = round(1.0 + random.random() * 2.2, 1)
+    d = round(34 + random.random() * 24, 1)          # 한 송이가 다 내려오는 데 34~58초(천천히)
+    x = round(random.random() * W, 1)
+    op = round(.4 + random.random() * .5, 2)
+    flakes.append(f'<circle class="f" cx="{x}" cy="0" r="{r}" opacity="{op}" style="animation-duration:{d}s;animation-delay:-{round(random.random()*d,1)}s"/>')
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" preserveAspectRatio="xMaxYMax slice">
+<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#182838"/><stop offset=".6" stop-color="#22384A"/><stop offset="1" stop-color="#2B4458"/></linearGradient></defs>
+<style>.f{{fill:#fff;animation:fall linear infinite}}@keyframes fall{{0%{{transform:translate(0,-12px)}}50%{{transform:translate(14px,440px)}}100%{{transform:translate(-6px,{H}px)}}}}@media (prefers-reduced-motion:reduce){{.f{{animation:none;display:none}}}}</style>
+<rect width="{W}" height="{H}" fill="url(#sky)"/>
+{chr(10).join(flakes)}
+<g transform="translate(0,{GY})">
+<path d="M0 400 V268 Q60 258 130 266 T260 264 T390 262 V400Z" fill="#D5E0E8"/>
+<path d="M0 400 V274 Q80 264 170 272 T320 270 T390 268 V400Z" fill="#EAF0F4"/>
+<g transform="translate(378,272) scale(.62) translate(-378,-272)">
+<rect x="213" y="236" width="5" height="36" fill="#6B4A32"/>
+<rect x="192" y="210" width="48" height="28" rx="3" fill="#C8453A"/>
+<path d="M187 211 L216 190 L245 211Z" fill="#A8342B"/>
+<path d="M190 208 L216 189 L242 208 L236 208 L216 195 L196 208Z" fill="#fff"/>
+<text x="216" y="229" text-anchor="middle" font-size="12" font-weight="800" letter-spacing="1" fill="#fff" font-family="Arial,Helvetica,sans-serif">POST</text>
+<circle cx="268" cy="254" r="18" fill="#fff"/><circle cx="268" cy="228" r="12" fill="#fff"/>
+<path d="M252 262 A18 18 0 0 0 284 262 A22 14 0 0 1 252 262Z" fill="#DCE6EE"/>
+<path d="M257 220 H279 M261 220 V211 H275 V220" fill="#C8453A" stroke="#C8453A" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="264" cy="227" r="1.4" fill="{INK}"/><circle cx="272" cy="227" r="1.4" fill="{INK}"/>
+<path d="M268 230 l-7 2 7 1z" fill="#F08A3C"/>
+<circle cx="268" cy="248" r="1.5" fill="{INK}"/><circle cx="268" cy="256" r="1.5" fill="{INK}"/>
+<circle cx="338" cy="242" r="30" fill="#fff"/><circle cx="338" cy="198" r="20" fill="#fff"/>
+<path d="M311 255 A30 30 0 0 0 365 255 A36 22 0 0 1 311 255Z" fill="#DCE6EE"/>
+<path d="M320 214 Q338 222 356 214 L356 220 Q338 229 320 220Z" fill="#C8453A"/>
+<path d="M348 219 l4 20 -9 -1 1 -18z" fill="#C8453A"/>
+<path d="M318 184 H358 M324 184 V166 H352 V184" fill="#3E6B48" stroke="#3E6B48" stroke-width="4" stroke-linejoin="round"/>
+<rect x="324" y="176" width="28" height="4" fill="#C8453A"/>
+<circle cx="331" cy="196" r="2" fill="{INK}"/><circle cx="345" cy="196" r="2" fill="{INK}"/>
+<path d="M338 201 l-13 3 13 3z" fill="#F08A3C"/>
+<path d="M330 208 Q338 213 346 208" fill="none" stroke="{INK}" stroke-width="1.4" stroke-linecap="round"/>
+<circle cx="338" cy="232" r="2.2" fill="{INK}"/><circle cx="338" cy="244" r="2.2" fill="{INK}"/><circle cx="338" cy="256" r="2.2" fill="{INK}"/>
+<path d="M309 236 l-18 -12 M366 234 l16 -14" stroke="#6B4A32" stroke-width="2" stroke-linecap="round"/>
+</g></g></svg>
+'''
+out = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'docs', 'chat-themes')
+os.makedirs(out, exist_ok=True)
+io.open(os.path.join(out, 'xmas2026.svg'), 'w', encoding='utf-8', newline='').write(svg)
+print('ok', len(svg))
