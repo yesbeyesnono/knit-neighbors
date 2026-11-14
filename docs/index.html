@@ -767,7 +767,7 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 #pmenu{position:fixed;z-index:70;min-width:176px;background:var(--color-surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.22);overflow:hidden}
 #pmenu button{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;height:44px;padding:0 14px;background:none;border:0;border-bottom:1px solid var(--line2);border-radius:0;font:inherit;font-size:.92rem;font-weight:700;color:var(--ink);text-align:left;cursor:pointer}
 #pmenu button:last-child{border-bottom:0}#pmenu button.r{color:#D93025}#pmenu svg,.pintag svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
-#askdlg{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.4);display:grid;place-items:center;padding:36px}
+#askdlg{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.4);display:grid;place-items:center;padding:36px}
 #askdlg .bx{background:var(--color-surface);border-radius:18px;padding:20px 18px 14px;text-align:center;max-width:320px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.3)}
 #askdlg .bx>b{font-size:1rem}#askdlg p{font-size:.86rem;color:var(--color-text-muted);margin:6px 0 16px;line-height:1.5}
 #askdlg .bs{display:flex;gap:8px}#askdlg .bs button{flex:1;height:42px;border-radius:999px;font:inherit;font-weight:700;font-size:.92rem;border:1px solid var(--line);background:var(--color-surface);color:var(--ink);cursor:pointer}#askdlg .bs .rr{background:#D93025;color:#fff;border-color:#D93025}
@@ -4797,7 +4797,8 @@ function scEdit(k){
 function scEditOk(k, clear){ if(!sc) return closeSheet(); let v = clear ? '' : ($('#scIn')?.value||'').trim();
   if(k==='ball_g'||k==='ball_m'){ v=v.replace(',', '.'); if(v!=='' && !(/^\d{1,5}(\.\d{1,2})?$/.test(v) && +v>0)) return toast('숫자로 적어 주세요'); sc.ed[k] = v===''?null:+v; }
   else sc.ed[k]=v; closeSheet(); scResult(); }
-function scQuit(){ askConfirm('여기서 그만둘까요?', '찍은 실은 실함에 그대로 남아요. 나중에 실함에서 이름과 볼 수를 고칠 수 있어요.', '그만두기', ()=>scClose()); }
+// 결과 화면의 ✕ = 담지 않고 닫기(2026-11-15 대표 제보: ✕ 를 눌러도 안 닫힘 — 확인 창이 촬영 화면 뒤에 떠 있었음). 아직 [맞아요]를 누르기 전이므로 방금 찍은 줄과 사진을 지운다
+function scQuit(){ askConfirm('담지 않고 닫을까요?', '방금 찍은 사진과 읽은 내용은 지워져요.', '담지 않기', async ()=>{ const r=sc&&sc.row; if(r&&r.id){ try{ const { error } = await sb.from('yarn_stash').delete().eq('id', r.id); if(!error){ const ps=[r.band_photo, r.band_photo2].filter(Boolean); if(ps.length) sb.storage.from('bands').remove(ps).then(()=>{}); } }catch(e){} } scClose(); }); }
 async function scCommit(){
   if(!sc || !sc.row) return; const r=sc.row, e=sc.ed, keys=Object.keys(e); const edited=new Set(r.edited||[]); const patch={ bought_balls:sc.balls, left_balls:sc.balls };
   if('raw_name' in e){ patch.raw_name=(e.raw_name||'').slice(0,60)||null; patch.catalog_id=null; edited.add('raw_name'); }
