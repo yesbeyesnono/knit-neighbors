@@ -4204,6 +4204,10 @@ async function toggleRepost(id, btn){
 // 글자를 치는 동안(자판이 올라온 동안)에는 하단 메뉴를 숨긴다 — 자판 위에 메뉴가 떠서 입력칸을 가리던 문제(2026-11-14 대표 제보)
 (function(){ const isText=e=>e && (e.tagName==='TEXTAREA' || (e.tagName==='INPUT' && !/^(checkbox|radio|file|button|submit|range|color|date|time|datetime-local)$/i.test(e.type||'text')) || e.isContentEditable);
   let t=null; document.addEventListener('focusin', e=>{ if(isText(e.target)){ clearTimeout(t); document.body.classList.add('kb'); } });
+  // 자판이 올라와 화면이 줄어든 뒤에도 지금 적는 칸이 보이게 한다(2026-11-15 대표 제보: 목록에서 펼친 댓글 칸이 자판에 가림). 칸이 보이는 영역 밖이면 그 칸을 화면 가운데쯤으로 옮김
+  const reveal=()=>{ const el=document.activeElement; if(!isText(el)) return; const vh=(window.visualViewport&&visualViewport.height)||window.innerHeight; const r=el.getBoundingClientRect(); if(r.bottom>vh-2 || r.top<56){ try{ el.scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){ el.scrollIntoView(); } } };
+  document.addEventListener('focusin', e=>{ if(isText(e.target)){ setTimeout(reveal, 350); setTimeout(reveal, 800); } });
+  window.addEventListener('keyboardDidShow', ()=>setTimeout(reveal, 60)); if(window.visualViewport) visualViewport.addEventListener('resize', ()=>setTimeout(reveal, 80));
   document.addEventListener('focusout', ()=>{ clearTimeout(t); t=setTimeout(()=>{ if(!isText(document.activeElement)) document.body.classList.remove('kb'); }, 120); }); })();
 // 사진 전체 화면: 누른 사진이 속한 묶음(같은 글의 사진들)을 옆으로 넘겨 본다. 글의 사진이면 아래에 좋아요·댓글
 let phvPost=null, phvDirty=false;
