@@ -49,6 +49,7 @@ begin
   select count(*) into n from public.yarn_sellers; out := pg_temp.chk(out, 'yarn_sellers(asset)', n, 0);
   select count(*) into n from public.yarn_suggest('낙양'); out := pg_temp.chk(out, 'yarn_suggest>0', least(n,1), 1);
   select count(*) into n from public.yarn_popular(); out := pg_temp.chk(out, 'yarn_popular>0', least(n,1), 1);
+  select count(*) into n from public.yarn_brands(); out := pg_temp.chk(out, 'yarn_brands>0', least(n,1), 1);   -- schema 119
   select count(*) into n from public.yarn_colors_of((select id from public.yarn_suggest('낙양') limit 1)); out := pg_temp.chk(out, 'yarn_colors_of>0', least(n,1), 1);
   select case when public.yarn_spec((select id from public.yarn_suggest('아임울2') limit 1)) ? 'gauge_knit' then 1 else 0 end into n; out := pg_temp.chk(out, 'yarn_spec gauge', n, 1);   -- schema 68
   reset role;
@@ -227,6 +228,7 @@ begin
   out := pg_temp.cnt(out, 'yarn_catalog', 'select count(*) from public.yarn_catalog', 0);
   out := pg_temp.cnt(out, 'app_config>0', 'select least(count(*),1) from public.app_config', 1);
   out := pg_temp.cnt(out, 'yarn_suggest(anon)', 'select count(*) from public.yarn_suggest(''낙양'')', 0);
+  out := pg_temp.cnt(out, 'yarn_brands(anon)', 'select count(*) from public.yarn_brands()', 0);   -- schema 119
   out := pg_temp.cnt(out, 'yarn_gauge_search(anon)', 'select jsonb_array_length(public.yarn_gauge_search(''낙양'', ''crochet''))', 0);   -- schema 69
   out := pg_temp.cnt(out, 'studio_yarn_search(anon)', 'select jsonb_array_length(public.studio_yarn_search(''낙양'', ''crochet''))', 8);   -- schema 73: Studio 전용 이름·게이지 8건은 anon 허용
   out := pg_temp.cnt(out, 'studio_inbox(anon)', 'select count(*) from public.studio_inbox', 0);   -- schema 74

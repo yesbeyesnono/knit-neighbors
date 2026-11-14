@@ -735,6 +735,10 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #v-room.cth .bub{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.10)}#v-room.cth .bub.ph{box-shadow:none}#v-room.cthd .bub.ph time{color:#C9D6E0}
 #v-room .kkbox textarea{flex:1;min-width:0;width:auto;display:block;border:0;border-radius:0;background:transparent;box-shadow:none;outline:0;resize:none;padding:8px 0;margin:0;font-family:inherit;font-size:16px;line-height:22px;height:38px;min-height:38px;max-height:104px;overflow-y:auto;color:inherit}
 html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app{height:var(--vvh)!important}html.vvk #v-room .compose.kk{padding-bottom:8px}
+.ybr{display:block;font-size:.72rem!important;font-weight:500;color:var(--ink2);line-height:1.25}.ybr.unk{color:var(--ink3)}.plist mark,.ybr mark,.ybchip mark{background:#FFE9A6;color:inherit;border-radius:3px}
+.ybsec{font-size:.72rem;font-weight:700;color:var(--ink3);margin:12px 2px 6px}.ybchip{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;color:var(--chip-ink,var(--color-primary-dark));background:var(--color-primary-light);border:0;border-radius:12px;padding:10px 12px;margin-bottom:6px;cursor:pointer}.ybchip i{font-style:normal;width:30px;height:30px;border-radius:8px;background:var(--color-primary);color:#fff;display:grid;place-items:center;font-size:.75rem;font-weight:800;flex:none}.ybchip b{display:block;font-size:.93rem}.ybchip small{font-size:.75rem;opacity:.8}.ybchip em{margin-left:auto;font-style:normal;font-weight:700;color:var(--color-primary)}
+.ybpin{display:inline-flex;align-items:center;gap:6px;background:var(--color-primary);color:#fff;border:0;border-radius:999px;padding:6px 10px 6px 12px;font:inherit;font-size:.82rem;font-weight:700;margin:10px 0 2px;cursor:pointer}
+.ybsug{display:flex;flex-wrap:wrap;gap:6px;margin-top:-4px}.ybsug button{border:1px solid var(--color-primary);color:var(--color-primary);background:var(--color-surface);border-radius:999px;padding:5px 10px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.ybsug button.g{border-color:var(--line);color:var(--ink2)}.ybsug button.on{background:var(--color-primary);color:#fff}
 #greetBar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--color-surface);border-top:1px solid var(--line)}#greetBar button{border:1.5px solid var(--color-primary);background:none;color:var(--color-primary);border-radius:999px;padding:5px 11px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
 /* 실 촬영 화면 (2026-11-15 대표 확정 시안 6차) */
 #scap{position:fixed;inset:0;z-index:900;background:#fff;color:var(--ink);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
@@ -760,7 +764,7 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 #scap .scdone{width:92px;height:92px;border-radius:50%;background:var(--color-primary);color:#fff;font-size:48px;display:grid;place-items:center}
 #scap .scnote{font-size:.7rem;color:var(--ink3);text-align:center;padding:8px 20px 0;line-height:1.4}
 /* 실 촬영 결과에서 한 줄 고치기: 자판이 아래에서 올라와 창을 덮지 않게 창을 화면 위쪽에 띄운다(2026-11-15 대표 제보) */
-.sheetwrap:has(#scIn){align-items:flex-start}.sheetwrap:has(#scIn) .sheet{width:calc(100% - 28px);margin:calc(env(safe-area-inset-top,0px) + 56px) 14px 0;border-radius:20px;padding-bottom:18px;max-height:none}
+.sheetwrap:has(#scIn),.sheetwrap:has(#ybB){align-items:flex-start}.sheetwrap:has(#scIn) .sheet,.sheetwrap:has(#ybB) .sheet{width:calc(100% - 28px);margin:calc(env(safe-area-inset-top,0px) + 56px) 14px 0;border-radius:20px;padding-bottom:18px;max-height:none}
 .scin{display:flex;align-items:baseline;justify-content:center;gap:6px;margin:14px auto 0;border:2px solid var(--color-primary);border-radius:16px;padding:8px 18px;width:fit-content;max-width:100%}.scin input{border:0;outline:0;background:none;font:inherit;font-size:1.7rem;font-weight:900;width:150px;text-align:center;color:var(--ink)}.scin.t input{font-size:1.1rem;width:240px}.scin span{font-size:1rem;color:var(--color-text-muted)}
 .arcmore{display:flex;justify-content:space-between;align-items:center;width:calc(100% - 24px);margin:14px 12px;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:var(--color-surface);font:inherit;font-size:.9rem;font-weight:700;color:var(--ink);cursor:pointer}.arcmore small{font-weight:400;font-size:.78rem;color:var(--ink3)}
 #pmenuBg{position:fixed;inset:0;z-index:69}
@@ -3102,7 +3106,7 @@ function supKindLabel(k){ return k.endsWith('_revoke') ? SUP_KIND[k.replace('_re
 let checkInAt=0;
 // 앱을 다시 화면에 올렸을 때도 접속을 남긴다(30분에 한 번까지 — 서버는 1시간 단위로만 고쳐 쓴다)
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && me && myProfile?.onboarded_at && Date.now()-checkInAt>30*60*1000){ checkInAt=Date.now(); sb.rpc('check_in').then(()=>{},()=>{}); } });
-async function supCheckIn(){   // 앱 실행(로그인) 시 1회: 출석 + 초대 확인
+async function supCheckIn(){ ybLoad();   // 앱 실행(로그인) 시 1회: 출석 + 초대 확인
   // 접속 기록(check_in)은 서포터즈와 상관없이 항상 남긴다(2026-11-13 — 서포터즈 스위치에 묶여 11-06 부터 멈춰 있었음: 최근 접속·첫 인증 안내·복귀 환영이 같은 함수). 서포터즈 화면 값만 스위치를 따른다
   if(!me) return renderBeta(); checkInAt=Date.now(); try{ const { data } = await sb.rpc('check_in'); if(SUPPORTERS) supStatus=data||null; }catch(e){}
   renderBeta();
@@ -3696,7 +3700,7 @@ const NEEDLES = {
 };
 NEEDLES['줄바늘'] = ['2.0mm','2.5mm','3.0mm','3.5mm','4.0mm','4.5mm','5.0mm','5.5mm','6.0mm','7mm','8mm','9mm','10mm','12mm'];
 let wYarns=[], wNeedles=[], yarnSug={}, yarnSugTimer=null;
-function wyBlank(){ return { name:'', color:'', colorFamily:'', colorHex:null, colorMode:'solid', colorFamilies:[], amount:'', unit:'볼', ball_g:'', ball_m:'', weight:'', weightManual:false, fiber:'', rating:'', rating_reason:'', mix:'' }; }
+function wyBlank(){ return { name:'', brand:'', color:'', colorFamily:'', colorHex:null, colorMode:'solid', colorFamilies:[], amount:'', unit:'볼', ball_g:'', ball_m:'', weight:'', weightManual:false, fiber:'', rating:'', rating_reason:'', mix:'' }; }
 function parseMix(t){ const o={}; (t||'').split(/[,/·]+/).forEach(x=>{ const m=/^\s*([^\d%]+?)\s*(\d{1,3})\s*%?\s*$/.exec(x); if(m && +m[2]<=100) o[m[1].trim().slice(0,12)]=+m[2]; }); return Object.keys(o).length?o:null; }
 function wDefaultNeedleType(){ const ids=[...wTechSel]; const k=ids.filter(x=>x[0]==='K').length, c=ids.filter(x=>x[0]==='C').length; if(k>c) return '대바늘'; if(c>k) return '코바늘'; return (myProfile?.craft==='knit')?'대바늘':'코바늘'; }
 function wyReset(){ fillWEvent(); wItemSet(''); wYarns=[]; wNeedles=[]; renderWYarns(); renderWNeedles(); const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=''; if(z) z.value=''; const m=$('#wMore'); if(m) m.hidden=true; }
@@ -3837,7 +3841,7 @@ function wyAutoWeight(y){ if(!y.weightManual){ const g=yarnWeightGuess(y); y.wei
 function wyHintAll(){ wYarns.forEach(wyAutoWeight); renderWYarns(); }
 function renderWYarns(){
   const box=$('#wYarnsBox'); if(!box) return;
-  box.innerHTML = wYarns.map((y,i)=>`<div class="ysum" onclick="openYarnDetail(${i})"><div class="dot" style="background:${yColorCss(y)}"></div><div class="tx"><b>${esc(y.name)}</b><span>${esc([y.color, yAmtTxt(y)].filter(Boolean).join(' · ')||'색·사용량을 적어 보세요')}</span>${ySpecLine(y)?`<span>${esc(ySpecLine(y))}</span>`:''}</div><button type="button" title="지우기" onclick="event.stopPropagation();wyDel(${i})">${ico('close')}</button></div>`).join('');
+  box.innerHTML = wYarns.map((y,i)=>`<div class="ysum" onclick="openYarnDetail(${i})"><div class="dot" style="background:${yColorCss(y)}"></div><div class="tx">${ybHtml(y.name, y.brand)}<span>${esc([y.color, yAmtTxt(y)].filter(Boolean).join(' · ')||'색·사용량을 적어 보세요')}</span>${ySpecLine(y)?`<span>${esc(ySpecLine(y))}</span>`:''}</div><button type="button" title="지우기" onclick="event.stopPropagation();wyDel(${i})">${ico('close')}</button></div>`).join('');
   const sb2=$('#wySameBtn'); if(sb2) sb2.hidden=!wYarns.length;
   wGaugeHint();
 }
@@ -3879,7 +3883,7 @@ async function wqRecentPick(i){
 function wyAddSame(){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]; if(!last) return openYarnPick(-1); const y=Object.assign(wyBlank(), {name:last.name, catalogId:last.catalogId, colors:last.colors, spec:last.spec, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix, fromDict:last.fromDict}); ydOpen(y, -1); }
 // 실 사전 한 줄(yarn_suggest 결과) → 입력용 실 객체. 색 목록도 같이 불러온다
 async function yarnFromDict(r){
-  const y=wyBlank(); y.name=r.name; y.catalogId=r.id||null; y.fromDict=!!r.id;
+  const y=wyBlank(); y.name=r.name; y.brand=ybSplit(r.name)[0]; y.catalogId=r.id||null; y.fromDict=!!r.id;
   if(r.ball_g) y.ball_g=String(r.ball_g); if(r.ball_m) y.ball_m=String(r.ball_m); if(r.fiber) y.fiber=r.fiber; if(r.fibers) y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', ');
   if(r.id){ const [{ data:cs }, { data:sp }] = await Promise.all([sb.rpc('yarn_colors_of', { p_catalog: r.id }), sb.rpc('yarn_spec', { p_id: r.id })]); y.colors=cs||[]; y.spec=sp||null; }   // 실 사전은 직접 조회 불가(schema 66) — 함수로 실 하나씩(색 목록 + 바늘·게이지)
   wyAutoWeight(y); return y;
@@ -3902,7 +3906,7 @@ function renderNeedleAdd(){
 function wnCommit(){ if(!wnDraft?.size) return toast('호수를 골라 주세요'); wNeedles.push({type:wnDraft.type, size:wnDraft.size}); closeSheet(); renderWNeedles(); wYarns.forEach(wyAutoWeight); renderWYarns(); }
 function wnDel(i){ wNeedles.splice(i,1); renderWNeedles(); }
 function wYarnPayload(){
-  const ys=wYarns.map(y=>({ name:(y.name||'').trim(), color:(y.color||'').trim(), amount:String(y.amount||'').trim(), unit:y.unit, ball_g:String(y.ball_g||'').trim(), ball_m:String(y.ball_m||'').trim(), weight:y.weight||'', fiber:y.fiber||'', rating:y.rating||'', rating_reason:y.rating_reason||'', fibers:parseMix(y.mix), stash_id:y.stashId||undefined, color_hex:(y.colorHex&&y.colorHex.length)?y.colorHex:undefined, color_mode:(y.colorHex&&y.colorHex.length)?(y.colorMode||'solid'):undefined, color_families:(y.colorFamilies&&y.colorFamilies.length)?y.colorFamilies:undefined })).filter(y=>y.name);
+  const ys=wYarns.map(y=>({ name:(y.name||'').trim(), brand:((y.brand && ybStrip(y.name, y.brand)!==null)?String(y.brand).trim().slice(0,40):ybSplit(y.name)[0])||undefined, color:(y.color||'').trim(), amount:String(y.amount||'').trim(), unit:y.unit, ball_g:String(y.ball_g||'').trim(), ball_m:String(y.ball_m||'').trim(), weight:y.weight||'', fiber:y.fiber||'', rating:y.rating||'', rating_reason:y.rating_reason||'', fibers:parseMix(y.mix), stash_id:y.stashId||undefined, color_hex:(y.colorHex&&y.colorHex.length)?y.colorHex:undefined, color_mode:(y.colorHex&&y.colorHex.length)?(y.colorMode||'solid'):undefined, color_families:(y.colorFamilies&&y.colorFamilies.length)?y.colorFamilies:undefined })).filter(y=>y.name);
   const ns=wNeedles.filter(n=>(n.size||'').trim()).map(n=>({ type:n.type, size:n.size.trim() }));
   const y0=ys[0], n0=ns[0];
   const needleTxt = n0 ? `${n0.type} ${n0.size}` : '';
@@ -3925,7 +3929,7 @@ async function openYarnSimilar(name){
 }
 function workYarnDetail(w){
   const ys=w.yarns||[], ns=w.needles||[]; if(ys.length<2 && ns.length<2 && !w.gauge && !w.finished_size && !(ys[0]&&(ys[0].amount||ys[0].ball_g))) return '';
-  const yl=ys.map(y=>`<div>· ${FULL?`<a href="#" data-n="${esc(y.name)}" onclick="event.stopPropagation();openYarnSimilar(this.dataset.n);return false" style="color:inherit;text-decoration:underline">${esc(y.name)}</a>`:esc(y.name)}${y.color?` ${y.color_hex&&y.color_hex.length?`<i style="display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid var(--line);vertical-align:-1px;background:${colorCss(y.color_hex,y.color_mode)}"></i> `:''}<span class="muted">${esc(y.color)}</span>`:''}${y.amount?` · ${y.amount}${esc(y.unit||'')}`:''}${y.ball_g&&y.ball_m?` <span class="muted">(${y.ball_g}g·${y.ball_m}m)</span>`:''}${y.weight?` · ${esc(y.weight)}`:''}</div>`).join('');
+  const yl=ys.map(y=>`<div>· ${FULL?`<a href="#" data-n="${esc(y.name)}" onclick="event.stopPropagation();openYarnSimilar(this.dataset.n);return false" style="color:inherit;text-decoration:underline">${ybInline(y.name, y.brand)}</a>`:ybInline(y.name, y.brand)}${y.color?` ${y.color_hex&&y.color_hex.length?`<i style="display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid var(--line);vertical-align:-1px;background:${colorCss(y.color_hex,y.color_mode)}"></i> `:''}<span class="muted">${esc(y.color)}</span>`:''}${y.amount?` · ${y.amount}${esc(y.unit||'')}`:''}${y.ball_g&&y.ball_m?` <span class="muted">(${y.ball_g}g·${y.ball_m}m)</span>`:''}${y.weight?` · ${esc(y.weight)}`:''}</div>`).join('');
   const nl=ns.length?`<div>· 바늘 ${ns.map(n=>esc((n.type?n.type+' ':'')+n.size)).join(', ')}</div>`:'';
   const ex=[w.gauge&&`게이지 ${esc(w.gauge)}`, w.finished_size&&`완성 ${esc(w.finished_size)}`].filter(Boolean).join(' · ');
   return `<details class="wyd" open onclick="event.stopPropagation()"><summary>실·바늘 자세히</summary><div class="ml" style="line-height:1.6">${yl}${nl}${ex?`<div>· ${ex}</div>`:''}</div></details>`;
@@ -4587,11 +4591,29 @@ function classBox(p){
 
 // ----- 실 고르기 (datalist 대신 직접 그린 목록)
 let ypIdx=-1, ypTab='search', ypRows=[], ypTimer=null, ypSeq=0, ypQuery='', ypOffset=0, ypMore=false;
+// ===== 실 = 브랜드 / 실 이름 (schema 119, 2026-11-15 대표 확정 시안) =====
+// 이름(name·raw_name)은 지금처럼 '브랜드 + 제품명' 한 줄로 저장하고(옛 앱·매칭 호환) 브랜드를 한 칸 더 둔다. 화면에서는 어디서나 브랜드(작게, 위) / 실 이름(굵게, 아래).
+// 옛 기록은 브랜드 칸이 없으므로 확정 실의 브랜드 목록(yarn_brands: 이름+별칭)을 한 번 받아 이름 앞부분과 맞춰 나눈다.
+let YB=null, YBK=[], ypBrand='';
+const ybN=t=>String(t||'').toLowerCase().replace(/[\s·.\-_]+/g,'');
+async function ybLoad(){ if(YB) return YB; try{ const { data, error } = await sb.rpc('yarn_brands'); if(error) throw error; const L=data||[]; YBK=[]; L.forEach(b=>[b.brand, ...(b.aliases||[])].forEach(a=>{ const k=ybN(a); if(k.length>=2) YBK.push([k, b.brand]); })); YBK.sort((a,b)=>b[0].length-a[0].length); YB=L; }catch(e){ return []; } return YB; }
+function ybStrip(name, pre){ const k=ybN(pre); if(!k) return null; const t=String(name||''); let i=0, j=0; while(i<t.length && j<k.length){ const c=ybN(t[i]); if(c===''){ i++; continue; } if(c!==k[j]) return null; i++; j++; } if(j<k.length) return null; return t.slice(i).replace(/^[\s·:\-_/]+/,'').trim(); }
+function ybSplit(name, brand){ name=String(name||'').trim(); brand=String(brand||'').trim();
+  if(brand){ const r=ybStrip(name, brand); return [brand, r==null?name:r]; }
+  for(const [k,b] of YBK){ const r=ybStrip(name, k); if(r) return [b, r]; }
+  return ['', name]; }
+function ybJoin(b, p){ return [String(b||'').trim(), String(p||'').trim()].filter(Boolean).join(' ').slice(0,60); }
+function ybMark(t, q){ t=String(t||''); q=String(q||'').trim(); const i=q?t.toLowerCase().indexOf(q.toLowerCase()):-1; return i<0?esc(t):esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length)); }
+function ybHtml(name, brand, o){ o=o||{}; const [b,p]=ybSplit(name, brand); return `${b&&p&&!o.nob?`<span class="ybr">${ybMark(b,o.hi)}</span>`:(!b&&o.unk?'<span class="ybr unk">브랜드 모름</span>':'')}<b>${ybMark(p||b||name,o.hi)}${o.tail||''}</b>`; }
+function ybInline(name, brand){ const [b,p]=ybSplit(name, brand); return `${b&&p?`<span class="muted">${esc(b)}</span> `:''}${esc(p||b||name)}`; }
+function ybFind(q){ const k=ybN(q); return k.length<2?[]:(YB||[]).filter(b=>[b.brand, ...(b.aliases||[])].some(a=>ybN(a).includes(k))); }
+function ypBrandSet(b){ ypBrand=b||''; const i=$('#ypQ'); if(i){ i.value=''; i.placeholder=ypBrand?`${ypBrand} 안에서 실 이름 찾기`:'브랜드나 실 이름으로 찾기'; } if(ypBrand) ypSearch(''); else ypLoadTab('recent'); }
 function openYarnPick(idx){
+  ypBrand=''; ybLoad();
   if(idx<0 && ypStashMode!=='manual' && wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요');
   ypIdx=idx; ypTab='recent'; ypRows=[]; const manual = ypStashMode==='manual';
-  openSub(manual?'실 이름으로 추가':'실 고르기', `<div style="position:relative;margin-top:8px"><span style="position:absolute;left:12px;top:13px;color:var(--ink3)">${SVG_SEARCH}</span><input id="ypQ" maxlength="60" placeholder="실 이름으로 찾기 (브랜드 + 제품명)" style="padding-left:38px" autocomplete="off" autocorrect="off" oninput="ypInput(this.value)"></div>
-    <div class="seg" id="ypTabs"></div><div class="plist" id="ypList"></div><div id="ypDirect"></div>`);
+  openSub(manual?'실 이름으로 추가':'실 고르기', `<div style="position:relative;margin-top:8px"><span style="position:absolute;left:12px;top:13px;color:var(--ink3)">${SVG_SEARCH}</span><input id="ypQ" maxlength="60" placeholder="브랜드나 실 이름으로 찾기" style="padding-left:38px" autocomplete="off" autocorrect="off" oninput="ypInput(this.value)"></div>
+    <div class="seg" id="ypTabs"></div><div id="ypBrands"></div><div class="plist" id="ypList"></div><div id="ypDirect"></div>`);
   if(manual){ subOnBack=()=>{ ypStashMode=''; closeSub(); openStashAdd(); }; return ypLoadTab('recent'); }
   ypStashMode=''; ypLoadTab('recent');
   loadStash().then(rows=>{ if(rows.some(x=>+x.left_balls>0 && x.raw_name) && !($('#ypQ')?.value||'').trim() && $('#ypTabs')) ypLoadTab('stash'); else if($('#ypTabs')) ypTabsRender(); });
@@ -4599,20 +4621,24 @@ function openYarnPick(idx){
 function ypTabsRender(){ const n=stashRows.filter(x=>+x.left_balls>0 && x.raw_name).length; $('#ypTabs').innerHTML=[...(ypStashMode==='manual'?[]:[['stash','내 실함'+(n?' '+n:'')]]),['search','검색 결과'],['recent','최근 쓴 실'],['popular','이웃이 많이 쓴 실']].map(([k,l])=>`<button type="button" class="${ypTab===k?'on':''}" onclick="ypLoadTab('${k}')">${l}</button>`).join(''); }
 function ypRender(emptyMsg){
   ypTabsRender();
-  $('#ypList').innerHTML = ypRows.length ? ypRows.map((r,i)=> r._stash ? `<button type="button" onclick="ypPick(${i})">${stashThumbHtml(r._stash)}<div style="flex:1;min-width:0"><b>${esc(r.name)}</b><span>${esc(stashSpec(r._stash))}</span></div><span class="sleft">${fmtBalls(r._stash.left_balls)}볼 남음</span></button>` : `<button type="button" onclick="ypPick(${i})"><div><b>${esc(r.name)}${r.verified?'<span class="vtag">확인된 실</span>':''}</b><span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('') + (ypTab==='search'&&ypMore?`<button type="button" style="justify-content:center;color:var(--acc);font-weight:700" onclick="ypSearch(ypQuery,true)">더보기 ↓</button>`:'') : `<div class="empty" style="padding:24px 0">${emptyMsg||''}</div>`;
+  $('#ypList').innerHTML = ypRows.length ? ypRows.map((r,i)=> r._stash ? `<button type="button" onclick="ypPick(${i})">${stashThumbHtml(r._stash)}<div style="flex:1;min-width:0">${ybHtml(r.name, r._stash.brand, {unk:1})}<span>${esc(stashSpec(r._stash))}</span></div><span class="sleft">${fmtBalls(r._stash.left_balls)}볼 남음</span></button>` : `<button type="button" onclick="ypPick(${i})"><div>${ybHtml(r.name, '', {hi:ypTab==='search'&&!ypBrand?ypQuery:'', nob:!!ypBrand, tail:r.verified?'<span class="vtag">확인된 실</span>':''})}<span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('') + (ypTab==='search'&&ypMore?`<button type="button" style="justify-content:center;color:var(--acc);font-weight:700" onclick="ypSearch(ypQuery,true)">더보기 ↓</button>`:'') : `<div class="empty" style="padding:24px 0">${emptyMsg||''}</div>`;
   const q=($('#ypQ')?.value||'').trim();
+  { const bx=$('#ypBrands'); if(bx){ const L=(ypTab==='search' && !ypBrand && q)?ybFind(q).slice(0,3):[];   // 브랜드를 치면 브랜드가 따로 맨 위에
+    bx.innerHTML = ypBrand ? `<button type="button" class="ybpin" onclick="ypBrandSet('')">${esc(ypBrand)} <span>✕</span></button>` : (L.length?`<div class="ybsec">브랜드</div>${L.map(b=>`<button type="button" class="ybchip" data-b="${esc(b.brand)}" onclick="ypBrandSet(this.dataset.b)"><i>${esc(b.brand.slice(0,1))}</i><span><b>${ybMark(b.brand,q)}</b><small>실 ${b.n}종</small></span><em>›</em></button>`).join('')}<div class="ybsec">실</div>`:''); } }
+  if(ypBrand && !q){ $('#ypDirect').innerHTML=`<button type="button" class="cfrow" onclick="ypDirect()"><span>${esc(ypBrand)}의 다른 실 직접 입력하기</span><span class="muted">›</span></button>`; return; }
   if(ypTab==='stash' && !q){ $('#ypDirect').innerHTML=`<p class="muted" style="font-size:.82rem;margin:12px 0">찍어 둔 실에서 고르면 이름·규격·색이 한 번에 들어가요.</p><button type="button" class="btn o" style="width:100%" onclick="ypStashMode='cert';openStashAdd()">${ico('camera')} 볼밴드 찍어서 바로 추가</button><button type="button" class="cfrow" onclick="ypLoadTab('search');$('#ypQ').focus()"><span>실함에 없는 실 직접 입력</span><span class="muted">›</span></button>`; return; }
   $('#ypDirect').innerHTML = q ? `<button type="button" class="cfrow" onclick="ypDirect()"><span>"${esc(q)}" 직접 입력하기</span><span class="muted">›</span></button>` : `<p class="muted" style="font-size:.82rem;margin-top:14px">찾는 실이 없으면 이름을 적고 「직접 입력하기」를 눌러 주세요.</p>`;
 }
-function ypInput(v){ clearTimeout(ypTimer); const q=v.trim(); if(!q){ return ypLoadTab('recent'); } ypTimer=setTimeout(()=>ypSearch(q), 250); }
+function ypInput(v){ clearTimeout(ypTimer); const q=v.trim(); if(!q){ return ypBrand?ypSearch(''):ypLoadTab('recent'); } ypTimer=setTimeout(()=>ypSearch(q), 250); }
 async function ypSearch(q, more){   // 8건씩, 9번째가 있으면 '더보기' (대표 2026-09-30)
   const seq=++ypSeq; ypTab='search'; const off=more?ypOffset+8:0;
-  const { data } = await sb.rpc('yarn_suggest_page', { p_q:q, p_offset:off }); if(seq!==ypSeq) return;
-  const rows=data||[]; ypMore=rows.length>8; const page=rows.slice(0,8); ypRows=more?ypRows.concat(page):page; ypOffset=off; ypQuery=q;
+  const { data } = await sb.rpc('yarn_suggest_page', { p_q:ypBrand?(ypBrand+' '+q).trim():q, p_offset:off }); if(seq!==ypSeq) return;
+  const rows=data||[]; ypMore=rows.length>8; let page=rows.slice(0,8); if(ypBrand) page=page.filter(r=>ybSplit(r.name)[0]===ypBrand); ypRows=more?ypRows.concat(page):page; ypOffset=off; ypQuery=q;
   ypRender('실 사전에 아직 없는 실이에요'); }
 async function ypLoadTab(k){
   const seq=++ypSeq; ypTab=k;
-  if(k==='search'){ const q=($('#ypQ')?.value||'').trim(); if(q) return ypSearch(q); ypRows=[]; return ypRender('실 이름을 입력해 보세요'); }
+  if(k!=='search' && ypBrand){ ypBrand=''; const i=$('#ypQ'); if(i) i.placeholder='브랜드나 실 이름으로 찾기'; }
+  if(k==='search'){ const q=($('#ypQ')?.value||'').trim(); if(q || ypBrand) return ypSearch(q); ypRows=[]; return ypRender('실 이름을 입력해 보세요'); }
   if(k==='stash'){ ypRows=stashRows.filter(x=>+x.left_balls>0 && x.raw_name).map(x=>({ _stash:x, name:x.raw_name })); return ypRender('내 실함에 남은 실이 없어요'); }
   ypRows=[]; ypRender('불러오는 중…');
   let rows=[];
@@ -4628,17 +4654,30 @@ async function ypPick(i){
 }
 // 직접 입력: 사전에 딱 맞는 실이 없어도 비슷한 확정 실이 있으면 "혹시 이 실인가요?"로 먼저 묻는다(schema 98). 고르면 사전 실로 연결, '다른 실'이면 적은 이름 그대로
 let ygRows=[], ygName='';
-function ypDirectGo(q){ const y=wyBlank(); y.name=q.slice(0,60); ydOpen(y, ypIdx, true); }
-async function ypDirect(){ const q=($('#ypQ')?.value||'').trim(); if(!q) return;
+let ybD={brand:'',product:''}, ygBrand='';
+function ypDirectGo(q, b){ const y=wyBlank(); y.name=q.slice(0,60); y.brand=b||''; ydOpen(y, ypIdx, true); }
+// 직접 입력 = 브랜드 / 실 이름 두 칸(브랜드는 몰라도 됨). 자판에 가리지 않게 창은 화면 위쪽(.sheetwrap:has(#ybB))
+function ypDirect(){ const q=($('#ypQ')?.value||'').trim(); if(!q && !ypBrand) return; let [b,p] = ypBrand?[ypBrand,q]:ybSplit(q); if(!b){ const m=/^(\S{2,})\s+(\S.*)$/.exec(p); if(m){ b=m[1]; p=m[2]; } }   // 아는 브랜드가 아니어도 '다이소 수면사'처럼 띄어 적었으면 앞 낱말을 브랜드 칸에 미리 넣어 둔다(고칠 수 있음)
+  ybD={ brand:b, product:p };
+  openSheet(`<b style="font-size:1.05rem">직접 입력</b>
+    <label class="f">브랜드 <span class="muted" style="font-weight:400;font-size:.78rem">만든 회사나 가게 이름</span><input id="ybB" maxlength="40" autocomplete="off" autocorrect="off" value="${esc(b)}" placeholder="예: 낙양모사, 다이소" oninput="ybD.brand=this.value;ybD.unk=false;ybBSug()"></label><div class="ybsug" id="ybBSug"></div>
+    <label class="f">실 이름 <span class="muted" style="font-weight:400;font-size:.78rem">볼밴드(띠지)에 적힌 이름</span><input id="ybP" maxlength="60" autocomplete="off" autocorrect="off" value="${esc(p)}" placeholder="예: 꽁뜨, 수면사, 코튼 마크라메" oninput="ybD.product=this.value"></label>
+    <p class="muted" style="font-size:.8rem;margin:0">만들 작품 이름이 아니에요. 이름이 없으면 '면사', '수면사'처럼 종류만 적어도 돼요.</p>
+    <button type="button" class="btn" onclick="ybDirectOk()">다음 · 색과 사용량</button>`); ybBSug(); }
+function ybBSug(){ const box=$('#ybBSug'); if(!box) return; const k=ybN(ybD.brand); const L=k.length>=1?(YB||[]).filter(b=>[b.brand, ...(b.aliases||[])].some(a=>ybN(a).includes(k)) && ybN(b.brand)!==k).sort((x,y)=>(ybN(y.brand).startsWith(k)?1:0)-(ybN(x.brand).startsWith(k)?1:0)).slice(0,4):[];
+  box.innerHTML=L.map(b=>`<button type="button" data-b="${esc(b.brand)}" onclick="ybBSet(this.dataset.b)">${esc(b.brand)}</button>`).join('')+`<button type="button" class="g ${ybD.unk?'on':''}" onclick="ybBSet('')">브랜드를 몰라요</button>`; }
+function ybBSet(b){ ybD.brand=b; ybD.unk=!b; const i=$('#ybB'); if(i) i.value=b; ybBSug(); $('#ybP')?.focus(); }
+function ybDirectOk(){ const b=String(ybD.brand||'').trim().slice(0,40); let p=String(ybD.product||'').trim(); if(b){ const r=ybStrip(p, b); if(r) p=r; } if(!p) return toast(b?'실 이름을 적어 주세요 · 모르면 종류만 적어도 돼요':'실 이름을 적어 주세요'); closeSheet(); ypGuess(ybJoin(b,p), b); }
+async function ypGuess(q, b){ if(!q) return;
   let L=[]; try{ const {data}=await sb.rpc('yarn_guess',{p_name:q}); L=data||[]; }catch(e){}
-  if(!L.length) return ypDirectGo(q);
-  ygRows=L; ygName=q;
+  if(!L.length) return ypDirectGo(q, b);
+  ygRows=L; ygName=q; ygBrand=b||'';
   const sw=r=>r.photo&&/^https:\/\//.test(r.photo)?`style="background-image:url('${esc(r.photo)}')"`:(r.color_hex&&/^#[0-9a-fA-F]{6}$/.test(r.color_hex)?`style="background:${r.color_hex}"`:'');
   openSheet(`<b style="font-size:1.05rem">혹시 이 실인가요?</b><p class="muted" style="margin:2px 0 4px;font-size:.84rem">「${esc(q)}」와 비슷한 실을 찾았어요. 맞는 것이 있으면 골라 주세요.</p>
-    ${L.map((r,i)=>`<button type="button" class="ygrow" onclick="ygPick(${i})"><span class="sw" ${sw(r)}></span><span><b>${esc(r.name)}</b><small>${esc([r.ball_g?r.ball_g+'g':'', r.ball_m?r.ball_m+'m':'', r.fibers?Object.keys(r.fibers).join('·'):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</small></span><i>이 실</i></button>`).join('')}
+    ${L.map((r,i)=>`<button type="button" class="ygrow" onclick="ygPick(${i})"><span class="sw" ${sw(r)}></span><span>${ybHtml(r.name)}<small>${esc([r.ball_g?r.ball_g+'g':'', r.ball_m?r.ball_m+'m':'', r.fibers?Object.keys(r.fibers).join('·'):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</small></span><i>이 실</i></button>`).join('')}
     <button type="button" class="ygno" onclick="ygPick(-1)">아니에요, 다른 실이에요</button>`);
 }
-async function ygPick(i){ const r=ygRows[i], q=ygName; closeSheet(); sb.rpc('yarn_guess_confirm',{p_name:q,p_catalog:r?r.id:null}).then(()=>{},()=>{}); if(!r) return ypDirectGo(q); ydOpen(await yarnFromDict(r), ypIdx); }
+async function ygPick(i){ const r=ygRows[i], q=ygName; closeSheet(); sb.rpc('yarn_guess_confirm',{p_name:q,p_catalog:r?r.id:null}).then(()=>{},()=>{}); if(!r) return ypDirectGo(q, ygBrand); ydOpen(await yarnFromDict(r), ypIdx); }
 
 // ----- 색·사용량
 let yd=null, ydIdx=-1, ydFam='', ydSpecOpen=false;
@@ -4717,7 +4756,7 @@ function renderStash(){
   $('#stashBody').innerHTML=`<div class="ssum"><div><b>${stashRows.length}</b><span>보유 실</span></div><div><b>${fmtBalls(has.reduce((t,s)=>t+(+s.left_balls),0))}</b><span>남은 볼</span></div><div><b>${done.length}</b><span>다 쓴 실</span></div></div>
     <div style="padding:0 16px"><div class="saopt"><button type="button" class="pri" onclick="openStashAdd()">${ico('camera')}<b>볼밴드 찍어서 추가</b><span>사진을 읽어 이름·규격을 채워요</span></button><button type="button" onclick="stashAddManual()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg><b>이름으로 추가</b><span>볼밴드가 없어도 돼요</span></button></div>${FULL&&has.length?`<button class="btn o" style="width:100%;margin-top:8px" onclick="openStashPatterns(null)">내 실로 뜰 수 있는 도안 찾기</button>`:''}</div>
     <div class="seg" style="padding:12px 16px 4px">${[['all','전체'],['left','남은 실'],['done','다 쓴 실']].map(([k,l])=>`<button type="button" class="${stashFilter===k?'on':''}" onclick="stashFilter='${k}';renderStash()">${l}</button>`).join('')}</div>
-    <div class="list">${list.map(s=>`<div class="item" onclick="openStashItem('${s.id}')">${stashThumbHtml(s)}<div class="tx"><b>${esc(stashName(s))}</b><span>${esc(s.read_status==='pending'?'잠시 뒤 이름·규격이 채워져요':stashSpec(s)||(s.read_status==='failed'?'볼밴드를 읽지 못했어요 · 눌러서 직접 적기':''))}</span></div><span class="sleft ${+s.left_balls>0?'':'end'}">${+s.left_balls>0?fmtBalls(s.left_balls)+'볼 남음':'다 씀'}</span></div>`).join('')||`<div class="empty">아직 담은 실이 없어요.<br>산 실의 볼밴드를 찍어 두면 완성작품 인증 때 한 번에 들어가요</div>`}</div>`;
+    <div class="list">${list.map(s=>`<div class="item" onclick="openStashItem('${s.id}')">${stashThumbHtml(s)}<div class="tx">${s.raw_name?ybHtml(s.raw_name, s.brand, {unk:1}):`<b>${esc(stashName(s))}</b>`}<span>${esc(s.read_status==='pending'?'잠시 뒤 이름·규격이 채워져요':stashSpec(s)||(s.read_status==='failed'?'볼밴드를 읽지 못했어요 · 눌러서 직접 적기':''))}</span></div><span class="sleft ${+s.left_balls>0?'':'end'}">${+s.left_balls>0?fmtBalls(s.left_balls)+'볼 남음':'다 씀'}</span></div>`).join('')||`<div class="empty">아직 담은 실이 없어요.<br>산 실의 볼밴드를 찍어 두면 완성작품 인증 때 한 번에 들어가요</div>`}</div>`;
 }
 // ----- 실 추가: 볼밴드를 연달아 찍고 볼 수만 적는다. 찍는 즉시 저장·읽기 시작
 let saDraft=[];   // {id, url, balls}
@@ -4778,20 +4817,21 @@ async function scSave(){
   }catch(e){ if(!sc) return; toast('담지 못했어요: '+(e.message||'')); if(sc.row) scResult(); else scRev(sc.blobs[1]?1:0); }
 }
 function scVal(k){ const r=sc.row||{}, e=sc.ed; if(k in e) return e[k]; if(k==='mix') return r.fibers?Object.entries(r.fibers).map(([a,b])=>a+' '+b).join(', '):''; return r[k]; }
+function scBP(){ const e=sc.ed, r=sc.row||{}; const base=ybSplit(r.raw_name||'', r.brand||''); return ['brand' in e?e.brand:base[0], 'product' in e?e.product:base[1]]; }
 function scResult(){ if(!sc || !sc.row) return; sc.step='result'; const r=sc.row; const col={ color:scVal('color'), color_hex:scVal('color_hex'), color_mode:scVal('color_mode'), color_family:scVal('color_family') };
   const fail = r.read_status!=='done'; const tx=scTexture(r.texture);
   const row=(k,label,val,unit)=>`<button type="button" class="scrw ${val?'':'miss'}" onclick="scEdit('${k}')"><span>${label}</span><b>${val?esc(val+(unit||'')):'못 읽었어요 · 적기'}</b><em>›</em></button>`;
   scWrap(`<div class="scbar"><span></span><button type="button" aria-label="닫기" onclick="scQuit()">✕</button></div>
     <div class="scrs"><div class="scrh">${fail?'사진을 다 읽지 못했어요':'이렇게 읽었어요'}</div><div class="scrp">${fail?'아래 칸을 눌러 직접 적어 주세요. 비워 둬도 담을 수 있어요.':'틀린 곳은 눌러서 고쳐 주세요'}</div>
       <div class="scrc" onclick="scEdit('color')"><i style="background:${stashColorCss(col)}"></i><div><small>사진에서 본 색</small><b>${esc(col.color||'색 고르기')}</b>${tx?`<span>${esc(tx)}</span>`:''}</div><em>›</em></div>
-      <div class="scrl">${row('raw_name','이름',scVal('raw_name'))}${row('mix','소재',scVal('mix'))}${row('ball_g','1볼 무게',scVal('ball_g')?fmtBalls(scVal('ball_g')):'','g')}${row('ball_m','1볼 길이',scVal('ball_m')?fmtBalls(scVal('ball_m')):'','m')}</div>
+      <div class="scrl">${row('brand','브랜드',scBP()[0])}${row('product','실 이름',scBP()[1])}${row('mix','소재',scVal('mix'))}${row('ball_g','1볼 무게',scVal('ball_g')?fmtBalls(scVal('ball_g')):'','g')}${row('ball_m','1볼 길이',scVal('ball_m')?fmtBalls(scVal('ball_m')):'','m')}</div>
       <div class="scrb"><span>몇 볼 있나요?</span><div class="scst"><button type="button" onclick="scBalls(-1)">−</button><b id="scBalls">${fmtBalls(sc.balls)}</b><button type="button" onclick="scBalls(1)">＋</button></div></div></div>
     <button type="button" class="sccta" onclick="scCommit()">${fail?'실함에 담기':'맞아요 · 실함에 담기'}</button>`); }
 function scBalls(d){ sc.balls=Math.max(0.5, Math.min(999, Math.round((sc.balls+d*(sc.balls<1||(sc.balls===1&&d<0)?0.5:1))*100)/100)); const e=$('#scBalls'); if(e) e.textContent=fmtBalls(sc.balls); }
 function scEdit(k){
   if(k==='color'){ const cur={ name:scVal('color'), family:scVal('color_family'), hex:scVal('color_hex'), mode:scVal('color_mode') }; return openColorPick(cur, r=>{ if(!sc) return; Object.assign(sc.ed, { color:r.name, color_family:r.family, color_families:r.families, color_hex:r.hex, color_mode:r.mode }); scResult(); }); }
-  const M={ raw_name:['실 이름','띠지에 적힌 브랜드와 제품명 (예: 낙양모사 꽁뜨)','', 't', 60], mix:['소재','띠지에 적힌 대로 (예: 면 60, 아크릴 40)','', 't', 40], ball_g:['1볼 무게','띠지에 적힌 숫자만 적어 주세요 (예: 50g)','g','n',6], ball_m:['1볼 길이','띠지에 적힌 숫자만 적어 주세요 (예: 110m)','m','n',6] }[k]; if(!M) return;
-  const v=scVal(k); openSheet(`<b style="font-size:1.1rem;text-align:center;display:block">${M[0]}</b><p class="muted" style="margin:0;font-size:.82rem;text-align:center">${M[1]}</p><div class="scin ${M[3]}"><input id="scIn" maxlength="${M[4]}" ${M[3]==='n'?'inputmode="decimal"':''} value="${esc(v==null?'':(M[3]==='n'&&v?fmtBalls(v):String(v)))}">${M[2]?`<span>${M[2]}</span>`:''}</div><button class="btn" onclick="scEditOk('${k}')">확인</button><button class="btn o" onclick="scEditOk('${k}', true)">모르겠어요 · 비워 두기</button>`);
+  const M={ brand:['브랜드','띠지에 적힌 회사 이름 (예: 낙양모사)','', 't', 40], product:['실 이름','띠지에 적힌 제품 이름 (예: 꽁뜨)','', 't', 60], mix:['소재','띠지에 적힌 대로 (예: 면 60, 아크릴 40)','', 't', 40], ball_g:['1볼 무게','띠지에 적힌 숫자만 적어 주세요 (예: 50g)','g','n',6], ball_m:['1볼 길이','띠지에 적힌 숫자만 적어 주세요 (예: 110m)','m','n',6] }[k]; if(!M) return;
+  const v = k==='brand'?scBP()[0]:k==='product'?scBP()[1]:scVal(k); openSheet(`<b style="font-size:1.1rem;text-align:center;display:block">${M[0]}</b><p class="muted" style="margin:0;font-size:.82rem;text-align:center">${M[1]}</p><div class="scin ${M[3]}"><input id="scIn" maxlength="${M[4]}" ${M[3]==='n'?'inputmode="decimal"':''} value="${esc(v==null?'':(M[3]==='n'&&v?fmtBalls(v):String(v)))}">${M[2]?`<span>${M[2]}</span>`:''}</div><button class="btn" onclick="scEditOk('${k}')">확인</button><button class="btn o" onclick="scEditOk('${k}', true)">모르겠어요 · 비워 두기</button>`);
   setTimeout(()=>{ const i=$('#scIn'); if(i){ i.focus(); i.select&&i.select(); } }, 150);
 }
 function scEditOk(k, clear){ if(!sc) return closeSheet(); let v = clear ? '' : ($('#scIn')?.value||'').trim();
@@ -4801,12 +4841,12 @@ function scEditOk(k, clear){ if(!sc) return closeSheet(); let v = clear ? '' : (
 function scQuit(){ askConfirm('담지 않고 닫을까요?', '방금 찍은 사진과 읽은 내용은 지워져요.', '담지 않기', async ()=>{ const r=sc&&sc.row; if(r&&r.id){ try{ const { error } = await sb.from('yarn_stash').delete().eq('id', r.id); if(!error){ const ps=[r.band_photo, r.band_photo2].filter(Boolean); if(ps.length) sb.storage.from('bands').remove(ps).then(()=>{}); } }catch(e){} } scClose(); }); }
 async function scCommit(){
   if(!sc || !sc.row) return; const r=sc.row, e=sc.ed, keys=Object.keys(e); const edited=new Set(r.edited||[]); const patch={ bought_balls:sc.balls, left_balls:sc.balls };
-  if('raw_name' in e){ patch.raw_name=(e.raw_name||'').slice(0,60)||null; patch.catalog_id=null; edited.add('raw_name'); }
+  if('brand' in e || 'product' in e){ const [b,p]=scBP(); patch.brand=String(b||'').slice(0,40)||null; patch.raw_name=ybJoin(b,p)||null; patch.catalog_id=null; edited.add('raw_name'); edited.add('brand'); }
   if('mix' in e){ patch.fibers=parseMix(e.mix); edited.add('fibers'); }
   if('ball_g' in e){ patch.ball_g=e.ball_g; edited.add('ball_g'); } if('ball_m' in e){ patch.ball_m=e.ball_m; edited.add('ball_m'); }
   if('color' in e){ patch.color=(e.color||'').slice(0,40)||null; patch.color_hex=(e.color_hex&&e.color_hex.length)?e.color_hex:null; patch.color_mode=patch.color_hex?(e.color_mode||'solid'):null; patch.color_families=(e.color_families&&e.color_families.length)?e.color_families:null; edited.add('color'); }
   if(keys.length) patch.edited=[...edited];
-  const name = ('raw_name' in e) ? patch.raw_name : r.raw_name; if(name && r.read_status!=='done') patch.read_status='manual';
+  const name = ('raw_name' in patch) ? patch.raw_name : r.raw_name; if(name && r.read_status!=='done') patch.read_status='manual';
   const { data, error } = await sb.from('yarn_stash').update(patch).eq('id', r.id).select('*').single(); if(error) return toast(error.message);
   sc.row=data; const k=stashRows.findIndex(x=>x.id===data.id); if(k>=0) stashRows[k]=data; sc.step='done';
   scWrap(`<div class="scctr"><div class="scdone">✓</div><div class="sch" style="margin-top:20px">실함에 담았어요</div><div class="scp"><b style="color:var(--ink)">${esc(data.raw_name||'이름 없는 실')}</b> ${esc(data.color||'')} · ${fmtBalls(data.left_balls)}볼</div></div>
@@ -4857,7 +4897,8 @@ async function openStashItem(id, draft){
   const u=s.band_photo&&stashThumb[s.band_photo];
   openSub('실 정보', `${u?`<img src="${u}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--bg2);margin-top:8px" onclick="openPhoto(this.src)">`:''}
     ${s.read_status==='failed'?'<p class="muted" style="font-size:.85rem">볼밴드를 읽지 못했어요. 아래에 직접 적어 주세요.</p>':s.read_status==='done'?'<p class="muted" style="font-size:.85rem">볼밴드에서 읽어 온 값이에요. 다르면 고쳐 주세요 — 고친 값이 우선이에요.</p>':''}
-    <label class="f" style="margin-top:8px">실 이름 <span class="muted" style="font-weight:400;font-size:.78rem">볼밴드(띠지)에 적힌 이름 · 만들 작품 이름이 아니에요</span><input id="siName" maxlength="60" autocomplete="off" value="${esc(s.raw_name||'')}" placeholder="브랜드 + 제품명 (예: 낙양모사 아임울)" oninput="siSet('raw_name',this.value);siSuggest(this.value)"></label>
+    <label class="f" style="margin-top:8px">브랜드 <span class="muted" style="font-weight:400;font-size:.78rem">만든 회사나 가게 이름 · 모르면 비워 두세요</span><input id="siBrand" maxlength="40" autocomplete="off" value="${esc(siBPv()[0])}" placeholder="예: 낙양모사" oninput="siBP(this.value, null)"></label>
+    <label class="f" style="margin-top:8px">실 이름 <span class="muted" style="font-weight:400;font-size:.78rem">볼밴드(띠지)에 적힌 이름 · 만들 작품 이름이 아니에요</span><input id="siName" maxlength="60" autocomplete="off" value="${esc(siBPv()[1])}" placeholder="예: 아임울" oninput="siBP(null, this.value);siSuggest(siRow.raw_name)"></label>
     <div class="plist" id="siSug" hidden></div>
     <p class="muted" id="siLink" style="font-size:.8rem;margin:4px 0 0">${s.catalog_id?'✓ 실 사전에 연결된 실이에요':'이름을 적으면 실 사전에서 찾아 드려요 · 고르면 규격이 채워져요'}</p>
     <div class="cfl">색 <span class="muted">번호가 있으면 이름 앞에 같이 적어요</span></div>
@@ -4871,6 +4912,8 @@ async function openStashItem(id, draft){
     ${FULL&&!draft?`<button type="button" class="btn o" style="width:100%;margin-top:18px" onclick="openStashPatterns('${s.id}')">이 실로 뜰 수 있는 도안 찾기</button>`:''}
     <button type="button" class="btn r" style="width:100%;margin-top:${FULL&&!draft?'10':'22'}px" onclick="stashDelete('${s.id}')">실함에서 지우기</button>`, { label:'저장', fn:stashItemSave });
 }
+function siBPv(){ const r=siRow||{}; if(r._b==null || r._p==null){ const x=ybSplit(r.raw_name||'', r.brand||''); if(r._b==null) r._b=x[0]; if(r._p==null) r._p=x[1]; } return [r._b, r._p]; }
+function siBP(b, p){ const r=siRow; siBPv(); if(b!=null) r._b=b; if(p!=null) r._p=p; r.brand=String(r._b||'').trim().slice(0,40); r.raw_name=ybJoin(r._b, r._p); const ed=(r._ed=r._ed||new Set()); ed.add('raw_name'); ed.add('brand'); r.catalog_id=null; }
 function siSet(k,v){ siRow[k]=v; (siRow._ed=siRow._ed||new Set()).add(k==='mix'?'fibers':k); if(k==='raw_name') siRow.catalog_id=null; }
 // 실 이름 자동완성(실 사전 yarn_suggest) — 고르면 표준 이름·규격·혼용률을 채우고 catalog_id 로 연결
 let siSugTimer=null, siSugSeq=0, siSugRows=[];
@@ -4878,12 +4921,12 @@ function siSuggest(v){
   clearTimeout(siSugTimer); const q=(v||'').trim(); const box=$('#siSug'); if(!box) return;
   if(q.length<2){ box.hidden=true; box.innerHTML=''; return; }
   siSugTimer=setTimeout(async()=>{ const seq=++siSugSeq; const { data } = await sb.rpc('yarn_suggest', { p_q:q }); if(seq!==siSugSeq || !$('#siSug')) return; siSugRows=data||[];
-    box.innerHTML=siSugRows.map((r,i)=>`<button type="button" onclick="siPickDict(${i})"><div><b>${esc(r.name)}${r.verified?'<span class="vtag">확인된 실</span>':''}</b><span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('');
+    box.innerHTML=siSugRows.map((r,i)=>`<button type="button" onclick="siPickDict(${i})"><div>${ybHtml(r.name, '', {tail:r.verified?'<span class="vtag">확인된 실</span>':''})}<span>${esc([r.ball_g&&r.ball_m?`${r.ball_g}g · ${r.ball_m}m`:'', r.fibers?Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(' '):(r.fiber||''), (r.weight||'').replace(/\(.*\)/,'')].filter(Boolean).join(' · ')||'규격 정보 없음')}</span></div></button>`).join('');
     box.hidden=!siSugRows.length; }, 250);
 }
 function siPickDict(i){
   const r=siSugRows[i]; if(!r) return; const s=siRow, ed=(s._ed=s._ed||new Set());
-  s.raw_name=r.name; s.catalog_id=r.id||null; ed.add('raw_name');
+  s.raw_name=r.name; s.brand=ybSplit(r.name)[0]; s._b=null; s._p=null; s.catalog_id=r.id||null; ed.add('raw_name'); ed.add('brand');
   if(r.ball_g){ s.ball_g=String(r.ball_g); ed.add('ball_g'); } if(r.ball_m){ s.ball_m=String(r.ball_m); ed.add('ball_m'); }
   if(r.fibers){ s.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '); s.fibers=r.fibers; ed.add('fibers'); }
   if(r.weight) s.weight=r.weight;
@@ -4896,7 +4939,7 @@ async function stashItemSave(){
   const g=num(s.ball_g), m=num(s.ball_m), left=parseFloat(s.left_balls);
   if(Number.isNaN(g)||Number.isNaN(m)) return toast('1볼 중량·길이는 숫자로 적어 주세요'); if(!(left>=0)||left>999) return toast('남은 볼을 확인해 주세요');
   const edited=[...new Set([...(s.edited||[]), ...(s._ed||[])])];
-  const patch={ raw_name:(s.raw_name||'').trim().slice(0,60)||null, color:(s.color||'').trim().slice(0,40)||null, color_hex:(s.color_hex&&s.color_hex.length)?s.color_hex:null, color_mode:(s.color_hex&&s.color_hex.length)?(s.color_mode||'solid'):null, color_families:(s.color_families&&s.color_families.length)?s.color_families:null, ball_g:g, ball_m:m, left_balls:Math.round(left*100)/100, edited };
+  const patch={ raw_name:(s.raw_name||'').trim().slice(0,60)||null, brand:String(s.brand||'').trim().slice(0,40)||null, color:(s.color||'').trim().slice(0,40)||null, color_hex:(s.color_hex&&s.color_hex.length)?s.color_hex:null, color_mode:(s.color_hex&&s.color_hex.length)?(s.color_mode||'solid'):null, color_families:(s.color_families&&s.color_families.length)?s.color_families:null, ball_g:g, ball_m:m, left_balls:Math.round(left*100)/100, edited };
   if(s._ed?.has('fibers')) patch.fibers=parseMix(s.mix);
   if(s._ed?.has('raw_name')) patch.catalog_id=s.catalog_id||null;   // 자동완성에서 고른 사전 실 → 바로 연결, 이름을 새로 적었으면 연결 해제 뒤 다시 찾기
   if(left>+s.bought_balls) patch.bought_balls=patch.left_balls;
@@ -4915,13 +4958,13 @@ async function stashDelete(id){
 // ----- 실 고르기와의 연결
 let ypStashMode='';   // 'manual' = 실함에 이름으로 직접 추가하는 중, 'cert' = 인증 도중 볼밴드 추가
 async function stashYarn(s){   // 실함의 실 → 인증 입력용 실
-  const y=wyBlank(); y.name=s.raw_name||''; y.color=s.color||''; y.colorFamily=s.color_family||''; y.colorHex=s.color_hex||null; y.colorMode=s.color_mode||'solid'; y.colorFamilies=s.color_families||(s.color_family?[s.color_family]:[]); y.catalogId=s.catalog_id||null; y.stashId=s.id; y.stashLeft=+s.left_balls; y.fromDict=true;
+  const y=wyBlank(); y.name=s.raw_name||''; y.brand=s.brand||ybSplit(s.raw_name||'')[0]; y.color=s.color||''; y.colorFamily=s.color_family||''; y.colorHex=s.color_hex||null; y.colorMode=s.color_mode||'solid'; y.colorFamilies=s.color_families||(s.color_family?[s.color_family]:[]); y.catalogId=s.catalog_id||null; y.stashId=s.id; y.stashLeft=+s.left_balls; y.fromDict=true;
   if(s.ball_g) y.ball_g=fmtBalls(s.ball_g); if(s.ball_m) y.ball_m=fmtBalls(s.ball_m); if(s.fiber) y.fiber=s.fiber; if(s.fibers) y.mix=Object.entries(s.fibers).map(([k,v])=>k+' '+v).join(', ');
   wyAutoWeight(y); return y;
 }
 async function stashAddFromDict(y){   // 실 사전·직접 입력으로 고른 실을 실함에 담기
   const g=parseFloat(y.ball_g)||null, m=parseFloat(y.ball_m)||null;
-  const { data:row, error } = await sb.from('yarn_stash').insert({ catalog_id:y.catalogId||null, raw_name:y.name.slice(0,60), color:(y.color||'').slice(0,40)||null, color_hex:(y.colorHex&&y.colorHex.length)?y.colorHex:null, color_mode:(y.colorHex&&y.colorHex.length)?(y.colorMode||'solid'):null, color_families:(y.colorFamilies&&y.colorFamilies.length)?y.colorFamilies:null, ball_g:g, ball_m:m, fiber:y.fiber||null, fibers:parseMix(y.mix), weight:y.weight||null, bought_balls:+y.amount||1, left_balls:+y.amount||1, read_status:'manual' }).select('id').single();
+  const { data:row, error } = await sb.from('yarn_stash').insert({ catalog_id:y.catalogId||null, raw_name:y.name.slice(0,60), brand:(y.brand||ybSplit(y.name)[0]||'').slice(0,40)||null, color:(y.color||'').slice(0,40)||null, color_hex:(y.colorHex&&y.colorHex.length)?y.colorHex:null, color_mode:(y.colorHex&&y.colorHex.length)?(y.colorMode||'solid'):null, color_families:(y.colorFamilies&&y.colorFamilies.length)?y.colorFamilies:null, ball_g:g, ball_m:m, fiber:y.fiber||null, fibers:parseMix(y.mix), weight:y.weight||null, bought_balls:+y.amount||1, left_balls:+y.amount||1, read_status:'manual' }).select('id').single();
   if(error) return toast(error.message);
   if(!y.catalogId) sb.rpc('stash_link_catalog', { p_id:row.id }).then(()=>{});
   toast('내 실함에 담았어요'); closeSub(); ypStashMode=''; openStash();
