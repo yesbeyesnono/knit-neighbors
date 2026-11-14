@@ -1737,3 +1737,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --       notifications kind 'remind'(푸시 O) 한 건 — "○○ 님의 뜨친 신청이 기다리고 있어요", link {type:'profile', id:신청한 사람}. 신청마다 한 번만
 --   크론 friend-remind 매일 10:30 UTC(19:30 KST). 탈퇴 예정·정지·차단 관계는 제외, 60일 넘은 신청은 보내지 않음
 
+-- ============================================================
+-- 117. 실 촬영 두 장 + 질감 (2026-11-15) — 마이그레이션 stash_two_photos_texture (+ Edge read-band v15)
+-- ============================================================
+--   yarn_stash.band_photo2(띠지 뒷면 사진, 버킷 bands 의 내 폴더) · yarn_stash.texture jsonb {halo: none|light|fuzzy, twist: tight|loose|none, shape: plain|boucle|chenille|tape|cord, thickness: fine|medium|bulky}
+--   band_photo = 첫 장(실 전체 + 띠지 앞면), band_photo2 = 둘째 장(띠지 뒷면 가까이). 옛 앱은 band_photo 한 장만 올린다(그대로 동작)
+--   stash_apply_read : 띠지에 색 이름이 없으면 사진에서 본 색 이름(color_guess)을 쓰고, texture 를 허용 값만 골라 저장('texture' 를 회원이 고쳤으면 유지)
+--   read-band : 사진 한 장 또는 두 장을 한 번에 읽는다. 실 자체의 대표색(color_hex)·색 이름(color_guess)·질감(texture)을 새로 읽음
+
