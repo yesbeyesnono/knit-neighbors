@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>실 — 브랜드 / 실 이름 나누기 시안</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:#E7E4DB;padding:26px 22px 30px;color:#22362A;width:1700px}
+h1{font-size:21px;margin-bottom:6px}.sub{font-size:13.5px;color:#55604F;margin-bottom:20px}
+.row{display:flex;gap:22px}
+.col{width:312px}.cap{font-size:15px;font-weight:800;margin-bottom:3px}.cap2{font-size:12.5px;color:#55604F;line-height:1.45;min-height:54px;margin-bottom:8px}
+.ph{width:312px;height:640px;border-radius:24px;overflow:hidden;background:#F3F1EA;box-shadow:0 8px 26px rgba(0,0,0,.16);display:flex;flex-direction:column;position:relative}
+.top{background:#22362A;color:#F3F1EA;height:50px;display:flex;align-items:center;padding:0 14px;gap:10px;flex:none;font-weight:700;font-size:16px}
+.body{flex:1;padding:12px 12px;overflow:hidden}
+.srch{background:#fff;border:1.5px solid #3E6B48;border-radius:12px;height:42px;display:flex;align-items:center;padding:0 12px;font-size:15px;gap:8px}
+.srch .mg{color:#8A9384}.srch i{font-style:normal;color:#8A9384}
+.sec{font-size:11.5px;font-weight:700;color:#8A9384;margin:14px 2px 6px;letter-spacing:.02em}
+.bchip{display:flex;align-items:center;gap:10px;background:#DDE8D6;border-radius:12px;padding:10px 12px;margin-bottom:6px}
+.bchip .bi{width:30px;height:30px;border-radius:8px;background:#3E6B48;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+.bchip b{font-size:14.5px}.bchip span{font-size:12px;color:#55604F}.bchip em{margin-left:auto;font-style:normal;color:#3E6B48;font-weight:700}
+.it{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:9px 12px;margin-bottom:6px}
+.sw{width:34px;height:34px;border-radius:9px;flex:none}
+.it .br{font-size:11.5px;color:#55604F;display:block;line-height:1.2}
+.it .nm{font-size:15px;font-weight:700;display:block;line-height:1.3}
+.it .sp{font-size:11.5px;color:#8A9384;display:block}
+mark{background:#FFE9A6;color:inherit;border-radius:3px;padding:0 1px}
+.pin{display:inline-flex;align-items:center;gap:6px;background:#3E6B48;color:#fff;border-radius:999px;padding:6px 10px 6px 12px;font-size:13px;font-weight:700;margin:10px 0 2px}
+.pin u{text-decoration:none;opacity:.8}
+.lab{font-size:12.5px;font-weight:700;margin:14px 2px 6px}.lab small{font-weight:400;color:#8A9384}
+.inp{background:#fff;border:1px solid #E2DFD5;border-radius:12px;height:44px;display:flex;align-items:center;padding:0 12px;font-size:15px}
+.inp.on{border:1.5px solid #3E6B48}.inp i{font-style:normal;color:#8A9384}
+.sug{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.sug span{border:1px solid #3E6B48;color:#3E6B48;border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:600;background:#fff}
+.sug span.g{border-color:#E2DFD5;color:#55604F}
+.btn{background:#3E6B48;color:#fff;border-radius:14px;height:48px;display:grid;place-items:center;font-weight:700;font-size:15.5px;margin-top:18px}
+.hint{font-size:12px;color:#8A9384;margin:6px 2px 0;line-height:1.45}
+.rd{background:#fff;border-radius:14px;overflow:hidden;margin-top:10px}
+.rd div{display:flex;align-items:center;padding:12px 13px;border-bottom:1px solid #F0EEE8;font-size:14.5px}
+.rd div:last-child{border:0}.rd label{width:74px;color:#8A9384;font-size:12.5px;flex:none}.rd b{font-weight:700}.rd em{margin-left:auto;color:#8A9384;font-style:normal}
+.rd .miss{background:#FFF6DA}.rd .new{box-shadow:inset 3px 0 0 #3E6B48}
+.h2{font-size:17px;font-weight:800;margin:6px 2px 2px}
+.card{background:#fff;border-radius:14px;padding:12px;margin-bottom:10px}
+.yl{display:flex;align-items:center;gap:9px;padding:6px 0}.yl .sw{width:26px;height:26px;border-radius:7px}
+.yl .br{font-size:11px;color:#55604F;display:block}.yl .nm{font-size:14px;font-weight:700;display:block}.yl em{margin-left:auto;font-style:normal;font-size:12.5px;color:#55604F}
+.tag{position:absolute;right:10px;top:60px;background:#C8453A;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:3px 8px}
+.note{margin-top:20px;font-size:13.5px;line-height:1.65;max-width:1600px}
+</style></head><body>
+<h1>실 — 브랜드 / 실 이름을 나누기</h1>
+<div class="sub">지금은 "낙양모사 꽁뜨"처럼 한 줄로 적고 한 줄로 보여요. 고를 때·적을 때·찍을 때·볼 때 모두 <b>브랜드(작게, 위) / 실 이름(굵게, 아래)</b> 두 칸으로 나눕니다.</div>
+<div class="row">
+
+<div class="col"><div class="cap">① 검색 — 브랜드를 치면</div><div class="cap2">맨 위에 <b>브랜드</b>가 따로 나오고(몇 종인지), 그 아래 실은 브랜드·이름 두 줄. 맞은 글자는 노랗게.</div>
+<div class="ph"><div class="top">‹ &nbsp;실 고르기</div><div class="body">
+<div class="srch"><span class="mg">🔍</span>낙양</div>
+<div class="sec">브랜드</div>
+<div class="bchip"><div class="bi">낙</div><div><b><mark>낙양</mark>모사</b><br><span>실 47종</span></div><em>›</em></div>
+<div class="sec">실</div>
+<div class="it"><div class="sw" style="background:#F4B8C4"></div><div><span class="br"><mark>낙양</mark>모사</span><span class="nm">꽁뜨</span><span class="sp">면 60 · 아크릴 40 · 50g</span></div></div>
+<div class="it"><div class="sw" style="background:#C9B79A"></div><div><span class="br"><mark>낙양</mark>모사</span><span class="nm">마당</span><span class="sp">면 100 · 100g</span></div></div>
+<div class="it"><div class="sw" style="background:#8FA7C4"></div><div><span class="br"><mark>낙양</mark>모사</span><span class="nm">세븐이지</span><span class="sp">울 50 · 아크릴 50 · 100g</span></div></div>
+<div class="it"><div class="sw" style="background:#E8DCC8"></div><div><span class="br"><mark>낙양</mark>모사</span><span class="nm">슬로우스텝</span><span class="sp">울 100 · 50g</span></div></div>
+</div></div></div>
+
+<div class="col"><div class="cap">② 브랜드를 누르면</div><div class="cap2">그 브랜드로 좁혀진 채 <b>실 이름만</b> 찾아요. 브랜드 칩의 ✕ 를 누르면 전체로.</div>
+<div class="ph"><div class="top">‹ &nbsp;실 고르기</div><div class="body">
+<div class="srch"><span class="mg">🔍</span><i>낙양모사 안에서 실 이름 찾기</i></div>
+<div class="pin">낙양모사 <u>✕</u></div>
+<div class="sec">실 47종 · 가나다순</div>
+<div class="it"><div class="sw" style="background:#F4B8C4"></div><div><span class="nm">꽁뜨</span><span class="sp">면 60 · 아크릴 40 · 50g</span></div></div>
+<div class="it"><div class="sw" style="background:#D8C8E8"></div><div><span class="nm">니트 코튼</span><span class="sp">면 100 · 40g</span></div></div>
+<div class="it"><div class="sw" style="background:#C9B79A"></div><div><span class="nm">마당</span><span class="sp">면 100 · 100g</span></div></div>
+<div class="it"><div class="sw" style="background:#8FA7C4"></div><div><span class="nm">세븐이지</span><span class="sp">울 50 · 아크릴 50 · 100g</span></div></div>
+<div class="it"><div class="sw" style="background:#E8DCC8"></div><div><span class="nm">슬로우스텝</span><span class="sp">울 100 · 50g</span></div></div>
+<div class="it"><div class="sw" style="background:#A9C7A0"></div><div><span class="nm">코지 울</span><span class="sp">울 80 · 나일론 20 · 50g</span></div></div>
+</div></div></div>
+
+<div class="col"><div class="cap">③ 직접 입력 — 두 칸</div><div class="cap2">사전에 없는 실은 <b>브랜드</b>와 <b>실 이름</b>을 따로 적어요. 브랜드는 치는 대로 아래에 후보가 떠요.</div>
+<div class="ph"><div class="top">‹ &nbsp;직접 입력</div><div class="body">
+<div class="lab">브랜드 <small>· 만든 회사나 가게 이름</small></div>
+<div class="inp on">다이</div>
+<div class="sug"><span>다이소</span><span>다이아몬드</span><span>다루마</span></div>
+<div class="sug"><span class="g">브랜드를 몰라요</span></div>
+<div class="lab">실 이름 <small>· 볼밴드(띠지)에 적힌 이름</small></div>
+<div class="inp"><i>예: 꽁뜨, 수면사, 코튼 마크라메</i></div>
+<div class="hint">만들 작품 이름이 아니에요. 이름이 없으면 '면사', '수면사'처럼 종류만 적어도 돼요.</div>
+<div class="btn">다음 · 색과 사용량</div>
+</div></div></div>
+
+<div class="col"><div class="cap">④ 사진으로 담을 때</div><div class="cap2">'이렇게 읽었어요'에서 이름 한 줄이 <b>브랜드 / 실 이름</b> 두 줄로. 각각 눌러 고쳐요.</div>
+<div class="ph"><div class="top">✕ &nbsp;실함에 담기</div><div class="body">
+<div class="h2">이렇게 읽었어요</div><div class="hint" style="margin-top:0">틀린 줄만 눌러서 고쳐 주세요.</div>
+<div class="rd">
+<div class="new"><label>브랜드</label><b>낙양모사</b><em>›</em></div>
+<div class="new"><label>실 이름</label><b>꽁뜨</b><em>›</em></div>
+<div><label>색</label><span style="width:18px;height:18px;border-radius:5px;background:#F4B8C4;margin-right:7px"></span><b>401 연분홍</b><em>›</em></div>
+<div><label>소재</label><b>면 60 · 아크릴 40</b><em>›</em></div>
+<div><label>1볼 무게</label><b>50g</b><em>›</em></div>
+<div class="miss"><label>1볼 길이</label><span style="color:#8A6A12">못 읽었어요 · 눌러서 적기</span><em>›</em></div>
+</div>
+<div class="btn">맞아요 · 실함에 담기</div>
+</div></div></div>
+
+<div class="col"><div class="cap">⑤ 보일 때</div><div class="cap2">완성작품 인증 카드·내 실함 어디서나 같은 모양: 브랜드 작게 위, 실 이름 굵게 아래.</div>
+<div class="ph"><div class="top">내 실함</div><div class="body">
+<div class="card">
+<div class="yl"><div class="sw" style="background:#F4B8C4"></div><div><span class="br">낙양모사</span><span class="nm">꽁뜨 · 401 연분홍</span></div><em>남은 3볼</em></div>
+<div class="yl"><div class="sw" style="background:#8FA7C4"></div><div><span class="br">낙양모사</span><span class="nm">세븐이지 · 하늘</span></div><em>남은 1볼</em></div>
+<div class="yl"><div class="sw" style="background:#F2E3B3"></div><div><span class="br">다이소</span><span class="nm">수면사 · 크림</span></div><em>남은 2볼</em></div>
+<div class="yl"><div class="sw" style="background:#B9C2B4"></div><div><span class="br" style="color:#B0B6AA">브랜드 모름</span><span class="nm">면사 · 회색</span></div><em>남은 1볼</em></div>
+</div>
+<div class="sec">완성작품 인증 카드의 실 줄</div>
+<div class="card" style="padding:10px 12px">
+<div class="yl"><div class="sw" style="background:#F4B8C4"></div><div><span class="br">낙양모사</span><span class="nm">꽁뜨</span></div><em>2볼 · 4mm</em></div>
+</div>
+</div></div></div>
+
+</div>
+<div class="note">
+<b>이미 쌓인 기록</b>은 서버가 한 번 나눕니다 — 사전에 연결된 실은 사전의 브랜드·이름 그대로, 나머지는 이름 앞부분이 아는 브랜드(별칭 포함)와 같으면 거기서 나누고, 못 나누면 '브랜드 모름'으로 둡니다(회원이 적은 원문은 그대로 보관).<br>
+<b>검색</b>은 지금처럼 한 칸입니다. 브랜드를 치든 실 이름을 치든 "낙양 꽁뜨"처럼 둘 다 치든 찾고, 결과만 브랜드 / 실로 나눠 보여 줍니다.
+</div>
+</body></html>

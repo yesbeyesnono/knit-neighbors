@@ -759,6 +759,8 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 #scap .sclk{display:block;width:100%;border:0;background:none;font:inherit;font-size:.8rem;color:var(--ink3);text-decoration:underline;padding:0 0 calc(16px + env(safe-area-inset-bottom));cursor:pointer}
 #scap .scdone{width:92px;height:92px;border-radius:50%;background:var(--color-primary);color:#fff;font-size:48px;display:grid;place-items:center}
 #scap .scnote{font-size:.7rem;color:var(--ink3);text-align:center;padding:8px 20px 0;line-height:1.4}
+/* 실 촬영 결과에서 한 줄 고치기: 자판이 아래에서 올라와 창을 덮지 않게 창을 화면 위쪽에 띄운다(2026-11-15 대표 제보) */
+.sheetwrap:has(#scIn){align-items:flex-start}.sheetwrap:has(#scIn) .sheet{width:calc(100% - 28px);margin:calc(env(safe-area-inset-top,0px) + 56px) 14px 0;border-radius:20px;padding-bottom:18px;max-height:none}
 .scin{display:flex;align-items:baseline;justify-content:center;gap:6px;margin:14px auto 0;border:2px solid var(--color-primary);border-radius:16px;padding:8px 18px;width:fit-content;max-width:100%}.scin input{border:0;outline:0;background:none;font:inherit;font-size:1.7rem;font-weight:900;width:150px;text-align:center;color:var(--ink)}.scin.t input{font-size:1.1rem;width:240px}.scin span{font-size:1rem;color:var(--color-text-muted)}
 .arcmore{display:flex;justify-content:space-between;align-items:center;width:calc(100% - 24px);margin:14px 12px;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:var(--color-surface);font:inherit;font-size:.9rem;font-weight:700;color:var(--ink);cursor:pointer}.arcmore small{font-weight:400;font-size:.78rem;color:var(--ink3)}
 #pmenuBg{position:fixed;inset:0;z-index:69}
