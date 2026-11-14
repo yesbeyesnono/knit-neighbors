@@ -2856,7 +2856,7 @@ async function loadHomeNotice(){
   try{ const { data } = await sb.from('app_config').select('value').eq('key','home_notice').maybeSingle(); const n=data?.value;
     if(!n || !n.active || !n.body){ homeNoticeCur=null; box.hidden=true; return; }
     homeNoticeCur=n; const id=String(n.id);
-    if(hnSeen('kn_notice_x', id)) box.hidden=true;
+    if(n.card===false || hnSeen('kn_notice_x', id)) box.hidden=true;   // card:false = 팝업(시트)만 띄우고 카드는 남기지 않음(이벤트 줄과 겹치지 않게)
     else { box.innerHTML=`${n.title?`<b>${esc(n.title)}</b>`:''}${String(n.body).split(/\n\s*\n/).map(t=>`<p>${esc(t.replace(/\s*\n\s*/g,' ').trim())}</p>`).join('')}<button type="button" class="x" aria-label="공지 닫기" onclick="closeHomeNotice('${esc(id)}')">✕</button>`; box.hidden=false; }
     homeNoticeSheet();
   }catch(e){ box.hidden=true; }
