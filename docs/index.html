@@ -734,7 +734,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .fqbar{position:sticky;bottom:0;z-index:5;background:#FFD95C;color:#3B1D08;padding:12px 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.14);margin-top:8px}.fqbar>b{display:block;font-size:.9rem;margin-bottom:8px}.fqbar .fqtwo{display:flex;gap:8px}
 #v-room.cth .bub{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.10)}#v-room.cth .bub.ph{box-shadow:none}#v-room.cthd .bub.ph time{color:#C9D6E0}#v-room.cth .top{border-bottom-color:transparent}
 #v-room .kkbox textarea{flex:1;min-width:0;width:auto;display:block;border:0;border-radius:0;background:transparent;box-shadow:none;outline:0;resize:none;padding:8px 0;margin:0;font-family:inherit;font-size:16px;line-height:22px;height:38px;min-height:38px;max-height:104px;overflow-y:auto;color:inherit}
-html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app{height:var(--vvh)!important}html.vvk #v-room .compose.kk{padding-bottom:8px}
+html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app{height:var(--vvh)!important}html.vvk #v-room .compose.kk,body.kb #v-room .compose.kk{padding-bottom:8px}
 .ybr{display:block;font-size:.72rem!important;font-weight:500;color:var(--ink2);line-height:1.25}.ybr.unk{color:var(--ink3)}.plist mark,.ybr mark,.ybchip mark{background:#FFE9A6;color:inherit;border-radius:3px}
 .ybsec{font-size:.72rem;font-weight:700;color:var(--ink3);margin:12px 2px 6px}.ybchip{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;color:var(--chip-ink,var(--color-primary-dark));background:var(--color-primary-light);border:0;border-radius:12px;padding:10px 12px;margin-bottom:6px;cursor:pointer}.ybchip i{font-style:normal;width:30px;height:30px;border-radius:8px;background:var(--color-primary);color:#fff;display:grid;place-items:center;font-size:.75rem;font-weight:800;flex:none}.ybchip b{display:block;font-size:.93rem}.ybchip small{font-size:.75rem;opacity:.8}.ybchip em{margin-left:auto;font-style:normal;font-weight:700;color:var(--color-primary)}
 .ybpin{display:inline-flex;align-items:center;gap:6px;background:var(--color-primary);color:#fff;border:0;border-radius:999px;padding:6px 10px 6px 12px;font:inherit;font-size:.82rem;font-weight:700;margin:10px 0 2px;cursor:pointer}
@@ -3358,7 +3358,8 @@ function kkKey(e){ if(e.key!=='Enter' || e.shiftKey || e.isComposing || e.keyCod
 // 자판이 올라오면(아이폰) 화면이 통째로 위로 밀려 방 제목과 대화가 사라지고, 입력칸 아래에 빈 공간이 생기던 문제(2026-11-15 대표 제보):
 // 채팅방에서는 보이는 영역 높이에 앱을 맞추고(제목은 위, 입력칸은 자판 바로 위) 밀린 화면을 되돌린다. 안드로이드는 화면이 스스로 줄어들어 해당 없음
 (function(){ const vv=window.visualViewport; if(!vv) return; const root=document.documentElement; let on=false, lastH=0;
-  const fit=()=>{ const open = view==='room' && document.body.classList.contains('kb') && (window.innerHeight - vv.height) > 120;
+  let base=Math.max(window.innerHeight, vv.height);   // 자판이 없을 때의 화면 높이(아이폰 앱에서는 자판이 올라오면 innerHeight 도 함께 줄어 비교가 안 됐음 — 2026-11-15)
+  const fit=()=>{ const kb=document.body.classList.contains('kb'); if(!kb) base=Math.max(window.innerHeight, vv.height); const open = view==='room' && kb && (base - vv.height) > 120;
     if(open){ const h=Math.round(vv.height); root.style.setProperty('--vvh', h+'px'); const ch = !on || h!==lastH; on=true; lastH=h; root.classList.add('vvk');
       if(window.scrollY || vv.offsetTop) window.scrollTo(0,0); if(ch) requestAnimationFrame(()=>{ try{ scrollMsgs(); }catch(e){} }); }
     else if(on){ on=false; lastH=0; root.classList.remove('vvk'); root.style.removeProperty('--vvh'); } };
