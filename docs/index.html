@@ -471,7 +471,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 #v-room .compose.kk{display:flex;align-items:center;gap:8px;padding:8px 10px max(8px, env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface)}
 #v-room .kkplus{width:38px;height:38px;border-radius:50%;background:var(--bg2);border:0;display:grid;place-items:center;flex:none;color:var(--ink);cursor:pointer;padding:0}
 #v-room .kkplus svg{width:22px;height:22px}
-#v-room .kkbox{flex:1;display:flex;align-items:center;background:var(--bg2);border-radius:22px;padding:3px 3px 3px 14px;min-width:0}
+#v-room .kkbox{flex:1;display:flex;align-items:flex-end;background:var(--bg2);border-radius:22px;padding:3px 3px 3px 14px;min-width:0}
 #v-room .kkbox input{flex:1;border:0;background:transparent;padding:8px 0;font-size:16px;min-width:0;border-radius:0;box-shadow:none}
 #v-room .kksend{width:34px;height:34px;border-radius:50%;background:var(--sel);color:#fff;border:0;display:grid;place-items:center;flex:none;cursor:pointer;padding:0}
 #v-room .kksend svg{width:18px;height:18px}
@@ -733,6 +733,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #fqpop .fqcf i{position:absolute;display:block;animation:fqcf 1.1s ease-out both}@keyframes fqcf{from{transform:translateY(-60px) rotate(0);opacity:0}30%{opacity:1}to{transform:translateY(0) rotate(200deg);opacity:1}}
 .fqbar{position:sticky;bottom:0;z-index:5;background:#FFD95C;color:#3B1D08;padding:12px 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.14);margin-top:8px}.fqbar>b{display:block;font-size:.9rem;margin-bottom:8px}.fqbar .fqtwo{display:flex;gap:8px}
 #v-room.cth .bub{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.10)}#v-room.cth .bub.ph{box-shadow:none}#v-room.cthd .bub.ph time{color:#C9D6E0}
+#v-room .kkbox textarea{flex:1;min-width:0;width:auto;display:block;border:0;border-radius:0;background:transparent;box-shadow:none;outline:0;resize:none;padding:8px 0;margin:0;font-family:inherit;font-size:16px;line-height:22px;height:38px;min-height:38px;max-height:104px;overflow-y:auto;color:inherit}
+html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app{height:var(--vvh)!important}html.vvk #v-room .compose.kk{padding-bottom:8px}
 #greetBar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--color-surface);border-top:1px solid var(--line)}#greetBar button{border:1.5px solid var(--color-primary);background:none;color:var(--color-primary);border-radius:999px;padding:5px 11px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
 /* 실 촬영 화면 (2026-11-15 대표 확정 시안 6차) */
 #scap{position:fixed;inset:0;z-index:900;background:#fff;color:var(--ink);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
@@ -1108,7 +1110,7 @@ body.kb #nav{display:none!important}
     <div class="top"><button class="back" onclick="leaveRoom()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="roomTitle"></h1><span class="mbadge" id="roomBadge" hidden>모임</span><span style="flex:1"></span><button class="btn sm o" id="meetInfoBtn" onclick="openMeetInfo()" hidden><i class="ico" data-ico="location"><b>📍</b></i> 모임 정보</button></div>
     <div class="roomstrip" id="roomStrip" onclick="openMeetInfo()" hidden></div>
     <div class="msgs" id="msgs"></div>
-    <div class="compose kk"><button type="button" class="kkplus" title="사진 보내기" onclick="$('#chatFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><input id="chatFile" type="file" accept="image/*" hidden onchange="sendChatPhoto(this.files[0]);this.value=''"><div class="kkbox"><input id="msgIn" placeholder="메시지 입력" maxlength="1000" onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)sendMsg()"><button type="button" class="kksend" title="보내기" onclick="sendMsg()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
+    <div class="compose kk"><button type="button" class="kkplus" title="사진 보내기" onclick="$('#chatFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><input id="chatFile" type="file" accept="image/*" hidden onchange="sendChatPhoto(this.files[0]);this.value=''"><div class="kkbox"><textarea id="msgIn" rows="1" placeholder="메시지 입력" maxlength="1000" oninput="kkGrow()" onkeydown="kkKey(event)"></textarea><button type="button" class="kksend" title="보내기" onclick="sendMsg()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
   </section>
 
   <!-- 뜨개 단계 자가진단 -->
@@ -2887,7 +2889,7 @@ async function fqCelebrate(id, opt){ opt=opt||{};
 function fqAfter(){ if(fq.rows.length){ fqDraw('who'); } else fqClose(); }
 const FQ_GREET=['안녕하세요! 반가워요 😊','요즘 뭐 뜨고 계세요?','같은 동네네요! 반가워요'];
 async function fqGreet(id){ fqClose(); await openDirectRoom(id);
-  setTimeout(()=>{ if(view!=='room') return; const inp=$('#msgIn'); if(inp && !inp.value) inp.value=FQ_GREET[0]; $('#greetBar')?.remove(); const bar=document.createElement('div'); bar.id='greetBar'; bar.innerHTML=FQ_GREET.map(t=>`<button type="button">${esc(t)}</button>`).join(''); bar.onclick=e=>{ const b=e.target.closest('button'); if(b){ $('#msgIn').value=b.textContent; $('#msgIn').focus(); } }; const c=$('#v-room .compose'); if(c) c.parentNode.insertBefore(bar, c); }, 900); }
+  setTimeout(()=>{ if(view!=='room') return; const inp=$('#msgIn'); if(inp && !inp.value){ inp.value=FQ_GREET[0]; kkGrow(); } $('#greetBar')?.remove(); const bar=document.createElement('div'); bar.id='greetBar'; bar.innerHTML=FQ_GREET.map(t=>`<button type="button">${esc(t)}</button>`).join(''); bar.onclick=e=>{ const b=e.target.closest('button'); if(b){ $('#msgIn').value=b.textContent; kkGrow(); $('#msgIn').focus(); } }; const c=$('#v-room .compose'); if(c) c.parentNode.insertBefore(bar, c); }, 900); }
 async function blockUser(id){
   if(!confirm('차단하면 지도와 채팅에서 서로 보이지 않아요. 차단할까요?')) return;
   const { data:rel } = await sb.from('friendships').select('requester_id,addressee_id').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`);
@@ -3344,12 +3346,23 @@ function appendMsg(m){
   $('#msgs').appendChild(el);
 }
 function scrollMsgs(){ const v=$('#v-room'); v.scrollTop=v.scrollHeight; }
+// 채팅 입력칸(2026-11-15): 여러 줄(4줄까지 늘어남). 휴대폰은 엔터 = 줄바꿈·보내기는 버튼, PC 는 엔터 = 보내기·Shift+엔터 = 줄바꿈
+function kkGrow(){ const el=$('#msgIn'); if(!el) return; const h0=el.offsetHeight; el.style.height='38px'; if(el.value) el.style.height=Math.min(104, Math.max(38, el.scrollHeight))+'px'; if(el.offsetHeight!==h0 && view==='room') scrollMsgs(); }
+function kkKey(e){ if(e.key!=='Enter' || e.shiftKey || e.isComposing || e.keyCode===229) return; if(window.matchMedia && matchMedia('(pointer:coarse)').matches) return; e.preventDefault(); sendMsg(); }
+// 자판이 올라오면(아이폰) 화면이 통째로 위로 밀려 방 제목과 대화가 사라지고, 입력칸 아래에 빈 공간이 생기던 문제(2026-11-15 대표 제보):
+// 채팅방에서는 보이는 영역 높이에 앱을 맞추고(제목은 위, 입력칸은 자판 바로 위) 밀린 화면을 되돌린다. 안드로이드는 화면이 스스로 줄어들어 해당 없음
+(function(){ const vv=window.visualViewport; if(!vv) return; const root=document.documentElement; let on=false, lastH=0;
+  const fit=()=>{ const open = view==='room' && document.body.classList.contains('kb') && (window.innerHeight - vv.height) > 120;
+    if(open){ const h=Math.round(vv.height); root.style.setProperty('--vvh', h+'px'); const ch = !on || h!==lastH; on=true; lastH=h; root.classList.add('vvk');
+      if(window.scrollY || vv.offsetTop) window.scrollTo(0,0); if(ch) requestAnimationFrame(()=>{ try{ scrollMsgs(); }catch(e){} }); }
+    else if(on){ on=false; lastH=0; root.classList.remove('vvk'); root.style.removeProperty('--vvh'); } };
+  vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); document.addEventListener('focusin', ()=>setTimeout(fit, 250)); document.addEventListener('focusout', ()=>setTimeout(fit, 250)); })();
 async function sendMsg(txt){ $('#greetBar')?.remove();   // txt 를 주면 입력창 대신 그 글을 보낸다(서포터즈 신청·친구 초대 알리기)
   const t=(typeof txt==='string'?txt:$('#msgIn').value).trim(); if(!t||!roomId)return;
   await loadBanned(); if(hasBanned(t)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
-  if(typeof txt!=='string') $('#msgIn').value='';
+  if(typeof txt!=='string'){ $('#msgIn').value=''; kkGrow(); }
   const { error } = await sb.from('messages').insert({room_id:roomId,sender_id:me.id,body:t});
-  if(error){ toast('전송 실패: '+error.message); $('#msgIn').value=t; }
+  if(error){ toast('전송 실패: '+error.message); $('#msgIn').value=t; kkGrow(); }
 }
 async function sendChatPhoto(file){
   if(!file||!roomId) return;
