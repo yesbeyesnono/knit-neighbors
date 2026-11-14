@@ -18,6 +18,10 @@
       "launchAutoHide": true,
       "backgroundColor": "#ffffff",
       "showSpinner": false
+    },
+    "Keyboard": {
+      "resize": "native",
+      "resizeOnFullScreen": true
     }
   }
 }
