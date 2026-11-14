@@ -3975,7 +3975,7 @@ async function editWorkOpen(p){
   sPhotos=(p.photos||[]).map(u=>({ url:u, old:true })); renderCertPhotos(); renderCertTech();
   // 실·바늘·기록: 저장된 값을 입력 상태로 되돌려 채움. 저장할 때 바뀐 경우에만 서버에 보냄(edit_work_yarn — 실함 차감을 다시 계산)
   wItemSet(w.item_type||'');
-  wYarns=(Array.isArray(w.yarns)?w.yarns:[]).map(y=>Object.assign(wyBlank(), { name:y.name||'', color:y.color||'', amount:(y.amount===null||y.amount===undefined)?'':String(y.amount), unit:y.unit||'볼', ball_g:y.ball_g?String(y.ball_g):'', ball_m:y.ball_m?String(y.ball_m):'', weight:y.weight||'', weightManual:!!y.weight, fiber:y.fiber||'', rating:(y.rating===null||y.rating===undefined)?'':y.rating, rating_reason:y.rating_reason||'', mix:y.fibers?Object.entries(y.fibers).map(([k,v])=>k+' '+v).join(', '):'', stashId:y.stash_id||undefined }));
+  wYarns=(Array.isArray(w.yarns)?w.yarns:[]).map(y=>Object.assign(wyBlank(), { name:y.name||'', color:y.color||'', amount:(y.amount===null||y.amount===undefined)?'':String(y.amount), unit:y.unit||'볼', ball_g:y.ball_g?String(y.ball_g):'', ball_m:y.ball_m?String(y.ball_m):'', weight:y.weight||'', weightManual:!!y.weight, fiber:y.fiber||'', rating:(y.rating===null||y.rating===undefined)?'':y.rating, rating_reason:y.rating_reason||'', mix:y.fibers?Object.entries(y.fibers).map(([k,v])=>k+' '+v).join(', '):'', stashId:y.stash_id||undefined, colorHex:(Array.isArray(y.color_hex)&&y.color_hex.length)?y.color_hex:null, colorMode:y.color_mode||'solid', colorFamilies:Array.isArray(y.color_families)?y.color_families:[], colorFamily:(Array.isArray(y.color_families)&&y.color_families[0])||'' }));
   wNeedles=(Array.isArray(w.needles)?w.needles:[]).filter(n=>n&&n.size).map(n=>({ type:n.type||'코바늘', size:n.size }));
   renderWYarns(); renderWNeedles(); $('#wGauge').value=w.gauge||''; $('#wSize').value=w.finished_size||'';
   editWorkYarn0=JSON.stringify(wYarnPayload()); certCheck();
@@ -4534,7 +4534,7 @@ function openStashAdd(){
 }
 function renderStashAdd(){
   openSub('실 추가', `${saDraft.length?`<p class="muted" style="font-size:.85rem;margin:8px 0">볼밴드를 찍고 볼 수만 적으세요. 여러 개를 연달아 찍어도 돼요.</p>`:`<p class="muted" style="font-size:.85rem;margin:8px 0">어떻게 넣을까요?</p>
-    <div class="saopt"><button type="button" class="pri" onclick="$('#saFile').click()">${ico('camera')}<b>볼밴드 찍기</b><span>앨범에서 골라도 돼요<br>이름·규격은 AI가 사진에서 읽어요</span></button><button type="button" onclick="stashAddManual()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg><b>이름으로 적기</b><span>실 이름을 검색하거나<br>직접 적어요</span></button></div>`}
+    <div class="saopt"><button type="button" class="pri" onclick="$('#saFile').click()">${ico('camera')}<b>볼밴드 찍기</b><span>앨범에서 골라도 돼요<br>이름·규격은 AI가 사진에서 읽어요</span></button><button type="button" onclick="stashAddManual()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg><b>이름으로 적기</b><span>볼밴드에 적힌 실 이름을<br>검색하거나 직접 적어요</span></button></div>`}
     <input id="saFile" type="file" accept="image/*" multiple hidden onchange="stashPickBands(this.files)">
     ${saDraft.length?'':'<p class="muted" style="font-size:.74rem;margin:2px 0 6px;line-height:1.45">볼밴드 사진은 글자를 읽기 위해 AI(외부 처리)로 분석되고 내 실함에만 비공개로 저장돼요. 다른 회원에게는 보이지 않아요.</p>'}
     <div id="saList">${saDraft.map((d,i)=>{ const s=stashRows.find(x=>x.id===d.id)||{}; const st=s.read_status;
@@ -4572,7 +4572,7 @@ async function openStashItem(id, draft){
   const u=s.band_photo&&stashThumb[s.band_photo];
   openSub('실 정보', `${u?`<img src="${u}" alt="" style="width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--bg2);margin-top:8px" onclick="openPhoto(this.src)">`:''}
     ${s.read_status==='failed'?'<p class="muted" style="font-size:.85rem">볼밴드를 읽지 못했어요. 아래에 직접 적어 주세요.</p>':s.read_status==='done'?'<p class="muted" style="font-size:.85rem">볼밴드에서 읽어 온 값이에요. 다르면 고쳐 주세요 — 고친 값이 우선이에요.</p>':''}
-    <label class="f" style="margin-top:8px">실 이름<input id="siName" maxlength="60" autocomplete="off" value="${esc(s.raw_name||'')}" placeholder="브랜드 + 제품명 (예: 낙양모사 아임울)" oninput="siSet('raw_name',this.value);siSuggest(this.value)"></label>
+    <label class="f" style="margin-top:8px">실 이름 <span class="muted" style="font-weight:400;font-size:.78rem">볼밴드(띠지)에 적힌 이름 · 만들 작품 이름이 아니에요</span><input id="siName" maxlength="60" autocomplete="off" value="${esc(s.raw_name||'')}" placeholder="브랜드 + 제품명 (예: 낙양모사 아임울)" oninput="siSet('raw_name',this.value);siSuggest(this.value)"></label>
     <div class="plist" id="siSug" hidden></div>
     <p class="muted" id="siLink" style="font-size:.8rem;margin:4px 0 0">${s.catalog_id?'✓ 실 사전에 연결된 실이에요':'이름을 적으면 실 사전에서 찾아 드려요 · 고르면 규격이 채워져요'}</p>
     <div class="cfl">색 <span class="muted">번호가 있으면 이름 앞에 같이 적어요</span></div>

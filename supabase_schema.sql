@@ -1701,3 +1701,11 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   edit_work_yarn(post, yarn_line, yarn_meta) : 내 작품 인증의 실·바늘·게이지·완성 크기·작품 종류. 정리 규칙은 create_work 와 같음.
 --       실함 차감을 되돌렸다가(stash_restore) 새 값으로 다시 차감, 이 작품의 yarn_entries 는 지우고 새로 기록(사전 uses 도 맞춤). 이벤트·뜨친인증 접수 글은 거절
 
+-- ============================================================
+-- 112. 실 데이터 점검 뒤 고침 (2026-11-14) — 마이그레이션 yarn_color_keep_and_stats
+-- ============================================================
+--   create_work · edit_work_yarn : 실마다 color_hex(#RRGGBB 4개까지) · color_mode · color_families 도 정리해서 저장
+--       (그 전에는 저장 목록에서 빠져 works.yarns·yarn_entries 에 색 코드가 남지 않았다 — 실함에서만 남았음. 이전 인증 27건은 복구 불가)
+--   admin_yarn_stats : '최근 30일 많이 쓴 실'·'30일 기록 수'에서 실함에 담은 기록(source='stash')을 뺌. 수요 탭(admin_yarn_demand)은 처음부터 빼고 있었음
+--   정리: 실 이름 칸에 작품 이름을 적어 생긴 후보 4건(북커버·파우치·스크런치·행잉트리, 연결된 실함·인증 없음) 삭제 — admin_logs yarn_cleanup
+
