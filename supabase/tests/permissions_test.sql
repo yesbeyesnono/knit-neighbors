@@ -184,6 +184,11 @@ begin
   out := pg_temp.must_fail(out, 'insert meetup_applications', format('insert into public.meetup_applications(meetup_id, profile_id) values (gen_random_uuid(), %L)', d1));   -- schema 109
   out := pg_temp.must_fail(out, 'meetup_set_terms(남의 모임)', 'select public.meetup_set_terms(gen_random_uuid(), ''x'', ''apply'', null)');
   out := pg_temp.must_fail(out, 'meetup_decide(남의 모임)', format('select public.meetup_decide(gen_random_uuid(), %L, true)', d2));
+  -- schema 110: 글 수정·고정·보관은 내 글만
+  out := pg_temp.must_fail(out, 'edit_post(없는/남의 글)', $q$select public.edit_post(gen_random_uuid(), 'x', '{}', null)$q$);
+  out := pg_temp.must_fail(out, 'edit_work(없는/남의 글)', $q$select public.edit_work(gen_random_uuid(), 'x', null, array['https://api.knitup.co.kr/storage/v1/object/public/posts/a.jpg'])$q$);
+  out := pg_temp.must_fail(out, 'post_pin(없는/남의 글)', $q$select public.post_pin(gen_random_uuid(), true)$q$);
+  out := pg_temp.must_fail(out, 'post_archive(없는/남의 글)', $q$select public.post_archive(gen_random_uuid(), true)$q$);
   out := pg_temp.must_fail(out, 'meetup_applicants(남의 모임)', 'select count(*) from public.meetup_applicants(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'read ddeuchin_claims', 'select 1 from public.ddeuchin_claims limit 1');   -- schema 100
   out := pg_temp.must_fail(out, 'admin_ddeuchin_list', 'select public.admin_ddeuchin_list()');

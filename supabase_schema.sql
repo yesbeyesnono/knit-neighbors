@@ -1678,3 +1678,14 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   meetup_app_summary(meetup) → {mine, waiting(개설자에게만)} · meetup_applicants(meetup) 개설자용 목록
 --   meetup_decide(meetup, profile, accept) : 개설자만. 정원 확인 → 확정이면 room_members 추가(채팅방 입장) + 신청자에게 알림
 --   트리거 room_members_meetup_gate(before insert) : join_mode='apply' 모임의 방에는 개설자와 확정된 사람만 들어온다(옛 앱의 join_meetup·친구 초대도 여기서 막힘)
+
+-- ============================================================
+-- 110. 글 수정 · 프로필에 고정 · 보관하기 (2026-11-14) — 원본 supabase/post_edit.sql (+ 마이그레이션 post_edit, post_archive_pin)
+-- ============================================================
+--   posts.edited_at(고친 시각 — 앱이 '수정됨' 표시) · posts.pinned_at(프로필 맨 위 고정, 회원당 3개) · posts.archived_at(보관 = 나만 보기)
+--   posts/works 에는 회원용 UPDATE 정책이 없다 → 아래 함수로만 고친다(전부 security definer, authenticated 만 실행)
+--   edit_post(post, body, photos, mentions) : 내 일반 글만. 댓글·모임 글·작품 인증·#뜨친인증 접수 글은 거절. 새 사진은 우리 Storage 주소만. 고치면 mod_scanned_at=null 로 되돌려 지기 검사를 다시 받는다
+--   edit_work(post, title, note, photos, add_techniques, add_custom) : 내 작품 인증만. 기법은 추가만(빼기 불가 — works_apply_cert 가 단계를 다시 계산). 실·바늘은 고치지 않음. 이벤트 인증(works.event_id)·뜨친인증 접수 글은 거절
+--   post_pin(post, on) : 3개까지, 숨겨진 글 불가 · post_archive(post, on) : hidden=true + archived_at (기존 '숨긴 글은 글쓴이만 봄' 규칙 사용), 고정은 풀림
+--   트리거 posts_archive_guard(before update of hidden) : 운영진·신고가 보관 글을 숨기면 archived_at 을 지워 회원이 다시 공개하지 못하게, 숨김 해제가 닿으면 보관 상태 유지
+
