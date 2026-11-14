@@ -739,6 +739,8 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 .ybsec{font-size:.72rem;font-weight:700;color:var(--ink3);margin:12px 2px 6px}.ybchip{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;color:var(--chip-ink,var(--color-primary-dark));background:var(--color-primary-light);border:0;border-radius:12px;padding:10px 12px;margin-bottom:6px;cursor:pointer}.ybchip i{font-style:normal;width:30px;height:30px;border-radius:8px;background:var(--color-primary);color:#fff;display:grid;place-items:center;font-size:.75rem;font-weight:800;flex:none}.ybchip b{display:block;font-size:.93rem}.ybchip small{font-size:.75rem;opacity:.8}.ybchip em{margin-left:auto;font-style:normal;font-weight:700;color:var(--color-primary)}
 .ybpin{display:inline-flex;align-items:center;gap:6px;background:var(--color-primary);color:#fff;border:0;border-radius:999px;padding:6px 10px 6px 12px;font:inherit;font-size:.82rem;font-weight:700;margin:10px 0 2px;cursor:pointer}
 .ybsug{display:flex;flex-wrap:wrap;gap:6px;margin-top:-4px}.ybsug button{border:1px solid var(--color-primary);color:var(--color-primary);background:var(--color-surface);border-radius:999px;padding:5px 10px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.ybsug button.g{border-color:var(--line);color:var(--ink2)}.ybsug button.on{background:var(--color-primary);color:#fff}
+.witem{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line2,var(--line));margin-top:12px;padding-top:12px;font-size:.93rem;cursor:pointer}.witem span{color:var(--ink3)}.witem b{background:var(--color-primary);color:#fff;border-radius:999px;padding:5px 12px;font-size:.85rem;font-weight:700}.witem u{margin-left:auto;text-decoration:none;color:var(--color-primary);font-weight:700;font-size:.85rem}.witem em{margin-left:auto;font-style:normal;color:var(--ink3)}
+.wigrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.wigrid button{font:inherit;font-size:.88rem;color:var(--ink);background:var(--color-surface);border:1px solid var(--line);border-radius:12px;padding:12px 4px;cursor:pointer}.wigrid button.on{background:var(--color-primary);color:#fff;border-color:transparent;font-weight:700}
 #greetBar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--color-surface);border-top:1px solid var(--line)}#greetBar button{border:1.5px solid var(--color-primary);background:none;color:var(--color-primary);border-radius:999px;padding:5px 11px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
 /* 실 촬영 화면 (2026-11-15 대표 확정 시안 6차) */
 #scap{position:fixed;inset:0;z-index:900;background:#fff;color:var(--ink);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
@@ -1156,8 +1158,8 @@ body.kb #nav{display:none!important}
       <div class="cfphotos" id="cfPhotos" style="justify-content:center"></div><input id="wFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
       <div class="cfreq ed-hide" id="cfReq" style="justify-content:center;padding:0"></div><div id="wEditNote">사진·작품 이름·실·바늘·기록을 고칠 수 있어요. 기법은 더 넣을 수만 있어요(이미 인증한 기법은 그대로).</div>
       <div class="ccard"><div class="cfl">작품 <span class="req">필수</span></div>
-        <input id="wTitle" maxlength="60" placeholder="작품 이름 (예: 그래니 스퀘어 가디건)" oninput="certCheck()">
-        <div class="cfl ed-hide">작품 종류</div><div class="seg ed-hide" id="wItemChips"></div><input type="hidden" id="wItem">
+        <input id="wTitle" maxlength="60" placeholder="작품 이름 (예: 그래니 스퀘어 가디건)" oninput="certCheck();wItemAuto()">
+        <div class="witem ed-hide" id="wItemRow" onclick="wItemPick()"></div><input type="hidden" id="wItem">
         <div id="wEventRow" hidden><div class="cfl">이벤트 인증</div><select id="wEvent" onchange="wEventPicked()"></select><p class="muted" style="font-size:.78rem;margin:6px 0 0">선정된 이벤트의 작품이면 골라 주세요. 샘플을 받아 뜬 작품에는 「샘플 제공」 표시가 붙어요.</p></div>
       </div>
       <div class="ccard" id="wYarnCard"><div class="cfl">어떤 실로 떴어요? <span class="muted">선택 · 아래에서 누르면 바로 들어가요</span></div>
@@ -3704,7 +3706,7 @@ let wYarns=[], wNeedles=[], yarnSug={}, yarnSugTimer=null;
 function wyBlank(){ return { name:'', brand:'', color:'', colorFamily:'', colorHex:null, colorMode:'solid', colorFamilies:[], amount:'', unit:'볼', ball_g:'', ball_m:'', weight:'', weightManual:false, fiber:'', rating:'', rating_reason:'', mix:'' }; }
 function parseMix(t){ const o={}; (t||'').split(/[,/·]+/).forEach(x=>{ const m=/^\s*([^\d%]+?)\s*(\d{1,3})\s*%?\s*$/.exec(x); if(m && +m[2]<=100) o[m[1].trim().slice(0,12)]=+m[2]; }); return Object.keys(o).length?o:null; }
 function wDefaultNeedleType(){ const ids=[...wTechSel]; const k=ids.filter(x=>x[0]==='K').length, c=ids.filter(x=>x[0]==='C').length; if(k>c) return '대바늘'; if(c>k) return '코바늘'; return (myProfile?.craft==='knit')?'대바늘':'코바늘'; }
-function wyReset(){ fillWEvent(); wItemSet(''); wYarns=[]; wNeedles=[]; renderWYarns(); renderWNeedles(); const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=''; if(z) z.value=''; const m=$('#wMore'); if(m) m.hidden=true; }
+function wyReset(){ fillWEvent(); wItemSet('', true); wYarns=[]; wNeedles=[]; renderWYarns(); renderWNeedles(); const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=''; if(z) z.value=''; const m=$('#wMore'); if(m) m.hidden=true; }
 function needleMm(sz){ const m=/([0-9.]+)\s*mm/.exec(sz||''); return m?+m[1]:null; }
 function yarnWeightGuess(y){
   const g=+y.ball_g, m=+y.ball_m;
@@ -4305,7 +4307,14 @@ function subBack(){ const f=subOnBack; subOnBack=null; if(f) return f(); closeSu
 
 // ----- 완성작품 인증 페이지
 const W_ITEMS=['소품·키링','인형','가방·파우치','모자','목도리·숄','의류','블랭킷·쿠션','수세미·코스터','기타'];
-function wItemSet(v){ const h=$('#wItem'); if(h) h.value=v||''; const box=$('#wItemChips'); if(box) box.innerHTML=W_ITEMS.map(x=>`<button type="button" class="${x===v?'on':''}" onclick="wItemSet(this.textContent)">${x}</button>`).join(''); }
+// 작품 종류(2026-11-15 대표 확정 C안): 칩 9개를 펼쳐 두지 않고 한 줄만. 작품 이름에서 종류를 알아맞혀 칩 하나로 보여 주고(틀리면 [바꾸기] → 고르는 창), 못 맞히면 '고르기 ›'.
+// 회원이 직접 고른 뒤에는(wItemManual) 이름을 바꿔도 건드리지 않는다. 순서가 중요: 앞에서 먼저 맞은 것이 이김(버킷백 = 가방, 버킷햇 = 모자)
+let wItemManual=false;
+const W_ITEM_RE=[['수세미·코스터',/수세미|코스터|컵\s*받침|냄비\s*받침|티\s*매트/],['인형',/인형|아미구루미|애착|모빌/],['가방·파우치',/가방|파우치|네트백|에코백|크로스백|토트백|숄더백|미니백|버킷백|복조리|지갑|케이스/],['모자',/모자|비니|보넷|버킷|베레|바라클라바|귀도리|햇$|캡$/],['목도리·숄',/목도리|머플러|숄|넥\s*워머|스카프|케이프|쁘띠/],['블랭킷·쿠션',/블랭킷|블랑켓|담요|쿠션|방석|러그|이불/],['의류',/가디건|카디건|조끼|베스트|스웨터|풀오버|원피스|치마|스커트|양말|덧신|장갑|워머|볼레로|뷔스티에|티셔츠|탑$|바지/],['소품·키링',/키링|열쇠고리|소품|책갈피|북커버|스크런치|곱창|헤어밴드|머리띠|브로치|도일리|바구니|오너먼트|리스$|가랜드|트리$/]];
+function wItemGuess(t){ t=String(t||'').trim(); if(t.length<2) return ''; for(const [k,re] of W_ITEM_RE) if(re.test(t)) return k; return ''; }
+function wItemAuto(){ if(wItemManual || editWorkPost) return; const g=wItemGuess($('#wTitle')?.value); if(g!==($('#wItem')?.value||'')) wItemSet(g, true); }
+function wItemSet(v, auto){ v=v||''; wItemManual = !auto && !!v; const h=$('#wItem'); if(h) h.value=v; const box=$('#wItemRow'); if(box) box.innerHTML=`<span>작품 종류</span>${v?`<b>${esc(v)}</b><u>바꾸기</u>`:'<em>고르기 ›</em>'}`; }
+function wItemPick(){ const cur=$('#wItem')?.value||''; openSheet(`<b style="font-size:1.05rem">작품 종류</b><div class="wigrid">${W_ITEMS.map(x=>`<button type="button" class="${x===cur?'on':''}" onclick="wItemSet(this.textContent===($('#wItem').value||'')?'':this.textContent);closeSheet()">${x}</button>`).join('')}</div>`); }
 async function openCert(){
   if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
   closeSub(); sPhotos=[]; composeKind='work'; editWorkPost=null; wLocked=new Set(); $('#v-cert').classList.remove('edit'); $('#v-cert .top h1').textContent='완성작품 인증'; $('#certPost').textContent='게시';
