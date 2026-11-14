@@ -709,6 +709,8 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .swrow.open .item{transform:translateX(-136px)}.swacts{position:absolute;top:0;right:0;bottom:0;width:136px;display:flex}.swacts button{flex:1;border:0;color:#fff;font:inherit;font-weight:700;font-size:.85rem;cursor:pointer}.swacts .a1{background:var(--color-primary)}.swacts .a2{background:#b3261e}
 .archrow{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;border-top:8px solid var(--color-bg);background:var(--color-surface);padding:14px 16px;font:inherit;font-size:.86rem;font-weight:700;color:var(--color-text-muted);cursor:pointer}
 .archit{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.archit .tx{flex:1;min-width:0;cursor:pointer}.archit .tx b{display:block;font-size:.92rem}.archit .tx b .mbadge{display:inline-block;width:auto;margin-top:0}.archit .tx span{display:block;color:var(--ink3);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.archit button{flex:none;border:1px solid var(--line);background:var(--color-surface);border-radius:999px;font:inherit;font-size:.76rem;padding:5px 10px;cursor:pointer}
+.wqsub{font-size:.72rem;font-weight:700;color:var(--ink3);margin:8px 0 5px}.wqk{display:flex;flex-wrap:wrap;gap:6px}.wqk button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:var(--color-surface);font:inherit;font-size:.8rem;font-weight:700;color:var(--ink);cursor:pointer;max-width:100%}.wqk button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wqk button i{width:14px;height:14px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.08)}.wqk button.on{background:var(--color-primary);border-color:var(--color-primary);color:#fff}.wqk button.s{border-style:dashed;background:var(--bg2);color:var(--color-text-muted)}#wQuick:not(:empty){margin-bottom:10px}
+.addy{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;border:1.5px dashed var(--color-primary);border-radius:12px;padding:8px 12px;font-size:.82rem;font-weight:700;color:var(--color-primary);cursor:pointer}.addy small{font-weight:400;font-size:.72rem;color:var(--ink3);flex:none}
 .arcmore{display:flex;justify-content:space-between;align-items:center;width:calc(100% - 24px);margin:14px 12px;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:var(--color-surface);font:inherit;font-size:.9rem;font-weight:700;color:var(--ink);cursor:pointer}.arcmore small{font-weight:400;font-size:.78rem;color:var(--ink3)}
 #pmenuBg{position:fixed;inset:0;z-index:69}
 #pmenu{position:fixed;z-index:70;min-width:176px;background:var(--color-surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.22);overflow:hidden}
@@ -1103,13 +1105,14 @@ body.kb #nav{display:none!important}
         <div class="cfl ed-hide">작품 종류</div><div class="seg ed-hide" id="wItemChips"></div><input type="hidden" id="wItem">
         <div id="wEventRow" hidden><div class="cfl">이벤트 인증</div><select id="wEvent" onchange="wEventPicked()"></select><p class="muted" style="font-size:.78rem;margin:6px 0 0">선정된 이벤트의 작품이면 골라 주세요. 샘플을 받아 뜬 작품에는 「샘플 제공」 표시가 붙어요.</p></div>
       </div>
+      <div class="ccard" id="wYarnCard"><div class="cfl">어떤 실로 떴어요? <span class="muted">선택 · 아래에서 누르면 바로 들어가요</span></div>
+        <div id="wQuick"></div>
+        <div id="wYarnsBox"></div>
+        <div class="yadd"><button type="button" onclick="openYarnPick(-1)">＋ 실 추가</button><button type="button" id="wySameBtn" onclick="wyAddSame()">＋ 같은 실, 다른 색</button></div>
+      </div>
       <div class="ccard"><div class="cfl">사용한 기법 <span class="req">필수</span> <span class="muted">기법 맵에서 여러 개</span></div>
         <button type="button" class="cfrow" style="border-top:0;padding-top:0;margin-top:0" onclick="openTechSub()"><span>기법 고르기</span><span class="muted" id="wPicked">0개 선택 ›</span></button>
         <div class="tchips" id="cfTechChips"></div>
-      </div>
-      <div class="ccard ed-hide"><div class="cfl">실 <span class="muted">선택 · 실 사전에서 고르면 규격이 자동으로 채워져요</span></div>
-        <div id="wYarnsBox"></div>
-        <div class="yadd"><button type="button" onclick="openYarnPick(-1)">＋ 실 추가</button><button type="button" id="wySameBtn" onclick="wyAddSame()">＋ 같은 실, 다른 색</button></div>
       </div>
       <div class="ccard ed-hide"><div class="cfl">바늘 <span class="muted">선택</span></div><div class="seg" id="wNeedlesBox"></div></div>
       <div class="ccard"><div class="cfl">기록 <span class="muted">선택</span></div>
@@ -3684,7 +3687,41 @@ function renderWYarns(){
   const sb2=$('#wySameBtn'); if(sb2) sb2.hidden=!wYarns.length;
   wGaugeHint();
 }
-function wyDel(i){ wYarns.splice(i,1); renderWYarns(); }
+function wyDel(i){ wYarns.splice(i,1); renderWYarns(); renderWQuick(); }
+// 작품 인증의 실 칸: 내 실함·최근에 쓴 실을 칩으로 — 한 번 누르면 바로 들어가고(사용량 1볼로 시작), 다시 누르면 빠진다. 줄을 누르면 색·사용량을 고친다 (2026-11-14 대표 확정 A안)
+let wqRecent=null;
+async function wqLoad(){
+  renderWQuick();
+  try{ await loadStash(); }catch(e){}
+  if(wqRecent===null){ wqRecent=[]; try{ const { data } = await sb.from('works').select('yarns').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(12); const seen=new Set(); (data||[]).forEach(w=>(Array.isArray(w.yarns)?w.yarns:[]).forEach(y=>{ if(y.name && !seen.has(y.name) && wqRecent.length<6){ seen.add(y.name); wqRecent.push(y); } })); }catch(e){} }
+  renderWQuick();
+}
+function renderWQuick(){
+  const box=$('#wQuick'); if(!box) return;
+  const st=stashRows.filter(x=>+x.left_balls>0 && x.raw_name).slice(0,6), stNames=new Set(st.map(x=>x.raw_name));
+  const rc=(wqRecent||[]).filter(y=>!stNames.has(y.name)).slice(0,4);
+  if(!st.length && !rc.length){ box.innerHTML=''; return; }
+  const has=n=>wYarns.some(y=>y.name===n);
+  const chip=(label, css, on, fn)=>`<button type="button" class="${on?'on':''}" onclick="${fn}"><i style="background:${css||'var(--bg2)'}"></i><span>${esc(label)}${on?' ✓':''}</span></button>`;
+  box.innerHTML = (st.length?`<div class="wqsub" style="margin-top:0">내 실함</div><div class="wqk">${st.map(x=>chip([x.raw_name, x.color].filter(Boolean).join(' '), stashColorCss(x), wYarns.some(y=>y.stashId===x.id), `wqStash('${x.id}')`)).join('')}</div>`:'')
+    + (rc.length?`<div class="wqsub"${st.length?'':' style="margin-top:0"'}>최근에 쓴 실</div><div class="wqk">${rc.map((y,i)=>chip(y.name, colorCss(y.color_hex, y.color_mode)||'', has(y.name), `wqRecentPick(${i})`)).join('')}</div>`:'');
+  box._rc=rc;
+}
+async function wqStash(id){
+  const i=wYarns.findIndex(y=>y.stashId===id); if(i>=0){ wYarns.splice(i,1); renderWYarns(); return renderWQuick(); }
+  if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요');
+  const sr=stashRows.find(x=>x.id===id); if(!sr) return;
+  const y=await stashYarn(sr); if(y.amount===''||y.amount==null) y.amount='1'; wYarns.push(y); renderWYarns(); renderWQuick();
+}
+async function wqRecentPick(i){
+  const r=($('#wQuick')._rc||[])[i]; if(!r) return;
+  const j=wYarns.findIndex(y=>y.name===r.name); if(j>=0){ wYarns.splice(j,1); renderWYarns(); return renderWQuick(); }
+  if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요');
+  let y=null; try{ const { data } = await sb.rpc('yarn_suggest', { p_q:r.name }); const hit=(data||[]).find(x=>x.name===r.name); if(hit) y=await yarnFromDict(hit); }catch(e){}
+  if(!y){ y=wyBlank(); y.name=r.name; if(r.ball_g) y.ball_g=String(r.ball_g); if(r.ball_m) y.ball_m=String(r.ball_m); y.weight=r.weight||''; y.weightManual=!!r.weight; y.fiber=r.fiber||''; if(r.fibers) y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '); }
+  y.color=r.color||''; if(Array.isArray(r.color_hex)&&r.color_hex.length){ y.colorHex=r.color_hex; y.colorMode=r.color_mode||'solid'; y.colorFamilies=Array.isArray(r.color_families)?r.color_families:[]; }
+  y.amount='1'; wYarns.push(y); renderWYarns(); renderWQuick();
+}
 function wyAddSame(){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]; if(!last) return openYarnPick(-1); const y=Object.assign(wyBlank(), {name:last.name, catalogId:last.catalogId, colors:last.colors, spec:last.spec, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix, fromDict:last.fromDict}); ydOpen(y, -1); }
 // 실 사전 한 줄(yarn_suggest 결과) → 입력용 실 객체. 색 목록도 같이 불러온다
 async function yarnFromDict(r){
@@ -3899,7 +3936,7 @@ function postCard(p, opts={}){
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b>${lvBadge(a)}<time>${agoShort(p.created_at)}${p.edited_at?' · 수정됨':''}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}','${a.id}')">···</button></div>
       ${p.body?`<div class="txt">${bodyHtml(p)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`).join('')}</div>`:''}
-      ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work):''}
+      ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work):''}${mine && p.work && !p.parent_id && !p.work.sponsored && !(Array.isArray(p.work.yarns)&&p.work.yarns.length) && !p.work.yarn_info ? `<div class="addy" onclick="event.stopPropagation();editPostOpen('${p.id}','yarn')"><span>＋ 어떤 실로 떴는지 적기</span><small>나에게만 보여요</small></div>` : ''}
       <div class="acts">
         <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${ICON.heart}<span>${p.like_count||''}</span></button>
         <button class="${expandedReplies.has(p.id)?'on2':''}" onclick="event.stopPropagation();toggleReplies('${p.parent_id||p.id}')">${ICON.reply}<span>${p.reply_count||''}</span></button>
@@ -3956,15 +3993,15 @@ async function openArchivedPosts(){
 // 글 수정 (schema 110): 일반 글은 글쓰기 화면, 작품 인증은 작품 인증 화면에 지금 내용을 채워서 엶
 let editPostId=null, editWorkPost=null, wLocked=new Set(), editWorkYarn0='';
 function editBackGo(){ const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
-async function editPostOpen(id){
+async function editPostOpen(id, focus){
   const p=pmFind(id); if(!p) return toast('글을 찾을 수 없어요');
-  if(p.work_id) return editWorkOpen(p);
+  if(p.work_id) return editWorkOpen(p, focus);
   await openCompose('post'); editPostId=id;
   $('#composeTitle').textContent='글 수정'; $('#sPost').textContent='저장';
   $('#sText').value=p.body||''; autoGrow($('#sText')); sPhotos=(p.photos||[]).map(u=>({ url:u, old:true })); renderPv('s');
   $('#sHint').textContent='좋아요·댓글은 그대로 남아요. 고친 글에는 \'수정됨\'이 붙어요';
 }
-async function editWorkOpen(p){
+async function editWorkOpen(p, focus){
   const r0=await sb.from('works').select('id,title,note,techniques,custom_techniques,yarns,needles,gauge,finished_size,item_type').eq('id', p.work_id).single(); const w=r0.data||p.work;
   if(!w) return toast('작품 정보를 찾을 수 없어요');
   await openCert(); if(view!=='cert') return;
@@ -3978,7 +4015,8 @@ async function editWorkOpen(p){
   wYarns=(Array.isArray(w.yarns)?w.yarns:[]).map(y=>Object.assign(wyBlank(), { name:y.name||'', color:y.color||'', amount:(y.amount===null||y.amount===undefined)?'':String(y.amount), unit:y.unit||'볼', ball_g:y.ball_g?String(y.ball_g):'', ball_m:y.ball_m?String(y.ball_m):'', weight:y.weight||'', weightManual:!!y.weight, fiber:y.fiber||'', rating:(y.rating===null||y.rating===undefined)?'':y.rating, rating_reason:y.rating_reason||'', mix:y.fibers?Object.entries(y.fibers).map(([k,v])=>k+' '+v).join(', '):'', stashId:y.stash_id||undefined, colorHex:(Array.isArray(y.color_hex)&&y.color_hex.length)?y.color_hex:null, colorMode:y.color_mode||'solid', colorFamilies:Array.isArray(y.color_families)?y.color_families:[], colorFamily:(Array.isArray(y.color_families)&&y.color_families[0])||'' }));
   wNeedles=(Array.isArray(w.needles)?w.needles:[]).filter(n=>n&&n.size).map(n=>({ type:n.type||'코바늘', size:n.size }));
   renderWYarns(); renderWNeedles(); $('#wGauge').value=w.gauge||''; $('#wSize').value=w.finished_size||'';
-  editWorkYarn0=JSON.stringify(wYarnPayload()); certCheck();
+  editWorkYarn0=JSON.stringify(wYarnPayload()); certCheck(); renderWQuick();
+  if(focus==='yarn') setTimeout(()=>{ const c=$('#wYarnCard'); if(c) c.scrollIntoView({ block:'start' }); }, 250);
 }
 function reportPost(id){
   openSheet(`<b>글 신고</b><div class="muted" style="font-size:.85rem">신고가 3건 쌓이면 글이 자동으로 숨겨지고, 운영자가 24시간 안에 확인해요.</div><label class="f">사유<select id="prReason"><option value="spam">스팸·광고</option><option value="harassment">괴롭힘·혐오</option><option value="inappropriate">부적절한 내용(성적·폭력)</option><option value="fake">허위·사기</option><option value="other">기타</option></select></label><textarea id="prDetail" maxlength="500" placeholder="자세한 내용 (선택)"></textarea><button class="btn r" onclick="sendPostReport('${id}')">신고하기</button>`);
@@ -4110,7 +4148,7 @@ async function openCert(){
   closeSub(); sPhotos=[]; composeKind='work'; editWorkPost=null; wLocked=new Set(); $('#v-cert').classList.remove('edit'); $('#v-cert .top h1').textContent='작품 인증'; $('#certPost').textContent='게시';
   if(!['compose','cert','meetform'].includes(view)) composeBack=view;
   $('#wTitle').value=''; $('#wNote').value=''; wCustom=[]; wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
-  wyReset(); renderCertPhotos(); renderCertTech(); certCheck();
+  wyReset(); renderCertPhotos(); renderCertTech(); certCheck(); wqLoad();
   show('cert'); $('#v-cert').scrollTop=0;
   loadTech().then(renderCertTech);
 }
