@@ -1689,3 +1689,15 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   post_pin(post, on) : 3개까지, 숨겨진 글 불가 · post_archive(post, on) : hidden=true + archived_at (기존 '숨긴 글은 글쓴이만 봄' 규칙 사용), 고정은 풀림
 --   트리거 posts_archive_guard(before update of hidden) : 운영진·신고가 보관 글을 숨기면 archived_at 을 지워 회원이 다시 공개하지 못하게, 숨김 해제가 닿으면 보관 상태 유지
 
+-- ============================================================
+-- 111. 모임 수정 · 클래스 변경 알림 · 작품 인증의 실·바늘 수정 (2026-11-14) — 원본 supabase/meetup_class_edit.sql (+ 마이그레이션 meetup_class_edit, edit_work_yarn)
+-- ============================================================
+--   대표 확정: 참가비·수강료는 신청자가 있어도 바꿀 수 있다. 일시·장소·비용이 바뀌면 참여자·신청자에게 앱이 자동으로 알린다(notifications kind 'notice' → 푸시)
+--   meetup_edit(meetup, title, place, starts_at, is_public, body, lat, lng, photos, extra) → {ok, notified, changes} : 개설자만. create_meetup 과 같은 칸 +
+--       extra.fee_note/refund_note/join_mode. 링크·계좌번호·금칙어 거절, 정원은 지금 참여 인원보다 적게 못 함, 일시를 바꿀 때만 '지금 이후' 검사.
+--       모임 글(posts)의 본문·사진·edited_at, 채팅방 이름도 함께 고침. 일시·장소·참가비가 바뀐 경우에만 방 참여자 + 확인 대기 신청자에게 알림
+--   트리거 shop_posts_class_changed(after update of extra) : 클래스의 일시(extra.starts_at)·장소·수강료/재료비가 바뀌면 신청자(applied·accepted)에게 알림.
+--       호스트는 기존 정책(shop_posts_update_owner/author)으로 직접 고친다. shop_posts.edited_at 추가
+--   edit_work_yarn(post, yarn_line, yarn_meta) : 내 작품 인증의 실·바늘·게이지·완성 크기·작품 종류. 정리 규칙은 create_work 와 같음.
+--       실함 차감을 되돌렸다가(stash_restore) 새 값으로 다시 차감, 이 작품의 yarn_entries 는 지우고 새로 기록(사전 uses 도 맞춤). 이벤트·뜨친인증 접수 글은 거절
+

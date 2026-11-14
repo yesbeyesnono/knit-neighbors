@@ -709,6 +709,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .swrow.open .item{transform:translateX(-136px)}.swacts{position:absolute;top:0;right:0;bottom:0;width:136px;display:flex}.swacts button{flex:1;border:0;color:#fff;font:inherit;font-weight:700;font-size:.85rem;cursor:pointer}.swacts .a1{background:var(--color-primary)}.swacts .a2{background:#b3261e}
 .archrow{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;border-top:8px solid var(--color-bg);background:var(--color-surface);padding:14px 16px;font:inherit;font-size:.86rem;font-weight:700;color:var(--color-text-muted);cursor:pointer}
 .archit{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.archit .tx{flex:1;min-width:0;cursor:pointer}.archit .tx b{display:block;font-size:.92rem}.archit .tx b .mbadge{display:inline-block;width:auto;margin-top:0}.archit .tx span{display:block;color:var(--ink3);font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.archit button{flex:none;border:1px solid var(--line);background:var(--color-surface);border-radius:999px;font:inherit;font-size:.76rem;padding:5px 10px;cursor:pointer}
+.arcmore{display:flex;justify-content:space-between;align-items:center;width:calc(100% - 24px);margin:14px 12px;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:var(--color-surface);font:inherit;font-size:.9rem;font-weight:700;color:var(--ink);cursor:pointer}.arcmore small{font-weight:400;font-size:.78rem;color:var(--ink3)}
 #pmenuBg{position:fixed;inset:0;z-index:69}
 #pmenu{position:fixed;z-index:70;min-width:176px;background:var(--color-surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.22);overflow:hidden}
 #pmenu button{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;height:44px;padding:0 14px;background:none;border:0;border-bottom:1px solid var(--line2);border-radius:0;font:inherit;font-size:.92rem;font-weight:700;color:var(--ink);text-align:left;cursor:pointer}
@@ -718,7 +719,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #askdlg .bx>b{font-size:1rem}#askdlg p{font-size:.86rem;color:var(--color-text-muted);margin:6px 0 16px;line-height:1.5}
 #askdlg .bs{display:flex;gap:8px}#askdlg .bs button{flex:1;height:42px;border-radius:999px;font:inherit;font-weight:700;font-size:.92rem;border:1px solid var(--line);background:var(--color-surface);color:var(--ink);cursor:pointer}#askdlg .bs .rr{background:#D93025;color:#fff;border-color:#D93025}
 .pintag{display:flex;align-items:center;gap:4px;font-size:.75rem;font-weight:700;color:var(--color-text-muted);margin-bottom:2px}.pintag svg{width:14px;height:14px}
-#wEditNote{display:none}#v-cert.edit #wEditNote{display:block;background:var(--bg2);border-radius:12px;padding:10px 12px;font-size:.8rem;color:var(--color-text-muted);line-height:1.5}#v-cert.edit .ed-hide{display:none!important}
+#wEditNote{display:none}#v-cert.edit #wEditNote{display:block;background:var(--bg2);border-radius:12px;padding:10px 12px;font-size:.8rem;color:var(--color-text-muted);line-height:1.5}#v-cert.edit #cfReq,#v-cert.edit #wEventRow{display:none!important}
 .arow{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line2)}.arow img{width:56px;height:56px;border-radius:10px;object-fit:cover;flex:none}.arow .ab{flex:1;min-width:0}.arow .at{font-size:.9rem;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.arow .ad{font-size:.75rem;color:var(--ink3);margin-top:2px}.arow .abt{display:flex;gap:6px;margin-top:8px}.arow .abt button{height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--color-surface);font:inherit;font-size:.8rem;font-weight:700;color:var(--ink);cursor:pointer}.arow .abt .g{background:var(--color-primary);border-color:var(--color-primary);color:#fff}.arow .abt .r{color:#D93025}
 #undoBar{position:fixed;left:16px;right:16px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:60;background:var(--color-primary-dark);color:#fff;border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:.86rem;box-shadow:0 6px 20px rgba(0,0,0,.25)}#undoBar[hidden]{display:none}#undoBar button{border:0;background:none;color:#CFE3C7;font:inherit;font-weight:700;cursor:pointer;padding:0 0 0 12px}
 /* 혹시 이 실인가요?(schema 98) */
@@ -1096,7 +1097,7 @@ body.kb #nav{display:none!important}
     <div class="body" style="gap:10px">
       <div class="mhero" id="wHero" onclick="$('#wFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">작품 사진 · 1~4장</span></div>
       <div class="cfphotos" id="cfPhotos" style="justify-content:center"></div><input id="wFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
-      <div class="cfreq ed-hide" id="cfReq" style="justify-content:center;padding:0"></div><div id="wEditNote">사진·작품 이름·한 줄 소감을 고칠 수 있어요. 기법은 더 넣을 수만 있고(이미 인증한 기법은 그대로), 실·바늘 정보는 아직 고칠 수 없어요.</div>
+      <div class="cfreq ed-hide" id="cfReq" style="justify-content:center;padding:0"></div><div id="wEditNote">사진·작품 이름·실·바늘·기록을 고칠 수 있어요. 기법은 더 넣을 수만 있어요(이미 인증한 기법은 그대로).</div>
       <div class="ccard"><div class="cfl">작품 <span class="req">필수</span></div>
         <input id="wTitle" maxlength="60" placeholder="작품 이름 (예: 그래니 스퀘어 가디건)" oninput="certCheck()">
         <div class="cfl ed-hide">작품 종류</div><div class="seg ed-hide" id="wItemChips"></div><input type="hidden" id="wItem">
@@ -2077,7 +2078,7 @@ async function openInquiry(kind, id){
 function pgToggle(id){ const e=document.getElementById('pgf-'+id); if(e) e.hidden=!e.hidden; }
 function clsTime(p){ const t=p?.extra?.starts_at||p?.ends_at||null; return t?new Date(t).getTime():Infinity; }
 function clsPast(p){ const t=clsTime(p); if(t===Infinity) return false; const x=p.extra||{}; const span = x.type==='course' ? Math.max(1,(x.sessions||1))*(x.cycle==='biweekly'?14:7)*864e5 : 6*3600e3; return t+span < Date.now(); }
-function spostCard(p, mine){ return `<div class="spost" id="sp-${p.id}"><span class="k ${p.kind==='class'?'class':''}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`; }
+function spostCard(p, mine){ return `<div class="spost" id="sp-${p.id}"><span class="k ${p.kind==='class'?'class':''}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button><button class="menu" style="float:right;background:none;border:0;cursor:pointer;margin-right:10px" onclick="editShopPost('${p.id}')">수정</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`; }
 function pgClsRow(p, mine, label){ const x=p.extra||{}; const ap=classApps[p.id]||{}; const past=clsPast(p); const left = x.max ? Math.max(0, x.max-(ap.accepted||0)) : null;
   const sub=[x.starts_at?fmtWhen(x.starts_at):'', past?'':(left===null?'':(left?`자리 ${left}개 남음`:'마감')), x.fee?won(x.fee):(p.extra?.v?'무료':'')].filter(Boolean).join(' · ');
   return `<div class="pgli" onclick="pgToggle('${p.id}')"><div><b><span class="pgk ${past?'n':'c'}">${label||(past?'지난 클래스':'모집 중')}</span>${esc(p.title)}</b><div class="s">${esc(sub)}</div></div><span class="go">${past?'보기':'신청'} ›</span></div><div class="pgfull" id="pgf-${p.id}" hidden>${spostCard(p, mine)}</div>`; }
@@ -2732,6 +2733,9 @@ async function loadUserFeed(uid, tab, el){
   const emptyMsg = { posts: mine?'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요':'아직 올린 글이 없어요', replies: mine?'아직 남긴 댓글이 없어요':'아직 남긴 댓글이 없어요', works: mine?'아직 인증한 작품이 없어요.\n＋ 버튼 › 작품 인증에서 올리면 여기에 모여요':'아직 인증한 작품이 없어요' }[tab];
   el.innerHTML = (data||[]).length ? data.map(p=> p.parent_id ? postCard(p,{noLine:true, replyTo: p.parent?.author?.nickname}) : postGroup(p)).join('') : `<div class="empty" style="white-space:pre-line">${emptyMsg}</div>`;
   if(uid!==me.id || true){ feedRows = (data||[]); }
+  // 보관한 글(나만 보기)이 있으면 내 목록 맨 아래에 한 줄 — 채팅의 '보관한 대화 N'과 같은 방식
+  if(mine && (tab==='posts'||tab==='works')){ let cq=sb.from('posts').select('id',{count:'exact',head:true}).eq('author_id', me.id).is('parent_id', null).not('archived_at','is',null); if(tab==='works') cq=cq.not('work_id','is',null);
+    const { count } = await cq; if(count && el.isConnected) el.insertAdjacentHTML('beforeend', `<button type="button" class="arcmore" onclick="openArchivedPosts()"><span>보관한 글 ${count}</span><small>나만 볼 수 있어요 ›</small></button>`); }
 }
 async function requestFriend(id, wave){
   const { data:rel } = await sb.from('friendships').select('requester_id,addressee_id,status,created_at').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`).limit(1);
@@ -3850,7 +3854,7 @@ async function openMeetup(id){
     ${joined && !myReviewed ? `<button class="btn" onclick="closeSheet();openCompose('review','${m.id}')">후기 쓰기</button>` : ''}` : '';
   openSheet(`<div class="mh" style="font-size:12px;color:var(--ink3);font-weight:700">${ico('location')} 모임${m.is_public?'':' · 초대만'} · ${MKIND[m.kind]||'자유 뜨개'}</div>
     <b style="font-size:1.25rem">${esc(m.title)}</b>
-    <div>${esc(m.place_name)}${m.address?`<div class="muted" style="font-size:.88rem">${esc(m.address)}${(()=>{ const g=parseGeo(m.location); return g?` · <a href="https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">길찾기</a>`:''; })()}</div>`:''}${m.created_by===me.id&&!past?`<div><a href="#" onclick="openMeetupLocEdit('${m.id}', this.dataset.p);return false" data-p="${esc(m.place_name)}" style="font-size:.85rem;color:var(--ink2);text-decoration:underline">${m.address?'장소 위치 수정':'지도 핀을 모임 장소로 옮기기'}</a></div>`:''}</div><div class="muted">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}${m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''}</div>
+    <div>${esc(m.place_name)}${m.address?`<div class="muted" style="font-size:.88rem">${esc(m.address)}${(()=>{ const g=parseGeo(m.location); return g?` · <a href="https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">길찾기</a>`:''; })()}</div>`:''}${m.created_by===me.id&&!past?`<div><a href="#" onclick="editMeetOpen('${m.id}');return false" style="font-size:.85rem;color:var(--ink2);text-decoration:underline">모임 수정 · 일시·장소·참가비</a></div>`:''}</div><div class="muted">${fmtWhen(m.starts_at)}${m.repeat&&m.repeat!=='once'?` · ${MREPEAT[m.repeat]}`:''}${m.duration_min?` · ${m.duration_min>=60?Math.floor(m.duration_min/60)+'시간':m.duration_min+'분'}`:''}</div>
     <div class="mcard" style="margin:0"><div class="mtags" style="margin:0">${meetupTags(m)}</div>${m.bring?`<div class="ml" style="margin-top:8px">준비물: ${esc(m.bring)}</div>`:''}</div>
     ${(m.fee_note||m.refund_note||m.join_mode==='apply')?`<div class="card soft" style="font-size:.9rem;line-height:1.6">${m.fee?`<b>참가비 ${esc(m.fee)}</b>`:''}${m.fee_note?`<div class="muted">${esc(m.fee_note)}</div>`:''}${m.refund_note?`<div>취소·환불 · ${esc(m.refund_note)}</div>`:''}${m.join_mode==='apply'?'<div class="muted">신청하면 개설자가 확정해요. 확정된 분만 채팅방에 들어와요.</div>':''}</div>`:''}
     ${m.descr?`<div style="white-space:pre-wrap">${esc(m.descr)}</div>`:''}
@@ -3914,6 +3918,7 @@ function postMenu(id, authorId){
   if(authorId===me.id){
     const top = p && !p.parent_id, open = p && (!p.hidden || p.archived_at);
     if(top && !p.meetup_id) items.push(['수정', PM_ICO.edit, `editPostOpen('${id}')`]);
+    if(top && p.meetup_id) items.push(['모임 수정', PM_ICO.edit, `editMeetOpen('${p.meetup_id}')`]);
     if(top && open) items.push([p.pinned_at?'고정 풀기':'프로필에 고정', PM_ICO.pin, `pinPost('${id}',${p.pinned_at?'false':'true'})`]);
     if(top && open && !p.meetup_id) items.push(['보관하기', PM_ICO.box, `archivePost('${id}',true)`]);
     items.push(['삭제', PM_ICO.del, `deletePost('${id}')`, 'r']);
@@ -3937,7 +3942,7 @@ async function pinPost(id, on){ const { error } = await sb.rpc('post_pin', { p_p
 // 보관하기: 나만 보이게(삭제 아님). 설정 › 보관한 글에서 다시 공개
 async function archivePost(id, on){
   const { error } = await sb.rpc('post_archive', { p_post:id, p_on:on }); if(error) return toast(error.message.replace(/^.*?: /,''));
-  if(on){ feedRows = feedRows.filter(x=>x.id!==id); const g=vEl('pg-'+id); if(g) g.remove(); if(view==='post' && curPost?.id===id) go('comm'); undoBar('글을 보관했어요 · 설정 › 보관한 글', ()=>archivePost(id,false)); }
+  if(on){ feedRows = feedRows.filter(x=>x.id!==id); const g=vEl('pg-'+id); if(g) g.remove(); if(view==='post' && curPost?.id===id) go('comm'); undoBar('글을 보관했어요 · 마이 › Thread 맨 아래에 모여요', ()=>archivePost(id,false)); if(view==='my') loadMyFeed(); }
   else { toast('다시 공개했어요'); if($('#arcList')) openArchivedPosts(); pmRefresh(); }
 }
 async function openArchivedPosts(){
@@ -3945,11 +3950,11 @@ async function openArchivedPosts(){
   const { data, error } = await sb.from('posts').select('id,body,photos,created_at,archived_at,author_id,parent_id,meetup_id,work_id').eq('author_id', me.id).not('archived_at','is',null).order('archived_at',{ascending:false}).limit(100);
   if(error){ $('#subBody').innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
   const rows=data||[]; rows.forEach(r=>{ if(!pmFind(r.id)) feedRows.push(r); });
-  $('#subBody').innerHTML = `<p class="muted" style="font-size:.82rem;margin:14px 0 4px;line-height:1.5">보관한 글은 나만 볼 수 있어요. 좋아요·댓글은 그대로 남아 있고, [다시 공개]를 누르면 원래 자리로 돌아가요.</p><div id="arcList">` +
-    (rows.length ? rows.map(r=>`<div class="arow">${(r.photos||[])[0]?`<img src="${esc(r.photos[0])}" alt="">`:''}<div class="ab"><div class="at">${esc(r.body||'(사진)')}</div><div class="ad">${new Date(r.created_at).toLocaleDateString("ko-KR",{month:"long",day:"numeric"})} 올림</div><div class="abt"><button type="button" class="g" onclick="archivePost('${r.id}',false)">다시 공개</button><button type="button" class="r" onclick="deletePost('${r.id}')">삭제</button></div></div></div>`).join('') : '<div class="empty">보관한 글이 없어요.<br>내 글의 ··· 에서 [보관하기]를 누르면 여기에 모여요</div>') + '</div>';
+  $('#subBody').innerHTML = `<p class="muted" style="font-size:.82rem;margin:14px 0 4px;line-height:1.5">보관한 글은 나만 볼 수 있어요. 좋아요·댓글은 그대로 남아 있고, [다시 공개]를 누르면 처음 올린 날짜의 자리로 돌아가요.</p><div id="arcList">` +
+    (rows.length ? rows.map(r=>`<div class="arow">${(r.photos||[])[0]?`<img src="${esc(r.photos[0])}" alt="">`:''}<div class="ab"><div class="at">${r.work_id?'<span class="pgk c">인증</span>':''}${esc(r.body||'(사진)')}</div><div class="ad">${new Date(r.created_at).toLocaleDateString("ko-KR",{month:"long",day:"numeric"})} 올림</div><div class="abt"><button type="button" class="g" onclick="archivePost('${r.id}',false)">다시 공개</button><button type="button" class="r" onclick="deletePost('${r.id}')">삭제</button></div></div></div>`).join('') : '<div class="empty">보관한 글이 없어요.<br>내 글의 ··· 에서 [보관하기]를 누르면 여기에 모여요</div>') + '</div>';
 }
 // 글 수정 (schema 110): 일반 글은 글쓰기 화면, 작품 인증은 작품 인증 화면에 지금 내용을 채워서 엶
-let editPostId=null, editWorkPost=null, wLocked=new Set();
+let editPostId=null, editWorkPost=null, wLocked=new Set(), editWorkYarn0='';
 function editBackGo(){ const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
 async function editPostOpen(id){
   const p=pmFind(id); if(!p) return toast('글을 찾을 수 없어요');
@@ -3960,14 +3965,20 @@ async function editPostOpen(id){
   $('#sHint').textContent='좋아요·댓글은 그대로 남아요. 고친 글에는 \'수정됨\'이 붙어요';
 }
 async function editWorkOpen(p){
-  let w=p.work; if(!w){ const r=await sb.from('works').select('id,title,note,techniques,custom_techniques').eq('id', p.work_id).single(); w=r.data; }
+  const r0=await sb.from('works').select('id,title,note,techniques,custom_techniques,yarns,needles,gauge,finished_size,item_type').eq('id', p.work_id).single(); const w=r0.data||p.work;
   if(!w) return toast('작품 정보를 찾을 수 없어요');
   await openCert(); if(view!=='cert') return;
   editWorkPost=p.id; $('#v-cert').classList.add('edit'); $('#v-cert .top h1').textContent='작품 인증 수정'; $('#certPost').textContent='저장';
   $('#wTitle').value=w.title||''; $('#wNote').value=w.note||'';
   wTechSel=new Set(w.techniques||[]); wLocked=new Set(w.techniques||[]); wCustom=[...(w.custom_techniques||[])];
   if((w.techniques||[]).length) wCraft = String(w.techniques[0]).startsWith('K') ? 'knitting' : 'crochet';
-  sPhotos=(p.photos||[]).map(u=>({ url:u, old:true })); renderCertPhotos(); renderCertTech(); certCheck();
+  sPhotos=(p.photos||[]).map(u=>({ url:u, old:true })); renderCertPhotos(); renderCertTech();
+  // 실·바늘·기록: 저장된 값을 입력 상태로 되돌려 채움. 저장할 때 바뀐 경우에만 서버에 보냄(edit_work_yarn — 실함 차감을 다시 계산)
+  wItemSet(w.item_type||'');
+  wYarns=(Array.isArray(w.yarns)?w.yarns:[]).map(y=>Object.assign(wyBlank(), { name:y.name||'', color:y.color||'', amount:(y.amount===null||y.amount===undefined)?'':String(y.amount), unit:y.unit||'볼', ball_g:y.ball_g?String(y.ball_g):'', ball_m:y.ball_m?String(y.ball_m):'', weight:y.weight||'', weightManual:!!y.weight, fiber:y.fiber||'', rating:(y.rating===null||y.rating===undefined)?'':y.rating, rating_reason:y.rating_reason||'', mix:y.fibers?Object.entries(y.fibers).map(([k,v])=>k+' '+v).join(', '):'', stashId:y.stash_id||undefined }));
+  wNeedles=(Array.isArray(w.needles)?w.needles:[]).filter(n=>n&&n.size).map(n=>({ type:n.type||'코바늘', size:n.size }));
+  renderWYarns(); renderWNeedles(); $('#wGauge').value=w.gauge||''; $('#wSize').value=w.finished_size||'';
+  editWorkYarn0=JSON.stringify(wYarnPayload()); certCheck();
 }
 function reportPost(id){
   openSheet(`<b>글 신고</b><div class="muted" style="font-size:.85rem">신고가 3건 쌓이면 글이 자동으로 숨겨지고, 운영자가 24시간 안에 확인해요.</div><label class="f">사유<select id="prReason"><option value="spam">스팸·광고</option><option value="harassment">괴롭힘·혐오</option><option value="inappropriate">부적절한 내용(성적·폭력)</option><option value="fake">허위·사기</option><option value="other">기타</option></select></label><textarea id="prDetail" maxlength="500" placeholder="자세한 내용 (선택)"></textarea><button class="btn r" onclick="sendPostReport('${id}')">신고하기</button>`);
@@ -4145,6 +4156,7 @@ async function submitCert(){
     if(editWorkPost){
       const { error } = await sb.rpc('edit_work', { p_post: editWorkPost, p_title: title, p_note: $('#wNote').value.trim()||null, p_photos: photos, p_add_techniques: [...wTechSel], p_add_custom: wCustom });
       if(error) throw new Error(error.message.replace(/^.*?: /,''));
+      const yp2=wYarnPayload(); if(JSON.stringify(yp2)!==editWorkYarn0){ const r2=await sb.rpc('edit_work_yarn', { p_post: editWorkPost, p_yarn: yp2.line, p_yarn_meta: yp2.meta }); if(r2.error) throw new Error('실·바늘 저장 실패: '+r2.error.message.replace(/^.*?: /,'')); editWorkYarn0=JSON.stringify(yp2); }
       await loadMe(); sPhotos=[]; editWorkPost=null; toast('고쳤어요'); certCheck.busy=false; return editBackGo();
     }
     const yp = wYarnPayload();
@@ -4168,7 +4180,7 @@ function renderShopNewsPhotos(){
 }
 function openShopNewsForm(){
   if(!myShop) return toast('가게 계정만 올릴 수 있어요');
-  closeSub(); closeSheet(); composeKind='shop'; sPhotos=[];
+  closeSub(); closeSheet(); composeKind='shop'; sPhotos=[]; editNewsId=null; $('#v-shopform .top h1').textContent='가게 소식'; $('#shopPost').textContent='게시';
   if(!['compose','cert','meetform','classform','shopform'].includes(view)) composeBack=view;
   $('#nTitle').value=''; $('#nBody').value=''; $('#nShopName').textContent='· '+myShop.name; $('#shopPost').disabled=false;
   renderShopNewsPhotos(); show('shopform'); $('#v-shopform .body').scrollTop=0;
@@ -4182,6 +4194,11 @@ async function submitShopNews(){
     await loadBanned(); if(hasBanned(title)||hasBanned(body)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const photos = await uploadPhotos(sPhotos);
     const ends = null;   // 마감일 칸은 2026-11-13 대표 지시로 없앰
+    if(editNewsId){
+      const { error:e2 } = await sb.from('shop_posts').update({ title, body: body||null, photos, edited_at: new Date().toISOString() }).eq('id', editNewsId);
+      if(e2) throw new Error(e2.message);
+      editNewsId=null; sPhotos=[]; toast('고쳤어요'); composeBack=null; b.disabled=false; return openShop(myShop.id);
+    }
     const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind: 'notice', title, body: body||null, photos, ends_at: ends });
     if(error) throw new Error(error.message);
     sPhotos=[]; toast('소식을 올렸어요. 팔로워에게 알림이 갔어요'); composeBack=null; return openShop(myShop.id);
@@ -4196,7 +4213,7 @@ async function loadMyClasses(el){
   if(myShop) curShop = curShop && curShop.id===myShop.id ? curShop : myShop;
   await loadClassApps(mine||[]);
   const ST={applied:'확인 기다리는 중',accepted:'확정',rejected:'함께하지 못함'};
-  const hostSec = (myShop||myProfile?.is_author) ? `<div class="msec">내가 연 클래스 ${(mine||[]).length} <button type="button" class="btn sm o" style="float:right;margin-top:-4px" onclick="openClassForm()">＋ 클래스 열기</button></div>${(mine||[]).length ? mine.map(p=>`<div class="spost" id="sp-${p.id}" style="border-top:0;border-bottom:1px solid var(--line)"><span class="k class">클래스</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteMyClass('${p.id}')">삭제</button><div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${Math.min(p.photos.length,4)}">${p.photos.slice(0,4).map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}${p.extra?.v?classBox(p):''}</div>`).join('') : '<div class="empty" style="padding:20px">아직 연 클래스가 없어요</div>'}` : '';
+  const hostSec = (myShop||myProfile?.is_author) ? `<div class="msec">내가 연 클래스 ${(mine||[]).length} <button type="button" class="btn sm o" style="float:right;margin-top:-4px" onclick="openClassForm()">＋ 클래스 열기</button></div>${(mine||[]).length ? mine.map(p=>`<div class="spost" id="sp-${p.id}" style="border-top:0;border-bottom:1px solid var(--line)"><span class="k class">클래스</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteMyClass('${p.id}')">삭제</button><button class="menu" style="float:right;background:none;border:0;cursor:pointer;margin-right:10px" onclick="editShopPost('${p.id}')">수정</button><div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${Math.min(p.photos.length,4)}">${p.photos.slice(0,4).map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}${p.extra?.v?classBox(p):''}</div>`).join('') : '<div class="empty" style="padding:20px">아직 연 클래스가 없어요</div>'}` : '';
   const appSec = `<div class="msec">신청한 클래스 ${(apps||[]).length}</div>${(apps||[]).length ? apps.map(a=>`<div class="aprow" style="padding:10px 16px;cursor:pointer" onclick="openLink({type:'class',id:'${a.post_id}'})"><div class="nm"><b>${esc(a.title)} <span class="st ${a.status==='rejected'?'r':''}">${ST[a.status]||a.status}</span></b><span>${esc(a.host||'')}${a.starts_at?' · '+fmtd(a.starts_at):''}${a.host_note?`<br>"${esc(a.host_note)}"`:''}</span></div>${a.status==='accepted'&&a.room_id?`<button onclick="event.stopPropagation();openRoom('${a.room_id}')">채팅방</button>`:''}</div>`).join('') : '<div class="empty" style="padding:20px">아직 신청한 클래스가 없어요. 가게 화면이나 작가 프로필의 클래스에서 신청할 수 있어요.</div>'}`;
   el.innerHTML = hostSec + appSec;
 }
@@ -4205,7 +4222,7 @@ async function loadUserClasses(uid, el){
   const { data, error } = await sb.from('shop_posts').select('*').eq('author_id', uid).is('shop_id', null).eq('kind','class').order('created_at',{ascending:false}).limit(30);
   if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
   await loadClassApps(data); const mine = uid===me.id;
-  el.innerHTML = (data||[]).length ? data.map(p=>`<div class="spost" id="sp-${p.id}" style="border-top:0;border-bottom:1px solid var(--line)"><span class="k class">클래스</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteMyClass('${p.id}')">삭제</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${Math.min(p.photos.length,4)}">${p.photos.slice(0,4).map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}${p.extra?.v?classBox(p):''}</div>`).join('')
+  el.innerHTML = (data||[]).length ? data.map(p=>`<div class="spost" id="sp-${p.id}" style="border-top:0;border-bottom:1px solid var(--line)"><span class="k class">클래스</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteMyClass('${p.id}')">삭제</button><button class="menu" style="float:right;background:none;border:0;cursor:pointer;margin-right:10px" onclick="editShopPost('${p.id}')">수정</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${Math.min(p.photos.length,4)}">${p.photos.slice(0,4).map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}${p.extra?.v?classBox(p):''}</div>`).join('')
     : `<div class="empty" style="white-space:pre-line">${mine?'아직 연 클래스가 없어요.\n＋ › 클래스 열기로 첫 클래스를 열어 보세요':'아직 연 클래스가 없어요'}</div>`;
 }
 async function deleteMyClass(id){ if(!confirm('이 클래스를 삭제할까요?')) return; const {error}=await sb.from('shop_posts').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); if(view==='my') loadMyFeed(); else if(curShop) openShop(curShop.id); }
@@ -4224,11 +4241,37 @@ function renderClassPhotos(){
   const box=$('#cfPhotos'); if(!box) return;
   box.innerHTML = sPhotos.length ? sPhotos.map((p,i)=>`<div style="background-image:url(${p.url});width:56px;height:56px">${i===0?'<span style="position:absolute;left:3px;bottom:3px;font-size:.6rem;font-weight:700;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff">대표</span>':''}<b onclick="event.stopPropagation();sPhotos.splice(${i},1);renderPv('s')">${ico('close')}</b></div>`).join('') + (sPhotos.length<4?`<button type="button" style="width:56px;height:56px;font-size:.7rem" onclick="$('#cFile').click()">${ico('camera')}<br>추가</button>`:'') : '';
 }
+// 클래스·가게 소식 수정 (schema 111): 같은 양식에 지금 내용을 채워서 엶. 클래스의 일시·장소·수강료가 바뀌면 서버 트리거가 신청자에게 알림
+let editClassId=null, editClassOrig=null, editNewsId=null;
+async function editShopPost(id){
+  const { data:p, error } = await sb.from('shop_posts').select('*').eq('id', id).single(); if(error || !p) return toast('글을 찾을 수 없어요');
+  if(p.kind==='class' && p.extra?.v) return editClassOpen(p);
+  return editNewsOpen(p);
+}
+async function editClassOpen(p){
+  await openClassForm(); if(view!=='classform') return;
+  const x=p.extra||{}; editClassId=p.id; editClassOrig=p; $('#v-classform .top h1').textContent='클래스 수정'; $('#classPost').textContent='저장';
+  const set=(id,v)=>{ const el=$('#'+id); if(el) el.value = (v===null||v===undefined) ? '' : v; };
+  set('cTitle',p.title); set('cTag',x.tag); set('cWork',x.work); set('cSessions',x.sessions>1?x.sessions:''); set('cCycle',x.cycle); set('cMin',x.min||1); set('cMax',x.max||''); set('cFee',x.fee??''); set('cMatFee',x.material_fee||'');
+  set('cProvide',x.provide); set('cBring',x.bring); set('cPlaceTxt',x.place==='shop'?'':x.place_text); set('cPlaceHint',x.place_hint); set('cDescr',x.descr); set('cFor',x.target); set('cCurri',(x.curriculum||[]).join('\n')); set('cTeacher',x.teacher); set('cNote',x.note); set('cRefundTxt',x.refund); set('cDeposit',x.deposit||'');
+  const rk=Object.keys(C_REFUND_TXT).find(k=>k!=='custom' && C_REFUND_TXT[k]===x.refund)||'custom';
+  segSet('#cCraft',x.craft||'crochet'); segSet('#cLevel',String(x.level||1)); segSet('#cType',x.type||'oneday'); segSet('#cDur',String(x.duration_min||120)); segSet('#cMat',x.material||'incl'); segSet('#cPlace',x.place||(myShop?'shop':'other')); segSet('#cRefund',rk); segSet('#cPay',x.pay||'onsite'); segSet('#cPayDays',String(x.pay_days||2));
+  $('#cDeposit').hidden=x.pay!=='deposit'; $('#cPayDaysWrap').hidden=(x.pay||'onsite')==='onsite'; $('#cRepeatWrap').hidden=x.type!=='course'; $('#cMatFee').hidden=x.material!=='extra'; $('#cPlaceTxt').hidden=x.place==='shop';
+  const pad=n=>String(n).padStart(2,'0'), ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  if(x.starts_at){ const d=new Date(x.starts_at); $('#cDate').min=''; $('#cDate').value=ymd(d); $('#cClock').value=`${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+  $('#cEnds').value = p.ends_at ? ymd(new Date(p.ends_at)) : ''; $('#cEnds').dataset.touched='1';
+  cTechSel=new Set(x.techniques||[]); renderCTech(); sPhotos=(p.photos||[]).map(u=>({ url:u, old:true })); renderClassPhotos();
+}
+function editNewsOpen(p){
+  openShopNewsForm(); if(view!=='shopform') return;
+  editNewsId=p.id; $('#v-shopform .top h1').textContent='가게 소식 수정'; $('#shopPost').textContent='저장';
+  $('#nTitle').value=p.title||''; $('#nBody').value=p.body||''; sPhotos=(p.photos||[]).map(u=>({ url:u, old:true })); renderShopNewsPhotos();
+}
 async function openClassForm(){
   const asAuthor = !myShop && !!myProfile?.is_author;
   if(!myShop && !asAuthor) return toast('가게 계정이나 작가만 클래스를 열 수 있어요');
   if(myShop && !myShop.is_active) return toast('가게가 지도에 공개된 뒤 클래스를 열 수 있어요');
-  closeSub(); closeSheet(); composeKind='class'; sPhotos=[]; cTechSel=new Set();
+  closeSub(); closeSheet(); composeKind='class'; sPhotos=[]; cTechSel=new Set(); editClassId=null; editClassOrig=null; $('#v-classform .top h1').textContent='클래스 열기'; $('#classPost').textContent='게시';
   if(!['compose','cert','meetform','classform'].includes(view)) composeBack=view;
   if(!$('#cCraft').children.length){
     seg('#cCraft', C_CRAFT); seg('#cLevel', {1:'1단계 입문',2:'2단계 초급',3:'3단계 중급',4:'4단계 상급',5:'5단계 전문'}); seg('#cType', C_TYPE); seg('#cDur', M_DUR); seg('#cMat', C_MAT); seg('#cPlace', C_PLACE); seg('#cRefund', C_REFUND); seg('#cPay', C_PAY); seg('#cPayDays', C_PAYDAYS);
@@ -4270,7 +4313,7 @@ async function submitClass(){
     if(!sPhotos.length) throw new Error('대표 사진을 1장 이상 올려 주세요');
     const work=v('cWork'); if(!work) throw new Error('무엇을 만드는지 적어 주세요');
     const date=v('cDate'), clock=v('cClock'); if(!date||!clock) throw new Error('날짜와 시간을 정해 주세요');
-    const startsAt=new Date(`${date}T${clock}:00`); if(isNaN(startsAt)||startsAt<new Date()) throw new Error('시작 일시를 지금 이후로 정해 주세요');
+    const startsAt=new Date(`${date}T${clock}:00`); if(isNaN(startsAt)||(startsAt<new Date() && !(editClassId && +startsAt===+new Date(editClassOrig?.extra?.starts_at)))) throw new Error('시작 일시를 지금 이후로 정해 주세요');
     const type=segVal('#cType')||'oneday'; const sessions=type==='course'?+v('cSessions')||0:1; if(type==='course' && sessions<2) throw new Error('정규 클래스는 총 회차를 2 이상으로 적어 주세요');
     const min=Math.max(1,+v('cMin')||1), max=+v('cMax')||0; if(!max) throw new Error('최대 인원을 적어 주세요'); if(max<min) throw new Error('최대 인원이 최소 인원보다 작아요');
     if(v('cFee')==='') throw new Error('수강료를 적어 주세요 (무료면 0)'); const fee=Math.max(0,+v('cFee')||0);
@@ -4287,6 +4330,11 @@ async function submitClass(){
     const extra = { v:1, tag:v('cTag')||null, craft:segVal('#cCraft')||'crochet', level:+(segVal('#cLevel')||1), techniques:[...cTechSel], work, type, starts_at:startsAt.toISOString(), duration_min:+(segVal('#cDur')||120), sessions, cycle:type==='course'?v('cCycle'):null,
       min, max, fee, material:mat, material_fee:matFee, pay, deposit, pay_days:payDays, provide:v('cProvide')||null, bring:v('cBring')||null, place, place_text:placeTxt||null, place_hint:v('cPlaceHint')||null,
       descr:v('cDescr')||null, target:v('cFor')||null, curriculum:v('cCurri').split('\n').map(x=>x.trim()).filter(Boolean), teacher:v('cTeacher')||null, apply:'app', apply_to:null, refund, note:v('cNote')||null };
+    if(editClassId){
+      const { error:e2 } = await sb.from('shop_posts').update({ title, body: extra.tag, photos, ends_at: ends?ends.toISOString():null, extra, edited_at: new Date().toISOString() }).eq('id', editClassId);
+      if(e2) throw new Error(e2.message);
+      editClassId=null; editClassOrig=null; sPhotos=[]; composeBack=null; toast('고쳤어요. 일시·장소·수강료가 바뀌었으면 신청자에게 알림이 가요'); b.disabled=false; if(myShop) return openShop(myShop.id); return goMy('thread','classes');
+    }
     const { error } = await sb.from('shop_posts').insert({ shop_id: myShop?myShop.id:null, author_id: me.id, kind:'class', title, body: extra.tag, photos, ends_at: ends?ends.toISOString():null, extra });
     if(error) throw new Error(error.message);
     sPhotos=[]; composeBack=null; if(myShop){ toast('클래스를 열었어요. 팔로워에게 알림이 갔어요'); return openShop(myShop.id); } toast('클래스를 열었어요. 친구들에게 알림이 갔어요'); return goMy('thread','classes');
@@ -4636,10 +4684,31 @@ function renderMeetChips(){
 }
 function renderMeetPub(){ const on=$('#mPublic').checked; $('#mPubPill').innerHTML = `<svg viewBox="0 0 24 24">${on?'<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0"/>':'<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'}</svg>${on?'공개 · 우리 동네 이웃이 볼 수 있어요':'비공개 · 초대한 사람만 볼 수 있어요'} ›`; }
 function toggleMeetPublic(){ const c=$('#mPublic'); c.checked=!c.checked; renderMeetPub(); }
+// 모임 수정 (schema 111): 모임 만들기 화면에 지금 내용을 채워서 엶. 일시·장소·참가비가 바뀌면 서버가 참여자·신청자에게 알림
+let editMeetId=null, editMeetOrig=null;
+async function editMeetOpen(mid){
+  pmClose(); closeSheet();
+  const { data:m, error } = await sb.from('meetups').select('*').eq('id', mid).single(); if(error || !m) return toast('모임을 찾을 수 없어요');
+  if(m.created_by!==me.id) return toast('모임을 연 사람만 고칠 수 있어요');
+  const { data:po } = await sb.from('posts').select('id,photos').eq('meetup_id', mid).eq('author_id', me.id).is('parent_id', null).order('created_at').limit(1);
+  await openMeetForm(); if(view!=='meetform') return;
+  editMeetId=mid; editMeetOrig=m; $('#v-meetform .top h1').textContent='모임 수정'; $('#meetPost').textContent='저장';
+  const pad=n=>String(n).padStart(2,'0'), d=new Date(m.starts_at);
+  $('#mTitle').value=m.title||''; $('#mDate').min=''; $('#mDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#mClock').value=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const g=parseGeo(m.location); placePick.m = g ? { name:m.place_name||'', addr:m.address||'', lat:g.lat, lng:g.lng } : null; renderMeetPlace();
+  $('#mDesc').value=m.descr||''; $('#mBring').value=m.bring||''; $('#mPlaceDetail').value='';
+  segSet('#mKind', m.kind||'free'); $('#mTechWrap').hidden = m.kind!=='workshop'; segSet('#mCraft', m.craft||'both'); $('#mLvMin').value=m.level_min||''; $('#mLvMax').value=m.level_max||'';
+  mCap=m.capacity||0; $('#mCapVal').textContent=mCap; segSet('#mDurSeg', String(m.duration_min||120)); segSet('#mRepeatSeg', m.repeat||'once');
+  const fk = Object.keys(M_FEE).find(k=>k!=='custom' && M_FEE[k]===m.fee) || (m.fee ? 'custom' : 'free'), cu = fk==='custom';
+  segSet('#mFeeSeg', fk); $('#mFee').hidden=!cu; $('#mFee').value=cu?(m.fee||''):''; $('#mPaidBox').hidden=!(cu && meetApplyOK!==false);
+  $('#mFeeNote').value=m.fee_note||''; $('#mRefund').value=m.refund_note||''; segSet('#mJoinSeg', m.join_mode||'open'); $('#mJoinHint').textContent=M_JOIN_HINT[m.join_mode||'open'];
+  $('#mPublic').checked=!!m.is_public; mTechSel=new Set(m.technique_ids||[]); renderMTech(); renderMeetPub(); renderMeetChips();
+  sPhotos=((po&&po[0]&&po[0].photos)||[]).map(u=>({ url:u, old:true })); renderMeetPhotos();
+}
 async function openMeetForm(){
   if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
   if(!((myProfile?.cert_count||0)>0)) return openMeetGate();
-  closeSub(); composeKind='meetup'; sPhotos=[]; renderMeetPhotos();
+  closeSub(); composeKind='meetup'; sPhotos=[]; renderMeetPhotos(); editMeetId=null; editMeetOrig=null; $('#v-meetform .top h1').textContent='모임 만들기'; $('#meetPost').textContent='게시';
   if(!['compose','cert','meetform','classform'].includes(view)) composeBack=view;
   if(!$('#mKind').children.length){
     seg('#mKind', MKIND); seg('#mCraft', MCRAFT); seg('#mDurSeg', M_DUR); seg('#mRepeatSeg', M_REP); seg('#mFeeSeg', M_FEE); seg('#mJoinSeg', M_JOIN);
@@ -4675,7 +4744,7 @@ async function submitMeet(){
     const title=$('#mTitle').value.trim(), date=$('#mDate').value, clock=$('#mClock').value, c=placePick.m;
     if(!title) throw new Error('모임 이름을 적어 주세요');
     if(!date || !clock) throw new Error('날짜와 시작 시간을 정해 주세요');
-    const when=new Date(`${date}T${clock}`); if(isNaN(when) || when < new Date()) throw new Error('일시를 지금 이후로 정해 주세요');
+    const when=new Date(`${date}T${clock}`); if(isNaN(when) || (when < new Date() && !(editMeetId && editMeetOrig && +when===+new Date(editMeetOrig.starts_at)))) throw new Error('일시를 지금 이후로 정해 주세요');
     if(!c) throw new Error('모임 장소를 찾아서 골라 주세요');
     const pname=($('#mPlace')?.value||'').trim(); if(!pname) throw new Error('장소 이름을 적어 주세요');
     const detail=$('#mPlaceDetail').value.trim(); const place=(pname+(detail?` · ${detail}`:'')).slice(0,80);
@@ -4690,6 +4759,12 @@ async function submitMeet(){
     const extra = { kind, craft: segVal('#mCraft')||'both', level_min: lmin?+lmin:null, level_max: lmax?+lmax:null, technique_id: kind==='workshop'?[...mTechSel][0]:null, technique_ids: kind==='workshop'?[...mTechSel]:[],
       capacity: mCap>=2?mCap:null, fee, bring: $('#mBring').value.trim()||null, duration_min:+(segVal('#mDurSeg')||120), repeat:segVal('#mRepeatSeg')||'once', address: c.addr||null };
     const photos = await uploadPhotos(sPhotos);
+    if(editMeetId){
+      const ex={ ...extra, fee_note: feeK==='custom'?($('#mFeeNote').value.trim()||null):null, refund_note: feeK==='custom'?($('#mRefund').value.trim()||null):null, join_mode: feeK==='custom'?(segVal('#mJoinSeg')||'open'):'open' };
+      const { data:rs, error:e2 } = await sb.rpc('meetup_edit', { p_meetup:editMeetId, p_title:title, p_place:place, p_starts_at:when.toISOString(), p_is_public:$('#mPublic').checked, p_body:$('#mDesc').value.trim()||null, p_lat:c.lat, p_lng:c.lng, p_photos:photos, p_extra:ex });
+      if(e2) throw new Error(e2.message.replace(/^.*?: /,''));
+      editMeetId=null; editMeetOrig=null; sPhotos=[]; await loadMyRooms(); toast(rs?.notified ? `고쳤어요. 참여자 ${rs.notified}명에게 바뀐 내용을 알렸어요` : '고쳤어요'); b.disabled=false; return editBackGo();
+    }
     const { error } = await sb.rpc('create_meetup', { p_title:title, p_place:place, p_starts_at:when.toISOString(), p_is_public:$('#mPublic').checked, p_body: $('#mDesc').value.trim()||null, p_lat:c.lat, p_lng:c.lng, p_photos:photos, p_extra: extra });
     if(error) throw new Error(error.message.replace(/^.*?: /,''));
     if(feeK==='custom' && meetApplyOK){ const fn=$('#mFeeNote').value.trim(), rf=$('#mRefund').value.trim(), jm=segVal('#mJoinSeg')||'open';
@@ -5309,7 +5384,6 @@ function openSettingsInner(){
       ${PushN?`<button class="srow" onclick="closeSheet();pushSettingsRow()"><span>앱 알림 <span class="muted" id="pushStat"></span></span><span class="car">›</span></button>`:''}
       <button class="srow" onclick="closeSheet();openSkills()"><span>내 뜨개 단계 <span class="muted">${lvShort(p)||'아직 없음'}</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openSlides()"><span>뜨개 단계 설명</span><span class="car">›</span></button>
-      <button class="srow" onclick="closeSheet();openArchivedPosts()"><span>보관한 글<br><span class="muted">나만 볼 수 있게 넣어 둔 글 · 다시 공개할 수 있어요</span></span><span class="car">›</span></button>
       ${FULL?`<button class="srow" onclick="openSavedPatterns()"><span>찜한 도안</span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openStore()"><span>뜨개 상점 <span class="authbadge" style="background:var(--sel)">Lab</span><br><span class="muted">실 사기(무통장) · 도안(무료 체험)</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openMyOrders()"><span>내 주문</span><span class="car">›</span></button>

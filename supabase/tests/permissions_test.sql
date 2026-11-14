@@ -189,6 +189,9 @@ begin
   out := pg_temp.must_fail(out, 'edit_work(없는/남의 글)', $q$select public.edit_work(gen_random_uuid(), 'x', null, array['https://api.knitup.co.kr/storage/v1/object/public/posts/a.jpg'])$q$);
   out := pg_temp.must_fail(out, 'post_pin(없는/남의 글)', $q$select public.post_pin(gen_random_uuid(), true)$q$);
   out := pg_temp.must_fail(out, 'post_archive(없는/남의 글)', $q$select public.post_archive(gen_random_uuid(), true)$q$);
+  -- schema 111: 모임 수정은 개설자만, 실·바늘 수정은 내 작품만
+  out := pg_temp.must_fail(out, 'meetup_edit(없는/남의 모임)', $q$select public.meetup_edit(gen_random_uuid(), 't', 'p', now() + interval '1 day', true)$q$);
+  out := pg_temp.must_fail(out, 'edit_work_yarn(없는/남의 글)', $q$select public.edit_work_yarn(gen_random_uuid(), 'x', '{}'::jsonb)$q$);
   out := pg_temp.must_fail(out, 'meetup_applicants(남의 모임)', 'select count(*) from public.meetup_applicants(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'read ddeuchin_claims', 'select 1 from public.ddeuchin_claims limit 1');   -- schema 100
   out := pg_temp.must_fail(out, 'admin_ddeuchin_list', 'select public.admin_ddeuchin_list()');
