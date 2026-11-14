@@ -1730,3 +1730,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 -- ============================================================
 --   서버가 내보내는 안내·오류 문구만(함수 9개: create_meetup, apply_author, link_work_event, cheer_daily, admin_delete_work, admin_talk_member, edit_post, edit_work, edit_work_yarn). 동작 변화 없음
 
+-- ============================================================
+-- 116. 뜨친 신청 다시 알리기 (2026-11-15) — 마이그레이션 friend_request_remind
+-- ============================================================
+--   friendships.reminded_at 추가. friend_request_remind() : 3일 넘게 대기 중이고 아직 다시 알리지 않은 신청마다 받는 사람에게
+--       notifications kind 'remind'(푸시 O) 한 건 — "○○ 님의 뜨친 신청이 기다리고 있어요", link {type:'profile', id:신청한 사람}. 신청마다 한 번만
+--   크론 friend-remind 매일 10:30 UTC(19:30 KST). 탈퇴 예정·정지·차단 관계는 제외, 60일 넘은 신청은 보내지 않음
+

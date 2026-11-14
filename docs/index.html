@@ -1369,7 +1369,7 @@ const isNative = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
 function metaEvent(name, params){ try{ const M = isNative && CAP.Plugins && CAP.Plugins.MetaEvents; if(M) M.logEvent({ name, params: params||{} }).catch(()=>{}); }catch(e){} }
 // ===== 아이콘 =====
 // 키 → 이모지(기본 표시). 디자인 이미지가 docs/icons/<key>.svg 로 들어오면 ICON_IMAGES=true 로 바꿔 일괄 교체
-const APP_VERSION = '1.0.7';
+const APP_VERSION = '1.0.8';
 const ICON_IMAGES = true;
 const EMOJI = { wave:'🙋', location:'📍', yarn:'🧶', cert:'🏅', check:'✓', close:'✕', handshake:'🤝', report:'🚩', camera:'📷', heart:'♥', reply:'💬', party:'🎉', review:'📝', group:'👥', learn:'📚', teach:'🧑‍🏫', at:'@', signal:'📶', tap:'👆', ruler:'📏' };
 function ico(k){ return `<i class="ico" data-ico="${k}"><b>${EMOJI[k]||''}</b></i>`; }
@@ -2795,10 +2795,22 @@ async function fqCheck(force){
   if(!me || !myProfile?.onboarded_at || $('#fqpop')) return;
   if(!['map','comm','chats','my'].includes(view) || $('#sheetwrap').classList.contains('on') || $('#askdlg') || ($('#subpg') && !$('#subpg').hidden) || ($('#phv')&&$('#phv').classList.contains('on'))) return;
   if(!force && Date.now()-fqAt<45000) return; fqAt=Date.now();
-  let rows=[]; try{ rows=(await fetchFriendships()).filter(r=>r.status==='pending' && r.addressee_id===me.id && r.requester && r.requester.nickname); }catch(e){ return; }
-  const seen=fqSeenGet(); const fresh=rows.filter(r=>!seen[r.requester_id+'|'+r.created_at]); if(!fresh.length || $('#fqpop')) return;
+  let all=[]; try{ all=await fetchFriendships(); }catch(e){ return; }
+  const rows=all.filter(r=>r.status==='pending' && r.addressee_id===me.id && r.requester && r.requester.nickname);
+  const seen=fqSeenGet(); const fresh=rows.filter(r=>!seen[r.requester_id+'|'+r.created_at]); if($('#fqpop')) return;
+  if(!fresh.length) return fqAccCheck(all);
   fqSeenAdd(fresh.map(r=>r.requester_id+'|'+r.created_at));
   fq={ rows:fresh.slice(0,10), i:0, extra:{} }; fqDraw('intro');
+}
+// 내가 보낸 신청이 수락됐으면 나에게도 같은 축하 카드를 한 번(기기 기억 kn_fq_acc). 처음 실행할 때는 이미 뜨친인 사람들을 '본 것'으로만 적어 두고 띄우지 않는다
+function fqAccCheck(all){
+  const acc=all.filter(r=>r.status==='accepted' && r.requester_id===me.id && r.addressee && r.addressee.nickname);
+  let seen=null; try{ const v=localStorage.getItem('kn_fq_acc'); seen = v===null ? null : JSON.parse(v); }catch(e){ seen={}; }
+  const save=o=>{ try{ localStorage.setItem('kn_fq_acc', JSON.stringify(o)); }catch(e){} };
+  if(seen===null){ const o={}; acc.forEach(r=>o[r.addressee_id]=1); return save(o); }
+  const fresh=acc.filter(r=>!seen[r.addressee_id] && (!r.responded_at || Date.now()-new Date(r.responded_at) < 30*864e5));
+  acc.forEach(r=>seen[r.addressee_id]=1); save(seen);
+  if(fresh.length) fqCelebrate(fresh[0].addressee_id, { profile:fresh[0].addressee, accepted:true });
 }
 function fqClose(){ $('#fqpop')?.remove(); }
 function fqWrap(html){ let w=$('#fqpop'); if(!w){ w=document.createElement('div'); w.id='fqpop'; w.onclick=e=>{ if(e.target===w) fqClose(); }; document.body.appendChild(w); } w.innerHTML=html; }
@@ -2836,14 +2848,14 @@ async function fqAccept(id){
 }
 function fqDecline(id){ askConfirm('이 신청을 거절할까요?', '상대에게 따로 알리지는 않아요. 30일 뒤에 다시 신청할 수 있어요.', '거절', async()=>{ const { error } = await sb.from('friendships').update({ status:'declined' }).eq('requester_id', id).eq('addressee_id', me.id); if(error) return toast('실패: '+error.message); refreshBadge(); $('#fqBar')?.remove(); if($('#fqpop')){ fq.rows.splice(fq.i,1); if(fq.i>=fq.rows.length) fq.i=fq.rows.length-1; if(fq.rows.length) fqDraw('who'); else fqClose(); } else if(view==='profile' && profId===id) openProfile(id, true); toast('거절했어요'); }); }
 // ③ 축하 카드: 팝업·프로필의 노란 띠·받은 신청 목록 어디서 수락하든 같은 카드
-async function fqCelebrate(id){
-  let p=(fq.rows.find(r=>r.requester_id===id)||{}).requester; if(!p){ try{ const { data } = await sb.from('profiles').select('id,nickname,avatar_url').eq('id', id).maybeSingle(); p=data; }catch(e){} } p=p||{ nickname:'뜨친' };
+async function fqCelebrate(id, opt){ opt=opt||{};
+  let p=opt.profile || (fq.rows.find(r=>r.requester_id===id)||{}).requester; if(!p){ try{ const { data } = await sb.from('profiles').select('id,nickname,avatar_url').eq('id', id).maybeSingle(); p=data; }catch(e){} } p=p||{ nickname:'뜨친' };
   const left = fq.rows.filter(r=>r.requester_id!==id).length; fq.rows=fq.rows.filter(r=>r.requester_id!==id); if(fq.i>=fq.rows.length) fq.i=Math.max(0, fq.rows.length-1);
   const cf=[['12%','118px','#E2572B','50%',10,10],['80%','150px','#5E8C3A','2px',8,16],['16%','214px','#fff','2px',8,16],['86%','232px','#fff','50%',10,10],['30%','104px','#5E8C3A','50%',8,8],['70%','108px','#E2572B','2px',8,14]];
   fqWrap(`<div class="fqc tk"><div class="fqpop-img"><img src="events/ddeuchin-highfive.webp" alt=""></div><button type="button" class="fqx" aria-label="닫기" onclick="fqAfter()">✕</button>
     <div class="fqcf">${cf.map(([l,t,c,rr,w,h],k)=>`<i style="left:${l};top:${t};width:${w}px;height:${h}px;background:${c};border-radius:${rr};animation-delay:${k*70}ms"></i>`).join('')}</div>
     <span class="fqkick c">축하해요!</span><div class="fqbig">뜨친이<br>생겼어요 🎉</div>
-    <div class="fqpair">${avatar(myProfile||{},true)}<b>♥</b>${avatar(p,true)}</div><div class="fqsmall">${esc(myProfile?.nickname||'나')} · ${esc(p.nickname||'')}</div><div class="fqline"></div>
+    <div class="fqpair">${avatar(myProfile||{},true)}<b>♥</b>${avatar(p,true)}</div><div class="fqsmall">${opt.accepted ? esc(p.nickname||'')+' 님이 신청을 수락했어요' : esc(myProfile?.nickname||'나')+' · '+esc(p.nickname||'')}</div><div class="fqline"></div>
     <button type="button" class="fqcta" onclick="fqGreet('${id}')">첫 인사 건네기 💬</button><button type="button" class="fqlater" onclick="fqAfter()">나중에 인사할게요</button></div>`);
   fq._left=left;
 }
@@ -2900,7 +2912,7 @@ function watchFriends(){
     if(payload.eventType==='INSERT'){ toast('새 뜨친 신청이 왔어요'); fqSoon(true); }
     refreshBadge(); if(view==='friends') renderFriends();
   }).on('postgres_changes',{event:'UPDATE',schema:'public',table:'friendships',filter:`requester_id=eq.${me.id}`},payload=>{
-    if(payload.new.status==='accepted') toast('친구 신청이 수락됐어요');
+    if(payload.new.status==='accepted'){ toast('뜨친 신청이 수락됐어요'); fqSoon(true); }
   }).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`recipient_id=eq.${me.id}`},payload=>{
     const k=payload.new.kind; if(k==='mention') toast('누군가 회원님을 언급했어요 @'); else if(k==='reply') toast('내 글에 댓글이 달렸어요'); else if(k==='like') toast('내 글을 좋아해요 ♥');
     refreshBadge(); if(view==='activity') renderActivity();
