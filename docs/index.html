@@ -2669,7 +2669,7 @@ async function openProfile(id, back, own){
   if(staff) action = `<button class="btn primary" onclick="openSupportRoom()">지기에게 말하기</button>`;
   else if(!r) action = `<button class="btn primary" onclick="requestFriend('${id}')">친구 신청</button>`;
   else if(r.status==='accepted') action = `<button class="btn primary" onclick="openDirectRoom('${id}')">메시지</button>`;
-  else if(r.status==='pending' && r.requester_id===me.id) action = `<button class="btn o" disabled>신청 대기 중</button>`;
+  else if(r.status==='pending' && r.requester_id===me.id) action = `<button class="btn o" disabled>친구 신청 보냄 · 수락을 기다려요</button>`;
   else if(r.status==='pending') action = `<button class="btn primary" onclick="respond('${id}','accepted')">수락</button><button class="btn o" onclick="respond('${id}','declined')">거절</button>`;
   else if(r.status==='blocked') action = `<button class="btn o" disabled>차단됨</button>`;
   else action = `<button class="btn o" disabled>거절됨 · 30일 후 재신청</button>`;
