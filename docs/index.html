@@ -209,7 +209,7 @@ details .seg{margin-top:8px;justify-content:center}
 .mcard .mtags span.warn{background:#fff3e0;color:#9a5a00}
 .mcard .mtags span.full{background:#fde8ea;color:#c9303f}
 .mcard .kind{font-size:12px;font-weight:700;color:var(--ink);background:var(--bg2);padding:2px 8px;border-radius:6px;margin-left:6px}
-/* 작품 인증 */
+/* 완성작품 인증 */
 .wcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:4px 0 10px;background:var(--surface)}
 .wcard .wh{font-size:12px;color:var(--color-primary-dark);font-weight:700;margin-bottom:4px}
 .wcard b{font-size:16px;display:block}
@@ -478,7 +478,7 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .bub img.chatph{display:block;max-width:220px;width:100%;border-radius:12px;background:var(--bg2);min-height:60px}
 #v-room .bub.ph{padding:0;background:transparent;border:0}
 #v-room .bub.ph time{display:block;text-align:right}
-/* 내 뜨개 단계: 좌우 여백 + 작품 인증 섹션과 같은 톤 */
+/* 내 뜨개 단계: 좌우 여백 + 완성작품 인증 섹션과 같은 톤 */
 #skillsBody{padding:12px 16px 28px;gap:12px}
 #skillsBody .lvsec .techs{gap:6px;padding:4px 12px 12px}
 #skillsBody .tech{font-size:.82rem;padding:6px 11px}
@@ -660,7 +660,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .upin .crown{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(180deg,#FFD95A,#E2A91C);color:#3A2A00;font-size:10.5px;font-weight:800;letter-spacing:.02em;padding:2px 8px 2px 6px;border-radius:999px;border:1.5px solid #FFF3C4;margin-bottom:2px;white-space:nowrap}
 .upin .crown svg{width:12px;height:10px;display:block}
 .authlink{display:flex;align-items:center;gap:6px;margin:10px 16px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none;font-size:.9rem;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.authlink span{margin-left:auto;color:var(--ink3)}
-/* ===== Phase 1 (2026-09-20 시안): ＋ 팝업 · 작품 인증/모임 새 페이지 · 보조 화면 · 모임 채팅 ===== */
+/* ===== Phase 1 (2026-09-20 시안): ＋ 팝업 · 완성작품 인증/모임 새 페이지 · 보조 화면 · 모임 채팅 ===== */
 .plusrow{display:flex;align-items:center;gap:14px;width:100%;padding:14px 4px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .plusrow:last-of-type{border-bottom:0}.plusrow .pi{flex:none;width:42px;height:42px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center}
 .plusrow b{display:block;font-size:1rem}.plusrow span{display:block;font-size:.82rem;color:var(--ink2)}.plusrow .lock{color:var(--yarn);font-weight:600}
@@ -1093,9 +1093,9 @@ body.kb #nav{display:none!important}
   </section>
 
 
-  <!-- 작품 인증 (새 페이지) -->
+  <!-- 완성작품 인증 (새 페이지) -->
   <section class="view" id="v-cert">
-    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>작품 인증</h1><button class="btn" id="certPost" onclick="submitCert()" disabled>게시</button></div>
+    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>완성작품 인증</h1><button class="btn" id="certPost" onclick="submitCert()" disabled>게시</button></div>
     <div class="body" style="gap:10px">
       <div class="mhero" id="wHero" onclick="$('#wFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">작품 사진 · 1~4장</span></div>
       <div class="cfphotos" id="cfPhotos" style="justify-content:center"></div><input id="wFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
@@ -2221,7 +2221,7 @@ async function openPatternViewer(id){
   f.srcdoc=openPatternViewer.html;
   f.onload=()=>f.contentWindow.postMessage({ type:'knitup-pkg', pkg:c.pkg, prog:pr?.prog||0, who:myProfile?.nickname||'', gauge:gctx||null }, '*');
 }
-// 완성 모멘트(knitup v9 이식): 마지막 단까지 체크하면 축하 → 작품 인증(도안 제목·기법 자동) → 다음 도전(추천 도안)
+// 완성 모멘트(knitup v9 이식): 마지막 단까지 체크하면 축하 → 완성작품 인증(도안 제목·기법 자동) → 다음 도전(추천 도안)
 function openPatternDone(m){
   if(!m) return;
   openSheet(`<div style="text-align:center;padding:6px 0"><div style="font-size:2.2rem">🎉</div><b style="font-size:1.1rem">다 떴어요!</b><div class="muted" style="margin-top:4px">${esc(m.title||'도안')}을(를) 끝까지 뜨셨어요. 완성작을 인증하면 쓰인 기법이 내 뜨개 단계에 인증으로 남아요</div></div>
@@ -2367,7 +2367,7 @@ async function openAuthorApply(){
   const { data:rows } = await sb.from('author_applications').select('*').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(1);
   const a=(rows||[])[0]; const { data:elig } = await sb.rpc('my_author_eligibility'); const certs=elig?.adv||0, total=elig?.total||0;
   if(a && a.status==='pending') return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0">신청을 확인하고 있어요. 보통 5일 안에 활동 알림으로 결과를 알려 드려요.</p><button class="btn o" onclick="cancelAuthorApply('${a.id}')">신청 취소</button>`);
-  if(certs < AUTHOR_MIN_CERTS) return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0"><b style="color:var(--ink)">상급(4단계) 이상 기법</b>이 들어간 작품 인증 ${AUTHOR_MIN_CERTS}개부터 신청할 수 있어요. 지금 <b style="color:var(--ink)">${certs}개</b>예요 (전체 인증 ${total}개).<br>작가가 되면 ${FULL?'도안을 등록해 이웃에게 추천되고, ':''}지도에 작가 핀으로 표시되고 내 인스타그램·링크를 프로필에 넣을 수 있어요.</p><button class="btn" onclick="closeSheet();openCompose('work')">작품 인증하러 가기</button>`);
+  if(certs < AUTHOR_MIN_CERTS) return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0"><b style="color:var(--ink)">상급(4단계) 이상 기법</b>이 들어간 완성작품 인증 ${AUTHOR_MIN_CERTS}개부터 신청할 수 있어요. 지금 <b style="color:var(--ink)">${certs}개</b>예요 (전체 인증 ${total}개).<br>작가가 되면 ${FULL?'도안을 등록해 이웃에게 추천되고, ':''}지도에 작가 핀으로 표시되고 내 인스타그램·링크를 프로필에 넣을 수 있어요.</p><button class="btn" onclick="closeSheet();openCompose('work')">완성작품 인증하러 가기</button>`);
   openSheet(`<b>작가 신청</b>
     <p class="muted" style="margin:0">상급 이상 기법으로 인증한 작품 ${certs}개와 아래 내용을 운영진이 확인한 뒤 승인해요. 승인되면 ${FULL?'도안을 등록할 수 있고 ':''}지도에 작가 핀으로 표시되고, 가게처럼 <b style="color:var(--ink)">클래스를 열 수</b> 있고, 아래 활동 링크가 프로필에 보여요.${a&&a.status==='rejected'?`<br>지난 신청은 반려됐어요${a.reject_reason?': '+esc(a.reject_reason):''}`:''}</p>
     <label class="f">이름 (본인 확인용, 공개되지 않아요)<input id="auName" maxlength="40" placeholder="실명 또는 사업자 상호"></label>
@@ -2539,7 +2539,7 @@ async function openSavedPatterns(){
 }
 async function showRecsAfterWork(){
   const list = await loadRecs(true); if(!list.length) return;
-  openSheet(`<b style="font-size:1.05rem">작품 인증 완료!</b><p class="muted" style="margin:0">이제 이런 도안도 뜰 수 있어요</p><div class="patlist">${list.slice(0,3).map(patItem).join('')}</div><button class="btn o" onclick="closeSheet()">닫기</button>`);
+  openSheet(`<b style="font-size:1.05rem">완성작품 인증 완료!</b><p class="muted" style="margin:0">이제 이런 도안도 뜰 수 있어요</p><div class="patlist">${list.slice(0,3).map(patItem).join('')}</div><button class="btn o" onclick="closeSheet()">닫기</button>`);
 }
 // ===== 가게 등록 신청 =====
 let claimDoc=null;
@@ -2695,7 +2695,7 @@ async function openProfile(id, back, own){
   $('#profBody').innerHTML = `
     <div class="ptop"><div class="pinfo"><h2>${esc(p.nickname)}${lvBadge(p)}${p.is_author?'<span class="authbadge">작가</span>':''}</h2><div class="phandle">${esc(handle)}</div>${isWaving(p)?'<div style="margin-top:8px"><span class="wavebadge">'+ico('wave')+' 뜨개 친구를 찾고 있어요 · 먼저 인사해 주면 반가워해요</span></div>':''}</div>${avatar(p,true)}</div>
     ${bio?`<div class="pbio">${esc(bio)}</div>`:''}
-    ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:var(--color-primary-light);color:var(--color-primary-dark)">${ico('cert')} 작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
+    ${meta?`<div class="pmeta">${meta}${p.cert_count?`<span class="chip" style="background:var(--color-primary-light);color:var(--color-primary-dark)">${ico('cert')} 완성작품 인증 ${p.cert_count}</span>`:''}</div>`:''}
     ${r?.status==='pending'&&r.addressee_id===me.id&&r.message?`<div class="pbio"><div class="story">"${esc(r.message)}"</div></div>`:''}
     <div class="pbtns">${action}</div>
     ${p.is_author&&p.author_link?`<a class="authlink" href="#" data-u="${esc(p.author_link)}" onclick="event.preventDefault();openExt(this.dataset.u, '작가가 등록한 링크')">${linkLabel(p.author_link)} <span>↗</span></a>`:''}
@@ -2733,7 +2733,7 @@ async function loadUserFeed(uid, tab, el){
   if(pids.length){ const { data:parents } = await sb.from('posts').select('id, '+AUTHOR_SEL).in('id', pids); const byId={}; (parents||[]).forEach(x=>byId[x.id]=x); (data||[]).forEach(r=>{ r.parent = byId[r.parent_id]||null; }); }
   await Promise.all([loadLikes(data||[]), attachMeetups(data||[]), attachWorks(data||[])]);
   const mine = uid===me.id;
-  const emptyMsg = { posts: mine?'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요':'아직 올린 글이 없어요', replies: mine?'아직 남긴 댓글이 없어요':'아직 남긴 댓글이 없어요', works: mine?'아직 인증한 작품이 없어요.\n＋ 버튼 › 작품 인증에서 올리면 여기에 모여요':'아직 인증한 작품이 없어요' }[tab];
+  const emptyMsg = { posts: mine?'아직 올린 글이 없어요.\n＋ 버튼으로 첫 글을 올려 보세요':'아직 올린 글이 없어요', replies: mine?'아직 남긴 댓글이 없어요':'아직 남긴 댓글이 없어요', works: mine?'아직 인증한 작품이 없어요.\n＋ 버튼 › 완성작품 인증에서 올리면 여기에 모여요':'아직 인증한 작품이 없어요' }[tab];
   el.innerHTML = (data||[]).length ? data.map(p=> p.parent_id ? postCard(p,{noLine:true, replyTo: p.parent?.author?.nickname}) : postGroup(p)).join('') : `<div class="empty" style="white-space:pre-line">${emptyMsg}</div>`;
   if(uid!==me.id || true){ feedRows = (data||[]); }
   // 보관한 글(나만 보기)이 있으면 내 목록 맨 아래에 한 줄 — 채팅의 '보관한 대화 N'과 같은 방식
@@ -2901,7 +2901,7 @@ async function loadEvents(){
   evRows=(evs||[]).filter(e=>{ const st=evApps[e.id]?.status; if(st==='selected'||st==='applied') return true; return e.status==='open' && new Date(e.apply_until)>now; });
   try{ const { data:dc } = await sb.from('app_config').select('value').eq('key','ddeuchin_event').maybeSingle(); ddCfg=dc?.value||null; }catch(e){ ddCfg=null; }
   box.innerHTML = (ddOn()?`<div class="evcard dd" onclick="openDdeuchin()"><img src="${DD_POSTER}" alt=""><div><div class="ek">기간 한정 이벤트</div><b>뜨친 생겼다 축하 이벤트</b><div class="em">뜨친과 함께 뜨면 두 분 모두 커피 쿠폰${ddCfg.until?` · ~${evDate(new Date(new Date(ddCfg.until).getTime()-60000))}`:''}</div></div></div>`:'') + evRows.map(e=>{ const st=evState(e); const lv=myProfile?.act_level||0;
-    return `<div class="evcard ${st==='lock'?'lock':''}" onclick="openEvent('${e.id}')"><div class="ek">${EV_KIND[e.kind]||'이벤트'}${e.min_level>0?` · Lv.${e.min_level} 이상`:''}</div><b>${esc(e.title)}</b><div class="em">${[e.capacity?`${e.capacity}명`:'', EV_MODE[e.select_mode], `~${evDate(e.apply_until)} 신청`].filter(Boolean).join(' · ')}</div><div class="es">${st==='lock'?`작품 인증 ${e.min_level-lv}번 더 하면 신청할 수 있어요`:EV_STATE_TXT[st]||''}</div></div>`; }).join('');
+    return `<div class="evcard ${st==='lock'?'lock':''}" onclick="openEvent('${e.id}')"><div class="ek">${EV_KIND[e.kind]||'이벤트'}${e.min_level>0?` · Lv.${e.min_level} 이상`:''}</div><b>${esc(e.title)}</b><div class="em">${[e.capacity?`${e.capacity}명`:'', EV_MODE[e.select_mode], `~${evDate(e.apply_until)} 신청`].filter(Boolean).join(' · ')}</div><div class="es">${st==='lock'?`완성작품 인증 ${e.min_level-lv}번 더 하면 신청할 수 있어요`:EV_STATE_TXT[st]||''}</div></div>`; }).join('');
 }
 // ---- 뜨친 생겼다 축하 이벤트(schema 100): app_config.ddeuchin_event {active, from, until, post_id}
 //      사진 + @뜨친 닉네임 + #뜨친인증 글을 올리면 서버가 확인(뜨친·기간·같은 쌍 한 번) → 대표가 지기 채팅으로 쿠폰을 보낸다. 앱은 안내와 글쓰기 채움만 한다
@@ -2932,20 +2932,20 @@ async function openEvent(id){
   if(a && e.needs_shipping && (st==='selected'||st==='done')){ const r=await sb.from('event_shipping').select('*').eq('application_id', a.id).maybeSingle(); ship=r.data; }
   const cond=[e.min_level>0?`Lv.${e.min_level} 이상`:'누구나', e.capacity?`${e.capacity}명`:'', EV_MODE[e.select_mode], `신청 ${evDate(e.apply_from)}~${evDate(e.apply_until)}`, e.cert_due?`인증 마감 ${evDate(e.cert_due)}`:''].filter(Boolean).join(' · ');
   let act='';
-  if(st==='can') act=`<textarea id="evNote" maxlength="200" rows="2" placeholder="신청 한마디 (선택) — 뜨고 싶은 작품 등"></textarea>${e.kind==='sample'?'<p class="muted" style="font-size:.8rem;margin:0">선정되면 샘플을 받아 작품을 뜨고, 인증 마감일까지 「이벤트 인증」으로 작품 인증을 올려 주세요. 그 인증에는 「샘플 제공」 표시가 붙어요.</p>':''}<button class="btn" onclick="applyEvent('${e.id}')">신청하기</button>`;
-  else if(st==='lock') act=`<div class="empty" style="padding:14px 0">Lv.${e.min_level}부터 신청할 수 있어요 · 지금 Lv.${lv}<br>작품 인증을 올린 날마다 레벨이 1씩 올라요 (${e.min_level-lv}번 더)</div><button class="btn" onclick="closeSheet();openCompose('work')">작품 인증하러 가기</button>`;
+  if(st==='can') act=`<textarea id="evNote" maxlength="200" rows="2" placeholder="신청 한마디 (선택) — 뜨고 싶은 작품 등"></textarea>${e.kind==='sample'?'<p class="muted" style="font-size:.8rem;margin:0">선정되면 샘플을 받아 작품을 뜨고, 인증 마감일까지 「이벤트 인증」으로 완성작품 인증을 올려 주세요. 그 인증에는 「샘플 제공」 표시가 붙어요.</p>':''}<button class="btn" onclick="applyEvent('${e.id}')">신청하기</button>`;
+  else if(st==='lock') act=`<div class="empty" style="padding:14px 0">Lv.${e.min_level}부터 신청할 수 있어요 · 지금 Lv.${lv}<br>완성작품 인증을 올린 날마다 레벨이 1씩 올라요 (${e.min_level-lv}번 더)</div><button class="btn" onclick="closeSheet();openCompose('work')">완성작품 인증하러 가기</button>`;
   else if(st==='applied') act=`<div class="empty" style="padding:14px 0">신청 완료 · 발표를 기다려 주세요</div><button class="btn o" onclick="cancelEventApp('${e.id}')">신청 취소</button>`;
   else if(st==='selected'){
     if(e.needs_shipping){ const lock=!!ship?.shipped_at; const v=k=>esc(ship?.[k]||'');
       act+=`<div class="mtitle" style="font-size:.9rem">받으실 곳 ${lock?'<span class="muted">(발송됨)</span>':''}</div><input id="shName" maxlength="30" placeholder="받는 분 이름" value="${v('name')}" ${lock?'disabled':''}><input id="shPhone" maxlength="20" inputmode="tel" placeholder="연락처" value="${v('phone')}" ${lock?'disabled':''}><input id="shZip" maxlength="10" inputmode="numeric" placeholder="우편번호" value="${v('zip')}" ${lock?'disabled':''}><input id="shAddr" maxlength="200" placeholder="주소" value="${v('addr')}" ${lock?'disabled':''}><input id="shMemo" maxlength="100" placeholder="배송 메모 (선택)" value="${v('memo')}" ${lock?'disabled':''}><p class="muted" style="font-size:.78rem;margin:0">배송지는 이 이벤트 발송에만 쓰고, 운영진만 볼 수 있어요. 발송 30일 뒤 자동으로 지워요.</p>${lock?'':`<button class="btn ${ship?'o':''}" onclick="saveEventShip('${e.id}')">${ship?'배송지 고치기':'배송지 저장'}</button>`}`; }
-    act+=`<button class="btn" onclick="closeSheet();wEventPre='${e.id}';openCompose('work')">이벤트 작품 인증하기</button><button class="btn o" onclick="cancelEventApp('${e.id}')">참여 취소</button>`; }
+    act+=`<button class="btn" onclick="closeSheet();wEventPre='${e.id}';openCompose('work')">이벤트 완성작품 인증하기</button><button class="btn o" onclick="cancelEventApp('${e.id}')">참여 취소</button>`; }
   else act=`<div class="empty" style="padding:14px 0">${EV_STATE_TXT[st]||''}</div>`;
   openSheet(`${e.photo?`<img class="evphoto" src="${esc(e.photo)}" alt="">`:''}<div class="muted" style="font-size:.8rem;font-weight:700">${EV_KIND[e.kind]||'이벤트'}</div><b style="font-size:1.1rem">${esc(e.title)}</b><div class="muted" style="font-size:.85rem">${esc(cond)}</div>${e.body?`<p style="white-space:pre-wrap;margin:4px 0">${esc(e.body)}</p>`:''}${act}<p class="muted" style="font-size:.72rem;margin:8px 0 0;line-height:1.4">이 이벤트는 펌테크주식회사가 진행하며 Apple·Google과 무관해요. Apple·Google은 후원·보증·관리하지 않아요.</p>`);
 }
 async function applyEvent(id){ const { data, error } = await sb.rpc('apply_event', { p_event:id, p_note:$('#evNote')?.value.trim()||null }); if(error) return toast(error.message.replace(/^.*?: /,'')); toast(data==='selected'?'선착순으로 선정됐어요!':'신청했어요'); await loadEvents(); openEvent(id); }
 async function cancelEventApp(id){ if(!confirm('이 이벤트 신청을 취소할까요?')) return; const { error } = await sb.rpc('cancel_event_application', { p_event:id }); if(error) return toast(error.message); toast('취소했어요'); closeSheet(); loadEvents(); }
 async function saveEventShip(id){ const g=k=>$('#'+k)?.value.trim()||''; const { error } = await sb.rpc('set_event_shipping', { p_event:id, p_name:g('shName'), p_phone:g('shPhone'), p_zip:g('shZip'), p_addr:g('shAddr'), p_memo:g('shMemo')||null }); if(error) return toast(error.message); toast('배송지를 저장했어요'); openEvent(id); }
-// 작품 인증 폼: 선정된(아직 인증 전) 이벤트가 있으면 고를 수 있게
+// 완성작품 인증 폼: 선정된(아직 인증 전) 이벤트가 있으면 고를 수 있게
 async function fillWEvent(){
   const row=$('#wEventRow'), sel=$('#wEvent'); if(!row||!sel||!me) return; const pre=wEventPre; wEventPre=''; sel.innerHTML=''; row.hidden=true;
   const { data } = await sb.from('event_applications').select('event_id, ev:events(id,title,catalog_id)').eq('profile_id', me.id).eq('status','selected');
@@ -2965,7 +2965,7 @@ async function wEventPicked(){   // 이벤트에 실 사전의 실이 연결돼 
 // 2026-11-04 대표: 지금은 감당이 안 되니 서포터즈는 접는다 → SUPPORTERS=false 로 앱에서 전부 숨김(띠·초대·설정 줄·추천인 칸·배지). DB·콘솔·코드는 남겨 둠(다시 열 때 true)
 const SUPPORTERS=false;
 let supStatus=null;
-const SUP_KIND={attendance:'출석',work_verified:'작품 인증',post:'게시글',comment:'댓글',survey:'설문',bug_accepted:'버그 제보 채택',referral:'친구 초대'};
+const SUP_KIND={attendance:'출석',work_verified:'완성작품 인증',post:'게시글',comment:'댓글',survey:'설문',bug_accepted:'버그 제보 채택',referral:'친구 초대'};
 const SUP_TIER={basic:'기본',excellent:'우수',mvp:'MVP',none:'미달'};
 function supKindLabel(k){ return k.endsWith('_revoke') ? SUP_KIND[k.replace('_revoke','')]+' 취소' : (SUP_KIND[k]||k); }
 let checkInAt=0;
@@ -2985,7 +2985,7 @@ function renderBeta(){
 }
 const SUP_INTRO = `<div class="supcard"><b style="font-size:1.1rem">뜨개동네 1기 서포터즈</b>
   <p class="muted" style="margin:6px 0 0">오늘부터 60일 동안 함께 앱을 키워 주세요. 30일씩 두 구간이고, 구간마다 100점이 목표예요.</p>
-  <div class="suprule"><b>점수 모으기</b><ul><li>출석 1점 (하루 1번)</li><li>작품 인증 10점 (하루 1개)</li><li>글 3점 (하루 1개) · 댓글 1점 (하루 2개, 내 글 댓글은 제외)</li><li>격주 설문 10점 (60일 동안 4회)</li><li>버그 제보 채택 10점 · 친구 초대 20점 (제한 없음 — 친구가 가입하면 지기에게 닉네임을 알려 주세요)</li></ul></div>
+  <div class="suprule"><b>점수 모으기</b><ul><li>출석 1점 (하루 1번)</li><li>완성작품 인증 10점 (하루 1개)</li><li>글 3점 (하루 1개) · 댓글 1점 (하루 2개, 내 글 댓글은 제외)</li><li>격주 설문 10점 (60일 동안 4회)</li><li>버그 제보 채택 10점 · 친구 초대 20점 (제한 없음 — 친구가 가입하면 지기에게 닉네임을 알려 주세요)</li></ul></div>
   <div class="suprule"><b>보상 (60일 뒤)</b><ul><li>기본: 두 구간 모두 100점 → 1기 서포터 뱃지 + 니트업 매거진</li><li>우수: 기본 + 누적 300점 → 레벨업 쿠션 추가</li><li>MVP: 우수 중 상위 5명 → 실 키트 추가</li></ul></div></div>`;
 async function openSupporterIntro(){
   if(!SUPPORTERS) return toast('서포터즈는 지금 운영하지 않아요');
@@ -3323,7 +3323,7 @@ async function loadFeed(more){
     if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
     await Promise.all([loadLikes(data||[]), attachWorks(data||[])]);
     feedRows = data||[]; $('#feedMore').hidden = true;
-    $('#feed').innerHTML = feedRows.length ? feedRows.map(p=>postGroup(p)).join('') : '<div class="empty">아직 인증된 작품이 없어요.<br>＋ 버튼 › 작품 인증에서 첫 작품을 올려 보세요</div>';
+    $('#feed').innerHTML = feedRows.length ? feedRows.map(p=>postGroup(p)).join('') : '<div class="empty">아직 인증된 작품이 없어요.<br>＋ 버튼 › 완성작품 인증에서 첫 작품을 올려 보세요</div>';
     return;
   }
   if(commFilter==='dong'){ if(!myProfile?.dong_code){ $('#feed').innerHTML='<div class="empty">프로필에서 동네를 먼저 정해 주세요</div>'; return; } q = q.eq('dong_code', myProfile.dong_code); }
@@ -3380,7 +3380,7 @@ async function tagUi(){
   bar.hidden=true;
   try{ const {data}=await sb.rpc('tag_popular',{p_limit:8}); if(commTag) return; const L=data||[]; row.hidden=!L.length; row.innerHTML=L.map(x=>`<button class="tagchip" onclick="openTag('${esc(x.tag)}')">#${esc(x.tag)}<i>${x.n}</i></button>`).join(''); }catch(e){ row.hidden=true; }
 }
-// 글을 쓰다가 #을 치면 이웃들이 쓰는 태그를 추천(새 태그를 그대로 써도 됨). 대상: 커뮤니티 글쓰기 칸 · 글쓰기 페이지 · 작품 인증 한 줄 소감
+// 글을 쓰다가 #을 치면 이웃들이 쓰는 태그를 추천(새 태그를 그대로 써도 됨). 대상: 커뮤니티 글쓰기 칸 · 글쓰기 페이지 · 완성작품 인증 한 줄 소감
 function tagToken(inp){ const v=inp.value.slice(0, inp.selectionStart??inp.value.length); const m=v.match(/(^|\s)#([가-힣A-Za-z0-9_]{0,20})$/); return m ? {q:m[2], start:v.length-m[2].length-1} : null; }
 function tagPopEl(inp){ let pop=$('#tagPop'); if(!pop){ pop=document.createElement('div'); pop.id='tagPop'; pop.className='tagpop'; pop.hidden=true; } if(pop.previousElementSibling!==inp) inp.insertAdjacentElement('afterend', pop); return pop; }
 function tagInput(inp){ const t=tagToken(inp); const pop=tagPopEl(inp); if(!t){ pop.hidden=true; return; } tagInp=inp; clearTimeout(tagTimer);
@@ -3530,7 +3530,7 @@ async function attachWorks(rows){
   const { data } = await sb.from('works').select('id,title,yarn_info,techniques,custom_techniques,note,yarns,needles,gauge,finished_size,sponsored').in('id', ids);
   const byId={}; (data||[]).forEach(w=>byId[w.id]=w); rows.forEach(r=>{ if(r.work_id) r.work = byId[r.work_id]||null; });
 }
-// ===== 작품 인증: 실(여러 개)·바늘(여러 개) =====
+// ===== 완성작품 인증: 실(여러 개)·바늘(여러 개) =====
 // 굵기는 이름을 고르게 하지 않고, 볼밴드에 적힌 1볼 중량(g)·길이(m)에서 100g당 길이로 추정한다. 길이를 모르면 바늘 굵기로 추정.
 const YW = [[600,'레이스·극세'],[350,'합세(Fingering)'],[250,'중세(Sport)'],[200,'합태(DK)'],[120,'병태(Worsted)'],[60,'극태(Bulky)'],[0,'초극태']];
 const YW_NAMES = YW.map(x=>x[1]);
@@ -3688,7 +3688,7 @@ function renderWYarns(){
   wGaugeHint();
 }
 function wyDel(i){ wYarns.splice(i,1); renderWYarns(); renderWQuick(); }
-// 작품 인증의 실 칸: 내 실함·최근에 쓴 실을 칩으로 — 한 번 누르면 바로 들어가고(사용량 1볼로 시작), 다시 누르면 빠진다. 줄을 누르면 색·사용량을 고친다 (2026-11-14 대표 확정 A안)
+// 완성작품 인증의 실 칸: 내 실함·최근에 쓴 실을 칩으로 — 한 번 누르면 바로 들어가고(사용량 1볼로 시작), 다시 누르면 빠진다. 줄을 누르면 색·사용량을 고친다 (2026-11-14 대표 확정 A안)
 let wqRecent=null;
 async function wqLoad(){
   renderWQuick();
@@ -3761,7 +3761,7 @@ function workCard(w){
   const chips=[...(w.techniques||[]).map(id=>({t:techName(id)})), ...(w.custom_techniques||[]).map(t=>({t, c:1}))];
   const det = workYarnDetail(w);   // 실·바늘 자세한 정보(있을 때만) — 기법과 함께 '자세히' 하나로 펼친다
   const tg = (chips.length || det) ? `<span class="wtg" onclick="event.stopPropagation();const c=this.closest('.wcard');const o=c.classList.toggle('open');this.querySelector('i').textContent=o?'▴':'▾'">자세히 <i>▾</i></span>` : '';
-  return `<div class="wcard"><div class="wtop"><div class="wl"><div class="wh">${ico('cert')} 작품 인증${w.sponsored?'<span class="spon">샘플 제공</span>':''}</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}</div>${tg}</div>${det}${chips.length?`<div class="tchips">${chips.map(x=>`<span class="${x.c?'custom':''}">${esc(x.t)}</span>`).join('')}</div>`:''}</div>`;
+  return `<div class="wcard"><div class="wtop"><div class="wl"><div class="wh">${ico('cert')} 완성작품 인증${w.sponsored?'<span class="spon">샘플 제공</span>':''}</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}</div>${tg}</div>${det}${chips.length?`<div class="tchips">${chips.map(x=>`<span class="${x.c?'custom':''}">${esc(x.t)}</span>`).join('')}</div>`:''}</div>`;
 }
 async function openYarnSimilar(name){
   const { data, error } = await sb.rpc('yarn_similar', { p_name:name, p_limit:8 });
@@ -3919,7 +3919,7 @@ async function openMeetApplicants(id){ const { data, error } = await sb.rpc('mee
     ${rows.length?rows.map(r=>`<div class="archit"><div onclick="closeSheet();openProfile('${r.profile_id}')" style="cursor:pointer">${avatar(r)}</div><div class="tx" style="cursor:default"><b>${esc(r.nickname||'')}</b><span>${r.note?esc(r.note):(r.status==='accepted'?'확정됨':'한마디 없음')}</span></div>${r.status==='applied'?`<button type="button" style="background:var(--sel);color:#fff;border-color:var(--sel)" onclick="decideMeetApp('${id}','${r.profile_id}',true)">확정</button><button type="button" onclick="decideMeetApp('${id}','${r.profile_id}',false)">거절</button>`:'<span class="muted" style="font-size:.8rem">확정</span>'}</div>`).join(''):'<div class="empty">아직 신청한 분이 없어요</div>'}
     <button class="btn o" onclick="openMeetup('${id}')">모임으로 돌아가기</button>`); }
 async function decideMeetApp(id, pid, ok){ const { error } = await sb.rpc('meetup_decide', { p_meetup:id, p_profile:pid, p_accept:ok }); if(error) return toast(error.message.replace(/^.*?: /,'')); toast(ok?'확정했어요 · 채팅방에 들어왔어요':'거절했어요'); openMeetApplicants(id); }
-function lvBadge(a){ return (a&&a.act_level>0?`<span class="lvb" title="활동 레벨 · 작품 인증을 올린 날마다 +1">Lv.${a.act_level}</span>`:'') + (SUPPORTERS&&a&&a.supporter_badge?`<span class="supbadge">${esc(a.supporter_badge)}</span>`:''); }
+function lvBadge(a){ return (a&&a.act_level>0?`<span class="lvb" title="활동 레벨 · 완성작품 인증을 올린 날마다 +1">Lv.${a.act_level}</span>`:'') + (SUPPORTERS&&a&&a.supporter_badge?`<span class="supbadge">${esc(a.supporter_badge)}</span>`:''); }
 function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
 function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
 function postCard(p, opts={}){
@@ -3990,7 +3990,7 @@ async function openArchivedPosts(){
   $('#subBody').innerHTML = `<p class="muted" style="font-size:.82rem;margin:14px 0 4px;line-height:1.5">보관한 글은 나만 볼 수 있어요. 좋아요·댓글은 그대로 남아 있고, [다시 공개]를 누르면 처음 올린 날짜의 자리로 돌아가요.</p><div id="arcList">` +
     (rows.length ? rows.map(r=>`<div class="arow">${(r.photos||[])[0]?`<img src="${esc(r.photos[0])}" alt="">`:''}<div class="ab"><div class="at">${r.work_id?'<span class="pgk c">인증</span>':''}${esc(r.body||'(사진)')}</div><div class="ad">${new Date(r.created_at).toLocaleDateString("ko-KR",{month:"long",day:"numeric"})} 올림</div><div class="abt"><button type="button" class="g" onclick="archivePost('${r.id}',false)">다시 공개</button><button type="button" class="r" onclick="deletePost('${r.id}')">삭제</button></div></div></div>`).join('') : '<div class="empty">보관한 글이 없어요.<br>내 글의 ··· 에서 [보관하기]를 누르면 여기에 모여요</div>') + '</div>';
 }
-// 글 수정 (schema 110): 일반 글은 글쓰기 화면, 작품 인증은 작품 인증 화면에 지금 내용을 채워서 엶
+// 글 수정 (schema 110): 일반 글은 글쓰기 화면, 완성작품 인증은 완성작품 인증 화면에 지금 내용을 채워서 엶
 let editPostId=null, editWorkPost=null, wLocked=new Set(), editWorkYarn0='';
 function editBackGo(){ const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
 async function editPostOpen(id, focus){
@@ -4005,7 +4005,7 @@ async function editWorkOpen(p, focus){
   const r0=await sb.from('works').select('id,title,note,techniques,custom_techniques,yarns,needles,gauge,finished_size,item_type').eq('id', p.work_id).single(); const w=r0.data||p.work;
   if(!w) return toast('작품 정보를 찾을 수 없어요');
   await openCert(); if(view!=='cert') return;
-  editWorkPost=p.id; $('#v-cert').classList.add('edit'); $('#v-cert .top h1').textContent='작품 인증 수정'; $('#certPost').textContent='저장';
+  editWorkPost=p.id; $('#v-cert').classList.add('edit'); $('#v-cert .top h1').textContent='완성작품 인증 수정'; $('#certPost').textContent='저장';
   $('#wTitle').value=w.title||''; $('#wNote').value=w.note||'';
   wTechSel=new Set(w.techniques||[]); wLocked=new Set(w.techniques||[]); wCustom=[...(w.custom_techniques||[])];
   if((w.techniques||[]).length) wCraft = String(w.techniques[0]).startsWith('K') ? 'knitting' : 'crochet';
@@ -4111,7 +4111,7 @@ function renderPv(which){
   const arr = which==='s' ? sPhotos : cPhotos, el = which==='s' ? $('#sPv') : $('#cPv'); if(!el) return;
   el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">${ico('close')}</b></div>`).join('');
 }
-// ============ Phase 1 (2026-09-20 시안): ＋ 선택 팝업 · 작품 인증 페이지 · 모임 만들기 페이지 · 보조 화면 ============
+// ============ Phase 1 (2026-09-20 시안): ＋ 선택 팝업 · 완성작품 인증 페이지 · 모임 만들기 페이지 · 보조 화면 ============
 const SVG_CAL = '<i class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></i>';
 const SVG_PEN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
 const SVG_SEARCH = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>';
@@ -4123,15 +4123,15 @@ function openPlusSheet(){
   const row=(fn, icon, title, sub, extra='')=>`<button type="button" class="plusrow" onclick="${fn}"><div class="pi">${icon}</div><div><b>${title}</b><span>${sub}</span>${extra}</div></button>`;
   openSheet(`<b style="font-size:1.05rem">무엇을 올릴까요?</b><div>
     ${row("closeSheet();openCompose('post')", SVG_PEN, '글', '동네 이웃에게 소식·질문 남기기')}
-    ${row("closeSheet();openCert()", ico('cert'), '작품 인증', '완성작 사진과 기법·실 기록 · 활동 레벨이 올라요')}
-    ${row("closeSheet();openMeetForm()", ico('location'), '모임 · 같이 떠요', '가르치지 않고 함께 뜨는 자리 · 참가비를 받을 수 있어요', certified?'':'<span class="lock">작품 인증 1개부터 열 수 있어요</span>')}
+    ${row("closeSheet();openCert()", ico('cert'), '완성작품 인증', '완성작 사진과 기법·실 기록 · 활동 레벨이 올라요')}
+    ${row("closeSheet();openMeetForm()", ico('location'), '모임 · 같이 떠요', '가르치지 않고 함께 뜨는 자리 · 참가비를 받을 수 있어요', certified?'':'<span class="lock">완성작품 인증 1개부터 열 수 있어요</span>')}
     ${myShop?row("closeSheet();openCompose('shop')", ico('signal'), '가게 소식', esc(myShop.name)+' 팔로워에게 알리기'):''}
     ${myShop||myProfile?.is_author?row("closeSheet();openClassForm()", ico('cert'), '클래스 · 가르쳐요', '배울 기법·완성작이 있는 수업 · 수강료·환불 규정'):''}
     ${FULL && myProfile?.is_author?row("closeSheet();openPatternForm()", ico('ruler'), '도안', '내 도안 등록하기'):''}
   </div><button class="btn o" onclick="closeSheet()">닫기</button>`);
 }
 function openMeetGate(){
-  openSheet(`<b>${ico('cert')} 모임을 열려면 작품 인증이 필요해요</b><div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div><button class="btn" type="button" onclick="closeSheet();openCert()">작품 인증하러 가기</button>`);
+  openSheet(`<b>${ico('cert')} 모임을 열려면 완성작품 인증이 필요해요</b><div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div><button class="btn" type="button" onclick="closeSheet();openCert()">완성작품 인증하러 가기</button>`);
 }
 
 // ----- 보조 화면(한 장 덮기)
@@ -4140,12 +4140,12 @@ function openSub(title, html, act){ $('#subTitle').textContent=title; $('#subBod
 function closeSub(){ $('#subpg').hidden=true; $('#subBody').innerHTML=''; subOnBack=null; }
 function subBack(){ const f=subOnBack; subOnBack=null; if(f) return f(); closeSub(); }
 
-// ----- 작품 인증 페이지
+// ----- 완성작품 인증 페이지
 const W_ITEMS=['소품·키링','인형','가방·파우치','모자','목도리·숄','의류','블랭킷·쿠션','수세미·코스터','기타'];
 function wItemSet(v){ const h=$('#wItem'); if(h) h.value=v||''; const box=$('#wItemChips'); if(box) box.innerHTML=W_ITEMS.map(x=>`<button type="button" class="${x===v?'on':''}" onclick="wItemSet(this.textContent)">${x}</button>`).join(''); }
 async function openCert(){
   if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
-  closeSub(); sPhotos=[]; composeKind='work'; editWorkPost=null; wLocked=new Set(); $('#v-cert').classList.remove('edit'); $('#v-cert .top h1').textContent='작품 인증'; $('#certPost').textContent='게시';
+  closeSub(); sPhotos=[]; composeKind='work'; editWorkPost=null; wLocked=new Set(); $('#v-cert').classList.remove('edit'); $('#v-cert .top h1').textContent='완성작품 인증'; $('#certPost').textContent='게시';
   if(!['compose','cert','meetform'].includes(view)) composeBack=view;
   $('#wTitle').value=''; $('#wNote').value=''; wCustom=[]; wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
   wyReset(); renderCertPhotos(); renderCertTech(); certCheck(); wqLoad();
@@ -4202,7 +4202,7 @@ async function submitCert(){
     const { data:newPost, error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn: yp.line, p_note: $('#wNote').value.trim()||null, p_custom: wCustom, p_yarn_meta: yp.meta });
     if(error) throw new Error(error.message);
     let evDone=false; if(evId && newPost){ const r2 = await sb.rpc('link_work_event', { p_post:newPost, p_event:evId }); if(r2.error) toast('이벤트 연결 실패: '+r2.error.message); else evDone=true; }
-    await loadMe(); sPhotos=[]; toast(evDone?'이벤트 인증까지 완료했어요!':`작품 인증 완료! Lv.${myProfile?.act_level||1}`); setTimeout(showRecsAfterWork, 600);
+    await loadMe(); sPhotos=[]; toast(evDone?'이벤트 인증까지 완료했어요!':`완성작품 인증 완료! Lv.${myProfile?.act_level||1}`); setTimeout(showRecsAfterWork, 600);
     composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
   }catch(e){ toast(e.message); }
   certCheck.busy=false; certCheck();
@@ -4535,7 +4535,7 @@ function ydDone(){
   closeSub(); renderWYarns();
 }
 
-// ============ Phase 2: 내 실함 (볼밴드 찍어 보관 → 작품 인증에서 고르면 자동 차감) ============
+// ============ Phase 2: 내 실함 (볼밴드 찍어 보관 → 완성작품 인증에서 고르면 자동 차감) ============
 // 본인과 운영진만 볼 수 있다. 남은 볼은 본인이 언제든 고칠 수 있다(분실·나눔 등).
 let stashRows=[], stashFilter='all', stashThumb={}, stashPoll=null;
 const fmtBalls = n => { const v=Math.round((+n||0)*100)/100; return String(v); };
@@ -4563,7 +4563,7 @@ function renderStash(){
   $('#stashBody').innerHTML=`<div class="ssum"><div><b>${stashRows.length}</b><span>보유 실</span></div><div><b>${fmtBalls(has.reduce((t,s)=>t+(+s.left_balls),0))}</b><span>남은 볼</span></div><div><b>${done.length}</b><span>다 쓴 실</span></div></div>
     <div style="padding:0 16px"><div class="saopt"><button type="button" class="pri" onclick="openStashAdd()">${ico('camera')}<b>볼밴드 찍어서 추가</b><span>사진을 읽어 이름·규격을 채워요</span></button><button type="button" onclick="stashAddManual()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg><b>이름으로 추가</b><span>볼밴드가 없어도 돼요</span></button></div>${FULL&&has.length?`<button class="btn o" style="width:100%;margin-top:8px" onclick="openStashPatterns(null)">내 실로 뜰 수 있는 도안 찾기</button>`:''}</div>
     <div class="seg" style="padding:12px 16px 4px">${[['all','전체'],['left','남은 실'],['done','다 쓴 실']].map(([k,l])=>`<button type="button" class="${stashFilter===k?'on':''}" onclick="stashFilter='${k}';renderStash()">${l}</button>`).join('')}</div>
-    <div class="list">${list.map(s=>`<div class="item" onclick="openStashItem('${s.id}')">${stashThumbHtml(s)}<div class="tx"><b>${esc(stashName(s))}</b><span>${esc(s.read_status==='pending'?'잠시 뒤 이름·규격이 채워져요':stashSpec(s)||(s.read_status==='failed'?'볼밴드를 읽지 못했어요 · 눌러서 직접 적기':''))}</span></div><span class="sleft ${+s.left_balls>0?'':'end'}">${+s.left_balls>0?fmtBalls(s.left_balls)+'볼 남음':'다 씀'}</span></div>`).join('')||`<div class="empty">아직 담은 실이 없어요.<br>산 실의 볼밴드를 찍어 두면 작품 인증 때 한 번에 들어가요</div>`}</div>`;
+    <div class="list">${list.map(s=>`<div class="item" onclick="openStashItem('${s.id}')">${stashThumbHtml(s)}<div class="tx"><b>${esc(stashName(s))}</b><span>${esc(s.read_status==='pending'?'잠시 뒤 이름·규격이 채워져요':stashSpec(s)||(s.read_status==='failed'?'볼밴드를 읽지 못했어요 · 눌러서 직접 적기':''))}</span></div><span class="sleft ${+s.left_balls>0?'':'end'}">${+s.left_balls>0?fmtBalls(s.left_balls)+'볼 남음':'다 씀'}</span></div>`).join('')||`<div class="empty">아직 담은 실이 없어요.<br>산 실의 볼밴드를 찍어 두면 완성작품 인증 때 한 번에 들어가요</div>`}</div>`;
 }
 // ----- 실 추가: 볼밴드를 연달아 찍고 볼 수만 적는다. 찍는 즉시 저장·읽기 시작
 let saDraft=[];   // {id, url, balls}
@@ -5121,14 +5121,14 @@ function renderSkills(){
       <div class="lvbar">${[1,2,3,4,5].map(l=>`<i class="${l<=lv?'done':''}"><b style="width:${st[l]?Math.round(st[l].done/st[l].total*100):0}%"></b></i>`).join('')}</div></div></div>
     <div class="tmlegend"><span><i class="k done"></i>할 수 있어요</span><span><i class="k ready"></i>다음에 배울 차례</span><span><i class="k"></i>아직</span><span style="margin-left:auto">옆으로 밀어 보세요 →</span></div>
     <div class="tmscroll" id="tmScroll" data-craft="${craft}">${bd.html}</div>
-    <div class="card soft muted">기법을 누르면 체크돼요. 위 단계 기법을 누르면 선으로 이어진 아래 기법이 함께 체크돼요. 한 단계 기법의 절반 이상을 체크하면 그 단계로 표시돼요. <b>인증</b>은 작품 인증으로 증명된 기법이에요.</div>
+    <div class="card soft muted">기법을 누르면 체크돼요. 위 단계 기법을 누르면 선으로 이어진 아래 기법이 함께 체크돼요. 한 단계 기법의 절반 이상을 체크하면 그 단계로 표시돼요. <b>인증</b>은 완성작품 인증으로 증명된 기법이에요.</div>
     ${recs.filter(r=>r.craft===craft).length?`<div><b>내 단계에 맞는 도안</b><div class="patlist">${recs.filter(r=>r.craft===craft).slice(0,4).map(patItem).join('')}</div></div>`:''}
     <button class="btn" onclick="finishSkills()">저장하고 나가기</button>`;
   const sc=$('#tmScroll');
   sc.scrollLeft = keep!==null ? keep : Math.max(0, (Math.min(5, Math.max(1, lv+1))-1)*(colW+gapX) - 24);
 }
 function switchCraft(c){ skillCraft=c; openLv=null; renderSkills(); }
-// 기법 맵(knitup 방식): 단계별 세로 열을 왼쪽→오른쪽으로 놓고, 선행 기법을 곡선으로 잇는다. cls(t) → 'done'|'ready'|'far'. 내 뜨개 단계·작품 인증·모임 기법 고르기·모임 기법 보기가 함께 쓴다
+// 기법 맵(knitup 방식): 단계별 세로 열을 왼쪽→오른쪽으로 놓고, 선행 기법을 곡선으로 잇는다. cls(t) → 'done'|'ready'|'far'. 내 뜨개 단계·완성작품 인증·모임 기법 고르기·모임 기법 보기가 함께 쓴다
 function techBoard(craft, cls, onClick, ver){
   const list = techOf(craft), colW=142, gapX=44, rowH=54, headH=40, nodeH=44; ver = ver||new Set();
   const cols={}; list.forEach(t=>{ (cols[t.level] ||= []).push(t); });
@@ -5157,7 +5157,7 @@ function openTechPanel(id){
   const t=TECH.find(x=>x.id===id); if(!t) return; const vs=TECH_VARIANTS[id]||[];
   const has=new Set(myProfile?.skills||[]), ver=new Set(myProfile?.verified_skills||[]);
   const pre=t.prereq||[], ready=!has.has(id) && pre.every(q=>has.has(q));
-  const st = has.has(id) ? [ver.has(id)?'할 수 있어요 · 작품 인증으로 증명됐어요':'할 수 있어요 (직접 체크)', 'var(--chip)', 'var(--olive)'] : ready ? ['지금 도전하면 좋아요 — 먼저 알아야 할 기법을 다 알아요', '#FFF6E8', '#8a6d1a'] : ['먼저 배울 기법이 있어요', '#F3F3F1', 'var(--ink2)'];
+  const st = has.has(id) ? [ver.has(id)?'할 수 있어요 · 완성작품 인증으로 증명됐어요':'할 수 있어요 (직접 체크)', 'var(--chip)', 'var(--olive)'] : ready ? ['지금 도전하면 좋아요 — 먼저 알아야 할 기법을 다 알아요', '#FFF6E8', '#8a6d1a'] : ['먼저 배울 기법이 있어요', '#F3F3F1', 'var(--ink2)'];
   const nexts=TECH.filter(x=>x.craft===t.craft && (x.prereq||[]).includes(id));
   const chip=x=>`<button type="button" class="tech ${has.has(x.id)?'on':''}" onclick="openTechPanel('${x.id}')">${has.has(x.id)?'✓ ':''}${esc(x.name_ko)}</button>`;
   const q=encodeURIComponent((t.craft==='knitting'?'대바늘 ':'코바늘 ')+t.name_ko+' 하는 법');
@@ -5294,7 +5294,7 @@ async function renderMy(){
   renderMyTop();
 }
 // ---- Connect / Host / Skill Index (2026-09-27 대표 확정) — 서버가 계산(compute_trait_index), 앱은 그리기만
-const IDX_DEF=[['connect','Connect','연결 — 댓글·공감·모임 참여'],['host','Host','모임을 만들고 사람을 모으는 힘 — 새 글·모임·클래스 열기'],['skill','Skill','뜨개 숙련도 — 작품 인증·상급 기법·뜨개 단계']];
+const IDX_DEF=[['connect','Connect','연결 — 댓글·공감·모임 참여'],['host','Host','모임을 만들고 사람을 모으는 힘 — 새 글·모임·클래스 열기'],['skill','Skill','뜨개 숙련도 — 완성작품 인증·상급 기법·뜨개 단계']];
 const TRAIT_TXT={connect:'Connect Index가 높아요 — 이웃과 이어지는 사람',host:'Host Index가 높아요 — 판을 벌이고 사람을 모으는 사람',skill:'Skill Index가 높아요 — 손끝이 좋은 사람',balanced:'세 Index가 고르게 — 두루두루',new:'아직 알아가는 중 — 활동이 쌓이면 성향이 보여요'};
 function idxRadar(p, size){
   const v=[p.idx_connect||0, p.idx_host||0, p.idx_skill||0]; const W=size||96, H=Math.round(W*0.92), cx=W/2, cy=H*0.56, R=W*0.38;
@@ -5411,7 +5411,7 @@ function openSettingsInner(){
   const p=myProfile||{};
   const handle=[p.dong_name||'동네 미설정', lvShort(p)||(p.craft?CRAFT[p.craft]:'')].filter(Boolean).join(' · ');
   openSheet(`<b style="font-size:1.05rem">설정</b>
-    <div class="setprof">${avatar(p,true)}<div style="flex:1;min-width:0"><div class="nm">${esc(p.nickname||'')}${lvBadge(p)}${p.is_author?'<span class="authbadge">작가</span>':''}</div><div class="muted">${esc(handle)}${p.cert_count?` · 작품 인증 ${p.cert_count}`:''}</div>${p.bio?`<div class="bio">${esc(p.bio)}</div>`:''}</div></div>
+    <div class="setprof">${avatar(p,true)}<div style="flex:1;min-width:0"><div class="nm">${esc(p.nickname||'')}${lvBadge(p)}${p.is_author?'<span class="authbadge">작가</span>':''}</div><div class="muted">${esc(handle)}${p.cert_count?` · 완성작품 인증 ${p.cert_count}`:''}</div>${p.bio?`<div class="bio">${esc(p.bio)}</div>`:''}</div></div>
     <div class="sgrp">프로필</div>
     <div class="slist">
       <button class="srow" onclick="closeSheet();openOnboard(true)"><span>프로필 편집<br><span class="muted">닉네임·소개·경력·만나기 좋은 시간</span></span><span class="car">›</span></button>
@@ -5426,7 +5426,7 @@ function openSettingsInner(){
       <button class="srow" onclick="closeSheet();openStore()"><span>뜨개 상점 <span class="authbadge" style="background:var(--sel)">Lab</span><br><span class="muted">실 사기(무통장) · 도안(무료 체험)</span></span><span class="car">›</span></button>
       <button class="srow" onclick="closeSheet();openMyOrders()"><span>내 주문</span><span class="car">›</span></button>
       <button class="srow" onclick="openMyPurchases()"><span>구매한 도안</span><span class="car">›</span></button>${p.is_author?`<button class="srow" onclick="openSettlement()"><span>도안 판매·정산 <span class="authbadge">작가</span></span><span class="car">›</span></button>`:''}`:''}
-      ${p.is_author?`<button class="srow" onclick="openStudio()"><span>knitup Studio <span class="authbadge">작가</span><br><span class="muted">도안 제작 도구 — 차트·지시문·인쇄·패키지 (패드·노트북 권장)</span></span><span class="car">›</span></button>${FULL?`<button class="srow" onclick="openMyPatterns()"><span>내 도안 <span class="authbadge">작가</span><br><span class="muted">도안 등록·수정</span></span><span class="car">›</span></button>`:''}<button class="srow" onclick="closeSheet();openClassForm()"><span>클래스 열기 <span class="authbadge">작가</span><br><span class="muted">일정·인원·비용·환불 규정까지 양식으로 · 마이 › 클래스 탭에 보여요</span></span><span class="car">›</span></button><button class="srow" onclick="openAuthorPageEdit()"><span>작가 화면 꾸미기 ${FULL?'':'<span class="authbadge">작가</span>'}<br><span class="muted">맨 위 사진 · 인스타그램·스토어 링크(3개까지)</span></span><span class="car">›</span></button><button class="srow" onclick="closeSheet();openProfile(me.id,false,true)"><span>내 작가 화면 보기<br><span class="muted">다른 회원에게 보이는 모습</span></span><span class="car">›</span></button>`:`<button class="srow" onclick="openAuthorApply()"><span>작가 신청<br><span class="muted">상급 이상 기법 작품 인증 ${AUTHOR_MIN_CERTS}개부터 · 클래스 열기${FULL?'·도안 등록':''} · 지도에 작가로 표시</span></span><span class="car">›</span></button>`}
+      ${p.is_author?`<button class="srow" onclick="openStudio()"><span>knitup Studio <span class="authbadge">작가</span><br><span class="muted">도안 제작 도구 — 차트·지시문·인쇄·패키지 (패드·노트북 권장)</span></span><span class="car">›</span></button>${FULL?`<button class="srow" onclick="openMyPatterns()"><span>내 도안 <span class="authbadge">작가</span><br><span class="muted">도안 등록·수정</span></span><span class="car">›</span></button>`:''}<button class="srow" onclick="closeSheet();openClassForm()"><span>클래스 열기 <span class="authbadge">작가</span><br><span class="muted">일정·인원·비용·환불 규정까지 양식으로 · 마이 › 클래스 탭에 보여요</span></span><span class="car">›</span></button><button class="srow" onclick="openAuthorPageEdit()"><span>작가 화면 꾸미기 ${FULL?'':'<span class="authbadge">작가</span>'}<br><span class="muted">맨 위 사진 · 인스타그램·스토어 링크(3개까지)</span></span><span class="car">›</span></button><button class="srow" onclick="closeSheet();openProfile(me.id,false,true)"><span>내 작가 화면 보기<br><span class="muted">다른 회원에게 보이는 모습</span></span><span class="car">›</span></button>`:`<button class="srow" onclick="openAuthorApply()"><span>작가 신청<br><span class="muted">상급 이상 기법 완성작품 인증 ${AUTHOR_MIN_CERTS}개부터 · 클래스 열기${FULL?'·도안 등록':''} · 지도에 작가로 표시</span></span><span class="car">›</span></button>`}
       <button class="srow" onclick="relocateNow()"><span>현위치로 동네 다시 설정<br><span class="muted">지금 ${esc(p.dong_name||'미설정')} · 가입한 위치로 고정돼 있어요</span></span><span class="car">›</span></button>
       <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 200m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
     </div>

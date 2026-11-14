@@ -1716,3 +1716,17 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --       함수 안에서 조건을 다시 확인: 같은 브랜드(후보의 brand 가 비어 있으면 이름이 그 브랜드·별칭으로 시작해야 함) + 1볼 g 가 둘 다 있고 10% 안 + m 는 둘 다 있을 때 10% 안.
 --       합치는 내용은 admin_yarn_merge 와 같고 admin_logs 에 yarn_merge(auto:true) 로 남는다
 
+-- ============================================================
+-- 114. 동네 자동 보정 (2026-11-14) — 마이그레이션 dong_autofix + Edge Function dong-fix
+-- ============================================================
+--   대상: 프로필은 끝냈는데 지도 위치(location)가 없는 회원(옛 앱에서 동네를 글자로만 적은 경우). 테스트 계정(@knit.local) 제외
+--   크론 dong-fix(매시 20분, 대상이 있을 때만) → dong_fix_call() → Edge dong-fix(x-jigi-secret)
+--   dong_autofix_candidates() / dong_autofix_apply(profile, tried, ok, note, name, code, lat, lng) : service_role 전용.
+--       apply 는 위치가 아직 비어 있고 동네 글자가 그대로일 때만 고치고(200m 격자 중심), admin_logs member_edit(auto:true) + dong_fix_log 에 남긴다
+--   dong_fix_log(profile_id pk, tried, ok, note, tried_at) : 같은 글자는 30일 동안 다시 시도하지 않음. 관리자만 조회
+
+-- ============================================================
+-- 115. 말 바꾸기 '작품 인증' → '완성작품 인증' (2026-11-14) — 마이그레이션 rename_work_cert_wording
+-- ============================================================
+--   서버가 내보내는 안내·오류 문구만(함수 9개: create_meetup, apply_author, link_work_event, cheer_daily, admin_delete_work, admin_talk_member, edit_post, edit_work, edit_work_yarn). 동작 변화 없음
+
