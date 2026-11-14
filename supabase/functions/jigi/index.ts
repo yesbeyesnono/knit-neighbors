@@ -320,13 +320,41 @@ async function tech() {
 // ---------- yarn: 미확정 실 이름 ↔ 확정 실 대조(검토 건만 만든다. 합치기는 콘솔 › 실 사전에서) ----------
 const bigrams = (s: string) => { const t = norm(s), o = new Set<string>(); for (let i = 0; i < t.length - 1; i++) o.add(t.slice(i, i + 2)); return o; };
 const sim = (a: string, b: string) => { const x = bigrams(a), y = bigrams(b); if (!x.size || !y.size) return 0; let n = 0; x.forEach((g) => y.has(g) && n++); return (2 * n) / (x.size + y.size); };
+// 2026-11-14 대표: "관리자에 항상 실 관련 이슈가 생긴다" → 검토 건을 줄인다.
+//  ① 한 번 판단한 후보는 다시 올리지 않는다(같은 후보의 검토 건이 이미 있으면 건너뜀 — 전에는 밤마다 다시 만들어졌다)
+//  ② 제품이 아닌 일반 이름(메리노울·모헤어·수세미…)과 브랜드가 다른 실, 1볼 무게가 다른 실은 올리지 않는다
+//  ③ 같은 브랜드 + 1볼 g·m 가 같고 이름이 거의 같으면 지기가 바로 합친다(DB 함수 yarn_auto_merge 가 조건을 다시 확인) — 기록만 남김
+//  ④ 그 밖에 정말 애매한 것만 검토 건으로(유사도 0.75 이상)
+const YARN_GENERIC = ["메리노울", "메리노", "모헤어", "수세미", "수세미실", "면사", "면실", "울", "울사", "아크릴", "아크릴사", "코튼", "코튼사", "린넨", "알파카", "캐시미어", "레이스실", "뜨개실", "털실", "실", "램스울", "모사", "혼방사", "벨벳실", "수면사"];
 async function yarn() {
-  const { data: autos } = await db.from("yarn_catalog").select("id,brand,product").eq("status", "auto").is("merged_into", null).gte("created_at", new Date(Date.now() - 2 * 864e5).toISOString()).limit(40);
-  const { data: ver } = await db.from("yarn_catalog").select("id,brand,product").eq("status", "verified").is("merged_into", null).limit(2000); let made = 0;
-  for (const a of autos ?? []) { const name = `${a.brand ?? ""} ${a.product}`.trim(); const best = (ver ?? []).map((v) => ({ v, s: Math.max(sim(name, `${v.brand ?? ""} ${v.product}`), sim(a.product, v.product)) })).sort((p, q) => q.s - p.s)[0];
-    if (!best || best.s < 0.6) continue;
-    if (await createItem({ kind: "yarn_review", target_type: "yarn", target_id: a.id, severity: "info", summary: `실 이름 확인 — 「${name}」 = 「${`${best.v.brand ?? ""} ${best.v.product}`.trim()}」?`, evidence: { from: a.id, into: best.v.id, similarity: Math.round(best.s * 100) / 100 }, ai_suggestion: { reason: `이름 유사도 ${Math.round(best.s * 100)}%`, action: "콘솔 › 실 사전에서 합치기" } })) made++; }
-  return { checked: autos?.length ?? 0, items: made };
+  const { data: autos } = await db.from("yarn_catalog").select("id,brand,product,ball_g,ball_m").eq("status", "auto").is("merged_into", null).gte("created_at", new Date(Date.now() - 2 * 864e5).toISOString()).limit(40);
+  if (!(autos ?? []).length) return { checked: 0, items: 0, merged: 0, skipped: 0 };
+  const { data: ver } = await db.from("yarn_catalog").select("id,brand,product,ball_g,ball_m").eq("status", "verified").is("merged_into", null).limit(3000);
+  const { data: seen } = await db.from("mod_items").select("target_id").eq("kind", "yarn_review").in("target_id", (autos ?? []).map((x) => x.id));
+  const done = new Set((seen ?? []).map((x) => x.target_id));
+  const { data: al } = await db.from("yarn_brand_aliases").select("brand,alias");
+  const brandKeys: Record<string, string[]> = {};
+  for (const v of ver ?? []) if (v.brand && !brandKeys[v.brand]) brandKeys[v.brand] = [norm(v.brand)];
+  for (const x of al ?? []) if (brandKeys[x.brand]) brandKeys[x.brand].push(norm(x.alias));
+  const brandOf = (c: J): string | null => { if (c.brand) return c.brand; const n = norm(c.product); for (const b in brandKeys) if (brandKeys[b].some((k) => k.length >= 2 && n.startsWith(k))) return b; return null; };
+  const near = (x: number | null, y: number | null) => x == null || y == null ? null : Math.abs(+x - +y) <= +y * 0.1;
+  let made = 0, merged = 0, skipped = 0;
+  for (const c of autos ?? []) {
+    if (done.has(c.id)) { skipped++; continue; }
+    const name = `${c.brand ?? ""} ${c.product}`.trim(); const cb = brandOf(c);
+    if (!cb && (YARN_GENERIC.includes(norm(c.product)) || norm(c.product).length <= 2)) { skipped++; continue; }
+    const best = (ver ?? []).map((v) => ({ v, s: Math.max(sim(name, `${v.brand ?? ""} ${v.product}`), sim(c.product, v.product)) })).sort((p, q) => q.s - p.s)[0];
+    if (!best || best.s < 0.75) continue;
+    const v = best.v; const vname = `${v.brand ?? ""} ${v.product}`.trim();
+    if (cb && v.brand && norm(cb) !== norm(v.brand)) { skipped++; continue; }          // 브랜드가 다르면 다른 실
+    if (near(c.ball_g, v.ball_g) === false) { skipped++; continue; }                   // 1볼 무게가 다르면 다른 실
+    if (cb && v.brand && near(c.ball_g, v.ball_g) === true && near(c.ball_m, v.ball_m) !== false && best.s >= 0.8) {
+      const { data: ok } = await db.rpc("yarn_auto_merge", { p_from: c.id, p_into: v.id, p_reason: `이름 유사도 ${Math.round(best.s * 100)}% · 같은 브랜드 · 1볼 무게 같음` });
+      if (ok) { merged++; await createItem({ kind: "yarn_review", target_type: "yarn", target_id: c.id, severity: "info", summary: `실 이름 자동 합침 — 「${name}」 → 「${vname}」`, evidence: { from: c.id, into: v.id, similarity: Math.round(best.s * 100) / 100 }, ai_suggestion: { reason: "같은 브랜드, 1볼 무게 같음, 이름이 거의 같음", action: "기록만 — 할 일 없음" }, status: "auto_done", auto_action: "yarn_auto_merge", resolved_at: new Date().toISOString(), resolved_by: "ai" }); continue; }
+    }
+    if (await createItem({ kind: "yarn_review", target_type: "yarn", target_id: c.id, severity: "info", summary: `실 이름 확인 — 「${name}」 = 「${vname}」?`, evidence: { from: c.id, into: v.id, similarity: Math.round(best.s * 100) / 100 }, ai_suggestion: { reason: `이름 유사도 ${Math.round(best.s * 100)}%${cb ? "" : " · 브랜드를 알 수 없어 자동으로 합치지 않았어요"}`, action: "콘솔 › 실 사전에서 합치기" } })) made++;
+  }
+  return { checked: autos?.length ?? 0, items: made, merged, skipped };
 }
 
 // ---------- 지기 AI 1차 응대 (2026-09-26 대표 확정): 지기 채팅에서 불편 사항을 공손하게 정확히 파악 → 티켓 → 대표에게 전달 → 대표 답변을 회원에게 ----------

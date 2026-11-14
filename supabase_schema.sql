@@ -1709,3 +1709,10 @@ alter table public.profiles add column if not exists wave_until timestamptz;
 --   admin_yarn_stats : '최근 30일 많이 쓴 실'·'30일 기록 수'에서 실함에 담은 기록(source='stash')을 뺌. 수요 탭(admin_yarn_demand)은 처음부터 빼고 있었음
 --   정리: 실 이름 칸에 작품 이름을 적어 생긴 후보 4건(북커버·파우치·스크런치·행잉트리, 연결된 실함·인증 없음) 삭제 — admin_logs yarn_cleanup
 
+-- ============================================================
+-- 113. 실 이름 검토 줄이기 (2026-11-14) — 마이그레이션 yarn_auto_merge (+ jigi yarn() 개정)
+-- ============================================================
+--   yarn_auto_merge(from, into, reason) → boolean : service_role 전용(지기 밤 정리가 부름). 후보(status auto)를 확정 실에 합친다.
+--       함수 안에서 조건을 다시 확인: 같은 브랜드(후보의 brand 가 비어 있으면 이름이 그 브랜드·별칭으로 시작해야 함) + 1볼 g 가 둘 다 있고 10% 안 + m 는 둘 다 있을 때 10% 안.
+--       합치는 내용은 admin_yarn_merge 와 같고 admin_logs 에 yarn_merge(auto:true) 로 남는다
+
