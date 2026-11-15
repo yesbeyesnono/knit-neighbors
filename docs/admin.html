@@ -72,7 +72,6 @@ textarea{width:100%;min-height:90px}
 pre{background:var(--bg2);border-radius:8px;padding:10px;font-size:12px;overflow:auto;white-space:pre-wrap}
 /* 모바일(대표가 폰에서 확인·처리): 상단 바 + 서랍 메뉴, 표는 가로 스크롤, 패널은 전체 폭, 버튼은 손가락 크기 */
 /* 공지 */
-.bcgrid{display:grid;grid-template-columns:1fr 1.25fr;gap:12px;margin-bottom:16px;align-items:start}
 label.ysel{display:block;margin-bottom:4px}label.ysel input{margin:0}
 .bcsteps{display:grid;gap:12px;max-width:1000px;margin-bottom:18px}.bcstep{gap:0}
 .bch{display:flex;align-items:center;gap:10px;margin-bottom:10px;min-height:28px}.bch .n{width:26px;height:26px;border-radius:50%;background:var(--olive);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}.bch b{font-size:16px}.bch .muted{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
@@ -81,8 +80,8 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
 .bctabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 10px}.bctabs button{padding:6px 12px;border-radius:999px;font-size:13px}.bctabs button.on{background:var(--olive);color:#fff;border-color:var(--olive)}.bctabs .b{display:inline-block;min-width:16px;height:16px;line-height:16px;border-radius:8px;background:rgba(0,0,0,.18);color:#fff;font-size:11px;text-align:center;margin-left:6px;padding:0 4px}.bctabs button:not(.on) .b{background:var(--olive)}
 .bcbody{background:var(--bg2);border-radius:12px;padding:12px 14px}.bcfields{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px 18px}.bcfield>label{display:block;font-size:12px;color:var(--ink2);margin-bottom:4px}.bcfield.set>label{color:var(--olive);font-weight:700}.bcfield input[type=text],.bcfield input[type=number],.bcfield select{width:100%;box-sizing:border-box}.bcfield select[multiple]{min-width:0}.bcfield .row{margin:0;flex-wrap:nowrap}.bcfield .row input{width:auto;flex:1;min-width:0}.bcfield .muted{font-size:11px;margin-top:2px}
 .bcprev{margin-top:12px;padding:10px 12px;border:1px dashed var(--line);border-radius:12px}.bcprev .bcn{font-size:14px;margin-bottom:6px}.bcprev .bcn b{font-size:22px}.bcprev .chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-@media (max-width:760px){.bcrow{grid-template-columns:1fr}.bcrow>label{font-size:12px}.bcfields{grid-template-columns:1fr}}.bcgrid details{border-top:1px solid var(--line);padding:6px 0}.bcgrid summary{cursor:pointer;padding:4px 0}.bcgrid table{border:0;border-radius:0;font-size:12.5px}.bcgrid td{padding:5px 6px;border-bottom:0}
-@media(max-width:900px){.bcgrid{grid-template-columns:1fr}}
+@media (max-width:760px){.bcrow{grid-template-columns:1fr}.bcrow>label{font-size:12px}.bcfields{grid-template-columns:1fr}}
+@media(max-width:900px){}
 /* 오늘 */
 .hero3{display:grid;grid-template-columns:1.1fr 1.3fr 1fr;gap:12px;margin-bottom:12px}.hero3 .card{display:flex;flex-direction:column;gap:6px}.hero3 .big{font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
 .hero3 .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.hero3 .kp div{background:var(--soft);border-radius:10px;padding:8px 6px;text-align:center}.hero3 .kp b{display:block;font-size:18px}.hero3 .kp span{font-size:11px;color:var(--ink3)}
@@ -629,10 +628,6 @@ async function openUserPanel(id){
 }
 async function setAdmin(id, add){ if(!confirm(add?'이 사용자를 관리자로 지정할까요? 모든 데이터를 보고 처리할 수 있게 돼요.':'관리자 권한을 해제할까요?')) return; const {error}=await sb.rpc('admin_set_admin',{p_user:id,p_add:add}); if(error) return toast(error.message); toast(add?'관리자로 지정했어요':'해제했어요'); openUserPanel(id); }
 // ===== 지기 문의함 =====
-async function supportRooms(){
-  const { data } = await sb.from('room_members').select('room_id, room:rooms(id,kind,created_at, room_members(profile_id, profiles(id,nickname,dong_name)), messages(id,body,photo_url,sender_id,created_at))').eq('profile_id',SUPPORT_ID).order('created_at',{foreignTable:'room.messages',ascending:false}).limit(1,{foreignTable:'room.messages'});
-  return (data||[]).map(x=>x.room).filter(r=>r&&r.kind==='direct').map(r=>{ r.user=(r.room_members||[]).map(m=>m.profiles).find(p=>p&&p.id!==SUPPORT_ID); r.last=r.messages?.[0]; r.unanswered=!!(r.last && r.last.sender_id!==SUPPORT_ID); return r; }).filter(r=>r.last).sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
-}
 // ===== 지기 문의함(schema 95): 대화(기본) · AI가 정리한 문의 · 통계. 대화 = 왼쪽 목록(답장 필요/기다리는 중/대화 전체, 환영 인사만 간 회원은 접어 둠) · 가운데 대화 · 오른쪽 회원 활동 =====
 let TK={tab:'talk', seg:null, q:'', tag:'', sel:null, rows:[], mem:null, n:0};
 const TK_SEGS=[['need','답장 필요'],['wait','기다리는 중'],['all','대화 전체']];
