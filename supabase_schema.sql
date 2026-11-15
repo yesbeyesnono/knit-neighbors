@@ -2054,3 +2054,11 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 130. 가게 소식 링크 (2026-11-16, 마이그레이션 shop_post_link)
 --   shop_posts.link text: 외부 링크 한 개. check shop_posts_link_chk = https 주소 · 300자 이내 · kind 가 class 가 아닐 때만
 -- ============================================================
+
+-- ============================================================
+-- 131. 정리 (2026-11-16, 마이그레이션 cleanup_20261116 — 전체 점검 3단계)
+--   drop table push_tokens(옛 푸시 토큰, 0줄) · drop index meetups_room_id_idx(중복)
+--   크론 cron-log-clean 매일 03:50 KST: cron.job_run_details 의 14일 지난 줄 삭제
+--   트리거 함수 posts_archive_guard·report_case_on_report 의 실행 권한 회수
+--   _friend_next_goal·_bigram_dice·post_tags·_own_storage_url·_chat_mask 에 search_path 고정
+-- ============================================================
