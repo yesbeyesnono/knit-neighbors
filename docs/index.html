@@ -4372,7 +4372,8 @@ function ccTech(n){ if(!sc) return; sc.step='tech'; sc.cur=n; if(!TECH.length) r
     <button type="button" class="sccta" onclick="ccTechOk(${n})">다음</button>`); }
 function ccTog(n, id){ const x=sc.tech[n]; if(x.has(id)){ x.delete(id); if(!sc.tech.some(y=>y&&y.has(id))) wTechSel.delete(id); } else { x.add(id); wTechSel.add(id); } ccTech(n); }
 function ccMap(n){ sc.before=new Set(wTechSel); sc.cur=n; openTechSub(); }   // 기법 맵에서 새로 고른 것은 이 사진의 기법이 된다(renderCertTech 에서 받아 옴)
-function ccMapBack(){ if(!(sc && sc.cert && sc.before)) return; const n=sc.cur; [...wTechSel].forEach(id=>{ if(!sc.before.has(id)) sc.tech[n].add(id); }); sc.tech.forEach(x=>x&&[...x].forEach(id=>{ if(!wTechSel.has(id)) x.delete(id); })); sc.before=null; ccTech(n); }
+function ccMapBack(){ if(!(sc && sc.cert && sc.before)) return; if(!$('#subpg')?.hidden) return;   // 기법 맵이 아직 열려 있는 동안(하나 누를 때마다 불림)에는 기다렸다가, [완료]로 닫힌 뒤 한 번에 반영 — 첫 기법만 골라지고 나머지는 다시 골라야 하던 오류(2026-11-15 대표 제보)
+  const n=sc.cur; [...wTechSel].forEach(id=>{ if(!sc.before.has(id)) sc.tech[n].add(id); }); sc.tech.forEach(x=>x&&[...x].forEach(id=>{ if(!wTechSel.has(id)) x.delete(id); })); sc.before=null; ccTech(n); }
 function ccTechOk(n){ if(!sc.tech[n].size) return toast('이 사진에 보이는 기법을 하나 이상 골라 주세요'); ccMore(); }
 function ccMore(){ if(!sc) return; scStop(); sc.step='more'; const n=sc.urls.length, full=n>=4;
   scWrap(`${ccBar()}<div class="cctech"><div class="ccq" style="margin-top:14px">다른 기법이 쓰인 부분이 더 있나요?</div><div class="ccqs">있으면 그 부분도 가까이 찍어 주세요. 기법 사진은 3장까지예요.</div>
