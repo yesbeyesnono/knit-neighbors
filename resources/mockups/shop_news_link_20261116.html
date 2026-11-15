@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>가게 소식 링크 — 시안</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:#E7E4DB;padding:26px 24px 30px;color:#22362A;width:1130px}
+h1{font-size:21px;margin-bottom:6px}.sub{font-size:13.5px;color:#55604F;margin-bottom:20px;line-height:1.55}
+.row{display:flex;gap:24px;align-items:flex-start}.col{width:340px}
+.cap{font-size:14.5px;font-weight:800;margin-bottom:3px}.cap2{font-size:12.5px;color:#55604F;line-height:1.45;min-height:56px;margin-bottom:8px}
+.ph{width:340px;height:680px;border-radius:26px;overflow:hidden;background:#F3F1EA;box-shadow:0 8px 26px rgba(0,0,0,.16);display:flex;flex-direction:column;position:relative}
+.top{background:#22362A;color:#F3F1EA;height:52px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 14px;flex:none;font-size:16px;font-weight:700}
+.top span:first-child{font-weight:400;font-size:13.5px;opacity:.7}.top em{justify-self:end;font-style:normal;background:#DDE8D6;color:#22362A;border-radius:999px;padding:6px 14px;font-size:13px}
+.bd{flex:1;padding:14px;overflow:hidden}
+.hero{height:120px;border-radius:18px;background:linear-gradient(135deg,#C9D8BF,#E8D9CF);margin:0 auto 12px;width:150px;transform:rotate(-2deg)}
+.card{background:#fff;border:1px solid #E2DFD5;border-radius:16px;padding:14px;margin-bottom:10px}
+.lb{font-size:12.5px;font-weight:800;margin-bottom:7px}.lb small{font-weight:500;color:#8A9384;font-size:11.5px;margin-left:4px}
+.in{border:1.5px solid #E2DFD5;border-radius:12px;min-height:42px;display:flex;align-items:center;padding:8px 12px;font-size:13.5px}.in.t{align-items:flex-start;min-height:92px;line-height:1.5}
+.in.on{border-color:#3E6B48;font-size:12.5px;color:#22362A}
+.pv{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:#55604F}.pv b{background:#DDE8D6;border-radius:999px;padding:4px 10px;color:#22362A;font-size:12px}
+.hint{font-size:11.5px;color:#8A9384;margin-top:6px;line-height:1.5}
+.top2{background:#22362A;color:#F3F1EA;height:52px;display:flex;align-items:center;gap:12px;padding:0 16px;flex:none;font-size:16px;font-weight:700}.top2 i{font-style:normal;font-size:20px;font-weight:400}
+.sh{font-size:14px;font-weight:800;margin:4px 0 8px}
+.np{background:#fff;border:1px solid #E2DFD5;border-radius:16px;overflow:hidden;margin-bottom:10px}
+.np .img{height:150px;background:linear-gradient(135deg,#D9E2D0,#E9E3D3)}
+.np .tx{padding:12px 14px}.np .k{display:inline-block;background:#DDE8D6;border-radius:6px;font-size:11px;font-weight:700;padding:1px 7px;margin-right:6px}.np time{font-size:11.5px;color:#8A9384}
+.np h3{font-size:15px;margin:6px 0 4px}.np p{font-size:13px;color:#55604F;line-height:1.5}
+.lbtn{display:flex;align-items:center;gap:10px;border:1.5px solid #3E6B48;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13.5px;font-weight:800;color:#3E6B48}
+.lbtn .ic{width:28px;height:28px;border-radius:8px;background:#DDE8D6;display:grid;place-items:center;flex:none}.lbtn .ic svg{width:16px;height:16px;stroke:#3E6B48;fill:none;stroke-width:1.8}
+.lbtn small{font-weight:500;color:#8A9384;font-size:11.5px;display:block}.lbtn em{margin-left:auto;font-style:normal}
+.row2{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E2DFD5;border-radius:14px;padding:10px 12px;font-size:13px}.row2 .th{width:44px;height:44px;border-radius:10px;background:#E9E3D3;flex:none}.row2 b{display:block;font-size:13.5px}.row2 span{color:#8A9384;font-size:11.5px}.row2 em{margin-left:auto;font-style:normal;color:#3E6B48;font-weight:700;font-size:12.5px}
+.dim{position:absolute;inset:0;background:rgba(34,54,42,.38)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#F3F1EA;border-radius:22px 22px 0 0;padding:20px 18px 22px}
+.sheet h4{font-size:16px;margin-bottom:6px}.sheet p{font-size:13px;color:#55604F;line-height:1.5}
+.dom{background:#fff;border:1px solid #E2DFD5;border-radius:12px;padding:12px;margin:12px 0;font-size:14px;font-weight:700;word-break:break-all}.dom small{display:block;font-weight:500;color:#8A9384;font-size:11.5px;margin-top:3px}
+.b1{height:46px;border-radius:12px;background:#3E6B48;color:#fff;display:grid;place-items:center;font-weight:800;font-size:14.5px;margin-bottom:8px}.b2{height:44px;border-radius:12px;border:1.5px solid #E2DFD5;display:grid;place-items:center;font-size:14px;background:#fff}
+.nt{margin-top:22px;font-size:13.5px;line-height:1.75;background:#fff;border-radius:16px;padding:16px 18px}
+.tag{display:inline-block;background:#3E6B48;color:#fff;border-radius:6px;font-size:11.5px;font-weight:700;padding:1px 7px;margin-right:6px}.tag.o{background:#8A9384}
+</style></head><body>
+<h1>가게 소식에 링크 한 개</h1>
+<div class="sub">가게 소식 쓰기에 <b>링크 칸 하나</b>를 더하고, 소식에는 <b>버튼</b>으로 보여 줍니다. 누르면 지금의 가게 링크처럼 확인 창을 거쳐 열립니다. (가게 이름·내용은 예시)</div>
+<div class="row">
+
+<div class="col"><div class="cap">① 가게 소식 쓰기</div><div class="cap2">사진·제목·내용 아래 '링크(선택)' 한 칸. 주소를 넣으면 어떻게 보일지 바로 알려 줍니다.</div>
+<div class="ph"><div class="top"><span>취소</span><span>가게 소식</span><em>게시</em></div><div class="bd">
+<div class="hero"></div>
+<div class="card"><div class="lb">기본 <small>예시 뜨개공방</small></div><div class="in">겨울 신상 실 입고됐어요</div></div>
+<div class="card"><div class="lb">내용</div><div class="in t">메리노 혼방 8색이 들어왔어요. 이번 주 토요일까지 10% 할인해요.</div></div>
+<div class="card"><div class="lb">링크 <small>선택 · 한 개</small></div>
+<div class="in on">https://smartstore.naver.com/example/products/123</div>
+<div class="pv">소식에 이렇게 보여요 <b>스마트스토어 열기 ↗</b></div>
+<div class="hint">구매·예약 페이지나 인스타그램 글 주소를 넣어 주세요. 누르면 확인 창을 거쳐 열려요.</div></div>
+</div></div></div>
+
+<div class="col"><div class="cap">② 가게 화면의 소식</div><div class="cap2">소식을 펼치면 내용 아래에 링크 버튼. 주소에 맞춰 이름(스마트스토어·인스타그램·홈페이지…)이 자동으로 붙습니다.</div>
+<div class="ph"><div class="top2"><i>‹</i>예시 뜨개공방</div><div class="bd">
+<div class="sh">소식</div>
+<div class="np"><div class="img"></div><div class="tx"><span class="k">소식</span><time>2시간 전</time>
+<h3>겨울 신상 실 입고됐어요</h3><p>메리노 혼방 8색이 들어왔어요. 이번 주 토요일까지 10% 할인해요.</p>
+<div class="lbtn"><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 11H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span><span>스마트스토어 열기<small>smartstore.naver.com</small></span><em>↗</em></div></div></div>
+<div class="row2"><div class="th"></div><div><b>12월 정규반 모집 안내</b><span>1일 전</span></div><em>보기 ›</em></div>
+</div></div></div>
+
+<div class="col"><div class="cap">③ 누르면 — 확인 창</div><div class="cap2">앱이 바로 열지 않습니다. 어디로 가는지 주소를 보여 주고 [열기]를 눌러야 열립니다(지금 가게·작가 링크와 같음).</div>
+<div class="ph"><div class="top2"><i>‹</i>예시 뜨개공방</div><div class="bd">
+<div class="sh">소식</div>
+<div class="np"><div class="img"></div><div class="tx"><span class="k">소식</span><time>2시간 전</time><h3>겨울 신상 실 입고됐어요</h3><p>메리노 혼방 8색이 들어왔어요.</p></div></div>
+</div><div class="dim"></div>
+<div class="sheet"><h4>앱 밖 페이지로 이동해요</h4><p>예시 뜨개공방이 올린 링크예요. 결제·개인정보 입력은 주소를 확인한 뒤에 해 주세요.</p>
+<div class="dom">smartstore.naver.com<small>https://smartstore.naver.com/example/products/123</small></div>
+<div class="b1">열기</div><div class="b2">취소</div></div></div></div>
+
+</div>
+<div class="nt">
+<span class="tag">범위</span>가게 소식에만 넣습니다. <b>클래스·모임 안내는 지금처럼 링크·계좌번호를 막아 둡니다</b>(신청·결제는 앱 안에서). 작가의 일반 글 속 링크는 이미 눌러집니다.<br>
+<span class="tag">규칙</span>링크는 한 개, https 주소만. 서버가 주소 형식을 다시 확인합니다. 이미 올린 소식도 [수정]에서 링크를 넣을 수 있습니다.<br>
+<span class="tag o">참고</span>지도의 가게 핀·팔로워 알림 문구는 그대로입니다. 웹은 올리는 즉시, 스토어 앱은 1.0.9부터 보입니다(옛 버전에서는 버튼이 안 보임).
+</div>
+</body></html>
