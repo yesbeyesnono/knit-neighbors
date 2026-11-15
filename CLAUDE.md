@@ -30,6 +30,7 @@
 - 앱: `docs/index.html` 한 파일 · 콘솔: `docs/admin.html`(관리자: knitup.official, yesbeyesnono, cocos.jay) · 법적 문서 5개 `docs/*.html` · 뷰어 `docs/viewer.html`(직접 수정 금지, `node tools/build-viewer.js`)
 - GitHub Pages(main `/docs`) → https://yesbeyesnono.github.io/knit-neighbors/ (웹 앱·콘솔 `…/admin.html`)
 - 홈페이지 https://app.knitup.co.kr = 저장소 `yesbeyesnono/knitup-home`. **홈페이지 수정·올리기는 이 세션에서만.** 법적 문서 5개의 원본은 이 저장소 `docs/` — 고쳐 푸시한 날 `gh workflow run sync-legal.yml -R yesbeyesnono/knitup-home` 후 `curl` 확인. 초대장·사용법: `author-invite.html` · `authors.html` · `shops.html` · `shop-guide.html`(주소 끝 `#이름`)
+- **회원 데이터 백업**: 비공개 저장소 `yesbeyesnono/knitup-backup` 의 Actions `daily-db-backup` 이 매일 03:30 KST 전체 사본(pg_dump)을 받아 30일 보관(대표 결정 2026-11-16). 열쇠 `SUPABASE_DB_URL`·`BACKUP_PASSPHRASE` 는 대표가 넣음. 사진 파일 자체는 백업에 없음
 - 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 131) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(10개: jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow)
 - 네이티브: Capacitor 8(`android/`, `ios/`), 로컬 플러그인 `plugins/capacitor-meta-events`. iOS 빌드 = Codemagic(`codemagic.yaml`: main 푸시 → `ios-public` → TestFlight / `lab-*` 태그 → `ios-lab`). Android = 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk, R8 켬) → `.aab`
 - 에디션: 코드 하나, `docs/edition.js` 의 `KN_EDITION`(meet = 공개 앱, full = Lab). Lab 전용은 `FULL` 로 감싼다. 브랜치를 가르지 말 것
@@ -78,8 +79,9 @@
 - 진행 중: **뜨친 이벤트**(~11-30, 12-01 00:00 뒤 `ddeuchin_event.active=false`·공지 내리기, 12-01~04 콘솔에서 쌍마다 쿠폰 2장 발송) · 「미피 인형」 신고 건(11-18 11:35 KST 까지 답 없으면 자동 임시 숨김) · 채팅 성탄 배경(~12-31)
 - 대표 확인 대기: 실제 기기에서 — 가입 동네 화면의 위치 허용/거절, 가게 계정으로 링크 든 소식 올리기, 콘솔 초대·안내 눌러 보기, 작가 지정 때 자동 안내 푸시, 지도 핀 벌리기, 안드로이드 1.0.8
 - 승인 대기(시안 보여 줌): 업데이트 소식 1.0.6~1.0.8(`resources/home-news/`) — 스토어에 나온 버전부터 "소식 올려줘"
+- **대표가 할 일(백업)**: `knitup-backup` 저장소에 열쇠 2개 넣고 한 번 실행해 초록 체크 확인(그 저장소 README '처음 한 번') — 넣기 전에는 매일 실패 메일이 옴. 첫 성공 뒤 Claude 가 백업 내용(표 수·크기)을 확인할 것
 - 대표가 Supabase 화면에서 지울 것(급하지 않음): 빈 버킷 `works`, 서버 함수 `place-search`
 - 전체 점검(2026-11-16) 1~5단계 끝: 통일·안 쓰는 코드·서버 찌꺼기·문서·화면별 동작(`tools/audit/flows.mjs` — demo1·demo2 로 글·댓글·대댓글·수정·고정·보관·태그·뜨친 신청·수락·채팅·화면 30여 개·Lab 화면, 63개 통과). 큰 수정 뒤 다시 돌릴 것. **못 본 것**: 콘솔(관리자 로그인이 필요해 흉내 낸 응답으로만), 실제 기기 전용(카메라·푸시·위치 권한·자판), 모임 만들기·신고·주문(실제 회원에게 보이거나 대표에게 알림이 가서 뺌). 콘솔 '질문·해결 댓글' 화면은 옛 데이터용이라 남겨 둠
 - 테스트 계정 상태: demo1·2·3 정상(가입 완료), **demo4·demo6 정지 상태**, demo5 가입 미완료. demo2·demo3 은 지금 작가가 아님(Lab 설명회 때 작가 화면을 보이려면 다시 지정)
-- 제안만 해 둔 것(대표 답 대기): 사용법 카드를 알림으로 차례로 보내기 · 색 팔레트(틸2 시안) · 회원 실 사진을 사전 색 견본으로 · 빠진 실 브랜드 넣기 · 기법 근접 사진 AI 판별과 작가 자격 연동 · 콘솔 회원·모임 화면 모바일 · 가입 '먼저 둘러보기' · 지기 공개 질문('이번 주 질문') · 데이터베이스 정기 백업 방식
+- 제안만 해 둔 것(대표 답 대기): 사용법 카드를 알림으로 차례로 보내기 · 색 팔레트(틸2 시안) · 회원 실 사진을 사전 색 견본으로 · 빠진 실 브랜드 넣기 · 기법 근접 사진 AI 판별과 작가 자격 연동 · 콘솔 회원·모임 화면 모바일 · 가입 '먼저 둘러보기' · 지기 공개 질문('이번 주 질문')
 - 기한이 있는 것: Apple 로그인 시크릿 만료 **2027-03-13**(`tools/apple-secret.js`) · Play 위치 권한 정책 2027-01-27(`ACCESS_FINE_LOCATION` 제거 검토) · iPhone Duo 스크린샷 2027-04 부터 필수 · 다음 iOS 버전 만들 때 App Store 개인정보 처리방침 URL 은 이미 app.knitup.co.kr
