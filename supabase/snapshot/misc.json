@@ -1,0 +1,998 @@
+{
+ "col_grants": [
+  {
+   "t": "profiles",
+   "c": "act_level",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "address",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "address",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "address",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "author_link",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "author_links",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "author_since",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "available",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "available",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "avatar_url",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "avatar_url",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "beginner_ok",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "beginner_ok",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "bio",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "bio",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "cert_count",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "chat_restricted_until",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "cover_url",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "cover_url",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "cover_url",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "craft",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "craft",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "created_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "created_at",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "created_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "deleted_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "descr",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "descr",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "descr",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "dong_code",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "dong_code",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "dong_name",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "dong_name",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "dong_verified_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "dong_verified_at",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "experience",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "experience",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "hours",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "hours",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "hours",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "id",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "id",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "id",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "idx_connect",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "idx_host",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "idx_skill",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "idx_updated_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "is_active",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "is_active",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "is_author",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "is_test",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "is_visible",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "is_visible",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "kind",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "kind",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "kind",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "last_seen_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "level_crochet",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "level_knit",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "links",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "links",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "links",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "location",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "location",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "location",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "location",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "location",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "logo_url",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "logo_url",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "logo_url",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "mbti",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "mbti",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "name",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "name",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "name",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "nickname",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "nickname",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "nickname_changed_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "now_making",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "now_making",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "now_making_photo",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "now_making_photo",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "onboard_step",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "onboarded_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "onboarded_at",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "owner_id",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "owner_id",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "phone",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "phone",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "phone",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "post_restricted_until",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "radius_m",
+   "p": "INSERT",
+   "g": "authenticated"
+  },
+  {
+   "t": "shops",
+   "c": "radius_m",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "referred_by",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "skills",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "skills",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "skills_updated_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "stuck_on",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "stuck_on",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "supporter_badge",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "suspended_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "terms_agreed_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "terms_agreed_at",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "trait",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "updated_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "verified_skills",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "wave_until",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "wave_until",
+   "p": "UPDATE",
+   "g": "authenticated"
+  }
+ ],
+ "buckets": [
+  {
+   "id": "avatars",
+   "public": true,
+   "limit": 2097152,
+   "mime": [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+   ]
+  },
+  {
+   "id": "works",
+   "public": true,
+   "limit": 5242880,
+   "mime": [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+   ]
+  },
+  {
+   "id": "chat-photos",
+   "public": false,
+   "limit": 5242880,
+   "mime": [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+   ]
+  },
+  {
+   "id": "posts",
+   "public": true,
+   "limit": 5242880,
+   "mime": [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+   ]
+  },
+  {
+   "id": "shop-docs",
+   "public": false,
+   "limit": 5242880,
+   "mime": [
+    "image/jpeg",
+    "image/png"
+   ]
+  },
+  {
+   "id": "bands",
+   "public": false,
+   "limit": 3145728,
+   "mime": [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+   ]
+  },
+  {
+   "id": "feedback",
+   "public": false,
+   "limit": 10485760,
+   "mime": [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "application/pdf"
+   ]
+  },
+  {
+   "id": "shops",
+   "public": true,
+   "limit": 3145728,
+   "mime": [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+   ]
+  },
+  {
+   "id": "yarn-colors",
+   "public": true,
+   "limit": 512000,
+   "mime": [
+    "image/jpeg",
+    "image/webp",
+    "image/png"
+   ]
+  },
+  {
+   "id": "yarn-import",
+   "public": true,
+   "limit": 52428800,
+   "mime": [
+    "application/json",
+    "text/plain"
+   ]
+  }
+ ],
+ "extensions": [
+  "pg_cron 1.6.4 @pg_catalog",
+  "plpgsql 1.0 @pg_catalog",
+  "postgis 3.3.7 @extensions",
+  "pgcrypto 1.3 @extensions",
+  "uuid-ossp 1.1 @extensions",
+  "pg_stat_statements 1.11 @extensions",
+  "supabase_vault 0.3.1 @vault",
+  "pg_net 0.20.4 @public"
+ ],
+ "views": [
+  {
+   "v": "custom_technique_stats",
+   "def": " SELECT lower(t.t) AS name,\n    count(*) AS uses\n   FROM works w,\n    LATERAL unnest(w.custom_techniques) t(t)\n  GROUP BY (lower(t.t))\n  ORDER BY (count(*)) DESC;"
+  }
+ ],
+ "types": [
+  {
+   "t": "craft_type",
+   "vals": [
+    "knit",
+    "crochet",
+    "both"
+   ]
+  },
+  {
+   "t": "experience_level",
+   "vals": [
+    "new",
+    "under_1y",
+    "1_3y",
+    "over_3y"
+   ]
+  },
+  {
+   "t": "friendship_status",
+   "vals": [
+    "pending",
+    "accepted",
+    "declined",
+    "blocked"
+   ]
+  },
+  {
+   "t": "room_kind",
+   "vals": [
+    "direct",
+    "group"
+   ]
+  },
+  {
+   "t": "report_reason",
+   "vals": [
+    "spam",
+    "harassment",
+    "inappropriate",
+    "fake",
+    "other"
+   ]
+  }
+ ],
+ "migrations": [
+  "20260910104522 init_schema",
+  "20260910104557 functions_and_triggers",
+  "20260910104635 rls_realtime_storage",
+  "20260910104719 harden_function_grants",
+  "20260910104740 fk_indexes",
+  "20260910110901 fix_room_members_insert_policy",
+  "20260912111059 techniques_and_skill_levels",
+  "20260913124146 community_posts",
+  "20260913125230 feed_ranked",
+  "20260913134351 meetup_posts_and_join",
+  "20260913134709 create_meetup_count_fix",
+  "20260913135544 nearby_profiles_available",
+  "20260913135848 craft_from_skills",
+  "20260913140837 meetup_details",
+  "20260913142001 work_certification",
+  "20260913142841 works_custom_techniques",
+  "20260913145651 meetup_reviews",
+  "20260913150343 security_hardening",
+  "20260913151122 cancel_meetup",
+  "20260914111927 store_compliance",
+  "20260914112609 delete_account_fix",
+  "20260915005627 wave_for_friends",
+  "20260915024255 mentions_and_notifications",
+  "20260915045714 support_room",
+  "20260916102338 fuzzy_location_200m_center",
+  "20260916103541 data_collection_skill_events_yarn_solved",
+  "20260916132110 admin_console",
+  "20260916132144 admin_manage_admins",
+  "20260916133421 admin_reply_support",
+  "20260916134613 partner_shops",
+  "20260917040225 admin_read_chat_photos",
+  "20260917041359 admin_reply_support_photo",
+  "20260917041830 admin_dong_map",
+  "20260918024906 harden_function_grants",
+  "20260918122954 shop_claims",
+  "20260918123429 patterns_recommend",
+  "20260918123938 authors",
+  "20260918131237 reposts_pattern_save_count",
+  "20260919005655 pattern_contents_viewer",
+  "20260919012739 recommend_patterns_has_viewer",
+  "20260919032057 author_link_app_config",
+  "20260919112141 meetup_address_location",
+  "20260919233620 meetup_join_leave_flow",
+  "20260919234826 works_yarns_needles",
+  "20260919235927 yarn_catalog_entries",
+  "20260920000024 yarn_catalog_functions",
+  "20260920010818 yarn_colors_lexicon",
+  "20260920010847 yarn_color_family_logging",
+  "20260920020129 yarn_catalog_import_fn",
+  "20260920020310 yarn_norm_keep_ply",
+  "20260920021319 color_lexicon_food_nature",
+  "20260920030340 yarn_texture_use_tags",
+  "20260920071015 activity_level",
+  "20260920071212 events",
+  "20260920092531 api_rate_limit",
+  "20260920095753 yarn_stash",
+  "20260920100810 jigi_ai_tables",
+  "20260920100923 jigi_ai_tools",
+  "20260920100944 jigi_ai_hooks",
+  "20260920101005 jigi_on_change_fix",
+  "20260921130408 jigi_reminders",
+  "20260926082254 support_ai",
+  "20260926082457 support_kb_bump",
+  "20260926110319 supporters_v1",
+  "20260926110506 supporters_v1_fix_refcode",
+  "20260926110658 supporters_v1_cheer_seg",
+  "20260926130826 supporters_feedback_attach",
+  "20260926131109 meetup_multi_tech_supporter_room_welcome",
+  "20260926132021 supporter_invite_notice",
+  "20260926133931 shop_self_service_ai_claim",
+  "20260926140026 supporter_referral_claim_end_message",
+  "20260926143928 broadcast_targeting",
+  "20260926144323 broadcast_targeting_fix_alias",
+  "20260926144440 broadcast_preview_fix_alias",
+  "20260927025844 author_eligibility_and_classes",
+  "20260927104823 shops_bucket_policy_fix",
+  "20260927111314 class_applications",
+  "20260927123325 class_payment_notice",
+  "20260927124924 first_work_nudge",
+  "20260927131644 trait_index",
+  "20260927140617 jigi_reminders_long_text",
+  "20260928152930 techniques_v14",
+  "20260928153116 techniques_v14_levels",
+  "20260928154642 push_device_tokens",
+  "20260929052514 yarn_brand_aliases",
+  "20260929053643 yarn_color_hex",
+  "20260929060623 yarn_colors_photo",
+  "20260929063053 yarn_admin_tools",
+  "20260929070226 yarn_sellers",
+  "20260929071802 yarn_bulk_upsert",
+  "20260929072400 yarn_bulk_upsert_fix_keys",
+  "20260929072846 yarn_photos_apply",
+  "20260929110719 yarn_import_drop_tmp_policies",
+  "20260929115736 yarn_demand",
+  "20260929131441 yarn_match_v2",
+  "20260929131605 yarn_match_v2_fiber_norm",
+  "20260929155131 security_audit_v1",
+  "20260930022622 yarn_suggest_page",
+  "20261003015018 yarn_gauge_struct",
+  "20261003015400 yarn_gauge_parse_v2",
+  "20261003015955 yarn_gauge_parse_v3",
+  "20261003024654 pattern_gauge",
+  "20261003032939 push_android_fcm",
+  "20261009150751 pattern_continue",
+  "20261009150925 author_pattern_stats",
+  "20261010123207 cheer_system_v1",
+  "20261010123335 cheer_system_push_payload",
+  "20261010124557 studio_yarn_search",
+  "20261010131827 cheer_system_d5",
+  "20261010131851 cheer_system_kind_check",
+  "20261010140403 studio_inbox",
+  "20261019142135 commerce_demo_v1",
+  "20261019143916 commerce_demo_v1_fix",
+  "20261023064605 security_lint_2026_10_23",
+  "20261104021518 account_deletion_grace",
+  "20261104035227 admin_delete_work_meetup",
+  "20261104035744 admin_find_users_cast_fix",
+  "20261104035832 admin_delete_notify",
+  "20261104040114 supporters_off_switch",
+  "20261104040613 admin_delete_user",
+  "20261104041444 admin_yarn_delete",
+  "20261104041654 yarn_suggest_brand_rank",
+  "20261107052359 shop_delete",
+  "20261107052536 shop_delete_fix",
+  "20261108004721 cheer_daily_supporters_gate",
+  "20261109020546 home_notice",
+  "20261109024603 cheer_zero_counts",
+  "20261109024721 cheer_daily_d3_craft_fix",
+  "20261109125845 home_notice_sheet",
+  "20261110032213 admin_members",
+  "20261110133914 news_posts",
+  "20261110135727 admin_meetups",
+  "20261111012011 chat_push",
+  "20261111012048 chat_push_support_replies",
+  "20261111013356 admin_friend_stats",
+  "20261111013414 admin_friend_stats_fix_and_milestone",
+  "20261111013436 friend_real_region_fix",
+  "20261111015158 admin_talk",
+  "20261111044223 chat_scan",
+  "20261111044300 chat_scan_rules_fix",
+  "20261111050921 post_tags",
+  "20261111050948 post_tags_guard",
+  "20261112013847 yarn_guess",
+  "20261112013920 yarn_guess_confirm",
+  "20261112015126 yarn_web_lookup",
+  "20261112021123 ddeuchin_event",
+  "20261112021204 ddeuchin_event_log_fix",
+  "20261112021410 ddeuchin_event_nick_match",
+  "20261112023656 nickname_rules",
+  "20261112051821 nearby_profiles_authors_everywhere",
+  "20261112063625 posts_reply_to",
+  "20261113015708 sync_last_seen",
+  "20261113020851 wording_reply_to_comment",
+  "20261113051049 room_archive_leave",
+  "20261113071735 admin_stats_member_chat",
+  "20261113125827 shop_author_page_columns",
+  "20261113125919 shop_author_page_helpers",
+  "20261113130006 shop_author_page_follow_inquiry",
+  "20261113130056 shop_author_page_notify",
+  "20261114132717 post_edit",
+  "20261114133904 post_archive_pin",
+  "20261114140641 meetup_class_edit",
+  "20261114141154 edit_work_yarn",
+  "20261114142837 yarn_color_keep_and_stats",
+  "20261114144005 yarn_auto_merge",
+  "20261114144918 dong_autofix",
+  "20261114145024 rename_work_cert_wording",
+  "20261114153051 friend_request_remind",
+  "20261114161201 stash_two_photos_texture",
+  "20261114231516 yarn_brand_split",
+  "20261115001151 author_requires_level5",
+  "20261115003103 work_tech_photos",
+  "20261115020437 test_accounts_sandbox",
+  "20261115022139 admin_talk_room",
+  "20261115024322 report_cases",
+  "20261115033012 news_posts_button",
+  "20261115101700 shops_everywhere",
+  "20261115132049 partner_invites",
+  "20261115145930 onboard_step",
+  "20261115150725 shop_post_link",
+  "20261115154440 cleanup_20261116"
+ ]
+}
