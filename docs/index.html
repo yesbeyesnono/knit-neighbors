@@ -3025,7 +3025,8 @@ async function openNotif(i){
   if(n.event_id) return openEvent(n.event_id);
   if(n.kind==='supporter') return openSupporters();
   if(n.kind==='notice' && n.shop_id){ const { data:shop } = await sb.from('shops').select('*').eq('owner_id', me.id).maybeSingle(); myShop = shop||myShop; return openShop(n.shop_id); }
-  if(n.kind==='notice') return openSupportRoom();
+  // 링크가 없는 공지: 예전에는 지기 채팅방을 열었는데, 공지 내용이 채팅방에는 없어 빈 화면처럼 보였다(2026-11-15 제보) → 공지 내용을 그 자리에서 보여 주고, 물어볼 것이 있을 때만 지기 채팅으로
+  if(n.kind==='notice') return openSheet(`<b style="font-size:1.05rem">뜨개동네 지기의 공지</b><p style="margin:0;white-space:pre-wrap;line-height:1.6;font-size:.95rem">${esc(n.snippet||'')}</p><button type="button" class="btn" onclick="closeSheet()">확인</button><button type="button" class="btn o" onclick="closeSheet();openSupportRoom()">지기에게 물어보기</button>`);
   if(n.kind==='shop_post' && n.shop_id) return openShop(n.shop_id);
   if(n.kind==='friend_request'||n.kind==='friend_accept') return openProfile(n.actor_id);
   if(n.kind==='meetup_join' || n.kind==='meetup_leave') return openMeetup(n.meetup_id);
