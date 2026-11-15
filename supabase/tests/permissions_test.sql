@@ -50,6 +50,7 @@ begin
   select count(*) into n from public.yarn_suggest('낙양'); out := pg_temp.chk(out, 'yarn_suggest>0', least(n,1), 1);
   select count(*) into n from public.yarn_popular(); out := pg_temp.chk(out, 'yarn_popular>0', least(n,1), 1);
   select count(*) into n from public.yarn_brands(); out := pg_temp.chk(out, 'yarn_brands>0', least(n,1), 1);   -- schema 119
+  out := pg_temp.must_fail(out, 'set is_test (self)', 'update public.profiles set is_test = false where id = auth.uid()');   -- schema 122: 테스트 계정 표시는 서버만
   select count(*) into n from public.yarn_colors_of((select id from public.yarn_suggest('낙양') limit 1)); out := pg_temp.chk(out, 'yarn_colors_of>0', least(n,1), 1);
   select case when public.yarn_spec((select id from public.yarn_suggest('아임울2') limit 1)) ? 'gauge_knit' then 1 else 0 end into n; out := pg_temp.chk(out, 'yarn_spec gauge', n, 1);   -- schema 68
   reset role;

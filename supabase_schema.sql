@@ -1820,3 +1820,14 @@ alter table public.yarn_stash enable trigger yarn_stash_fill;
 -- works.tech_photos jsonb = [{photo, techniques:[id…], memo}] (최대 3장). 회원이 고른 값(판별 결과 아님)
 -- work_set_tech_photos(p_post uuid, p_items jsonb) returns integer — 본인 인증만, 그 인증에 올린 사진·그 인증의 기법만 받아 저장. authenticated 만 실행
 -- (정의는 마이그레이션 work_tech_photos 참고)
+
+-- ============================================================
+-- 122. 테스트 계정 모래상자 (2026-11-15)
+-- ============================================================
+-- profiles.is_test boolean default false (서버만 바꿈) — demo1~6 = true
+-- is_test_user(uuid) returns boolean (stable, security definer, authenticated 만)
+-- posts_select 정책: 글쓴이가 테스트 계정이면 보는 사람도 테스트 계정일 때만 보임(운영진은 posts_admin_select 로 봄)
+--   using ( ((not hidden) or author_id = auth.uid()) and not is_blocked(auth.uid(), author_id)
+--           and exists (select 1 from profiles p where p.id = posts.author_id and p.suspended_at is null
+--                        and (not p.is_test or is_test_user(auth.uid()))) )
+-- 모임(meetups)·작품(works)·실 기록은 아직 나누지 않음
