@@ -1,0 +1,135 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>패드 시안</title>
+<style>
+:root{--p:#3E6B48;--pd:#22362A;--pl:#DDE8D6;--bg:#F3F1EA;--sf:#fff;--mu:#55604F;--ink3:#8A9384;--line:#E2DFD5;--bg2:#EBE9E0;--gold:#E2A91C}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard','Malgun Gothic',sans-serif;background:#D9D6CC;color:var(--pd);padding:40px;width:2000px}
+h1.t{font-size:30px;margin-bottom:6px}.lead{font-size:17px;color:var(--mu);margin-bottom:34px}
+.rowx{display:flex;gap:40px;margin-bottom:54px;align-items:flex-start}
+h2{font-size:21px;margin:0 0 4px}.cap{font-size:14.5px;color:var(--mu);margin-bottom:12px;line-height:1.5}
+.dev{background:#1b1b1b;border-radius:30px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.scr{background:var(--bg);border-radius:18px;overflow:hidden;display:grid;position:relative}
+.L{width:1194px;height:834px}.P{width:626px;height:834px}.P>.in{width:834px;height:1112px;zoom:.75;display:grid}
+.side{background:var(--pd);color:#F3F1EA;padding:22px 14px;display:flex;flex-direction:column;gap:4px}
+.logo{font-size:24px;font-weight:800;padding:0 10px;display:flex;align-items:center}.logo u{margin-left:auto;text-decoration:none;font-size:18px;opacity:.7;border:1.5px solid rgba(255,255,255,.4);border-radius:8px;width:30px;height:30px;text-align:center;line-height:26px}
+.nv{margin-top:20px;display:flex;flex-direction:column;gap:3px}
+.nv a{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:12px;font-size:15.5px;font-weight:600;opacity:.78}
+.nv a.on{background:rgba(255,255,255,.15);opacity:1}.nv i{width:22px;height:22px;border:2px solid currentColor;border-radius:7px;flex:none}
+.nv .rd{margin-left:auto;background:#D9483B;font-size:11px;border-radius:9px;padding:1px 7px}.nv hr{border:0;border-top:1px solid rgba(255,255,255,.15);margin:10px 6px}
+.nv .soon{font-size:10.5px;margin-left:auto;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:1px 6px;opacity:.8}
+.plus{margin-top:14px;background:var(--p);color:#fff;border-radius:24px;padding:12px;text-align:center;font-weight:700}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:8px 10px;font-size:13.5px}.av{width:36px;height:36px;border-radius:50%;background:var(--pl);flex:none}
+.rail{padding:22px 8px;align-items:center}.rail .nv a{padding:11px;justify-content:center;position:relative}.rail .rd{position:absolute;right:2px;top:2px;margin:0;width:10px;height:10px;padding:0;border-radius:50%}
+.rail .plus{width:44px;height:44px;padding:0;line-height:44px;font-size:22px}.rail .logo{padding:0;font-size:15px}.rail .tg{border:1.5px solid rgba(255,255,255,.4);border-radius:8px;width:30px;height:30px;text-align:center;line-height:26px;font-size:16px;opacity:.7}
+.hd{padding:20px 26px 0}.hd h3{font-size:21px}.tabs{display:flex;gap:8px;margin-top:12px}
+.tabs b{padding:7px 15px;border-radius:20px;font-size:13.5px;background:var(--sf);border:1px solid var(--line);font-weight:600;color:var(--mu)}.tabs b.on{background:var(--p);color:#fff;border-color:var(--p)}
+.main{border-right:1px solid var(--line);overflow:hidden}
+.feed{padding:12px 26px}
+.post{display:flex;gap:11px;padding:14px 0;border-bottom:1px solid var(--line)}.post .av{width:44px;height:44px}
+.post b{font-size:15px}.post s{text-decoration:none;color:var(--ink3);font-size:12.5px;margin-left:6px}.post p{font-size:15px;line-height:1.5;margin-top:3px}
+.ph{display:flex;gap:8px;margin-top:9px}.ph div{width:190px;height:136px;border-radius:12px;background:linear-gradient(135deg,#C9D8C0,#E9DFC8)}.ph div:nth-child(2){background:linear-gradient(135deg,#E3CFC0,#D8E2D0)}
+.act{display:flex;gap:24px;margin-top:9px;color:var(--ink3);font-size:13px}
+.right{padding:20px 18px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--sf);border:1px solid var(--line);border-radius:14px;padding:14px}.card h4{font-size:14.5px;margin-bottom:8px}
+.r{display:flex;padding:7px 0;font-size:13.5px;border-top:1px solid var(--line)}.r:first-of-type{border:0}.r em{margin-left:auto;font-style:normal;color:var(--ink3);font-size:12px}
+.ev{background:#FFD95C;border-radius:14px;padding:14px;font-weight:700;color:#3B1D08;font-size:14.5px}.ev small{display:block;font-weight:500;font-size:12.5px;margin-top:3px}
+.mini{height:150px;border-radius:10px;background:#FBFBF8;position:relative;overflow:hidden;border:1px solid var(--line)}
+.rd0{position:absolute;inset:0;background:linear-gradient(115deg,transparent 46%,#E4E6D9 46%,#E4E6D9 47.4%,transparent 47.4%),linear-gradient(20deg,transparent 60%,#E4E6D9 60%,#E4E6D9 61.4%,transparent 61.4%),linear-gradient(-30deg,transparent 30%,#E4E6D9 30%,#E4E6D9 31%,transparent 31%),radial-gradient(circle at 75% 30%,#EDF2DD 0 16%,transparent 16.2%),radial-gradient(circle at 15% 85%,#EEF0E8 0 20%,transparent 20.2%)}
+.pin{position:absolute;width:30px;height:30px;border-radius:50%;background:var(--p);border:3px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.2)}.pin.g{background:var(--gold);width:38px;height:38px}.pin.s{border-radius:9px;background:#fff;border-color:var(--p)}
+/* 채팅 */
+.clist{background:var(--sf);border-right:1px solid var(--line)}.ci{display:flex;gap:11px;padding:14px 18px;border-top:1px solid var(--line);align-items:center}.ci b{font-size:15.5px;display:block}.ci span{font-size:13.5px;color:var(--mu)}.ci.sel{background:var(--pl)}.ci em{margin-left:auto;font-style:normal;font-size:12px;color:var(--ink3)}
+.room{display:flex;flex-direction:column;background:#1E2B3A linear-gradient(#22324A,#3B4A63)}.room .top{background:var(--pd);color:#F3F1EA;padding:18px 20px;font-weight:700;font-size:17px}
+.msgs{flex:1;padding:20px;display:flex;flex-direction:column;gap:10px}.m{max-width:70%;padding:10px 14px;border-radius:16px;background:#fff;font-size:15px;line-height:1.45;align-self:flex-start}.m.me2{align-self:flex-end;background:var(--p);color:#fff}
+.inp{margin:14px;background:#fff;border-radius:22px;padding:13px 18px;color:var(--ink3);font-size:15px;display:flex}.inp b{margin-left:auto;color:var(--p)}
+/* 뷰어 */
+.vw{grid-template-columns:1fr 360px;grid-template-rows:56px 1fr;background:#fff}
+.vtop{grid-column:1/3;display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line);font-weight:700;font-size:16px}
+.mb{width:36px;height:36px;border-radius:10px;background:var(--pd);color:#fff;text-align:center;line-height:36px;font-size:18px}.vtop em{margin-left:auto;font-style:normal;font-size:13px;color:var(--mu);font-weight:500}
+.chart{background:#FAFAF6;position:relative;overflow:hidden}
+.grid{position:absolute;left:60px;top:50px;width:700px;height:640px;background:
+ linear-gradient(var(--line) 1px,transparent 1px) 0 0/100% 40px,linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/40px 100%,#fff;border:1.5px solid var(--ink3)}
+.hl{position:absolute;left:60px;top:370px;width:700px;height:40px;background:rgba(62,107,72,.18);border:2px solid var(--p)}
+.sy{position:absolute;font-size:20px;color:var(--pd);font-weight:700}
+.vside{border-left:1px solid var(--line);padding:20px;display:flex;flex-direction:column;gap:12px}
+.step{border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;line-height:1.5}.step.on{border-color:var(--p);background:var(--pl)}.step b{display:block;font-size:13px;color:var(--p);margin-bottom:2px}
+.bar{height:8px;border-radius:4px;background:var(--bg2)}.bar i{display:block;width:45%;height:100%;background:var(--p);border-radius:4px}
+.btn{display:inline-block;background:var(--p);color:#fff;border-radius:22px;padding:11px 18px;font-size:14.5px;font-weight:700;text-align:center}
+.edge{position:absolute;left:0;top:50%;width:6px;height:90px;margin-top:-45px;background:var(--pd);border-radius:0 6px 6px 0;opacity:.5}
+/* 상점 */
+.shop{padding:20px 24px;overflow:hidden}.pg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px}
+.pc{background:var(--sf);border:1px solid var(--line);border-radius:14px;overflow:hidden}.pc div{height:132px;background:linear-gradient(135deg,#D9C7B8,#EADFCB)}.pc:nth-child(2n) div{background:linear-gradient(135deg,#C4D3C0,#E3E9D6)}.pc:nth-child(3n) div{background:linear-gradient(135deg,#C9CFE0,#E6E3EE)}
+.pc p{padding:10px 12px;font-size:13.5px;line-height:1.4}.pc p small{color:var(--ink3);display:block;font-size:12px}.pc p b{display:block;margin-top:3px}
+.cart{background:var(--sf);border-left:1px solid var(--line);padding:20px 18px;display:flex;flex-direction:column;gap:10px}
+.cr{display:flex;gap:10px;align-items:center;font-size:13.5px;padding:8px 0;border-bottom:1px solid var(--line)}.cr i{width:44px;height:44px;border-radius:10px;background:var(--pl);flex:none}.cr em{margin-left:auto;font-style:normal;font-weight:700}
+.note{background:#fff;border-radius:16px;padding:20px 24px;font-size:15.5px;line-height:1.8;flex:1}
+.st{display:flex;gap:18px;margin-top:14px}.st div{flex:1;text-align:center;font-size:14px}.st .bx{height:150px;border-radius:12px;border:1px solid var(--line);background:var(--bg);display:flex;overflow:hidden;margin-bottom:8px}.st .bx i{background:var(--pd);display:block}
+</style></head><body>
+<h1 class="t">패드 · 폴드 시안</h1><div class="lead">왼쪽 메뉴 하나로 통일 · 메뉴는 펼침 / 접힘(아이콘만) / 숨김 3단계 · 도안·상점은 메뉴에 한 줄씩 추가(예시)</div>
+
+<div class="rowx">
+ <div><h2>① 패드 가로 — 커뮤니티 (메뉴 펼침)</h2><div class="cap">메뉴 · 글 목록 · 동네 요약 3칸. 메뉴 오른쪽 위 ‹ 를 누르면 아이콘만 남게 접힘</div>
+ <div class="dev"><div class="scr L" style="grid-template-columns:216px 1fr 300px">
+  <div class="side"><div class="logo">knitup<u>‹</u></div>
+   <div class="nv"><a><i></i>지도</a><a class="on"><i></i>커뮤니티</a><a><i></i>채팅<span class="rd">2</span></a><a><i></i>마이</a><hr><a><i></i>도안<span class="soon">예정</span></a><a><i></i>상점<span class="soon">예정</span></a></div>
+   <div class="plus">＋ 글쓰기</div><div class="me"><div class="av"></div>뜨개이웃 · 주엽동</div></div>
+  <div class="main"><div class="hd"><h3>우리 동네 뜨개 이야기</h3><div class="tabs"><b class="on">추천</b><b>최신</b><b>모임</b><b>완성작품</b><b>동네</b><b>친구</b></div></div>
+   <div class="feed">
+    <div class="post"><div class="av"></div><div><b>솜사탕뜨개</b><s>3시간 · 백석동 · 초급</s><p>첫 모자 완성했어요! 코 줄이는 부분이 어려웠는데 이웃 분 덕분에 끝냈어요 #첫완성</p><div class="ph"><div></div><div></div></div><div class="act"><span>♡ 12</span><span>💬 4</span><span>↻ 1</span></div></div></div>
+    <div class="post"><div class="av"></div><div><b>밤뜨개</b><s>5시간 · 주엽동 · 중급</s><p>토요일 오후에 카페에서 같이 뜨실 분 계신가요? 대바늘·코바늘 다 좋아요.</p><div class="act"><span>♡ 7</span><span>💬 9</span><span>↻</span></div></div></div>
+    <div class="post"><div class="av"></div><div><b>뜨개동네 지기</b><s>어제 · 운영진</s><p>뜨친과 만나 함께 뜨면 두 분 모두 커피 쿠폰! #뜨친인증</p><div class="ph"><div></div></div></div></div>
+   </div></div>
+  <div class="right"><div class="ev">뜨친 생겼다 축하 이벤트 ☕<small>11월 30일까지 · 참여 방법 보기 ›</small></div>
+   <div class="card"><h4>우리 동네 지도</h4><div class="mini"><div class="rd0"></div><div class="pin" style="left:50px;top:40px"></div><div class="pin g" style="left:130px;top:70px"></div><div class="pin s" style="left:190px;top:30px"></div></div></div>
+   <div class="card"><h4>다가오는 모임</h4><div class="r">토요 카페 뜨개<em>11/21 · 3명</em></div><div class="r">코바늘 수세미 같이 떠요<em>11/23 · 5명</em></div></div></div>
+ </div></div></div>
+
+ <div><h2>② 패드 세로 — 채팅 (메뉴 접힘)</h2><div class="cap">아이콘만 남은 메뉴 · 대화 목록 · 대화 2칸</div>
+ <div class="dev"><div class="scr P"><div class="in" style="grid-template-columns:68px 300px 1fr">
+  <div class="side rail"><div class="tg">›</div><div class="nv"><a><i></i></a><a><i></i></a><a class="on"><i></i><span class="rd"></span></a><a><i></i></a><hr style="width:30px"><a><i></i></a><a><i></i></a></div><div class="plus">＋</div><div class="av" style="margin-top:auto"></div></div>
+  <div class="clist"><div class="hd" style="padding-bottom:14px"><h3>친구·모임·클래스 대화</h3></div>
+   <div class="ci sel"><div class="av" style="width:46px;height:46px"></div><div><b>솜사탕뜨개</b><span>토요일에 봬요!</span></div><em>오후 2:10</em></div>
+   <div class="ci"><div class="av" style="width:46px;height:46px;border-radius:12px;background:var(--p)"></div><div><b>토요 카페 뜨개</b><span>장소 공지 드려요</span></div><em>어제</em></div>
+   <div class="ci"><div class="av" style="width:46px;height:46px"></div><div><b>밤뜨개</b><span>사진 고마워요</span></div><em>11/12</em></div></div>
+  <div class="room"><div class="top">솜사탕뜨개</div><div class="msgs"><div class="m">모자 사진 봤어요, 너무 예뻐요</div><div class="m me2">고마워요! 코 줄이기 알려 주신 덕분이에요</div><div class="m">토요일에 같이 떠요</div><div class="m me2">좋아요, 토요일에 봬요!</div></div><div class="inp">메시지 보내기<b>➤</b></div></div>
+ </div></div></div></div>
+</div>
+
+<div class="rowx">
+ <div><h2>③ 패드 가로 — 도안 보기 (메뉴 숨김, 전체 화면) · 예시</h2><div class="cap">들어오면 메뉴가 자동으로 사라짐. 왼쪽 위 ☰ 또는 화면 왼쪽 끝을 밀면 메뉴가 화면 위로 잠깐 나옴</div>
+ <div class="dev"><div class="scr L vw">
+  <div class="vtop"><div class="mb">☰</div>포근 겨울 모자 · 차트<em>12단 / 26단 · 사이즈 M</em></div>
+  <div class="chart"><div class="grid"></div><div class="hl"></div>
+   <div class="sy" style="left:112px;top:376px">○ &nbsp; × &nbsp; × &nbsp; ∨ &nbsp; × &nbsp; × &nbsp; ○ &nbsp; × &nbsp; × &nbsp; ∨ &nbsp; × &nbsp; ×</div>
+   <div class="sy" style="left:112px;top:416px;opacity:.45">× &nbsp; × &nbsp; × &nbsp; × &nbsp; × &nbsp; × &nbsp; × &nbsp; × &nbsp; × &nbsp; × &nbsp; × &nbsp; ×</div>
+   <div class="sy" style="left:112px;top:336px;opacity:.45">○ &nbsp; ∧ &nbsp; × &nbsp; × &nbsp; ○ &nbsp; ∧ &nbsp; × &nbsp; × &nbsp; ○ &nbsp; ∧ &nbsp; × &nbsp; ×</div><div class="edge"></div></div>
+  <div class="vside"><b style="font-size:15px">진도</b><div class="bar"><i></i></div>
+   <div class="step"><b>11단</b>짧은뜨기 36코</div><div class="step on"><b>12단 · 지금</b>사슬 1, 짧은뜨기 2, 2코 늘리기 — 6번 반복 (48코)</div><div class="step"><b>13단</b>짧은뜨기 48코</div>
+   <div class="card" style="background:var(--bg)"><h4>이 단의 기법</h4><span style="font-size:13.5px">코 늘리기 · 원형뜨기</span></div>
+   <div class="btn" style="margin-top:auto">12단 완료 · 다음 단 ›</div></div>
+ </div></div></div>
+
+ <div class="note"><b style="font-size:18px">메뉴 3단계</b>
+  <div class="st"><div><div class="bx"><i style="width:34%"></i></div><b>펼침</b><br>아이콘+이름<br>패드 가로</div><div><div class="bx"><i style="width:12%"></i></div><b>접힘</b><br>아이콘만<br>패드 세로·폴드</div><div><div class="bx"></div><b>숨김</b><br>전체 화면<br>도안·사진·상품 상세</div></div>
+  <br>· ‹ › 버튼으로 직접 바꾸고, 그 상태를 기억해요<br>· 도안 보기처럼 넓게 써야 하는 화면은 자동으로 숨김<br>· 메뉴에 줄만 더하면 되니 <b>도안·상점</b>이 생겨도 구조는 그대로<br>· 폰(폭 600 미만)은 지금의 하단 탭 그대로</div>
+</div>
+
+<div class="rowx">
+ <div><h2>④ 패드 가로 — 상점 (메뉴 접힘 + 장바구니) · 예시</h2><div class="cap">상품을 넓게 보고, 오른쪽에 담은 것이 계속 보임</div>
+ <div class="dev"><div class="scr L" style="grid-template-columns:68px 1fr 300px">
+  <div class="side rail"><div class="tg">›</div><div class="nv"><a><i></i></a><a><i></i></a><a><i></i><span class="rd"></span></a><a><i></i></a><hr style="width:30px"><a><i></i></a><a class="on"><i></i></a></div><div class="plus">＋</div><div class="av" style="margin-top:auto"></div></div>
+  <div class="shop"><h3 style="font-size:21px">뜨개 상점</h3><div class="tabs"><b class="on">실</b><b>도안</b><b>내 실로 뜰 수 있는 도안</b></div>
+   <div class="pg"><div class="pc"><div></div><p><small>브랜드 A</small>포근 울 100g<b>6,500원</b></p></div><div class="pc"><div></div><p><small>브랜드 B</small>코튼 믹스 50g<b>4,200원</b></p></div><div class="pc"><div></div><p><small>브랜드 A</small>모헤어 25g<b>8,900원</b></p></div><div class="pc"><div></div><p><small>브랜드 C</small>수면사 100g<b>3,800원</b></p></div>
+   <div class="pc"><div></div><p><small>브랜드 B</small>메리노 50g<b>7,400원</b></p></div><div class="pc"><div></div><p><small>브랜드 C</small>린넨 코튼<b>5,600원</b></p></div><div class="pc"><div></div><p><small>브랜드 A</small>트위드 100g<b>9,200원</b></p></div><div class="pc"><div></div><p><small>브랜드 B</small>아크릴 믹스<b>2,900원</b></p></div></div></div>
+  <div class="cart"><b style="font-size:17px">장바구니 2</b><div class="cr"><i></i>포근 울 · 아이보리 ×2<em>13,000</em></div><div class="cr"><i></i>모헤어 · 로즈 ×1<em>8,900</em></div>
+   <div class="r" style="border:0;margin-top:6px">배송비<em>3,000원</em></div><div class="r" style="font-weight:700;font-size:15px">합계<em style="font-size:15px;color:var(--pd)">24,900원</em></div><div class="btn" style="margin-top:auto">주문하기</div></div>
+ </div></div></div>
+
+ <div><h2>⑤ 폴드 펼침 — 지도 (메뉴 접힘)</h2><div class="cap">펼친 폴드·접는 아이폰 안쪽 화면. 지도 크게 + 아래 카드</div>
+ <div class="dev"><div class="scr P" style="grid-template-columns:60px 1fr">
+  <div class="side rail" style="padding:18px 6px"><div class="tg">›</div><div class="nv"><a class="on"><i></i></a><a><i></i></a><a><i></i><span class="rd"></span></a><a><i></i></a></div><div class="plus">＋</div><div class="av" style="margin-top:auto"></div></div>
+  <div style="position:relative;background:#FBFBF8"><div class="rd0"></div>
+   <div style="position:absolute;left:14px;right:14px;top:14px;display:flex;gap:6px"><b style="background:var(--p);color:#fff;border-radius:16px;padding:7px 13px;font-size:13px">전체</b><b style="background:#fff;border-radius:16px;padding:7px 13px;font-size:13px;border:1px solid var(--line)">친구 찾는 이웃</b><b style="background:#fff;border-radius:16px;padding:7px 13px;font-size:13px;border:1px solid var(--line)">모임</b><b style="background:#fff;border-radius:16px;padding:7px 13px;font-size:13px;border:1px solid var(--line)">가게</b></div>
+   <div class="pin g" style="left:230px;top:300px"></div><div class="pin s" style="left:288px;top:304px"></div><div class="pin" style="left:120px;top:420px"></div><div class="pin" style="left:400px;top:200px"></div><div class="pin" style="left:90px;top:170px"></div>
+   <div style="position:absolute;left:14px;right:14px;bottom:14px;background:#fff;border-radius:16px;padding:16px;box-shadow:0 6px 22px rgba(0,0,0,.16);display:flex;gap:12px;align-items:center"><div class="av" style="width:52px;height:52px;border:3px solid var(--gold)"></div><div><b style="font-size:16px">뜨개작가</b> <span style="font-size:12px;background:#FBEFC8;color:#7A5A00;border-radius:9px;padding:2px 8px">♛ 작가</span><br><span style="font-size:13.5px;color:var(--mu)">모집 중인 클래스 1 · 완성작품 28</span></div><span class="btn" style="margin-left:auto">작가 화면</span></div></div>
+ </div></div></div>
+</div>
+</body></html>
