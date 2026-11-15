@@ -1813,3 +1813,10 @@ alter table public.yarn_stash enable trigger yarn_stash_fill;
 -- 120. 작가 신청 자격: 상급(4단계) → 전문(5단계) 기법 인증 3개 (2026-11-15 대표)
 -- ============================================================
 -- author_adv_count(p_user): t.level >= 4 → t.level >= 5. apply_author·cheer_on_work·cheer_on_profile 의 문구도 '전문(5단계) 기법'으로. 이미 작가인 회원은 그대로
+
+-- ============================================================
+-- 121. 완성작품 인증의 기법 근접 사진 (2026-11-15)
+-- ============================================================
+-- works.tech_photos jsonb = [{photo, techniques:[id…], memo}] (최대 3장). 회원이 고른 값(판별 결과 아님)
+-- work_set_tech_photos(p_post uuid, p_items jsonb) returns integer — 본인 인증만, 그 인증에 올린 사진·그 인증의 기법만 받아 저장. authenticated 만 실행
+-- (정의는 마이그레이션 work_tech_photos 참고)

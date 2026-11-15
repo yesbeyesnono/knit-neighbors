@@ -171,6 +171,7 @@ begin
   out := pg_temp.must_fail(out, '_work_tags(내부용)', 'select public._work_tags(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'read yarn_guess_log', 'select 1 from public.yarn_guess_log limit 1');   -- schema 98
   out := pg_temp.must_fail(out, 'insert yarn_guess_log', 'insert into public.yarn_guess_log(user_id, name_key) values (auth.uid(), ''x'')');
+  out := pg_temp.must_fail(out, 'work_set_tech_photos(not mine)', 'select public.work_set_tech_photos(''00000000-0000-0000-0000-000000000000'', ''[]''::jsonb)');   -- schema 121
   out := pg_temp.must_fail(out, 'read yarn_web_lookup', 'select 1 from public.yarn_web_lookup limit 1');   -- schema 99
   out := pg_temp.must_fail(out, 'own nickname_changed_at', 'update public.profiles set nickname_changed_at = null where id = auth.uid()');   -- schema 101
   out := pg_temp.must_fail(out, 'sync_last_seen(내부용)', 'select public.sync_last_seen()');   -- schema 104

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>완성작품 인증 — 한 장씩 찍기 시안</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:#E7E4DB;padding:26px 22px 30px;color:#22362A;width:1790px}
+h1{font-size:21px;margin-bottom:6px}.sub{font-size:13.5px;color:#55604F;margin-bottom:20px;line-height:1.5}
+.row{display:flex;gap:16px}
+.col{width:278px}.cap{font-size:14px;font-weight:800;margin-bottom:3px}.cap2{font-size:12px;color:#55604F;line-height:1.45;min-height:52px;margin-bottom:8px}
+.ph{width:278px;height:580px;border-radius:24px;overflow:hidden;position:relative;box-shadow:0 8px 26px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.cam{background:#111;color:#fff}
+.bar{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-size:13px;flex:none}
+.bar b{font-size:13px;opacity:.85}.bar span{font-size:18px}
+.vf{flex:1;margin:0 10px;border-radius:16px;overflow:hidden;position:relative;background:#3a3026}
+.vf svg{position:absolute;inset:0;width:100%;height:100%}
+.fr{position:absolute;inset:16px;border:2px dashed rgba(255,255,255,.75);border-radius:14px}
+.lb{text-align:center;font-size:16px;font-weight:800;padding:12px 10px 2px}.lb small{display:block;font-size:11.5px;font-weight:400;opacity:.75;margin-top:3px}
+.sh{height:92px;display:flex;align-items:center;justify-content:center;gap:44px;flex:none}
+.sh .b{width:60px;height:60px;border-radius:50%;background:#fff;border:4px solid #111;outline:3px solid #fff}
+.sh i{font-style:normal;font-size:11px;opacity:.8;text-align:center;width:44px}
+.two{display:flex;gap:8px;padding:12px 12px 16px;flex:none}
+.two div{flex:1;height:46px;border-radius:14px;display:grid;place-items:center;font-size:14px;font-weight:700}
+.two .o{background:rgba(255,255,255,.14);color:#fff}.two .g{background:#fff;color:#111;flex:1.5}
+.lt{background:#fff;color:#22362A}
+.lt .bar{color:#22362A}
+.pad{padding:4px 16px 0;flex:1}
+.q{font-size:19px;font-weight:800;line-height:1.3;margin:4px 0 4px}.qs{font-size:12.5px;color:#55604F;margin-bottom:10px}
+.thumb{height:150px;border-radius:14px;overflow:hidden;position:relative;background:#3a3026;margin-bottom:12px}.thumb svg{position:absolute;inset:0;width:100%;height:100%}
+.sec{font-size:11.5px;font-weight:700;color:#8A9384;margin:10px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.c{border:1px solid #E2DFD5;border-radius:999px;padding:6px 11px;font-size:12.5px;color:#55604F;white-space:nowrap;background:#fff}
+.c.on{background:#3E6B48;color:#fff;border-color:#3E6B48;font-weight:700}.c.lv{border-color:#E2A91C;color:#8A6A12}
+.c.more{border-style:dashed}
+.memo{border:1px solid #E2DFD5;border-radius:12px;height:40px;display:flex;align-items:center;padding:0 12px;font-size:13px;color:#8A9384;margin-top:10px}
+.cta{margin:10px 16px 16px;height:50px;border-radius:16px;background:#3E6B48;color:#fff;display:grid;place-items:center;font-weight:800;font-size:15.5px;flex:none}
+.cta.o{background:#fff;color:#3E6B48;border:1.5px solid #3E6B48;margin-bottom:0}
+.lnk{text-align:center;font-size:12.5px;color:#8A9384;padding:0 0 14px;flex:none}
+.shots{display:flex;gap:8px;margin:10px 0 4px}
+.shots .s{width:74px;height:74px;border-radius:12px;overflow:hidden;position:relative;background:#3a3026;flex:none}.shots .s svg{position:absolute;inset:0;width:100%;height:100%}
+.shots .s em{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);color:#fff;font-style:normal;font-size:10px;text-align:center;padding:2px 0}
+.shots .add{width:74px;height:74px;border-radius:12px;border:1.5px dashed #B9C2B4;display:grid;place-items:center;color:#8A9384;font-size:22px}
+.f{border:1px solid #E2DFD5;border-radius:12px;height:42px;display:flex;align-items:center;padding:0 12px;font-size:14px;margin-top:8px}
+.ln{display:flex;align-items:center;gap:8px;font-size:13px;color:#8A9384;margin-top:10px}.ln b{background:#3E6B48;color:#fff;border-radius:999px;padding:4px 10px;font-size:12px}.ln u{margin-left:auto;text-decoration:none;color:#3E6B48;font-weight:700;font-size:12px}
+.badge{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;border-radius:999px;padding:3px 9px}
+.note{margin-top:20px;font-size:13.5px;line-height:1.7;max-width:1700px}
+</style></head><body>
+<h1>완성작품 인증 — 실 촬영처럼 한 장씩 안내하며 찍기</h1>
+<div class="sub">① 완성작 전체 → ② 기법이 보이는 부분 가까이 → 그 사진에 보이는 기법 고르기 → ③ 기법이 더 있으면 한 장 더, 없으면 건너뛰기 → 이름·실 → 게시. <b>한 화면에 할 일 하나, 큰 버튼 하나.</b></div>
+<svg width="0" height="0" style="position:absolute"><defs>
+<g id="hat"><rect width="278" height="400" fill="#B88A5A"/><path d="M0 300 Q140 260 278 300 V400 H0Z" fill="#A67A4C"/><path d="M70 250 Q70 110 139 110 Q208 110 208 250Z" fill="#5F8FC4"/><rect x="60" y="238" width="158" height="26" rx="13" fill="#fff"/><circle cx="139" cy="100" r="18" fill="#fff"/><g fill="#fff"><circle cx="110" cy="180" r="12"/><circle cx="168" cy="180" r="12"/><circle cx="139" cy="150" r="10"/><circle cx="139" cy="212" r="10"/></g><circle cx="139" cy="181" r="9" fill="#5F8FC4"/><path d="M92 262 q-20 50 10 76 M186 262 q20 50 -10 76" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+<pattern id="st" width="30" height="26" patternUnits="userSpaceOnUse"><rect width="30" height="26" fill="#5F8FC4"/><path d="M2 22 Q8 2 15 13 Q22 24 28 4" fill="none" stroke="#86ADD8" stroke-width="5" stroke-linecap="round"/><path d="M2 22 Q8 2 15 13 Q22 24 28 4" fill="none" stroke="#4A78AB" stroke-width="1.2"/></pattern>
+<g id="close"><rect width="278" height="400" fill="url(#st)"/><circle cx="139" cy="200" r="64" fill="#fff"/><g fill="#EEF3F8" stroke="#D5DEE8" stroke-width="2"><ellipse cx="139" cy="152" rx="16" ry="30"/><ellipse cx="139" cy="248" rx="16" ry="30"/><ellipse cx="91" cy="200" rx="30" ry="16"/><ellipse cx="187" cy="200" rx="30" ry="16"/><ellipse cx="105" cy="166" rx="16" ry="28" transform="rotate(-45 105 166)"/><ellipse cx="173" cy="166" rx="16" ry="28" transform="rotate(45 173 166)"/><ellipse cx="105" cy="234" rx="16" ry="28" transform="rotate(45 105 234)"/><ellipse cx="173" cy="234" rx="16" ry="28" transform="rotate(-45 173 234)"/></g><circle cx="139" cy="200" r="20" fill="#5F8FC4"/></g>
+</defs></svg>
+<div class="row">
+
+<div class="col"><div class="cap">① 완성작 전체</div><div class="cap2">＋ › 완성작품 인증을 누르면 바로 카메라. 작품이 다 들어오게 한 장.</div>
+<div class="ph cam"><div class="bar"><span>✕</span><b>1 / 2</b><span style="opacity:0">✕</span></div><div class="vf"><svg viewBox="0 0 278 400" preserveAspectRatio="xMidYMid slice"><use href="#hat"/></svg><div class="fr"></div></div>
+<div class="lb">① 완성작 전체<small>작품이 한 화면에 다 들어오게 찍어 주세요</small></div><div class="sh"><i>사진첩</i><div class="b"></div><i></i></div></div></div>
+
+<div class="col"><div class="cap">확인</div><div class="cap2">찍힌 사진을 그대로 보여 줌. 다시 찍거나 다음으로.</div>
+<div class="ph cam"><div class="bar"><span>✕</span><b>1 / 2</b><span style="opacity:0">✕</span></div><div class="vf"><svg viewBox="0 0 278 400" preserveAspectRatio="xMidYMid slice"><use href="#hat"/></svg></div>
+<div class="lb">잘 나왔나요?</div><div class="two"><div class="o">다시 찍기</div><div class="g">다음 · 기법 가까이 ›</div></div></div></div>
+
+<div class="col"><div class="cap">② 기법이 보이는 부분 가까이</div><div class="cap2">코가 하나하나 보일 만큼 가까이. 밝은 곳에서 평평하게 펴서.</div>
+<div class="ph cam"><div class="bar"><span>✕</span><b>2 / 2</b><span style="font-size:12px;opacity:.8">건너뛰기</span></div><div class="vf"><svg viewBox="0 0 278 400" preserveAspectRatio="xMidYMid slice"><use href="#close"/></svg><div class="fr"></div></div>
+<div class="lb">② 기법이 보이는 부분<small>코 모양이 보이게 가까이 찍어 주세요</small></div><div class="sh"><i>사진첩</i><div class="b"></div><i></i></div></div></div>
+
+<div class="col"><div class="cap">이 사진에 보이는 기법 고르기</div><div class="cap2">내가 인증한 적 있는 기법·이 작품에 흔한 기법이 먼저. 없으면 기법 맵에서. 메모는 선택.</div>
+<div class="ph lt"><div class="bar"><span>✕</span><b></b><span style="opacity:0">✕</span></div><div class="pad">
+<div class="thumb"><svg viewBox="0 0 278 150" preserveAspectRatio="xMidYMid slice"><g transform="translate(0,-125)"><use href="#close"/></g></svg></div>
+<div class="q">이 사진에 어떤 기법이 보이나요?</div><div class="qs">보이는 것만 골라 주세요. 여러 개도 돼요.</div>
+<div class="chips"><span class="c on">한길 긴뜨기</span><span class="c on">구슬뜨기</span><span class="c">짧은뜨기</span><span class="c">사슬뜨기</span><span class="c">모티브 잇기</span><span class="c lv">팝콘뜨기 · 4단계</span><span class="c more">기법 맵에서 찾기 ›</span></div>
+<div class="memo">메모(선택) · 예: 꽃잎은 구슬뜨기 5코</div>
+</div><div class="cta">다음</div></div></div>
+
+<div class="col"><div class="cap">③ 기법이 더 있나요?</div><div class="cap2">다른 기법이 쓰인 부분이 있으면 한 장 더(3장까지). 없으면 바로 다음.</div>
+<div class="ph lt"><div class="bar"><span>✕</span><b></b><span style="opacity:0">✕</span></div><div class="pad">
+<div class="q" style="margin-top:14px">다른 기법이 쓰인 부분이 더 있나요?</div><div class="qs">있으면 그 부분도 가까이 찍어 주세요.</div>
+<div class="shots"><div class="s"><svg viewBox="0 0 278 278" preserveAspectRatio="xMidYMid slice"><g transform="translate(0,-60)"><use href="#hat"/></g></svg><em>전체</em></div><div class="s"><svg viewBox="0 0 278 278" preserveAspectRatio="xMidYMid slice"><g transform="translate(0,-60)"><use href="#close"/></g></svg><em>한길 긴뜨기 외 1</em></div><div class="add">＋</div></div>
+</div><div class="cta o">한 장 더 찍기</div><div class="cta">없어요 · 다음</div></div></div>
+
+<div class="col"><div class="cap">④ 이름·실 → 게시</div><div class="cap2">사진과 기법은 이미 채워져 있음. 이름을 적으면 종류는 자동. 실은 칩으로.</div>
+<div class="ph lt"><div class="bar"><span>✕</span><b style="font-size:15px;opacity:1">완성작품 인증</b><span style="font-size:13px;background:#3E6B48;color:#fff;border-radius:999px;padding:5px 12px">게시</span></div><div class="pad">
+<div class="shots" style="margin-top:2px"><div class="s"><svg viewBox="0 0 278 278" preserveAspectRatio="xMidYMid slice"><g transform="translate(0,-60)"><use href="#hat"/></g></svg><em>전체</em></div><div class="s"><svg viewBox="0 0 278 278" preserveAspectRatio="xMidYMid slice"><g transform="translate(0,-60)"><use href="#close"/></g></svg><em>기법</em></div></div>
+<div class="sec">기법 2 · 사진에서 고름</div><div class="chips"><span class="c on">한길 긴뜨기</span><span class="c on">구슬뜨기</span><span class="c more">＋</span></div>
+<div class="f">그래니스퀘어 베이비 보넷</div>
+<div class="ln">작품 종류 <b>모자</b><u>바꾸기</u></div>
+<div class="sec" style="margin-top:14px">어떤 실로 떴어요?</div><div class="chips"><span class="c on">● 쎄비 로미오</span><span class="c">● 낙양모사 꽁뜨</span><span class="c more">＋ 실 추가</span></div>
+</div><div class="cta">게시</div></div></div>
+
+</div>
+<div class="note">
+· <b>근접 사진은 언제 필수?</b> — 시안은 "평소에는 건너뛰기 가능, <b>4·5단계 기법을 고르면 그 기법은 근접 사진이 있어야</b>" 기준으로 그렸습니다. 작가 자격으로 세는 인증도 근접 사진이 있는 것만.<br>
+· 기법은 이제 사진마다 붙습니다(어느 사진이 어느 기법인지). 그래서 지금의 '기법 고르기' 칸은 따로 필요 없고, 사진 없이 기법만 더하고 싶을 때만 ④의 ＋ 로.<br>
+· 사진첩에서 고르는 것도 됩니다(셔터 왼쪽). 사진은 지금처럼 4장까지 = 전체 1 + 기법 3.<br>
+· 이렇게 모인 '기법이 붙은 근접 사진'은 나중에 AI 판별과 기법 사전 예시 사진으로 쓸 수 있습니다. 닉네임 쪽지 사진은 작가 신청 때만 따로 받습니다.
+</div>
+</body></html>

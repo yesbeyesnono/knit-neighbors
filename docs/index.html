@@ -743,6 +743,12 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 /* 바늘 추가: 종류(코바늘·레이스 바늘·대바늘·줄바늘)는 위쪽 탭, 그 아래가 그 종류의 호수 — 같은 칩 모양이라 위아래가 구분되지 않던 것(2026-11-15 대표) */
 .wntabs{display:flex;border-bottom:1px solid var(--line);margin:0 -18px;padding:0 18px}.wntabs button{flex:1;font:inherit;font-size:.93rem;color:var(--ink3);background:none;border:0;border-bottom:2.5px solid transparent;margin-bottom:-1px;padding:10px 2px;cursor:pointer;white-space:nowrap}.wntabs button.on{color:var(--color-primary-dark);font-weight:800;border-bottom-color:var(--color-primary)}
 .wnlab{font-size:.75rem;font-weight:700;color:var(--ink3);margin:2px 2px -4px}.wngrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;max-height:38vh;overflow-y:auto}.wngrid button{font:inherit;font-size:.86rem;color:var(--ink);background:var(--color-surface);border:1px solid var(--line);border-radius:12px;padding:11px 2px;cursor:pointer;white-space:nowrap}.wngrid button.on{background:var(--color-primary);color:#fff;border-color:transparent;font-weight:700}
+#scap .cctech{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 0}#scap .ccth{height:150px;border-radius:14px;background:#111 center/cover no-repeat;margin-bottom:12px}
+#scap .ccq{font-size:1.25rem;font-weight:900;line-height:1.3}#scap .ccqs{font-size:.82rem;color:var(--color-text-muted);margin:4px 0 10px}
+#scap .ccchips{display:flex;flex-wrap:wrap;gap:6px}#scap .ccchips button{font:inherit;font-size:.84rem;border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:999px;padding:7px 12px;cursor:pointer}#scap .ccchips button.on{background:var(--color-primary);color:#fff;border-color:transparent;font-weight:700}#scap .ccchips button.more{border-style:dashed;color:var(--color-primary)}#scap .ccchips small{opacity:.75;margin-left:4px;font-size:.7rem}
+#scap .ccmemo{width:100%;margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:16px;background:#fff;color:var(--ink)}
+#scap .ccshots{display:flex;gap:8px;margin-top:14px}#scap .ccshots div{width:76px;height:76px;border-radius:12px;background:#111 center/cover no-repeat;position:relative;overflow:hidden}#scap .ccshots em{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);color:#fff;font-style:normal;font-size:.62rem;text-align:center;padding:2px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#scap .sccta.o{background:#fff;color:var(--color-primary);border:1.5px solid var(--color-primary);margin-bottom:0}
 .witem{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line2,var(--line));margin-top:12px;padding-top:12px;font-size:.93rem;cursor:pointer}.witem span{color:var(--ink3)}.witem b{background:var(--color-primary);color:#fff;border-radius:999px;padding:5px 12px;font-size:.85rem;font-weight:700}.witem u{margin-left:auto;text-decoration:none;color:var(--color-primary);font-weight:700;font-size:.85rem}.witem em{margin-left:auto;font-style:normal;color:var(--ink3)}
 .wigrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.wigrid button{font:inherit;font-size:.88rem;color:var(--ink);background:var(--color-surface);border:1px solid var(--line);border-radius:12px;padding:12px 4px;cursor:pointer}.wigrid button.on{background:var(--color-primary);color:#fff;border-color:transparent;font-weight:700}
 #greetBar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--color-surface);border-top:1px solid var(--line)}#greetBar button{border:1.5px solid var(--color-primary);background:none;color:var(--color-primary);border-radius:999px;padding:5px 11px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
@@ -1158,7 +1164,7 @@ body.kb #nav{display:none!important}
   <section class="view" id="v-cert">
     <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>완성작품 인증</h1><button class="btn" id="certPost" onclick="submitCert()" disabled>게시</button></div>
     <div class="body" style="gap:10px">
-      <div class="mhero" id="wHero" onclick="$('#wFile').click()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">작품 사진 · 1~4장</span></div>
+      <div class="mhero" id="wHero" onclick="editWorkPost?$('#wFile').click():ccOpen()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">작품 사진 · 1~4장</span></div>
       <div class="cfphotos" id="cfPhotos" style="justify-content:center"></div><input id="wFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
       <div class="cfreq ed-hide" id="cfReq" style="justify-content:center;padding:0"></div><div id="wEditNote">사진·작품 이름·실·바늘·기록을 고칠 수 있어요. 기법은 더 넣을 수만 있어요(이미 인증한 기법은 그대로).</div>
       <div class="ccard"><div class="cfl">작품 <span class="req">필수</span></div>
@@ -4327,7 +4333,54 @@ async function openCert(){
   wyReset(); renderCertPhotos(); renderCertTech(); certCheck(); wqLoad();
   show('cert'); $('#v-cert').scrollTop=0;
   loadTech().then(renderCertTech);
+  wShotTech=new Map(); ccOpen();
 }
+// ===== 완성작품 인증: 실 촬영처럼 한 장씩 안내하며 찍기 (2026-11-15 대표 확정 시안, schema 121) =====
+// ① 완성작 전체 → 확인 → ② 기법이 보이는 부분 가까이 → 확인 → 이 사진에 보이는 기법 고르기(+메모) → 더 있나요?(기법 사진 3장까지) → 폼(이름·실) → 게시
+// 촬영 화면은 실 촬영의 #scap·카메라 코드를 같이 쓴다(sc.cert=true 면 scGot 이 ccGot 으로 넘김). 근접 사진 1장은 필수(대표: 전부). 사진별 기법은 게시 뒤 work_set_tech_photos 로 저장
+let wShotTech=new Map();   // 사진(local url) → { techs:[기법 id], memo }
+function ccOpen(){ closeSub(); closeSheet(); $('#scap')?.remove(); scStop(); sc={ cert:true, blobs:[], urls:[], tech:[], memo:[], stream:null, live:false, cur:0 }; const w=document.createElement('div'); w.id='scap'; document.body.appendChild(w); ccCam(0); }
+function ccClose(keep){ scStop(); if(!keep) (sc&&sc.urls||[]).forEach(u=>{ try{ u&&URL.revokeObjectURL(u); }catch(e){} }); $('#scap')?.remove(); sc=null; }
+function ccQuit(){ askConfirm('인증을 그만둘까요?', '찍은 사진은 지워져요.', '그만두기', ()=>{ const had=sPhotos.length; ccClose(); if(view==='cert' && !had) closeCompose(); }); }
+const ccBar=()=>`<div class="scbar"><span></span><button type="button" aria-label="닫기" onclick="ccQuit()">✕</button></div>`;
+async function ccCam(n){
+  if(!sc) return; scStop(); sc.step='cam'+n; sc.cur=n;
+  scWrap(`${ccBar()}<div class="scvf" id="scVf"><div class="hatch"></div></div>
+    <div class="scbot"><div class="sclb">${n?'② 기법이 보이는 부분':'① 완성작 전체'}</div><div class="schn">${n?'코 모양이 보이게 가까이 · 밝은 곳에서 평평하게 펴서':'작품이 한 화면에 다 들어오게'}</div>
+      <div class="scctl"><button type="button" class="scsd" onclick="$('#scAlbum').click()">${SC_ICO.album}사진첩</button><button type="button" class="scsh" aria-label="찍기" onclick="scShoot(${n})"></button>${n>1?`<button type="button" class="scsd" onclick="ccMore()">${SC_ICO.skip}그만 찍기</button>`:'<span></span>'}</div></div>
+    <input id="scFile" type="file" accept="image/*" capture="environment" hidden onchange="scPicked(${n}, this.files[0]);this.value=''"><input id="scAlbum" type="file" accept="image/*" hidden onchange="scPicked(${n}, this.files[0]);this.value=''">`);
+  sc.live=false;
+  try{ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){ const st=await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1920 }, height:{ ideal:1440 } }, audio:false });
+      if(!sc || sc.step!=='cam'+n || !$('#scVf')){ st.getTracks().forEach(t=>t.stop()); return; }
+      sc.stream=st; const v=document.createElement('video'); v.setAttribute('playsinline',''); v.muted=true; v.autoplay=true; v.srcObject=st; const vf=$('#scVf'); vf.insertBefore(v, vf.firstChild); vf.classList.add('live'); await v.play().catch(()=>{}); sc.live=true; } }catch(e){ sc && (sc.live=false); }
+}
+function ccGot(n, blob){ scStop(); if(sc.urls[n]) try{ URL.revokeObjectURL(sc.urls[n]); }catch(e){} sc.blobs[n]=blob; sc.urls[n]=URL.createObjectURL(blob); if(!sc.tech[n]) sc.tech[n]=new Set(); ccRev(n); }
+function ccRev(n){ if(!sc) return; sc.step='rev'+n;
+  scWrap(`${ccBar()}<div class="scvf"><img id="scShot" src="${sc.urls[n]}" alt=""></div>
+    <div class="scbot"><div class="sclb">${n?'코 모양이 잘 보이나요?':'잘 나왔나요?'}</div><div class="schn">${n?'기법이 쓰인 부분이 또렷하면 좋아요':'작품이 다 보이고 흔들리지 않았으면 좋아요'}</div>
+      <div class="sctwo"><button type="button" class="o" onclick="ccCam(${n})">다시 찍기</button><button type="button" class="g" onclick="${n?`ccTech(${n})`:(sc.urls.length>1?'ccMore()':'ccCam(1)')}">${n?'다음 · 기법 고르기 ›':'다음 · 기법 가까이 ›'}</button></div></div>`); }
+function ccCand(n){ const ids=[]; const add=id=>{ if(id && !ids.includes(id) && TECH.some(t=>t.id===id)) ids.push(id); };
+  sc.tech[n].forEach(add); sc.tech.forEach(x=>x&&x.forEach(add)); [...wTechSel].forEach(add);
+  (myProfile?.verified_skills||[]).slice().reverse().forEach(id=>{ if(ids.length<12) add(id); });
+  if(ids.length<6) TECH.filter(t=>t.craft===wCraft && t.level<=2).forEach(t=>{ if(ids.length<8) add(t.id); });
+  return ids; }
+function ccTech(n){ if(!sc) return; sc.step='tech'; sc.cur=n; if(!TECH.length) return loadTech().then(()=>{ if(sc && sc.step==='tech') ccTech(n); }); const sel=sc.tech[n];
+  scWrap(`${ccBar()}<div class="cctech"><div class="ccth" style="background-image:url(${sc.urls[n]})"></div>
+      <div class="ccq">이 사진에 어떤 기법이 보이나요?</div><div class="ccqs">보이는 것만 골라 주세요. 여러 개도 돼요.</div>
+      <div class="ccchips">${ccCand(n).map(id=>{ const t=TECH.find(x=>x.id===id); return `<button type="button" class="${sel.has(id)?'on':''}" data-id="${esc(id)}" onclick="ccTog(${n}, this.dataset.id)">${esc(t.name_ko)}${t.level>=4?`<small>${t.level}단계</small>`:''}</button>`; }).join('')}<button type="button" class="more" onclick="ccMap(${n})">기법 맵에서 찾기 ›</button></div>
+      <input class="ccmemo" maxlength="80" placeholder="메모(선택) · 예: 꽃잎은 구슬뜨기 5코" value="${esc(sc.memo[n]||'')}" oninput="sc.memo[${n}]=this.value"></div>
+    <button type="button" class="sccta" onclick="ccTechOk(${n})">다음</button>`); }
+function ccTog(n, id){ const x=sc.tech[n]; if(x.has(id)){ x.delete(id); if(!sc.tech.some(y=>y&&y.has(id))) wTechSel.delete(id); } else { x.add(id); wTechSel.add(id); } ccTech(n); }
+function ccMap(n){ sc.before=new Set(wTechSel); sc.cur=n; openTechSub(); }   // 기법 맵에서 새로 고른 것은 이 사진의 기법이 된다(renderCertTech 에서 받아 옴)
+function ccMapBack(){ if(!(sc && sc.cert && sc.before)) return; const n=sc.cur; [...wTechSel].forEach(id=>{ if(!sc.before.has(id)) sc.tech[n].add(id); }); sc.tech.forEach(x=>x&&[...x].forEach(id=>{ if(!wTechSel.has(id)) x.delete(id); })); sc.before=null; ccTech(n); }
+function ccTechOk(n){ if(!sc.tech[n].size) return toast('이 사진에 보이는 기법을 하나 이상 골라 주세요'); ccMore(); }
+function ccMore(){ if(!sc) return; scStop(); sc.step='more'; const n=sc.urls.length, full=n>=4;
+  scWrap(`${ccBar()}<div class="cctech"><div class="ccq" style="margin-top:14px">다른 기법이 쓰인 부분이 더 있나요?</div><div class="ccqs">있으면 그 부분도 가까이 찍어 주세요. 기법 사진은 3장까지예요.</div>
+      <div class="ccshots">${sc.urls.map((u,i)=>`<div style="background-image:url(${u})"><em>${i?esc([...sc.tech[i]].map(techName).join('·')):'전체'}</em></div>`).join('')}</div></div>
+    ${full?'':`<button type="button" class="sccta o" onclick="ccCam(${n})">한 장 더 찍기</button>`}<button type="button" class="sccta" onclick="ccDone()">${full?'다음':'없어요 · 다음'}</button>`); }
+function ccDone(){ if(!sc) return; const keep=[]; wShotTech=new Map();
+  sc.urls.forEach((u,i)=>{ if(!u) return; if(i && !(sc.tech[i]&&sc.tech[i].size)) return; keep.push({ blob:sc.blobs[i], url:u }); if(i) wShotTech.set(u, { techs:[...sc.tech[i]], memo:String(sc.memo[i]||'').trim() }); });
+  sPhotos=keep; ccClose(true); renderCertPhotos(); renderCertTech(); }
 function renderMeetPhotos(){
   const hero=$('#mHero'); if(!hero) return; const p0=sPhotos[0];
   hero.classList.toggle('has', !!p0); hero.style.backgroundImage = p0?`url(${p0.url})`:'';
@@ -4344,10 +4397,10 @@ function renderCertPhotos(){
 function renderCertTech(){
   const box=$('#cfTechChips'); if(!box) return;
   box.innerHTML = [...wTechSel].map(id=>`<span>${esc(techName(id))}</span>`).join('') + wCustom.map(t=>`<span class="custom">${esc(t)}</span>`).join('');
-  const n=wTechSel.size+wCustom.length; $('#wPicked').textContent = `${n}개 선택 ›`; certCheck();
+  const n=wTechSel.size+wCustom.length; $('#wPicked').textContent = `${n}개 선택 ›`; certCheck(); ccMapBack();
 }
 function certCheck(){
-  const ok=[sPhotos.length>0, !!$('#wTitle')?.value.trim(), (wTechSel.size+wCustom.length)>0];
+  const ok=[sPhotos.length>0, !!$('#wTitle')?.value.trim(), (wTechSel.size+wCustom.length)>0, !!editWorkPost || sPhotos.some(p=>wShotTech.has(p.url))];
   const el=$('#cfReq'); if(el) el.innerHTML='필수 3가지 '+['사진','작품 이름','기법'].map((t,i)=>`<i class="${ok[i]?'ok':''}">${ok[i]?'✓ ':''}${t}</i>`).join('');
   const b=$('#certPost'); if(b && !certCheck.busy) b.disabled=!ok.every(Boolean);
 }
@@ -4365,6 +4418,7 @@ async function submitCert(){
     const title=$('#wTitle').value.trim(); if(!title) throw new Error('작품 이름을 적어 주세요');
     if(!wTechSel.size && !wCustom.length) throw new Error('사용한 기법을 하나 이상 골라 주세요');
     if(!sPhotos.length) throw new Error('작품 사진을 1장 이상 올려 주세요');
+    if(!editWorkPost && !sPhotos.some(p=>wShotTech.has(p.url))) throw new Error('기법이 보이는 가까운 사진이 한 장 필요해요 · 맨 위 사진을 눌러 다시 찍어 주세요');
     await loadBanned(); if(hasBanned(title) || hasBanned($('#wNote').value) || wCustom.some(hasBanned)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const photos = await uploadPhotos(sPhotos);
     if(editWorkPost){
@@ -4377,6 +4431,7 @@ async function submitCert(){
     const evId = $('#wEvent')?.value||'';
     const { data:newPost, error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn: yp.line, p_note: $('#wNote').value.trim()||null, p_custom: wCustom, p_yarn_meta: yp.meta });
     if(error) throw new Error(error.message);
+    if(newPost && wShotTech.size){ const items=sPhotos.map((p,i)=>{ const x=wShotTech.get(p.url); return x?{ photo:photos[i], techniques:x.techs.filter(id=>wTechSel.has(id)), memo:x.memo||undefined }:null; }).filter(Boolean); if(items.length){ try{ await sb.rpc('work_set_tech_photos', { p_post:newPost, p_items:items }); }catch(e){} } wShotTech=new Map(); }
     let evDone=false; if(evId && newPost){ const r2 = await sb.rpc('link_work_event', { p_post:newPost, p_event:evId }); if(r2.error) toast('이벤트 연결 실패: '+r2.error.message); else evDone=true; }
     await loadMe(); sPhotos=[]; toast(evDone?'이벤트 인증까지 완료했어요!':`완성작품 인증 완료! Lv.${myProfile?.act_level||1}`); setTimeout(showRecsAfterWork, 600);
     composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
@@ -4814,7 +4869,7 @@ async function scShoot(n){
   $('#scFile').click();
 }
 async function scPicked(n, f){ if(!f || !sc) return; try{ const blob=await shrinkImage(f, 1280); scGot(n, blob); }catch(e){ toast(e.message||'사진을 불러오지 못했어요'); } }
-function scGot(n, blob){ if(!sc) return; scStop(); if(sc.urls[n]) try{ URL.revokeObjectURL(sc.urls[n]); }catch(e){} sc.blobs[n]=blob; sc.urls[n]=URL.createObjectURL(blob); sc.show=n; scRev(n); }
+function scGot(n, blob){ if(!sc) return; if(sc.cert) return ccGot(n, blob); scStop(); if(sc.urls[n]) try{ URL.revokeObjectURL(sc.urls[n]); }catch(e){} sc.blobs[n]=blob; sc.urls[n]=URL.createObjectURL(blob); sc.show=n; scRev(n); }
 function scRev(n){ if(!sc) return; sc.step='rev'+n; const both = n===1 && sc.urls[0];
   scWrap(`<div class="scbar"><span></span><button type="button" aria-label="닫기" onclick="scClose()">✕</button></div>
     <div class="scvf"><img id="scShot" src="${sc.urls[sc.show]}" alt="">${both?`<div class="scthumbs"><img src="${sc.urls[0]}" class="${sc.show===0?'on':''}" onclick="sc.show=0;scRev(1)" alt="첫 장"><img src="${sc.urls[1]}" class="${sc.show===1?'on':''}" onclick="sc.show=1;scRev(1)" alt="둘째 장"></div>`:''}</div>
