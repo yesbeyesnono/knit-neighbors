@@ -1808,3 +1808,8 @@ update public.yarn_stash s set brand = c.brand from public.yarn_catalog c
 update public.yarn_stash set brand = left(btrim(read_json->>'brand'), 40)
  where brand is null and coalesce(btrim(read_json->>'brand'), '') <> '';
 alter table public.yarn_stash enable trigger yarn_stash_fill;
+
+-- ============================================================
+-- 120. 작가 신청 자격: 상급(4단계) → 전문(5단계) 기법 인증 3개 (2026-11-15 대표)
+-- ============================================================
+-- author_adv_count(p_user): t.level >= 4 → t.level >= 5. apply_author·cheer_on_work·cheer_on_profile 의 문구도 '전문(5단계) 기법'으로. 이미 작가인 회원은 그대로
