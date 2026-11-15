@@ -2101,10 +2101,17 @@ async function fetchPins(){
   ]);
   if(error) return toast('근처 조회 실패: '+error.message);
   MapAdapter.clear();
-  const spread = (list)=>{   // 같은 좌표 그룹을 화면상 26px 반지름 원으로 분산
-    const z=MapAdapter.zoom(); const dLng=360/(256*Math.pow(2,z)); const groups={};
-    list.forEach(p=>{ const k=p.lat.toFixed(5)+','+p.lng.toFixed(5); (groups[k] ||= []).push(p); });
-    Object.values(groups).forEach(g=>{ if(g.length<2) return; const r=26*dLng; g.forEach((p,i)=>{ const a=i/g.length*2*Math.PI - Math.PI/2; p.lng=p.lng + r*Math.cos(a); p.lat=p.lat + r*Math.sin(a)*Math.cos(p.lat*Math.PI/180); }); });
+  // 겹친 핀 벌리기(2026-11-15 대표 제보: 큰 작가 핀이 옆 핀을 덮음). 좌표가 똑같을 때만이 아니라 **화면에서 44px 안으로 붙으면** 한 묶음으로 보고,
+  // 2~3개는 좌우로 나란히, 4개 이상은 원으로 놓는다(작가 핀이 끼면 더 넓게). 지도를 움직이거나 확대·축소할 때마다 다시 계산된다(위치는 어차피 200m 격자 중심)
+  const spread = (list)=>{
+    const z=MapAdapter.zoom(); const ppd=256*Math.pow(2,z)/360;   // 경도 1도 = 몇 px
+    const px=(a,b)=>{ const k=Math.cos(a.lat*Math.PI/180)||1; return Math.hypot((b.lng-a.lng)*ppd, (b.lat-a.lat)*ppd/k); };
+    const groups=[]; list.forEach(p=>{ const g=groups.find(g=>px(g[0], p)<44); if(g) g.push(p); else groups.push([p]); });
+    groups.forEach(g=>{ const n=g.length; if(n<2) return; const cx=g.reduce((t,p)=>t+p.lng,0)/n, cy=g.reduce((t,p)=>t+p.lat,0)/n; const k=Math.cos(cy*Math.PI/180)||1;
+      const gap = g.some(p=>p.p&&p.p.is_author) ? 58 : 48; const r=Math.max(34, gap*n/(2*Math.PI));
+      g.sort((a,b)=>(a.lng-b.lng) || ((a.p&&a.p.id||'')<(b.p&&b.p.id||'')?-1:1));   // 늘 같은 순서로(움직일 때마다 자리가 바뀌지 않게)
+      g.forEach((p,i)=>{ let ox, oy; if(n<=3){ ox=(i-(n-1)/2)*gap; oy=0; } else { const a=i/n*2*Math.PI - Math.PI/2; ox=r*Math.cos(a); oy=r*Math.sin(a); }
+        p.lng=cx + ox/ppd; p.lat=cy - oy*k/ppd; }); });
   };
   const mePin = myProfile?._c ? {lat:myProfile._c.lat,lng:myProfile._c.lng,me:true} : null;
   let shown = people||[];
