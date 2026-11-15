@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>마이 Dashboard — 손 들기 · 소식 · 사용법 시안</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:#E7E4DB;padding:26px 22px 30px;color:#22362A;width:1400px}
+h1{font-size:21px;margin-bottom:6px}.sub{font-size:13.5px;color:#55604F;margin-bottom:20px;line-height:1.5}
+.row{display:flex;gap:22px}.col{width:322px}
+.cap{font-size:14.500px;font-weight:800;margin-bottom:3px}.cap2{font-size:12.5px;color:#55604F;line-height:1.45;min-height:56px;margin-bottom:8px}
+.ph{width:322px;height:690px;border-radius:26px;overflow:hidden;background:#F3F1EA;box-shadow:0 8px 26px rgba(0,0,0,.16);display:flex;flex-direction:column;position:relative}
+.top{background:#22362A;color:#F3F1EA;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex:none}
+.pill{display:flex;background:rgba(255,255,255,.12);border-radius:999px;padding:3px;font-size:12.5px}.pill span{padding:5px 12px;border-radius:999px}.pill .on{background:#DDE8D6;color:#22362A;font-weight:700}
+.body{flex:1;overflow:hidden;padding:10px 12px}
+.me{display:flex;gap:10px;align-items:center;padding:4px 2px 10px}.av{width:44px;height:44px;border-radius:50%;background:#C9D8BF;flex:none}.me b{font-size:15px;display:block}.me span{font-size:12px;color:#8A9384}
+.card{background:#fff;border-radius:16px;padding:12px 14px;margin-bottom:9px}
+.wave{display:flex;align-items:center;gap:11px;background:#FFF4CF;border:1.5px solid #F0D27A}
+.wave .h{width:40px;height:40px;border-radius:12px;background:#FFD95C;display:grid;place-items:center;font-size:21px;flex:none}
+.wave b{font-size:14.5px;display:block}.wave span{font-size:12px;color:#7A6420}
+.sw{margin-left:auto;width:46px;height:28px;border-radius:999px;background:#3E6B48;position:relative;flex:none}.sw::after{content:"";position:absolute;right:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff}
+.sw.off{background:#CFCBBE}.sw.off::after{right:auto;left:3px}
+.hd{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;margin-bottom:8px}.hd a{font-weight:600;color:#3E6B48;font-size:12px}
+.nt{display:flex;gap:9px;align-items:center;font-size:13.5px}.nt i{font-style:normal;background:#C8453A;color:#fff;font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 7px;flex:none}.nt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gs{display:flex;gap:8px;margin-right:-14px;overflow:hidden}
+.g{width:104px;flex:none;border-radius:13px;padding:9px;background:#F3F1EA}.g .art{height:54px;border-radius:9px;display:grid;place-items:center;font-size:24px;margin-bottom:6px}
+.g b{font-size:12.5px;display:block;line-height:1.3}.g em{font-style:normal;font-size:10.5px;color:#8A9384}.g em.ok{color:#3E6B48;font-weight:700}
+.q{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #F0EEE8;font-size:13.5px}.q:first-of-type{border-top:0}
+.ck{width:22px;height:22px;border-radius:50%;border:2px solid #CFCBBE;flex:none;display:grid;place-items:center;font-size:12px;color:#fff}.ck.ok{background:#3E6B48;border-color:#3E6B48}
+.q span{flex:1}.q.done span{color:#8A9384;text-decoration:line-through}.q u{text-decoration:none;color:#3E6B48;font-weight:700;font-size:12.5px}
+.bar{height:6px;border-radius:99px;background:#EBE9E0;overflow:hidden;margin:2px 0 8px}.bar i{display:block;height:100%;width:40%;background:#3E6B48}
+.nav{height:58px;background:#fff;border-top:1px solid #E2DFD5;display:flex;align-items:center;justify-content:space-around;flex:none;font-size:20px;color:#8A9384}
+.nav .on{color:#3E6B48;position:relative}.nav .on::after{content:"";position:absolute;right:-6px;top:-2px;width:8px;height:8px;border-radius:50%;background:#C8453A}
+.tabs{display:flex;background:#EBE9E0;border-radius:12px;padding:3px;margin-bottom:10px;font-size:13.5px}.tabs span{flex:1;text-align:center;padding:8px;border-radius:9px;color:#55604F}.tabs .on{background:#fff;font-weight:800;color:#22362A}
+.gl{display:flex;gap:11px;align-items:center}.gl .art{width:54px;height:54px;border-radius:12px;display:grid;place-items:center;font-size:25px;flex:none}
+.gl b{font-size:14.5px;display:block}.gl span{font-size:12px;color:#8A9384}.gl em{margin-left:auto;font-style:normal;font-size:11.5px;color:#8A9384;white-space:nowrap}.gl em.ok{color:#3E6B48;font-weight:700}
+.note{margin-top:20px;font-size:13.5px;line-height:1.7}
+</style></head><body>
+<h1>마이 Dashboard — 손 들기 · 공지 · 사용법을 한곳에</h1>
+<div class="sub">지금은 손 들기(뜨개 친구 찾기)와 공지·새 소식이 설정 안에 있어 찾기 어렵습니다. <b>사람 버튼(마이)을 누르면 바로 보이는 Dashboard</b> 맨 위로 올리고, 기능을 하나씩 익히는 '사용법'과 '해 볼 것'을 함께 둡니다.</div>
+<div class="row">
+
+<div class="col"><div class="cap">① 마이 › Dashboard (바뀐 모습)</div><div class="cap2">프로필 바로 아래 <b>손 들기 스위치</b> → <b>소식·사용법</b> → <b>해 볼 것</b> → 기존 카드(내 뜨개 단계·이번 주 활동…). 새 공지가 있으면 하단 사람 버튼에 빨간 점.</div>
+<div class="ph"><div class="top"><span>🔔</span><div class="pill"><span class="on">Dashboard</span><span>Thread</span></div><span>⚙</span></div><div class="body">
+<div class="me"><div class="av"></div><div><b>솔방울 <span style="background:#DDE8D6;color:#3E6B48;font-size:11px;border-radius:999px;padding:1px 7px;font-weight:700">Lv.3</span></b><span>성수1가1동 · 코바늘 3단계</span></div></div>
+<div class="card wave"><div class="h">✋</div><div><b>뜨개 친구 찾는 중</b><span>지도에 손 든 표시 · 12일 남음</span></div><div class="sw"></div></div>
+<div class="card"><div class="hd"><span>소식 · 사용법</span><a>전체 보기 ›</a></div>
+<div class="nt"><i>새 글</i><span>뜨친 생겼다 축하 이벤트 — 11월 30일까지</span></div>
+<div style="height:10px"></div>
+<div class="gs"><div class="g"><div class="art" style="background:#DDE8D6">🧶</div><b>완성작품 인증</b><em class="ok">✓ 해 봤어요</em></div><div class="g"><div class="art" style="background:#FFF4CF">✋</div><b>뜨친 찾기</b><em>3장 · 1분</em></div><div class="g"><div class="art" style="background:#F6EBD3">📍</div><b>모임</b><em>4장 · 1분</em></div><div class="g"><div class="art" style="background:#FBF1CF">♛</div><b>작가</b><em>3장</em></div></div></div>
+<div class="card"><div class="hd"><span>해 볼 것 · 2 / 5</span><a>접기</a></div><div class="bar"><i></i></div>
+<div class="q done"><div class="ck ok">✓</div><span>프로필 완성하기</span></div>
+<div class="q done"><div class="ck ok">✓</div><span>첫 완성작품 인증</span></div>
+<div class="q"><div class="ck"></div><span>뜨개 친구 찾기 — 손 들기</span><u>켜기 ›</u></div>
+<div class="q"><div class="ck"></div><span>동네 모임 구경하기</span><u>보러 가기 ›</u></div>
+<div class="q"><div class="ck"></div><span>내 실함에 실 하나 담기</span><u>담기 ›</u></div></div>
+</div><div class="nav"><span>⌂</span><span>📍</span><span style="background:#3E6B48;color:#fff;border-radius:12px;padding:6px 14px">＋</span><span>➤</span><span class="on">👤</span></div></div></div>
+
+<div class="col"><div class="cap">② 손 들기가 꺼져 있을 때</div><div class="cap2">같은 자리에서 한 번에 켭니다. 켜면 14일 동안 지도에 ✋ 표시. '해 볼 것'의 줄도 같이 체크돼요.</div>
+<div class="ph"><div class="top"><span>🔔</span><div class="pill"><span class="on">Dashboard</span><span>Thread</span></div><span>⚙</span></div><div class="body">
+<div class="me"><div class="av"></div><div><b>솔방울</b><span>성수1가1동 · 코바늘 3단계</span></div></div>
+<div class="card" style="display:flex;align-items:center;gap:11px;border:1.5px dashed #CFCBBE"><div style="width:40px;height:40px;border-radius:12px;background:#F3F1EA;display:grid;place-items:center;font-size:21px;flex:none">✋</div><div><b style="font-size:14.5px;display:block">뜨개 친구를 찾고 있나요?</b><span style="font-size:12px;color:#8A9384">손을 들면 지도에서 이웃이 먼저 알아봐요</span></div><div class="sw off"></div></div>
+<div class="card"><div class="hd"><span>소식 · 사용법</span><a>전체 보기 ›</a></div>
+<div class="nt"><span style="color:#55604F">채팅 알림과 #태그가 생겼어요</span></div>
+<div style="height:10px"></div>
+<div class="gs"><div class="g"><div class="art" style="background:#DDE8D6">🧶</div><b>완성작품 인증</b><em>5장 · 2분</em></div><div class="g"><div class="art" style="background:#FFF4CF">✋</div><b>뜨친 찾기</b><em>3장 · 1분</em></div><div class="g"><div class="art" style="background:#F6EBD3">📍</div><b>모임</b><em>4장 · 1분</em></div><div class="g"><div class="art" style="background:#FBF1CF">♛</div><b>작가</b><em>3장</em></div></div></div>
+<div class="card"><div class="hd"><span>내 뜨개 단계</span><a>보기 ›</a></div><div style="font-size:12.5px;color:#8A9384">코바늘 3단계 · 인증한 기법 9개</div></div>
+<div class="card"><div class="hd"><span>이번 주 활동</span></div><div style="font-size:12.5px;color:#8A9384">글 2 · 댓글 5 · 인증 1</div></div>
+</div><div class="nav"><span>⌂</span><span>📍</span><span style="background:#3E6B48;color:#fff;border-radius:12px;padding:6px 14px">＋</span><span>➤</span><span style="color:#3E6B48">👤</span></div></div></div>
+
+<div class="col"><div class="cap">③ 소식 · 사용법 (전체 보기)</div><div class="cap2">공지와 사용법을 탭으로. 사용법은 주제별 묶음 — 누르면 그림 카드 몇 장으로 넘겨 봄(완성작품 인증 5장 시안과 같은 모양).</div>
+<div class="ph"><div class="top"><span>‹ &nbsp;<b>소식 · 사용법</b></span><span></span></div><div class="body">
+<div class="tabs"><span>공지 · 새 소식</span><span class="on">사용법</span></div>
+<div class="card gl"><div class="art" style="background:#DDE8D6">🧶</div><div><b>완성작품 인증</b><span>왜 하나요 · 무엇이 열리나요</span></div><em class="ok">✓ 다 봤어요</em></div>
+<div class="card gl"><div class="art" style="background:#FFF4CF">✋</div><div><b>뜨개 친구(뜨친) 찾기</b><span>손 들기 · 신청 · 첫 인사</span></div><em>3장</em></div>
+<div class="card gl"><div class="art" style="background:#F6EBD3">📍</div><div><b>모임</b><span>참여하기 · 직접 열기 · 참가비</span></div><em>4장</em></div>
+<div class="card gl"><div class="art" style="background:#FBF1CF">♛</div><div><b>작가</b><span>작가가 되려면 · 클래스 열기</span></div><em>3장</em></div>
+<div class="card gl"><div class="art" style="background:#E4ECF2">🏪</div><div><b>가게</b><span>우리 가게 등록 · 소식 · 클래스</span></div><em>3장</em></div>
+<div class="card gl"><div class="art" style="background:#FBE7DF">🧺</div><div><b>내 실함</b><span>실 담기 · 인증에서 꺼내 쓰기</span></div><em>3장</em></div>
+</div></div></div>
+
+<div class="col"><div class="cap">④ 설정은 이렇게 정리</div><div class="cap2">Dashboard 로 올라간 것은 설정에서 뺍니다(두 곳에 두면 헷갈림). 설정은 계정·알림·약관만.</div>
+<div class="ph"><div class="top"><span>‹ &nbsp;<b>설정</b></span><span></span></div><div class="body">
+<div class="card" style="padding:4px 14px"><div class="q" style="border:0"><span>프로필 편집</span><u>›</u></div><div class="q"><span>내 뜨개 단계</span><u>›</u></div><div class="q"><span>현위치로 동네 다시 설정</span><u>›</u></div></div>
+<div class="card" style="padding:4px 14px;opacity:.45"><div class="q" style="border:0"><span style="text-decoration:line-through">뜨개 친구 찾기 (손 들기)</span><em style="font-style:normal;font-size:11.5px">→ Dashboard</em></div><div class="q"><span style="text-decoration:line-through">공지 · 새 소식</span><em style="font-style:normal;font-size:11.5px">→ Dashboard</em></div></div>
+<div class="card" style="padding:4px 14px"><div class="q" style="border:0"><span>앱 알림</span><u>›</u></div><div class="q"><span>지기에게 말하기</span><u>›</u></div><div class="q"><span>약관 · 개인정보처리방침</span><u>›</u></div><div class="q"><span>로그아웃 · 계정 삭제</span><u>›</u></div></div>
+</div></div></div>
+
+</div>
+<div class="note">
+· <b>사용법 묶음</b>은 앞서 보여 드린 '완성작품 인증 안내 5장'과 같은 그림 카드입니다. 알림으로 한 장씩 보내는 것과 같은 내용을 여기서 언제든 다시 볼 수 있어요. 묶음은 서버에 두어 앱 업데이트 없이 추가·수정합니다.<br>
+· <b>해 볼 것</b>은 5가지를 다 하면 사라집니다(접어 둘 수도 있음). 실제로 했는지는 서버 기록으로 자동 체크합니다.<br>
+· 새 공지나 새 사용법이 올라오면 하단 사람 버튼에 빨간 점이 붙습니다.
+</div>
+</body></html>

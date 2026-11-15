@@ -754,6 +754,21 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 .btn.cpv{width:100%;margin-top:12px}#v-cert.edit .cpv{display:none}.cpvlab{background:#FFF6DA;color:#8A6A12;font-size:.78rem;text-align:center;padding:7px;margin:8px -16px 0}#cpvBody{margin:0 -16px;background:var(--color-surface)}.cpvtwo{display:flex;gap:8px;margin-top:14px}.cpvtwo .btn{flex:1}.cpvtwo .btn:last-child{flex:1.5}
 .pgrid .tph{position:relative;display:block;flex:none;max-width:82%;scroll-snap-align:start}.pgrid .tph img{max-width:100%;display:block}.pgrid .tph em{position:absolute;left:8px;bottom:8px;max-width:calc(100% - 16px);background:rgba(0,0,0,.58);color:#fff;font-style:normal;font-size:.72rem;font-weight:600;line-height:1.3;border-radius:999px;padding:4px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 #cfPhotos>div{cursor:pointer}#cfPhotos .tg{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);color:#fff;font-size:.58rem;text-align:center;padding:1px 0;border-radius:0 0 10px 10px;pointer-events:none}
+/* 마이 Dashboard: 손 들기 · 소식·사용법 · 해 볼 것 (2026-11-15) */
+.mywave{display:flex;align-items:center;gap:11px;border-radius:16px;padding:12px 14px;margin:0 16px 10px;cursor:pointer;background:var(--color-surface);border:1.5px dashed var(--line)}
+.mywave.on{background:#FFF4CF;border:1.5px solid #F0D27A}.mywave .h{width:40px;height:40px;border-radius:12px;background:var(--bg2);display:grid;place-items:center;font-size:21px;flex:none}.mywave.on .h{background:#FFD95C}
+.mywave b{display:block;font-size:.93rem}.mywave span{font-size:.76rem;color:var(--ink3)}.mywave.on span{color:#7A6420}
+.mywave .sw{margin-left:auto;width:46px;height:28px;border-radius:999px;background:#CFCBBE;position:relative;flex:none}.mywave .sw::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}.mywave.on .sw{background:var(--color-primary)}.mywave.on .sw::after{left:21px}
+.myhub{background:var(--color-surface);border-radius:16px;padding:12px 14px;margin:0 16px 10px}.myhub .hd{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;font-weight:800;margin-bottom:8px}.myhub .hd a{font-weight:600;color:var(--color-primary);font-size:.78rem;cursor:pointer}
+.myhub .nt{display:flex;gap:8px;align-items:center;font-size:.86rem;cursor:pointer;margin-bottom:10px}.myhub .nt i{font-style:normal;background:#C8453A;color:#fff;font-size:.66rem;font-weight:700;border-radius:999px;padding:2px 7px;flex:none}.myhub .nt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink2)}
+.gds{display:flex;gap:8px;overflow-x:auto;margin-right:-14px;padding-right:14px;scrollbar-width:none}.gds::-webkit-scrollbar{display:none}
+.gd{width:108px;flex:none;border-radius:13px;padding:9px;background:var(--color-bg);cursor:pointer;border:0;text-align:left;font:inherit;color:inherit}.gd .art{height:54px;border-radius:9px;display:grid;place-items:center;font-size:24px;margin-bottom:6px}.gd b{font-size:.8rem;display:block;line-height:1.3}.gd em{font-style:normal;font-size:.68rem;color:var(--ink3)}.gd em.ok{color:var(--color-primary);font-weight:700}
+.qst .bar{height:6px;border-radius:99px;background:var(--bg2);overflow:hidden;margin:2px 0 6px}.qst .bar i{display:block;height:100%;background:var(--color-primary)}
+.qst .q{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line2,var(--line));font-size:.86rem;cursor:pointer}.qst .q:first-of-type{border-top:0}.qst .ck{width:22px;height:22px;border-radius:50%;border:2px solid #CFCBBE;flex:none;display:grid;place-items:center;font-size:.72rem;color:#fff}.qst .q.done .ck{background:var(--color-primary);border-color:var(--color-primary)}.qst .q span{flex:1}.qst .q.done{cursor:default}.qst .q.done span{color:var(--ink3);text-decoration:line-through}.qst .q u{text-decoration:none;color:var(--color-primary);font-weight:700;font-size:.8rem}
+.hubtabs{display:flex;background:var(--bg2);border-radius:12px;padding:3px;margin:10px 0}.hubtabs button{flex:1;border:0;background:none;font:inherit;font-size:.88rem;padding:8px;border-radius:9px;color:var(--ink2);cursor:pointer}.hubtabs button.on{background:var(--color-surface);font-weight:800;color:var(--ink)}
+.gl{display:flex;gap:11px;align-items:center;background:var(--color-surface);border-radius:16px;padding:12px 14px;margin-bottom:9px;cursor:pointer}.gl .art{width:54px;height:54px;border-radius:12px;display:grid;place-items:center;font-size:25px;flex:none}.gl b{display:block;font-size:.93rem}.gl span{font-size:.76rem;color:var(--ink3)}.gl em{margin-left:auto;font-style:normal;font-size:.72rem;color:var(--ink3);white-space:nowrap}.gl em.ok{color:var(--color-primary);font-weight:700}
+.gtrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:8px -16px 0;scrollbar-width:none}.gtrack::-webkit-scrollbar{display:none}.gcard{flex:none;width:100%;scroll-snap-align:center;padding:0 16px}.gcard .in{background:var(--color-surface);border-radius:20px;overflow:hidden}.gcard img{display:block;width:100%;aspect-ratio:320/178;object-fit:cover;background:var(--bg2)}.gcard .tx{padding:16px 18px 18px}.gcard .k{font-size:.72rem;font-weight:800;color:var(--color-primary);margin-bottom:5px}.gcard .tx>b{font-size:1.15rem;line-height:1.3;display:block;margin-bottom:8px}.gcard p{font-size:.86rem;line-height:1.6;color:var(--ink2);margin:0;white-space:pre-line}.gcard .btn{width:100%;margin-top:14px}
+.gdots{display:flex;gap:5px;justify-content:center;padding:12px 0}.gdots i{width:6px;height:6px;border-radius:50%;background:#D9D5C8}.gdots i.on{background:var(--color-primary);width:16px;border-radius:3px}
 .witem{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line2,var(--line));margin-top:12px;padding-top:12px;font-size:.93rem;cursor:pointer}.witem span{color:var(--ink3)}.witem b{background:var(--color-primary);color:#fff;border-radius:999px;padding:5px 12px;font-size:.85rem;font-weight:700}.witem u{margin-left:auto;text-decoration:none;color:var(--color-primary);font-weight:700;font-size:.85rem}.witem em{margin-left:auto;font-style:normal;color:var(--ink3)}
 .wigrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.wigrid button{font:inherit;font-size:.88rem;color:var(--ink);background:var(--color-surface);border:1px solid var(--line);border-radius:12px;padding:12px 4px;cursor:pointer}.wigrid button.on{background:var(--color-primary);color:#fff;border-color:transparent;font-weight:700}
 #greetBar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--color-surface);border-top:1px solid var(--line)}#greetBar button{border:1.5px solid var(--color-primary);background:none;color:var(--color-primary);border-radius:999px;padding:5px 11px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer}
@@ -1353,7 +1368,7 @@ body.kb #nav{display:none!important}
     <button data-v="map" title="지도"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.4S5 15.7 5 10.2a7 7 0 0 1 14 0c0 5.5-7 11.2-7 11.2Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></button>
     <button data-v="plus" title="글쓰기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></button>
     <button data-v="chats" title="채팅"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2.5 11.3 12.7"></path><path d="M21.5 2.5 14.9 21.3l-3.6-8.6-8.6-3.6Z"></path></svg><span class="navdot" id="chatDot" hidden></span></button>
-    <button data-v="my" title="마이" onclick="myPage='dash'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.9" r="3.9"></circle><path d="M4.6 20.4c.6-4 3.6-6.2 7.4-6.2s6.8 2.2 7.4 6.2"></path></svg><span class="badge" id="badgeFriends" hidden></span></button>
+    <button data-v="my" title="마이" onclick="myPage='dash'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.9" r="3.9"></circle><path d="M4.6 20.4c.6-4 3.6-6.2 7.4-6.2s6.8 2.2 7.4 6.2"></path></svg><span class="badge" id="badgeFriends" hidden></span><span class="navdot" id="myDot" hidden></span></button>
   </nav>
 
   <div class="sheetwrap" id="sheetwrap" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
@@ -2999,7 +3014,7 @@ async function openLink(l){
     if(l.type==='pattern') return typeof openPattern==='function' ? openPattern(l.id) : go('comm');
     if(l.type==='class'||l.type==='class_manage'){ const { data:p } = await sb.from('shop_posts').select('id,shop_id,author_id').eq('id', l.id).single(); if(!p) return go('comm'); if(p.shop_id) await openShop(p.shop_id); else { myTab='classes'; if(p.author_id===me.id) goMy('thread','classes'); else { await openProfile(p.author_id); const b=document.querySelector('#profTabs [data-t="classes"]'); if(b) b.click(); } } if(l.type==='class_manage') setTimeout(()=>openClassApplicants(l.id), 400); return; }
     if(l.type==='profile'){ if(l.id===me.id){ return goMy(l.tab?'thread':'dash', l.tab); } await openProfile(l.id); if(l.tab){ const b=document.querySelector('#profTabs [data-t=+l.tab+]'); if(b) b.click(); } return; }
-    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='orders') return openMyOrders(); if(v==='settlement') return openSettlement(); if(v==='store') return openStore(); if(v==='cert') return openCert(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(v==='ddeuchin'){ await loadEvents(); return ddOn()?openDdeuchin():go('comm'); } if(['map','comm','chats','my'].includes(v)) return go(v); }
+    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='orders') return openMyOrders(); if(v==='settlement') return openSettlement(); if(v==='store') return openStore(); if(v==='cert') return openCert(); if(v==='author') return openAuthorApply(); if(v==='wave'){ await go('my'); return toggleWave(); } if(v==='hub') return openHub('guide'); if(v==='meets') return questMeet(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(v==='ddeuchin'){ await loadEvents(); return ddOn()?openDdeuchin():go('comm'); } if(['map','comm','chats','my'].includes(v)) return go(v); }
   }catch(e){}
   return openSupportRoom();
 }
@@ -3132,7 +3147,7 @@ function supKindLabel(k){ return k.endsWith('_revoke') ? SUP_KIND[k.replace('_re
 let checkInAt=0;
 // 앱을 다시 화면에 올렸을 때도 접속을 남긴다(30분에 한 번까지 — 서버는 1시간 단위로만 고쳐 쓴다)
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && me && myProfile?.onboarded_at && Date.now()-checkInAt>30*60*1000){ checkInAt=Date.now(); sb.rpc('check_in').then(()=>{},()=>{}); } });
-async function supCheckIn(){ ybLoad(); if(myProfile?.is_test) setTimeout(()=>toast('테스트 계정이에요 · 여기서 올린 글은 테스트 계정에만 보여요'), 1500);   // schema 122: 테스트 계정(demo1~6)의 글은 테스트 계정끼리만 보임
+async function supCheckIn(){ ybLoad(); newsDot(); if(myProfile?.is_test) setTimeout(()=>toast('테스트 계정이에요 · 여기서 올린 글은 테스트 계정에만 보여요'), 1500);   // schema 122: 테스트 계정(demo1~6)의 글은 테스트 계정끼리만 보임
     // 앱 실행(로그인) 시 1회: 출석 + 초대 확인
   // 접속 기록(check_in)은 서포터즈와 상관없이 항상 남긴다(2026-11-13 — 서포터즈 스위치에 묶여 11-06 부터 멈춰 있었음: 최근 접속·첫 인증 안내·복귀 환영이 같은 함수). 서포터즈 화면 값만 스위치를 따른다
   if(!me) return renderBeta(); checkInAt=Date.now(); try{ const { data } = await sb.rpc('check_in'); if(SUPPORTERS) supStatus=data||null; }catch(e){}
@@ -5704,6 +5719,7 @@ async function renderMy(){
   $('#myBody').innerHTML=`
     <div id="myDash" ${myPage==='thread'?'hidden':''}>
     <div class="mepro" onclick="openOnboard(true)"><div class="av">${avatar(p,true)}</div><div style="flex:1;min-width:0"><div class="nm">${esc(p.nickname||'')}${lvBadge(p)}${idxChip(p)}</div><div class="sub">${esc(handle)}${p.mbti?' · '+esc(p.mbti):''}</div></div><span class="car">›</span></div>
+    <div id="myWave"></div><div id="myGuide"></div><div id="myQuest"></div>
     <div id="myLv">${myLvCard()}</div>
     <div class="shopcard" id="myStashCard" onclick="openStash()"><div class="sq">${ico('yarn')}</div><div style="flex:1;min-width:0"><b>내 실함</b><div class="muted" id="myStashSub">볼밴드를 찍어 두면 인증 때 한 번에 들어가고, 쓴 만큼 줄어요</div></div><span style="color:var(--ink3)">›</span></div>
     ${FULL?`<div class="shopcard" onclick="openStore()"><div class="sq">🧺</div><div style="flex:1;min-width:0"><b>뜨개 상점 <span class="authbadge" style="background:var(--sel)">Lab</span></b><div class="muted">실 사전의 실 사기 · 도안 사기(무료 체험) · 내 주문</div></div><span style="color:var(--ink3)">›</span></div>`:''}
@@ -5754,7 +5770,49 @@ function myLvCard(){
     return `<div class="lvrow"><span class="nm">${c==='crochet'?'코바늘':'대바늘'}</span><span class="lvmini">${[1,2,3,4,5].map(l=>`<i class="${l<=lv?'on':''}"></i>`).join('')}</span><span class="st">${lv?`${lv}단계 ${LVNAME[lv]}`:'아직 없음'}</span></div>${lv<5&&next?`<div class="muted" style="font-size:.75rem;margin:-2px 0 4px 54px">${lv+1}단계까지 기법 ${next}개 남음 · 익힌 기법 ${done}개</div>`:''}`; }).join('');
   return `<div class="mycard" onclick="openSkills()"><div class="hd"><b>내 뜨개 단계</b>${lvBadge(p)}<span class="car">›</span></div>${rows}${set.size?'':'<div class="muted" style="font-size:.8rem">할 수 있는 기법을 체크하면 단계가 정해지고, 나에게 맞는 모임·클래스가 보여요</div>'}</div>`;
 }
+// ===== 마이 Dashboard: 손 들기 · 소식·사용법 · 해 볼 것 (2026-11-15 대표 확정 시안, schema 125) =====
+// 손 들기(뜨개 친구 찾기)와 공지·새 소식을 설정에서 Dashboard 맨 위로 옮김. 사용법 묶음은 서버(app_config 'guides' = {topics:[{id,title,sub,emoji,bg,cards:[{title,body,img,btn,link}]}]})에 있어
+// 앱 업데이트 없이 추가·수정한다. 그림은 이 저장소의 guides/<이름>.svg 만(이름은 소문자·숫자·-), 버튼 링크는 openLink 가 아는 종류만
+let GUIDES=null;
+const gNative=()=>!!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+const gImg=n=>/^[a-z0-9-]{1,40}$/.test(String(n||''))?(gNative()?'https://yesbeyesnono.github.io/knit-neighbors/':'')+'guides/'+n+'.svg':'';
+const gBg=c=>/^#[0-9a-fA-F]{6}$/.test(String(c||''))?c:'#DDE8D6';
+async function guidesLoad(){ if(GUIDES) return GUIDES; try{ const { data } = await sb.from('app_config').select('value').eq('key','guides').maybeSingle(); const t=data&&data.value&&Array.isArray(data.value.topics)?data.value.topics:[]; GUIDES=t.filter(x=>x&&x.id&&x.title&&Array.isArray(x.cards)&&x.cards.length); }catch(e){ return []; } return GUIDES; }
+function gSeen(){ try{ return JSON.parse(localStorage.getItem('kn_guide_seen')||'{}')||{}; }catch(e){ return {}; } }
+function gMark(id){ const x=gSeen(); if(x[id]) return; x[id]=1; try{ localStorage.setItem('kn_guide_seen', JSON.stringify(x)); }catch(e){} }
+function gState(t){ if(t.id==='cert' && (myProfile?.cert_count||0)>0) return ['ok','✓ 해 봤어요']; if(gSeen()[t.id]) return ['ok','✓ 다 봤어요']; return ['', t.cards.length+'장']; }
+function myDotSet(on){ const e=$('#myDot'); if(e) e.hidden=!on || !$('#badgeFriends')?.hidden; }
+async function renderMyHub(){
+  const w=$('#myWave'); if(w){ const on=isWaving(myProfile); const d=on?Math.max(1, Math.ceil((new Date(myProfile.wave_until)-Date.now())/864e5)):0;
+    w.innerHTML=`<div class="mywave ${on?'on':''}" onclick="toggleWave()"><div class="h">✋</div><div><b>${on?'뜨개 친구 찾는 중':'뜨개 친구를 찾고 있나요?'}</b><span>${on?`지도에 손 든 표시 · ${d}일 남음`:'손을 들면 지도에서 이웃이 먼저 알아봐요'}</span></div><div class="sw"></div></div>`; }
+  const [topics, nr] = await Promise.all([guidesLoad(), sb.from('news_posts').select('title,published_at').order('published_at',{ascending:false}).limit(1).then(r=>(r.data&&r.data[0])||null, ()=>null)]);
+  const g=$('#myGuide'); if(g){ const isNew=!!nr && Date.parse(nr.published_at)>newsSeen();
+    g.innerHTML = (nr||topics.length) ? `<div class="myhub"><div class="hd"><span>소식 · 사용법</span><a onclick="openHub('${topics.length?'guide':'news'}')">전체 보기 ›</a></div>${nr?`<div class="nt" onclick="openHub('news')">${isNew?'<i>새 글</i>':''}<span>${esc(nr.title)}</span></div>`:''}${topics.length?`<div class="gds">${topics.map(t=>{ const [c,l]=gState(t); return `<button type="button" class="gd" data-g="${esc(t.id)}" onclick="openGuide(this.dataset.g)"><div class="art" style="background:${gBg(t.bg)}">${esc(t.emoji||'📘')}</div><b>${esc(t.title)}</b><em class="${c}">${l}</em></button>`; }).join('')}</div>`:''}</div>` : '';
+    myDotSet(isNew); }
+  renderQuest();
+}
+// 해 볼 것: 실제로 했는지 보고 자동으로 체크(모임 구경만 이 기기 기억). 다 하면 사라지고, 접어 둘 수 있다
+async function renderQuest(){ const el=$('#myQuest'); if(!el) return; let hide=false, seenMeet=false, waved=false; try{ hide=localStorage.getItem('kn_quest_hide')==='1'; seenMeet=localStorage.getItem('kn_q_meet')==='1'; waved=localStorage.getItem('waveInfoSeen')==='1'; }catch(e){}
+  let stash=0; try{ const r=await sb.from('yarn_stash').select('id',{count:'exact',head:true}).eq('owner_id', me.id); stash=r.count||0; }catch(e){}
+  const Q=[['프로필 완성하기', !!myProfile?.onboarded_at, '', ''], ['첫 완성작품 인증', (myProfile?.cert_count||0)>0, '인증하기 ›', 'openCert()'], ['뜨개 친구 찾기 — 손 들기', isWaving(myProfile)||waved, '켜기 ›', 'toggleWave()'], ['동네 모임 구경하기', seenMeet, '보러 가기 ›', 'questMeet()'], ['내 실함에 실 하나 담기', stash>0, '담기 ›', 'openStash()']];
+  const n=Q.filter(x=>x[1]).length; if(n>=Q.length || !$('#myQuest')){ if($('#myQuest')) $('#myQuest').innerHTML=''; return; }
+  $('#myQuest').innerHTML=`<div class="myhub qst"><div class="hd"><span>해 볼 것 · ${n} / ${Q.length}</span><a onclick="questFold()">${hide?'펼치기':'접기'}</a></div><div class="bar"><i style="width:${Math.round(n/Q.length*100)}%"></i></div>${hide?'':Q.map(([t,ok,l,fn])=>`<div class="q ${ok?'done':''}" ${ok||!fn?'':`onclick="${fn}"`}><div class="ck">${ok?'✓':''}</div><span>${t}</span>${ok?'':`<u>${l}</u>`}</div>`).join('')}</div>`; }
+function questFold(){ try{ localStorage.setItem('kn_quest_hide', localStorage.getItem('kn_quest_hide')==='1'?'0':'1'); }catch(e){} renderQuest(); }
+function questMeet(){ try{ localStorage.setItem('kn_q_meet','1'); }catch(e){} commFilter='meet'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on', x.dataset.f==='meet')); go('comm'); }
+// 소식 · 사용법 (전체 보기): 공지 탭 = 예전 '공지·새 소식', 사용법 탭 = 주제별 묶음
+async function openHub(tab){ const t=tab==='guide'?'guide':'news';
+  openSub('소식 · 사용법', `<div class="hubtabs"><button type="button" class="${t==='news'?'on':''}" onclick="openHub('news')">공지 · 새 소식</button><button type="button" class="${t==='guide'?'on':''}" onclick="openHub('guide')">사용법</button></div><div id="hubBody"><p class="muted" style="margin-top:16px">불러오는 중…</p></div>`);
+  subOnBack=()=>{ closeSub(); if(view==='my') renderMyHub(); };
+  if(t==='news') return newsLoad();
+  const T=await guidesLoad(); const el=$('#hubBody'); if(!el) return;
+  el.innerHTML = T.length ? T.map(x=>{ const [c,l]=gState(x); return `<div class="gl" data-g="${esc(x.id)}" onclick="openGuide(this.dataset.g)"><div class="art" style="background:${gBg(x.bg)}">${esc(x.emoji||'📘')}</div><div style="min-width:0"><b>${esc(x.title)}</b><span>${esc(x.sub||'')}</span></div><em class="${c}">${l}</em></div>`; }).join('') : '<p class="muted" style="margin-top:16px">사용법을 준비하고 있어요.</p>'; }
+async function openGuide(id){ const T=await guidesLoad(); const t=T.find(x=>x.id===id); if(!t) return; const n=t.cards.length;
+  openSub(t.title, `<div class="gtrack" id="gTrack">${t.cards.map((c,i)=>{ const im=gImg(c.img); return `<div class="gcard"><div class="in">${im?`<img src="${im}" alt="" onerror="this.style.display='none'">`:''}<div class="tx"><div class="k">${esc(t.title)} · ${i+1}/${n}</div><b>${esc(c.title||'')}</b><p>${esc(c.body||'')}</p>${c.btn&&c.link?`<button type="button" class="btn" data-g="${esc(t.id)}" onclick="guideGo(this.dataset.g, ${i})">${esc(c.btn)}</button>`:''}</div></div></div>`; }).join('')}</div><div class="gdots" id="gDots">${t.cards.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>${n>1?'<p class="muted" style="text-align:center;font-size:.76rem;margin:0">옆으로 넘겨 보세요</p>':''}`);
+  subOnBack=()=>{ closeSub(); if(view==='my') renderMyHub(); };
+  const tr=$('#gTrack'); if(n<=1) gMark(id); tr.onscroll=()=>{ const i=Math.round(tr.scrollLeft/Math.max(1,tr.clientWidth)); [...$('#gDots').children].forEach((d,k)=>d.classList.toggle('on',k===i)); if(i>=n-1) gMark(id); }; }
+function guideGo(id, i){ const t=(GUIDES||[]).find(x=>x.id===id); const c=t&&t.cards[i]; if(!c||!c.link) return; gMark(id); closeSub(); openLink(c.link); }
 async function renderMyTop(){
+  renderMyHub();
   if(!me) return; const now=new Date(); const in7=new Date(Date.now()+7*864e5).toISOString();
   const wk=new Date(now); wk.setHours(0,0,0,0); wk.setDate(wk.getDate()-((wk.getDay()+6)%7)); const wkIso=wk.toISOString();
   const [rm, apps, fr, wks, psts, stash, pend] = await Promise.all([
@@ -5824,16 +5882,17 @@ function openSettings(){ openSettingsInner(); newsDot(); pushStatusText().then(t
 const NEWS_IMG=/^https:\/\/app\.knitup\.co\.kr\/images\/[A-Za-z0-9._-]+\.(jpg|jpeg|png|webp)$/;
 let newsRows=[], newsOpen=null;
 function newsSeen(){ try{ return +localStorage.getItem('kn_news_seen')||0; }catch(e){ return 0; } }
-async function newsDot(){ try{ const {data}=await sb.from('news_posts').select('published_at').order('published_at',{ascending:false}).limit(1); const t=data&&data[0]?Date.parse(data[0].published_at):0; const e=$('#newsDot'); if(e) e.hidden=!(t>newsSeen()); }catch(e){} }
-async function openNews(){
-  openSub('공지·새 소식','<p class="muted" style="margin-top:16px">불러오는 중…</p>');
+async function newsDot(){ try{ const {data}=await sb.from('news_posts').select('published_at').order('published_at',{ascending:false}).limit(1); const t=data&&data[0]?Date.parse(data[0].published_at):0; const e=$('#newsDot'); if(e) e.hidden=!(t>newsSeen()); myDotSet(t>newsSeen()); }catch(e){} }
+function openNews(){ return openHub('news'); }
+async function newsLoad(){
   const {data,error}=await sb.from('news_posts').select('id,kind,version,title,body,image_url,published_at').order('published_at',{ascending:false}).limit(50);
-  if(error){ $('#subBody').innerHTML='<p class="muted" style="margin-top:16px">소식을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.</p>'; return; }
+  if(error){ const e0=$('#hubBody')||$('#subBody'); if(e0) e0.innerHTML='<p class="muted" style="margin-top:16px">소식을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.</p>'; return; }
   const seen=newsSeen(); newsRows=(data||[]).map(r=>({...r, t:Date.parse(r.published_at), isNew:Date.parse(r.published_at)>seen})); if(!seen) newsRows.forEach((r,i)=>{ r.isNew=i===0; }); newsOpen=null; renderNews();
   if(newsRows[0]) try{ localStorage.setItem('kn_news_seen', String(newsRows[0].t)); }catch(e){}
+  myDotSet(false);
 }
 function renderNews(){
-  const el=$('#subBody'); if(!el) return;
+  const el=$('#hubBody')||$('#subBody'); if(!el) return;
   if(!newsRows.length){ el.innerHTML='<p class="muted" style="margin-top:16px">아직 올라온 소식이 없어요.</p>'; return; }
   el.innerHTML=newsRows.map(r=>{ const d=new Date(r.t), day=String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0'), on=newsOpen===r.id;
     const tag=r.kind==='update'?('업데이트'+(r.version?' · '+esc(r.version):'')):'공지';
@@ -5848,7 +5907,7 @@ function openSettingsInner(){
     <div class="sgrp">프로필</div>
     <div class="slist">
       <button class="srow" onclick="closeSheet();openOnboard(true)"><span>프로필 편집<br><span class="muted">닉네임·소개·경력·만나기 좋은 시간</span></span><span class="car">›</span></button>
-      <label class="srow"><span>${ico('wave')} 뜨개 친구 찾기 <b id="waveState" style="font-size:.85rem">${isWaving(p)?'켜짐':'꺼짐'}</b><br><span class="muted" id="waveDesc">${waveDesc(p)}</span></span><input type="checkbox" id="waveChk" ${isWaving(p)?'checked':''} onchange="setWaveInSettings(this)"></label>
+
     </div>
     <div class="sgrp">내 뜨개</div>
     <div class="slist">
@@ -5872,7 +5931,7 @@ function openSettingsInner(){
     <div class="sgrp">도움</div>
     <div class="slist">
       ${supStatus?.supporter?`<button class="srow" onclick="closeSheet();openSupporters()"><span>${ico('party')} 1기 서포터즈 <span class="muted">${supStatus.segment||''}구간 ${supStatus['seg'+(supStatus.segment||1)]||0}점 · 누적 ${supStatus.total||0}</span></span><span class="car">›</span></button>`:''}
-      <button class="srow" onclick="closeSheet();openNews()"><span>공지·새 소식<span class="nwdot" id="newsDot" hidden></span><br><span class="muted">운영 공지와 업데이트 내용을 모아 봐요</span></span><span class="car">›</span></button>
+
       <button class="srow" onclick="closeSheet();openSupportRoom()"><span>${ico('yarn')} 뜨개동네 지기에게 말하기 <span class="authbadge" style="background:var(--sel)">운영진</span><br><span class="muted" id="supHint">궁금한 점·불편한 점·바라는 기능을 채팅으로 남겨 주세요</span></span><span class="car">›</span></button>
       <a class="srow" href="mailto:knitup.official@gmail.com"><span>이메일 문의</span><span class="car">›</span></a>
     </div>

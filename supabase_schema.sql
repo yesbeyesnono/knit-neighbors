@@ -2015,3 +2015,10 @@ insert into public.report_cases(post_id, author_id, asked_at, due_at)
 select 'da81f326-e4e8-407c-8c89-50de187dc87b', '4612d2c0-36ee-4667-bc20-64d607950806', '2026-11-15 11:35:30+09', '2026-11-18 11:35:30+09'
 where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50de187dc87b')
   and not exists (select 1 from public.report_cases where post_id = 'da81f326-e4e8-407c-8c89-50de187dc87b');
+
+-- ============================================================
+-- 125. 사용법 묶음 (2026-11-15) — 테이블·함수 변경 없음, app_config 값 하나
+-- ============================================================
+-- app_config.guides = {"topics":[{"id","title","sub","emoji","bg":"#rrggbb","cards":[{"img":"cert-1","title","body","btn","link":{"type":"view","view":"cert"}}]}]}
+--   img  : 이 저장소 docs/guides/<이름>.svg 의 이름만(소문자·숫자·-). link : 앱 openLink 가 아는 종류만(view: cert·skills·events·author·wave·meets·stash·support·map·comm·my …)
+-- 주제를 더하거나 문구를 고치려면 이 값만 바꾸면 됨(앱 심사 불필요). 처음 값 = 완성작품 인증 5장

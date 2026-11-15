@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 -14 320 178" width="640" height="356"><rect x="-45" y="-14" width="320" height="178" fill="#E4ECF2"/><g font-family="Arial" font-size="9" font-weight="700" fill="#55604F"><text x="30" y="24">입문</text><text x="78" y="24">초급</text><text x="126" y="24">중급</text><text x="174" y="24">상급</text></g>
+<g stroke="#9DB0BF" stroke-width="2" fill="none"><path d="M58 46 H74 M58 46 Q66 46 66 78 H74 M106 46 H122 M106 78 H122 M154 46 H170 M106 110 Q114 110 114 78"/></g>
+<g><rect x="22" y="32" width="36" height="28" rx="8" fill="#3E6B48"/><rect x="22" y="64" width="36" height="28" rx="8" fill="#3E6B48"/><rect x="22" y="96" width="36" height="28" rx="8" fill="#3E6B48"/>
+<rect x="70" y="32" width="36" height="28" rx="8" fill="#3E6B48"/><rect x="70" y="64" width="36" height="28" rx="8" fill="#3E6B48"/><rect x="70" y="96" width="36" height="28" rx="8" fill="#fff" stroke="#9DB0BF" stroke-width="1.5"/>
+<rect x="118" y="32" width="36" height="28" rx="8" fill="#E2A91C"/><rect x="118" y="64" width="36" height="28" rx="8" fill="#fff" stroke="#9DB0BF" stroke-width="1.5"/>
+<rect x="166" y="32" width="36" height="28" rx="8" fill="#fff" stroke="#9DB0BF" stroke-width="1.5" stroke-dasharray="4 3"/></g>
+<g stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M33 46 l5 5 9 -9"/><path d="M33 78 l5 5 9 -9"/><path d="M33 110 l5 5 9 -9"/><path d="M81 46 l5 5 9 -9"/><path d="M81 78 l5 5 9 -9"/></g>
+<text x="136" y="51" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" font-family="Arial">NEW</text></svg>
