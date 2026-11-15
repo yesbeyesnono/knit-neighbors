@@ -2049,3 +2049,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   profiles.onboard_step smallint: 가입(프로필 만들기) 몇 단계까지 갔는지 1~4. 가입을 마친 뒤에는 바뀌지 않음
 --   onboard_step(p_step): 본인 것만, 큰 값으로만 갱신(authenticated). 콘솔 회원 › 프로필 미완료에 '미완료 · N단계'로 표시
 -- ============================================================
+
+-- ============================================================
+-- 130. 가게 소식 링크 (2026-11-16, 마이그레이션 shop_post_link)
+--   shop_posts.link text: 외부 링크 한 개. check shop_posts_link_chk = https 주소 · 300자 이내 · kind 가 class 가 아닐 때만
+-- ============================================================

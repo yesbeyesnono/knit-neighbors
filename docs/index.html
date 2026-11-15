@@ -1044,6 +1044,9 @@ body.kb #nav{display:none!important}
 .dfix{background:var(--color-primary-light);color:var(--color-primary-dark);margin:12px 0 0}.dfix b{display:block;font-size:.88rem;margin-bottom:4px}.dfix ul{margin:0;padding-left:1.1em}.dfix li{margin:2px 0}.dfix u{text-decoration:none;font-weight:800;color:var(--color-primary)}
 .btn.obnext.dis{opacity:.45}
 #v-onboard.edit #dongAlt{display:block}
+/* 가게 소식 링크 (2026-11-16) */
+.nlink .pglinks{margin:10px 0 4px;border-color:var(--color-primary)}.nlink .pglinks a{color:var(--color-primary)}
+.nlpv{margin-top:8px;font-size:.78rem;color:var(--ink2)}.nlpv b{display:inline-block;background:var(--color-primary-light);color:var(--color-primary-dark);border-radius:999px;padding:3px 10px;margin-left:4px;font-size:.78rem}
 </style>
 </head>
 <body>
@@ -1294,6 +1297,10 @@ body.kb #nav{display:none!important}
       </div>
       <div class="ccard"><div class="cfl">내용</div><textarea id="nBody" maxlength="500" placeholder="예: 이번 주 토요일까지 전 상품 10% 할인. 새로 들어온 실도 구경 오세요" style="min-height:110px"></textarea>
         <p class="muted" style="font-size:.78rem;margin:8px 0 0">팔로워에게 알림이 가고, 근처 이웃의 지도 핀에 종이 울려요. 클래스는 가게 화면의 [클래스 열기]에서 따로 열어요.</p></div>
+      <div class="ccard"><div class="cfl">링크 <span class="muted">선택 · 한 개</span></div>
+        <input id="nLink" maxlength="300" inputmode="url" autocapitalize="off" autocomplete="off" placeholder="https://… 구매·예약 페이지, 인스타그램 글" oninput="nLinkPv()">
+        <div id="nLinkPv" class="nlpv" hidden></div>
+        <p class="muted" style="font-size:.78rem;margin:8px 0 0">소식 아래에 버튼으로 보여요. 누르면 확인 창을 거쳐 열려요.</p></div>
     </div>
   </section>
 
@@ -2207,7 +2214,7 @@ async function openInquiry(kind, id){
 function pgToggle(id){ const e=document.getElementById('pgf-'+id); if(e) e.hidden=!e.hidden; }
 function clsTime(p){ const t=p?.extra?.starts_at||p?.ends_at||null; return t?new Date(t).getTime():Infinity; }
 function clsPast(p){ const t=clsTime(p); if(t===Infinity) return false; const x=p.extra||{}; const span = x.type==='course' ? Math.max(1,(x.sessions||1))*(x.cycle==='biweekly'?14:7)*864e5 : 6*3600e3; return t+span < Date.now(); }
-function spostCard(p, mine){ return `<div class="spost" id="sp-${p.id}"><span class="k ${p.kind==='class'?'class':''}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button><button class="menu" style="float:right;background:none;border:0;cursor:pointer;margin-right:10px" onclick="editShopPost('${p.id}')">수정</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`; }
+function spostCard(p, mine){ return `<div class="spost" id="sp-${p.id}"><span class="k ${p.kind==='class'?'class':''}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button><button class="menu" style="float:right;background:none;border:0;cursor:pointer;margin-right:10px" onclick="editShopPost('${p.id}')">수정</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.link&&p.kind!=='class'&&NEWS_LINK_RE.test(p.link)?`<div class="nlink" onclick="event.stopPropagation()">${linkList([{u:p.link}],'가게 소식 링크')}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`; }
 function pgClsRow(p, mine, label){ const x=p.extra||{}; const ap=classApps[p.id]||{}; const past=clsPast(p); const left = x.max ? Math.max(0, x.max-(ap.accepted||0)) : null;
   const sub=[x.starts_at?fmtWhen(x.starts_at):'', past?'':(left===null?'':(left?`자리 ${left}개 남음`:'마감')), x.fee?won(x.fee):(p.extra?.v?'무료':'')].filter(Boolean).join(' · ');
   return `<div class="pgli" onclick="pgToggle('${p.id}')"><div><b><span class="pgk ${past?'n':'c'}">${label||(past?'지난 클래스':'모집 중')}</span>${esc(p.title)}</b><div class="s">${esc(sub)}</div></div><span class="go">${past?'보기':'신청'} ›</span></div><div class="pgfull" id="pgf-${p.id}" hidden>${spostCard(p, mine)}</div>`; }
@@ -4569,9 +4576,14 @@ function openShopNewsForm(){
   if(!myShop) return toast('가게 계정만 올릴 수 있어요');
   closeSub(); closeSheet(); composeKind='shop'; sPhotos=[]; editNewsId=null; $('#v-shopform .top h1').textContent='가게 소식'; $('#shopPost').textContent='게시';
   if(!['compose','cert','meetform','classform','shopform'].includes(view)) composeBack=view;
-  $('#nTitle').value=''; $('#nBody').value=''; $('#nShopName').textContent='· '+myShop.name; $('#shopPost').disabled=false;
+  $('#nTitle').value=''; $('#nBody').value=''; $('#nLink').value=''; nLinkPv(); $('#nShopName').textContent='· '+myShop.name; $('#shopPost').disabled=false;
   renderShopNewsPhotos(); show('shopform'); $('#v-shopform .body').scrollTop=0;
 }
+// 가게 소식 링크(schema 130): 한 개, https 주소만. 소식에는 버튼으로 보이고 누르면 확인 시트(openExt)
+const NEWS_LINK_RE=/^https:\/\/[A-Za-z0-9.-]+\.[A-Za-z]{2,}([\/?#][^\s<>"']*)?$/;
+function newsLink(){ let v=($('#nLink')?.value||'').trim(); if(!v) return { url:null }; if(/^http:\/\//i.test(v)) v='https://'+v.slice(7); else if(!/^[a-z][a-z0-9+.-]*:/i.test(v)) v='https://'+v;
+  if(v.length>300 || !NEWS_LINK_RE.test(v)) return { err:'링크 주소를 확인해 주세요 (https:// 로 시작하는 주소 한 개)' }; return { url:v }; }
+function nLinkPv(){ const el=$('#nLinkPv'); if(!el) return; const nl=newsLink(); if(!nl.url){ el.hidden=!nl.err; el.textContent=nl.err?'주소를 끝까지 적어 주세요':''; return; } const i=linkInfo(nl.url); el.hidden=false; el.innerHTML=`소식에 이렇게 보여요 <b>${esc(i.n)} ↗</b>`; }
 async function submitShopNews(){
   const b=$('#shopPost'); b.disabled=true;
   try{
@@ -4579,14 +4591,15 @@ async function submitShopNews(){
     const title=$('#nTitle').value.trim(); if(!title) throw new Error('제목을 적어 주세요');
     const body=$('#nBody').value.trim(); if(!body && !sPhotos.length) throw new Error('내용이나 사진을 넣어 주세요');
     await loadBanned(); if(hasBanned(title)||hasBanned(body)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+    const nl=newsLink(); if(nl.err) throw new Error(nl.err); const link=nl.url;
     const photos = await uploadPhotos(sPhotos);
     const ends = null;   // 마감일 칸은 2026-11-13 대표 지시로 없앰
     if(editNewsId){
-      const { error:e2 } = await sb.from('shop_posts').update({ title, body: body||null, photos, edited_at: new Date().toISOString() }).eq('id', editNewsId);
+      const { error:e2 } = await sb.from('shop_posts').update({ title, body: body||null, photos, link, edited_at: new Date().toISOString() }).eq('id', editNewsId);
       if(e2) throw new Error(e2.message);
       editNewsId=null; sPhotos=[]; toast('고쳤어요'); composeBack=null; b.disabled=false; return openShop(myShop.id);
     }
-    const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind: 'notice', title, body: body||null, photos, ends_at: ends });
+    const { error } = await sb.from('shop_posts').insert({ shop_id: myShop.id, author_id: me.id, kind: 'notice', title, body: body||null, photos, ends_at: ends, ...(link?{ link }:{}) });
     if(error) throw new Error(error.message);
     sPhotos=[]; toast('소식을 올렸어요. 팔로워에게 알림이 갔어요'); composeBack=null; return openShop(myShop.id);
   }catch(e){ toast(e.message); }
@@ -4652,7 +4665,7 @@ async function editClassOpen(p){
 function editNewsOpen(p){
   openShopNewsForm(); if(view!=='shopform') return;
   editNewsId=p.id; $('#v-shopform .top h1').textContent='가게 소식 수정'; $('#shopPost').textContent='저장';
-  $('#nTitle').value=p.title||''; $('#nBody').value=p.body||''; sPhotos=(p.photos||[]).map(u=>({ url:u, old:true })); renderShopNewsPhotos();
+  $('#nTitle').value=p.title||''; $('#nBody').value=p.body||''; $('#nLink').value=p.link||''; nLinkPv(); sPhotos=(p.photos||[]).map(u=>({ url:u, old:true })); renderShopNewsPhotos();
 }
 async function openClassForm(){
   const asAuthor = !myShop && !!myProfile?.is_author;
