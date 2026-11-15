@@ -588,7 +588,7 @@ const TK_SEGS=[['need','답장 필요'],['wait','기다리는 중'],['all','대�
 // 회원 상세 → [대화하기]: 그 회원의 지기 채팅방을 찾아(없으면 만들어) 지기 문의함의 대화 화면에서 바로 연다(2026-11-15 대표, schema 123)
 async function talkWith(uid, nick){ const {data:room,error}=await sb.rpc('admin_talk_room',{p_user:uid}); if(error||!room) return toast(error?.message||'대화방을 열지 못했어요'); let seg='all'; try{ const has=async g=>{ const {data}=await sb.rpc('admin_talk_list',{p:{seg:g,q:nick||'',tag:''}}); return ((data&&data.rows)||[]).some(x=>x.room===room); }; if(!(await has('all'))) seg=(await has('auto'))?'auto':'all'; }catch(e){}   // 환영 인사만 간 회원의 방은 '환영 인사만' 묶음에 있음
   closePanel(); TK.tab='talk'; TK.seg=seg; TK.q=nick||''; TK.tag=''; TK.sel=room; if(location.hash==='#support') route(); else location.hash='#support'; }
-function talkSet(k,v){ TK[k]=v; if(k==='seg'||k==='q'||k==='tag') TK.sel=null; route(); }
+function talkSet(k,v){ TK[k]=v; if(k==='seg'||k==='q'||k==='tag') TK.sel=null; if(k==='seg') TK.q=''; if(k==='q' && v) TK.seg='all'; route(); }
 VIEWS.support = async(arg)=>{
   if(arg) TK.tab='tickets';
   const [{data:tks},{data:st}] = await Promise.all([
@@ -613,15 +613,16 @@ VIEWS.support = async(arg)=>{
   }
   let {data:ls,error}=await sb.rpc('admin_talk_list',{p:{seg:TK.seg||'all',q:TK.q,tag:TK.tag}}); if(error) throw error;
   if(!TK.seg){ const c0=ls.counts||{}; TK.seg=c0.need>0?'need':c0.wait>0?'wait':'all'; if(TK.seg!=='all'){ const r2=await sb.rpc('admin_talk_list',{p:{seg:TK.seg,q:TK.q,tag:TK.tag}}); if(r2.error) throw r2.error; ls=r2.data; } }
+  if(TK.q && TK.seg==='all' && !(ls.rows||[]).length){ const r3=await sb.rpc('admin_talk_list',{p:{seg:'auto',q:TK.q,tag:TK.tag}}); if(!r3.error && ((r3.data&&r3.data.rows)||[]).length){ ls=r3.data; TK.seg='auto'; } }
   const c=ls.counts||{}, n=x=>Number(x||0).toLocaleString(); TK.rows=ls.rows||[];
   const tm=t=>{ const d=new Date(t), now=new Date(); return d.toDateString()===now.toDateString()?`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:`${d.getMonth()+1}.${d.getDate()}`; };
   const isNew=t=>Date.now()-new Date(t).getTime()<86400e3;
   const cv=r=>`<div class="tkcv ${TK.sel===r.room?'on':''}" data-room="${r.room}" onclick="talkOpen('${r.room}')"><div class="h"><b>${esc(r.nick||'(이름 없음)')}</b><small>${esc(r.dong||'동네 미설정')}${isNew(r.joined)?' · 새 회원':''}</small><time>${tm(r.at)}</time></div>
     <p>${r.from_member?'':'<span class="muted">지기: </span>'}${esc(r.body||(r.photo?'(사진)':''))}</p>${r.need?'<span class="tkt rd">답장 필요</span>':r.unread?'<span class="tkt rd">안 읽음</span>':r.wait?'<span class="tkt g">읽음</span>':''}${r.human_msgs>0&&!r.push_on?'<span class="tkt g">앱 알림 꺼짐</span>':''}${(r.tags||[]).map(t=>`<span class="tkt y">${esc(t)}</span>`).join('')}</div>`;
   $('#main').innerHTML=`${head}
-  <div class="mbtiles"><div class="mbtile"><b style="${c.need?'color:var(--red)':''}">${n(c.need)}</b><span>답장이 필요한 회원</span></div><div class="mbtile"><b>${n(c.wait)}</b><span>내가 보내고 답을 기다리는 중 · 안 읽음 ${n(c.wait_unread)}</span></div><div class="mbtile"><b>${n(c.talked)}</b><span>대화가 오간 회원</span></div><div class="mbtile"><b>${n(c.auto)}</b><span>환영 인사만 간 회원 (아직 대화 없음)</span></div></div>
+  <div class="mbtiles"><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','need')"><b style="${c.need?'color:var(--red)':''}">${n(c.need)}</b><span>답장이 필요한 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','wait')"><b>${n(c.wait)}</b><span>내가 보내고 답을 기다리는 중 · 안 읽음 ${n(c.wait_unread)}</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','all')"><b>${n(c.talked)}</b><span>대화가 오간 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','auto')"><b>${n(c.auto)}</b><span>환영 인사만 간 회원 (아직 대화 없음)</span></div></div>
   <div class="tkbox">
-    <div class="tkl"><input placeholder="닉네임·동네·대화 내용 검색 후 Enter" value="${esc(TK.q)}" onkeydown="if(event.key==='Enter')talkSet('q',this.value.trim())">
+    <div class="tkl"><input placeholder="닉네임·동네·대화 내용 검색 후 Enter" value="${esc(TK.q)}" onkeydown="if(event.key==='Enter')talkSet('q',this.value.trim())">${TK.q?`<div style="margin:6px 2px 0;font-size:12px"><span style="background:#DDE8D6;border-radius:999px;padding:3px 6px 3px 10px;cursor:pointer" onclick="talkSet('q','')">검색: ${esc(TK.q)} ✕</span></div>`:''}
       <div class="tkseg">${TK_SEGS.map(([k,l])=>`<button class="${TK.seg===k?'on':''}" onclick="talkSet('seg','${k}')">${l}<em>${n(c[k])}</em></button>`).join('')}${(ls.tags||[]).length?`<select onchange="talkSet('tag',this.value)"><option value="">꼬리표</option>${ls.tags.map(t=>`<option${TK.tag===t?' selected':''}>${esc(t)}</option>`).join('')}</select>`:''}</div>
       <div class="tklist" id="tkList">${TK.rows.map(cv).join('')||`<div class="tkempty">${TK.seg==='need'?'답장을 기다리는 회원이 없어요':TK.seg==='wait'?'답을 기다리는 대화가 없어요':'조건에 맞는 대화가 없어요'}</div>`}${ls.total>TK.rows.length?`<div class="tkempty">${n(ls.total-TK.rows.length)}명 더 있어요 · 검색으로 좁혀 보세요</div>`:''}</div>
       <div class="tkfold" onclick="talkSet('seg','${TK.seg==='auto'?'all':'auto'}')"><span>환영 인사만 간 회원 ${n(c.auto)}명</span><span>${TK.seg==='auto'?'접기':'펼치기'}</span></div></div>
