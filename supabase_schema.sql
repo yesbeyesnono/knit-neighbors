@@ -2027,3 +2027,9 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 126. 공지·새 소식 글의 버튼 (2026-11-15)
 -- ============================================================
 -- news_posts.btn text, link jsonb(type: view|post|event|meetup). 첫 화면 공지(home_notice)의 btn·link 를 _news_from_home_notice 가 함께 복사
+
+-- ============================================================
+-- 127. 가게 핀도 지도 어디서나 (2026-11-15, 마이그레이션 shops_everywhere)
+--   app_config.shops_everywhere = true 인 동안 nearby_shops 가 거리와 상관없이 공개 가게 전부(가까운 순 200개)를 돌려준다.
+--   끄려면 update app_config set value='false' where key='shops_everywhere'; (예전처럼 반경 안만)
+-- ============================================================
