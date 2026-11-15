@@ -114,6 +114,22 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
 .tkitem{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:13px;cursor:pointer}.tkitem:hover{background:#F2F6EE;border-color:var(--olive)}.tkitem>span:first-child{font-size:11.5px;color:var(--ink3)}.tkitem b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tkitem small{color:var(--ink2);font-size:12px}.tkitem i{font-style:normal;color:var(--olive);font-weight:700}
 .tktl{font-size:12.5px;color:var(--ink2);border-left:2px solid var(--line);padding-left:10px;margin-bottom:14px}.tktl div{padding:2px 0;display:flex;gap:6px}.tktl time{color:var(--ink3);flex:none;width:74px}.tktl span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tktl a{color:var(--olive);font-weight:700;margin-left:auto;flex:none;font-size:12px;text-decoration:none}
 .tkr textarea{min-height:58px;background:#FFFDF4;font-size:13px;margin:0 0 8px}.tkacts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.tkempty{margin:auto;color:var(--ink3);font-size:13.5px;text-align:center;padding:24px}
+.tkback,.tkinfo,.tkrx{display:none}
+@media(max-width:760px){
+  .tktiles{display:none}
+  .tkbox{display:block;height:auto;min-height:0;border:0;border-radius:0;background:none;overflow:visible;margin:0 -12px}
+  .tkl{border:0;background:#fff;border-top:1px solid var(--line)}.tkl input{font-size:16px}.tklist{max-height:none!important}.tkcv{padding:14px 14px}.tkcv p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tkm,.tkr{display:none}
+  .tkbox.open .tkm{display:flex;position:fixed;inset:0;height:100dvh;z-index:60;border:0;background:#FBFAF6}
+  .tkbox.open .tkmh{min-height:52px;padding:0 8px 0 4px;gap:6px}.tkbox.open .tkmh small{display:none}
+  .tkback,.tkinfo{display:inline-flex;align-items:center;justify-content:center;border:0;background:none;font:inherit;cursor:pointer;height:44px}
+  .tkback{width:44px;font-size:26px;line-height:1}.tkinfo{margin-left:auto;font-size:13px;font-weight:700;color:var(--olive);padding:0 10px}
+  .tkth{max-height:none!important;padding:12px}.tkth .msg{max-width:86%;font-size:15px;overflow-wrap:anywhere}
+  .tkcmp{padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}.tkcmp textarea{min-height:44px;max-height:120px;font-size:16px}
+  .tkcmp .cb{margin-top:6px;gap:6px}.tkcmp .cb label{font-size:12px;flex-basis:100%;margin:0 0 2px}.tkcmp .cb button.p{margin-left:auto;min-width:96px}.tkcmp .cb button{height:36px;padding:0 10px}.tkcmp .cb button.p{padding:0 16px}
+  .tkbox.open.info .tkr{display:block;position:fixed;inset:0;height:100dvh;z-index:70;background:#fff;overflow-y:auto;overflow-x:hidden;padding:60px 14px 30px}
+  .tkbox.open.info .tkrx{display:block;position:fixed;top:8px;right:10px;z-index:71;border:1px solid var(--line);background:#fff;border-radius:999px;height:40px;padding:0 14px;font:inherit;font-weight:700}
+}
 @media(max-width:1100px){.tkbox{grid-template-columns:1fr;height:auto}.tkl,.tkm{border-right:0;border-bottom:1px solid var(--line)}.tklist{max-height:320px}.tkth{max-height:420px}}
 /* 오늘 › 채팅 점검(schema 96) */
 .cssum{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0}.cssum div{background:var(--soft);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--ink2)}.cssum b{display:block;font-size:20px;color:var(--ink)}
@@ -620,17 +636,18 @@ VIEWS.support = async(arg)=>{
   const cv=r=>`<div class="tkcv ${TK.sel===r.room?'on':''}" data-room="${r.room}" onclick="talkOpen('${r.room}')"><div class="h"><b>${esc(r.nick||'(이름 없음)')}</b><small>${esc(r.dong||'동네 미설정')}${isNew(r.joined)?' · 새 회원':''}</small><time>${tm(r.at)}</time></div>
     <p>${r.from_member?'':'<span class="muted">지기: </span>'}${esc(r.body||(r.photo?'(사진)':''))}</p>${r.need?'<span class="tkt rd">답장 필요</span>':r.unread?'<span class="tkt rd">안 읽음</span>':r.wait?'<span class="tkt g">읽음</span>':''}${r.human_msgs>0&&!r.push_on?'<span class="tkt g">앱 알림 꺼짐</span>':''}${(r.tags||[]).map(t=>`<span class="tkt y">${esc(t)}</span>`).join('')}</div>`;
   $('#main').innerHTML=`${head}
-  <div class="mbtiles"><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','need')"><b style="${c.need?'color:var(--red)':''}">${n(c.need)}</b><span>답장이 필요한 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','wait')"><b>${n(c.wait)}</b><span>내가 보내고 답을 기다리는 중 · 안 읽음 ${n(c.wait_unread)}</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','all')"><b>${n(c.talked)}</b><span>대화가 오간 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','auto')"><b>${n(c.auto)}</b><span>환영 인사만 간 회원 (아직 대화 없음)</span></div></div>
+  <div class="mbtiles tktiles"><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','need')"><b style="${c.need?'color:var(--red)':''}">${n(c.need)}</b><span>답장이 필요한 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','wait')"><b>${n(c.wait)}</b><span>내가 보내고 답을 기다리는 중 · 안 읽음 ${n(c.wait_unread)}</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','all')"><b>${n(c.talked)}</b><span>대화가 오간 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','auto')"><b>${n(c.auto)}</b><span>환영 인사만 간 회원 (아직 대화 없음)</span></div></div>
   <div class="tkbox">
     <div class="tkl"><input placeholder="닉네임·동네·대화 내용 검색 후 Enter" value="${esc(TK.q)}" onkeydown="if(event.key==='Enter')talkSet('q',this.value.trim())">${TK.q?`<div style="margin:6px 2px 0;font-size:12px"><span style="background:#DDE8D6;border-radius:999px;padding:3px 6px 3px 10px;cursor:pointer" onclick="talkSet('q','')">검색: ${esc(TK.q)} ✕</span></div>`:''}
       <div class="tkseg">${TK_SEGS.map(([k,l])=>`<button class="${TK.seg===k?'on':''}" onclick="talkSet('seg','${k}')">${l}<em>${n(c[k])}</em></button>`).join('')}${(ls.tags||[]).length?`<select onchange="talkSet('tag',this.value)"><option value="">꼬리표</option>${ls.tags.map(t=>`<option${TK.tag===t?' selected':''}>${esc(t)}</option>`).join('')}</select>`:''}</div>
       <div class="tklist" id="tkList">${TK.rows.map(cv).join('')||`<div class="tkempty">${TK.seg==='need'?'답장을 기다리는 회원이 없어요':TK.seg==='wait'?'답을 기다리는 대화가 없어요':'조건에 맞는 대화가 없어요'}</div>`}${ls.total>TK.rows.length?`<div class="tkempty">${n(ls.total-TK.rows.length)}명 더 있어요 · 검색으로 좁혀 보세요</div>`:''}</div>
       <div class="tkfold" onclick="talkSet('seg','${TK.seg==='auto'?'all':'auto'}')"><span>환영 인사만 간 회원 ${n(c.auto)}명</span><span>${TK.seg==='auto'?'접기':'펼치기'}</span></div></div>
     <div class="tkm" id="tkMid"><div class="tkempty">왼쪽에서 대화를 골라 주세요</div></div>
-    <div class="tkr" id="tkRight"></div>
+    <div class="tkr" id="tkRight"></div><button type="button" class="tkrx" onclick="this.closest('.tkbox').classList.remove('info')">✕ 닫기</button>
   </div>`;
   if(TK.sel && TK.rows.some(r=>r.room===TK.sel)) talkOpen(TK.sel); else if(TK.rows.length && innerWidth>1100) talkOpen(TK.rows[0].room);
 };
+function talkBack(){ const b=document.querySelector('.tkbox'); if(b) b.classList.remove('open','info'); TK.sel=null; document.querySelectorAll('.tkcv').forEach(e=>e.classList.remove('on')); }   // 휴대폰: 대화 → 목록으로
 async function talkOpen(room){
   const r=TK.rows.find(x=>x.room===room); if(!r) return; TK.sel=room; const my=++TK.n;
   document.querySelectorAll('.tkcv').forEach(e=>e.classList.toggle('on', e.dataset.room===room));
@@ -639,7 +656,8 @@ async function talkOpen(room){
   const M=msgs||[]; const lastHuman=[...M].reverse().find(m=>m.sender_id===SUPPORT_ID && !m.by_ai);
   const hm=t=>{ const d=new Date(t); return `${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
   const lv=mem?[mem.lc?`코바늘 ${mem.lc}단계`:'', mem.lk?`대바늘 ${mem.lk}단계`:''].filter(Boolean).join(' · '):'';
-  $('#tkMid').innerHTML=`<div class="tkmh"><b>${esc(r.nick||'(이름 없음)')}</b><small>${esc([r.dong, lv].filter(Boolean).join(' · '))}</small></div>
+  $('#tkMid').closest('.tkbox')?.classList.add('open');
+  $('#tkMid').innerHTML=`<div class="tkmh"><button type="button" class="tkback" aria-label="목록으로" onclick="talkBack()">‹</button><b>${esc(r.nick||'(이름 없음)')}</b><small>${esc([r.dong, lv].filter(Boolean).join(' · '))}</small><button type="button" class="tkinfo" onclick="this.closest('.tkbox').classList.add('info')">회원 정보</button></div>
     <div class="tkth" id="tkMsgs">${M.map(m=>{ const sup=m.sender_id===SUPPORT_ID; const read=lastHuman&&m.id===lastHuman.id ? (r.member_read && new Date(r.member_read)>=new Date(m.created_at) ? ' · <i>읽음</i>' : ' · <b>아직 안 읽음</b>') : '';
       return `<div class="msg ${sup?'sup':''} ${sup&&m.by_ai?'auto':''}">${esc(m.body||'')}${m.photo_url?`<img class="cph" data-ref="${esc(m.photo_url)}" alt="사진 불러오는 중…" style="display:block;max-width:240px;width:100%;border-radius:10px;margin-top:4px;background:#e9e9e9;min-height:60px;cursor:pointer" onclick="window.open(this.src,'_blank')">`:''}</div><div class="meta ${sup?'s':''}">${sup?(m.by_ai?'자동':'대표님이 보냄')+' · ':''}${hm(m.created_at)}${read}</div>`; }).join('')||'<div class="tkempty">메시지 없음</div>'}</div>
     <div class="tkcmp"><textarea id="tkReply" placeholder="답장 내용 (Enter = 줄바꿈, Ctrl+Enter = 보내기)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))talkSend()"></textarea>
