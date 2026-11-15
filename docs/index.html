@@ -2123,8 +2123,8 @@ async function fetchPins(){
     const px=(a,b)=>{ const k=Math.cos(a.lat*Math.PI/180)||1; return Math.hypot((b.lng-a.lng)*ppd, (b.lat-a.lat)*ppd/k); };
     const groups=[]; list.forEach(p=>{ const g=groups.find(g=>px(g[0], p)<44); if(g) g.push(p); else groups.push([p]); });
     groups.forEach(g=>{ const n=g.length; if(n<2) return; const cx=g.reduce((t,p)=>t+p.lng,0)/n, cy=g.reduce((t,p)=>t+p.lat,0)/n; const k=Math.cos(cy*Math.PI/180)||1;
-      const gap = g.some(p=>p.p&&p.p.is_author) ? 58 : 48; const r=Math.max(34, gap*n/(2*Math.PI));
-      g.sort((a,b)=>(a.lng-b.lng) || ((a.p&&a.p.id||'')<(b.p&&b.p.id||'')?-1:1));   // 늘 같은 순서로(움직일 때마다 자리가 바뀌지 않게)
+      const gap = g.some(p=>(p.p&&p.p.is_author)||p.sh||p.mt) ? 58 : 48; const r=Math.max(34, gap*n/(2*Math.PI));
+      const kid=x=>String((x.p&&x.p.id)||(x.sh&&x.sh.id)||(x.mt&&x.mt.id)||''); g.sort((a,b)=>(a.lng-b.lng) || (kid(a)<kid(b)?-1:1));   // 늘 같은 순서로(움직일 때마다 자리가 바뀌지 않게)
       g.forEach((p,i)=>{ let ox, oy; if(n<=3){ ox=(i-(n-1)/2)*gap; oy=0; } else { const a=i/n*2*Math.PI - Math.PI/2; ox=r*Math.cos(a); oy=r*Math.sin(a); }
         p.lng=cx + ox/ppd; p.lat=cy - oy*k/ppd; }); });
   };
@@ -2136,11 +2136,15 @@ async function fetchPins(){
   if(filter.mode==='friends'){ const ids=new Set(await friendIds()); shown = shown.filter(p=>ids.has(p.id)); }
   if(filter.mode==='wave') shown = shown.filter(p=>p.waving);
   if(filter.mode==='author') shown = shown.filter(p=>p.is_author);
-  const pts = shown.map(p=>({lat:p.lat,lng:p.lng,p})); if(mePin) pts.push(mePin); spread(pts);
+  const pts = shown.map(p=>({lat:p.lat,lng:p.lng,p})); if(mePin) pts.push(mePin);
+  // 공방·모임 핀도 같은 묶음으로 벌린다(작가 핀이 자기 공방 핀을 덮지 않게)
+  if(filter.mode==='all' || filter.mode==='meet') (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) pts.push({lat:g.lat,lng:g.lng,mt:m}); });
+  if(filter.mode==='all' || filter.mode==='shop') (shops||[]).forEach(sh=>{ if(sh.lat!=null) pts.push({lat:sh.lat,lng:sh.lng,sh}); });
+  spread(pts);
   if(mePin) MapAdapter.marker({lat:mePin.lat,lng:mePin.lng,label:'나',avatar:myProfile.avatar_url,cls:'me',wave:isWaving(myProfile)});
   pts.filter(x=>x.p).forEach(({lat,lng,p})=>MapAdapter.marker({lat,lng,label:p.nickname,avatar:p.avatar_url,cls:p.is_author?'author':(p.craft==='knit'?'knit':''),wave:!!p.waving,onClick:()=>showPinCard(p)}));
-  if(filter.mode==='all' || filter.mode==='meet') (meetups||[]).forEach(m=>{ const g=parseGeo(m.location); if(g) MapAdapter.marker({...g,label:m.title,cls:'meet',onClick:()=>openMeetup(m.id)}); });
-  if(filter.mode==='all' || filter.mode==='shop') (shops||[]).forEach(sh=>{ if(sh.lat!=null) MapAdapter.marker({lat:sh.lat,lng:sh.lng,label:sh.name,cls:'shop',bell:!!sh.unread,onClick:()=>openShop(sh.id)}); });
+  pts.filter(x=>x.mt).forEach(({lat,lng,mt:m})=>MapAdapter.marker({lat,lng,label:m.title,cls:'meet',onClick:()=>openMeetup(m.id)}));
+  pts.filter(x=>x.sh).forEach(({lat,lng,sh})=>MapAdapter.marker({lat,lng,label:sh.name,cls:'shop',bell:!!sh.unread,onClick:()=>openShop(sh.id)}));
   let em=$('#mapview .mapempty'); if(!em){ em=document.createElement('div'); em.className='mapempty'; $('#mapview').appendChild(em); }
   const emptyNow = filter.mode!=='all' && !shown.length && !(filter.mode==='meet' && (meetups||[]).length) && !(filter.mode==='shop' && (shops||[]).length);
   if(!emptyNow && shown.some(p=>p.waving) && !localStorage.getItem('waveTipSeen')){ localStorage.setItem('waveTipSeen','1'); const tip='🙋 손 든 이웃은 뜨개 친구를 찾는 중이에요. 먼저 인사해 보세요'; em.textContent=tip; em.hidden=false; setTimeout(()=>{ if(em.textContent===tip) em.hidden=true; }, 6000); return void (pins = people||[]); }
