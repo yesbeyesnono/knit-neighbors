@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>내 프로필에 인스타그램 — 시안</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:#E7E4DB;padding:26px 22px 30px;color:#22362A;width:1420px}
+h1{font-size:21px;margin-bottom:6px}.sub{font-size:13.5px;color:#55604F;margin-bottom:20px;line-height:1.55}
+.row{display:flex;gap:22px}.col{width:326px}
+.cap{font-size:14.5px;font-weight:800;margin-bottom:3px}.cap2{font-size:12.5px;color:#55604F;line-height:1.45;min-height:56px;margin-bottom:8px}
+.ph{width:326px;height:640px;border-radius:26px;overflow:hidden;background:#fff;box-shadow:0 8px 26px rgba(0,0,0,.16);display:flex;flex-direction:column}
+.top{background:#22362A;color:#F3F1EA;height:52px;display:flex;align-items:center;gap:12px;padding:0 16px;flex:none;font-size:16px;font-weight:700}
+.top i{font-style:normal;font-size:20px;font-weight:400}.top em{margin-left:auto;font-style:normal;background:#3E6B48;border-radius:999px;padding:6px 14px;font-size:13px}
+.body{flex:1;overflow:hidden;padding:14px 16px;background:#F3F1EA}
+.body.w{background:#fff}
+.card{background:#fff;border-radius:16px;padding:14px;margin-bottom:10px}
+.lb{font-size:12.5px;font-weight:800;margin-bottom:7px;display:flex;align-items:center;gap:6px}.lb small{font-weight:500;color:#8A9384;font-size:11.5px}
+.in{border:1.5px solid #E2DFD5;border-radius:12px;height:44px;display:flex;align-items:center;padding:0 12px;font-size:14.5px;gap:6px}
+.in .at{color:#8A9384}.in.dis{background:#F3F1EA;color:#8A9384;border-style:dashed}
+.in.on{border-color:#3E6B48}
+.hint{font-size:12px;color:#55604F;line-height:1.5;margin-top:8px}
+.lock{display:flex;gap:10px;align-items:center;background:#FFF4CF;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:12.5px;line-height:1.45;color:#5F4D12}
+.lock b{display:block;font-size:13px;color:#3B2F06}
+.lock u{margin-left:auto;text-decoration:none;background:#3E6B48;color:#fff;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;white-space:nowrap}
+.seg{display:flex;background:#EBE9E0;border-radius:12px;padding:3px;font-size:13px;margin-top:10px}.seg span{flex:1;text-align:center;padding:8px 4px;border-radius:9px;color:#55604F}.seg .on{background:#fff;font-weight:800;color:#22362A}
+.gray{height:44px;border-radius:12px;background:#F3F1EA;margin-bottom:8px}
+.pf{display:flex;gap:12px;align-items:center;margin-bottom:10px}.av{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#C9D8BF,#9DB592);flex:none}
+.pf b{font-size:18px;display:block}.pf span{font-size:12.5px;color:#55604F;display:block;margin-top:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.chips span{background:#DDE8D6;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:600}
+.btns{display:flex;gap:8px;margin-bottom:12px}.btns span{flex:1;height:38px;border-radius:999px;display:grid;place-items:center;font-size:13.5px;font-weight:700}
+.btns .a{background:#DDE8D6}.btns .b{border:1.5px solid #E2DFD5}
+.ig{display:flex;align-items:center;gap:10px;border:1.5px solid #E2DFD5;border-radius:14px;padding:11px 12px;font-size:14px}
+.ig .ic{width:30px;height:30px;border-radius:9px;background:#DDE8D6;display:grid;place-items:center;flex:none}
+.ig .ic svg{width:17px;height:17px;stroke:#3E6B48;fill:none;stroke-width:1.8}
+.ig b{font-size:14px}.ig span{color:#8A9384;font-size:12.5px}.ig em{margin-left:auto;font-style:normal;color:#3E6B48}
+.ig.wait{border-style:dashed;background:#FBFAF6}
+.ig.wait u{margin-left:auto;text-decoration:none;background:#3E6B48;color:#fff;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;white-space:nowrap}
+.sec{font-size:13.5px;font-weight:800;margin:14px 0 8px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.grid i{aspect-ratio:1;border-radius:9px;background:#E9E3D3}.grid i:nth-child(2){background:#D9E2D0}.grid i:nth-child(3){background:#E8D9CF}
+.tabs{display:flex;background:#DDE8D6;border-radius:999px;padding:4px;margin-top:14px;font-size:13px}.tabs span{flex:1;text-align:center;padding:8px 0;border-radius:999px;font-weight:700;color:#3E6B48}.tabs .on{background:#3E6B48;color:#fff}
+.note{margin-top:22px;font-size:13.5px;line-height:1.75;background:#fff;border-radius:16px;padding:16px 18px}
+.note b{color:#22362A}.tag{display:inline-block;background:#3E6B48;color:#fff;border-radius:6px;font-size:11.5px;font-weight:700;padding:1px 7px;margin-right:6px}
+.tag.o{background:#8A9384}
+</style></head><body>
+<h1>내 프로필에 인스타그램 — 앱 안 활동과 묶기</h1>
+<div class="sub">인스타그램 아이디 한 칸을 넣되, <b>앱에서 먼저 활동해야 열리고 · 앱에서 먼저 인사해야 보이게</b> 합니다. 대화와 작품이 인스타그램으로 빠져나가지 않게 하는 장치입니다.</div>
+<div class="row">
+
+<div class="col"><div class="cap">① 프로필 편집 — 아직 잠김</div><div class="cap2">완성작품 인증이 없는 회원. 칸은 보이지만 잠겨 있고, 첫 인증을 올리면 열린다고 알려 줍니다.</div>
+<div class="ph"><div class="top"><i>‹</i>프로필 편집<em>저장</em></div><div class="body">
+<div class="card"><div class="lb">닉네임</div><div class="gray"></div><div class="lb">한 줄 소개</div><div class="gray" style="margin-bottom:0"></div></div>
+<div class="card"><div class="lb">인스타그램 <small>선택</small></div>
+<div class="in dis"><span class="at">@</span>아이디</div>
+<div class="lock"><div><b>첫 완성작품 인증을 올리면 열려요</b>뜨개동네에 작품을 먼저 보여 주세요</div><u>인증하러 가기</u></div></div>
+</div></div></div>
+
+<div class="col"><div class="cap">② 프로필 편집 — 열림</div><div class="cap2">인증이 1개 이상인 회원. 아이디만 적습니다(링크·다른 주소는 안 받음). 누구에게 보일지는 기본 '뜨친에게만'.</div>
+<div class="ph"><div class="top"><i>‹</i>프로필 편집<em>저장</em></div><div class="body">
+<div class="card"><div class="lb">닉네임</div><div class="gray"></div><div class="lb">한 줄 소개</div><div class="gray" style="margin-bottom:0"></div></div>
+<div class="card"><div class="lb">인스타그램 <small>선택</small></div>
+<div class="in on"><span class="at">@</span>knit_everyday</div>
+<div class="seg"><span class="on">뜨친에게만</span><span>모두에게</span></div>
+<div class="hint">뜨친이 되어 서로 첫 인사를 나눈 뒤에 보여요.<br>모르는 사람에게는 보이지 않아요.</div></div>
+</div></div></div>
+
+<div class="col"><div class="cap">③ 뜨친 프로필 — 인사 전</div><div class="cap2">뜨친은 됐지만 아직 대화가 없을 때. 인스타그램 자리에 '첫 인사를 나누면 보여요'와 인사 버튼.</div>
+<div class="ph"><div class="top"><i>‹</i><span style="margin-left:auto;font-weight:400">···</span></div><div class="body w">
+<div class="pf"><div class="av"></div><div><b>실타래</b><span>고양시 주엽2동 · 대바늘 3단계</span><span>퇴근하고 한 단씩 떠요</span></div></div>
+<div class="chips"><span>✓ 뜨친</span><span>같은 동네</span><span>시간 맞음</span></div>
+<div class="btns"><span class="a">채팅</span><span class="b">같이 뜰래요</span></div>
+<div class="ig wait"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r=".6"/></svg></div><div><b>인스타그램</b><br><span>첫 인사를 나누면 보여요</span></div><u>인사 건네기</u></div>
+<div class="sec">완성작품 3</div><div class="grid"><i></i><i></i><i></i></div>
+<div class="tabs"><span class="on">글</span><span>리포스트</span><span>인증</span></div>
+</div></div></div>
+
+<div class="col"><div class="cap">④ 뜨친 프로필 — 인사 뒤</div><div class="cap2">두 사람이 채팅에서 한 번씩 말한 뒤. 인스타그램이 열리고, 누르면 확인 창을 거쳐 열립니다.</div>
+<div class="ph"><div class="top"><i>‹</i><span style="margin-left:auto;font-weight:400">···</span></div><div class="body w">
+<div class="pf"><div class="av"></div><div><b>실타래</b><span>고양시 주엽2동 · 대바늘 3단계</span><span>퇴근하고 한 단씩 떠요</span></div></div>
+<div class="chips"><span>✓ 뜨친</span><span>같은 동네</span><span>시간 맞음</span></div>
+<div class="btns"><span class="a">채팅</span><span class="b">같이 뜰래요</span></div>
+<div class="ig"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r=".6"/></svg></div><b>인스타그램</b><span>@knit_everyday</span><em>↗</em></div>
+<div class="sec">완성작품 3</div><div class="grid"><i></i><i></i><i></i></div>
+<div class="tabs"><span class="on">글</span><span>리포스트</span><span>인증</span></div>
+</div></div></div>
+
+</div>
+<div class="note">
+<b>붙이는 장치 (추천 = 가 + 나)</b><br>
+<span class="tag">가</span><b>인증해야 열림</b> — 완성작품 인증을 1개 이상 올린 회원만 인스타그램을 넣을 수 있어요. 작품이 앱에 먼저 쌓입니다.<br>
+<span class="tag">나</span><b>인사해야 보임</b> — 뜨친이 된 뒤 채팅에서 서로 한 번씩 말해야 상대의 인스타그램이 보여요. 지금 막히는 '성사 뒤 채팅'을 밀어 줍니다.<br>
+<span class="tag o">다</span><b>쉬면 숨김(선택)</b> — 30일 동안 앱에 오지 않으면 인스타그램 줄이 숨겨지고, 다시 오면 저절로 보여요. 조금 엄격해서 권하지는 않습니다.<br>
+<span class="tag o">참고</span>'모두에게'를 고른 회원은 뜨친이 아닌 사람에게도 보이지만, 가(인증)는 똑같이 적용됩니다. 작가·공방의 링크 목록(여러 개)은 지금 그대로입니다.
+</div>
+</body></html>
