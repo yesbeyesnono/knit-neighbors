@@ -1009,6 +1009,7 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 #phv .phtop{flex:none;display:flex;justify-content:space-between;padding:max(14px,env(safe-area-inset-top)) 14px 6px}#phv .phtop button{width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:1rem;cursor:pointer;padding:0}
 #phv .phtrack{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}#phv .phtrack::-webkit-scrollbar{display:none}
 #phv .phs{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;align-items:center;justify-content:center;min-width:0}#phv .phs img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+#phv .phcap{flex:none;min-height:1.3em;text-align:center;font-size:.86rem;line-height:1.4;color:#fff;opacity:.92;padding:10px 20px 0}
 #phv .phdots{flex:none;display:flex;gap:6px;justify-content:center;min-height:6px;margin:12px 0 0;padding-bottom:max(22px,env(safe-area-inset-bottom))}#phv .phs{overflow:hidden}#phv .phs img{transform-origin:center center;will-change:transform}#phv .phtrack{touch-action:pan-x}#phv .phdots i{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.4}#phv .phdots i.on{opacity:1}
 #phv .phacts{flex:none;justify-content:center;gap:28px;margin:0;padding:12px 0 max(18px,env(safe-area-inset-bottom));color:#fff}#phv .phacts button{color:#fff;font-size:14px}#phv .phacts button.on{color:var(--tred,#e0245e)}#phv .phacts button svg{width:22px;height:22px}
 body.kb #nav{display:none!important}
@@ -4099,7 +4100,7 @@ function lvBadge(a){ return (a&&a.act_level>0?`<span class="lvb" title="활동 �
 function lvShort(a){ const parts=[]; if(a.level_crochet>0) parts.push('코바늘 '+a.level_crochet+'단계'); if(a.level_knit>0) parts.push('대바늘 '+a.level_knit+'단계'); return parts.join(' · '); }
 function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분'; if(d<86400)return Math.floor(d/3600)+'시간'; if(d<86400*7)return Math.floor(d/86400)+'일'; const x=new Date(t); return `${String(x.getFullYear()).slice(2)}. ${x.getMonth()+1}. ${x.getDate()}.`; }
 // 완성작품 인증의 기법 근접 사진(works.tech_photos): 그 사진 위에 보이는 기법 이름을 적어 준다(2026-11-15 대표). 크게 보기(사진 전체 화면)에는 아무것도 넣지 않는다
-function tphLabel(w, u){ const L=w && Array.isArray(w.tech_photos) ? w.tech_photos : null; if(!L) return ''; const x=L.find(y=>y && y.photo===u); if(!x || !Array.isArray(x.techniques) || !x.techniques.length) return ''; const nm=x.techniques.map(techName); return nm.slice(0,3).join(' · ')+(nm.length>3?` 외 ${nm.length-3}`:''); }
+function tphLabel(w, u, full){ const L=w && Array.isArray(w.tech_photos) ? w.tech_photos : null; if(!L) return ''; const x=L.find(y=>y && y.photo===u); if(!x || !Array.isArray(x.techniques) || !x.techniques.length) return ''; const nm=x.techniques.map(techName); if(full) return nm.join(' · ')+(x.memo?` — ${x.memo}`:''); return nm.slice(0,3).join(' · ')+(nm.length>3?` 외 ${nm.length-3}`:''); }
 function postCard(p, opts={}){
   const a = p.author||{}; const mine = p.author_id===me.id;
   const n = (p.photos||[]).length;
@@ -4113,7 +4114,7 @@ function postCard(p, opts={}){
       ${p.review_meetup?`<div class="rvtag" onclick="event.stopPropagation();openMeetup('${p.review_of}')">${ico('yarn')} 모임 후기 · ${esc(p.review_meetup.title)}</div>`:''}
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b>${lvBadge(a)}<time>${agoShort(p.created_at)}${p.edited_at?' · 수정됨':''}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}','${a.id}')">···</button></div>
       ${p.body?`<div class="txt">${bodyHtml(p)}</div>`:''}
-      ${n?`<div class="pgrid n${n}">${p.photos.map(u=>{ const im=`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`; const lb=tphLabel(p.work, u); return lb?`<span class="tph">${im}<em>${esc(lb)}</em></span>`:im; }).join('')}</div>`:''}
+      ${n?`<div class="pgrid n${n}">${p.photos.map(u=>{ const im=`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`; const lb=tphLabel(p.work, u); return lb?`<span class="tph">${im}<em data-f="${esc(tphLabel(p.work, u, true))}">${esc(lb)}</em></span>`:im; }).join('')}</div>`:''}
       ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work):''}${mine && p.work && !p.parent_id && !p.work.sponsored && !(Array.isArray(p.work.yarns)&&p.work.yarns.length) && !p.work.yarn_info ? `<div class="addy" onclick="event.stopPropagation();editPostOpen('${p.id}','yarn')"><span>＋ 어떤 실로 떴는지 적기</span><small>나에게만 보여요</small></div>` : ''}
       <div class="acts">
         <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${ICON.heart}<span>${p.like_count||''}</span></button>
@@ -4248,8 +4249,9 @@ function phvZoomBind(tr){
 }
 function openPhoto(u){
   const t = (typeof event!=='undefined' && event && event.target && event.target.tagName==='IMG') ? event.target : null;
-  let list=[u], idx=0;
-  if(t && t.parentElement){ const box=t.closest('.pgrid'); const imgs=box?[...box.querySelectorAll('img')]:[...t.parentElement.querySelectorAll(':scope > img')]; if(imgs.length>1){ list=imgs.map(i=>i.currentSrc||i.src); idx=Math.max(0, imgs.indexOf(t)); } }
+  let list=[u], idx=0, caps=[];   // caps = 기법 사진의 기법 이름(크게 볼 때 사진 아래 한 줄 — 2026-11-15 대표: 기법 사진만 문구 표시)
+  const capOf=i=>{ const e=i.closest('.tph')?.querySelector('em'); return e?(e.dataset.f||e.textContent||''):''; };
+  if(t && t.parentElement){ const box=t.closest('.pgrid'); const imgs=box?[...box.querySelectorAll('img')]:[...t.parentElement.querySelectorAll(':scope > img')]; if(imgs.length>1){ list=imgs.map(i=>i.currentSrc||i.src); caps=imgs.map(capOf); idx=Math.max(0, imgs.indexOf(t)); } else caps=[capOf(t)]; }
   let pid=null; if(t){ const g=t.closest('.pgroup'); if(g && t.closest('.post')) pid=g.id.replace(/^pg-/,''); else if(t.closest('.post.dpost') && typeof curPost!=='undefined' && curPost) pid=curPost.id; }
   const p = pid ? (findPost(pid) || (typeof curPost!=='undefined' && curPost && curPost.id===pid ? curPost : null)) : null; phvPost = p ? pid : null; phvDirty=false;
   let w=$('#phv'); if(!w){ w=document.createElement('div'); w.id='phv'; document.body.appendChild(w);
@@ -4258,10 +4260,11 @@ function openPhoto(u){
     document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('#phv')?.classList.contains('on')) closePhoto(); }); }
   w.innerHTML = `<div class="phtop"><button type="button" aria-label="닫기" onclick="closePhoto()">✕</button></div>
     <div class="phtrack" id="phTrack">${list.map(x=>`<div class="phs"><img src="${esc(x)}" alt="" referrerpolicy="no-referrer"></div>`).join('')}</div>
+    <div class="phcap" id="phCap">${esc(caps[idx]||'')}</div>
     <div class="phdots" id="phDots">${list.length>1?list.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join(''):''}</div>`;
   w.classList.add('on');
   const tr=$('#phTrack'); tr.scrollLeft = idx*tr.clientWidth;
-  tr.onscroll=()=>{ const i=Math.round(tr.scrollLeft/Math.max(1,tr.clientWidth)); [...$('#phDots').children].forEach((d,k)=>d.classList.toggle('on',k===i)); };
+  tr.onscroll=()=>{ const i=Math.round(tr.scrollLeft/Math.max(1,tr.clientWidth)); [...$('#phDots').children].forEach((d,k)=>d.classList.toggle('on',k===i)); const c=$('#phCap'); if(c) c.textContent=caps[i]||''; };
   phvZ={ s:0 }; phvZoomBind(tr);
 }
 function closePhoto(){ const w=$('#phv'); if(!w) return; w.classList.remove('on'); w.innerHTML='';
