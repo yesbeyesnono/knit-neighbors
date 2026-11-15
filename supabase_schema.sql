@@ -2022,3 +2022,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- app_config.guides = {"topics":[{"id","title","sub","emoji","bg":"#rrggbb","cards":[{"img":"cert-1","title","body","btn","link":{"type":"view","view":"cert"}}]}]}
 --   img  : 이 저장소 docs/guides/<이름>.svg 의 이름만(소문자·숫자·-). link : 앱 openLink 가 아는 종류만(view: cert·skills·events·author·wave·meets·stash·support·map·comm·my …)
 -- 주제를 더하거나 문구를 고치려면 이 값만 바꾸면 됨(앱 심사 불필요). 처음 값 = 완성작품 인증 5장
+
+-- ============================================================
+-- 126. 공지·새 소식 글의 버튼 (2026-11-15)
+-- ============================================================
+-- news_posts.btn text, link jsonb(type: view|post|event|meetup). 첫 화면 공지(home_notice)의 btn·link 를 _news_from_home_notice 가 함께 복사

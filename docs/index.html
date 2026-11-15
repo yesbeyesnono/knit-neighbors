@@ -5887,18 +5887,19 @@ function newsSeen(){ try{ return +localStorage.getItem('kn_news_seen')||0; }catc
 async function newsDot(){ try{ const {data}=await sb.from('news_posts').select('published_at').order('published_at',{ascending:false}).limit(1); const t=data&&data[0]?Date.parse(data[0].published_at):0; const e=$('#newsDot'); if(e) e.hidden=!(t>newsSeen()); myDotSet(t>newsSeen()); }catch(e){} }
 function openNews(){ return openHub('news'); }
 async function newsLoad(){
-  const {data,error}=await sb.from('news_posts').select('id,kind,version,title,body,image_url,published_at').order('published_at',{ascending:false}).limit(50);
+  const {data,error}=await sb.from('news_posts').select('*').order('published_at',{ascending:false}).limit(50);
   if(error){ const e0=$('#hubBody')||$('#subBody'); if(e0) e0.innerHTML='<p class="muted" style="margin-top:16px">소식을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.</p>'; return; }
   const seen=newsSeen(); newsRows=(data||[]).map(r=>({...r, t:Date.parse(r.published_at), isNew:Date.parse(r.published_at)>seen})); if(!seen) newsRows.forEach((r,i)=>{ r.isNew=i===0; }); newsOpen=null; renderNews();
   if(newsRows[0]) try{ localStorage.setItem('kn_news_seen', String(newsRows[0].t)); }catch(e){}
   myDotSet(false);
 }
+function newsGo(id){ const r=newsRows.find(x=>x.id===id); if(!r||!r.link) return; closeSub(); openLink(r.link); }   // 공지 글의 버튼(schema 126): 이벤트 안내처럼 이동할 곳이 있는 글
 function renderNews(){
   const el=$('#hubBody')||$('#subBody'); if(!el) return;
   if(!newsRows.length){ el.innerHTML='<p class="muted" style="margin-top:16px">아직 올라온 소식이 없어요.</p>'; return; }
   el.innerHTML=newsRows.map(r=>{ const d=new Date(r.t), day=String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0'), on=newsOpen===r.id;
     const tag=r.kind==='update'?('업데이트'+(r.version?' · '+esc(r.version):'')):'공지';
-    return `<div class="nwc" onclick="newsToggle('${r.id}')"><div class="nwm"><span class="nwtag">${tag}</span>${r.isNew?'<span class="nwtag n">새 글</span>':''}<span>${day}</span><span class="cv">${on?'⌃':'⌄'}</span></div><b>${esc(r.title)}</b>${on?`<div class="nwx">${esc(r.body)}</div>${r.image_url&&NEWS_IMG.test(r.image_url)?`<img src="${esc(r.image_url)}" alt="" loading="lazy" onerror="this.remove()">`:''}`:`<div class="nws">${esc(String(r.body).replace(/\s+/g,' '))}</div>`}</div>`; }).join('');
+    return `<div class="nwc" onclick="newsToggle('${r.id}')"><div class="nwm"><span class="nwtag">${tag}</span>${r.isNew?'<span class="nwtag n">새 글</span>':''}<span>${day}</span><span class="cv">${on?'⌃':'⌄'}</span></div><b>${esc(r.title)}</b>${on?`<div class="nwx">${esc(r.body)}</div>${r.image_url&&NEWS_IMG.test(r.image_url)?`<img src="${esc(r.image_url)}" alt="" loading="lazy" onerror="this.remove()">`:''}${r.btn&&r.link&&typeof r.link==='object'?`<button type="button" class="btn" style="width:100%;margin-top:12px" onclick="event.stopPropagation();newsGo('${r.id}')">${esc(r.btn)}</button>`:''}`:`<div class="nws">${esc(String(r.body).replace(/\s+/g,' '))}</div>`}</div>`; }).join('');
 }
 function newsToggle(id){ newsOpen=newsOpen===id?null:id; renderNews(); }
 function openSettingsInner(){
