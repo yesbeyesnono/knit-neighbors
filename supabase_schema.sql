@@ -2033,3 +2033,13 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   app_config.shops_everywhere = true 인 동안 nearby_shops 가 거리와 상관없이 공개 가게 전부(가까운 순 200개)를 돌려준다.
 --   끄려면 update app_config set value='false' where key='shops_everywhere'; (예전처럼 반경 안만)
 -- ============================================================
+
+-- ============================================================
+-- 128. 초대·안내 (2026-11-15, 마이그레이션 partner_invites — 원본 supabase/partner_invites.sql)
+--   partner_invites: 대표가 회원이 아닌 작가·공방께 보낸 초대 기록(이름·메모·보냄·연결된 회원). 관리자 함수로만 접근
+--   partner_guides: 작가 지정·가게 공개 순간 보낸 사용법 안내 기록(한 사람·종류당 한 번). seeded=이 기능 전부터 작가·가게(안 보냄)
+--   _partner_guide_send(user, kind): 지기 채팅(messages.card {type:guide,url,label}) + 🔔 notice(link view support). 승인 알림이 방금 갔으면 🔔 생략
+--   트리거(커밋 때 실행): profiles_partner_guide(is_author 켜짐) · shops_partner_guide(오너 있는 가게가 공개됨)
+--   partner_guide_nudge(): 크론 partner-guide-nudge 매일 10:00 KST — 안내 3일 뒤 대표 사진(가게는 매장 사진)이 없으면 remind 한 번(link view author_page/shop_edit)
+--   콘솔: admin_partner_list() · admin_partner_invite(kind,name,memo) · admin_partner_invite_set(id, op[sent|unsent|link|unlink|memo|delete], val)
+-- ============================================================

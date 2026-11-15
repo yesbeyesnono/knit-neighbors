@@ -1031,6 +1031,8 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 body.kb #nav{display:none!important}
 .wcard .wtop{display:flex;align-items:flex-end;gap:8px}.wcard .wl{flex:1;min-width:0}.wcard .wtg{flex:none;font-size:12.5px;font-weight:700;color:var(--olive);background:var(--chip);border-radius:999px;padding:3px 10px;cursor:pointer;white-space:nowrap}.wcard .wtg i{font-style:normal;font-size:.7em;vertical-align:1px}.wcard .tchips{display:none}.wcard.open .tchips{display:flex}.wcard .wyd{display:none}.wcard.open .wyd{display:block;margin-top:6px}.wcard .wyd summary{display:none}
 #v-comm > *{flex-shrink:0}   /* 옆으로 넘기는 줄(이벤트·태그)이 글이 많을 때 높이 0 으로 눌리던 문제 */
+/* 채팅 말풍선: 줄바꿈 그대로 보이게 (2026-11-15) */
+#msgs .bub{white-space:pre-wrap;overflow-wrap:anywhere}#msgs .bub .card-btns,#msgs .bub .who,#msgs .bub time{white-space:normal}
 </style>
 </head>
 <body>
@@ -3018,7 +3020,7 @@ async function openLink(l){
     if(l.type==='pattern') return typeof openPattern==='function' ? openPattern(l.id) : go('comm');
     if(l.type==='class'||l.type==='class_manage'){ const { data:p } = await sb.from('shop_posts').select('id,shop_id,author_id').eq('id', l.id).single(); if(!p) return go('comm'); if(p.shop_id) await openShop(p.shop_id); else { myTab='classes'; if(p.author_id===me.id) goMy('thread','classes'); else { await openProfile(p.author_id); const b=document.querySelector('#profTabs [data-t="classes"]'); if(b) b.click(); } } if(l.type==='class_manage') setTimeout(()=>openClassApplicants(l.id), 400); return; }
     if(l.type==='profile'){ if(l.id===me.id){ return goMy(l.tab?'thread':'dash', l.tab); } await openProfile(l.id); if(l.tab){ const b=document.querySelector('#profTabs [data-t=+l.tab+]'); if(b) b.click(); } return; }
-    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='orders') return openMyOrders(); if(v==='settlement') return openSettlement(); if(v==='store') return openStore(); if(v==='cert') return openCert(); if(v==='author') return openAuthorApply(); if(v==='wave'){ await go('my'); return toggleWave(); } if(v==='hub') return openHub('guide'); if(v==='meets') return questMeet(); if(v==='support') return openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(v==='ddeuchin'){ await loadEvents(); return ddOn()?openDdeuchin():go('comm'); } if(['map','comm','chats','my'].includes(v)) return go(v); }
+    if(l.type==='view'){ const v=l.view; if(v==='skills') return openSkills(); if(v==='supporters') return openSupporters(); if(v==='stash') return openStash(); if(v==='orders') return openMyOrders(); if(v==='settlement') return openSettlement(); if(v==='store') return openStore(); if(v==='cert') return openCert(); if(v==='author') return openAuthorApply(); if(v==='wave'){ await go('my'); return toggleWave(); } if(v==='hub') return openHub('guide'); if(v==='meets') return questMeet(); if(v==='support') return openSupportRoom(); if(v==='author_page') return (myProfile&&myProfile.is_author)?openAuthorPageEdit():openSupportRoom(); if(v==='shop_edit') return myShop?openShopEdit():openSupportRoom(); if(v==='shopclaim') return openShopClaim(); if(v==='events') return go('comm'); if(v==='ddeuchin'){ await loadEvents(); return ddOn()?openDdeuchin():go('comm'); } if(['map','comm','chats','my'].includes(v)) return go(v); }
   }catch(e){}
   return openSupportRoom();
 }
@@ -3389,11 +3391,14 @@ async function openRoom(id){
 // 채팅 안전 점검(schema 96): 기계가 위험 신호를 찾은 메시지 아래에, 받는 사람에게만 주의 문구를 작게 붙인다(보낸 사람에게는 안 보임). 점검이 꺼져 있으면 아무것도 안 옴
 const CAU_TEXT={money:'⚠ 돈을 먼저 보내 달라는 요청은 사기일 수 있어요. 불안하면 신고해 주세요.', offapp:'⚠ 앱 밖으로 연락을 옮기자는 요청은 조심해 주세요. 불안하면 신고해 주세요.'};
 async function chatWarns(room){ try{ const {data}=await sb.rpc('chat_warns',{p_room:room}); if(roomId!==room) return; (data||[]).forEach(w=>{ const el=document.querySelector(`#msgs .bub[data-mid="${w.message_id}"]`); if(!el || !CAU_TEXT[w.warn] || el.nextElementSibling?.classList.contains('cau')) return; const c=document.createElement('div'); c.className='cau'; c.textContent=CAU_TEXT[w.warn]; el.after(c); }); }catch(e){} }
+// 작가·가게 안내 카드(schema 128): 우리 홈페이지 안내만 연다
+const GUIDE_URL=/^https:\/\/app\.knitup\.co\.kr\/[a-z0-9-]+\.html$/;
+function guideCard(el){ const u=el.dataset.u||''; if(!GUIDE_URL.test(u)) return; if(isNative) CAP.Plugins.Browser.open({ url:u }); else window.open(u,'_blank','noopener'); }
 function nameOf(uid){ const m=roomInfo?.room_members.find(m=>m.profile_id===uid); return m?.profiles?.nickname||'알 수 없음'; }
 function appendMsg(m){
   const mine=m.sender_id===me.id; const el=document.createElement('div'); el.className='bub'+(mine?' me':''); if(m.id!=null) el.dataset.mid=m.id;
   let body = m.body?esc(m.body):''; if(m.place) body += `<div>${ico('location')} ${esc(m.place.name)}${m.place.address?`<div class="muted">${esc(m.place.address)}</div>`:''}</div>`; if(m.photo_url){ body+=`<img class="chatph" alt="" onclick="openPhoto(this.src)">`; if(!m.body) el.classList.add('ph'); }
-  if(m.card?.type==='supporters') body += `<div class="card-btns"><button onclick="joinSupporters()">시작하기</button><button class="o" onclick="openSupporterIntro()">자세히 보기</button></div>`; else if(m.card?.type==='supporters_full') body += `<div class="card-btns"><button onclick="joinWaitlist()">2기 알림 신청</button></div>`;
+  if(m.card?.type==='supporters') body += `<div class="card-btns"><button onclick="joinSupporters()">시작하기</button><button class="o" onclick="openSupporterIntro()">자세히 보기</button></div>`; else if(m.card?.type==='supporters_full') body += `<div class="card-btns"><button onclick="joinWaitlist()">2기 알림 신청</button></div>`; else if(m.card?.type==='guide' && GUIDE_URL.test(m.card.url||'')) body += `<div class="card-btns"><button data-u="${esc(m.card.url)}" onclick="guideCard(this)">${esc(m.card.label||'안내 보기')}</button></div>`;
   el.innerHTML = `${!mine&&roomInfo?.kind==='group'?`<span class="who">${esc(nameOf(m.sender_id))}</span>`:''}${!mine&&m.sender_id===SUPPORT_ID?`<span class="who">${m.by_ai?'지기 AI':'뜨개동네 지기'}</span>`:''}${body}<time>${hhmm(m.created_at)}</time>`;
   if(m.photo_url){ const img=el.querySelector('img.chatph'); resolveChatPhoto(img, m.photo_url).then(()=>{ img.onload=scrollMsgs; }); }
   $('#msgs').appendChild(el);

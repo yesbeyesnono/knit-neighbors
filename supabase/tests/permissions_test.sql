@@ -248,6 +248,8 @@ begin
   out := pg_temp.cnt(out, 'purchase_pattern(anon)', 'select case when public.purchase_pattern(gen_random_uuid()) is null then 0 else 1 end', 0);
   out := pg_temp.cnt(out, 'account_deletions(anon)', 'select count(*) from public.account_deletions', 0);   -- schema 77
   out := pg_temp.cnt(out, 'request_account_deletion(anon)', 'select case when public.request_account_deletion() is null then 0 else 1 end', 0);
+  out := pg_temp.cnt(out, 'partner_invites(anon)', 'select count(*) from public.partner_invites', 0);   -- schema 128
+  out := pg_temp.cnt(out, 'admin_partner_list(anon)', 'select jsonb_array_length(public.admin_partner_list())', 0);
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;

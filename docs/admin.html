@@ -214,6 +214,7 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
     <div class="grp">가게·작가·도안</div>
     <a href="#shops" data-v="shops">파트너 가게</a>
     <a href="#authors" data-v="authors">작가 신청</a>
+    <a href="#invites" data-v="invites">초대·안내</a>
     <a href="#patterns" data-v="patterns">도안</a>
     <a href="#store" data-v="store">상점 (Lab 커머스)</a>
     <div class="grp">실 데이터</div>
@@ -289,7 +290,7 @@ const NAV=[
   {l:'오늘', items:[['today','오늘 (지기 AI)'],['reports','신고함'],['support','지기 문의함']]},
   {l:'회원·커뮤니티', items:[['users','회원'],['content','글·인증'],['meetups','모임']]},
   {l:'알리기', items:[['broadcast','공지·알림 보내기'],['events','이벤트']]},
-  {l:'가게·작가·도안', items:[['shops','파트너 가게'],['authors','작가 신청'],['patterns','도안'],['store','상점 (Lab)']]},
+  {l:'가게·작가·도안', items:[['shops','파트너 가게'],['authors','작가 신청'],['invites','초대·안내'],['patterns','도안'],['store','상점 (Lab)']]},
   {l:'실 데이터', items:[['yarns','실 사전'],['stash','회원 실함']]},
   {l:'현황·분석', items:[['dash','대시보드'],['dong','동네 분포'],['ai-photos','AI 데이터',[['ai-photos','사진↔기법 라벨'],['ai-path','학습 경로'],['ai-qa','질문·해결 댓글'],['ai-yarn','실·바늘 통계']]],['export','내보내기']]},
   {l:'지기 AI 관리', items:[['rules','규칙'],['modlog','기록·되돌리기'],['kb','지식 창고'],['badwords','금지어',[['badwords','욕설 사전 (지기 AI 감지)'],['banned','금칙어 (글쓰기 차단)']]],['techcand','기법 후보']]},
@@ -1173,6 +1174,47 @@ VIEWS.authors = async()=>{
   ${(authors||[]).map(u=>`<tr class="clk" onclick="openUserPanel('${u.id}')"><td><b>${esc(u.nickname)}</b></td><td class="muted">${u.author_since?fmt(u.author_since):''}</td><td>${u.cert_count||0}</td><td>${(u.patterns||[]).length}</td><td><button onclick="event.stopPropagation();setAuthor('${u.id}',false)">작가 해제</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">없음</td></tr>'}</table><p class="muted">작가 이름을 누르면 프로필을 어떻게 꾸몄는지(사진·소개·작가 링크·연 클래스)를 볼 수 있어요.</p>`;
 };
 async function decideAuthor(id, ok){ let reason=null; if(!ok){ reason=prompt('반려 사유 (신청자에게 전달돼요)'); if(reason===null) return; } else if(!confirm('작가로 승인할까요?')) return; const {error}=await sb.rpc('admin_decide_author',{p_id:id,p_approve:ok,p_reason:reason}); if(error) return toast(error.message); toast(ok?'승인했어요':'반려했어요'); route(); }
+// ===== 초대·안내 (schema 128): 초대 링크 만들기 · 가입/승인/안내 현황. 사용법 안내는 작가 지정·가게 공개 순간 서버가 자동으로 보냄 =====
+const INV_URL={author:'https://app.knitup.co.kr/author-invite.html', shop:'https://app.knitup.co.kr/shops.html'};
+let INV={kind:'author', last:null};
+const invLink=(k,n)=>INV_URL[k]+'#'+encodeURIComponent(n);
+VIEWS.invites = async()=>{
+  const {data,error}=await sb.rpc('admin_partner_list'); if(error) throw error; const rows=data||[];
+  const md=t=>{ if(!t) return ''; const d=new Date(t); return (d.getMonth()+1)+'/'+d.getDate(); };
+  const isP=r=>r.kind==='author'?r.is_author:r.shop_active, cover=r=>r.kind==='author'?r.a_cover:r.s_cover, links=r=>r.kind==='author'?r.a_links:Number(r.s_links||0);
+  const inv=rows.filter(r=>r.id), n=x=>Number(x||0).toLocaleString(), sm=t=>t?`<small class="muted" style="display:block;font-size:.72rem">${t}</small>`:'';
+  const tiles=[[inv.filter(r=>r.sent_at).length,'초대 보냄'],[inv.filter(r=>r.profile_id).length,'가입함'],[rows.filter(isP).length,'작가·가게'],[rows.filter(r=>r.guide_at).length,'사용법 안내 받음'],[rows.filter(r=>isP(r)&&cover(r)).length,'대표 사진 넣음']];
+  const L=INV.last;
+  const cInv=r=>!r.id?'<span class="muted">—</span>':(r.sent_at?`<b style="color:var(--green)">보냄</b>${sm(md(r.sent_at))}`:`<button class="p" onclick="invSet('${r.id}','sent')">보냄으로 기록</button>`);
+  const cJoin=r=>r.profile_id?`<a href="javascript:void 0" onclick="openUserPanel('${r.profile_id}')"><b>${esc(r.nickname||'(이름 없음)')}</b></a>${sm(md(r.joined_at)+' 가입')}`:(r.id?`<button onclick="invLinkNick('${r.id}')">닉네임 연결</button>`:'');
+  const cPart=r=>r.kind==='author'
+    ? (r.is_author?`<b>작가</b>${sm(md(r.author_since))}`:(r.profile_id?`<button class="p" onclick="setAuthor('${r.profile_id}',true)">작가로 지정</button>`:'<span class="muted">—</span>'))
+    : (r.shop_active?`<b>가게</b>${sm(md(r.shop_at))}`:(r.shop_id?'<span class="chip y">공개 전</span>':(r.claim_status==='pending'?'<span class="chip y">신청 확인 중</span>':(r.profile_id?'<span class="muted">가게 신청 전</span>':'<span class="muted">—</span>'))));
+  const cGuide=r=>r.guide_at?`<b style="color:var(--green)">보냄</b> · ${r.guide_read?'읽음':'<span class="muted">안 읽음</span>'}${sm(md(r.guide_at))}`:(r.seeded?'<span class="muted">이전 가입 · 안 보냄</span>':`<span class="muted">${r.kind==='author'?'지정하면 자동':'공개되면 자동'}</span>`);
+  const cDeco=r=>!isP(r)?'<span class="muted">—</span>':`${cover(r)?'사진 ✓':'<b style="color:var(--amber)">사진 없음</b>'} · 링크 ${links(r)}${sm(r.nudge_sent?'사진 알림 '+md(r.nudged_at):'')}`;
+  $('#main').innerHTML=`<h1>초대·안내 <small>초대장은 직접 보내고, 사용법 안내는 작가 지정·가게 공개 순간 자동으로 가요</small></h1>
+  <div class="mbtiles" style="grid-template-columns:repeat(5,1fr)">${tiles.map(([v,l])=>`<div class="mbtile"><b>${n(v)}</b><span>${l}</span></div>`).join('')}</div>
+  <div style="border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 16px;background:var(--bg2)">
+    <b style="display:block;margin-bottom:10px">초대 링크 만들기</b>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="invKind" style="height:40px"><option value="author"${INV.kind==='author'?' selected':''}>작가</option><option value="shop"${INV.kind==='shop'?' selected':''}>공방</option></select>
+      <input id="invName" placeholder="이름 (초대장에 '○○ 작가님께'로 보여요)" maxlength="40" style="height:40px;flex:1 1 220px">
+      <input id="invMemo" placeholder="메모 (예: 인스타 아이디, DM 으로)" maxlength="300" style="height:40px;flex:1 1 260px">
+      <button class="p" style="height:40px" onclick="invMake()">링크 만들기</button>
+    </div>
+    ${L?`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><input readonly id="invUrl" value="${esc(invLink(L.kind,L.name))}" style="height:40px;flex:1 1 320px;font-family:Consolas,monospace;font-size:.8rem"><button style="height:40px" data-k="${L.kind}" data-n="${esc(L.name)}" onclick="invCopy(this)">복사</button><a href="${esc(invLink(L.kind,L.name))}" target="_blank" rel="noopener"><button style="height:40px">미리 보기</button></a><button class="p" style="height:40px" onclick="invSet('${L.id}','sent')">보냄으로 기록</button></div>`:''}
+    <p class="muted" style="margin:8px 0 0;font-size:.78rem">링크를 복사해 인스타그램 DM·카카오톡으로 직접 보내 주세요. 아직 회원이 아니라서 앱으로는 보낼 수 없어요. 답장으로 닉네임이 오면 [닉네임 연결] → [작가로 지정].</p>
+  </div>
+  <div style="overflow-x:auto"><table><tr><th>이름</th><th>종류</th><th>초대</th><th>가입 (앱 닉네임)</th><th>작가·가게</th><th>사용법 안내</th><th>사진·링크</th><th>메모</th><th></th></tr>
+  ${rows.map(r=>`<tr style="height:48px"><td><b>${esc(r.name||r.shop_name||r.nickname||'')}</b>${r.id?'':sm('초대 없이')}</td><td><span class="chip${r.kind==='author'?' y':''}">${r.kind==='author'?'작가':'공방'}</span></td><td>${cInv(r)}</td><td>${cJoin(r)}</td><td>${cPart(r)}</td><td>${cGuide(r)}</td><td>${cDeco(r)}</td><td class="muted" style="max-width:220px">${esc(r.memo||'')}</td><td style="white-space:nowrap">${r.id?`<button data-k="${r.kind}" data-n="${esc(r.name)}" onclick="invCopy(this)">링크</button> <button onclick="invMemo('${r.id}')">메모</button> <button onclick="invDel('${r.id}')">삭제</button>`:''}</td></tr>`).join('')||'<tr><td colspan="9" class="muted">아직 기록이 없어요</td></tr>'}</table></div>
+  <p class="muted">3일 뒤에도 대표 사진(가게는 매장 사진)이 없으면 사진을 넣어 보라는 알림이 한 번 가요. 이 기능 전부터 작가·가게였던 분께는 안내를 보내지 않았어요.</p>`;
+};
+async function invMake(){ const kind=$('#invKind').value, name=$('#invName').value.trim(), memo=$('#invMemo').value.trim(); if(!name) return toast('이름을 적어 주세요'); const {data,error}=await sb.rpc('admin_partner_invite',{p_kind:kind,p_name:name,p_memo:memo||null}); if(error) return toast(error.message); INV.kind=kind; INV.last={id:data,kind,name:name.replace(/[<>#]/g,'').trim()}; toast('링크를 만들었어요'); route(); }
+async function invCopy(el){ const u=invLink(el.dataset.k, el.dataset.n); try{ await navigator.clipboard.writeText(u); toast('링크를 복사했어요'); }catch(e){ prompt('아래 링크를 복사해 주세요', u); } }
+async function invSet(id, op, val){ const {error}=await sb.rpc('admin_partner_invite_set',{p_id:id,p_op:op,p_val:val??null}); if(error) return toast(error.message); if(op==='delete'&&INV.last&&INV.last.id===id) INV.last=null; toast(op==='sent'?'보냄으로 기록했어요':op==='link'?'연결했어요':'처리했어요'); route(); }
+function invLinkNick(id){ const v=prompt('답장으로 받은 앱 닉네임을 적어 주세요'); if(v===null||!v.trim()) return; invSet(id,'link',v.trim()); }
+function invMemo(id){ const v=prompt('메모'); if(v===null) return; invSet(id,'memo',v); }
+function invDel(id){ if(!confirm('이 초대 기록을 지울까요? (회원·작가 자격은 그대로예요)')) return; invSet(id,'delete'); }
 async function setAuthor(id, on){ if(!confirm(on?'작가로 지정할까요?':'작가 자격을 해제할까요? 등록한 도안은 남아 있어요(필요하면 도안 메뉴에서 숨김).')) return; const {error}=await sb.rpc('admin_set_author',{p_profile:id,p_on:on}); if(error) return toast(error.message); toast('처리했어요'); route(); }
 // ===== 지기 AI (작업지시서 Phase 3): 오늘 · 건별 처리 · 규칙 · 기록 · 기법 후보 · 욕설 사전 =====
 // 텔레그램과 같은 mod_items·같은 도구(jigi_tool)를 쓴다. 콘솔에서의 클릭 = 대표 승인(admin_jigi_tool).
