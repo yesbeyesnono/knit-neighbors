@@ -464,6 +464,7 @@ async function openWorkPanel(id){
     <div class="row"><button class="r" onclick="delWork('${w.id}')">인증 삭제</button></div>
     <h2>인증 글 ${(posts||[]).length}</h2>${(posts||[]).map(r=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="muted">${fmt(r.created_at)} · 좋아요 ${r.like_count||0} · 댓글 ${r.reply_count||0}</span><div style="white-space:pre-wrap">${esc(r.body||'')}</div><div class="row" style="margin-top:4px"><button onclick="openPostPanel('${r.id}')">글 열기</button></div></div>`).join('')||'<div class="muted">없음</div>'}`);
 }
+async function rcDecide(cid, ok, postId){ if(!confirm(ok?'직접 뜬 작품으로 확인하고 글을 그대로 둘까요?\n작성자와 신고자에게 결과 안내가 갑니다.':'이 글을 숨길까요?\n작성자와 신고자에게 결과 안내가 갑니다.')) return; const {error}=await sb.rpc('admin_report_case_decide',{p_case:cid,p_ok:ok}); if(error) return toast(error.message); toast(ok?'그대로 두고 안내를 보냈어요':'숨기고 안내를 보냈어요'); openPostPanel(postId); if(location.hash.startsWith('#reports')) route(); }
 async function openPostPanel(id){
   const [{data:p},{data:replies},{data:reps}] = await Promise.all([
     sb.from('posts').select('*, author:profiles!posts_author_id_fkey(id,nickname,dong_name,suspended_at)').eq('id',id).single(),
@@ -471,7 +472,14 @@ async function openPostPanel(id){
     sb.from('post_reports').select('reason,detail,created_at,reviewed_at,reporter:profiles!post_reports_reporter_id_fkey(nickname)').eq('post_id',id).order('created_at',{ascending:false})
   ]);
   if(!p) return toast('글을 찾을 수 없어요');
-  openPanel(`<h2 style="margin-top:0">글 상세 ${p.hidden?'<span class="chip y">숨김</span>':''}</h2>
+  // "직접 뜬 것이 아님" 신고 건(schema 124): 지기가 작성자에게 사진을 요청해 둔 상태면 맨 위에 진행 상황과 결정 버튼
+  let rc=null; try{ const r=await sb.from('report_cases').select('*').eq('post_id',id).in('status',['ask','review','hidden']).order('id',{ascending:false}).limit(1); rc=(r.data||[])[0]||null; }catch(e){}
+  const RCS={ask:'작성자에게 사진을 요청했어요 · 답을 기다리는 중', review:'작성자가 사진을 보냈어요 · 결정해 주세요', hidden:'답이 없어 임시로 숨긴 상태'};
+  const rcBox = rc ? `<div style="border:1.5px solid #E2A91C;background:#FFF9E6;border-radius:12px;padding:14px 16px;margin:12px 0"><b>직접 뜬 작품인지 확인 중</b><div class="muted" style="margin:4px 0 8px">${RCS[rc.status]||''} · 요청 ${fmt(rc.asked_at)}${rc.status==='ask'?` · ${fmt(rc.due_at)}까지 답이 없으면 자동으로 임시 숨김`:''}${rc.replied_at?` · 답장 ${fmt(rc.replied_at)}`:''}</div>
+      ${rc.verdict&&rc.verdict.same?`<div style="font-size:13px;line-height:1.6;margin-bottom:10px">AI 의견(참고용): 같은 작품인가 <b>${esc(rc.verdict.same)}</b> · 원래 사진이 AI·광고 같아 보이는가 <b>${esc(rc.verdict.ai_like||'')}</b><br><span class="muted">${esc(rc.verdict.reason||'')}</span></div>`:''}
+      <div class="row" style="margin:0"><button style="background:#3E6B48;color:#fff;border-color:transparent" onclick="rcDecide(${rc.id},true,'${id}')">직접 뜬 것 확인 · 그대로 두기</button><button class="r" onclick="rcDecide(${rc.id},false,'${id}')">숨기기</button><button data-n="${esc(p.author?.nickname||'')}" onclick="talkWith('${p.author_id}', this.dataset.n)">작성자와 대화 보기</button></div>
+      <div class="muted" style="font-size:12px;margin-top:8px">누르면 작성자와 신고자에게 결과 안내가 지기 채팅으로 자동으로 가고, 신고가 닫혀요.</div></div>` : '';
+  openPanel(`<h2 style="margin-top:0">글 상세 ${p.hidden?'<span class="chip y">숨김</span>':''}</h2>${rcBox}
     <div class="muted"><a href="#" onclick="openUserPanel('${p.author_id}');return false">${esc(p.author?.nickname)}</a> · ${esc(p.author?.dong_name||'')} · ${fmt(p.created_at)} · 좋아요 ${p.like_count||0} · 댓글 ${p.reply_count||0}</div>
     <p style="white-space:pre-wrap">${esc(p.body||'')}</p><div class="ph">${(p.photos||[]).map(u=>`<a href="${esc(u)}" target="_blank"><img src="${esc(u)}"></a>`).join('')}</div>
     <div class="row"><button onclick="hidePost('${p.id}',${!p.hidden})">${p.hidden?'복구':'숨김'}</button><button class="r" onclick="delPost('${p.id}')">삭제</button><button onclick="suspendUser('${p.author_id}',${!p.author?.suspended_at})">${p.author?.suspended_at?'작성자 정지 해제':'작성자 정지'}</button></div>
