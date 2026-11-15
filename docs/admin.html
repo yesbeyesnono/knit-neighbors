@@ -115,6 +115,20 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
 .tktl{font-size:12.5px;color:var(--ink2);border-left:2px solid var(--line);padding-left:10px;margin-bottom:14px}.tktl div{padding:2px 0;display:flex;gap:6px}.tktl time{color:var(--ink3);flex:none;width:74px}.tktl span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tktl a{color:var(--olive);font-weight:700;margin-left:auto;flex:none;font-size:12px;text-decoration:none}
 .tkr textarea{min-height:58px;background:#FFFDF4;font-size:13px;margin:0 0 8px}.tkacts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.tkempty{margin:auto;color:var(--ink3);font-size:13.5px;text-align:center;padding:24px}
 .rpcards{display:none}
+/* 오늘 화면 — 휴대폰: 처리할 것부터(처리할 일 → 기다리는 신청·문의 → 검토할 글·신고 → 채팅 점검 → 어제 브리핑 → 지기 AI에게 묻기 → AI 상태) */
+@media(max-width:760px){
+  .tdv{display:flex;flex-direction:column}.tdv>*{order:5}.tdv>h1{order:0}.tdv .hero3{display:contents}
+  .tdv .hero3>.card{margin-bottom:10px;padding:14px}.tdv .hero3>.card:nth-child(1){order:1}.tdv .hero3>.card:nth-child(2){order:6}.tdv .hero3>.card:nth-child(3){order:8}
+  .tdv .tdq{order:2}.tdv .tdm{order:3}.tdv #chatScan{order:4}.tdv .tdask{order:7}
+  .hero3 .big{font-size:30px}.tdm>h2{font-size:16px}
+  .tdm .card{padding:14px}.tdm .card .row{gap:8px}.tdm .card .row button{flex:1 1 44%;min-height:44px;font-size:14px}
+  .tdm .card .muted[style*="pre-wrap"]{white-space:pre-wrap;word-break:break-word}
+  .qlist{grid-template-columns:1fr}.qlist a{min-height:52px}
+  .cssum{grid-template-columns:repeat(2,1fr);gap:8px}.cssum div{padding:8px 10px}
+  .csit{grid-template-columns:1fr auto;gap:6px 10px;padding:12px}.csit .cslv{grid-column:1/-1;justify-self:start}.csit small{white-space:normal}
+  #chatScan .card>.row{flex-direction:column;align-items:flex-start!important;gap:6px}
+  .chatbox input{font-size:16px;min-width:0}.chatbox button{height:44px}
+}
 @media(max-width:760px){
   .rptable{display:none!important}.rpcards{display:block;margin-top:12px}
   .rpc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer}
@@ -1217,16 +1231,16 @@ VIEWS.today = async(arg)=>{
   const ord={urgent:0,today:1,info:2}; MOD_ITEMS=(items||[]).sort((a,b)=>ord[a.severity]-ord[b.severity]||new Date(a.created_at)-new Date(b.created_at));
   const br=brs?.[0]; const c=s=>MOD_ITEMS.filter(x=>x.severity===s).length;
   const st=br?.body?.stats||{}; const totalQ=queue.reduce((t,x)=>t+x[1],0);
-  $('#main').innerHTML=`<h1>오늘 <small>${new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'})} · 지기 AI가 먼저 보고 대표가 결정해요</small></h1>
+  $('#main').innerHTML=`<div class="tdv"><h1>오늘 <small>${new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'})} · 지기 AI가 먼저 보고 대표가 결정해요</small></h1>
   <div class="hero3">
     <div class="card"><div class="l">오늘 처리할 일</div><div class="big">${MOD_ITEMS.length+totalQ}<small style="font-size:16px;font-weight:600;color:var(--ink3)"> 건</small></div><div><span class="chip r">긴급 ${c('urgent')}</span><span class="chip g">오늘 ${c('today')}</span><span class="chip">참고 ${c('info')}</span><span class="chip">신청·문의 ${totalQ}</span></div><a href="#modlog" class="muted" style="margin-top:auto">최근 3일 AI 자동 처리 ${autoN||0}건 · 되돌리기 ›</a></div>
     <div class="card"><div class="l">어제 ${br?`· ${esc(br.date)} 브리핑`:''}</div>${br?`<div class="kp"><div><b>${st.posts??0}</b><span>새 글</span></div><div><b>${st.replies??0}</b><span>댓글</span></div><div><b>${st.signups??0}</b><span>가입</span></div><div><b>${st.works??0}</b><span>완성작품 인증</span></div></div><div class="muted">${(br.body?.notable||[]).length?'특이: '+esc(br.body.notable.join(', ')):'특이 사항 없음'}${br.body?.supporters?esc(br.body.supporters):''}</div>`:'<div class="muted">아직 브리핑이 없어요 — 매일 오전 8시에 만들어져요.</div>'}</div>
     <div class="card"><div class="l">지기 AI 상태</div><div id="jigiStatus" class="st"><i></i>확인 중…</div><div id="jigiTg" class="st"><i></i>텔레그램</div><div class="row" style="margin-top:auto"><button onclick="jigiRun('scan')">지금 검사</button><button onclick="jigiRun('brief')">브리핑 다시 만들기</button></div></div>
   </div>
   <div id="chatScan"></div>
-  ${queue.length?`<div class="card" style="margin-bottom:12px"><b>기다리는 신청·문의</b><div class="qlist">${queue.map(([l,n,h])=>`<a href="${h}"><b>${n}</b><span>${l}</span><i>›</i></a>`).join('')}</div></div>`:''}
-  ${MOD_ITEMS.length?`<h2 style="margin-top:6px">검토할 글·신고 ${MOD_ITEMS.length}건</h2>`+MOD_ITEMS.map(modCard).join(''):`<div class="card empty"><div class="ok">✓</div><div><b>검토할 글·신고가 없어요</b></div><div class="muted" style="margin-top:4px">새 글·댓글·신고·모임은 지기 AI가 먼저 읽고, 확인이 필요한 것만 여기에 올려요.</div></div>`}
-  <div class="card" style="margin-top:12px"><b>지기 AI에게 묻기</b><div class="muted" style="margin-top:2px">예: 이번 주 불만 요약해 줘 · 1번 제안대로 해 · 규칙 보여 줘 · 자동 처리 내역</div><div id="jChat-today" style="margin:8px 0;max-height:320px;overflow:auto"></div><div class="chatbox"><input id="jIn-today" placeholder="지기 AI에게 물어보거나 지시하기" onkeydown="if(event.key==='Enter'&&!event.isComposing)jigiAsk('today')"><button class="p" onclick="jigiAsk('today')">보내기</button></div></div>`;
+  ${queue.length?`<div class="card tdq" style="margin-bottom:12px"><b>기다리는 신청·문의</b><div class="qlist">${queue.map(([l,n,h])=>`<a href="${h}"><b>${n}</b><span>${l}</span><i>›</i></a>`).join('')}</div></div>`:''}
+  <div class="tdm">${MOD_ITEMS.length?`<h2 style="margin-top:6px">검토할 글·신고 ${MOD_ITEMS.length}건</h2>`+MOD_ITEMS.map(modCard).join(''):`<div class="card empty"><div class="ok">✓</div><div><b>검토할 글·신고가 없어요</b></div><div class="muted" style="margin-top:4px">새 글·댓글·신고·모임은 지기 AI가 먼저 읽고, 확인이 필요한 것만 여기에 올려요.</div></div>`}</div>
+  <div class="card tdask" style="margin-top:12px"><b>지기 AI에게 묻기</b><div class="muted" style="margin-top:2px">예: 이번 주 불만 요약해 줘 · 1번 제안대로 해 · 규칙 보여 줘 · 자동 처리 내역</div><div id="jChat-today" style="margin:8px 0;max-height:320px;overflow:auto"></div><div class="chatbox"><input id="jIn-today" placeholder="지기 AI에게 물어보거나 지시하기" onkeydown="if(event.key==='Enter'&&!event.isComposing)jigiAsk('today')"><button class="p" onclick="jigiAsk('today')">보내기</button></div></div></div>`;
   jigi('status').then(s=>{ const ok=!!s.ai, tg=!!(s.telegram&&s.webhook_secret); $('#jigiStatus').innerHTML=`<i class="${ok?'on':'off'}"></i>AI ${ok?'켜짐 · '+esc(s.provider||''):'꺼짐 — 키 없음'}`; $('#jigiTg').innerHTML=`<i class="${tg?'on':'off'}"></i>텔레그램 ${tg?'연결됨':'미연결'}`; }).catch(()=>{ $('#jigiStatus').innerHTML='<i class="off"></i>지기 AI 서버 함수에 연결하지 못했어요'; });
   chatScanLoad(); if(arg) openModItem(+arg);
 };
