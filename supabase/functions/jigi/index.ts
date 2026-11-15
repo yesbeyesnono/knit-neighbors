@@ -109,7 +109,7 @@ async function itemButtons(it: J) {
     if (it.author_id) await add("숨김 + 7일 글쓰기 제한", [{ name: "hide_temp", args: { post_id: pid } }, { name: "restrict_posting", args: { user_id: it.author_id, days: 7 } }], true);
     await add("문제 없음", [{ name: "unhide", args: { post_id: pid } }, { name: "dismiss_item", args: {} }]);
   } else if (pid && it.kind === "app_complaint") {
-    if (it.ai_suggestion?.reply_draft) await add("답글 보내기", [{ name: "reply_as_jigi", args: { post_id: pid, text: it.ai_suggestion.reply_draft } }], true);
+    if (it.ai_suggestion?.reply_draft) await add("댓글 보내기", [{ name: "reply_as_jigi", args: { post_id: pid, text: it.ai_suggestion.reply_draft } }], true);
     await add("확인함", [{ name: "dismiss_item", args: { note: "확인" } }]);
   } else await add("확인함", [{ name: "dismiss_item", args: { note: "확인" } }]);
   return b;
@@ -152,7 +152,7 @@ async function scan() {
     if (c && (c.confidence ?? 0) >= 0.6) { if (!kind || c.label === "risk" || c.label === "scam") kind = c.label; if (c.label === "risk" || c.label === "scam" || (c.label === "abuse" && c.severity === "urgent")) sev = "urgent"; else if (!w) sev = c.severity === "info" ? "info" : "today"; reason = [reason, c.reason].filter(Boolean).join(" · "); }
     if (!kind) continue;
     const f = { kind, account_days: days, same_link: same, bad_word: !!w }; const rule = (rules ?? []).find((r) => ruleMatch(r, f));
-    const it = await createItem({ kind, target_type: "post", target_id: p.id, author_id: p.author_id, severity: sev, summary: `${p.parent_id ? "답글" : "글"}에서 ${KIND[kind]} 감지 — ${author?.nickname ?? ""}`,
+    const it = await createItem({ kind, target_type: "post", target_id: p.id, author_id: p.author_id, severity: sev, summary: `${p.parent_id ? "댓글" : "글"}에서 ${KIND[kind]} 감지 — ${author?.nickname ?? ""}`,
       evidence: { text: p.body.slice(0, 500), nickname: author?.nickname, account_days: days, same_link: same, bad_word: w?.word ?? null, is_reply: !!p.parent_id },
       ai_suggestion: { reason, confidence: c?.confidence ?? (w ? 0.9 : 0.6), reply_draft: c?.reply_draft ?? null, action: kind === "spam" ? "숨김 + 7일 글쓰기 제한" : kind === "app_complaint" ? "답글 보내기" : "경고 보내고 숨김 유지" } });
     if (!it) continue; made++;
@@ -196,11 +196,11 @@ async function scan() {
 async function brief() {
   const items = (await tool("list_open_items", {})) as J[]; const s1 = await tool("get_stats", { days: 1 }); const s2 = await tool("get_stats", { days: 2 });
   const prev = (k: string) => (s2?.[k] ?? 0) - (s1?.[k] ?? 0); const cnt = (s: string) => items.filter((i) => i.severity === s).length;
-  const notable = ["posts", "replies", "signups", "reports"].filter((k) => (s1?.[k] ?? 0) >= 5 && (s1[k] > prev(k) * 2)).map((k) => `${({ posts: "새 글", replies: "답글", signups: "가입", reports: "신고" } as J)[k]} ${prev(k)}→${s1[k]}`);
+  const notable = ["posts", "replies", "signups", "reports"].filter((k) => (s1?.[k] ?? 0) >= 5 && (s1[k] > prev(k) * 2)).map((k) => `${({ posts: "새 글", replies: "댓글", signups: "가입", reports: "신고" } as J)[k]} ${prev(k)}→${s1[k]}`);
   const minutes = Math.max(1, Math.round(items.length * 0.8));
   const head = items.length ? `좋은 아침이에요. 오늘 처리할 일 ${items.length}건, 예상 ${minutes}분.` : "좋은 아침이에요. 오늘은 이상 없음 — 처리할 일이 없어요.";
   const lines = items.slice(0, 10).map((it, i) => `${i + 1}. [${SEV[it.severity]}] ${KIND[it.kind] ?? it.kind} — ${it.summary}`);
-  const tail = `어제 새 글 ${s1?.posts ?? 0}개·답글 ${s1?.replies ?? 0}개·가입 ${s1?.signups ?? 0}명·모임 ${s1?.meetups ?? 0}개·인증 ${s1?.works ?? 0}개. 자동 처리 ${s1?.auto_done ?? 0}건.${notable.length ? "\n특이: " + notable.join(", ") : ""}`;
+  const tail = `어제 새 글 ${s1?.posts ?? 0}개·댓글 ${s1?.replies ?? 0}개·가입 ${s1?.signups ?? 0}명·모임 ${s1?.meetups ?? 0}개·인증 ${s1?.works ?? 0}개. 자동 처리 ${s1?.auto_done ?? 0}건.${notable.length ? "\n특이: " + notable.join(", ") : ""}`;
   let supLine = "";
   try { const cnt = async (t: string, f: (q: J) => J) => (await f(db.from(t).select("id", { count: "exact", head: true }))).count ?? 0;
     const q = [["가게 신청", await cnt("shop_claims", (x) => x.eq("status", "pending"))], ["작가 신청", await cnt("author_applications", (x) => x.eq("status", "pending"))], ["제보·제안", await cnt("feedback_reports", (x) => x.eq("status", "open"))], ["문의 답변 대기", await cnt("support_tickets", (x) => x.in("status", ["open", "waiting_admin"]))]].filter((x) => (x[1] as number) > 0);
@@ -227,7 +227,7 @@ const TOOLS = [
   T("hide_temp", "글 임시 숨김(단독 가능)", { post_id: S, item_id: N }, ["post_id"]), T("add_to_feedback_group", "앱 불만 묶음에 추가(단독 가능)", { post_id: S, group_id: N, title: S }, ["post_id"]),
   T("unhide", "숨김 해제 [대표 승인 필요]", { post_id: S, item_id: N }, ["post_id"]), T("send_warning", "회원에게 경고 알림 [승인 필요]", { user_id: S, text: S, item_id: N }, ["user_id", "text"]),
   T("restrict_posting", "글쓰기 제한, 최대 30일 [승인 필요]", { user_id: S, days: N, item_id: N }, ["user_id", "days"]), T("dismiss_item", "문제 없음으로 닫기 [승인 필요]", { item_id: N, note: S }, ["item_id"]),
-  T("reply_as_jigi", "지기 이름으로 답글 [승인 필요]", { post_id: S, text: S, item_id: N }, ["post_id", "text"]), T("notify_reporter", "신고자에게 결과 알림 [승인 필요]", { post_id: S, text: S, item_id: N }, ["post_id"]),
+  T("reply_as_jigi", "지기 이름으로 댓글 [승인 필요]", { post_id: S, text: S, item_id: N }, ["post_id", "text"]), T("notify_reporter", "신고자에게 결과 알림 [승인 필요]", { post_id: S, text: S, item_id: N }, ["post_id"]),
   T("link_technique_alias", "기법 후보를 기존 기법의 별칭으로 연결 [승인 필요]", { candidate_id: N, technique_id: S }, ["candidate_id", "technique_id"]),
   T("save_rule", "위임 규칙 저장 [승인 필요]. condition 키: kind(abuse|spam|scam), max_account_days, min_same_link, bad_word. action: hide_temp | hide_temp+restrict7 | report_only", { title: S, rule_text: S, condition: { type: "object" }, action: S }, ["title", "rule_text", "condition", "action"]),
   T("delete_rule", "규칙 삭제 [승인 필요]", { rule_id: N }, ["rule_id"]), T("revert_action", "행동 되돌리기 [승인 필요]", { action_id: N }, ["action_id"]),

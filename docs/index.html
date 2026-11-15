@@ -1047,6 +1047,7 @@ body.kb #nav{display:none!important}
 /* 가게 소식 링크 (2026-11-16) */
 .nlink .pglinks{margin:10px 0 4px;border-color:var(--color-primary)}.nlink .pglinks a{color:var(--color-primary)}
 .nlpv{margin-top:8px;font-size:.78rem;color:var(--ink2)}.nlpv b{display:inline-block;background:var(--color-primary-light);color:var(--color-primary-dark);border-radius:999px;padding:3px 10px;margin-left:4px;font-size:.78rem}
+#askdlg .bx>b{display:block;line-height:1.45}#askdlg .bx>b+.bs{margin-top:16px}
 </style>
 </head>
 <body>
@@ -2112,8 +2113,7 @@ function relocateNow(){
     const { latitude:lat, longitude:lng } = pos.coords;
     let d=null; try{ d = await reverseGeocode(lat, lng); }catch(e){}
     if(!d?.dong_name) return toast('동네 이름을 찾지 못했어요. 프로필 편집의 「동네 찾기」를 이용해 주세요');
-    if(!confirm(`내 동네를 "${d.dong_name}"(으)로 바꿀까요?
-지도의 내 핀도 이 위치(200m 격자)로 옮겨져요.`)) return;
+    if(!await askOk(`내 동네를 "${d.dong_name}"(으)로 바꿀까요? 지도의 내 핀도 이 동네로 옮겨져요.`, '바꾸기')) return;
     const r = await sb.rpc('set_fuzzy_location', { p_lat:lat, p_lng:lng }); if(r.error) return toast('위치 저장 실패: '+r.error.message);
     const u = await sb.from('profiles').update({ dong_name:d.dong_name, dong_code:d.dong_code, dong_verified_at:new Date().toISOString() }).eq('id', me.id); if(u.error) return toast('저장 실패: '+u.error.message);
     await loadMe(); toast(`동네를 ${d.dong_name}(으)로 바꿨어요`);
@@ -2333,7 +2333,7 @@ async function toggleFollowShop(id, on){
   if(r.error) return toast('실패: '+r.error.message);
   toast(on?'팔로우했어요. 새 소식이 활동에 알림으로 와요':'팔로우를 취소했어요'); openShop(id);
 }
-async function deleteShopPost(id){ if(!confirm('이 소식을 삭제할까요?')) return; const {error}=await sb.from('shop_posts').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); openShop(curShop.id); }
+async function deleteShopPost(id){ if(!await askOk('이 소식을 삭제할까요?', '삭제')) return; const {error}=await sb.from('shop_posts').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); openShop(curShop.id); }
 // ===== knitup 도안 뷰어 (docs/viewer.html, tools/build-viewer.js 로 생성) =====
 let pvId=null, pvTimer=null, pvMeta=null, pvTotal=0, pvDone=false;
 async function openPatternViewer(id){
@@ -2452,7 +2452,7 @@ async function openMyOrders(){ const { data, error }=await sb.rpc('my_orders'); 
       <div class="sumrow tot" style="font-size:.95rem"><span>결제 금액</span><span>${won(o.total)}</span></div>
       ${o.status==='pending_payment'?`<div class="muted" style="font-size:.8rem">${BANK_DEMO.bank} ${BANK_DEMO.no} (${BANK_DEMO.holder})로 <b>${won(o.total)}</b> 입금해 주세요 · 입금자 ${esc(o.depositor||'')}</div><button class="btn o" style="margin-top:8px" onclick="cancelOrder('${o.id}')">주문 취소</button>`:''}
       ${o.tracking?`<div class="muted" style="font-size:.8rem">송장 ${esc(o.tracking)}</div>`:''}</div>`; }).join(''):'<div class="empty">아직 주문이 없어요</div>', null); }
-async function cancelOrder(id){ if(!confirm('이 주문을 취소할까요?')) return; const { error }=await sb.rpc('cancel_my_order',{ p_id:id }); if(error) return toast(error.message); toast('취소했어요'); openMyOrders(); }
+async function cancelOrder(id){ if(!await askOk('이 주문을 취소할까요?', '주문 취소', '닫기')) return; const { error }=await sb.rpc('cancel_my_order',{ p_id:id }); if(error) return toast(error.message); toast('취소했어요'); openMyOrders(); }
 // 도안 구매(무료 체험) · 돈 흐름(판매가 → 스토어 30% → 플랫폼 15% → 원천징수 3.3% → 작가 지급) — 서버 pattern_fee_calc 와 같은 식
 function feeFlow(price){ const s=Math.round(price*0.30), pf=Math.round((price-s)*0.15), t=Math.round((price-s-pf)*0.033); return { price, store:s, platform:pf, tax:t, author:price-s-pf-t }; }
 function flowHtml(price){ const f=feeFlow(price); return `<div class="flow"><span>판매가 <b>${won(f.price)}</b></span><i>→</i><span>스토어 30% −${won(f.store)}</span><i>→</i><span>플랫폼 15% −${won(f.platform)}</span><i>→</i><span>원천징수 3.3% −${won(f.tax)}</span><i>→</i><span>작가 지급 <b>${won(f.author)}</b></span></div>`; }
@@ -2517,7 +2517,7 @@ async function sendAuthorApply(){
   if(error){ $('#auSend').disabled=false; return toast(error.code==='23505'?'이미 확인 중인 신청이 있어요':error.message); }
   closeSheet(); toast('신청했어요. 확인 후 활동 알림으로 알려 드릴게요');
 }
-async function cancelAuthorApply(id){ if(!confirm('신청을 취소할까요?')) return; const {error}=await sb.from('author_applications').delete().eq('id',id); if(error) return toast(error.message); closeSheet(); toast('신청을 취소했어요'); }
+async function cancelAuthorApply(id){ if(!await askOk('신청을 취소할까요?', '신청 취소', '닫기')) return; const {error}=await sb.from('author_applications').delete().eq('id',id); if(error) return toast(error.message); closeSheet(); toast('신청을 취소했어요'); }
 async function openMyPatterns(){   // 작가 대시보드(2026-10-10): 도안별 찜·뜨기 시작·완성 수(my_pattern_stats, 서버 집계)
   const [{ data }, { data:st }, { data:stl }] = await Promise.all([sb.from('patterns').select('id,title,craft,level,photos,price,is_published,hidden').eq('author_id', me.id).order('created_at',{ascending:false}), sb.rpc('my_pattern_stats'), sb.rpc('author_settlement')]);
   const S=st||{}; const tot=k=>(data||[]).reduce((n,p)=>n+((S[p.id]||{})[k]||0),0); const ST=(stl&&stl.total)||{};
@@ -2597,7 +2597,7 @@ async function savePatternForm(id){
     toast(id?'저장했어요':'도안을 등록했어요'); recsAt=0; openMyPatterns();
   }catch(e){ toast(e.message); const b=$('#pfSave'); if(b) b.disabled=false; }
 }
-async function deleteMyPattern(id){ if(!confirm('이 도안을 삭제할까요?')) return; const {error}=await sb.from('patterns').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); openMyPatterns(); }
+async function deleteMyPattern(id){ if(!await askOk('이 도안을 삭제할까요?', '삭제')) return; const {error}=await sb.from('patterns').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); openMyPatterns(); }
 let upSort='new', upRows=[], upEl=null;
 async function loadUserPatterns(uid, el){
   el.innerHTML='<div class="empty">불러오는 중…</div>'; await loadTech();
@@ -2793,7 +2793,7 @@ async function saveShopEdit(){
   await loadMe(); closeSheet(); toast('저장했어요'); if(view==='shop') openShop(myShop.id); if(MapAdapter.ready) loadPins();
 }
 async function cancelShopClaim(id){
-  if(!confirm('신청을 취소할까요?')) return;
+  if(!await askOk('신청을 취소할까요?', '신청 취소', '닫기')) return;
   const { data:c } = await sb.from('shop_claims').select('doc_path').eq('id',id).maybeSingle();
   const { error } = await sb.from('shop_claims').delete().eq('id',id); if(error) return toast(error.message);
   if(c?.doc_path) await sb.storage.from('shop-docs').remove([c.doc_path]);
@@ -2937,7 +2937,7 @@ function fqDraw(step){
   if(step==='who'){ const ex=fq.extra[id]; const handle=[p.dong_name, lvShort(p)].filter(Boolean).join(' · ');
     fqWrap(`<div class="fqc"><button type="button" class="fqx" aria-label="닫기" onclick="fqClose()">✕</button><div class="fqbig s">이분이 뜨친을<br>신청했어요!</div>
       <div class="fqp">${avatar(p,true)}<div class="fqnm">${esc(p.nickname)}</div><div class="fqsub">${esc(handle||'동네 미설정')}</div>${fqChips(p)}${r.message?`<div class="fqmsg">"${esc(r.message)}"</div>`:''}
-        ${ex&&ex.open?`<div class="fqmore">${ex.bio?`<div class="bio">${esc(ex.bio)}</div>`:''}${ex.photos.length?`<div class="lab">최근 완성작</div><div class="fqg3">${ex.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join('')}</div>`:''}${!ex.bio&&!ex.photos.length?'<div class="bio" style="color:#8a7a6a">아직 소개나 완성작이 없어요</div>':''}<button type="button" class="fqlk" style="display:block;margin:10px auto 0" onclick="fqClose();openProfile('${id}')">프로필 전체 보기 ›</button></div>`:`<button type="button" class="fqlk" onclick="fqMore('${id}')">프로필 더 보기 ▾</button>`}</div>
+        ${ex&&ex.open?`<div class="fqmore">${ex.bio?`<div class="bio">${esc(ex.bio)}</div>`:''}${ex.photos.length?`<div class="lab">최근 완성작</div><div class="fqg3">${ex.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join('')}</div>`:''}${!ex.bio&&!ex.photos.length?'<div class="bio" style="color:var(--ink3)">아직 소개나 완성작이 없어요</div>':''}<button type="button" class="fqlk" style="display:block;margin:10px auto 0" onclick="fqClose();openProfile('${id}')">프로필 전체 보기 ›</button></div>`:`<button type="button" class="fqlk" onclick="fqMore('${id}')">프로필 더 보기 ▾</button>`}</div>
       ${fq.rows.length>1?`<div class="fqdots">${fq.rows.map((_,k)=>`<i class="${k===fq.i?'on':''}"></i>`).join('')}</div>`:''}
       <div class="fqtwo"><button type="button" class="a" onclick="fqAccept('${id}')">뜨친 할래요! 🙌</button><button type="button" class="b" onclick="fqNext()">다음에</button></div>
       <button type="button" class="fqlater" onclick="fqDecline('${id}')">정중히 거절하기</button></div>`);
@@ -2975,7 +2975,7 @@ const FQ_GREET=['안녕하세요! 반가워요 😊','요즘 뭐 뜨고 계세�
 async function fqGreet(id){ fqClose(); await openDirectRoom(id);
   setTimeout(()=>{ if(view!=='room') return; const inp=$('#msgIn'); if(inp && !inp.value){ inp.value=FQ_GREET[0]; kkGrow(); } $('#greetBar')?.remove(); const bar=document.createElement('div'); bar.id='greetBar'; bar.innerHTML=FQ_GREET.map(t=>`<button type="button">${esc(t)}</button>`).join(''); bar.onclick=e=>{ const b=e.target.closest('button'); if(b){ $('#msgIn').value=b.textContent; kkGrow(); $('#msgIn').focus(); } }; const c=$('#v-room .compose'); if(c) c.parentNode.insertBefore(bar, c); }, 900); }
 async function blockUser(id){
-  if(!confirm('차단하면 지도와 채팅에서 서로 보이지 않아요. 차단할까요?')) return;
+  if(!await askOk('차단하면 지도와 채팅에서 서로 보이지 않아요. 차단할까요?', '차단')) return;
   const { data:rel } = await sb.from('friendships').select('requester_id,addressee_id').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`);
   let r;
   if(rel?.length) r = await sb.from('friendships').update({status:'blocked'}).eq('requester_id',rel[0].requester_id).eq('addressee_id',rel[0].addressee_id);
@@ -3157,7 +3157,7 @@ async function openEvent(id){
   openSheet(`${e.photo?`<img class="evphoto" src="${esc(e.photo)}" alt="">`:''}<div class="muted" style="font-size:.8rem;font-weight:700">${EV_KIND[e.kind]||'이벤트'}</div><b style="font-size:1.1rem">${esc(e.title)}</b><div class="muted" style="font-size:.85rem">${esc(cond)}</div>${e.body?`<p style="white-space:pre-wrap;margin:4px 0">${esc(e.body)}</p>`:''}${act}<p class="muted" style="font-size:.72rem;margin:8px 0 0;line-height:1.4">이 이벤트는 펌테크주식회사가 진행하며 Apple·Google과 무관해요. Apple·Google은 후원·보증·관리하지 않아요.</p>`);
 }
 async function applyEvent(id){ const { data, error } = await sb.rpc('apply_event', { p_event:id, p_note:$('#evNote')?.value.trim()||null }); if(error) return toast(error.message.replace(/^.*?: /,'')); toast(data==='selected'?'선착순으로 선정됐어요!':'신청했어요'); await loadEvents(); openEvent(id); }
-async function cancelEventApp(id){ if(!confirm('이 이벤트 신청을 취소할까요?')) return; const { error } = await sb.rpc('cancel_event_application', { p_event:id }); if(error) return toast(error.message); toast('취소했어요'); closeSheet(); loadEvents(); }
+async function cancelEventApp(id){ if(!await askOk('이 이벤트 신청을 취소할까요?', '신청 취소', '닫기')) return; const { error } = await sb.rpc('cancel_event_application', { p_event:id }); if(error) return toast(error.message); toast('취소했어요'); closeSheet(); loadEvents(); }
 async function saveEventShip(id){ const g=k=>$('#'+k)?.value.trim()||''; const { error } = await sb.rpc('set_event_shipping', { p_event:id, p_name:g('shName'), p_phone:g('shPhone'), p_zip:g('shZip'), p_addr:g('shAddr'), p_memo:g('shMemo')||null }); if(error) return toast(error.message); toast('배송지를 저장했어요'); openEvent(id); }
 // 완성작품 인증 폼: 선정된(아직 인증 전) 이벤트가 있으면 고를 수 있게
 async function fillWEvent(){
@@ -4216,6 +4216,8 @@ function postMenu(id, authorId){
   m.style.top = (r.bottom+6+h > innerHeight-12 ? Math.max(8, r.top-6-h) : r.bottom+6)+'px';
 }
 // 앱 모양의 작은 확인 창 (휴대폰 기본 알림창 대신)
+// askOk: askConfirm 과 같은 모양, await 로 쓰는 판(2026-11-16 통일). no = 닫는 버튼 글자
+function askOk(title, ok, no){ return new Promise(res=>{ $('#askdlg')?.remove(); const d=document.createElement('div'); d.id='askdlg'; d.innerHTML=`<div class="bx"><b>${esc(title)}</b><div class="bs"><button type="button">${esc(no||'취소')}</button><button type="button" class="rr">${esc(ok||'확인')}</button></div></div>`; document.body.appendChild(d); const [c,o]=d.querySelectorAll('button'); const done=v=>{ d.remove(); res(v); }; c.onclick=()=>done(false); d.onclick=e=>{ if(e.target===d) done(false); }; o.onclick=()=>done(true); }); }
 function askConfirm(title, text, ok, fn){ $('#askdlg')?.remove(); const d=document.createElement('div'); d.id='askdlg'; d.innerHTML=`<div class="bx"><b>${esc(title)}</b><p>${esc(text)}</p><div class="bs"><button type="button">취소</button><button type="button" class="rr">${esc(ok)}</button></div></div>`; document.body.appendChild(d); const [c,o]=d.querySelectorAll('button'); c.onclick=()=>d.remove(); d.onclick=e=>{ if(e.target===d) d.remove(); }; o.onclick=()=>{ d.remove(); fn(); }; }
 function pmRefresh(){ if(view==='my') loadMyFeed(); else if(view==='profile') loadUserFeed(profId, profTab, $('#profFeed')); else if(view==='comm') loadFeed(); }
 // 프로필에 고정 (3개까지, schema 110)
@@ -4625,7 +4627,7 @@ async function loadUserClasses(uid, el){
   el.innerHTML = (data||[]).length ? data.map(p=>`<div class="spost" id="sp-${p.id}" style="border-top:0;border-bottom:1px solid var(--line)"><span class="k class">클래스</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteMyClass('${p.id}')">삭제</button><button class="menu" style="float:right;background:none;border:0;cursor:pointer;margin-right:10px" onclick="editShopPost('${p.id}')">수정</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${(p.photos||[]).length?`<div class="pgrid n${Math.min(p.photos.length,4)}">${p.photos.slice(0,4).map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}${p.extra?.v?classBox(p):''}</div>`).join('')
     : `<div class="empty" style="white-space:pre-line">${mine?'아직 연 클래스가 없어요.\n＋ › 클래스 열기로 첫 클래스를 열어 보세요':'아직 연 클래스가 없어요'}</div>`;
 }
-async function deleteMyClass(id){ if(!confirm('이 클래스를 삭제할까요?')) return; const {error}=await sb.from('shop_posts').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); if(view==='my') loadMyFeed(); else if(curShop) openShop(curShop.id); }
+async function deleteMyClass(id){ if(!await askOk('이 클래스를 삭제할까요?', '삭제')) return; const {error}=await sb.from('shop_posts').delete().eq('id',id); if(error) return toast(error.message); toast('삭제했어요'); if(view==='my') loadMyFeed(); else if(curShop) openShop(curShop.id); }
 // ===== 가게 클래스 열기 (shop_posts kind 'class' + extra) =====
 const C_CRAFT={crochet:'코바늘',knit:'대바늘',other:'기타'}, C_TYPE={oneday:'원데이',course:'정규 (여러 회차)'}, C_MAT={incl:'수강료에 포함',extra:'별도',none:'재료비 없음'}, C_PLACE={shop:'우리 가게',other:'다른 장소',online:'온라인'};
 const C_APPLY={link:'링크로 신청',phone:'전화',insta:'인스타그램 DM',visit:'가게에 직접'};
@@ -4754,7 +4756,7 @@ async function openClassApply(postId){
     <button class="btn" id="capSend" onclick="sendClassApply('${p.id}')">신청하기</button>`);
 }
 async function sendClassApply(postId){ const b=$('#capSend'); b.disabled=true; const { error } = await sb.rpc('apply_class', { p_post: postId, p_note: $('#capNote').value.trim()||null }); if(error){ b.disabled=false; return toast(error.message); } closeSheet(); toast('신청했어요. 호스트가 확정하면 알림으로 알려 드려요'); refreshClassCard(postId); }
-async function cancelClassApp(postId){ if(!confirm('신청을 취소할까요?')) return; const { error } = await sb.rpc('cancel_class_application', { p_post: postId }); if(error) return toast(error.message); toast('취소했어요'); refreshClassCard(postId); }
+async function cancelClassApp(postId){ if(!await askOk('신청을 취소할까요?', '신청 취소', '닫기')) return; const { error } = await sb.rpc('cancel_class_application', { p_post: postId }); if(error) return toast(error.message); toast('취소했어요'); refreshClassCard(postId); }
 async function openClassApplicants(postId){
   const [{ data:rows, error },{ data:p }] = await Promise.all([sb.rpc('class_applicants', { p_post: postId }), sb.from('shop_posts').select('id,title,extra,room_id').eq('id', postId).single()]); if(error) return toast(error.message);
   const x=p?.extra||{}; const acc=(rows||[]).filter(r=>r.status==='accepted').length; const ST={applied:'대기',accepted:'확정',rejected:'거절',cancelled:'취소'};
@@ -5154,7 +5156,7 @@ async function stashItemSave(){
   toast('저장했어요'); closeSub(); await loadStash(); if(view==='stash') renderStash();
 }
 async function stashDelete(id){
-  if(!confirm('이 실을 내 실함에서 지울까요? 볼밴드 사진도 같이 지워져요.')) return;
+  if(!await askOk('이 실을 내 실함에서 지울까요? 볼밴드 사진도 같이 지워져요.', '지우기')) return;
   const s=stashRows.find(x=>x.id===id); const { error } = await sb.from('yarn_stash').delete().eq('id', id); if(error) return toast(error.message);
   if(s?.band_photo) sb.storage.from('bands').remove([s.band_photo]).then(()=>{});
   toast('지웠어요'); closeSub(); await loadStash(); if(view==='stash') renderStash();
@@ -5302,7 +5304,7 @@ async function submitMeet(){
     if(feeK==='custom' && meetApplyOK){ const fn=$('#mFeeNote').value.trim(), rf=$('#mRefund').value.trim(), jm=segVal('#mJoinSeg')||'open';
       if(fn || rf || jm==='apply'){ const { data:mm } = await sb.from('meetups').select('id').eq('created_by', me.id).order('created_at',{ascending:false}).limit(1);
         const r2 = mm?.[0] ? await sb.rpc('meetup_set_terms', { p_meetup:mm[0].id, p_fee_note:fn||null, p_mode:jm, p_refund:rf||null }) : { error:{ message:'모임을 찾지 못했어요' } };
-        if(r2.error) alert('모임은 열렸지만 참가비 안내를 저장하지 못했어요: '+r2.error.message.replace(/^.*?: /,'')); } }
+        if(r2.error) toast('모임은 열렸지만 참가비 안내를 저장하지 못했어요: '+r2.error.message.replace(/^.*?: /,'')); } }
     sPhotos=[]; await loadMyRooms(); toast('모임을 만들었어요. 단체 채팅방이 열렸어요');
     composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
   }catch(e){ toast(e.message); b.disabled=false; }
@@ -5797,8 +5799,8 @@ function idxRadar(p, size){
   const pt=(i,r)=>{ const a=-Math.PI/2 + i*2*Math.PI/3; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; };
   const poly=r=>[0,1,2].map(i=>pt(i,r).map(n=>n.toFixed(1)).join(',')).join(' ');
   const val=[0,1,2].map(i=>pt(i, R*Math.max(0.08, v[i]/100)).map(n=>n.toFixed(1)).join(',')).join(' ');
-  const lab=[['C',0],['H',1],['S',2]].map(([t,i])=>{ const [x,y]=pt(i,R+9); return `<text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="middle" font-size="9" font-weight="700" fill="#8f948a">${t}</text>`; }).join('');
-  return `<svg viewBox="0 0 ${W} ${H}"><polygon points="${poly(R)}" fill="var(--bg2)" stroke="var(--line)"/><polygon points="${poly(R*0.5)}" fill="none" stroke="var(--line)"/><polygon points="${val}" fill="rgba(154,174,98,.45)" stroke="#3F4F22" stroke-width="1.5" stroke-linejoin="round"/>${lab}</svg>`;
+  const lab=[['C',0],['H',1],['S',2]].map(([t,i])=>{ const [x,y]=pt(i,R+9); return `<text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="middle" font-size="9" font-weight="700" style="fill:var(--ink3)">${t}</text>`; }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}"><polygon points="${poly(R)}" fill="var(--bg2)" stroke="var(--line)"/><polygon points="${poly(R*0.5)}" fill="none" stroke="var(--line)"/><polygon points="${val}" style="fill:color-mix(in srgb,var(--color-primary) 40%,transparent);stroke:var(--color-primary-dark)" stroke-width="1.5" stroke-linejoin="round"/>${lab}</svg>`;
 }
 function indexCard(p, mine){
   const rows=IDX_DEF.map(([k,n])=>`<div class="r"><b>${n}</b><i><em style="width:${p['idx_'+k]||0}%"></em></i><span>${p['idx_'+k]||0}</span></div>`).join('');
