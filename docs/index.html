@@ -1033,6 +1033,17 @@ body.kb #nav{display:none!important}
 #v-comm > *{flex-shrink:0}   /* 옆으로 넘기는 줄(이벤트·태그)이 글이 많을 때 높이 0 으로 눌리던 문제 */
 /* 채팅 말풍선: 줄바꿈 그대로 보이게 (2026-11-15) */
 #msgs .bub{white-space:pre-wrap;overflow-wrap:anywhere}#msgs .bub .card-btns,#msgs .bub .who,#msgs .bub time{white-space:normal}
+/* 가입 2단계 · 동네 (2026-11-15): 먼저 고르기 · 위치를 거절해도 큰 버튼 · '한 번 정하면 그대로' */
+.dopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:14px;margin:0 0 10px;font:inherit;color:var(--ink2);font-size:.82rem;cursor:pointer}
+.dopt.p{border-color:var(--color-primary);background:color-mix(in srgb,var(--color-primary-light) 35%,var(--surface))}
+.dopt .ic{width:42px;height:42px;border-radius:12px;background:var(--color-primary-light);display:grid;place-items:center;flex:none;color:var(--color-primary-dark)}.dopt .ic svg{width:20px;height:20px}
+.dopt .tx{flex:1;min-width:0;line-height:1.4}.dopt .tx b{display:block;font-size:.98rem;color:var(--ink)}.dopt .go{color:var(--color-primary);font-weight:800;font-size:1.15rem}
+.dsafe,.dnote,.dfix{border-radius:14px;padding:12px 14px;font-size:.82rem;line-height:1.5;text-align:left;margin:0 0 14px}
+.dsafe{background:var(--color-primary-light);color:var(--color-primary-dark);display:flex;gap:10px;align-items:flex-start}.dsafe svg{width:18px;height:18px;flex:none;margin-top:2px}.dsafe b,.dnote b{font-size:.88rem}.dsafe b{display:block}
+.dnote{background:#FFF4CF;color:#5F4D12}.dnote b{color:#3B2F06}
+.dfix{background:var(--color-primary-light);color:var(--color-primary-dark);margin:12px 0 0}.dfix b{display:block;font-size:.88rem;margin-bottom:4px}.dfix ul{margin:0;padding-left:1.1em}.dfix li{margin:2px 0}.dfix u{text-decoration:none;font-weight:800;color:var(--color-primary)}
+.btn.obnext.dis{opacity:.45}
+#v-onboard.edit #dongAlt{display:block}
 </style>
 </head>
 <body>
@@ -1063,11 +1074,11 @@ body.kb #nav{display:none!important}
       <button class="btn obnext" onclick="obGo(2)">다음</button><div class="oblink obnext" onclick="obGo(2)">나중에 할게요</div>
     </div>
     <div class="body form obs" data-s="2">
-      <h2 class="obttl">뜨개 이웃과 함께할 동네예요</h2><p class="obsub">자주 뜨개하는 동네를 정하면 가까운 이웃과 모임을 먼저 보여 드려요.</p>
-      <div class="dcard" id="locCard"><div id="locStatus"></div>
-        <div class="muted" style="margin-top:12px;font-size:.8rem">정확한 위치는 저장하지 않아요. 약 200m 격자로 흐려진 좌표만 저장돼요.</div></div>
+      <h2 class="obttl">어느 동네에서 뜨개하세요?</h2><p class="obsub">지금 계신 곳이 아니어도 돼요.<br>자주 뜨개하는 동네를 한 곳 정해 주세요.</p>
+      <div id="locCard"><div id="locStatus"></div>
+        </div>
       <div class="obspacer"></div>
-      <button class="btn obnext" onclick="obGo(3)">이 동네로 정하기</button><div class="oblink"><span onclick="detectLocation()">다시 확인</span> · <span onclick="manualDong()">동네 찾기</span></div>
+      <button class="btn obnext" id="dongNext" onclick="obGo(3)">이 동네로 정하기</button><div class="oblink" id="dongAlt"><span onclick="dongReset()">다른 동네로 바꾸기</span></div>
     </div>
     <div class="body form obs" data-s="3">
       <h2 class="obttl l">뭐라고 부를까요?</h2><p class="obsub l">지도와 글에 보이는 이름이에요.</p>
@@ -1778,22 +1789,35 @@ seg('#f_exp', EXP); seg('#f_avail', AVAIL, true);
 let loc = { lat:null, lng:null, dong_name:null, dong_code:null, verified:false };
 function setLocStatus(html){ $('#locStatus').innerHTML = html; }
 // 동네 카드(2단계) — loc 상태를 카드로 그린다. 동네가 잡히기 전엔 안내 문구
+let locState='';   // '' 처음 · wait 위치 확인 중 · denied 거절 · fail 못 가져옴 · noname 동 이름 못 찾음 · nogeo 위치 미지원
 function renderDong(){
-  const el=$('#locStatus'); if(!el) return;
-  if(loc.dong_name){ const parts=(loc.dong_code||'').split('|'); const sub = (loc.verified||loc.manual) ? parts.slice(0,-1).join(' ') : '직접 입력'; el.innerHTML=`<div class="dname">${esc(loc.dong_name)}</div><div class="dsub">${esc(sub)}</div><div style="margin-top:10px"><span class="chip">${ico('location')} 우리 동네</span></div>`; }
-  else el.innerHTML=`<div class="dwait">${ico('location')} 위치 확인 중…<br><span class="muted" style="font-size:.8rem">위치 권한을 허용하면 동네를 자동으로 찾아요</span></div>`;
+  const el=$('#locStatus'); if(!el) return; const nx=$('#dongNext'), alt=$('#dongAlt');
+  if(loc.dong_name){ const parts=(loc.dong_code||'').split('|'); const sub = (loc.verified||loc.manual) ? parts.slice(0,-1).join(' ') : '직접 입력';
+    el.innerHTML=`<div class="dcard"><div class="dname">${esc(loc.dong_name)}</div><div class="dsub">${esc(sub)}</div><div style="margin-top:10px"><span class="chip">${ico('location')} 내 뜨개 동네</span></div></div>
+      <div class="dfix"><b>한 번 정하면 그대로예요</b><ul><li>아침·점심·저녁, 어디로 이동해도 <u>따라오지 않아요</u></li><li>지금 회사에 계셔도, 뜨개하는 동네로 정하면 돼요</li><li>동네 이름만 보이고, 정확한 위치는 저장하지 않아요</li></ul></div>`;
+    if(nx){ nx.textContent='이 동네로 정하기'; nx.classList.remove('dis'); } if(alt) alt.hidden=false; return; }
+  const SV={search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>', map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 6.5l5.5-2 6 2 5.5-2v13l-5.5 2-6-2-5.5 2z"/><path d="M9 4.5v13M15 6.5v13"/></svg>'};
+  const st=locState, opt=(fn,ic,t,d,p)=>`<button type="button" class="dopt${p?' p':''}" onclick="${fn}"><span class="ic">${SV[ic]||ico(ic)}</span><span class="tx"><b>${t}</b>${d}</span><span class="go">›</span></button>`;
+  const here=opt('detectLocation()','location', st&&st!=='wait'?'현재 위치로 다시 찾기':'현재 위치로 찾기', st==='denied'?'휴대폰 설정에서 위치를 허용한 뒤':'누르면 위치를 한 번 확인해요', !st||st==='wait');
+  const byName=opt('manualDong()','search','동 이름으로 찾기','동 이름이나 도로명 주소로', st&&st!=='wait'), byMap=opt('dongMapPick()','map','지도에서 고르기','지도를 움직여 동네를 골라요');
+  const note = st==='wait' ? `<div class="dsafe">${ico('location')}<div><b>위치 확인 중…</b>잠시만 기다려 주세요.</div></div>`
+    : st ? `<div class="dnote"><b>${st==='noname'?'동네 이름을 찾지 못했어요.':'위치를 쓰지 않아도 괜찮아요.'}</b><br>동 이름으로 찾거나 지도에서 골라 주세요.</div>`
+    : `<div class="dsafe">${ico('location')}<div><b>한 번 정하면 그대로예요</b>이동해도 따라오지 않고, 동네 이름만 보여요.</div></div>`;
+  el.innerHTML = note + (st&&st!=='wait' ? byName+byMap+(st==='nogeo'?'':here) : here+byName+byMap);
+  if(nx){ nx.textContent='동네를 먼저 골라 주세요'; nx.classList.add('dis'); } if(alt) alt.hidden=true;
 }
+function dongReset(){ loc={ lat:null, lng:null, dong_name:null, dong_code:null, verified:false }; locState=''; renderDong(); }
 let obStep=1, obReturn=false;
 function obGo(n){
-  if(n===3 && !loc.dong_name) return toast('동네를 확인해 주세요 (다시 확인 또는 동네 찾기)');
+  if(n===3 && !loc.dong_name) return toast('동네를 먼저 골라 주세요');
   if(n===4){ return saveProfile().then(ok=>{ if(ok) obShow(4); }); }
   obShow(n);
 }
 function obShow(n){
-  obStep=n; document.querySelectorAll('#v-onboard .obs').forEach(el=>el.classList.toggle('on', +el.dataset.s===n));
+  obStep=n; if(me && myProfile && !myProfile.onboarded_at && !$('#v-onboard').classList.contains('edit')){ try{ sb.rpc('onboard_step',{p_step:n}).then(()=>{},()=>{}); }catch(e){} } document.querySelectorAll('#v-onboard .obs').forEach(el=>el.classList.toggle('on', +el.dataset.s===n));
   [...$('#obProg').children].forEach((i,k)=>i.classList.toggle('on', k<n));
   $('#obFoot').classList.toggle('on', n===4); $('#v-onboard').scrollTop=0;
-  if(n===2){ renderDong(); if(!loc.dong_name) detectLocation(); }
+  if(n===2){ renderDong(); }
   if(n===4) renderObReady();
 }
 function renderObReady(){
@@ -1843,17 +1867,17 @@ async function reverseGeocode(lat, lng){
   return { dong_name: dong, dong_code: [si,gu,dong].filter(Boolean).join('|') };
 }
 function detectLocation(){
-  if(!navigator.geolocation){ setLocStatus('이 브라우저는 위치를 지원하지 않아요. 「동네 찾기」를 눌러 주세요.'); return; }
-  renderDong();
+  if(!navigator.geolocation){ locState='nogeo'; renderDong(); return; }
+  locState='wait'; loc.dong_name=null; renderDong();
   navigator.geolocation.getCurrentPosition(async pos=>{
     const { latitude:lat, longitude:lng } = pos.coords;
     try{
       const d = await reverseGeocode(lat, lng);
-      loc = { lat, lng, dong_name:d.dong_name, dong_code:d.dong_code, verified:true };
+      loc = { lat, lng, dong_name:d.dong_name, dong_code:d.dong_code, verified:true }; locState='';
       renderDong();
-    }catch(e){ loc = { lat, lng, dong_name:null, dong_code:null, verified:true }; setLocStatus('<div class="dwait">위치는 잡았지만 동네 이름을 찾지 못했어요.<br>아래 「동네 찾기」를 눌러 주세요.</div>'); }
+    }catch(e){ loc = { lat, lng, dong_name:null, dong_code:null, verified:true }; locState='noname'; renderDong(); }
   }, err=>{
-    setLocStatus('<div class="dwait">'+(err.code===1 ? '위치 권한이 거부됐어요.<br>설정에서 허용하거나 「동네 찾기」를 눌러 주세요.' : '위치를 가져오지 못했어요.<br>「다시 확인」하거나 「동네 찾기」를 눌러 주세요.')+'</div>');
+    locState = err.code===1 ? 'denied' : 'fail'; renderDong();
   }, { enableHighAccuracy:false, timeout:10000, maximumAge:300000 });
 }
 // 동네 직접 입력 = 동네 검색(2026-11-10). 예전엔 글자만 받아 좌표가 없었고(지도에 핀이 안 생김) 집 주소를 적는 회원도 있었다.

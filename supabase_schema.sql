@@ -2043,3 +2043,9 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   partner_guide_nudge(): 크론 partner-guide-nudge 매일 10:00 KST — 안내 3일 뒤 대표 사진(가게는 매장 사진)이 없으면 remind 한 번(link view author_page/shop_edit)
 --   콘솔: admin_partner_list() · admin_partner_invite(kind,name,memo) · admin_partner_invite_set(id, op[sent|unsent|link|unlink|memo|delete], val)
 -- ============================================================
+
+-- ============================================================
+-- 129. 가입 단계 기록 (2026-11-15, 마이그레이션 onboard_step)
+--   profiles.onboard_step smallint: 가입(프로필 만들기) 몇 단계까지 갔는지 1~4. 가입을 마친 뒤에는 바뀌지 않음
+--   onboard_step(p_step): 본인 것만, 큰 값으로만 갱신(authenticated). 콘솔 회원 › 프로필 미완료에 '미완료 · N단계'로 표시
+-- ============================================================
