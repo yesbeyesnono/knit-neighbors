@@ -1831,3 +1831,8 @@ alter table public.yarn_stash enable trigger yarn_stash_fill;
 --           and exists (select 1 from profiles p where p.id = posts.author_id and p.suspended_at is null
 --                        and (not p.is_test or is_test_user(auth.uid()))) )
 -- 모임(meetups)·작품(works)·실 기록은 아직 나누지 않음
+
+-- ============================================================
+-- 123. 콘솔: 회원 상세에서 지기 대화 시작 (2026-11-15)
+-- ============================================================
+-- admin_talk_room(p_user uuid) returns uuid — 관리자만. 그 회원의 지기 채팅방(_support_room)을 찾아(없으면 만들어) 돌려줌

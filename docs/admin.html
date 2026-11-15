@@ -558,7 +558,7 @@ async function openUserPanel(id){
       <div class="mbr"><span>닉네임</span><b>${esc(p.nickname||'')}</b><a onclick="memClear('${id}','nick')">지우기</a></div>
       <div class="mbr"><span>소개</span><b style="font-weight:400">${esc((p.bio||'').slice(0,40))||'<span class="muted">없음</span>'}</b>${p.bio?`<a onclick="memClear('${id}','bio')">지우기</a>`:'<span></span>'}</div></div>
     <div id="mbDongBox"></div>
-    <div class="mbacts"><button onclick="broadcastTo('${id}','${esc(p.nickname)}')">알림 보내기</button><button onclick="suspendUser('${id}',${!p.suspended_at})">${p.suspended_at?'정지 해제':'정지'}</button>${isAdm?'<button disabled>계정 삭제</button>':`<button class="r" onclick="deleteUser('${id}','${esc(p.nickname)}')">계정 삭제</button>`}</div>
+    <div class="mbacts"><button data-n="${esc(p.nickname||'')}" onclick="talkWith('${id}', this.dataset.n)" style="background:var(--color-primary,#3E6B48);color:#fff;border-color:transparent">대화하기</button><button onclick="broadcastTo('${id}','${esc(p.nickname)}')">알림 보내기</button><button onclick="suspendUser('${id}',${!p.suspended_at})">${p.suspended_at?'정지 해제':'정지'}</button>${isAdm?'<button disabled>계정 삭제</button>':`<button class="r" onclick="deleteUser('${id}','${esc(p.nickname)}')">계정 삭제</button>`}</div>
     <div class="muted"><a href="#" onclick="event.preventDefault();setAdmin('${id}',${!isAdm})">${isAdm?'관리자 해제':'관리자로 지정'}</a></div>
     <div class="mblab">관리 기록</div>${(mlog||[]).map(l=>`<div class="muted">${fmt(l.created_at)} · ${esc(({member_edit:'정보 고침',suspend_user:'정지',unsuspend_user:'정지 해제',broadcast:'알림 보냄',set_admin:'관리자 지정'})[l.action]||l.action)}${l.detail?.action?' ('+esc(({dong:'동네',visible:'지도 공개',clear_nick:'닉네임',clear_bio:'소개'})[l.detail.action]||l.detail.action)+(l.detail.to!=null?' → '+esc(String(l.detail.to)):'')+')':''}</div>`).join('')||'<div class="muted">아직 없어요</div>'}
     <h2>기법 (${(p.skills||[]).length}) · 인증된 기법 (${(p.verified_skills||[]).length})</h2><div>${(p.skills||[]).map(t=>`<span class="chip ${(p.verified_skills||[]).includes(t)?'y':''}">${esc(TECH[t]?.name_ko||t)}</span>`).join('')||'<span class="muted">없음</span>'}</div>
@@ -577,6 +577,9 @@ async function supportRooms(){
 // ===== 지기 문의함(schema 95): 대화(기본) · AI가 정리한 문의 · 통계. 대화 = 왼쪽 목록(답장 필요/기다리는 중/대화 전체, 환영 인사만 간 회원은 접어 둠) · 가운데 대화 · 오른쪽 회원 활동 =====
 let TK={tab:'talk', seg:null, q:'', tag:'', sel:null, rows:[], mem:null, n:0};
 const TK_SEGS=[['need','답장 필요'],['wait','기다리는 중'],['all','대화 전체']];
+// 회원 상세 → [대화하기]: 그 회원의 지기 채팅방을 찾아(없으면 만들어) 지기 문의함의 대화 화면에서 바로 연다(2026-11-15 대표, schema 123)
+async function talkWith(uid, nick){ const {data:room,error}=await sb.rpc('admin_talk_room',{p_user:uid}); if(error||!room) return toast(error?.message||'대화방을 열지 못했어요'); let seg='all'; try{ const has=async g=>{ const {data}=await sb.rpc('admin_talk_list',{p:{seg:g,q:nick||'',tag:''}}); return ((data&&data.rows)||[]).some(x=>x.room===room); }; if(!(await has('all'))) seg=(await has('auto'))?'auto':'all'; }catch(e){}   // 환영 인사만 간 회원의 방은 '환영 인사만' 묶음에 있음
+  closePanel(); TK.tab='talk'; TK.seg=seg; TK.q=nick||''; TK.tag=''; TK.sel=room; if(location.hash==='#support') route(); else location.hash='#support'; }
 function talkSet(k,v){ TK[k]=v; if(k==='seg'||k==='q'||k==='tag') TK.sel=null; route(); }
 VIEWS.support = async(arg)=>{
   if(arg) TK.tab='tickets';
