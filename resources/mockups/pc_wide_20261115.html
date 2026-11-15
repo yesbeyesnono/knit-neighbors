@@ -1,0 +1,84 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>PC 넓은 화면 시안</title>
+<style>
+:root{--p:#3E6B48;--pd:#22362A;--pl:#DDE8D6;--bg:#F3F1EA;--sf:#fff;--mu:#55604F;--ink3:#8A9384;--line:#E2DFD5;--bg2:#EBE9E0;--gold:#E2A91C}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard','Malgun Gothic',sans-serif;background:#D9D6CC;color:var(--pd);padding:40px;width:1520px}
+h2{font-size:22px;margin:0 0 6px}.cap{font-size:15px;color:var(--mu);margin-bottom:16px}
+.scr{width:1440px;height:860px;background:var(--bg);border-radius:14px;overflow:hidden;display:grid;box-shadow:0 10px 40px rgba(0,0,0,.18);margin-bottom:48px}
+.a{grid-template-columns:232px 1fr 340px}.b{grid-template-columns:232px 400px 1fr}
+.side{background:var(--pd);color:#F3F1EA;padding:26px 16px;display:flex;flex-direction:column;gap:6px}
+.logo{font-size:26px;font-weight:800;letter-spacing:-.02em;padding:0 12px}.logo small{display:block;font-size:12px;font-weight:500;opacity:.7;margin-top:2px}
+.nv{margin-top:26px;display:flex;flex-direction:column;gap:4px}
+.nv a{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;font-size:16px;font-weight:600;color:#F3F1EA;opacity:.78}
+.nv a.on{background:rgba(255,255,255,.14);opacity:1}.nv i{width:22px;height:22px;border:2px solid currentColor;border-radius:7px;display:block}
+.nv .rd{margin-left:auto;background:#D9483B;color:#fff;font-size:11px;border-radius:9px;padding:1px 7px}
+.plus{margin-top:18px;background:var(--p);color:#fff;border-radius:24px;padding:13px;text-align:center;font-weight:700;font-size:16px}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14px}.av{width:36px;height:36px;border-radius:50%;background:var(--pl);flex:none}
+.main{overflow:hidden;display:flex;flex-direction:column;border-right:1px solid var(--line)}
+.hd{padding:22px 32px 0}.hd h1{font-size:22px}.tabs{display:flex;gap:8px;margin-top:14px}
+.tabs b{padding:8px 16px;border-radius:20px;font-size:14px;background:var(--sf);border:1px solid var(--line);font-weight:600;color:var(--mu)}.tabs b.on{background:var(--p);color:#fff;border-color:var(--p)}
+.feed{padding:16px 32px;display:flex;flex-direction:column;gap:0;max-width:760px;width:100%;margin:0 auto}
+.wr{background:var(--sf);border:1px solid var(--line);border-radius:14px;padding:14px 16px;color:var(--ink3);font-size:15px;display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.post{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid var(--line)}.post .av{width:44px;height:44px}
+.post b{font-size:15px}.post s{text-decoration:none;color:var(--ink3);font-size:13px;margin-left:6px}.post p{font-size:15px;line-height:1.5;margin-top:4px}
+.ph{display:flex;gap:8px;margin-top:10px}.ph div{width:210px;height:150px;border-radius:12px;background:linear-gradient(135deg,#C9D8C0,#E9DFC8)}.ph div:nth-child(2){background:linear-gradient(135deg,#E3CFC0,#D8E2D0)}
+.act{display:flex;gap:26px;margin-top:10px;color:var(--ink3);font-size:13px}
+.right{padding:22px 20px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+.card{background:var(--sf);border:1px solid var(--line);border-radius:14px;padding:16px}.card h3{font-size:15px;margin-bottom:10px}
+.mini{height:170px;border-radius:10px;background:#FBFBF8;position:relative;overflow:hidden;border:1px solid var(--line)}
+.mini:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 46%,#E4E6D9 46%,#E4E6D9 48%,transparent 48%),linear-gradient(20deg,transparent 60%,#E4E6D9 60%,#E4E6D9 62%,transparent 62%),radial-gradient(circle at 75% 30%,#EDF2DD 0 40px,transparent 41px)}
+.pin{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--p);border:3px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.2)}.pin.g{background:var(--gold);width:32px;height:32px}.pin.s{border-radius:8px;background:#fff;border-color:var(--p)}
+.row{display:flex;gap:10px;align-items:center;padding:8px 0;font-size:14px;border-top:1px solid var(--line)}.row:first-of-type{border:0}.row em{margin-left:auto;font-style:normal;color:var(--ink3);font-size:12px}
+.ev{background:#FFD95C;border-radius:14px;padding:16px;font-weight:700;color:#3B1D08;font-size:15px}.ev small{display:block;font-weight:500;font-size:13px;margin-top:4px}
+/* 지도 */
+.list{background:var(--sf);border-right:1px solid var(--line);display:flex;flex-direction:column}
+.list .hd{padding:22px 20px 12px}.srch{margin-top:12px;background:var(--bg);border-radius:12px;padding:11px 14px;color:var(--ink3);font-size:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.chips b{font-size:13px;padding:6px 12px;border-radius:16px;background:var(--pl);font-weight:600}.chips b.on{background:var(--p);color:#fff}
+.li{display:flex;gap:12px;padding:14px 20px;border-top:1px solid var(--line);align-items:center}.li b{font-size:15px;display:block}.li span{font-size:13px;color:var(--mu)}
+.li.sel{background:var(--pl)}.tag{margin-left:auto;font-size:12px;padding:3px 9px;border-radius:10px;background:var(--bg2);color:var(--mu)}.tag.g{background:#FBEFC8;color:#7A5A00}
+.map{position:relative;background:#FBFBF8;overflow:hidden}
+.map:before{content:"";position:absolute;inset:0;background:
+linear-gradient(100deg,transparent 30%,#E4E6D9 30%,#E4E6D9 30.6%,transparent 30.6%),linear-gradient(100deg,transparent 62%,#E4E6D9 62%,#E4E6D9 62.5%,transparent 62.5%),
+linear-gradient(8deg,transparent 40%,#E4E6D9 40%,#E4E6D9 40.8%,transparent 40.8%),linear-gradient(-14deg,transparent 70%,#E4E6D9 70%,#E4E6D9 70.6%,transparent 70.6%),
+radial-gradient(ellipse at 78% 22%,#EDF2DD 0 120px,transparent 121px),radial-gradient(ellipse at 18% 80%,#EEF0E8 0 150px,transparent 151px)}
+.map .pin{width:44px;height:44px}.map .pin.g{width:52px;height:52px}.lbl{position:absolute;font-size:12px;background:#fff;border:1.5px solid var(--p);border-radius:10px;padding:2px 8px;font-weight:700;transform:translate(-25%,50px);white-space:nowrap}
+.pop{position:absolute;left:470px;top:250px;width:300px;background:#fff;border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:18px}
+.pop b{font-size:17px}.pop p{font-size:14px;color:var(--mu);margin:6px 0 12px;line-height:1.5}.btn{display:inline-block;background:var(--p);color:#fff;border-radius:20px;padding:9px 18px;font-size:14px;font-weight:700}.btn.o{background:#fff;color:var(--p);border:1.5px solid var(--p);margin-left:6px}
+.zc{position:absolute;right:20px;bottom:20px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);font-size:22px;width:44px;text-align:center;line-height:44px}
+.note{background:#fff;border-radius:14px;padding:18px 22px;font-size:15px;line-height:1.75;width:1440px}
+</style></head><body>
+<h2>A. 커뮤니티 — 3칸</h2><div class="cap">왼쪽 메뉴(하단 탭이 옮겨 옴) · 가운데 글 목록(휴대폰과 같은 카드, 폭 760) · 오른쪽 동네 요약</div>
+<div class="scr a">
+ <div class="side"><div class="logo">knitup<small>뜨개동네</small></div>
+  <div class="nv"><a><i></i>지도</a><a class="on"><i></i>커뮤니티</a><a><i></i>채팅<span class="rd">2</span></a><a><i></i>마이</a></div>
+  <div class="plus">＋ 글쓰기</div><div class="me"><div class="av"></div>뜨개이웃 · 주엽동</div></div>
+ <div class="main"><div class="hd"><h1>우리 동네 뜨개 이야기</h1><div class="tabs"><b class="on">추천</b><b>최신</b><b>모임</b><b>완성작품</b><b>동네</b><b>친구</b></div></div>
+  <div class="feed"><div class="wr"><div class="av"></div>오늘 뜬 것, 궁금한 것을 적어 보세요</div>
+   <div class="post"><div class="av"></div><div><b>솜사탕뜨개</b><s>3시간 · 백석동 · 초급</s><p>첫 모자 완성했어요! 코 줄이는 부분이 어려웠는데 이웃 분 덕분에 끝냈어요 #첫완성</p><div class="ph"><div></div><div></div></div><div class="act"><span>♡ 12</span><span>💬 4</span><span>↻ 1</span></div></div></div>
+   <div class="post"><div class="av"></div><div><b>밤뜨개</b><s>5시간 · 주엽동 · 중급</s><p>토요일 오후에 카페에서 같이 뜨실 분 계신가요? 대바늘·코바늘 다 좋아요.</p><div class="act"><span>♡ 7</span><span>💬 9</span><span>↻</span></div></div></div>
+   <div class="post"><div class="av"></div><div><b>뜨개동네 지기</b><s>어제 · 운영진</s><p>뜨친과 만나 함께 뜨면 두 분 모두 커피 쿠폰! #뜨친인증 이벤트가 진행 중이에요.</p><div class="ph"><div></div></div></div></div>
+  </div></div>
+ <div class="right"><div class="ev">뜨친 생겼다 축하 이벤트 ☕<small>11월 30일까지 · 참여 방법 보기 ›</small></div>
+  <div class="card"><h3>우리 동네 지도</h3><div class="mini"><div class="pin" style="left:60px;top:50px"></div><div class="pin g" style="left:150px;top:80px"></div><div class="pin s" style="left:210px;top:40px"></div><div class="pin" style="left:110px;top:120px"></div></div></div>
+  <div class="card"><h3>다가오는 모임</h3><div class="row">토요 카페 뜨개<em>11/21 · 3명</em></div><div class="row">코바늘 수세미 같이 떠요<em>11/23 · 5명</em></div></div>
+  <div class="card"><h3>인기 태그</h3><div class="chips"><b>#첫완성</b><b>#모자</b><b>#뜨친인증</b><b>#대바늘</b></div></div></div>
+</div>
+
+<h2>B. 지도 — 목록 + 큰 지도</h2><div class="cap">왼쪽 목록에서 고르면 지도가 그 자리로 · 핀을 누르면 지도 위 카드</div>
+<div class="scr b">
+ <div class="side"><div class="logo">knitup<small>뜨개동네</small></div>
+  <div class="nv"><a class="on"><i></i>지도</a><a><i></i>커뮤니티</a><a><i></i>채팅<span class="rd">2</span></a><a><i></i>마이</a></div>
+  <div class="plus">＋ 글쓰기</div><div class="me"><div class="av"></div>뜨개이웃 · 주엽동</div></div>
+ <div class="list"><div class="hd"><h1 style="font-size:22px">우리 동네 뜨개 지도</h1><div class="srch">동네·이웃·공방 찾기</div><div class="chips"><b class="on">전체</b><b>친구 찾는 이웃</b><b>모임</b><b>가게</b><b>작가</b></div></div>
+  <div class="li sel"><div class="av" style="width:44px;height:44px;border:3px solid var(--gold)"></div><div><b>뜨개작가</b><span>고양시 일산서구 · 팔로워 34</span></div><span class="tag g">♛ 작가</span></div>
+  <div class="li"><div class="av" style="width:44px;height:44px;border-radius:10px"></div><div><b>포근 뜨개 공방</b><span>클래스 모집 중 1</span></div><span class="tag">공방</span></div>
+  <div class="li"><div class="av" style="width:44px;height:44px"></div><div><b>솜사탕뜨개</b><span>백석동 · 초급 · ✋ 친구 찾는 중</span></div><span class="tag">이웃</span></div>
+  <div class="li"><div class="av" style="width:44px;height:44px;border-radius:10px;background:var(--p)"></div><div><b>토요 카페 뜨개</b><span>11/21 오후 2시 · 3/6명</span></div><span class="tag">모임</span></div>
+  <div class="li"><div class="av" style="width:44px;height:44px"></div><div><b>밤뜨개</b><span>주엽동 · 중급</span></div><span class="tag">이웃</span></div></div>
+ <div class="map"><div class="pin g" style="left:380px;top:330px"></div><div class="lbl" style="left:380px;top:330px">♛ 뜨개작가</div>
+  <div class="pin s" style="left:445px;top:334px"></div><div class="pin" style="left:200px;top:480px"></div><div class="pin" style="left:610px;top:560px"></div><div class="pin" style="left:150px;top:180px"></div><div class="pin s" style="left:640px;top:140px;background:var(--p)"></div>
+  <div class="pop"><b>뜨개작가</b> <span class="tag g" style="margin-left:6px">♛ 작가</span><p>대바늘 니트 디자인 · 원데이 클래스를 열어요.<br>모집 중인 클래스 1 · 완성작품 28</p><span class="btn">작가 화면 보기</span><span class="btn o">팔로우</span></div>
+  <div class="zc">＋<br>－</div></div>
+</div>
+<div class="note"><b>공통</b> · 폭 1000px 이상일 때만 이 배치, 그보다 좁으면 지금의 휴대폰 화면 그대로 · 색·글씨·카드는 앱과 같음 · 글 화면·프로필·작성 페이지는 가운데 칸 안에서 열림 · 채팅은 [대화 목록 | 대화] 2칸, 마이는 [Dashboard | Thread] 2칸으로 같은 방식 · 스토어 앱에는 영향 없음(웹 전용)</div>
+</body></html>
