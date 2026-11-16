@@ -3108,11 +3108,12 @@ function homeNoticeSheet(){
 }
 function homeNoticeGo(){ const n=homeNoticeCur; if(n && n.link && typeof n.link==='object') openLink(n.link); }
 // ---- 앱 시작 공지: 좌우로 넘겨 보는 팝업 (2026-11-16 대표 확정 시안 notice_carousel_v2, schema 134 — app_config.home_notices)
-//      처음 보이는 카드는 무작위 · ✕(바깥 누르기 포함)로 닫으면 그날은 쉼 · '이 공지 다시 보지 않기'는 그 공지만(기기에 id 로 기억) · 버튼은 서버가 정해 준 link 만(openLink)
+//      처음 보이는 카드는 무작위 · ✕(바깥 누르기 포함)로 닫으면 그날은 쉼 · 버튼으로 본 공지는 그날만 빠지고 남은 공지는 계속 뜸 · '이 공지 다시 보지 않기'는 그 공지만(기기에 id 로 기억) · 버튼은 서버가 정해 준 link 만(openLink)
 let homeNotices=[];
 const hnDay=()=>{ const t=new Date(Date.now()+9*36e5); return t.toISOString().slice(0,10); };
 function hnNever(){ try{ const a=JSON.parse(localStorage.getItem('kn_notice_never')||'[]'); return Array.isArray(a)?a.map(String):[]; }catch(e){ return []; } }
-function hnLeft(){ const nv=hnNever(); return homeNotices.filter(n=>!nv.includes(String(n.id))); }
+function hnSeenToday(){ try{ const o=JSON.parse(localStorage.getItem('kn_notice_seen')||'{}'); return o && o.day===hnDay() && Array.isArray(o.ids) ? o.ids.map(String) : []; }catch(e){ return []; } }
+function hnLeft(){ const nv=hnNever(), sn=hnSeenToday(); return homeNotices.filter(n=>!nv.includes(String(n.id)) && !sn.includes(String(n.id))); }   // 다시 보지 않기로 끈 것 · 오늘 이미 눌러 본 것은 뺀다
 function homeNoticePop(){
   if(!me || !myProfile?.onboarded_at || !myProfile?.terms_agreed_at) return;
   if(!['map','comm'].includes(view) || $('#sheetwrap').classList.contains('on') || $('#hnpop') || $('#askdlg')) return;
@@ -3130,7 +3131,9 @@ function hnDraw(ls, start){ $('#hnpop')?.remove(); const d=document.createElemen
   d._ls=ls; d.onclick=e=>{ if(e.target===d || e.target.classList.contains('hnslide') || e.target.classList.contains('hntrack')) hnClose(); };
   document.body.appendChild(d); const tr=d.querySelector('.hntrack'); tr.scrollLeft=start*tr.clientWidth; }
 function hnClose(){ try{ localStorage.setItem('kn_notice_day', hnDay()); }catch(e){} $('#hnpop')?.remove(); }
-function hnGo(i){ const n=($('#hnpop')?._ls||[])[i]; hnClose(); if(n && n.btn && n.link && typeof n.link==='object') openLink(n.link); }
+function hnGo(i){ const n=($('#hnpop')?._ls||[])[i]; $('#hnpop')?.remove(); if(!n) return;   // 버튼으로 본 공지만 오늘 본 것으로 적는다 — 남은 공지는 다음에 앱을 열면 다시 뜬다(✕ 는 지금처럼 그날 전체를 쉼)
+  try{ const ids=hnSeenToday(); ids.push(String(n.id)); localStorage.setItem('kn_notice_seen', JSON.stringify({ day:hnDay(), ids })); }catch(e){}
+  if(n.btn && n.link && typeof n.link==='object') openLink(n.link); }
 function hnNo(i){ const d=$('#hnpop'), ls=d?._ls||[], n=ls[i]; if(!n) return; try{ const a=hnNever(); a.push(String(n.id)); localStorage.setItem('kn_notice_never', JSON.stringify(a.slice(-30))); }catch(e){}
   const rest=ls.filter((_,j)=>j!==i); if(!rest.length){ d.remove(); return; } hnDraw(rest, Math.min(i, rest.length-1)); }
 function openCertGuide(){ openSub('완성작품 인증', `<img src="events/cert-guide.jpg" alt="완성작품 인증 안내: 인증이 쌓이면 내 뜨개 단계·모임 열기·작가 자격의 바탕이 돼요. 하루에 한 작품씩 knitup 이 확인한 뒤 올려 드려요. 전체 사진, 기법이 보이는 가까운 사진, 걸린 시간과 뜨기 노하우를 담아 주세요. 뜨는 중인 이야기는 일반 글로 올려 주세요." style="display:block;width:calc(100% + 32px);max-width:none;margin:0 -16px">`); }
