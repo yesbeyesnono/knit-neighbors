@@ -4388,7 +4388,7 @@ function wItemSet(v, auto){ v=v||''; wItemManual = !auto && !!v; const h=$('#wIt
 function wItemPick(){ const cur=$('#wItem')?.value||''; openSheet(`<b style="font-size:1.05rem">작품 종류</b><div class="wigrid">${W_ITEMS.map(x=>`<button type="button" class="${x===cur?'on':''}" onclick="wItemSet(this.textContent===($('#wItem').value||'')?'':this.textContent);closeSheet()">${x}</button>`).join('')}</div>`); }
 async function openCert(skipDraft, noCam){
   if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
-  if(!noCam && !myProfile?.is_test && await certToday()>0) return askNote('오늘은 이미 올리셨어요', '완성작품 인증은 하루에 하나씩 올릴 수 있어요. 한 작품씩 천천히 보여 주세요. 쓰던 것이 있으면 이 휴대폰에 보관돼 있어서 내일 이어서 올릴 수 있어요.');   // 하루 1개(schema 133) — 서버도 막는다
+  if(!noCam && !myProfile?.is_test && await certToday()>0) return askNote('오늘은 이미 올리셨어요', '완성작품 인증은 하루에 하나씩 올릴 수 있어요. 한 작품씩 아껴서 보여 주세요. 쓰던 것이 있으면 이 휴대폰에 보관돼 있어서 내일 이어서 올릴 수 있어요.');   // 하루 1개(schema 133) — 서버도 막는다
   if(!skipDraft){ const d=await cdLoad(); if(d) return cdAsk(d); }   // 쓰던 인증이 있으면 먼저 묻는다
   closeSub(); sPhotos=[]; composeKind='work'; editWorkPost=null; wLocked=new Set(); $('#v-cert').classList.remove('edit'); $('#v-cert .top h1').textContent='완성작품 인증'; $('#certPost').textContent='다음'; wStory={ took:'', knowhow:'', regret:'' }; editWorkStatus=null; editWorkStory0='';
   if(!['compose','cert','meetform'].includes(view)) composeBack=view;
