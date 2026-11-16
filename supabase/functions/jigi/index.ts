@@ -406,7 +406,8 @@ async function supportScan() {
     if (act === "ask" && !/[?？]|까요|나요|세요|신가요|실까요/.test(reply)) act = ticket ? "note" : "escalate";
     // 이미 대표에게 전달된 뒤 회원이 "감사합니다/네" 같은 짧은 인사만 남기면 다시 답하지 않는다(2026-11-14 대표: 같은 안내가 두 번 나감)
     const lastMember = String(thread.filter((m) => m.sender_id !== SUPPORT_ID).slice(-1)[0]?.body ?? "").trim();
-    if (ticket && ticket.status === "waiting_admin" && ["note", "chat", "escalate", "ask"].includes(act) && lastMember.length <= 20 && /^(네+|넵|넹|예|감사|고맙|고마워|알겠|확인했|ㄳ|ㄱㅅ|좋아요|ok|okay|thanks|thank you)/i.test(lastMember)) { handled++; continue; }
+    // 문의가 없는 방에서 대표·자동 안내에 "네! 감사합니다"로 답한 것도 같다 — 전달 안내를 붙이지 않는다(2026-11-16 대표: 작가 안내 뒤 인사에 '전달할게요'가 나감)
+    if ((!ticket || ticket.status === "waiting_admin") && ["note", "chat", "escalate", "ask"].includes(act) && lastMember.length <= 20 && /^(네+|넵|넹|예|감사|고맙|고마워|알겠|확인했|ㄳ|ㄱㅅ|좋아요|ok|okay|thanks|thank you)/i.test(lastMember)) { handled++; continue; }
     if (act === "escalate" || act === "note") {
       const first = reply.replace(/^지기 AI예요\.?\s*/, "").split(/(?<=[.!?。])\s+/)[0]?.trim() ?? "";
       // 공감 한 문장만 허용. 사용법 설명이나 '전달하겠다'는 말(고정 문구와 겹침)은 버린다
