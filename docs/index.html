@@ -987,6 +987,8 @@ body.kb #nav{display:none!important}
 #askdlg .bs .gg{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
 .ntf.jg .tx .sn{white-space:normal;overflow:visible;line-height:1.5}
 .ntf .ngo{display:block;margin-top:6px;font-size:13px;font-weight:800;color:var(--color-primary)}
+.sheetwrap.ctr .cbs{display:flex;gap:8px}.sheetwrap.ctr .cbs .btn{flex:1;min-width:0;margin:0;height:44px;border-radius:999px;font-size:.92rem;padding:0 8px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.sheetwrap.ctr .sheet>button.btn{height:46px;border-radius:999px}
 </style>
 </head>
 <body>
@@ -1457,7 +1459,7 @@ async function studioCodeSheet(){
   openSheet(`<b style="font-size:1.05rem">knitup Studio 에서 가져오기</b>
     <div class="card soft" style="text-align:center"><div class="muted" style="font-size:.82rem">Studio 의 [뜨개동네에 등록] › <b>앱으로 보내기</b>에 이 코드를 입력하세요 (10분 유효)</div><div style="font-size:2.2rem;font-weight:800;letter-spacing:.25em;margin:8px 0;color:var(--olive)">${esc(code)}</div></div>
     <div class="muted" style="font-size:.82rem">Studio 는 PC·패드 브라우저에서 엽니다: <a href="#" onclick="event.preventDefault();openStudio()" style="color:var(--olive);font-weight:600">knitup Studio</a></div>
-    <button class="btn" onclick="studioCodeCheck()">받았는지 확인</button><button class="btn o" onclick="closeSheet()">닫기</button>`);
+    <button class="btn" onclick="studioCodeCheck()">받았는지 확인</button><button class="btn o" onclick="closeSheet()">닫기</button>`, 'c');
 }
 async function studioCodeCheck(){ const j=await studioInboxPull(); if(!j) return toast('아직 안 왔어요 — Studio 에서 코드로 보낸 뒤 다시 눌러 주세요'); closeSheet(); studioImportCheck(); }
 // 팔레트 되돌리기(대표 요청): ?theme=pistachio → 2026-09-26 피스타치오, ?theme=graphite → 흑백, ?theme=forest → 기본(숲 그린). 브라우저가 기억하고 네이티브도 localStorage 값이 있으면 따름
@@ -1528,7 +1530,8 @@ function ago(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금';
 function hhmm(t){ return new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}); }
 function chips(p){ return [p.craft&&`<span class="chip y">${CRAFT[p.craft]}</span>`, p.experience&&`<span class="chip">${EXP[p.experience]}</span>`, p.mbti&&`<span class="chip">${esc(p.mbti)}</span>`].filter(Boolean).join(' '); }
 // 창 규칙(2026-11-16 대표 확정 A안): 한 줄 알림=toast · 확인(예/아니오)=askOk/askConfirm(가운데) · 읽기(공지·안내)=askNote 또는 openSheet(html,'c')(가운데 카드) · 고르기·입력=openSheet(아래에서 올라옴) · 길게 적기=전체 화면
-function openSheet(html, mode){ if(typeof restoreMeetOpt==='function') restoreMeetOpt(); $('#sheet').innerHTML='<div class="hd"></div>'+html; $('#sheetwrap').classList.toggle('ctr', mode==='c'); $('#sheetwrap').classList.add('on'); }
+function openSheet(html, mode){ if(typeof restoreMeetOpt==='function') restoreMeetOpt(); $('#sheet').innerHTML='<div class="hd"></div>'+html; $('#sheetwrap').classList.toggle('ctr', mode==='c'); if(mode==='c') sheetPair(); $('#sheetwrap').classList.add('on'); }
+function sheetPair(){ const sh=$('#sheet'), bs=[...sh.children].filter(e=>e.matches('button.btn, a.btn')); if(bs.length===1 && !bs[0].classList.contains('o')){ const c=document.createElement('button'); c.type='button'; c.className='btn o'; c.textContent='닫기'; c.onclick=closeSheet; bs[0].after(c); bs.push(c); } if(bs.length!==2 || bs[0].nextElementSibling!==bs[1]) return; const no=bs.find(b=>b.classList.contains('o')), ok=bs.find(b=>b!==no); if(!no||!ok) return; const w=document.createElement('div'); w.className='cbs'; bs[0].before(w); w.append(no, ok); }
 function closeSheet(){ $('#sheetwrap').classList.remove('on'); if(typeof restoreMeetOpt==='function') restoreMeetOpt(); }
 // 시트 내려쓸기로 닫기: 시트가 맨 위까지 스크롤된 상태에서 아래로 끌면 따라 내려오고, 충분히 내리면 닫힘
 (function(){
@@ -2284,7 +2287,7 @@ function openPatternDone(m){
   openSheet(`<div style="text-align:center;padding:6px 0"><div style="font-size:2.2rem">🎉</div><b style="font-size:1.1rem">다 떴어요!</b><div class="muted" style="margin-top:4px">${esc(m.title||'도안')}을(를) 끝까지 뜨셨어요. 완성작을 인증하면 쓰인 기법이 내 뜨개 단계에 인증으로 남아요</div></div>
     <button class="btn" onclick="certFromPattern()">완성작 인증하기</button>
     <button class="btn o" onclick="closeSheet();openNextChallenge()">다음 도전 보기</button>
-    <button class="btn o" onclick="closeSheet()">나중에</button>`);
+    <button class="btn o" onclick="closeSheet()">나중에</button>`, 'c');
 }
 async function certFromPattern(){ const m=pvMeta; closeSheet(); await openCert(true); if(view!=='cert'||!m) return; $('#wTitle').value=(m.title||'').slice(0,40); if(m.craft==='knitting'||m.craft==='crochet') wCraft=m.craft; wTechSel=new Set((m.techniques||[]).filter(t=>TECH.find(x=>x.id===t))); renderCertTech(); certCheck(); toast('도안 이름과 기법이 채워졌어요 — 사진을 올려 주세요'); }
 async function openNextChallenge(){ await loadRecs(true); openSheet(`<b style="font-size:1.05rem">다음에 떠보면 좋아요</b><div class="muted" style="font-size:.82rem;margin-top:-6px">내 단계와 새로 배울 기법 1~2개를 기준으로 골랐어요</div><div class="patlist">${recs.slice(0,4).map(patItem).join('')||'<div class="empty">추천할 도안이 아직 없어요</div>'}</div>`); }
@@ -2369,7 +2372,7 @@ async function submitOrder(){ const d=ckDraft; if(!(d.name||'').trim()||!(d.phon
   if(error) return toast(error.message.replace(/^[^:]*: /,'')); await loadCart(); closeSub(); if(view==='store') renderStore();
   openSheet(`<div style="text-align:center;padding:6px 0"><div style="font-size:2rem">🧶</div><b style="font-size:1.1rem">주문이 접수됐어요</b><div class="muted" style="margin-top:4px">주문번호 <b style="color:var(--ink)">${esc(data.no)}</b></div></div>
     <div class="card soft" style="font-size:.9rem"><b>입금 안내</b><div class="sumrow"><span>입금 금액</span><b>${won(data.total)}</b></div><div class="sumrow"><span>계좌</span><span>${BANK_DEMO.bank} ${BANK_DEMO.no}</span></div><div class="sumrow"><span>예금주</span><span>${BANK_DEMO.holder}</span></div><div class="muted" style="font-size:.8rem;margin-top:4px">24시간 안에 입금해 주세요. 입금 확인 → 발송 → 완료 단계마다 알림이 와요.</div></div>
-    <button class="btn" onclick="closeSheet();openMyOrders()">내 주문 보기</button><button class="btn o" onclick="closeSheet()">닫기</button>`); }
+    <button class="btn" onclick="closeSheet();openMyOrders()">내 주문 보기</button><button class="btn o" onclick="closeSheet()">닫기</button>`, 'c'); }
 async function openMyOrders(){ const { data, error }=await sb.rpc('my_orders'); if(error) return toast(error.message);
   openSub('내 주문', (data||[]).length?data.map(o=>{ const st=OSTAT[o.status]||[o.status,'']; return `<div class="card" style="margin-top:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>${esc(o.no)}</b><span class="ostat ${st[1]}">${st[0]}</span></div><div class="muted" style="font-size:.78rem">${fmtDT(o.created_at)}</div>
       <div style="margin-top:6px;font-size:.9rem">${(o.items||[]).map(i=>`· ${esc(i.name)} ${i.color?esc(i.color)+' ':''}× ${i.qty} <span class="muted">${won(i.price*i.qty)}</span>`).join('<br>')}</div>
@@ -2383,7 +2386,7 @@ function flowHtml(price){ const f=feeFlow(price); return `<div class="flow"><spa
 async function buyPattern(id){ const { data, error }=await sb.rpc('purchase_pattern',{ p_pattern:id }); if(error) return toast(error.message);
   openSheet(`<div style="text-align:center;padding:6px 0"><div style="font-size:2rem">🎁</div><b style="font-size:1.1rem">${data.already?'이미 구매한 도안이에요':'구매 완료 · 무료 체험'}</b><div class="muted" style="margin-top:4px">결제 없이 열렸어요. 정식 출시 후에는 아래 흐름으로 돈이 움직여요.</div></div>
     ${data.price>0?`<div class="card soft">${flowHtml(data.price)}</div>`:''}
-    <button class="btn" onclick="closeSheet();openPattern('${id}')">도안으로 돌아가기</button>`); }
+    <button class="btn" onclick="closeSheet();openPattern('${id}')">도안으로 돌아가기</button>`, 'c'); }
 async function openMyPurchases(){ const { data }=await sb.rpc('my_pattern_purchases'); const list=data||[];
   openSheet(`<b style="font-size:1.05rem">구매한 도안</b><div class="patlist">${list.length?list.map(p=>patItem({ id:p.pattern_id, title:p.title, craft:p.craft, level:p.level, photos:p.photos, price:p.price, has_viewer:p.has_viewer, new_count:-1 })).join(''):'<div class="empty">아직 구매한 도안이 없어요</div>'}</div>`); }
 async function openSettlement(){ const { data:s, error }=await sb.rpc('author_settlement'); if(error) return toast(error.message); const t=s.total||{};
@@ -2413,8 +2416,8 @@ const AUTHOR_MIN_CERTS = 3;
 async function openAuthorApply(){
   const { data:rows } = await sb.from('author_applications').select('*').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(1);
   const a=(rows||[])[0]; const { data:elig } = await sb.rpc('my_author_eligibility'); const certs=elig?.adv||0, total=elig?.total||0;
-  if(a && a.status==='pending') return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0">신청을 확인하고 있어요. 보통 5일 안에 활동 알림으로 결과를 알려 드려요.</p><button class="btn o" onclick="cancelAuthorApply('${a.id}')">신청 취소</button>`);
-  if(certs < AUTHOR_MIN_CERTS) return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0"><b style="color:var(--ink)">전문(5단계) 기법</b>이 들어간 완성작품 인증 ${AUTHOR_MIN_CERTS}개부터 신청할 수 있어요. 지금 <b style="color:var(--ink)">${certs}개</b>예요 (전체 인증 ${total}개).<br>작가가 되면 ${FULL?'도안을 등록해 이웃에게 추천되고, ':''}지도에 작가 핀으로 표시되고 내 인스타그램·링크를 프로필에 넣을 수 있어요.</p><button class="btn" onclick="closeSheet();openCompose('work')">완성작품 인증하러 가기</button>`);
+  if(a && a.status==='pending') return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0">신청을 확인하고 있어요. 보통 5일 안에 활동 알림으로 결과를 알려 드려요.</p><button class="btn o" onclick="cancelAuthorApply('${a.id}')">신청 취소</button>`, 'c');
+  if(certs < AUTHOR_MIN_CERTS) return openSheet(`<b>작가 신청</b><p class="muted" style="margin:0"><b style="color:var(--ink)">전문(5단계) 기법</b>이 들어간 완성작품 인증 ${AUTHOR_MIN_CERTS}개부터 신청할 수 있어요. 지금 <b style="color:var(--ink)">${certs}개</b>예요 (전체 인증 ${total}개).<br>작가가 되면 ${FULL?'도안을 등록해 이웃에게 추천되고, ':''}지도에 작가 핀으로 표시되고 내 인스타그램·링크를 프로필에 넣을 수 있어요.</p><button class="btn" onclick="closeSheet();openCompose('work')">완성작품 인증하러 가기</button>`, 'c');
   openSheet(`<b>작가 신청</b>
     <p class="muted" style="margin:0">전문(5단계) 기법으로 인증한 작품 ${certs}개와 아래 내용을 운영진이 확인한 뒤 승인해요. 승인되면 ${FULL?'도안을 등록할 수 있고 ':''}지도에 작가 핀으로 표시되고, 가게처럼 <b style="color:var(--ink)">클래스를 열 수</b> 있고, 아래 활동 링크가 프로필에 보여요.${a&&a.status==='rejected'?`<br>지난 신청은 반려됐어요${a.reject_reason?': '+esc(a.reject_reason):''}`:''}</p>
     <label class="f">이름 (본인 확인용, 공개되지 않아요)<input id="auName" maxlength="40" placeholder="실명 또는 사업자 상호"></label>
@@ -2594,7 +2597,7 @@ let clRows=[], clPick=null, clTimer=null;
 async function openShopClaim(shopId, shopName){
   const { data:rows } = await sb.from('shop_claims').select('*').eq('profile_id', me.id).order('created_at',{ascending:false}).limit(1);
   const c = (rows||[])[0];
-  if(c && c.status==='pending') return openSheet(`<b>가게 등록 신청</b><p class="muted" style="margin:0">「${esc(c.name)}」 신청을 확인하고 있어요. 지기 AI가 서류를 읽어 신청 내용과 맞으면 바로 승인되고, 아니면 대표가 하루 안에 확인해요. 결과는 활동 알림으로 알려 드려요.</p><button class="btn o" onclick="cancelShopClaim('${c.id}')">신청 취소</button>`);
+  if(c && c.status==='pending') return openSheet(`<b>가게 등록 신청</b><p class="muted" style="margin:0">「${esc(c.name)}」 신청을 확인하고 있어요. 지기 AI가 서류를 읽어 신청 내용과 맞으면 바로 승인되고, 아니면 대표가 하루 안에 확인해요. 결과는 활동 알림으로 알려 드려요.</p><button class="btn o" onclick="cancelShopClaim('${c.id}')">신청 취소</button>`, 'c');
   claimDoc=null; clPick=null; clRows=[];
   openSheet(`<b>${shopId?'이 가게 주인이에요':'우리 가게 등록 신청'}</b>
     <p class="muted" style="margin:0">공방·실가게·뜨개 카페를 지도에 네모 핀으로 올리고 소식·클래스를 직접 올릴 수 있어요. 지금 로그인한 계정이 가게 관리자가 돼요.${c&&c.status==='rejected'?`<br>지난 신청은 반려됐어요${c.reject_reason?': '+esc(c.reject_reason):''}`:''}</p>
@@ -4281,7 +4284,7 @@ function openPlusSheet(){
   </div><button class="btn o" onclick="closeSheet()">닫기</button>`);
 }
 function openMeetGate(){
-  openSheet(`<b>${ico('cert')} 모임을 열려면 완성작품 인증이 필요해요</b><div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div><button class="btn" type="button" onclick="closeSheet();openCert()">완성작품 인증하러 가기</button>`);
+  openSheet(`<b>${ico('cert')} 모임을 열려면 완성작품 인증이 필요해요</b><div class="muted">본인이 완성한 작품 사진과 사용한 기법을 한 번 올리면 모임을 만들 수 있어요. 광고·가짜 모임을 막기 위한 최소 조건이에요.</div><button class="btn" type="button" onclick="closeSheet();openCert()">완성작품 인증하러 가기</button>`, 'c');
 }
 
 // ----- 보조 화면(한 장 덮기)
@@ -5602,7 +5605,7 @@ async function toggleWave(){
   if(on && !localStorage.getItem('waveInfoSeen')){
     openSheet(`<b style="font-size:1.05rem">${ico('wave')} 뜨개 친구를 찾고 있다고 알릴게요</b>
       <div class="muted" style="font-size:.92rem;line-height:1.55">지도의 내 핀에 손이 올라가고, 이웃들이 <b>"먼저 말 걸어도 되는 사람"</b>으로 봐요. 먼저 다가가기 어려운 분들을 위한 표시예요.<br>14일 뒤 자동으로 내려가고, 언제든 다시 누르면 내릴 수 있어요.</div>
-      <button class="btn" onclick="localStorage.setItem('waveInfoSeen','1');closeSheet();setWave(true)">알리기</button><button class="btn o" onclick="closeSheet()">나중에</button>`);
+      <button class="btn" onclick="localStorage.setItem('waveInfoSeen','1');closeSheet();setWave(true)">알리기</button><button class="btn o" onclick="closeSheet()">나중에</button>`, 'c');
     return;
   }
   setWave(on);
@@ -5796,8 +5799,8 @@ async function loadMyMeetups(el){
 }
 async function pushSettingsRow(){
   if(!PushN) return; const p = await PushN.checkPermissions();
-  if(p.receive==='granted'){ pushRegister(); openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 켜져 있어요. 끄려면 ${PUSH_OS} 설정 › 뜨개동네 › 알림에서 바꿔 주세요.</p><button class="btn o" onclick="closeSheet();pushTest()">테스트 알림 보내기</button>`); }
-  else if(p.receive==='denied') openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 꺼져 있어요. ${PUSH_OS} 설정 › 뜨개동네 › 알림에서 켜 주세요.</p>`);
+  if(p.receive==='granted'){ pushRegister(); openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 켜져 있어요. 끄려면 ${PUSH_OS} 설정 › 뜨개동네 › 알림에서 바꿔 주세요.</p><button class="btn o" onclick="closeSheet();pushTest()">테스트 알림 보내기</button>`, 'c'); }
+  else if(p.receive==='denied') openSheet(`<b>앱 알림</b><p class="muted" style="margin:0">알림이 꺼져 있어요. ${PUSH_OS} 설정 › 뜨개동네 › 알림에서 켜 주세요.</p>`, 'c');
   else pushAsk();
 }
 async function pushTest(){ closeSheet(); const { data, error } = await sb.functions.invoke('push-send', { body:{ route:'test' } }); if(error) return toast(error.message); toast(data?.sent ? '보냈어요 · 잠시 뒤 알림이 와요' : (/^(no|bad)_/.test(data?.error||'') ? '서버에 푸시 키가 아직 없어요' : data?.tried ? '보내지 못했어요 · 잠시 뒤 다시 해 주세요' : '등록된 기기가 없어요')); }
