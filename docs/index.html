@@ -1019,6 +1019,16 @@ body.kb #nav{display:none!important}
 #hnpop .hndots{display:flex;gap:7px;justify-content:center;height:8px;margin:13px 0 2px}#hnpop .hndots i{width:8px;height:8px;border-radius:50%;background:var(--line)}#hnpop .hndots i.on{width:20px;border-radius:999px;background:var(--color-primary)}
 #hnpop .hnnever{display:block;width:100%;border:0;background:none;font:inherit;font-size:.8rem;color:var(--color-text-muted);padding:9px 0 13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 #hnpop .hnhint{text-align:center;color:#fff;font-size:.78rem;opacity:.9;margin-top:12px}
+.ntfsec{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 6px;font-size:.76rem;font-weight:700;color:var(--color-text-muted);background:var(--color-bg)}.ntfsec button{border:0;background:none;font:inherit;font-weight:600;color:var(--color-text-muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0}
+.ntfrow{position:relative;overflow:hidden}.ntfrow .ntfdel{position:absolute;right:0;top:0;bottom:0;width:74px;border:0;background:#C8453A;color:#fff;font:inherit;font-weight:700;font-size:.88rem;cursor:pointer}.ntfrow>.ntf{position:relative;background:var(--color-surface);transition:transform .18s}.ntfrow.open>.ntf{transform:translateX(-74px)}
+.ntf.seen{background:#FAF9F5}.ntf.seen .tx,.ntf.seen .tx b,.ntf.seen .sn{color:var(--ink3,#8A9384);font-weight:500}.ntf.seen .ava,.ntf.seen .k{opacity:.55}
+.spacts{display:flex;gap:18px;margin-top:10px}.spacts button{display:inline-flex;align-items:center;gap:5px;border:0;background:none;font:inherit;font-size:.84rem;color:var(--color-text-muted);padding:4px 0;cursor:pointer}.spacts button i{font-style:normal;font-weight:700}.spacts svg{width:18px;height:18px}.spacts .spl.on{color:#D93025}.spacts .spl.on svg{fill:#D93025;stroke:#D93025}
+.spcm{margin-top:8px;background:var(--color-bg);border-radius:12px;padding:10px 12px}.spcr{display:flex;gap:9px;margin-bottom:10px}.spcr .ava,.spcr .avatar{width:30px;height:30px;font-size:.72rem;flex:none}.spcx{min-width:0;flex:1}.spcx b{font-size:.82rem}.spcx b i{font-style:normal;background:var(--color-primary);color:#fff;border-radius:999px;font-size:.66rem;padding:1px 7px;margin-left:5px;font-weight:700}.spcx time{font-size:.7rem;color:var(--ink3,#8A9384);margin-left:6px}.spcx button{border:0;background:none;font:inherit;font-size:.7rem;color:var(--ink3,#8A9384);margin-left:6px;cursor:pointer;padding:0}.spcx span{display:block;font-size:.88rem;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.spin{display:flex;gap:6px;align-items:center}.spin input{flex:1;min-width:0;height:40px;border:1.5px solid var(--line);border-radius:999px;padding:0 14px;font:inherit;font-size:.9rem;background:var(--color-surface)}.spin button{flex:none;height:40px;border:0;border-radius:999px;background:var(--color-primary);color:#fff;font:inherit;font-weight:700;font-size:.86rem;padding:0 15px;cursor:pointer}
+#fnStrip{padding:12px 0 12px 16px;border-bottom:8px solid var(--color-bg);background:var(--color-surface)}.fnhd{display:flex;justify-content:space-between;align-items:center;padding-right:16px;margin-bottom:9px}.fnhd b{font-size:.88rem}.fnhd button{border:0;background:none;font:inherit;font-size:.82rem;font-weight:700;color:var(--color-primary);cursor:pointer}
+.fncards{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-right:16px}.fncards::-webkit-scrollbar{display:none}.fncd{position:relative;flex:0 0 150px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--color-surface);cursor:pointer}.fnim{height:84px;background:var(--color-primary-light) center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--color-primary)}.fnim svg{width:28px;height:28px}
+.fncd em{position:absolute;left:7px;top:7px;background:#D93025;color:#fff;font-style:normal;font-size:.66rem;font-weight:700;border-radius:999px;padding:2px 7px}.fnx{padding:8px 9px 10px}.fnx small{display:block;font-size:.7rem;color:var(--ink3,#8A9384);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fnx b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.8rem;line-height:1.4;margin-top:2px;min-height:2.8em}
+.fnwho{padding:12px 16px 0;font-size:.82rem;font-weight:700;color:var(--color-primary);cursor:pointer}
 </style>
 </head>
 <body>
@@ -1108,6 +1118,7 @@ body.kb #nav{display:none!important}
     <div class="evstrip" id="evStrip"></div>
     <div class="tagrow" id="tagRow" hidden></div>
     <div class="tagbar" id="tagBar" hidden></div>
+    <div id="fnStrip" hidden></div>
     <div class="feed" id="feed"></div>
     <div class="feedmore" style="padding:12px 16px"><button class="btn" id="feedMore" onclick="loadFeed(true)" hidden>더 보기</button></div>
   </section>
@@ -2171,7 +2182,37 @@ async function openInquiry(kind, id){
 function pgToggle(id){ const e=document.getElementById('pgf-'+id); if(e) e.hidden=!e.hidden; }
 function clsTime(p){ const t=p?.extra?.starts_at||p?.ends_at||null; return t?new Date(t).getTime():Infinity; }
 function clsPast(p){ const t=clsTime(p); if(t===Infinity) return false; const x=p.extra||{}; const span = x.type==='course' ? Math.max(1,(x.sessions||1))*(x.cycle==='biweekly'?14:7)*864e5 : 6*3600e3; return t+span < Date.now(); }
-function spostCard(p, mine){ return `<div class="spost" id="sp-${p.id}"><span class="k ${p.kind==='class'?'class':''}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button><button class="menu" style="float:right;background:none;border:0;cursor:pointer;margin-right:10px" onclick="editShopPost('${p.id}')">수정</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.link&&p.kind!=='class'&&NEWS_LINK_RE.test(p.link)?`<div class="nlink" onclick="event.stopPropagation()">${linkList([{u:p.link}],'가게 소식 링크')}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}</div>`; }
+function spostCard(p, mine){ return `<div class="spost" id="sp-${p.id}"><span class="k ${p.kind==='class'?'class':''}">${SPOST_KIND[p.kind]||'소식'}</span><time>${agoShort(p.created_at)}</time>${p.ends_at?`<span class="ends">${new Date(p.ends_at)<new Date()?'마감':'~'+fmtd(p.ends_at)+'까지'}</span>`:''}${mine?`<button class="menu" style="float:right;background:none;border:0;cursor:pointer" onclick="deleteShopPost('${p.id}')">삭제</button><button class="menu" style="float:right;background:none;border:0;cursor:pointer;margin-right:10px" onclick="editShopPost('${p.id}')">수정</button>`:''}<div><b>${esc(p.title)}</b></div>${p.body?`<div class="txt">${esc(p.body)}</div>`:''}${p.link&&p.kind!=='class'&&NEWS_LINK_RE.test(p.link)?`<div class="nlink" onclick="event.stopPropagation()">${linkList([{u:p.link}],'가게 소식 링크')}</div>`:''}${p.kind==='class'&&p.extra?.v?classBox(p):''}${(p.photos||[]).length?`<div class="pgrid n${p.photos.length}">${p.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" onclick="openPhoto(this.src)">`).join('')}</div>`:''}${p.kind!=='class'?spActs(p):''}</div>`; }
+// ===== 가게 소식의 좋아요·댓글 (2026-11-16 대표 확정 시안 activity_shopnews_v1, schema 138) =====
+// '소식' 글에만(클래스는 신청 → 채팅방). 댓글은 글만, 쓰기는 서버 함수 shop_post_comment 로(링크·계좌번호 금지, 가게 주인·댓글 쓴 분에게 알림)
+const spLiked=new Set(), SP_OWNER={};
+function spActs(p){ clearTimeout(spHydrate.t); spHydrate.t=setTimeout(spHydrate, 120);
+  return `<div class="spacts" data-sp="${p.id}"><button type="button" class="spl${spLiked.has(p.id)?' on':''}" onclick="event.stopPropagation();spLike('${p.id}')">${ico('heart')}<span>좋아요</span><i>${p.like_count||0}</i></button><button type="button" class="spc" onclick="event.stopPropagation();spCmtToggle('${p.id}')">${ico('reply')}<span>댓글</span><i>${p.comment_count||0}</i></button></div><div class="spcm" id="spc-${p.id}" hidden onclick="event.stopPropagation()"></div>`; }
+async function spHydrate(){ const els=[...document.querySelectorAll('.spacts[data-sp]:not([data-h])')]; if(!els.length || !me) return; els.forEach(e=>e.dataset.h='1'); const ids=[...new Set(els.map(e=>e.dataset.sp))];
+  try{ const [a,b]=await Promise.all([sb.from('shop_posts').select('id,like_count,comment_count,author_id,shop:shops(owner_id)').in('id', ids), sb.from('shop_post_likes').select('post_id').eq('profile_id', me.id).in('post_id', ids)]);
+    (b.data||[]).forEach(l=>spLiked.add(l.post_id)); (a.data||[]).forEach(r=>{ SP_OWNER[r.id]=(r.shop&&r.shop.owner_id)||r.author_id; document.querySelectorAll(`.spacts[data-sp="${r.id}"]`).forEach(e=>{ e.querySelector('.spl').classList.toggle('on', spLiked.has(r.id)); e.querySelector('.spl i').textContent=r.like_count||0; e.querySelector('.spc i').textContent=r.comment_count||0; }); }); }catch(e){} }
+async function spLike(id){ const on=!spLiked.has(id); const { data, error }=await sb.rpc('shop_post_like', { p_post:id, p_on:on }); if(error) return toast(error.message.replace(/^.*?: /,'')); on?spLiked.add(id):spLiked.delete(id);
+  document.querySelectorAll(`.spacts[data-sp="${id}"]`).forEach(e=>{ e.querySelector('.spl').classList.toggle('on', on); e.querySelector('.spl i').textContent=data||0; }); }
+async function spCmtToggle(id){ const box=$('#spc-'+id); if(!box) return; if(!box.hidden){ box.hidden=true; return; } box.hidden=false; box.innerHTML='<div class="muted" style="font-size:.82rem;padding:6px 0">불러오는 중…</div>'; await spCmtLoad(id); }
+async function spCmtLoad(id){ const box=$('#spc-'+id); if(!box) return; const { data, error }=await sb.from('shop_post_comments').select('id,body,created_at,author_id, author:profiles!shop_post_comments_author_id_fkey(id,nickname,avatar_url)').eq('post_id', id).order('created_at').limit(100);
+  if(error){ box.innerHTML='<div class="muted" style="font-size:.82rem">댓글을 불러오지 못했어요</div>'; return; } const rows=data||[], own=SP_OWNER[id];
+  box.innerHTML=(rows.length?rows.map(c=>{ const a=c.author||{}; const can=c.author_id===me.id || own===me.id; return `<div class="spcr"><div onclick="openProfile('${a.id}')">${avatar(a)}</div><div class="spcx"><b>${esc(a.nickname||'알 수 없음')}${c.author_id===own?'<i>가게</i>':''}</b><time>${agoShort(c.created_at)}</time>${can?`<button type="button" aria-label="댓글 지우기" onclick="spCmtDel('${id}','${c.id}')">지우기</button>`:''}<span>${esc(c.body)}</span></div></div>`; }).join(''):'<div class="muted" style="font-size:.82rem;padding:2px 0 8px">첫 댓글을 남겨 보세요</div>')
+    + `<div class="spin"><input id="spi-${id}" maxlength="300" placeholder="댓글 남기기" enterkeyhint="send" onkeydown="if(event.key==='Enter'&&!event.isComposing){ event.preventDefault(); spCmtSend('${id}'); }"><button type="button" onclick="spCmtSend('${id}')">올리기</button></div>`;
+  document.querySelectorAll(`.spacts[data-sp="${id}"] .spc i`).forEach(e=>e.textContent=rows.length); }
+async function spCmtSend(id){ const el=$('#spi-'+id); const t=(el&&el.value||'').trim(); if(!t) return; if(spCmtSend.busy) return; spCmtSend.busy=true;
+  try{ await loadBanned(); if(hasBanned(t)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요'); const { error }=await sb.rpc('shop_post_comment', { p_post:id, p_body:t }); if(error) throw new Error(error.message.replace(/^.*?: /,'')); await spCmtLoad(id); }catch(e){ toast(e.message); }
+  spCmtSend.busy=false; }
+async function spCmtDel(id, cid){ if(!(await askOk('이 댓글을 지울까요?', '지우기', '닫기'))) return; const { error }=await sb.from('shop_post_comments').delete().eq('id', cid); if(error) return toast('지우지 못했어요'); spCmtLoad(id); }
+// ===== 커뮤니티 '친구' 탭 맨 위: 팔로우한 가게·작가의 최근 소식(14일) — 알림을 놓쳐도 다시 찾을 수 있게 =====
+let fnRows=[];
+async function loadFollowNews(){ const box=$('#fnStrip'); if(!box) return; box.hidden=true; fnRows=[];
+  try{ const [a,b]=await Promise.all([sb.from('shop_follows').select('shop_id').eq('profile_id', me.id), sb.from('author_follows').select('author_id').eq('profile_id', me.id)]);
+    const sids=(a.data||[]).map(r=>r.shop_id), aids=(b.data||[]).map(r=>r.author_id); const cond=[]; if(sids.length) cond.push(`shop_id.in.(${sids.join(',')})`); if(aids.length) cond.push(`author_id.in.(${aids.join(',')})`); if(!cond.length) return;
+    const { data }=await sb.from('shop_posts').select('*, shop:shops(id,name), author:profiles!shop_posts_author_id_fkey(id,nickname)').or(cond.join(',')).eq('hidden', false).gte('created_at', new Date(Date.now()-14*864e5).toISOString()).order('created_at',{ascending:false}).limit(20);
+    fnRows=data||[]; if(!fnRows.length || commFilter!=='friends') return;
+    box.innerHTML=`<div class="fnhd"><b>팔로우한 가게·작가 소식</b><button type="button" onclick="openFollowNews()">전체 ›</button></div><div class="fncards">${fnRows.slice(0,10).map((p,i)=>{ const ph=(p.photos||[])[0]; const who=(p.shop&&p.shop.name)||(p.author&&p.author.nickname)||''; return `<div class="fncd" onclick="fnOpen(${i})"><div class="fnim"${ph?` style="background-image:url('${esc(ph)}')"`:''}>${ph?'':SHOP_SVG}</div>${Date.now()-new Date(p.created_at)<864e5?'<em>새 글</em>':''}<div class="fnx"><small>${esc(who)} · ${agoShort(p.created_at)}</small><b>${esc(p.title)}</b></div></div>`; }).join('')}</div>`; box.hidden=false; }catch(e){} }
+function fnOpen(i){ const p=fnRows[i]; if(!p) return; if(p.shop_id) return openShop(p.shop_id); if(p.author_id) return openProfile(p.author_id); }
+function openFollowNews(){ openSub('팔로우한 가게·작가 소식', `<div style="padding-bottom:24px">${fnRows.length?fnRows.map((p,i)=>`<div class="fnwho" onclick="fnOpen(${i})">${esc((p.shop&&p.shop.name)||(p.author&&p.author.nickname)||'')} ›</div>`+spostCard(p,false)).join(''):'<div class="empty">최근 2주 동안 올라온 소식이 없어요</div>'}</div>`); }
 function pgClsRow(p, mine, label){ const x=p.extra||{}; const ap=classApps[p.id]||{}; const past=clsPast(p); const left = x.max ? Math.max(0, x.max-(ap.accepted||0)) : null;
   const sub=[x.starts_at?fmtWhen(x.starts_at):'', past?'':(left===null?'':(left?`자리 ${left}개 남음`:'마감')), x.fee?won(x.fee):(p.extra?.v?'무료':'')].filter(Boolean).join(' · ');
   return `<div class="pgli" onclick="pgToggle('${p.id}')"><div><b><span class="pgk ${past?'n':'c'}">${label||(past?'지난 클래스':'모집 중')}</span>${esc(p.title)}</b><div class="s">${esc(sub)}</div></div><span class="go">${past?'보기':'신청'} ›</span></div><div class="pgfull" id="pgf-${p.id}" hidden>${spostCard(p, mine)}</div>`; }
@@ -2986,12 +3027,14 @@ const NTF_JG=new Set(['cheer','remind','notice']);   // 지기가 보내는 안�
 const ntfDest=n=>!!((n.link && typeof n.link==='object') || n.event_id || (n.kind==='notice' && n.shop_id));
 function pushBadgeClear(){ try{ if(PushN && PushN.removeAllDeliveredNotifications) PushN.removeAllDeliveredNotifications().catch(()=>{}); }catch(e){} }   // 아이폰 앱 아이콘의 빨간 숫자·알림 센터의 지난 알림
 async function renderActivity(){
-  const { data, error } = await sb.from('notifications').select('*, actor:profiles!notifications_actor_id_fkey(id,nickname,avatar_url), shop:shops(name)').eq('recipient_id', me.id).order('created_at',{ascending:false}).limit(100);
+  const { data, error } = await sb.from('notifications').select('*, actor:profiles!notifications_actor_id_fkey(id,nickname,avatar_url), shop:shops(name)').eq('recipient_id', me.id).gte('created_at', new Date(Date.now()-30*864e5).toISOString()).order('created_at',{ascending:false}).limit(100);
   if(error){ $('#actBody').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
   actRows = (data||[]).filter(n=>SUPPORTERS || n.kind!=='supporter');   // 서포터즈 중단 뒤 옛 초대 알림은 숨김
-  $('#actBody').innerHTML = actRows.length ? actRows.map((n,i)=>{ const a=n.kind==='supporter'?{nickname:'서포터즈'}:(n.actor||{nickname:(n.kind||'').startsWith('event_')?'뜨개동네 이벤트':'(탈퇴한 사용자)'}); const who = n.kind==='shop_post' && n.shop ? {nickname:n.shop.name} : a; const txt = n.kind==='shop_post' && n.shop ? '에 새 소식이 올라왔어요' : (NTF_TEXT[n.kind]||''); const jg=NTF_JG.has(n.kind); return `<div class="ntf ${n.read_at?'':'unread'}${jg?' jg':''}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${n.kind==='shop_post'?`<div class="ava">${SHOP_SVG}</div>`:avatar(a)}<div class="tx"><b>${esc(who.nickname)}</b>${txt}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}${jg&&ntfDest(n)?'<span class="ngo">보러 가기 ›</span>':''}</div><time>${agoShort(n.created_at)}</time></div>`; }).join('')
+  const ntfRow=(n,i)=>{ const a=n.kind==='supporter'?{nickname:'서포터즈'}:(n.actor||{nickname:(n.kind||'').startsWith('event_')?'뜨개동네 이벤트':'(탈퇴한 사용자)'}); const who = n.kind==='shop_post' && n.shop ? {nickname:n.shop.name} : a; const txt = n.kind==='shop_post' && n.shop ? '에 새 소식이 올라왔어요' : (NTF_TEXT[n.kind]||''); const jg=NTF_JG.has(n.kind); return `<div class="ntfrow" id="ntfr-${i}"><button type="button" class="ntfdel" onclick="event.stopPropagation();delNotif(${i})">지우기</button><div class="ntf ${n.read_at?'':'unread'}${n.clicked_at?' seen':''}${jg?' jg':''}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${n.kind==='shop_post'?`<div class="ava">${SHOP_SVG}</div>`:avatar(a)}<div class="tx"><b>${esc(who.nickname)}</b>${txt}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}${jg&&ntfDest(n)?'<span class="ngo">보러 가기 ›</span>':''}</div><time>${agoShort(n.created_at)}</time></div></div>`; };
+  const nw=[], old=[]; actRows.forEach((n,i)=>(n.read_at?old:nw).push(ntfRow(n,i)));   // 새 알림 = 이번에 처음 보는 것 · 지난 활동 = 그 밖(누른 것은 흐리게) — 30일 동안 보관(2026-11-16 대표 확정 시안)
+  $('#actBody').innerHTML = actRows.length ? (nw.length?'<div class="ntfsec"><span>새 알림</span></div>'+nw.join(''):'') + (old.length?'<div class="ntfsec"><span>지난 활동 · 30일 동안 보관</span><button type="button" onclick="clearSeenNotifs()">모두 지우기</button></div>'+old.join(''):'')
     : '<div class="empty">아직 활동이 없어요<br>글을 쓰거나 이웃에게 먼저 인사해 보세요</div>';
-  pushBadgeClear();
+  actSwipeInit(); pushBadgeClear();
   if(actRows.some(n=>!n.read_at)){ await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',me.id).is('read_at',null); refreshBadge(); }
 }
 // 공지 딥링크(콘솔 › 공지·알림 보내기): {type:'meetup'|'event'|'shop'|'post'|'pattern'|'view', id|view}
@@ -3005,10 +3048,19 @@ async function openLink(l){
   }catch(e){}
   return openSupportRoom();
 }
+// 활동 줄을 왼쪽으로 밀면 [지우기]. 누른 알림은 지우지 않고 '지난 활동'에 흐리게 남긴다
+function actSwipeInit(){ const box=$('#actBody'); if(!box || box._sw) return; box._sw=true; let row=null, x0=0, y0=0, drag=false;
+  box.addEventListener('touchstart', e=>{ const r=e.target.closest('.ntfrow'); box.querySelectorAll('.ntfrow.open').forEach(o=>{ if(o!==r) o.classList.remove('open'); }); row=e.touches.length===1?r:null; if(row){ x0=e.touches[0].clientX; y0=e.touches[0].clientY; drag=false; } }, {passive:true});
+  box.addEventListener('touchmove', e=>{ if(!row) return; const dx=e.touches[0].clientX-x0, dy=e.touches[0].clientY-y0; if(!drag && Math.abs(dx)>14 && Math.abs(dx)>Math.abs(dy)*1.5) drag=true; if(drag){ row.classList.toggle('open', dx<-24); row._sw=Date.now(); } }, {passive:true});
+  box.addEventListener('touchend', ()=>{ row=null; }, {passive:true}); }
+async function delNotif(i){ const n=actRows[i]; if(!n) return; const { error }=await sb.from('notifications').delete().eq('id', n.id).eq('recipient_id', me.id); if(error) return toast('지우지 못했어요'); $('#ntfr-'+i)?.remove(); refreshBadge(); }
+async function clearSeenNotifs(){ const ids=actRows.filter(n=>n.read_at).map(n=>n.id); if(!ids.length) return; if(!(await askOk('지난 활동을 모두 지울까요?', '지우기', '닫기'))) return;
+  const { error }=await sb.from('notifications').delete().eq('recipient_id', me.id).in('id', ids); if(error) return toast('지우지 못했어요'); renderActivity(); }
 async function openNotif(i, go){
   const n=actRows[i]; if(!n) return;
+  if(!go){ const rw=$('#ntfr-'+i); if(rw && (rw.classList.contains('open') || Date.now()-(rw._sw||0)<350)){ rw.classList.remove('open'); return; } }
   if(NTF_JG.has(n.kind) && !go){ const who=n.actor?.nickname||'뜨개동네 지기'; if(ntfDest(n)) return askNote(who, n.snippet, '보러 가기', ()=>openNotif(i, true)); if(n.kind==='notice') return askNote(who, n.snippet, '지기에게 물어보기', ()=>openSupportRoom()); return askNote(who, n.snippet); }
-  sb.from('notifications').delete().eq('id', n.id).eq('recipient_id', me.id).then(()=>refreshBadge());   // 확인한 알림은 활동에서 지운다
+  if(!n.clicked_at){ n.clicked_at=new Date().toISOString(); sb.from('notifications').update({ clicked_at:n.clicked_at }).eq('id', n.id).eq('recipient_id', me.id).then(()=>{}); $('#ntfr-'+i)?.querySelector('.ntf')?.classList.add('seen'); }   // 누른 알림은 지우지 않는다(다시 찾아볼 수 있게)
   if(n.link && typeof n.link==='object'){ sb.from('notifications').update({ clicked_at:new Date().toISOString() }).eq('id', n.id).then(()=>{}); return openLink(n.link); }
   if(n.event_id) return openEvent(n.event_id);
   if(n.kind==='supporter') return openSupporters();
@@ -3498,7 +3550,7 @@ const FEED_PAGE = 30;
 const AUTHOR_SEL = 'author:profiles!posts_author_id_fkey(id,nickname,avatar_url,dong_name,craft,level_crochet,level_knit,act_level,supporter_badge)';
 function autoGrow(t){ t.style.height='auto'; t.style.height=Math.min(160, t.scrollHeight)+'px'; }
 function updateCnt(){ const n=$('#cText').value.length; $('#cCnt').textContent = n>400 ? n+'/500' : ''; }
-$('#commTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; commFilter=b.dataset.f; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x===b)); loadFeed(); };
+$('#commTabs').onclick = e => { const b=e.target.closest('button'); if(!b) return; commFilter=b.dataset.f; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x===b)); if($('#fnStrip')) $('#fnStrip').hidden=true; loadFeed(); };
 bindTabSwipe('#v-comm', '#commTabs');   // 커뮤니티 탭도 좌우 스와이프(2026-09-28 대표 지시)
 async function openComm(){ $('#cboxAva').innerHTML = avatar(myProfile||{}); $('#cboxName').textContent = myProfile?.nickname||''; loadTech(); loadFeed(); }
 async function friendIds(){ const rows=await fetchFriendships(); return rows.filter(r=>r.status==='accepted').map(r=>r.requester_id===me.id?r.addressee_id:r.requester_id); }
@@ -3547,7 +3599,7 @@ async function loadFeed(more){
     return;
   }
   if(commFilter==='dong'){ if(!myProfile?.dong_code){ $('#feed').innerHTML='<div class="empty">프로필에서 동네를 먼저 정해 주세요</div>'; return; } q = q.eq('dong_code', myProfile.dong_code); }
-  if(commFilter==='friends'){ const ids=await friendIds(); ids.push(me.id); q = q.in('author_id', ids); }
+  if(commFilter==='friends'){ const ids=await friendIds(); ids.push(me.id); q = q.in('author_id', ids); if(!feedRows.length) loadFollowNews(); }
   const { data, error } = await q;
   if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
   feedRows = feedRows.concat(data||[]);
@@ -5711,7 +5763,7 @@ function bindTabSwipe(viewSel, tabsSel){
   const v=$(viewSel); if(!v || v.dataset.swipe) return; v.dataset.swipe='1';
   let x0=null, y0=0, t0=0, sc=null, sl=0;
   // 가로로 넘기는 줄(사진 여러 장·추천 줄·기법 맵) 위에서는 그 줄이 먼저 — 단, 넘길 게 없거나(사진 1장) 이미 끝까지 간 방향이면 탭 전환
-  v.addEventListener('touchstart', e=>{ if(e.touches.length!==1 || e.target.closest('input,textarea,select')){ x0=null; return; } sc=e.target.closest('.recrow,.pgrid,.tmscroll,.gds'); sl=sc?sc.scrollLeft:0; x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); }, {passive:true});
+  v.addEventListener('touchstart', e=>{ if(e.touches.length!==1 || e.target.closest('input,textarea,select')){ x0=null; return; } sc=e.target.closest('.recrow,.pgrid,.tmscroll,.gds,.fncards'); sl=sc?sc.scrollLeft:0; x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); }, {passive:true});
   v.addEventListener('touchend', e=>{ if(x0===null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
     if(Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.8 || Date.now()-t0>700) return;
     if(sc) return;   // 옆으로 넘기는 줄(사진 여러 장·추천 줄·기법 맵·사용법 카드) 위에서는 끝까지 넘겨도 탭을 바꾸지 않는다(2026-11-15 대표 확정 — 예전에는 끝까지 간 방향이면 탭 전환)

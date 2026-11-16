@@ -255,6 +255,8 @@ begin
   out := pg_temp.cnt(out, 'works not approved(anon)', 'select count(*) from public.works where review_status <> ''approved''', 0);
   out := pg_temp.cnt(out, 'admin_home_notices_toggle(anon)', 'select jsonb_array_length(public.admin_home_notices_toggle(''x'', false))', 0);   -- schema 134
   out := pg_temp.cnt(out, 'admin_auto_jobs(anon)', 'select jsonb_array_length(public.admin_auto_jobs())', 0);   -- schema 136
+  out := pg_temp.cnt(out, 'shop_post_comments(anon)', 'select count(*) from public.shop_post_comments', 0);   -- schema 138
+  out := pg_temp.cnt(out, 'shop_post_likes(anon)', 'select count(*) from public.shop_post_likes', 0);
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;

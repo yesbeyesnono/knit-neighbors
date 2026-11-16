@@ -31,7 +31,7 @@
 - GitHub Pages(main `/docs`) → https://yesbeyesnono.github.io/knit-neighbors/ (웹 앱·콘솔 `…/admin.html`)
 - 홈페이지 https://app.knitup.co.kr = 저장소 `yesbeyesnono/knitup-home`. **홈페이지 수정·올리기는 이 세션에서만.** 법적 문서 5개의 원본은 이 저장소 `docs/` — 고쳐 푸시한 날 `gh workflow run sync-legal.yml -R yesbeyesnono/knitup-home` 후 `curl` 확인. 초대장·사용법: `author-invite.html` · `authors.html` · `shops.html` · `shop-guide.html`(주소 끝 `#이름`)
 - **회원 데이터 백업**: 비공개 저장소 `yesbeyesnono/knitup-backup` 의 Actions `daily-db-backup` 이 매일 03:30 KST 전체 사본(pg_dump)을 받아 30일 보관(대표 결정 2026-11-16). 열쇠 `SUPABASE_DB_URL`·`BACKUP_PASSPHRASE` 는 대표가 넣음. 사진 파일 자체는 백업에 없음
-- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 137) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(10개: jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow)
+- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 138) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(10개: jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow)
 - 네이티브: Capacitor 8(`android/`, `ios/`), 로컬 플러그인 `plugins/capacitor-meta-events`. iOS 빌드 = Codemagic(`codemagic.yaml`: main 푸시 → `ios-public` → TestFlight / `lab-*` 태그 → `ios-lab`). Android = 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk, R8 켬) → `.aab`
 - 에디션: 코드 하나, `docs/edition.js` 의 `KN_EDITION`(meet = 공개 앱, full = Lab). Lab 전용은 `FULL` 로 감싼다. 브랜치를 가르지 말 것
 
@@ -52,6 +52,7 @@
 - **'댓글'**(답글이라고 쓰지 않음) · **'완성작품 인증'**(탭 이름처럼 짧게 쓴 '인증'은 그대로) · 뜨개 실력은 **'N단계'**, 'Lv.'는 활동 레벨에만
 - **창 규칙(2026-11-16 대표 확정 A안)**: 한 줄 알림 = `toast` · 확인(예/아니오) = `askOk`/`askConfirm`(가운데 작은 창, 왼쪽 취소·오른쪽 실행, 지우는 일은 빨강 — 휴대폰 기본 confirm 금지, 취소하는 동작이면 닫는 버튼은 '닫기') · 읽기(공지·안내·축하) = `askNote` 또는 `openSheet(html,'c')`(가운데 카드) · **고르기·입력만** `openSheet`(아래에서 올라옴) · 길게 적는 것 = 전체 화면. 새 창을 만들 때 이 규칙으로 고를 것
 - **앱 시작 공지(2026-11-16 대표 확정)**: `app_config.home_notices`(여러 개) → 좌우로 넘겨 보는 가운데 팝업(`homeNoticePop`), 처음 카드는 무작위, ✕ 는 그날만 닫힘, '이 공지 다시 보지 않기'는 그 공지만. 두 카드는 같은 크기·글은 줄 넘김 없이(제목 한 줄·문구 두 줄). 옛 앱은 `home_notice`(하나)를 계속 읽으니 둘 다 관리할 것. 문구·그림을 바꾸는 일은 SQL(콘솔은 켜고 끄기만)
+- **활동에서 누른 알림은 지우지 않는다**(2026-11-16 대표 확정): 새 알림 / 지난 활동(누른 것은 흐리게, 30일 동안 보임)으로 나눠 보여 주고, 지우는 것은 옆으로 밀기와 '모두 지우기'로만. · **가게 소식(클래스 제외)에는 좋아요·댓글**(글만, 링크·계좌번호 금지, 쓰기는 `shop_post_comment` 함수로) · 커뮤니티 '친구' 탭 맨 위에 팔로우한 가게·작가의 최근 14일 소식 줄(`#fnStrip`)
 - 활동 목록: 지기가 보낸 안내(`cheer`·`remind`·`notice`)는 글 전체를 보여 주고, 누르면 글 전체 카드 먼저([닫기]는 알림을 지우지 않음)
 - `onclick` 등 속성 안에 `JSON.stringify` 로 글자를 넣지 말 것 → `data-` 속성으로
 - '뒤로'는 `navStack`(한 칸짜리 변수 금지). 마이·프로필에 옆으로 넘기는 줄을 만들면 탭 쓸기 예외 목록에 넣을 것

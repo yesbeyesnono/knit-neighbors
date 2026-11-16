@@ -2110,3 +2110,12 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   트리거 yarn_catalog_weight_from_spec(BEFORE UPDATE OF ball_g, ball_m): 추정이던 실에 1볼 g·m 이 들어오면 그 값으로 굵기를 다시 정하고 false 로(m_per_100g 는 계산 칸이라 g·m 으로 직접 계산)
 --   콘솔 실 목록 굵기 칸에 "바늘로 추정" 표시 · 대시보드 굵기별 카드에 추정 개수
 -- ============================================================
+
+-- ============================================================
+-- 138. 가게 소식 댓글·좋아요 (2026-11-16 대표 확정 시안 activity_shopnews_v1, 마이그레이션 shop_post_comments — 원본 supabase/shop_post_comments.sql)
+--   shop_posts.like_count · comment_count: 트리거 shop_post_counts 가 셈
+--   shop_post_comments(post_id, author_id, body 1~300자): RLS — 읽기는 차단 관계가 아니고 글이 보이는 회원, 지우기는 본인·가게 주인·관리자. 쓰기 권한 없음(함수로만)
+--   shop_post_likes(post_id, profile_id): 본인 것만 읽기, 쓰기는 함수로만
+--   shop_post_comment(p_post, p_body): 소식 글만(클래스 불가) · 링크·계좌번호·금칙어 거름 · 하루 40개 · 가게 주인에게(주인이 쓰면 그 글에 댓글 쓴 분들에게) notice 알림(link shop)
+--   shop_post_like(p_post, p_on) → 좋아요 수
+-- ============================================================
