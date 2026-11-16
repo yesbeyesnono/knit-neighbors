@@ -31,7 +31,7 @@
 - GitHub Pages(main `/docs`) → https://yesbeyesnono.github.io/knit-neighbors/ (웹 앱·콘솔 `…/admin.html`)
 - 홈페이지 https://app.knitup.co.kr = 저장소 `yesbeyesnono/knitup-home`. **홈페이지 수정·올리기는 이 세션에서만.** 법적 문서 5개의 원본은 이 저장소 `docs/` — 고쳐 푸시한 날 `gh workflow run sync-legal.yml -R yesbeyesnono/knitup-home` 후 `curl` 확인. 초대장·사용법: `author-invite.html` · `authors.html` · `shops.html` · `shop-guide.html`(주소 끝 `#이름`)
 - **회원 데이터 백업**: 비공개 저장소 `yesbeyesnono/knitup-backup` 의 Actions `daily-db-backup` 이 매일 03:30 KST 전체 사본(pg_dump)을 받아 30일 보관(대표 결정 2026-11-16). 열쇠 `SUPABASE_DB_URL`·`BACKUP_PASSPHRASE` 는 대표가 넣음. 사진 파일 자체는 백업에 없음
-- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 135) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(10개: jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow)
+- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 136) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(10개: jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow)
 - 네이티브: Capacitor 8(`android/`, `ios/`), 로컬 플러그인 `plugins/capacitor-meta-events`. iOS 빌드 = Codemagic(`codemagic.yaml`: main 푸시 → `ios-public` → TestFlight / `lab-*` 태그 → `ios-lab`). Android = 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk, R8 켬) → `.aab`
 - 에디션: 코드 하나, `docs/edition.js` 의 `KN_EDITION`(meet = 공개 앱, full = Lab). Lab 전용은 `FULL` 로 감싼다. 브랜치를 가르지 말 것
 
@@ -55,6 +55,7 @@
 - 활동 목록: 지기가 보낸 안내(`cheer`·`remind`·`notice`)는 글 전체를 보여 주고, 누르면 글 전체 카드 먼저([닫기]는 알림을 지우지 않음)
 - `onclick` 등 속성 안에 `JSON.stringify` 로 글자를 넣지 말 것 → `data-` 속성으로
 - '뒤로'는 `navStack`(한 칸짜리 변수 금지). 마이·프로필에 옆으로 넘기는 줄을 만들면 탭 쓸기 예외 목록에 넣을 것
+- **자동으로 나가는 메시지(알림·지기 채팅·텔레그램)를 새로 만들거나 문구·시점을 바꾸면 콘솔 › 알리기 › `자동 메시지` 의 목록(`AUTO_MSGS`, `docs/admin.html`)도 같은 커밋에서 고칠 것**(2026-11-16 대표: 잊어버렸을 때 확인하는 화면)
 - 콘솔에 새 화면을 만들면 `NAV` 와 aside 두 곳에. 기능을 끄는 스위치에 접속 기록 같은 공용 호출을 묶지 말 것
 - 큰 묶음과 그 안의 항목을 같은 칩 모양으로 나란히 두지 말 것 · 탭으로 내용이 바뀌는 창은 높이 고정 · 자판을 쓰는 입력 창은 자판에 가리는지 확인 · 전체 화면 위에 뜨는 창의 z-index 확인
 - 한 화면에 할 일 하나·큰 버튼 하나(촬영 흐름). 실은 하나씩만 담는다. `<datalist>` 금지
