@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>호환실 추천 — 시안</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:#E7E4DB;padding:26px 24px 30px;color:#22362A;width:1130px}
+h1{font-size:21px;margin-bottom:6px}.sub{font-size:13.5px;color:#55604F;margin-bottom:20px;line-height:1.55}
+.row{display:flex;gap:24px;align-items:flex-start}.col{width:340px}
+.cap{font-size:14.5px;font-weight:800;margin-bottom:3px}.cap2{font-size:12.5px;color:#55604F;line-height:1.45;min-height:56px;margin-bottom:8px}
+.ph{width:340px;height:700px;border-radius:26px;overflow:hidden;background:#F3F1EA;box-shadow:0 8px 26px rgba(0,0,0,.16);display:flex;flex-direction:column;position:relative}
+.top2{background:#22362A;color:#F3F1EA;height:52px;display:flex;align-items:center;gap:12px;padding:0 16px;flex:none;font-size:16px;font-weight:700}.top2 i{font-style:normal;font-size:20px;font-weight:400}
+.bd{flex:1;padding:14px;overflow:hidden}
+.card{background:#fff;border:1px solid #E2DFD5;border-radius:16px;padding:14px;margin-bottom:12px}
+.yh{display:flex;gap:12px;align-items:center}.sw{width:54px;height:54px;border-radius:14px;flex:none}
+.br{font-size:11.5px;color:#8A9384}.yn{font-size:16px;font-weight:800}.spec{font-size:12px;color:#55604F;margin-top:3px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.meta span{background:#F3F1EA;border-radius:999px;padding:3px 9px;font-size:11.5px;color:#55604F}
+.sh{font-size:14px;font-weight:800;margin:2px 2px 4px;display:flex;justify-content:space-between;align-items:baseline}.sh small{font-size:11px;color:#8A9384;font-weight:500}
+.sh a{font-size:12px;color:#3E6B48;font-weight:700;text-decoration:none}
+.alt{background:#fff;border:1px solid #E2DFD5;border-radius:14px;padding:11px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+.alt .sw{width:40px;height:40px;border-radius:10px}.alt .mid{flex:1;min-width:0}.alt .nm{font-size:13.5px;font-weight:800}
+.alt .why{font-size:11.5px;color:#55604F;margin-top:2px}.alt .pr{text-align:right;flex:none}.alt .pr b{font-size:13.5px;display:block}.alt .pr small{font-size:10.5px;color:#8A9384}
+.save{display:inline-block;margin-top:3px;background:#DDE8D6;color:#22362A;border-radius:6px;font-size:10.5px;font-weight:800;padding:1px 6px}
+.more{display:inline-block;margin-top:3px;background:#F1E4DA;color:#7A4B33;border-radius:6px;font-size:10.5px;font-weight:800;padding:1px 6px}
+.note{font-size:11px;color:#8A9384;line-height:1.5;margin:6px 2px 0}
+.dim{position:absolute;inset:0;background:rgba(20,30,22,.42)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#F3F1EA;border-radius:22px 22px 0 0;padding:10px 14px 16px;height:590px}
+.grab{width:40px;height:4px;border-radius:4px;background:#C9C6BC;margin:0 auto 12px}
+.st{font-size:15.5px;font-weight:800}.ss{font-size:12px;color:#55604F;margin:4px 0 10px;line-height:1.45}
+.seg{display:flex;background:#E7E4DB;border-radius:999px;padding:3px;margin-bottom:10px}.seg span{flex:1;text-align:center;font-size:12.5px;padding:6px 0;border-radius:999px;color:#55604F;font-weight:700}.seg .on{background:#fff;color:#22362A;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.go{display:block;white-space:nowrap;padding-left:8px!important;padding-right:8px!important;text-align:center;font-size:11.5px;color:#3E6B48;font-weight:800;border:1.5px solid #3E6B48;border-radius:9px;padding:3px 0;margin-top:5px}
+.dlg{position:absolute;left:28px;right:28px;top:230px;background:#fff;border-radius:18px;padding:20px 18px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.dlg h3{font-size:16px;margin-bottom:8px}.dlg p{font-size:13px;color:#55604F;line-height:1.55}.dlg .url{background:#F3F1EA;border-radius:10px;padding:8px 10px;font-size:12px;color:#22362A;margin:10px 0 14px;word-break:break-all}
+.btns{display:flex;gap:8px}.btns span{flex:1;text-align:center;padding:11px 0;border-radius:12px;font-size:14px;font-weight:800}.b1{background:#E7E4DB;color:#22362A}.b2{background:#3E6B48;color:#fff}
+.mark{position:absolute;background:#F2C94C;color:#22362A;font-size:11px;font-weight:900;border-radius:999px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.legend{margin-top:22px;background:#fff;border-radius:16px;padding:16px 20px;font-size:13px;line-height:1.75;color:#22362A}
+.legend b{display:inline-block;background:#F2C94C;border-radius:999px;width:19px;height:19px;text-align:center;font-size:11px;line-height:19px;margin-right:6px}
+</style></head><body>
+<h1>호환실 추천 · 가격 비교 — 시안</h1>
+<div class="sub">내 실함의 실(과 실 사전에서 고른 실)을 열면 아래에 「비슷한 실」 3개가 보이고, 전체 보기에서 비슷한 순 / 싼 순으로 바꿔 볼 수 있어요.<br>가격은 화면을 열 때 쇼핑몰에서 읽어 온 그날 값(100g 당으로 맞춰 비교). 예시 숫자는 11-16 실제 비교표에서 가져왔어요.</div>
+<div class="row">
+
+<!-- 1. 내 실함 실 상세 -->
+<div class="col"><div class="cap">① 내 실함 › 실 상세</div><div class="cap2">맨 아래에 비슷한 실 3개. 더 싸면 초록 표시, 비싸면 표시만 다르게. 누르면 ③ 확인 창.</div>
+<div class="ph"><div class="top2"><i>‹</i>내 실</div><div class="bd">
+  <div class="card"><div class="yh"><div class="sw" style="background:#C98E73"></div><div><div class="br">올림푸스</div><div class="yn">로미오</div><div class="spec">50g · 120m · 대바늘 4~5mm</div></div></div>
+    <div class="meta"><span>면 60 · 아크릴 40</span><span>합태(DK)</span><span>남은 양 3볼</span></div></div>
+  <div class="sh">비슷한 실 · 가격 <a>전체 보기 ›</a></div>
+  <div class="alt"><div class="sw" style="background:#D7B9A0"></div><div class="mid"><div class="br">청송뜨개실</div><div class="nm">빈티지얀</div><div class="why">소재 90% 같음 · 굵기 차이 4%</div></div><div class="pr"><b>2,390원</b><small>1볼 50g</small><br><span class="save">100g 당 3,220원 ↓</span></div></div>
+  <div class="alt"><div class="sw" style="background:#E3CFC0"></div><div class="mid"><div class="br">청송뜨개실</div><div class="nm">플라워 코튼</div><div class="why">소재 95% 같음 · 굵기 차이 4%</div></div><div class="pr"><b>3,300원</b><small>1볼 50g</small><br><span class="save">100g 당 1,400원 ↓</span></div></div>
+  <div class="alt"><div class="sw" style="background:#BFA48E"></div><div class="mid"><div class="br">낙양모사</div><div class="nm">꽁뜨</div><div class="why">소재 같음 · 굵기 차이 3%</div></div><div class="pr"><b>5,000원</b><small>1볼 45g</small><br><span class="more">100g 당 3,111원 ↑</span></div></div>
+  <div class="note">가격은 오늘 쇼핑몰 가격이에요(배송비·할인 제외). 굵기가 다르면 스와치로 확인해 주세요.</div>
+</div></div></div>
+
+<!-- 2. 전체 보기 시트 -->
+<div class="col"><div class="cap">② 전체 보기 (아래에서 올라오는 창)</div><div class="cap2">고르는 창이라 아래에서 올라와요. 비슷한 순 / 싼 순 두 가지만. 실마다 [쇼핑몰 보기].</div>
+<div class="ph"><div class="top2"><i>‹</i>내 실</div><div class="bd"></div><div class="dim"></div>
+ <div class="sheet"><div class="grab"></div>
+  <div class="st">로미오 대신 쓸 수 있는 실</div><div class="ss">소재·굵기가 비슷한 실이에요. 100g 당 가격으로 맞춰 비교했어요.</div>
+  <div class="seg"><span>비슷한 순</span><span class="on">싼 순</span></div>
+  <div class="alt"><div class="sw" style="background:#D7B9A0"></div><div class="mid"><div class="br">청송뜨개실</div><div class="nm">빈티지얀</div><div class="why">소재 90% · 굵기 4%</div></div><div class="pr"><b>4,780원</b><small>100g 당</small><span class="go">쇼핑몰 보기</span></div></div>
+  <div class="alt"><div class="sw" style="background:#E3CFC0"></div><div class="mid"><div class="br">청송뜨개실</div><div class="nm">플라워 코튼</div><div class="why">소재 95% · 굵기 4%</div></div><div class="pr"><b>6,600원</b><small>100g 당</small><span class="go">쇼핑몰 보기</span></div></div>
+  <div class="alt" style="border:1.5px dashed #3E6B48"><div class="sw" style="background:#C98E73"></div><div class="mid"><div class="br">지금 쓰는 실</div><div class="nm">올림푸스 로미오</div><div class="why">쎄비하우스</div></div><div class="pr"><b>8,000원</b><small>100g 당</small></div></div>
+  <div class="alt"><div class="sw" style="background:#BFA48E"></div><div class="mid"><div class="br">낙양모사</div><div class="nm">꽁뜨</div><div class="why">소재 100% · 굵기 3%</div></div><div class="pr"><b>11,111원</b><small>100g 당</small><span class="go">쇼핑몰 보기</span></div></div>
+  <div class="note">가격은 이 창을 열 때 쇼핑몰에서 읽은 값이에요. 실제 가격은 쇼핑몰에서 확인해 주세요.</div>
+ </div></div></div>
+
+<!-- 3. 외부 링크 확인 -->
+<div class="col"><div class="cap">③ 쇼핑몰로 나가기 전 확인</div><div class="cap2">지금 앱 규칙대로 가운데 확인 창(openExt). 왼쪽 취소 · 오른쪽 이동.</div>
+<div class="ph"><div class="top2"><i>‹</i>내 실</div><div class="bd"></div><div class="dim"></div>
+ <div class="dlg"><h3>쇼핑몰로 이동할까요?</h3><p>청송뜨개실 「빈티지얀」 상품 화면이 열려요. 가격·재고는 쇼핑몰에서 다시 확인해 주세요.</p>
+  <div class="url">tgesil.com/product/detail.html?product_no=4238</div>
+  <div class="btns"><span class="b1">취소</span><span class="b2">이동</span></div></div>
+</div></div>
+
+</div>
+<div class="legend">
+· 비슷한 실은 「소재가 비슷하고 굵기 차이 10% 안」인 실 중 위 3개. 규격(1볼 g·m)이 없는 실은 가격 비교에서 빠져요.<br>
+· 세트·묶음 상품은 빼고 1볼 가격만 비교. 회원가·할인가는 넣지 않아요(누구나 보는 가격만).<br>
+처음에는 내 실함에만 넣고, 반응을 보고 실 사전 검색·완성작품 인증의 실 이름에도 같은 창을 붙이는 순서를 제안해요.
+</div>
+</body></html>
