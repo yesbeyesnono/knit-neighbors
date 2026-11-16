@@ -648,6 +648,17 @@ const TK_SEGS=[['need','답장 필요'],['wait','기다리는 중'],['all','대�
 async function talkWith(uid, nick){ const {data:room,error}=await sb.rpc('admin_talk_room',{p_user:uid}); if(error||!room) return toast(error?.message||'대화방을 열지 못했어요'); let seg='all'; try{ const has=async g=>{ const {data}=await sb.rpc('admin_talk_list',{p:{seg:g,q:nick||'',tag:''}}); return ((data&&data.rows)||[]).some(x=>x.room===room); }; if(!(await has('all'))) seg=(await has('auto'))?'auto':'all'; }catch(e){}   // 환영 인사만 간 회원의 방은 '환영 인사만' 묶음에 있음
   closePanel(); TK.tab='talk'; TK.seg=seg; TK.q=nick||''; TK.tag=''; TK.sel=room; if(location.hash==='#support') route(); else location.hash='#support'; }
 function talkSet(k,v){ TK[k]=v; if(k==='seg'||k==='q'||k==='tag') TK.sel=null; if(k==='seg') TK.q=''; if(k==='q' && v) TK.seg='all'; route(); }
+const tkTm=t=>{ const d=new Date(t), now=new Date(); return d.toDateString()===now.toDateString()?`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:`${d.getMonth()+1}.${d.getDate()}`; };
+const tkIsNew=t=>Date.now()-new Date(t).getTime()<86400e3;
+const talkCv=r=>`<div class="tkcv ${TK.sel===r.room?'on':''}" data-room="${r.room}" onclick="talkOpen('${r.room}')"><div class="h"><b>${esc(r.nick||'(이름 없음)')}</b><small>${esc(r.dong||'동네 미설정')}${tkIsNew(r.joined)?' · 새 회원':''}</small><time>${tkTm(r.at)}</time></div>
+    <p>${r.from_member?'':'<span class="muted">지기: </span>'}${esc(r.body||(r.photo?'(사진)':''))}</p>${r.need?'<span class="tkt rd">답장 필요</span>':r.unread?'<span class="tkt rd">안 읽음</span>':r.wait?'<span class="tkt g">읽음</span>':''}${r.human_msgs>0&&!r.push_on?'<span class="tkt g">앱 알림 꺼짐</span>':''}${(r.tags||[]).map(t=>`<span class="tkt y">${esc(t)}</span>`).join('')}</div>`;
+// 대화 말풍선 하나 · 사진 주소 풀기 · 숫자만 다시 받기 — 답장을 보낸 뒤 화면을 통째로 다시 그리지 않으려고(메신저처럼 그 자리에 남음, 2026-11-16 대표)
+const tkHm=t=>{ const d=new Date(t); return `${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+function talkMsg(m, rd){ const sup=m.sender_id===SUPPORT_ID; const read = rd==='read' ? '<span class="tkrd"> · <i>읽음</i></span>' : rd==='unread' ? '<span class="tkrd"> · <b>아직 안 읽음</b></span>' : '';
+  return `<div class="msg ${sup?'sup':''} ${sup&&m.by_ai?'auto':''}">${esc(m.body||'')}${m.photo_url?`<img class="cph" data-ref="${esc(m.photo_url)}" alt="사진 불러오는 중…" style="display:block;max-width:240px;width:100%;border-radius:10px;margin-top:4px;background:#e9e9e9;min-height:60px;cursor:pointer" onclick="window.open(this.src,'_blank')">`:''}</div><div class="meta ${sup?'s':''}">${sup?(m.by_ai?'자동':'대표님이 보냄')+' · ':''}${tkHm(m.created_at)}${read}</div>`; }
+function talkImgs(box){ box.querySelectorAll('img.cph:not([src])').forEach(async img=>{ const ref=img.dataset.ref; if(/^https?:/.test(ref)){ img.src=ref; return; } const {data}=await sb.storage.from('chat-photos').createSignedUrl(ref,3600); if(data?.signedUrl){ img.src=data.signedUrl; img.onload=()=>{ box.scrollTop=box.scrollHeight; }; } else img.alt='사진을 불러올 수 없어요'; }); }
+async function talkCounts(){ try{ const {data}=await sb.rpc('admin_talk_list',{p:{seg:TK.seg||'all',q:TK.q,tag:TK.tag}}); const c=data&&data.counts; if(!c) return;
+  document.querySelectorAll('[data-tkc]').forEach(e=>{ const key=e.dataset.tkc; e.textContent=Number(c[key]||0).toLocaleString(); if(key==='need' && e.tagName==='B') e.style.color=c.need?'var(--red)':''; }); }catch(e){} }
 VIEWS.support = async(arg)=>{
   if(arg) TK.tab='tickets';
   const [{data:tks},{data:st}] = await Promise.all([
@@ -674,17 +685,15 @@ VIEWS.support = async(arg)=>{
   if(!TK.seg){ const c0=ls.counts||{}; TK.seg=c0.need>0?'need':c0.wait>0?'wait':'all'; if(TK.seg!=='all'){ const r2=await sb.rpc('admin_talk_list',{p:{seg:TK.seg,q:TK.q,tag:TK.tag}}); if(r2.error) throw r2.error; ls=r2.data; } }
   if(TK.q && TK.seg==='all' && !(ls.rows||[]).length){ const r3=await sb.rpc('admin_talk_list',{p:{seg:'auto',q:TK.q,tag:TK.tag}}); if(!r3.error && ((r3.data&&r3.data.rows)||[]).length){ ls=r3.data; TK.seg='auto'; } }
   const c=ls.counts||{}, n=x=>Number(x||0).toLocaleString(); TK.rows=ls.rows||[];
-  const tm=t=>{ const d=new Date(t), now=new Date(); return d.toDateString()===now.toDateString()?`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:`${d.getMonth()+1}.${d.getDate()}`; };
-  const isNew=t=>Date.now()-new Date(t).getTime()<86400e3;
-  const cv=r=>`<div class="tkcv ${TK.sel===r.room?'on':''}" data-room="${r.room}" onclick="talkOpen('${r.room}')"><div class="h"><b>${esc(r.nick||'(이름 없음)')}</b><small>${esc(r.dong||'동네 미설정')}${isNew(r.joined)?' · 새 회원':''}</small><time>${tm(r.at)}</time></div>
-    <p>${r.from_member?'':'<span class="muted">지기: </span>'}${esc(r.body||(r.photo?'(사진)':''))}</p>${r.need?'<span class="tkt rd">답장 필요</span>':r.unread?'<span class="tkt rd">안 읽음</span>':r.wait?'<span class="tkt g">읽음</span>':''}${r.human_msgs>0&&!r.push_on?'<span class="tkt g">앱 알림 꺼짐</span>':''}${(r.tags||[]).map(t=>`<span class="tkt y">${esc(t)}</span>`).join('')}</div>`;
+  if(TK.sel && TK.keep && TK.keep.room===TK.sel && !TK.rows.some(r=>r.room===TK.sel)) TK.rows.unshift(TK.keep);   // 열어 둔 대화는 조건에서 빠져도 맨 위에 남김(다른 칩·검색을 누르면 풀림)
+  const cv=talkCv;
   $('#main').innerHTML=`${head}
-  <div class="mbtiles tktiles"><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','need')"><b style="${c.need?'color:var(--red)':''}">${n(c.need)}</b><span>답장이 필요한 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','wait')"><b>${n(c.wait)}</b><span>내가 보내고 답을 기다리는 중 · 안 읽음 ${n(c.wait_unread)}</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','all')"><b>${n(c.talked)}</b><span>대화가 오간 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','auto')"><b>${n(c.auto)}</b><span>환영 인사만 간 회원 (아직 대화 없음)</span></div></div>
+  <div class="mbtiles tktiles"><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','need')"><b data-tkc="need" style="${c.need?'color:var(--red)':''}">${n(c.need)}</b><span>답장이 필요한 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','wait')"><b data-tkc="wait">${n(c.wait)}</b><span>내가 보내고 답을 기다리는 중 · 안 읽음 <i data-tkc="wait_unread" style="font-style:normal">${n(c.wait_unread)}</i></span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','all')"><b data-tkc="talked">${n(c.talked)}</b><span>대화가 오간 회원</span></div><div class="mbtile" style="cursor:pointer" onclick="talkSet('seg','auto')"><b data-tkc="auto">${n(c.auto)}</b><span>환영 인사만 간 회원 (아직 대화 없음)</span></div></div>
   <div class="tkbox">
     <div class="tkl"><input placeholder="닉네임·동네·대화 내용 검색 후 Enter" value="${esc(TK.q)}" onkeydown="if(event.key==='Enter')talkSet('q',this.value.trim())">${TK.q?`<div class="tkq"><span onclick="talkSet('q','')" title="검색 지우기"><i>검색: ${esc(TK.q)}</i><b>✕</b></span></div>`:''}
-      <div class="tkseg">${TK_SEGS.map(([k,l])=>`<button class="${TK.seg===k?'on':''}" onclick="talkSet('seg','${k}')">${l}<em>${n(c[k])}</em></button>`).join('')}${(ls.tags||[]).length?`<select onchange="talkSet('tag',this.value)"><option value="">꼬리표</option>${ls.tags.map(t=>`<option${TK.tag===t?' selected':''}>${esc(t)}</option>`).join('')}</select>`:''}</div>
+      <div class="tkseg">${TK_SEGS.map(([k,l])=>`<button class="${TK.seg===k?'on':''}" onclick="talkSet('seg','${k}')">${l}<em data-tkc="${k}">${n(c[k])}</em></button>`).join('')}${(ls.tags||[]).length?`<select onchange="talkSet('tag',this.value)"><option value="">꼬리표</option>${ls.tags.map(t=>`<option${TK.tag===t?' selected':''}>${esc(t)}</option>`).join('')}</select>`:''}</div>
       <div class="tklist" id="tkList">${TK.rows.map(cv).join('')||`<div class="tkempty">${TK.seg==='need'?'답장을 기다리는 회원이 없어요':TK.seg==='wait'?'답을 기다리는 대화가 없어요':'조건에 맞는 대화가 없어요'}</div>`}${ls.total>TK.rows.length?`<div class="tkempty">${n(ls.total-TK.rows.length)}명 더 있어요 · 검색으로 좁혀 보세요</div>`:''}</div>
-      <div class="tkfold" onclick="talkSet('seg','${TK.seg==='auto'?'all':'auto'}')"><span>환영 인사만 간 회원 ${n(c.auto)}명</span><span>${TK.seg==='auto'?'접기':'펼치기'}</span></div></div>
+      <div class="tkfold" onclick="talkSet('seg','${TK.seg==='auto'?'all':'auto'}')"><span>환영 인사만 간 회원 <i data-tkc="auto" style="font-style:normal">${n(c.auto)}</i>명</span><span>${TK.seg==='auto'?'접기':'펼치기'}</span></div></div>
     <div class="tkm" id="tkMid"><div class="tkempty">왼쪽에서 대화를 골라 주세요</div></div>
     <div class="tkr" id="tkRight"></div><button type="button" class="tkrx" onclick="this.closest('.tkbox').classList.remove('info')">✕ 닫기</button>
   </div>`;
@@ -692,21 +701,19 @@ VIEWS.support = async(arg)=>{
 };
 function talkBack(){ const b=document.querySelector('.tkbox'); if(b) b.classList.remove('open','info'); TK.sel=null; document.querySelectorAll('.tkcv').forEach(e=>e.classList.remove('on')); }   // 휴대폰: 대화 → 목록으로
 async function talkOpen(room){
-  const r=TK.rows.find(x=>x.room===room); if(!r) return; TK.sel=room; const my=++TK.n;
+  const r=TK.rows.find(x=>x.room===room); if(!r) return; TK.sel=room; TK.keep=r; const my=++TK.n;
   document.querySelectorAll('.tkcv').forEach(e=>e.classList.toggle('on', e.dataset.room===room));
   const [{data:msgs},{data:mem,error}] = await Promise.all([ sb.from('messages').select('id,body,photo_url,sender_id,by_ai,created_at').eq('room_id',room).order('created_at').limit(300), sb.rpc('admin_talk_member',{p_user:r.uid}) ]);
   if(my!==TK.n || !$('#tkMid')) return; TK.mem=mem;
   const M=msgs||[]; const lastHuman=[...M].reverse().find(m=>m.sender_id===SUPPORT_ID && !m.by_ai);
-  const hm=t=>{ const d=new Date(t); return `${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
   const lv=mem?[mem.lc?`코바늘 ${mem.lc}단계`:'', mem.lk?`대바늘 ${mem.lk}단계`:''].filter(Boolean).join(' · '):'';
   $('#tkMid').closest('.tkbox')?.classList.add('open');
   $('#tkMid').innerHTML=`<div class="tkmh"><button type="button" class="tkback" aria-label="목록으로" onclick="talkBack()">‹</button><b>${esc(r.nick||'(이름 없음)')}</b><small>${esc([r.dong, lv].filter(Boolean).join(' · '))}</small><button type="button" class="tkinfo" onclick="this.closest('.tkbox').classList.add('info')">회원 정보</button></div>
-    <div class="tkth" id="tkMsgs">${M.map(m=>{ const sup=m.sender_id===SUPPORT_ID; const read=lastHuman&&m.id===lastHuman.id ? (r.member_read && new Date(r.member_read)>=new Date(m.created_at) ? ' · <i>읽음</i>' : ' · <b>아직 안 읽음</b>') : '';
-      return `<div class="msg ${sup?'sup':''} ${sup&&m.by_ai?'auto':''}">${esc(m.body||'')}${m.photo_url?`<img class="cph" data-ref="${esc(m.photo_url)}" alt="사진 불러오는 중…" style="display:block;max-width:240px;width:100%;border-radius:10px;margin-top:4px;background:#e9e9e9;min-height:60px;cursor:pointer" onclick="window.open(this.src,'_blank')">`:''}</div><div class="meta ${sup?'s':''}">${sup?(m.by_ai?'자동':'대표님이 보냄')+' · ':''}${hm(m.created_at)}${read}</div>`; }).join('')||'<div class="tkempty">메시지 없음</div>'}</div>
+    <div class="tkth" id="tkMsgs">${M.map(m=>talkMsg(m, lastHuman&&m.id===lastHuman.id ? (r.member_read && new Date(r.member_read)>=new Date(m.created_at) ? 'read' : 'unread') : '')).join('')||'<div class="tkempty">메시지 없음</div>'}</div>
     <div class="tkcmp"><textarea id="tkReply" placeholder="답장 내용 (Enter = 줄바꿈, Ctrl+Enter = 보내기)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))talkSend()"></textarea>
       <div class="cb"><label><input type="checkbox" id="tkBell" checked> 🔔 앱 안 알림도 함께 보내기</label><button onclick="talkPolish()">AI로 다듬기</button><button onclick="$('#tkFile').click()">사진</button><input id="tkFile" type="file" accept="image/*" hidden onchange="talkPhoto(this.files[0]); this.value=''"><button class="p" onclick="talkSend()">보내기</button></div></div>`;
   const box=$('#tkMsgs'); box.scrollTop=box.scrollHeight;
-  box.querySelectorAll('img.cph').forEach(async img=>{ const ref=img.dataset.ref; if(/^https?:/.test(ref)){ img.src=ref; return; } const {data}=await sb.storage.from('chat-photos').createSignedUrl(ref,3600); if(data?.signedUrl){ img.src=data.signedUrl; img.onload=()=>{ box.scrollTop=box.scrollHeight; }; } else img.alt='사진을 불러올 수 없어요'; });
+  talkImgs(box);
   talkRight(error?null:mem, error);
 }
 function talkRight(m, error){
@@ -744,9 +751,19 @@ async function talkClass(id){
     ${c.shop_id?`<div class="row" style="margin-top:12px"><button onclick="openShopForm('${c.shop_id}')">가게 열기</button></div>`:''}`);
 }
 async function talkSend(photoPath){
-  const r=TK.rows.find(x=>x.room===TK.sel); if(!r) return; const t=$('#tkReply').value.trim(); if(!t && !photoPath) return toast('내용을 입력하세요');
-  const {error}=await sb.rpc('admin_talk_send',{p_room:r.room,p_body:t||null,p_photo:photoPath||null,p_bell:$('#tkBell').checked}); if(error) return toast(error.message);
-  toast(r.push_on?'보냈어요 · 푸시도 가요':'보냈어요 · 이 회원은 앱 알림이 꺼져 있어요'); refreshBadges(); route();
+  const r=TK.rows.find(x=>x.room===TK.sel); if(!r || TK.sending) return; const ta=$('#tkReply'); const t=ta.value.trim(); if(!t && !photoPath) return toast('내용을 입력하세요');
+  TK.sending=true; let error; try{ ({error}=await sb.rpc('admin_talk_send',{p_room:r.room,p_body:t||null,p_photo:photoPath||null,p_bell:$('#tkBell').checked})); }catch(e){ error=e; } TK.sending=false;
+  if(error) return toast(error.message);
+  toast(r.push_on?'보냈어요 · 푸시도 가요':'보냈어요 · 이 회원은 앱 알림이 꺼져 있어요');
+  // 메신저처럼: 보낸 글은 대화에 바로 붙고, 이 대화는 목록에 그대로 남는다(묶음이 바뀌어도 다른 칩을 누르기 전까지)
+  const now=new Date().toISOString();
+  Object.assign(r, { body:t||'', photo:photoPath||null, from_member:false, at:now, need:false, wait:true, unread:true, human_msgs:(r.human_msgs||0)+1 }); TK.keep=r;
+  const box=$('#tkMsgs');
+  if(box && TK.sel===r.room){ box.querySelectorAll('.tkrd,.tkempty').forEach(e=>e.remove());
+    box.insertAdjacentHTML('beforeend', talkMsg({ id:'new'+Date.now(), body:t||'', photo_url:photoPath||null, sender_id:SUPPORT_ID, by_ai:false, created_at:now }, 'unread'));
+    talkImgs(box); box.scrollTop=box.scrollHeight; if($('#tkReply')){ $('#tkReply').value=''; if(innerWidth>1100) $('#tkReply').focus(); } }
+  const el=[...document.querySelectorAll('.tkcv')].find(e=>e.dataset.room===r.room); if(el) el.outerHTML=talkCv(r);
+  talkCounts(); refreshBadges();
 }
 async function talkPhoto(file){ const r=TK.rows.find(x=>x.room===TK.sel); if(!file||!r) return; toast('사진 보내는 중…');
   try{ const blob=await shrinkImage(file,1280); const path=`${me.id}/${r.room}/${Date.now()}.jpg`; const up=await sb.storage.from('chat-photos').upload(path, blob, {contentType:'image/jpeg', upsert:false}); if(up.error) throw new Error(up.error.message); await talkSend(path); }catch(e){ toast('사진 전송 실패: '+e.message); } }
