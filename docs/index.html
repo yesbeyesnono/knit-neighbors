@@ -978,6 +978,15 @@ body.kb #nav{display:none!important}
 .nlink .pglinks{margin:10px 0 4px;border-color:var(--color-primary)}.nlink .pglinks a{color:var(--color-primary)}
 .nlpv{margin-top:8px;font-size:.78rem;color:var(--ink2)}.nlpv b{display:inline-block;background:var(--color-primary-light);color:var(--color-primary-dark);border-radius:999px;padding:3px 10px;margin-left:4px;font-size:.78rem}
 #askdlg .bx>b{display:block;line-height:1.45}#askdlg .bx>b+.bs{margin-top:16px}
+/* 창 규칙 A안(2026-11-16): 읽기·확인은 가운데 카드 */
+.sheetwrap.ctr{align-items:center;justify-content:center;padding:28px}
+.sheetwrap.ctr .sheet{width:100%;max-width:340px;margin:0;border-radius:18px;padding:20px 18px 16px;max-height:82%;background:var(--color-surface);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.sheetwrap.ctr .sheet .hd{display:none}
+#askdlg.note .bx{text-align:left}#askdlg.note .bx>b{font-size:.95rem}
+#askdlg.note p{white-space:pre-wrap;color:var(--ink);font-size:.95rem;line-height:1.6;margin:8px 0 18px;max-height:50vh;overflow-y:auto}
+#askdlg .bs .gg{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+.ntf.jg .tx .sn{white-space:normal;overflow:visible;line-height:1.5}
+.ntf .ngo{display:block;margin-top:6px;font-size:13px;font-weight:800;color:var(--color-primary)}
 </style>
 </head>
 <body>
@@ -1403,7 +1412,7 @@ function openStudio(){
   openSheet(`<b style="font-size:1.05rem">knitup Studio 로 이동해요</b>
     <div class="card soft" style="font-size:.9rem"><b>작가용 도안 제작 도구</b><div class="muted" style="font-size:.82rem;margin-top:4px">차트(원형·왕복·타원)를 그리면 지시문·인쇄(JIS/A4)·도안 패키지까지 만들어져요. 만든 패키지(.knitup-pkg.json)는 뜨개동네 '내 도안 › 도안 등록'에 첨부하면 뷰어로 열려요.</div></div>
     <p class="muted" style="margin:0;font-size:.82rem">뜨개동네와 같은 운영자가 만든 사이트(yesbeyesnono.github.io)예요. 패드·노트북 화면에 맞춰져 있어요.</p>
-    <a class="btn" href="${STUDIO_URL}" target="_blank" rel="noopener noreferrer" onclick="closeSheet()">열기</a><button class="btn o" onclick="closeSheet()">취소</button>`);
+    <a class="btn" href="${STUDIO_URL}" target="_blank" rel="noopener noreferrer" onclick="closeSheet()">열기</a><button class="btn o" onclick="closeSheet()">취소</button>`, 'c');
 }
 // ===== knitup Studio → 뜨개동네 등록 핸드오프(2026-10-11) =====
 // Studio(같은 origin yesbeyesnono.github.io)가 localStorage `kn_studio_handoff` 에 {title, pkg, meta} 를 두고 #studio-import 로 연다.
@@ -1419,9 +1428,9 @@ async function studioImportCheck(){
   let j=studioHandoffPeek(); if(!j) j=await studioInboxPull(); if(!j) return;
   if(location.hash==='#studio-import') history.replaceState(null,'',location.pathname+location.search);
   const t=esc(j.title||'제목 없는 도안'), n=j.pkg.charts.length;
-  if(!myProfile?.is_author){ openSheet(`<b style="font-size:1.05rem">knitup Studio 에서 보낸 도안</b><div class="card soft" style="font-size:.9rem">「${t}」 · 차트 ${n}개<div class="muted" style="font-size:.82rem;margin-top:4px">작가로 승인되면 등록할 수 있어요 — 마이 › 작가 되기. 도안은 이 기기에 7일간 보관돼요.</div></div><button class="btn o" onclick="closeSheet()">닫기</button>`); return; }
+  if(!myProfile?.is_author){ openSheet(`<b style="font-size:1.05rem">knitup Studio 에서 보낸 도안</b><div class="card soft" style="font-size:.9rem">「${t}」 · 차트 ${n}개<div class="muted" style="font-size:.82rem;margin-top:4px">작가로 승인되면 등록할 수 있어요 — 마이 › 작가 되기. 도안은 이 기기에 7일간 보관돼요.</div></div><button class="btn o" onclick="closeSheet()">닫기</button>`, 'c'); return; }
   openSheet(`<b style="font-size:1.05rem">knitup Studio 에서 보낸 도안</b><div class="card soft" style="font-size:.9rem">「${t}」 · 차트 ${n}개${j.meta?.gauge?` · 게이지 ${j.meta.gauge.sts}코×${j.meta.gauge.rows}단`:''}<div class="muted" style="font-size:.82rem;margin-top:4px">등록 폼에 제목·패키지·실·게이지·기법을 채워 드려요. 사진 1장 이상만 올리면 돼요.</div></div>
-    <button class="btn" onclick="openPatternFormFromStudio()">등록 폼 열기</button><button class="btn o" onclick="closeSheet()">나중에</button><button class="btn o" onclick="localStorage.removeItem(STUDIO_HANDOFF_KEY);closeSheet();toast('지웠어요')">지우기</button>`);
+    <button class="btn" onclick="openPatternFormFromStudio()">등록 폼 열기</button><button class="btn o" onclick="closeSheet()">나중에</button><button class="btn o" onclick="localStorage.removeItem(STUDIO_HANDOFF_KEY);closeSheet();toast('지웠어요')">지우기</button>`, 'c');
 }
 async function openPatternFormFromStudio(){
   const j=studioHandoffPeek(); if(!j) return toast('보낸 도안이 없어요');
@@ -1518,7 +1527,8 @@ function avatar(p, lg){ const ini=(p?.nickname||'?').slice(0,1); return `<div cl
 function ago(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방금'; if(d<3600)return Math.floor(d/60)+'분 전'; if(d<86400)return Math.floor(d/3600)+'시간 전'; return Math.floor(d/86400)+'일 전'; }
 function hhmm(t){ return new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}); }
 function chips(p){ return [p.craft&&`<span class="chip y">${CRAFT[p.craft]}</span>`, p.experience&&`<span class="chip">${EXP[p.experience]}</span>`, p.mbti&&`<span class="chip">${esc(p.mbti)}</span>`].filter(Boolean).join(' '); }
-function openSheet(html){ if(typeof restoreMeetOpt==='function') restoreMeetOpt(); $('#sheet').innerHTML='<div class="hd"></div>'+html; $('#sheetwrap').classList.add('on'); }
+// 창 규칙(2026-11-16 대표 확정 A안): 한 줄 알림=toast · 확인(예/아니오)=askOk/askConfirm(가운데) · 읽기(공지·안내)=askNote 또는 openSheet(html,'c')(가운데 카드) · 고르기·입력=openSheet(아래에서 올라옴) · 길게 적기=전체 화면
+function openSheet(html, mode){ if(typeof restoreMeetOpt==='function') restoreMeetOpt(); $('#sheet').innerHTML='<div class="hd"></div>'+html; $('#sheetwrap').classList.toggle('ctr', mode==='c'); $('#sheetwrap').classList.add('on'); }
 function closeSheet(){ $('#sheetwrap').classList.remove('on'); if(typeof restoreMeetOpt==='function') restoreMeetOpt(); }
 // 시트 내려쓸기로 닫기: 시트가 맨 위까지 스크롤된 상태에서 아래로 끌면 따라 내려오고, 충분히 내리면 닫힘
 (function(){
@@ -2396,7 +2406,7 @@ function openExt(u, what){
   let host=''; try{ const x=new URL(u); if(!/^https?:$/.test(x.protocol)) return toast('열 수 없는 주소예요'); host=x.hostname.replace(/^www\./,''); }catch(e){ return toast('주소가 올바르지 않아요'); }
   openSheet(`<b style="font-size:1.05rem">외부 사이트로 이동해요</b><div class="card soft" style="font-size:.9rem"><b>${esc(host)}</b><div class="muted" style="word-break:break-all;font-size:.8rem;margin-top:4px">${esc(u.slice(0,120))}${u.length>120?'…':''}</div></div>
     <p class="muted" style="margin:0;font-size:.82rem">${what||'회원이 등록한 링크'}예요. 뜨개동네 밖 사이트라 결제·개인정보 입력은 그곳 책임이에요. 뜨개동네는 앱 밖에서 돈이나 비밀번호를 요구하지 않아요.</p>
-    <a class="btn" href="${esc(u)}" target="_blank" rel="noopener noreferrer" onclick="closeSheet()">열기</a><button class="btn o" onclick="closeSheet()">취소</button>`);
+    <a class="btn" href="${esc(u)}" target="_blank" rel="noopener noreferrer" onclick="closeSheet()">열기</a><button class="btn o" onclick="closeSheet()">취소</button>`, 'c');
 }
 function linkLabel(u){ try{ const h=new URL(u); const host=h.hostname.replace(/^www\./,''); if(host.includes('instagram.com')) return '인스타그램 @'+esc(h.pathname.split('/').filter(Boolean)[0]||''); return esc(host+(h.pathname.length>1?h.pathname:'')).slice(0,48); }catch(e){ return esc(u).slice(0,48); } }
 const AUTHOR_MIN_CERTS = 3;
@@ -2576,7 +2586,7 @@ async function openSavedPatterns(){
 }
 async function showRecsAfterWork(){
   const list = await loadRecs(true); if(!list.length) return;
-  openSheet(`<b style="font-size:1.05rem">완성작품 인증 완료!</b><p class="muted" style="margin:0">이제 이런 도안도 뜰 수 있어요</p><div class="patlist">${list.slice(0,3).map(patItem).join('')}</div><button class="btn o" onclick="closeSheet()">닫기</button>`);
+  openSheet(`<b style="font-size:1.05rem">완성작품 인증 완료!</b><p class="muted" style="margin:0">이제 이런 도안도 뜰 수 있어요</p><div class="patlist">${list.slice(0,3).map(patItem).join('')}</div><button class="btn o" onclick="closeSheet()">닫기</button>`, 'c');
 }
 // ===== 가게 등록 신청 =====
 let claimDoc=null;
@@ -2780,8 +2790,8 @@ async function loadUserFeed(uid, tab, el){
 async function requestFriend(id, wave){
   const { data:rel } = await sb.from('friendships').select('requester_id,addressee_id,status,created_at').or(`and(requester_id.eq.${me.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${me.id})`).limit(1);
   const r = rel?.[0];
-  if(r?.status==='pending' && r.requester_id===me.id) return openSheet(`<b style="font-size:1.05rem">이미 인사를 건넸어요</b><div class="muted" style="font-size:.92rem;line-height:1.55">${agoShort(r.created_at)} 전에 친구 신청을 보냈어요. 상대가 앱을 열어 확인하면 알림으로 알려 드릴게요. 답이 늦어도 너무 서운해하지 마세요, 뜨개하느라 바쁠 수 있으니까요 🧶</div><button class="btn" onclick="closeSheet()">기다려 볼게요</button>`);
-  if(r?.status==='pending' && r.addressee_id===me.id) return openSheet(`<b style="font-size:1.05rem">이분이 먼저 인사를 건넸어요</b><div class="muted" style="font-size:.92rem">받은 친구 신청이 있어요. 수락하면 바로 채팅방이 열려요.</div>${r.message?`<div class="story">"${esc(r.message)}"</div>`:''}<button class="btn" onclick="closeSheet();respond('${id}','accepted')">수락하기</button><button class="btn o" onclick="closeSheet()">나중에</button>`);
+  if(r?.status==='pending' && r.requester_id===me.id) return openSheet(`<b style="font-size:1.05rem">이미 인사를 건넸어요</b><div class="muted" style="font-size:.92rem;line-height:1.55">${agoShort(r.created_at)} 전에 친구 신청을 보냈어요. 상대가 앱을 열어 확인하면 알림으로 알려 드릴게요. 답이 늦어도 너무 서운해하지 마세요, 뜨개하느라 바쁠 수 있으니까요 🧶</div><button class="btn" onclick="closeSheet()">기다려 볼게요</button>`, 'c');
+  if(r?.status==='pending' && r.addressee_id===me.id) return openSheet(`<b style="font-size:1.05rem">이분이 먼저 인사를 건넸어요</b><div class="muted" style="font-size:.92rem">받은 친구 신청이 있어요. 수락하면 바로 채팅방이 열려요.</div>${r.message?`<div class="story">"${esc(r.message)}"</div>`:''}<button class="btn" onclick="closeSheet();respond('${id}','accepted')">수락하기</button><button class="btn o" onclick="closeSheet()">나중에</button>`, 'c');
   if(r?.status==='accepted') return openDirectRoom(id);
   if(r?.status==='declined') return toast('거절된 신청은 30일 뒤 다시 보낼 수 있어요');
   if(r?.status==='blocked') return toast('차단 상태라 신청할 수 없어요');
@@ -2939,12 +2949,16 @@ const NTF_TEXT = { mention:'님이 회원님을 언급했어요', reply:'님이 
 const NTF_ICON = { mention:ico('at'), reply:ico('reply'), like:ico('heart'), friend_request:ico('handshake'), friend_accept:ico('party'), meetup_join:ico('yarn'), review:ico('review'), solved:ico('check'), notice:ico('yarn'), shop_post:ico('location'), repost:ico('reply'), meetup_leave:ico('yarn'), meetup_cancel:ico('yarn'), event_open:ico('party'), event_selected:ico('party'), event_rejected:ico('yarn'), supporter:ico('party'), cheer:ico('party'), remind:ico('location') };
 let actRows = [];
 function openActivity(){ show('activity'); renderActivity(); }
+const NTF_JG=new Set(['cheer','remind','notice']);   // 지기가 보내는 안내: 목록에서 글 전체, 누르면 글 전체 먼저(2026-11-16 회원 제보)
+const ntfDest=n=>!!((n.link && typeof n.link==='object') || n.event_id || (n.kind==='notice' && n.shop_id));
+function pushBadgeClear(){ try{ if(PushN && PushN.removeAllDeliveredNotifications) PushN.removeAllDeliveredNotifications().catch(()=>{}); }catch(e){} }   // 아이폰 앱 아이콘의 빨간 숫자·알림 센터의 지난 알림
 async function renderActivity(){
   const { data, error } = await sb.from('notifications').select('*, actor:profiles!notifications_actor_id_fkey(id,nickname,avatar_url), shop:shops(name)').eq('recipient_id', me.id).order('created_at',{ascending:false}).limit(100);
   if(error){ $('#actBody').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
   actRows = (data||[]).filter(n=>SUPPORTERS || n.kind!=='supporter');   // 서포터즈 중단 뒤 옛 초대 알림은 숨김
-  $('#actBody').innerHTML = actRows.length ? actRows.map((n,i)=>{ const a=n.kind==='supporter'?{nickname:'서포터즈'}:(n.actor||{nickname:(n.kind||'').startsWith('event_')?'뜨개동네 이벤트':'(탈퇴한 사용자)'}); const who = n.kind==='shop_post' && n.shop ? {nickname:n.shop.name} : a; const txt = n.kind==='shop_post' && n.shop ? '에 새 소식이 올라왔어요' : (NTF_TEXT[n.kind]||''); return `<div class="ntf ${n.read_at?'':'unread'}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${n.kind==='shop_post'?`<div class="ava">${SHOP_SVG}</div>`:avatar(a)}<div class="tx"><b>${esc(who.nickname)}</b>${txt}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}</div><time>${agoShort(n.created_at)}</time></div>`; }).join('')
+  $('#actBody').innerHTML = actRows.length ? actRows.map((n,i)=>{ const a=n.kind==='supporter'?{nickname:'서포터즈'}:(n.actor||{nickname:(n.kind||'').startsWith('event_')?'뜨개동네 이벤트':'(탈퇴한 사용자)'}); const who = n.kind==='shop_post' && n.shop ? {nickname:n.shop.name} : a; const txt = n.kind==='shop_post' && n.shop ? '에 새 소식이 올라왔어요' : (NTF_TEXT[n.kind]||''); const jg=NTF_JG.has(n.kind); return `<div class="ntf ${n.read_at?'':'unread'}${jg?' jg':''}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${n.kind==='shop_post'?`<div class="ava">${SHOP_SVG}</div>`:avatar(a)}<div class="tx"><b>${esc(who.nickname)}</b>${txt}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}${jg&&ntfDest(n)?'<span class="ngo">보러 가기 ›</span>':''}</div><time>${agoShort(n.created_at)}</time></div>`; }).join('')
     : '<div class="empty">아직 활동이 없어요<br>글을 쓰거나 이웃에게 먼저 인사해 보세요</div>';
+  pushBadgeClear();
   if(actRows.some(n=>!n.read_at)){ await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',me.id).is('read_at',null); refreshBadge(); }
 }
 // 공지 딥링크(콘솔 › 공지·알림 보내기): {type:'meetup'|'event'|'shop'|'post'|'pattern'|'view', id|view}
@@ -2958,15 +2972,14 @@ async function openLink(l){
   }catch(e){}
   return openSupportRoom();
 }
-async function openNotif(i){
+async function openNotif(i, go){
   const n=actRows[i]; if(!n) return;
+  if(NTF_JG.has(n.kind) && !go){ const who=n.actor?.nickname||'뜨개동네 지기'; if(ntfDest(n)) return askNote(who, n.snippet, '보러 가기', ()=>openNotif(i, true)); if(n.kind==='notice') return askNote(who, n.snippet, '지기에게 물어보기', ()=>openSupportRoom()); return askNote(who, n.snippet); }
   sb.from('notifications').delete().eq('id', n.id).eq('recipient_id', me.id).then(()=>refreshBadge());   // 확인한 알림은 활동에서 지운다
   if(n.link && typeof n.link==='object'){ sb.from('notifications').update({ clicked_at:new Date().toISOString() }).eq('id', n.id).then(()=>{}); return openLink(n.link); }
   if(n.event_id) return openEvent(n.event_id);
   if(n.kind==='supporter') return openSupporters();
   if(n.kind==='notice' && n.shop_id){ const { data:shop } = await sb.from('shops').select('*').eq('owner_id', me.id).maybeSingle(); myShop = shop||myShop; return openShop(n.shop_id); }
-  // 링크가 없는 공지: 예전에는 지기 채팅방을 열었는데, 공지 내용이 채팅방에는 없어 빈 화면처럼 보였다(2026-11-15 제보) → 공지 내용을 그 자리에서 보여 주고, 물어볼 것이 있을 때만 지기 채팅으로
-  if(n.kind==='notice') return openSheet(`<b style="font-size:1.05rem">뜨개동네 지기의 공지</b><p style="margin:0;white-space:pre-wrap;line-height:1.6;font-size:.95rem">${esc(n.snippet||'')}</p><button type="button" class="btn" onclick="closeSheet()">확인</button><button type="button" class="btn o" onclick="closeSheet();openSupportRoom()">지기에게 물어보기</button>`);
   if(n.kind==='shop_post' && n.shop_id) return openShop(n.shop_id);
   if(n.kind==='friend_request'||n.kind==='friend_accept') return openProfile(n.actor_id);
   if(n.kind==='meetup_join' || n.kind==='meetup_leave') return openMeetup(n.meetup_id);
@@ -3219,7 +3232,7 @@ async function pushSetup(){
     const asked = localStorage.getItem('kn_push_asked'); if(asked) return;   // 안내 시트는 한 번만
     localStorage.setItem('kn_push_asked', '1');
     openSheet(`<b style="font-size:1.05rem">알림을 받아 볼까요?</b><p class="muted" style="margin:0;font-size:.9rem;line-height:1.5">댓글·친구 신청·모임 소식·이벤트 선정처럼 놓치면 아쉬운 것만 보내요. 광고 알림은 없어요. ${PUSH_OS} 설정에서 언제든 끌 수 있어요.</p>
-      <button class="btn" onclick="closeSheet();pushAsk()">알림 받기</button><button class="btn o" onclick="closeSheet()">나중에</button>`);
+      <button class="btn" onclick="closeSheet();pushAsk()">알림 받기</button><button class="btn o" onclick="closeSheet()">나중에</button>`, 'c');
   }catch(e){}
 }
 async function pushAsk(){ if(!PushN) return; try{ const r = await PushN.requestPermissions(); if(r.receive === 'granted') pushRegister(); else toast('설정 › 뜨개동네 › 알림에서 켤 수 있어요'); }catch(e){} }
@@ -3280,7 +3293,7 @@ function chSwipeBind(){ const box=$('#chatsBody'); if(!box || box.dataset.sw) re
 }
 function undoBar(text, fn){ let b=$('#undoBar'); if(!b){ b=document.createElement('div'); b.id='undoBar'; document.body.appendChild(b); } b.innerHTML=`<span>${esc(text)}</span><button type="button">되돌리기</button>`; b.hidden=false; b.querySelector('button').onclick=()=>{ b.hidden=true; fn(); }; clearTimeout(b._t); b._t=setTimeout(()=>{ b.hidden=true; }, 5000); }
 async function chArchive(id, on=true){ chCloseAll(); const { error } = await sb.rpc('room_archive', { p_room:id, p_on:on }); if(error) return toast(error.message.replace(/^.*?: /,'')); await renderChats(); if(on) undoBar('대화를 보관했어요', ()=>chArchive(id,false)); else toast('채팅 목록으로 옮겼어요'); }
-function chLeave(id){ chCloseAll(); openSheet(`<b style="font-size:1.05rem">이 대화방에서 나갈까요?</b><p class="muted" style="margin:0;font-size:.88rem;line-height:1.55">내 채팅 목록에서 사라지고, 지난 대화를 다시 볼 수 없어요. 다른 분들의 대화방에는 그대로 남아요.</p><button class="btn r" onclick="chLeaveGo('${id}')">나가기</button><button class="btn o" onclick="closeSheet()">취소</button>`); }
+function chLeave(id){ chCloseAll(); openSheet(`<b style="font-size:1.05rem">이 대화방에서 나갈까요?</b><p class="muted" style="margin:0;font-size:.88rem;line-height:1.55">내 채팅 목록에서 사라지고, 지난 대화를 다시 볼 수 없어요. 다른 분들의 대화방에는 그대로 남아요.</p><button class="btn r" onclick="chLeaveGo('${id}')">나가기</button><button class="btn o" onclick="closeSheet()">취소</button>`, 'c'); }
 async function chLeaveGo(id){ closeSheet(); const { error } = await sb.rpc('room_leave', { p_room:id }); if(error) return toast(error.message.replace(/^.*?: /,'')); toast('대화방에서 나갔어요'); renderChats(); chatDot(); }
 function openArchived(){ if(!chArch.length) return renderChats();
   openSheet(`<b style="font-size:1.05rem">보관한 대화 ${chArch.length}</b><p class="muted" style="margin:0 0 4px;font-size:.82rem">새 메시지가 오면 채팅 목록으로 다시 올라와요.</p>${chArch.map(r=>`<div class="archit"><div class="tx" onclick="closeSheet();openRoom('${r.id}')"><b>${esc(r.name)}${r.meetup&&meetEnded(r.meetup)?'<span class="mbadge end">모임 종료</span>':''}</b><span>${r.last?.body?esc(r.last.body):(r.last?'사진·장소':'대화 없음')}</span></div>${r.archManual?`<button type="button" onclick="closeSheet();chArchive('${r.id}',false)">목록으로</button>`:''}<button type="button" onclick="closeSheet();chLeave('${r.id}')">나가기</button></div>`).join('')}`); }
@@ -3969,7 +3982,7 @@ function leaveMeetup(id){
   openSheet(`<b style="font-size:1.1rem">모임 참여를 취소할까요?</b>
     <div class="muted" style="font-size:.9rem;line-height:1.55">단체 채팅방에서도 나가고, 주최자에게 참여 취소 알림이 가요. 채팅방에는 "참여를 취소했어요"라고 남아요.</div>
     <label class="f">주최자에게 남길 말 (선택)<input id="lmNote" maxlength="200" placeholder="예: 갑자기 일정이 생겼어요. 다음에 꼭 갈게요"></label>
-    <button class="btn r" id="lmGo" onclick="confirmLeaveMeetup('${id}')">참여 취소</button><button class="btn o" onclick="openMeetup('${id}')">계속 참여할게요</button>`);
+    <button class="btn r" id="lmGo" onclick="confirmLeaveMeetup('${id}')">참여 취소</button><button class="btn o" onclick="openMeetup('${id}')">계속 참여할게요</button>`, 'c');
 }
 async function confirmLeaveMeetup(id){
   $('#lmGo').disabled=true;
@@ -3981,7 +3994,7 @@ function askCancelMeetup(id, n){
   openSheet(`<b style="font-size:1.1rem">모임을 취소할까요?</b>
     <div class="muted" style="font-size:.9rem;line-height:1.55">지도 핀과 모임 안내 글이 사라지고, ${n>1?`참여자 ${n-1}명에게`:'참여자에게'} 취소 알림이 가요. 단체 채팅방은 남아 있어요.</div>
     <label class="f">참여자에게 남길 말 (선택)<input id="cmNote" maxlength="200" placeholder="예: 장소 사정으로 취소해요. 다음 주에 다시 열게요"></label>
-    <button class="btn r" id="cmGo" onclick="cancelMeetup('${id}', $('#cmNote').value.trim())">모임 취소</button><button class="btn o" onclick="openMeetup('${id}')">취소하지 않을게요</button>`);
+    <button class="btn r" id="cmGo" onclick="cancelMeetup('${id}', $('#cmNote').value.trim())">모임 취소</button><button class="btn o" onclick="openMeetup('${id}')">취소하지 않을게요</button>`, 'c');
 }
 // ===== 장소 검색(모임 위치) — Google 지오코더, 실패 시 OpenStreetMap =====
 let placePick = { m:null, e:null };   // m=모임 만들기, e=기존 모임 장소 수정
@@ -4038,7 +4051,7 @@ function meetApplyBtn(m, app){ const st=app?.mine;
 function applyMeetup(id){ openSheet(`<b style="font-size:1.1rem">참여를 신청할까요?</b>
     <div class="muted" style="font-size:.88rem;line-height:1.55">개설자에게 신청 알림이 가요. 개설자가 확정하면 알림이 오고 모임 채팅방이 열려요. 참가비 안내는 채팅방에서 받아요.</div>
     <label class="f">개설자에게 한마디 (선택)<input id="maNote" maxlength="200" placeholder="예: 안녕하세요, 같이 뜨고 싶어요"></label>
-    <button class="btn" id="maGo" onclick="confirmApplyMeetup('${id}')">신청하기</button><button class="btn o" onclick="openMeetup('${id}')">다시 볼게요</button>`); }
+    <button class="btn" id="maGo" onclick="confirmApplyMeetup('${id}')">신청하기</button><button class="btn o" onclick="openMeetup('${id}')">다시 볼게요</button>`, 'c'); }
 async function confirmApplyMeetup(id){ const note=$('#maNote').value.trim(); await loadBanned(); if(hasBanned(note)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
   $('#maGo').disabled=true; const { error } = await sb.rpc('meetup_apply', { p_meetup:id, p_note:note||null });
   if(error){ const b=$('#maGo'); if(b) b.disabled=false; return toast(error.message.replace(/^.*?: /,'')); }
@@ -4107,6 +4120,8 @@ function postMenu(id, authorId){
 // 앱 모양의 작은 확인 창 (휴대폰 기본 알림창 대신)
 // askOk: askConfirm 과 같은 모양, await 로 쓰는 판(2026-11-16 통일). no = 닫는 버튼 글자
 function askOk(title, ok, no){ return new Promise(res=>{ $('#askdlg')?.remove(); const d=document.createElement('div'); d.id='askdlg'; d.innerHTML=`<div class="bx"><b>${esc(title)}</b><div class="bs"><button type="button">${esc(no||'취소')}</button><button type="button" class="rr">${esc(ok||'확인')}</button></div></div>`; document.body.appendChild(d); const [c,o]=d.querySelectorAll('button'); const done=v=>{ d.remove(); res(v); }; c.onclick=()=>done(false); d.onclick=e=>{ if(e.target===d) done(false); }; o.onclick=()=>done(true); }); }
+// askNote: 읽을거리(지기 안내·공지)를 가운데 카드로. ok 가 있으면 [닫기][ok], 없으면 [확인]
+function askNote(title, text, ok, fn){ $('#askdlg')?.remove(); const d=document.createElement('div'); d.id='askdlg'; d.className='note'; d.innerHTML=`<div class="bx"><b>${esc(title)}</b><p>${esc(text||'')}</p><div class="bs">${ok?`<button type="button">닫기</button><button type="button" class="gg">${esc(ok)}</button>`:'<button type="button" class="gg">확인</button>'}</div></div>`; document.body.appendChild(d); const bs=d.querySelectorAll('button'); bs[0].onclick=()=>d.remove(); d.onclick=e=>{ if(e.target===d) d.remove(); }; if(ok) bs[1].onclick=()=>{ d.remove(); if(fn) fn(); }; }
 function askConfirm(title, text, ok, fn){ $('#askdlg')?.remove(); const d=document.createElement('div'); d.id='askdlg'; d.innerHTML=`<div class="bx"><b>${esc(title)}</b><p>${esc(text)}</p><div class="bs"><button type="button">취소</button><button type="button" class="rr">${esc(ok)}</button></div></div>`; document.body.appendChild(d); const [c,o]=d.querySelectorAll('button'); c.onclick=()=>d.remove(); d.onclick=e=>{ if(e.target===d) d.remove(); }; o.onclick=()=>{ d.remove(); fn(); }; }
 function pmRefresh(){ if(view==='my') loadMyFeed(); else if(view==='profile') loadUserFeed(profId, profTab, $('#profFeed')); else if(view==='comm') loadFeed(); }
 // 프로필에 고정 (3개까지, schema 110)
@@ -4312,13 +4327,13 @@ document.addEventListener('visibilitychange', ()=>{ if(document.hidden && cdHas(
 function cdGo(){ closeSheet(); closeCompose.force=true; try{ closeCompose(); }finally{ closeCompose.force=false; } }
 function cdCloseAsk(){ openSheet(`<b style="font-size:1.1rem">나중에 이어서 쓸까요?</b><p class="muted" style="margin:0;font-size:.86rem;line-height:1.5">지금까지 적은 내용과 사진을 이 휴대폰에 보관해 둘게요. 다음에 완성작품 인증을 누르면 이어서 쓸 수 있어요.</p>
   <button type="button" class="btn" onclick="cdSave().then(ok=>{ if(!ok) toast('보관하지 못했어요'); else toast('보관했어요'); cdGo(); })">보관하고 닫기</button><button type="button" class="btn o" onclick="closeSheet()">계속 쓰기</button>
-  <button type="button" style="background:none;border:0;color:#C8453A;font:inherit;font-size:.86rem;font-weight:600;padding:6px;cursor:pointer" onclick="cdClear().then(cdGo)">보관하지 않고 지우기</button>`); }
+  <button type="button" style="background:none;border:0;color:#C8453A;font:inherit;font-size:.86rem;font-weight:600;padding:6px;cursor:pointer" onclick="cdClear().then(cdGo)">보관하지 않고 지우기</button>`, 'c'); }
 let cdDraft=null;
 function cdAsk(d){ cdDraft=d; const u=d.photos&&d.photos[0]?URL.createObjectURL(d.photos[0].blob):''; const t=new Date(d.at); const when=`${t.getMonth()+1}월 ${t.getDate()}일 ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
   openSheet(`<b style="font-size:1.1rem">쓰던 인증이 있어요</b><p class="muted" style="margin:0;font-size:.86rem">이어서 쓸까요?</p>
     <div style="display:flex;gap:10px;align-items:center;background:var(--color-surface);border-radius:14px;padding:10px"><div style="width:54px;height:54px;border-radius:10px;flex:none;background:var(--bg2) center/cover no-repeat${u?`;background-image:url(${u})`:''}"></div><div style="min-width:0"><b style="display:block">${esc((d.title||'').trim()||'이름 없는 작품')}</b><span class="muted" style="font-size:.78rem">${[d.photos&&d.photos.length?`사진 ${d.photos.length}장`:'', d.techs&&d.techs.length?`기법 ${d.techs.length}개`:'', when+' 보관'].filter(Boolean).join(' · ')}</span></div></div>
     <button type="button" class="btn" onclick="cdResume()">이어서 쓰기</button><button type="button" class="btn o" onclick="closeSheet();cdClear().then(()=>openCert(true))">새로 쓰기</button>
-    <p class="muted" style="margin:0;font-size:.75rem;text-align:center">새로 쓰면 보관한 것은 지워져요</p>`); }
+    <p class="muted" style="margin:0;font-size:.75rem;text-align:center">새로 쓰면 보관한 것은 지워져요</p>`, 'c'); }
 async function cdResume(){ const d=cdDraft; closeSheet(); if(!d) return openCert(true); await openCert(true, true); if(view!=='cert') return;
   $('#wTitle').value=d.title||''; $('#wNote').value=d.note||''; wCraft=d.craft==='knitting'?'knitting':'crochet'; wTechSel=new Set(d.techs||[]); wCustom=(d.custom||[]).slice();
   wYarns=d.yarns||[]; wNeedles=d.needles||[]; const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=d.gauge||''; if(z) z.value=d.size||'';
@@ -5671,7 +5686,7 @@ function idxChip(p){ return p&&p.trait&&p.trait!=='new'?`<span class="idxchip" t
 function idxMini(p){ return `<div class="idxmini" onclick="openIndexInfo()">${idxRadar(p,64)}<div class="r">${IDX_DEF.map(([k,n])=>`<b>${n}</b>${p['idx_'+k]||0}<br>`).join('')}</div><div class="r" style="flex:1"><span style="color:var(--olive);font-weight:700">${traitLabel(p.trait)}</span><br>${esc((TRAIT_TXT[p.trait]||TRAIT_TXT.new).split(' — ')[1]||'')}</div></div>`; }
 function openIndexInfo(){ openSheet(`<b style="font-size:1.05rem">Connect · Host · Skill Index</b><p class="muted" style="margin:0;font-size:.88rem">몇 개 했는지가 아니라 어떤 성향인지를 보여 줘요. 최근 90일 활동을 더 크게 보고, 처음 몇 번은 크게 오르다가 많아질수록 천천히 올라요(도배로는 못 채워요). 매일 밤 다시 계산해요.</p>
   ${IDX_DEF.map(([k,n,d])=>`<div class="card soft" style="font-size:.88rem"><b>${n} Index</b><div class="muted">${d}</div></div>`).join('')}
-  <p class="muted" style="margin:0;font-size:.8rem">가장 높은 Index가 다른 것보다 확실히 크면 그 이름이 프로필에 붙고(CONNECT·HOST·SKILL), 비슷하면 BALANCED예요. 서포터즈 점수와는 별개예요.</p><button class="btn o" onclick="closeSheet()">닫기</button>`); }
+  <p class="muted" style="margin:0;font-size:.8rem">가장 높은 Index가 다른 것보다 확실히 크면 그 이름이 프로필에 붙고(CONNECT·HOST·SKILL), 비슷하면 BALANCED예요. 서포터즈 점수와는 별개예요.</p><button class="btn o" onclick="closeSheet()">닫기</button>`, 'c'); }
 // ---- 마이 상단 카드 (2026-09-27 대표 확정: 뜨개 단계 → 할 일 → 이번 주 → 실함 → 가게/작가)
 function myLvCard(){
   const p=myProfile||{}; const set=new Set(p.skills||[]); const crafts=myCrafts();
@@ -5882,7 +5897,7 @@ async function openRestoreSheet(){
   openSheet(`<b style="font-size:1.05rem">삭제 예정인 계정이에요</b>
     <div class="card soft" style="font-size:.9rem;line-height:1.55">${until?`<b>${kdate(until)}</b>에 완전히 지워져요 (${days}일 남음). `:''}지금 복구하면 글·사진·친구·채팅이 그대로 돌아와요.</div>
     <button class="btn" onclick="restoreAccount()">복구하고 계속 쓰기</button>
-    <button class="btn o" onclick="logout()">그대로 두기 (로그아웃)</button>`);
+    <button class="btn o" onclick="logout()">그대로 두기 (로그아웃)</button>`, 'c');
 }
 async function restoreAccount(){
   const { error } = await sb.rpc('restore_my_account'); if(error) return toast('복구 실패: '+error.message);
