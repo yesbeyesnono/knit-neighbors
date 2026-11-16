@@ -2103,3 +2103,10 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 136. 콘솔 자동 메시지 화면용 (2026-11-16, 마이그레이션 admin_auto_jobs — 원본 supabase/admin_auto_jobs.sql)
 --   admin_auto_jobs(): 관리자만 — 예약 작업(cron.job) 이름·주기·켜짐 여부·마지막 실행 시각과 결과. 콘솔 › 알리기 › 자동 메시지의 상태 칸에 씀
 -- ============================================================
+
+-- ============================================================
+-- 137. 실 굵기 추정 (2026-11-16 대표 지시, 마이그레이션 yarn_weight_est — 원본 supabase/yarn_weight_est.sql)
+--   yarn_catalog.weight_est boolean: 1볼 길이(m)가 없어 굵기를 못 정한 실 281종에 권장 바늘(대바늘 우선, 없으면 일본식 코바늘 호수)로 굵기를 추정해 넣고 true
+--   트리거 yarn_catalog_weight_from_spec(BEFORE UPDATE OF ball_g, ball_m): 추정이던 실에 1볼 g·m 이 들어오면 그 값으로 굵기를 다시 정하고 false 로(m_per_100g 는 계산 칸이라 g·m 으로 직접 계산)
+--   콘솔 실 목록 굵기 칸에 "바늘로 추정" 표시 · 대시보드 굵기별 카드에 추정 개수
+-- ============================================================
