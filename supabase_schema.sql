@@ -2091,3 +2091,10 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   옛 앱은 app_config.home_notice(하나)를 계속 읽음 — 그대로 둠
 --   admin_home_notices_toggle(p_id, p_active): 관리자만, 공지 하나를 켜고 끔 + admin_log. 문구·그림 변경은 SQL
 -- ============================================================
+
+-- ============================================================
+-- 135. 뜨친 인사 알림 (2026-11-16 대표 지시, 마이그레이션 friend_chat_nudge — 원본 supabase/friend_chat_nudge.sql)
+--   friendships.chat_nudged_at: 알린 시각(한 쌍에 한 번)
+--   friend_chat_nudge(): 크론 friend-chat-nudge 매일 10:00 KST — 수락 뒤 24시간이 지났고(60일 안) 둘 사이 채팅 메시지가 하나도 없으면 양쪽에 remind 알림
+--     한 사람에게 하루 한 건(여러 명이면 "○○ 님 외 N명" + 채팅 목록 링크, 한 명이면 상대 프로필 링크). 탈퇴·정지·차단·지기 계정 제외. 문구는 가볍게, 이벤트 안내 없음
+-- ============================================================
