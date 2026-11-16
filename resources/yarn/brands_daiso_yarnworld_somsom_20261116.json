@@ -1,0 +1,2106 @@
+{
+ "다이소": [
+  {
+   "product": "양모 뜨개실",
+   "g": 35,
+   "m": null,
+   "fibers": {
+    "울": 100
+   },
+   "needle_knit": "4-5",
+   "needle_crochet": null,
+   "colors": 7,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1081430"
+  },
+  {
+   "product": "포근 그라데이션 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "아크릴": 78,
+    "폴리에스터": 22
+   },
+   "needle_knit": "4-5",
+   "needle_crochet": null,
+   "colors": 4,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080775"
+  },
+  {
+   "product": "소프트 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "8-10",
+   "needle_crochet": null,
+   "colors": 5,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080779"
+  },
+  {
+   "product": "컬러 포인트 아크릴 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "아크릴": 100
+   },
+   "needle_knit": "5-6",
+   "needle_crochet": null,
+   "colors": 4,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080704"
+  },
+  {
+   "product": "굵은 아크릴 뜨개실",
+   "g": 50,
+   "m": null,
+   "fibers": {
+    "아크릴": 100
+   },
+   "needle_knit": "5-6",
+   "needle_crochet": null,
+   "colors": 7,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080727"
+  },
+  {
+   "product": "코튼 아크릴 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "면": 62,
+    "아크릴": 38
+   },
+   "needle_knit": "4-5",
+   "needle_crochet": null,
+   "colors": 4,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080738"
+  },
+  {
+   "product": "면 뜨개실(25g)",
+   "g": 25,
+   "m": 75,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": "3",
+   "needle_crochet": null,
+   "colors": 8,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1028756"
+  },
+  {
+   "product": "굵은 울 믹스 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "아크릴": 50,
+    "울": 30,
+    "폴리에스터": 20
+   },
+   "needle_knit": "6-8",
+   "needle_crochet": null,
+   "colors": 6,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080752"
+  },
+  {
+   "product": "믹스 컬러 소프트 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6-8",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080745"
+  },
+  {
+   "product": "부드러운 아크릴 뜨개실",
+   "g": 50,
+   "m": null,
+   "fibers": {
+    "아크릴": 100
+   },
+   "needle_knit": "4-5",
+   "needle_crochet": null,
+   "colors": 8,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1047861"
+  },
+  {
+   "product": "트윙클 아크릴 뜨개실",
+   "g": 50,
+   "m": null,
+   "fibers": {
+    "아크릴": 98,
+    "폴리에스터": 2
+   },
+   "needle_knit": "5",
+   "needle_crochet": null,
+   "colors": 5,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080732"
+  },
+  {
+   "product": "보송보송 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 64,
+    "나일론": 18,
+    "울": 15,
+    "폴리우레탄": 3
+   },
+   "needle_knit": null,
+   "needle_crochet": "3-3.5mm",
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080710"
+  },
+  {
+   "product": "보송 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 64,
+    "나일론": 18,
+    "울": 15,
+    "폴리우레탄": 3
+   },
+   "needle_knit": null,
+   "needle_crochet": "3-3.5mm",
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1065688"
+  },
+  {
+   "product": "얇은 울 믹스 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "아크릴": 48,
+    "울": 30,
+    "나일론": 22
+   },
+   "needle_knit": "2-3",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080714"
+  },
+  {
+   "product": "밍크 퍼 뜨개실(30g)",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6-8",
+   "needle_crochet": null,
+   "colors": 7,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080770"
+  },
+  {
+   "product": "밍크 퍼 뜨개실(70g)",
+   "g": 70,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6-8",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1081411"
+  },
+  {
+   "product": "두꺼운 밍크 퍼 뜨개실",
+   "g": 100,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "12",
+   "needle_crochet": null,
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1054038"
+  },
+  {
+   "product": "밍크 퍼 합사 뜨개실",
+   "g": 35,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6-8",
+   "needle_crochet": null,
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1081402"
+  },
+  {
+   "product": "아크릴 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "아크릴": 100
+   },
+   "needle_knit": "4-5",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1068662"
+  },
+  {
+   "product": "믹스 컬러 아크릴 뜨개실",
+   "g": 50,
+   "m": null,
+   "fibers": {
+    "아크릴": 100
+   },
+   "needle_knit": "3.5-4",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1063926"
+  },
+  {
+   "product": "믹스 컬러 뜨개실",
+   "g": 50,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 50,
+    "아크릴": 50
+   },
+   "needle_knit": "2-3",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1063918"
+  },
+  {
+   "product": "믹스 포인트 아크릴 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "아크릴": 96,
+    "폴리에스터": 4
+   },
+   "needle_knit": "3.5-4",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1064099"
+  },
+  {
+   "product": "포근 날개 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080698"
+  },
+  {
+   "product": "도톰 날개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080730"
+  },
+  {
+   "product": "보송 날개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "나일론": 100
+   },
+   "needle_knit": "1.5-2",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1068646"
+  },
+  {
+   "product": "날개실",
+   "g": 30,
+   "m": 63,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": null,
+   "needle_crochet": "5호(3-4mm)",
+   "colors": 10,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=57766"
+  },
+  {
+   "product": "크레이프 뜨개실",
+   "g": 40,
+   "m": 52,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "5-6",
+   "needle_crochet": null,
+   "colors": 7,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1034178"
+  },
+  {
+   "product": "포근 믹스 케이크 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "아크릴": 36,
+    "폴리에스터": 32,
+    "나일론": 32
+   },
+   "needle_knit": "4-5",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080773"
+  },
+  {
+   "product": "보송 믹스 케이크 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "아크릴": 50,
+    "나일론": 50
+   },
+   "needle_knit": "4-5",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080723"
+  },
+  {
+   "product": "부드러운 극세사 뜨개실",
+   "g": 50,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6",
+   "needle_crochet": null,
+   "colors": 5,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080760"
+  },
+  {
+   "product": "극세사 뜨개실",
+   "g": 50,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6",
+   "needle_crochet": null,
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1065630"
+  },
+  {
+   "product": "극세사 통통 뜨개실",
+   "g": 50,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6.5",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1047846"
+  },
+  {
+   "product": "극세사 행주 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "5-6",
+   "needle_crochet": null,
+   "colors": 4,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1031386"
+  },
+  {
+   "product": "팝콘 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "아크릴": 70,
+    "폴리에스터": 30
+   },
+   "needle_knit": "5",
+   "needle_crochet": null,
+   "colors": 4,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080701"
+  },
+  {
+   "product": "얇은 벨벳 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "4-5",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1083073"
+  },
+  {
+   "product": "부드러운 벨벳 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6-7",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080741"
+  },
+  {
+   "product": "모헤어 믹스 뜨개실",
+   "g": 20,
+   "m": null,
+   "fibers": {
+    "양모": 90,
+    "모헤어": 10
+   },
+   "needle_knit": "3",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080754"
+  },
+  {
+   "product": "모헤어 뜨개실",
+   "g": 20,
+   "m": null,
+   "fibers": {
+    "양모": 90,
+    "모헤어": 10
+   },
+   "needle_knit": "3",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1065654"
+  },
+  {
+   "product": "울 믹스 꼬임 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "울": 50,
+    "나일론": 25,
+    "아크릴": 25
+   },
+   "needle_knit": "6",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080765"
+  },
+  {
+   "product": "롱헤어 뜨개실",
+   "g": 35,
+   "m": null,
+   "fibers": {
+    "나일론": 100
+   },
+   "needle_knit": "6",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080762"
+  },
+  {
+   "product": "소프트 퍼 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "3",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080719"
+  },
+  {
+   "product": "폭신폭신 소프트 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6.5",
+   "needle_crochet": null,
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1054064"
+  },
+  {
+   "product": "몽글 소프트 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "6-8",
+   "needle_crochet": null,
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1078001"
+  },
+  {
+   "product": "테디 나일론 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "나일론": 100
+   },
+   "needle_knit": "3.5-4",
+   "needle_crochet": null,
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1065679"
+  },
+  {
+   "product": "보송 나일론 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "나일론": 100
+   },
+   "needle_knit": "3-4",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1080715"
+  },
+  {
+   "product": "믹스 합사 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "3-4",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1074162"
+  },
+  {
+   "product": "스팽글 합사 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "5-6.5",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1074574"
+  },
+  {
+   "product": "포인트 합사 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "1.5-3",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1074572"
+  },
+  {
+   "product": "얇은 메탈 느낌 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": null,
+   "needle_knit": "2-2.5",
+   "needle_crochet": null,
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1073613"
+  },
+  {
+   "product": "반짝이 펄 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "아크릴": 85,
+    "폴리에스터": 15
+   },
+   "needle_knit": "5",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1052197"
+  },
+  {
+   "product": "아크릴 테이프 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "아크릴": 100
+   },
+   "needle_knit": "3-4",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1068665"
+  },
+  {
+   "product": "통통한 구름 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": null,
+   "needle_knit": "8",
+   "needle_crochet": null,
+   "colors": 6,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1052223"
+  },
+  {
+   "product": "면 뜨개실(35g)",
+   "g": 35,
+   "m": null,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": "2.5",
+   "needle_crochet": null,
+   "colors": 6,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1047858"
+  },
+  {
+   "product": "데님 느낌 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": "2.5",
+   "needle_crochet": null,
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1047834"
+  },
+  {
+   "product": "코튼로프 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": "6-8",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1043312"
+  },
+  {
+   "product": "코튼 케이크",
+   "g": 40,
+   "m": 80,
+   "fibers": {
+    "면": 50,
+    "아크릴": 50
+   },
+   "needle_knit": "4-5",
+   "needle_crochet": null,
+   "colors": 6,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1034180"
+  },
+  {
+   "product": "부드러운 4컬러 레인보우 뜨개실",
+   "g": 40,
+   "m": 70,
+   "fibers": {
+    "폴리에스터": 50,
+    "아크릴": 50
+   },
+   "needle_knit": "3-4",
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1032147"
+  },
+  {
+   "product": "레인보우 뜨개실",
+   "g": 40,
+   "m": 125,
+   "fibers": {
+    "폴리에스터": 50,
+    "아크릴": 50
+   },
+   "needle_knit": "3-4",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1032145"
+  },
+  {
+   "product": "일본제 믹스 염색 면 뜨개실",
+   "g": 20,
+   "m": null,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": "3-3.3",
+   "needle_crochet": "2.3-2.5mm",
+   "colors": 4,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1062818"
+  },
+  {
+   "product": "일본제 자외선 차단 뜨개실",
+   "g": 20,
+   "m": null,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": "3.5",
+   "needle_crochet": "2.5mm",
+   "colors": 5,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1062810"
+  },
+  {
+   "product": "수세미 뜨개실",
+   "g": 30,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": 6,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1044484"
+  },
+  {
+   "product": "수세미 메쉬 뜨개실",
+   "g": 40,
+   "m": null,
+   "fibers": {
+    "폴리에스터": 100
+   },
+   "needle_knit": "4.5-5",
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1052210"
+  },
+  {
+   "product": "빅 핸드니팅 뜨개실",
+   "g": 250,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": 2,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1045930"
+  },
+  {
+   "product": "일반 자이언트 얀 뜨개실",
+   "g": 250,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": 3,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1043681"
+  },
+  {
+   "product": "벨벳 빅 핸드니팅 뜨개실",
+   "g": 250,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": 1,
+   "url": "https://www.daisomall.co.kr/pd/pdr/SCR_PDR_0001?pdNo=1054109"
+  }
+ ],
+ "얀월드": [
+  {
+   "product": "착하면 50g",
+   "g": 50,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8869973782"
+  },
+  {
+   "product": "착하면 45g",
+   "g": 45,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8881091729"
+  },
+  {
+   "product": "착하면 30g",
+   "g": 30,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8881089041"
+  },
+  {
+   "product": "착하면 곱빼기",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9215949468"
+  },
+  {
+   "product": "다방면(착하면 시리즈 얇은 버전)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8881186615"
+  },
+  {
+   "product": "가늘면(착하면 시리즈 가는 버전)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7390824005"
+  },
+  {
+   "product": "착하면 네프",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8336311125"
+  },
+  {
+   "product": "착하면 인형실(얀스케치)",
+   "g": null,
+   "m": 68,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8550887429"
+  },
+  {
+   "product": "코순이",
+   "g": null,
+   "m": 155,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9355091876"
+  },
+  {
+   "product": "에어린",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9480954794"
+  },
+  {
+   "product": "떠보면 80g",
+   "g": 80,
+   "m": null,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7411046460"
+  },
+  {
+   "product": "썸머카사리 100g",
+   "g": 100,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7215377943"
+  },
+  {
+   "product": "열면 250g",
+   "g": 250,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7368620989"
+  },
+  {
+   "product": "린넨아",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8668863413"
+  },
+  {
+   "product": "모노카사리",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9344224559"
+  },
+  {
+   "product": "사다리얀 100g",
+   "g": 100,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7410997429"
+  },
+  {
+   "product": "에어로 린넨코튼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8989872568"
+  },
+  {
+   "product": "멀티카사리",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8989902394"
+  },
+  {
+   "product": "썬크림실(UV차단실)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8921840801"
+  },
+  {
+   "product": "애리조나 코튼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8939276613"
+  },
+  {
+   "product": "죽순이 대나무 코튼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8941281183"
+  },
+  {
+   "product": "위빙실(코튼팝콘)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8957234948"
+  },
+  {
+   "product": "쥬트코튼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9003646688"
+  },
+  {
+   "product": "그리고 메탈 튜브 70g",
+   "g": 70,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8187212814"
+  },
+  {
+   "product": "써보면(솜이 들어있는 뜨개실)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8870042869"
+  },
+  {
+   "product": "잘뜨면",
+   "g": null,
+   "m": null,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9552800728"
+  },
+  {
+   "product": "상비얀 100g",
+   "g": 100,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7394220013"
+  },
+  {
+   "product": "싸면",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8883849167"
+  },
+  {
+   "product": "싸면플러스",
+   "g": null,
+   "m": null,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9339581339"
+  },
+  {
+   "product": "유니나 수세미실",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8883814101"
+  },
+  {
+   "product": "윈터베를린",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9155437444"
+  },
+  {
+   "product": "따드탐 네프 모헤어",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9136054947"
+  },
+  {
+   "product": "따드탐 모헤어",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8936242014"
+  },
+  {
+   "product": "따드탐 라이트 모헤어",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9229058381"
+  },
+  {
+   "product": "포실이 80g",
+   "g": 80,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9160773100"
+  },
+  {
+   "product": "코튼브러쉬",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9160665624"
+  },
+  {
+   "product": "멜부클",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9072462339"
+  },
+  {
+   "product": "메리노 푸들",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8989852472"
+  },
+  {
+   "product": "트윙클실",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7221223849"
+  },
+  {
+   "product": "알래스카 셔닐",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9041804861"
+  },
+  {
+   "product": "그라데이션5 모헤어콘사",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8990187326"
+  },
+  {
+   "product": "아모스",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8989893034"
+  },
+  {
+   "product": "버지니아 패치 코튼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8989866520"
+  },
+  {
+   "product": "윙백 150g",
+   "g": 150,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://shop.coupang.com/vid/A01398869"
+  },
+  {
+   "product": "솜털 사이로 150g",
+   "g": 150,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7561461486"
+  },
+  {
+   "product": "임파스토실",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://shop.coupang.com/vid/A01398869"
+  },
+  {
+   "product": "컬러체인지로빙",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7499154560"
+  },
+  {
+   "product": "프라하(얇은 셔닐 벨벳)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8359916914"
+  },
+  {
+   "product": "양털처럼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7571500472"
+  },
+  {
+   "product": "뉴램",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8883815954"
+  },
+  {
+   "product": "오슬로(수면사)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9036933652"
+  },
+  {
+   "product": "세렌디",
+   "g": null,
+   "m": 65,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9288451604"
+  },
+  {
+   "product": "이태리탐",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8344349768"
+  },
+  {
+   "product": "곱슬이",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7411036608"
+  },
+  {
+   "product": "알파카실 모헤어(얀메이크)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7394207332"
+  },
+  {
+   "product": "메리노울 모헤어",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8359956825"
+  },
+  {
+   "product": "시드니",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8990171417"
+  },
+  {
+   "product": "앙카라",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8277065334"
+  },
+  {
+   "product": "얀부클레",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8870043169"
+  },
+  {
+   "product": "키드모헤어",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8990164226"
+  },
+  {
+   "product": "오사카 모헤어",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8317840460"
+  },
+  {
+   "product": "오색모헤어",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7223462384"
+  },
+  {
+   "product": "캘리포니아 코튼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8926083994"
+  },
+  {
+   "product": "이태리 주얼리 탐",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8402938971"
+  },
+  {
+   "product": "모헤어 그라데이션",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7627710725"
+  },
+  {
+   "product": "울헤어",
+   "g": null,
+   "m": null,
+   "fibers": {
+    "울": 90,
+    "나일론": 10
+   },
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8990178253"
+  },
+  {
+   "product": "보비너",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8960512544"
+  },
+  {
+   "product": "믹스방울",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7215442777"
+  },
+  {
+   "product": "레트로 부클",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7576707022"
+  },
+  {
+   "product": "바르샤바",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8317922152"
+  },
+  {
+   "product": "면네프 200g",
+   "g": 200,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8249675191"
+  },
+  {
+   "product": "실버 스파클 200g",
+   "g": 200,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://shop.coupang.com/vid/A01398869"
+  },
+  {
+   "product": "순면프렌드 200g",
+   "g": 200,
+   "m": null,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://shop.coupang.com/vid/A01398869"
+  },
+  {
+   "product": "실버진 150g",
+   "g": 150,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8989973148"
+  },
+  {
+   "product": "블루진 150g",
+   "g": 150,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8989973148"
+  },
+  {
+   "product": "지금 리미티드 엘리떼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9181269408"
+  },
+  {
+   "product": "알파카 링구사",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7411025300"
+  },
+  {
+   "product": "목화솜처럼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9074062350"
+  },
+  {
+   "product": "텍사스코튼",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8293275114"
+  },
+  {
+   "product": "멜란",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9695682023"
+  },
+  {
+   "product": "리코 200g",
+   "g": 200,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8987649928"
+  },
+  {
+   "product": "코지얀 100g",
+   "g": 100,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9552886705"
+  },
+  {
+   "product": "삐까번쩍(반짝 수면사)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9242465167"
+  },
+  {
+   "product": "시스루",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9373948588"
+  },
+  {
+   "product": "빈티지멜란지",
+   "g": null,
+   "m": 130,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8881065928"
+  },
+  {
+   "product": "흐르지오 100g",
+   "g": 100,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9507697856"
+  },
+  {
+   "product": "블루데님(리사이클 코튼)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/7243662752"
+  },
+  {
+   "product": "면이랑 80g",
+   "g": 80,
+   "m": 100,
+   "fibers": {
+    "면": 60,
+    "폴리에스터": 40
+   },
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9058132264"
+  },
+  {
+   "product": "에어핏 100g",
+   "g": 100,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9552878333"
+  },
+  {
+   "product": "썸밸런스 80g",
+   "g": 80,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9602755842"
+  },
+  {
+   "product": "뉴델리 코튼트윙클 60g",
+   "g": 60,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/8264298730"
+  },
+  {
+   "product": "옷이날개",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.coupang.com/vp/products/9800597622"
+  }
+ ],
+ "솜솜뜨개": [
+  {
+   "product": "프빌",
+   "g": 100,
+   "m": 800,
+   "fibers": {
+    "울": 70,
+    "알파카": 30
+   },
+   "needle_knit": "2합 3.5-4 / 3합 5-5.5 / 4합 6-7",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--17"
+  },
+  {
+   "product": "어푸",
+   "g": 400,
+   "m": 1200,
+   "fibers": null,
+   "needle_knit": "3-4",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--24"
+  },
+  {
+   "product": "하모니",
+   "g": 100,
+   "m": 600,
+   "fibers": {
+    "면(수피마)": 100
+   },
+   "needle_knit": "2합 3-4",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--32"
+  },
+  {
+   "product": "뉴보름",
+   "g": 100,
+   "m": 499,
+   "fibers": {
+    "울": 90,
+    "캐시미어": 10
+   },
+   "needle_knit": "1합 3-3.5 / 2합 5-5.5",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--34"
+  },
+  {
+   "product": "수플레",
+   "g": 100,
+   "m": 300,
+   "fibers": {
+    "울": 65,
+    "나일론": 25,
+    "캐시미어": 10
+   },
+   "needle_knit": "4.5-5",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--37"
+  },
+  {
+   "product": "시나몬",
+   "g": 100,
+   "m": 250,
+   "fibers": {
+    "울": 50,
+    "나일론": 30,
+    "폭스": 20
+   },
+   "needle_knit": "4.5-5.5",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--38"
+  },
+  {
+   "product": "소바",
+   "g": 100,
+   "m": 300,
+   "fibers": {
+    "면": 100
+   },
+   "needle_knit": "4.5-6",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--42"
+  },
+  {
+   "product": "별무리",
+   "g": 150,
+   "m": 1800,
+   "fibers": {
+    "나일론": 35,
+    "모헤어": 26.5,
+    "울": 26.5,
+    "메탈": 9,
+    "스팽글": 3
+   },
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--43"
+  },
+  {
+   "product": "잼잼",
+   "g": 400,
+   "m": 1319,
+   "fibers": {
+    "면": 60,
+    "모달": 40
+   },
+   "needle_knit": "4-4.5",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--44"
+  },
+  {
+   "product": "스무디",
+   "g": 100,
+   "m": 639,
+   "fibers": {
+    "면(머서라이즈드)": 100
+   },
+   "needle_knit": "1합 2-2.5 / 2합 3.5-4.5",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--45"
+  },
+  {
+   "product": "클라우드",
+   "g": 100,
+   "m": 533,
+   "fibers": {
+    "메리노울": 100
+   },
+   "needle_knit": "1합 3-3.5",
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/library/--50"
+  },
+  {
+   "product": "머핀",
+   "g": 100,
+   "m": 250,
+   "fibers": {
+    "메리노울": 50,
+    "나일론": 50
+   },
+   "needle_knit": "5-6",
+   "needle_crochet": null,
+   "colors": 25,
+   "url": "https://somsomknit.cafe24.com/product/detail.html?product_no=121"
+  },
+  {
+   "product": "머랭 (Meringue)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=55"
+  },
+  {
+   "product": "데이지 (Daisy)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=54"
+  },
+  {
+   "product": "메모리 (Memory)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=80"
+  },
+  {
+   "product": "그믐 (Geumuhm)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=81"
+  },
+  {
+   "product": "드리밍 (Dreaming)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=82"
+  },
+  {
+   "product": "앨모 (Elmo)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=83"
+  },
+  {
+   "product": "토핑 (Topping)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=57"
+  },
+  {
+   "product": "러스크 (Rusk)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=60"
+  },
+  {
+   "product": "쉬폰 (Chiffon)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=61"
+  },
+  {
+   "product": "소보로 (Soboro)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=78"
+  },
+  {
+   "product": "프루트 (Fruit)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=79"
+  },
+  {
+   "product": "포니",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=92"
+  },
+  {
+   "product": "뮬리 (Muhly)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=63"
+  },
+  {
+   "product": "플러피 (Fluffy)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=64"
+  },
+  {
+   "product": "블렌드 (Blend)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=65"
+  },
+  {
+   "product": "퍼피 (Puffy)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=84"
+  },
+  {
+   "product": "리프파이 (Leaf pie)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=73"
+  },
+  {
+   "product": "레이니 (Rainy)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=74"
+  },
+  {
+   "product": "모네 (Monet)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=77"
+  },
+  {
+   "product": "카프리 (Capri)",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://somsomknit.cafe24.com/product/list.html?cate_no=90"
+  },
+  {
+   "product": "베이글",
+   "g": null,
+   "m": null,
+   "fibers": null,
+   "needle_knit": null,
+   "needle_crochet": null,
+   "colors": null,
+   "url": "https://www.ravelry.com/yarns/brands/untitled-6"
+  }
+ ],
+ "notes": "다이소: 다이소몰 검색 API(뜨개실 446건) + 상세 설명 이미지의 OCR 텍스트(vsipPdDtl)에서 읽음. 길이(m)는 대부분 표기 없음(6개만). 다이소 바늘 칸은 '권장 바늘 N mm'(종류 미표기, 메리야스뜨기 게이지 기준이라 대바늘로 넣음) — 날개실(5호)·보송보송/보송(코바늘 명시)·일본제 2종만 코바늘 확인. colors 는 다이소몰에 지금 올라 있는 색 이름 수(품절 포함). 같은 이름 다른 규격: 밍크 퍼 30g/70g/100g/합사 35g, 면 뜨개실 25g(75m)/35g, 롱 헤어·롱헤어 35g(상품번호 둘, 같은 규격으로 합침), 수세미 뜨개실·수세미 실 30g 합침. 날개실 재질은 '폴리에스터'(퍼센트 없음, 100 으로 넣음) — 검색 요약엔 색에 따라 아크릴이라는 설명도 있음. 구름 뜨개실=겉면 면100+충전재 나일론, 얇은 메탈=겉 폴리에스터/속 면, 핸드니팅·자이언트얀=겉감 폴리에스터+충전재(PP/폴리) 이라 fibers null. '보들보들실'은 지금 다이소몰에 없음(단종 또는 매장 전용 추정 — 비슷한 이름: 보송보송 뜨개실, 부드러운 아크릴 뜨개실). 얀월드: 공식몰 yarnworld.co.kr 은 상품 0개, 스마트스토어·G마켓은 차단(403/안전 제한). 쿠팡 판매자 목록(약 95개 상품)에서 뽑음. 쿠팡 상세는 이미지라 g/m/혼용률 대부분 null — 제목·속성에 적힌 것만 넣음. '순면'이라 적힌 코순이·떠보면·싸면플러스·순면프렌드는 면 100 으로 넣음(라벨 퍼센트 확인 아님). 쿠팡 속성 '실 재질: 면사/아크릴사' 는 혼용률이 아니라 넣지 않음. '윤이'·'따드탐 벨플라워'는 쿠팡 목록·검색 어디에도 없음(따드탐은 모헤어/네프 모헤어/라이트 모헤어 3종만). 윙백·임파스토·실버 스파클·순면프렌드는 쿠팡 스토어 첫 화면에만 보여 url 은 스토어 주소. 실버진·블루진은 같은 상품번호(이름이 바뀐 듯). 솜솜뜨개: 사업자 주소가 인천 서구로 나옴(연희동은 오프라인 공간일 수 있음, 확인 못 함). 자체몰 somsomknit.cafe24.com 은 실 이름(카테고리)만 있고 상품은 머핀 1개만 보임 — 판매는 스마트스토어(차단됨). 규격은 Ravelry 실 데이터(판매자 문구 인용 포함)에서 가져옴: g·m 는 1합 기준, '어푸'는 혼용률 미기재. 시나몬의 20% 는 Ravelry 표기 'Arctic Fox'. 머랭 등 20개는 자체몰 카테고리 이름만 확인(규격 null) — 한글 이름은 영문 표기를 옮긴 것(머랭·포니·머핀 등 일부만 한글 확인). 머랭은 'cash 5' 표기(캐시미어 5% 로 보이나 확인 안 됨), 앨모는 제3자 글에 100g/180m 언급(미확인이라 null). 베이글은 Ravelry 목록 이름만."
+}
