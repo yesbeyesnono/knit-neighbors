@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>알림·팝업 통일 — 세 가지 안</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:#E7E4DB;padding:26px 24px 30px;color:#22362A;width:1240px}
+h1{font-size:21px;margin-bottom:6px}.sub{font-size:13.5px;color:#55604F;margin-bottom:16px;line-height:1.55}
+.now{background:#fff;border-radius:16px;padding:14px 18px;font-size:13.5px;line-height:1.75;margin-bottom:20px}
+.now b.r{color:#C8453A}
+table{border-collapse:separate;border-spacing:14px 12px;margin:-12px -14px}
+th{font-size:14.5px;text-align:left;vertical-align:top;padding-bottom:2px}th small{display:block;font-weight:500;color:#55604F;font-size:12px;line-height:1.45;margin-top:3px}
+th em{font-style:normal;background:#3E6B48;color:#fff;border-radius:6px;font-size:11px;padding:1px 7px;margin-right:6px}th em.o{background:#8A9384}
+td.l{font-size:13px;font-weight:800;width:92px;vertical-align:middle;line-height:1.4}td.l small{display:block;font-weight:500;color:#8A9384;font-size:11.5px}
+.ph{width:340px;height:250px;border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.14);position:relative}
+.bg{position:absolute;inset:0;padding:0}.bar{background:#22362A;height:34px}.ln{height:38px;border-bottom:1px solid #F0EEE8;display:flex;align-items:center;gap:8px;padding:0 12px}.ln i{width:24px;height:24px;border-radius:50%;background:#DDE8D6;flex:none}.ln u{height:8px;border-radius:4px;background:#E9E6DC;flex:1;text-decoration:none}.ln u.s{flex:0 0 40%}
+.dim{position:absolute;inset:0;background:rgba(34,54,42,.38)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#F3F1EA;border-radius:18px 18px 0 0;padding:14px 14px 14px}
+.sheet::before{content:"";display:block;width:34px;height:4px;border-radius:2px;background:#D3D0C4;margin:-4px auto 10px}
+.card{position:absolute;left:28px;right:28px;top:50%;transform:translateY(-50%);background:#fff;border-radius:18px;padding:16px 14px 12px;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center}
+.card.l{text-align:left}
+.t{font-size:13.5px;font-weight:800;margin-bottom:6px}.p{font-size:12px;color:#55604F;line-height:1.5;margin-bottom:10px}
+.bs{display:flex;gap:6px}.bs span{flex:1;height:32px;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:700;border:1px solid #E2DFD5;background:#fff}.bs .g{background:#3E6B48;color:#fff;border-color:#3E6B48}.bs .r{background:#C8453A;color:#fff;border-color:#C8453A}
+.bv span{display:grid;place-items:center;height:32px;border-radius:10px;font-size:12px;font-weight:700;margin-top:6px;border:1px solid #E2DFD5;background:#fff}.bv .g{background:#3E6B48;color:#fff;border-color:#3E6B48}.bv .r{background:#C8453A;color:#fff;border-color:#C8453A}
+.op{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid #E2DFD5;font-size:12px;font-weight:700}.op:first-of-type{border-top:0}.op i{width:26px;height:26px;border-radius:8px;background:#DDE8D6;flex:none}
+.nt{margin-top:20px;font-size:13.5px;line-height:1.75;background:#fff;border-radius:16px;padding:16px 18px}
+.tag{display:inline-block;background:#3E6B48;color:#fff;border-radius:6px;font-size:11.5px;font-weight:700;padding:1px 7px;margin-right:6px}.tag.o{background:#8A9384}
+</style></head><body>
+<h1>알림·팝업 통일 — 지금 상태와 세 가지 안</h1>
+<div class="sub">같은 종류의 일이 화면마다 다른 모양으로 뜨고 있습니다. 한 번 규칙을 정해 전체를 맞춥니다.</div>
+<div class="now"><b>지금 앱에 뜨는 것</b> — ① 아래에서 올라오는 창 <b>82곳</b>(이 중 짧은 확인·안내 41 · 입력 22 · 읽기만 12 · 고르기 2) ② 가운데 작은 확인 창 17곳 ③ 한 줄 알림(잠깐 떴다 사라짐) 332곳 ④ 가운데 카드(뜨친 신청·축하) ⑤ ··· 작은 메뉴 ⑥ 전체 화면 보조 페이지 22곳.<br>
+<b class="r">섞여 있는 곳</b>: "삭제할까요?" 같은 <b>확인</b>이 어떤 곳은 가운데 창, 어떤 곳은 아래 창 · <b>읽기만 하는 안내</b>가 아래 창으로 뜸 · 아래 창마다 버튼 순서와 모양이 조금씩 다름.</div>
+
+<table>
+<tr><td></td>
+<th><em>A안 · 권함</em>역할로 나누기<small>읽기·확인은 가운데, 고르기·입력은 아래. 아이폰·안드로이드의 기본 관습과 같습니다.</small></th>
+<th><em class="o">B안</em>전부 가운데 카드<small>아래에서 올라오는 창을 없앱니다. 모양은 하나지만 고르기·입력이 손에서 멀어집니다.</small></th>
+<th><em class="o">C안</em>전부 아래 창, 모양만 통일<small>지금 방식 그대로 두고 손잡이·제목·버튼 순서만 맞춥니다. 일이 가장 적습니다.</small></th></tr>
+
+<tr><td class="l">읽기<small>지기 안내 전체 보기</small></td>
+<td><div class="ph"><div class="bg"><div class="bar"></div><div class="ln"><i></i><u></u></div><div class="ln"><i></i><u class="s"></u></div><div class="ln"><i></i><u></u></div></div><div class="dim"></div>
+<div class="card l"><div class="t">뜨개동네 지기</div><div class="p">Lv.3! 인증한 날이 3일이에요. 작가 신청까지 완성작품 인증을 꾸준히 올려 보세요</div><div class="bs"><span>닫기</span><span class="g">보러 가기</span></div></div></div></td>
+<td><div class="ph"><div class="bg"><div class="bar"></div><div class="ln"><i></i><u></u></div><div class="ln"><i></i><u class="s"></u></div><div class="ln"><i></i><u></u></div></div><div class="dim"></div>
+<div class="card l"><div class="t">뜨개동네 지기</div><div class="p">Lv.3! 인증한 날이 3일이에요. 작가 신청까지 완성작품 인증을 꾸준히 올려 보세요</div><div class="bs"><span>닫기</span><span class="g">보러 가기</span></div></div></div></td>
+<td><div class="ph"><div class="bg"><div class="bar"></div><div class="ln"><i></i><u></u></div><div class="ln"><i></i><u class="s"></u></div></div><div class="dim"></div>
+<div class="sheet"><div class="t">뜨개동네 지기</div><div class="p">Lv.3! 인증한 날이 3일이에요. 작가 신청까지 완성작품 인증을 꾸준히 올려 보세요</div><div class="bv"><span class="g">보러 가기</span><span>닫기</span></div></div></div></td></tr>
+
+<tr><td class="l">확인<small>삭제·취소·차단</small></td>
+<td><div class="ph"><div class="bg"><div class="bar"></div><div class="ln"><i></i><u></u></div><div class="ln"><i></i><u class="s"></u></div><div class="ln"><i></i><u></u></div></div><div class="dim"></div>
+<div class="card"><div class="t">이 글을 삭제할까요?</div><div class="p">삭제하면 되돌릴 수 없어요.</div><div class="bs"><span>취소</span><span class="r">삭제</span></div></div></div></td>
+<td><div class="ph"><div class="bg"><div class="bar"></div><div class="ln"><i></i><u></u></div><div class="ln"><i></i><u class="s"></u></div><div class="ln"><i></i><u></u></div></div><div class="dim"></div>
+<div class="card"><div class="t">이 글을 삭제할까요?</div><div class="p">삭제하면 되돌릴 수 없어요.</div><div class="bs"><span>취소</span><span class="r">삭제</span></div></div></div></td>
+<td><div class="ph"><div class="bg"><div class="bar"></div><div class="ln"><i></i><u></u></div><div class="ln"><i></i><u class="s"></u></div></div><div class="dim"></div>
+<div class="sheet"><div class="t">이 글을 삭제할까요?</div><div class="p">삭제하면 되돌릴 수 없어요.</div><div class="bv"><span class="r">삭제</span><span>취소</span></div></div></div></td></tr>
+
+<tr><td class="l">고르기·입력<small>무엇을 올릴까요, 신고 사유, 동네 찾기</small></td>
+<td><div class="ph"><div class="bg"><div class="bar"></div><div class="ln"><i></i><u></u></div></div><div class="dim"></div>
+<div class="sheet"><div class="t">무엇을 올릴까요?</div><div class="op"><i></i>글</div><div class="op"><i></i>완성작품 인증</div><div class="op"><i></i>모임 · 같이 떠요</div></div></div></td>
+<td><div class="ph"><div class="bg"><div class="bar"></div><div class="ln"><i></i><u></u></div></div><div class="dim"></div>
+<div class="card l"><div class="t">무엇을 올릴까요?</div><div class="op"><i></i>글</div><div class="op"><i></i>완성작품 인증</div><div class="op"><i></i>모임 · 같이 떠요</div></div></div></td>
+<td><div class="ph"><div class="bg"><div class="bar"></div><div class="ln"><i></i><u></u></div></div><div class="dim"></div>
+<div class="sheet"><div class="t">무엇을 올릴까요?</div><div class="op"><i></i>글</div><div class="op"><i></i>완성작품 인증</div><div class="op"><i></i>모임 · 같이 떠요</div></div></div></td></tr>
+</table>
+
+<div class="nt">
+<span class="tag">A안의 규칙</span>① <b>한 줄 알림</b>(저장했어요·실패했어요) = 지금처럼 잠깐 떴다 사라짐 ② <b>확인</b>(예/아니오) = 가운데 작은 창, 버튼은 왼쪽 취소·오른쪽 실행(지우는 일은 빨강) ③ <b>읽기</b>(공지·안내·축하) = 가운데 카드 ④ <b>고르기·입력</b> = 아래에서 올라오는 창(엄지가 닿는 곳, 자판을 쓰는 입력은 화면 위쪽) ⑤ <b>길게 적는 것</b> = 전체 화면.<br>
+<span class="tag">일의 크기</span>A안: 아래 창 82곳 중 확인·읽기 50여 곳을 가운데로 옮김(두세 번에 나눠서) · B안: 82곳 전부 · C안: 모양 규칙만 손봄.<br>
+<span class="tag o">참고</span>뜨친 신청·축하 카드(버터 옐로)와 첫 화면 공지는 이미 정해 주신 모양이라 그대로 둡니다.
+</div>
+</body></html>
