@@ -2062,3 +2062,12 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   트리거 함수 posts_archive_guard·report_case_on_report 의 실행 권한 회수
 --   _friend_next_goal·_bigram_dice·post_tags·_own_storage_url·_chat_mask 에 search_path 고정
 -- ============================================================
+
+-- ============================================================
+-- 132. 초대한 분의 가입 알림 (2026-11-16, 마이그레이션 partner_invite_watch — 원본 supabase/partner_invite_watch.sql)
+--   partner_invites.keys text[]: 이름 말고 더 찾아볼 낱말(인스타그램 계정 등). 콘솔 화면에는 아직 입력 칸이 없음(SQL 로 넣음)
+--   partner_invite_hits(invite_id, profile_id, via nickname|email): 이미 알린 쌍. 관리자·회원 접근 없음(service_role 만)
+--   partner_invite_watch(): 크론 partner-invite-watch 10분마다 — 회원과 연결하지 않은 초대(profile_id null)마다
+--     닉네임이 이름·낱말을 포함하거나(공백 무시, 2자 이상) 닉네임(3자 이상이고 그 낱말 길이의 절반 이상)이 이름에 들어 있거나, 영문 낱말(영숫자 5자 이상)이 이메일 앞부분에 들어 있으면
+--     jigi_reminders 에 한 번 넣어 텔레그램으로 알림(닉네임·가입 시각만, 이메일은 적지 않음). 테스트 계정·탈퇴 계정 제외
+-- ============================================================

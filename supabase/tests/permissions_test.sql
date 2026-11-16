@@ -250,6 +250,7 @@ begin
   out := pg_temp.cnt(out, 'request_account_deletion(anon)', 'select case when public.request_account_deletion() is null then 0 else 1 end', 0);
   out := pg_temp.cnt(out, 'partner_invites(anon)', 'select count(*) from public.partner_invites', 0);   -- schema 128
   out := pg_temp.cnt(out, 'admin_partner_list(anon)', 'select jsonb_array_length(public.admin_partner_list())', 0);
+  out := pg_temp.cnt(out, 'partner_invite_hits(anon)', 'select count(*) from public.partner_invite_hits', 0);   -- schema 132
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;
