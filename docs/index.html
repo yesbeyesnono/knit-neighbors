@@ -989,6 +989,20 @@ body.kb #nav{display:none!important}
 .ntf .ngo{display:block;margin-top:6px;font-size:13px;font-weight:800;color:var(--color-primary)}
 .sheetwrap.ctr .cbs{display:flex;gap:8px}.sheetwrap.ctr .cbs .btn{flex:1;min-width:0;margin:0;height:44px;border-radius:999px;font-size:.92rem;padding:0 8px;display:flex;align-items:center;justify-content:center;text-decoration:none}
 .sheetwrap.ctr .sheet>button.btn{height:46px;border-radius:999px}
+/* 가운데 카드 버튼: 글자가 줄바꿈되지 않게 — 닫는 쪽은 좁게, 실행 쪽은 넓게. 그래도 넘치면 세로로(2026-11-16) */
+.sheetwrap.ctr .cbs .btn,#askdlg .bs button{white-space:nowrap}
+.sheetwrap.ctr .cbs .btn{width:auto}
+.sheetwrap.ctr .cbs .btn.o,#askdlg .bs button:first-child:not(:only-child){flex:0 0 auto;width:auto;min-width:92px;padding:0 20px}
+.sheetwrap.ctr .cbs.v{flex-direction:column-reverse}.sheetwrap.ctr .cbs.v .btn{flex:none;width:100%}
+/* 가운데 카드 글씨: 잘 보이게 한 치수 크게(2026-11-16 대표) — 제목 17.5px · 본문 15.5px · 버튼 16px */
+.sheetwrap.ctr .sheet>b,#askdlg .bx>b{font-size:1.1rem!important;line-height:1.4}
+#askdlg.note .bx>b{font-size:1.02rem!important}
+.sheetwrap.ctr .sheet p,.sheetwrap.ctr .sheet .muted,.sheetwrap.ctr .sheet .card,#askdlg p{font-size:.97rem!important;line-height:1.6!important}
+.sheetwrap.ctr .sheet p,.sheetwrap.ctr .sheet .muted,#askdlg p{color:var(--ink2)}
+#askdlg.note p{color:var(--ink);font-size:1rem!important}
+.sheetwrap.ctr .sheet .card .muted{font-size:.84rem!important}
+.sheetwrap.ctr .cbs .btn,.sheetwrap.ctr .sheet>button.btn,#askdlg .bs button{font-size:1rem;height:48px}
+#askdlg .bx{max-width:340px;padding:22px 18px 16px}
 </style>
 </head>
 <body>
@@ -1531,7 +1545,7 @@ function hhmm(t){ return new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',
 function chips(p){ return [p.craft&&`<span class="chip y">${CRAFT[p.craft]}</span>`, p.experience&&`<span class="chip">${EXP[p.experience]}</span>`, p.mbti&&`<span class="chip">${esc(p.mbti)}</span>`].filter(Boolean).join(' '); }
 // 창 규칙(2026-11-16 대표 확정 A안): 한 줄 알림=toast · 확인(예/아니오)=askOk/askConfirm(가운데) · 읽기(공지·안내)=askNote 또는 openSheet(html,'c')(가운데 카드) · 고르기·입력=openSheet(아래에서 올라옴) · 길게 적기=전체 화면
 function openSheet(html, mode){ if(typeof restoreMeetOpt==='function') restoreMeetOpt(); $('#sheet').innerHTML='<div class="hd"></div>'+html; $('#sheetwrap').classList.toggle('ctr', mode==='c'); if(mode==='c') sheetPair(); $('#sheetwrap').classList.add('on'); }
-function sheetPair(){ const sh=$('#sheet'), bs=[...sh.children].filter(e=>e.matches('button.btn, a.btn')); if(bs.length===1 && !bs[0].classList.contains('o')){ const c=document.createElement('button'); c.type='button'; c.className='btn o'; c.textContent='닫기'; c.onclick=closeSheet; bs[0].after(c); bs.push(c); } if(bs.length!==2 || bs[0].nextElementSibling!==bs[1]) return; const no=bs.find(b=>b.classList.contains('o')), ok=bs.find(b=>b!==no); if(!no||!ok) return; const w=document.createElement('div'); w.className='cbs'; bs[0].before(w); w.append(no, ok); }
+function sheetPair(){ const sh=$('#sheet'), bs=[...sh.children].filter(e=>e.matches('button.btn, a.btn')); if(bs.length===1 && !bs[0].classList.contains('o')){ const c=document.createElement('button'); c.type='button'; c.className='btn o'; c.textContent='닫기'; c.onclick=closeSheet; bs[0].after(c); bs.push(c); } if(bs.length!==2 || bs[0].nextElementSibling!==bs[1]) return; const no=bs.find(b=>b.classList.contains('o')), ok=bs.find(b=>b!==no); if(!no||!ok) return; const w=document.createElement('div'); w.className='cbs'; bs[0].before(w); w.append(no, ok); requestAnimationFrame(()=>{ if(ok.scrollWidth > ok.clientWidth+1) w.classList.add('v'); }); }
 function closeSheet(){ $('#sheetwrap').classList.remove('on'); if(typeof restoreMeetOpt==='function') restoreMeetOpt(); }
 // 시트 내려쓸기로 닫기: 시트가 맨 위까지 스크롤된 상태에서 아래로 끌면 따라 내려오고, 충분히 내리면 닫힘
 (function(){
