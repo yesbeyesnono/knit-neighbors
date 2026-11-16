@@ -1003,6 +1003,9 @@ body.kb #nav{display:none!important}
 .sheetwrap.ctr .sheet .card .muted{font-size:.84rem!important}
 .sheetwrap.ctr .cbs .btn,.sheetwrap.ctr .sheet>button.btn,#askdlg .bs button{font-size:1rem;height:48px}
 #askdlg .bx{max-width:340px;padding:22px 18px 16px}
+.stq{display:flex;flex-direction:column;gap:10px;padding:12px 0 24px}.stchips{display:flex;flex-wrap:wrap;gap:6px}.stchips button{border:1.5px solid var(--line);background:var(--color-surface);color:var(--ink);border-radius:999px;padding:8px 13px;font:inherit;font-size:.88rem;cursor:pointer}.stchips button.on{background:var(--color-primary);border-color:var(--color-primary);color:#fff;font-weight:700}
+.wstory{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}.wstory .wfact{display:inline-block;background:var(--color-bg);border-radius:8px;padding:4px 9px;font-size:.78rem;color:var(--color-text-muted)}.wstory .wfact b{display:inline;font-size:inherit;color:var(--ink)}.wstory .wk{font-size:.74rem;font-weight:700;color:var(--color-text-muted);margin:8px 0 2px}.wstory .wv{font-size:.86rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrev{margin-top:8px;border-radius:10px;padding:9px 11px;font-size:.82rem;line-height:1.5;background:var(--color-primary-light);color:var(--color-primary-dark)}.wrev b,.post .wcard .wrev b{display:block;font-size:.84rem;margin-bottom:1px}.wrev.fix{background:#FBEDE2;color:#8A3F14}.wrev.rej{background:#FBEAE8;color:#9B2C22}.wrev button{display:block;margin-top:8px;border:0;border-radius:999px;background:#B4541F;color:#fff;font:inherit;font-weight:700;font-size:.84rem;padding:8px 16px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1155,7 +1158,7 @@ body.kb #nav{display:none!important}
 
   <!-- 완성작품 인증 (새 페이지) -->
   <section class="view" id="v-cert">
-    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>완성작품 인증</h1><button class="btn" id="certPost" onclick="submitCert()" disabled>게시</button></div>
+    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>완성작품 인증</h1><button class="btn" id="certPost" onclick="certNext()" disabled>다음</button></div>
     <div class="body" style="gap:10px">
       <div class="mhero" id="wHero" onclick="editWorkPost?$('#wFile').click():ccOpen()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">작품 사진 · 1~4장</span></div>
       <div class="cfphotos" id="cfPhotos" style="justify-content:center"></div><input id="wFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
@@ -3689,7 +3692,7 @@ async function attachWorks(rows){
   if(rids.length){ const { data:ms } = await sb.from('meetups').select('id,title,place_name,starts_at').in('id', rids); const mm={}; (ms||[]).forEach(m=>mm[m.id]=m); rows.forEach(r=>{ if(r.review_of) r.review_meetup = mm[r.review_of]||null; }); }
   const ids=[...new Set((rows||[]).map(r=>r.work_id).filter(Boolean))]; if(!ids.length) return;
   await loadTech();
-  const { data } = await sb.from('works').select('id,title,yarn_info,techniques,custom_techniques,note,yarns,needles,gauge,finished_size,sponsored,tech_photos').in('id', ids);
+  const { data } = await sb.from('works').select('id,title,yarn_info,techniques,custom_techniques,note,yarns,needles,gauge,finished_size,sponsored,tech_photos,took,knowhow,regret,review_status,review_note').in('id', ids);
   const byId={}; (data||[]).forEach(w=>byId[w.id]=w); rows.forEach(r=>{ if(r.work_id) r.work = byId[r.work_id]||null; });
 }
 // ===== 완성작품 인증: 실(여러 개)·바늘(여러 개) =====
@@ -3916,13 +3919,36 @@ function wYarnPayload(){
   const line = [ y0 ? y0.name+(y0.color?`(${y0.color})`:'')+(ys.length>1?` 외 ${ys.length-1}종`:'') : '', y0?.weight||'', needleTxt+(ns.length>1?` 외 ${ns.length-1}`:'') ].filter(Boolean).join(' · ');
   return { line: line||null, meta:{ name:y0?.name||null, weight:y0?.weight||null, needle:needleTxt||null, yarns:ys, needles:ns, gauge:$('#wGauge').value.trim()||null, size:$('#wSize').value.trim()||null, item_type:$('#wItem').value||null } };
 }
-function workCard(w){
+// ===== 완성작품 인증: 확인 뒤 게시 + 뜨개 이야기 (2026-11-16 대표 확정 시안 cert_review_v3, schema 133) =====
+// 올리면 '확인 중' — 본인에게만 보이다가 대표가 콘솔에서 승인하면 커뮤니티에 올라간다. 보완 요청을 받으면 고쳐서 저장하는 순간 다시 확인 대기(서버 트리거)
+const TOOK={ '1d':'하루', '3d':'2~3일', '1w':'일주일쯤', '2w':'2주쯤', '1m':'한 달쯤', 'long':'그보다 오래' };
+let wStory={ took:'', knowhow:'', regret:'' };
+const storyPayload=()=>({ took:wStory.took||null, knowhow:(wStory.knowhow||'').trim(), regret:(wStory.regret||'').trim() });
+async function certToday(){ try{ const t=new Date(Date.now()+9*36e5); t.setUTCHours(0,0,0,0); const since=new Date(t.getTime()-9*36e5).toISOString(); const { count }=await sb.from('works').select('id',{count:'exact',head:true}).eq('profile_id', me.id).gte('created_at', since); return count||0; }catch(e){ return 0; } }
+function storyRead(){ const k=$('#stKnow'), r=$('#stReg'); if(k) wStory.knowhow=k.value; if(r) wStory.regret=r.value; }
+function certNext(){ if($('#certPost').disabled) return;
+  openSub('뜨개 이야기', `<div class="stq"><p class="muted" style="margin:0;font-size:.84rem;line-height:1.5">같은 작품을 뜨는 분이 읽고 배워 가는 부분이에요.</p>
+    <div class="ccard"><div class="cfl">얼마나 걸렸나요? <span class="req">필수</span></div><div class="stchips">${Object.entries(TOOK).map(([k,l])=>`<button type="button" class="${wStory.took===k?'on':''}" data-k="${k}" onclick="wStory.took=this.dataset.k;[...this.parentNode.children].forEach(b=>b.classList.toggle('on',b===this))">${l}</button>`).join('')}</div></div>
+    <div class="ccard"><div class="cfl">뜨기 노하우 <span class="req">필수</span></div><p class="muted" style="margin:0 0 8px;font-size:.8rem;line-height:1.5">어려웠던 곳과 이렇게 하니 됐다는 방법을 적어 주세요. 같은 작품을 뜨는 분께 가장 도움이 돼요.</p><textarea id="stKnow" maxlength="500" placeholder="예: 소매 코 줍기에서 구멍이 생겨서, 한 코 더 주워 다음 단에 모아떴어요" style="min-height:96px" oninput="wStory.knowhow=this.value">${esc(wStory.knowhow||'')}</textarea></div>
+    <div class="ccard"><div class="cfl">아쉬운 점 · 다음엔 이렇게 <span class="muted">선택</span></div><textarea id="stReg" maxlength="300" placeholder="예: 실을 한 호수 굵게 쓸걸 그랬어요" style="min-height:72px" oninput="wStory.regret=this.value">${esc(wStory.regret||'')}</textarea></div>
+    <p class="muted" style="margin:0;font-size:.78rem;text-align:center;line-height:1.5">${editWorkPost?'저장하면 바로 반영돼요.':'확인 요청을 보내면 knitup 이 확인한 뒤 커뮤니티에 올려 드려요.'}</p></div>`, { label: editWorkPost?'저장':'확인 요청', fn: storySubmit });
+  subOnBack=()=>{ storyRead(); closeSub(); }; }
+function storySubmit(){ storyRead(); const need=!editWorkPost || (editWorkStatus && editWorkStatus!=='approved');   // 이미 올라간 옛 인증을 고칠 때는 이야기를 강요하지 않는다
+  if(need && !wStory.took) return toast('얼마나 걸렸는지 골라 주세요'); if(need && (wStory.knowhow||'').trim().length<5) return toast('뜨기 노하우를 한 줄 적어 주세요');
+  closeSub(); submitCert(); }
+function workStory(w){ if(!(w.took && TOOK[w.took]) && !w.knowhow && !w.regret) return '';
+  return `<div class="wstory">${w.took && TOOK[w.took]?`<span class="wfact">걸린 시간 <b>${TOOK[w.took]}</b></span>`:''}${w.knowhow?`<div class="wk">뜨기 노하우</div><div class="wv">${esc(w.knowhow)}</div>`:''}${w.regret?`<div class="wk">아쉬운 점</div><div class="wv">${esc(w.regret)}</div>`:''}</div>`; }
+function workReview(w, p){ const st=w.review_status; if(!st || st==='approved') return '';   // 승인 전 인증은 본인(과 관리자)에게만 내려온다
+  if(st==='pending') return `<div class="wrev"><b>확인 중</b>knitup 이 확인한 뒤 커뮤니티에 올라가요. 지금은 나에게만 보여요.</div>`;
+  if(st==='fix') return `<div class="wrev fix"><b>보완이 필요해요</b>${esc(w.review_note||'')}${p && p.id && p.id!=='preview'?`<button type="button" onclick="event.stopPropagation();editPostOpen('${p.id}')">고치기</button>`:''}</div>`;
+  return `<div class="wrev rej"><b>커뮤니티에 올리지 못했어요</b>${esc(w.review_note||'')}</div>`; }
+function workCard(w, p){
   if(!w) return '';
   // 기법 칩과 실·바늘 자세한 정보는 처음에 숨기고, 오른쪽 '자세히 ▾' 하나로 함께 펼친다(2026-11-14 대표 확정)
   const chips=[...(w.techniques||[]).map(id=>({t:techName(id)})), ...(w.custom_techniques||[]).map(t=>({t, c:1}))];
   const det = workYarnDetail(w);   // 실·바늘 자세한 정보(있을 때만) — 기법과 함께 '자세히' 하나로 펼친다
   const tg = (chips.length || det) ? `<span class="wtg" onclick="event.stopPropagation();const c=this.closest('.wcard');const o=c.classList.toggle('open');this.querySelector('i').textContent=o?'▴':'▾'">자세히 <i>▾</i></span>` : '';
-  return `<div class="wcard"><div class="wtop"><div class="wl"><div class="wh">${ico('cert')} 완성작품 인증${w.sponsored?'<span class="spon">샘플 제공</span>':''}</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}</div>${tg}</div>${det}${chips.length?`<div class="tchips">${chips.map(x=>`<span class="${x.c?'custom':''}">${esc(x.t)}</span>`).join('')}</div>`:''}</div>`;
+  return `<div class="wcard"><div class="wtop"><div class="wl"><div class="wh">${ico('cert')} 완성작품 인증${w.sponsored?'<span class="spon">샘플 제공</span>':''}</div><b>${esc(w.title||'')}</b>${w.yarn_info?`<div class="ml">${esc(w.yarn_info)}</div>`:''}</div>${tg}</div>${det}${chips.length?`<div class="tchips">${chips.map(x=>`<span class="${x.c?'custom':''}">${esc(x.t)}</span>`).join('')}</div>`:''}${workStory(w)}${workReview(w, p)}</div>`;
 }
 async function openYarnSimilar(name){
   const { data, error } = await sb.rpc('yarn_similar', { p_name:name, p_limit:8 });
@@ -4099,7 +4125,7 @@ function postCard(p, opts={}){
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b>${lvBadge(a)}<time>${agoShort(p.created_at)}${p.edited_at?' · 수정됨':''}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}','${a.id}')">···</button></div>
       ${p.body?`<div class="txt">${bodyHtml(p)}</div>`:''}
       ${n?`<div class="pgrid n${n}">${p.photos.map(u=>{ const im=`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`; const lb=tphLabel(p.work, u); return lb?`<span class="tph">${im}<em data-f="${esc(tphLabel(p.work, u, true))}">${esc(lb)}</em></span>`:im; }).join('')}</div>`:''}
-      ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work):''}${mine && p.work && !p.parent_id && !p.work.sponsored && !(Array.isArray(p.work.yarns)&&p.work.yarns.length) && !p.work.yarn_info ? `<div class="addy" onclick="event.stopPropagation();editPostOpen('${p.id}','yarn')"><span>＋ 어떤 실로 떴는지 적기</span><small>나에게만 보여요</small></div>` : ''}
+      ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work, p):''}${mine && p.work && !p.parent_id && !p.work.sponsored && !(Array.isArray(p.work.yarns)&&p.work.yarns.length) && !p.work.yarn_info ? `<div class="addy" onclick="event.stopPropagation();editPostOpen('${p.id}','yarn')"><span>＋ 어떤 실로 떴는지 적기</span><small>나에게만 보여요</small></div>` : ''}
       <div class="acts">
         <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${ICON.heart}<span>${p.like_count||''}</span></button>
         <button class="${expandedReplies.has(p.id)?'on2':''}" onclick="event.stopPropagation();toggleReplies('${p.parent_id||p.id}')">${ICON.reply}<span>${p.reply_count||''}</span></button>
@@ -4158,7 +4184,7 @@ async function openArchivedPosts(){
     (rows.length ? rows.map(r=>`<div class="arow">${(r.photos||[])[0]?`<img src="${esc(r.photos[0])}" alt="">`:''}<div class="ab"><div class="at">${r.work_id?'<span class="pgk c">인증</span>':''}${esc(r.body||'(사진)')}</div><div class="ad">${new Date(r.created_at).toLocaleDateString("ko-KR",{month:"long",day:"numeric"})} 올림</div><div class="abt"><button type="button" class="g" onclick="archivePost('${r.id}',false)">다시 공개</button><button type="button" class="r" onclick="deletePost('${r.id}')">삭제</button></div></div></div>`).join('') : '<div class="empty">보관한 글이 없어요.<br>내 글의 ··· 에서 [보관하기]를 누르면 여기에 모여요</div>') + '</div>';
 }
 // 글 수정 (schema 110): 일반 글은 글쓰기 화면, 완성작품 인증은 완성작품 인증 화면에 지금 내용을 채워서 엶
-let editPostId=null, editWorkPost=null, wLocked=new Set(), editWorkYarn0='';
+let editPostId=null, editWorkPost=null, wLocked=new Set(), editWorkYarn0='', editWorkStory0='', editWorkStatus=null;
 function editBackGo(){ const b=composeBack||'comm'; composeBack=null; go(['map','comm','chats','my','friends'].includes(b)?b:'comm'); }
 async function editPostOpen(id, focus){
   const p=pmFind(id); if(!p) return toast('글을 찾을 수 없어요');
@@ -4169,10 +4195,11 @@ async function editPostOpen(id, focus){
   $('#sHint').textContent='좋아요·댓글은 그대로 남아요. 고친 글에는 \'수정됨\'이 붙어요';
 }
 async function editWorkOpen(p, focus){
-  const r0=await sb.from('works').select('id,title,note,techniques,custom_techniques,yarns,needles,gauge,finished_size,item_type').eq('id', p.work_id).single(); const w=r0.data||p.work;
+  const r0=await sb.from('works').select('id,title,note,techniques,custom_techniques,yarns,needles,gauge,finished_size,item_type,took,knowhow,regret,review_status').eq('id', p.work_id).single(); const w=r0.data||p.work;
   if(!w) return toast('작품 정보를 찾을 수 없어요');
   await openCert(true, true); if(view!=='cert') return;
-  editWorkPost=p.id; $('#v-cert').classList.add('edit'); $('#v-cert .top h1').textContent='완성작품 인증 수정'; $('#certPost').textContent='저장';
+  editWorkPost=p.id; $('#v-cert').classList.add('edit'); $('#v-cert .top h1').textContent='완성작품 인증 수정'; $('#certPost').textContent='다음';
+  wStory={ took:w.took||'', knowhow:w.knowhow||'', regret:w.regret||'' }; editWorkStory0=JSON.stringify(wStory); editWorkStatus=w.review_status||null;
   $('#wTitle').value=w.title||''; $('#wNote').value=w.note||'';
   wTechSel=new Set(w.techniques||[]); wLocked=new Set(w.techniques||[]); wCustom=[...(w.custom_techniques||[])];
   if((w.techniques||[]).length) wCraft = String(w.techniques[0]).startsWith('K') ? 'knitting' : 'crochet';
@@ -4319,8 +4346,9 @@ function wItemSet(v, auto){ v=v||''; wItemManual = !auto && !!v; const h=$('#wIt
 function wItemPick(){ const cur=$('#wItem')?.value||''; openSheet(`<b style="font-size:1.05rem">작품 종류</b><div class="wigrid">${W_ITEMS.map(x=>`<button type="button" class="${x===cur?'on':''}" onclick="wItemSet(this.textContent===($('#wItem').value||'')?'':this.textContent);closeSheet()">${x}</button>`).join('')}</div>`); }
 async function openCert(skipDraft, noCam){
   if(!myProfile?.onboarded_at) return toast('프로필을 먼저 완성해 주세요');
+  if(!noCam && !myProfile?.is_test && await certToday()>0) return askNote('오늘은 이미 올리셨어요', '완성작품 인증은 하루에 하나씩 올릴 수 있어요. 한 작품씩 천천히 보여 주세요. 쓰던 것이 있으면 이 휴대폰에 보관돼 있어서 내일 이어서 올릴 수 있어요.');   // 하루 1개(schema 133) — 서버도 막는다
   if(!skipDraft){ const d=await cdLoad(); if(d) return cdAsk(d); }   // 쓰던 인증이 있으면 먼저 묻는다
-  closeSub(); sPhotos=[]; composeKind='work'; editWorkPost=null; wLocked=new Set(); $('#v-cert').classList.remove('edit'); $('#v-cert .top h1').textContent='완성작품 인증'; $('#certPost').textContent='게시';
+  closeSub(); sPhotos=[]; composeKind='work'; editWorkPost=null; wLocked=new Set(); $('#v-cert').classList.remove('edit'); $('#v-cert .top h1').textContent='완성작품 인증'; $('#certPost').textContent='다음'; wStory={ took:'', knowhow:'', regret:'' }; editWorkStatus=null; editWorkStory0='';
   if(!['compose','cert','meetform'].includes(view)) composeBack=view;
   $('#wTitle').value=''; $('#wNote').value=''; wCustom=[]; wTechSel=new Set(); wCraft = myCrafts()[0]==='knitting'?'knitting':'crochet';
   wyReset(); renderCertPhotos(); renderCertTech(); certCheck(); wqLoad();
@@ -4337,7 +4365,7 @@ async function cdLoad(){ try{ const d=await cdOp('readonly', st=>st.get(cdKey())
 async function cdClear(){ try{ await cdOp('readwrite', st=>st.delete(cdKey())); }catch(e){} }
 function cdHas(){ return view==='cert' && !editWorkPost && (sPhotos.length>0 || !!$('#wTitle')?.value.trim()); }
 async function cdSave(){ if(!cdHas()) return false;
-  const d={ at:Date.now(), title:$('#wTitle').value, note:$('#wNote').value, item:$('#wItem').value, itemManual:wItemManual, craft:wCraft, techs:[...wTechSel], custom:wCustom.slice(), yarns:JSON.parse(JSON.stringify(wYarns)), needles:JSON.parse(JSON.stringify(wNeedles)), gauge:$('#wGauge')?.value||'', size:$('#wSize')?.value||'', photos:sPhotos.filter(p=>p.blob).map(p=>({ blob:p.blob, tech:wShotTech.get(p.url)||null })) };
+  const d={ at:Date.now(), story:wStory, title:$('#wTitle').value, note:$('#wNote').value, item:$('#wItem').value, itemManual:wItemManual, craft:wCraft, techs:[...wTechSel], custom:wCustom.slice(), yarns:JSON.parse(JSON.stringify(wYarns)), needles:JSON.parse(JSON.stringify(wNeedles)), gauge:$('#wGauge')?.value||'', size:$('#wSize')?.value||'', photos:sPhotos.filter(p=>p.blob).map(p=>({ blob:p.blob, tech:wShotTech.get(p.url)||null })) };
   try{ await cdOp('readwrite', st=>st.put(d, cdKey())); return true; }catch(e){ return false; } }
 setInterval(()=>{ if(cdHas() && !$('#scap') && !certCheck.busy) cdSave(); }, 10000);
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden && cdHas() && !certCheck.busy) cdSave(); });
@@ -4352,17 +4380,17 @@ function cdAsk(d){ cdDraft=d; const u=d.photos&&d.photos[0]?URL.createObjectURL(
     <button type="button" class="btn" onclick="cdResume()">이어서 쓰기</button><button type="button" class="btn o" onclick="closeSheet();cdClear().then(()=>openCert(true))">새로 쓰기</button>
     <p class="muted" style="margin:0;font-size:.75rem;text-align:center">새로 쓰면 보관한 것은 지워져요</p>`, 'c'); }
 async function cdResume(){ const d=cdDraft; closeSheet(); if(!d) return openCert(true); await openCert(true, true); if(view!=='cert') return;
-  $('#wTitle').value=d.title||''; $('#wNote').value=d.note||''; wCraft=d.craft==='knitting'?'knitting':'crochet'; wTechSel=new Set(d.techs||[]); wCustom=(d.custom||[]).slice();
+  $('#wTitle').value=d.title||''; $('#wNote').value=d.note||''; wStory=Object.assign({ took:'', knowhow:'', regret:'' }, d.story||{}); wCraft=d.craft==='knitting'?'knitting':'crochet'; wTechSel=new Set(d.techs||[]); wCustom=(d.custom||[]).slice();
   wYarns=d.yarns||[]; wNeedles=d.needles||[]; const g=$('#wGauge'), z=$('#wSize'); if(g) g.value=d.gauge||''; if(z) z.value=d.size||'';
   wShotTech=new Map(); sPhotos=(d.photos||[]).map(p=>{ const url=URL.createObjectURL(p.blob); if(p.tech) wShotTech.set(url, p.tech); return { blob:p.blob, url }; });
   wItemSet(d.item||'', !d.itemManual); renderWYarns(); renderWNeedles(); renderWQuick(); renderCertPhotos(); renderCertTech(); certCheck(); }
 // 미리 보기: 커뮤니티에 올라갈 모습을 화면에만 그린다(서버에 올리지 않음). 카드 안의 누름은 모두 막고 사진 넘겨 보기만 됨
 function certPreview(){ const title=$('#wTitle').value.trim(); if(!sPhotos.length) return toast('사진을 먼저 넣어 주세요'); if(!title) return toast('작품 이름을 먼저 적어 주세요');
   const yp=wYarnPayload(); const p={ id:'preview', author_id:'preview', author:myProfile||{}, body:$('#wNote').value.trim(), photos:sPhotos.map(x=>x.url), created_at:new Date().toISOString(), like_count:0, reply_count:0,
-    work:{ tech_photos:sPhotos.filter(x=>wShotTech.has(x.url)).map(x=>({ photo:x.url, techniques:wShotTech.get(x.url).techs })), title, yarn_info:yp.line, techniques:[...wTechSel], custom_techniques:wCustom, yarns:yp.meta.yarns, needles:yp.meta.needles, gauge:yp.meta.gauge, finished_size:yp.meta.size } };
+    work:{ tech_photos:sPhotos.filter(x=>wShotTech.has(x.url)).map(x=>({ photo:x.url, techniques:wShotTech.get(x.url).techs })), title, yarn_info:yp.line, techniques:[...wTechSel], custom_techniques:wCustom, yarns:yp.meta.yarns, needles:yp.meta.needles, gauge:yp.meta.gauge, finished_size:yp.meta.size, took:wStory.took||null, knowhow:(wStory.knowhow||'').trim(), regret:(wStory.regret||'').trim() } };
   const ok=!$('#certPost').disabled;
   openSub('미리 보기', `<div class="cpvlab">아직 올라가지 않았어요 · 커뮤니티에 이렇게 보여요</div><div id="cpvBody">${postCard(p,{noLine:true})}</div>
-    <div class="cpvtwo"><button type="button" class="btn o" onclick="closeSub()">고치기</button><button type="button" class="btn" ${ok?'':'disabled'} onclick="closeSub();submitCert()">게시</button></div>${ok?'':'<p class="muted" style="font-size:.78rem;text-align:center;margin:0">사진·작품 이름·기법(가까이 찍은 사진)이 모두 있어야 게시할 수 있어요</p>'}`);
+    <div class="cpvtwo"><button type="button" class="btn o" onclick="closeSub()">고치기</button><button type="button" class="btn" ${ok?'':'disabled'} onclick="closeSub();certNext()">다음</button></div>${ok?'':'<p class="muted" style="font-size:.78rem;text-align:center;margin:0">사진·작품 이름·기법(가까이 찍은 사진)이 모두 있어야 다음으로 갈 수 있어요</p>'}`);
   const b=$('#cpvBody'); if(b) b.addEventListener('click', e=>{ if(e.target.closest('.wtg')) return; e.stopPropagation(); e.preventDefault(); }, true); }
 // ===== 완성작품 인증: 실 촬영처럼 한 장씩 안내하며 찍기 (2026-11-15 대표 확정 시안, schema 121) =====
 // ① 완성작 전체 → 확인 → ② 기법이 보이는 부분 가까이 → 확인 → 이 사진에 보이는 기법 고르기(+메모) → 더 있나요?(기법 사진 3장까지) → 폼(이름·실) → 게시
@@ -4461,22 +4489,25 @@ async function submitCert(){
     if(!wTechSel.size && !wCustom.length) throw new Error('사용한 기법을 하나 이상 골라 주세요');
     if(!sPhotos.length) throw new Error('작품 사진을 1장 이상 올려 주세요');
     if(!editWorkPost && !sPhotos.some(p=>wShotTech.has(p.url))) throw new Error('기법이 보이는 가까운 사진이 한 장 필요해요 · 맨 위 사진을 눌러 다시 찍어 주세요');
-    await loadBanned(); if(hasBanned(title) || hasBanned($('#wNote').value) || wCustom.some(hasBanned)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+    await loadBanned(); if(hasBanned(title) || hasBanned($('#wNote').value) || hasBanned(wStory.knowhow) || hasBanned(wStory.regret) || wCustom.some(hasBanned)) throw new Error('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
     const photos = await uploadPhotos(sPhotos);
     if(editWorkPost){
       const { error } = await sb.rpc('edit_work', { p_post: editWorkPost, p_title: title, p_note: $('#wNote').value.trim()||null, p_photos: photos, p_add_techniques: [...wTechSel], p_add_custom: wCustom });
       if(error) throw new Error(error.message.replace(/^.*?: /,''));
       const yp2=wYarnPayload(); if(JSON.stringify(yp2)!==editWorkYarn0){ const r2=await sb.rpc('edit_work_yarn', { p_post: editWorkPost, p_yarn: yp2.line, p_yarn_meta: yp2.meta }); if(r2.error) throw new Error('실·바늘 저장 실패: '+r2.error.message.replace(/^.*?: /,'')); editWorkYarn0=JSON.stringify(yp2); }
-      await loadMe(); sPhotos=[]; editWorkPost=null; toast('고쳤어요'); certCheck.busy=false; return editBackGo();
+      if(JSON.stringify(wStory)!==editWorkStory0){ const r3=await sb.rpc('work_set_story', { p_post: editWorkPost, p_story: storyPayload() }); if(r3.error) throw new Error(r3.error.message.replace(/^.*?: /,'')); }
+      await loadMe(); sPhotos=[]; editWorkPost=null; toast(editWorkStatus==='fix'?'고쳐서 다시 확인을 요청했어요':'고쳤어요'); certCheck.busy=false; return editBackGo();
     }
     const yp = wYarnPayload();
     const evId = $('#wEvent')?.value||'';
     const { data:newPost, error } = await sb.rpc('create_work', { p_title:title, p_photos:photos, p_techniques:[...wTechSel], p_yarn: yp.line, p_note: $('#wNote').value.trim()||null, p_custom: wCustom, p_yarn_meta: yp.meta });
     if(error) throw new Error(error.message);
     if(newPost && wShotTech.size){ const items=sPhotos.map((p,i)=>{ const x=wShotTech.get(p.url); return x?{ photo:photos[i], techniques:x.techs.filter(id=>wTechSel.has(id)), memo:x.memo||undefined }:null; }).filter(Boolean); if(items.length){ try{ await sb.rpc('work_set_tech_photos', { p_post:newPost, p_items:items }); }catch(e){} } wShotTech=new Map(); }
+    if(newPost){ const r3=await sb.rpc('work_set_story', { p_post:newPost, p_story: storyPayload() }); if(r3.error) toast('뜨개 이야기를 저장하지 못했어요: '+r3.error.message.replace(/^.*?: /,'')); }
     let evDone=false; if(evId && newPost){ const r2 = await sb.rpc('link_work_event', { p_post:newPost, p_event:evId }); if(r2.error) toast('이벤트 연결 실패: '+r2.error.message); else evDone=true; }
-    await loadMe(); sPhotos=[]; cdClear(); toast(evDone?'이벤트 인증까지 완료했어요!':`완성작품 인증 완료! Lv.${myProfile?.act_level||1}`); setTimeout(showRecsAfterWork, 600);
-    composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
+    await loadMe(); sPhotos=[]; cdClear(); composeBack=null; goMy('thread','posts');   // 확인 뒤 게시(schema 133): 바로 올라가지 않는다 — 마이에서 '확인 중'으로 보임
+    askNote('확인 요청을 보냈어요', (evDone?'이벤트 인증으로 접수했어요. ':'')+'knitup 이 사진과 기법을 확인한 뒤 커뮤니티에 올려 드려요. 확인이 끝나면 알림으로 알려 드릴게요.');
+    $('#askdlg')?.querySelector('button')?.addEventListener('click', ()=>setTimeout(showRecsAfterWork, 400));
   }catch(e){ toast(e.message); }
   certCheck.busy=false; certCheck();
 }

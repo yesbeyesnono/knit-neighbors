@@ -251,6 +251,8 @@ begin
   out := pg_temp.cnt(out, 'partner_invites(anon)', 'select count(*) from public.partner_invites', 0);   -- schema 128
   out := pg_temp.cnt(out, 'admin_partner_list(anon)', 'select jsonb_array_length(public.admin_partner_list())', 0);
   out := pg_temp.cnt(out, 'partner_invite_hits(anon)', 'select count(*) from public.partner_invite_hits', 0);   -- schema 132
+  out := pg_temp.cnt(out, 'admin_work_queue(anon)', 'select jsonb_array_length(public.admin_work_queue(''pending'')->''items'')', 0);   -- schema 133
+  out := pg_temp.cnt(out, 'works not approved(anon)', 'select count(*) from public.works where review_status <> ''approved''', 0);
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;

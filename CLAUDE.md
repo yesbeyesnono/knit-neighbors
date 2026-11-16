@@ -31,7 +31,7 @@
 - GitHub Pages(main `/docs`) → https://yesbeyesnono.github.io/knit-neighbors/ (웹 앱·콘솔 `…/admin.html`)
 - 홈페이지 https://app.knitup.co.kr = 저장소 `yesbeyesnono/knitup-home`. **홈페이지 수정·올리기는 이 세션에서만.** 법적 문서 5개의 원본은 이 저장소 `docs/` — 고쳐 푸시한 날 `gh workflow run sync-legal.yml -R yesbeyesnono/knitup-home` 후 `curl` 확인. 초대장·사용법: `author-invite.html` · `authors.html` · `shops.html` · `shop-guide.html`(주소 끝 `#이름`)
 - **회원 데이터 백업**: 비공개 저장소 `yesbeyesnono/knitup-backup` 의 Actions `daily-db-backup` 이 매일 03:30 KST 전체 사본(pg_dump)을 받아 30일 보관(대표 결정 2026-11-16). 열쇠 `SUPABASE_DB_URL`·`BACKUP_PASSPHRASE` 는 대표가 넣음. 사진 파일 자체는 백업에 없음
-- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 132) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(10개: jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow)
+- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 133) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(10개: jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow)
 - 네이티브: Capacitor 8(`android/`, `ios/`), 로컬 플러그인 `plugins/capacitor-meta-events`. iOS 빌드 = Codemagic(`codemagic.yaml`: main 푸시 → `ios-public` → TestFlight / `lab-*` 태그 → `ios-lab`). Android = 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk, R8 켬) → `.aab`
 - 에디션: 코드 하나, `docs/edition.js` 의 `KN_EDITION`(meet = 공개 앱, full = Lab). Lab 전용은 `FULL` 로 감싼다. 브랜치를 가르지 말 것
 
@@ -57,6 +57,7 @@
 - 콘솔에 새 화면을 만들면 `NAV` 와 aside 두 곳에. 기능을 끄는 스위치에 접속 기록 같은 공용 호출을 묶지 말 것
 - 큰 묶음과 그 안의 항목을 같은 칩 모양으로 나란히 두지 말 것 · 탭으로 내용이 바뀌는 창은 높이 고정 · 자판을 쓰는 입력 창은 자판에 가리는지 확인 · 전체 화면 위에 뜨는 창의 z-index 확인
 - 한 화면에 할 일 하나·큰 버튼 하나(촬영 흐름). 실은 하나씩만 담는다. `<datalist>` 금지
+- **완성작품 인증은 확인 뒤 게시**(2026-11-16 대표 확정, schema 133): 올리면 '확인 중'(본인만 보임, 개수·기법·자격 미반영) → 대표가 콘솔 › 인증 확인에서 [승인·게시]/[보완 요청]/[반려]. 하루 1개(테스트 계정 제외). 질문은 걸린 시간·**뜨기 노하우**(필수)·아쉬운 점(선택) — '떠 보니 어땠나요'는 넣지 않는다. 승인은 대표만(지기 AI 가 하지 않음)
 - 샘플 체험단 인증의 「샘플 제공」 표시는 빼지 말 것(표시광고법). 앱 어디에도 특정 업체 '제휴' 표시를 하지 않는다
 
 ## 7. 대표가 정한 것 — 다시 제안하지 말 것
@@ -81,6 +82,7 @@
 - 대표 확인 대기: 실제 기기에서 — 가입 동네 화면의 위치 허용/거절, 가게 계정으로 링크 든 소식 올리기, 콘솔 초대·안내 눌러 보기, 작가 지정 때 자동 안내 푸시, 지도 핀 벌리기, 안드로이드 1.0.8
 - 승인 대기(시안 보여 줌): 업데이트 소식 1.0.6~1.0.8(`resources/home-news/`) — 스토어에 나온 버전부터 "소식 올려줘"
 - **대표가 할 일(백업)**: `knitup-backup` 저장소에 열쇠 2개 넣고 한 번 실행해 초록 체크 확인(그 저장소 README '처음 한 번') — 넣기 전에는 매일 실패 메일이 옴. 첫 성공 뒤 Claude 가 백업 내용(표 수·크기)을 확인할 것
+- **인증 확인(2026-11-16 시작)**: 서버는 그날 저녁부터 적용 — 옛 앱(1.0.8 이하)으로 올린 인증도 확인 대기로 들어온다(뜨개 이야기 칸 없음 → 사진·기법만 보고 승인). 앱 화면(뜨개 이야기·확인 중 표시)은 1.0.9 부터. 텔레그램: 새 대기 15분마다 · 하루 넘은 것 09:00
 - 대표가 Supabase 화면에서 지울 것(급하지 않음): 빈 버킷 `works`, 서버 함수 `place-search`
 - 전체 점검(2026-11-16) 1~5단계 끝: 통일·안 쓰는 코드·서버 찌꺼기·문서·화면별 동작(`tools/audit/flows.mjs` — demo1·demo2 로 글·댓글·대댓글·수정·고정·보관·태그·뜨친 신청·수락·채팅·화면 30여 개·Lab 화면, 63개 통과). 큰 수정 뒤 다시 돌릴 것. **못 본 것**: 콘솔(관리자 로그인이 필요해 흉내 낸 응답으로만), 실제 기기 전용(카메라·푸시·위치 권한·자판), 모임 만들기·신고·주문(실제 회원에게 보이거나 대표에게 알림이 가서 뺌). 콘솔 '질문·해결 댓글' 화면은 옛 데이터용이라 남겨 둠
 - 테스트 계정 상태(2026-11-16): demo1·2·3 정상(가입 완료 — 화면 동작 점검 `flows.mjs` 는 demo1·demo2 를 씀, 대표: 점검에 활용할 것), demo5 가입 미완료, **demo4·demo6 은 11-04 부터 정지 상태**. demo2·demo3 은 지금 작가가 아님(Lab 설명회 때 다시 지정)

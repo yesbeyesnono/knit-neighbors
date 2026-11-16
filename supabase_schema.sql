@@ -2071,3 +2071,16 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --     닉네임이 이름·낱말을 포함하거나(공백 무시, 2자 이상) 닉네임(3자 이상이고 그 낱말 길이의 절반 이상)이 이름에 들어 있거나, 영문 낱말(영숫자 5자 이상)이 이메일 앞부분에 들어 있으면
 --     jigi_reminders 에 한 번 넣어 텔레그램으로 알림(닉네임·가입 시각만, 이메일은 적지 않음). 테스트 계정·탈퇴 계정 제외
 -- ============================================================
+
+-- ============================================================
+-- 133. 완성작품 인증: 확인 뒤 게시 · 하루 1개 · 뜨개 이야기 (2026-11-16 대표 확정 시안 cert_review_v3, 마이그레이션 work_review — 원본 supabase/work_review.sql)
+--   works: review_status(pending|fix|approved|rejected, 기본 approved = 이전 인증은 그대로) · review_note · reviewed_at/by · submitted_at · review_alerted_at · fix_reminded_at
+--          took(1d|3d|1w|2w|1m|long = 걸린 시간) · knowhow(뜨기 노하우 500자) · regret(아쉬운 점 300자)
+--   create_work: 하루 1개(KST 날짜, 테스트 계정 제외) · pending 으로 넣음 · 글은 hidden=true(본인만 보임) · 접수 알림(notice, 푸시 없음). 옛 앱도 같은 함수라 그대로 적용
+--   RLS works_select: 승인된 것 또는 본인 것만(관리자는 works_admin_select)
+--   승인된 것만 세도록 고친 함수: works_apply_cert(인증 개수·기법·활동 레벨) · author_adv_count · my_author_eligibility · create_meetup(모임 열기 자격) · cheer_on_work(첫 인증 축하·작가 신청 안내는 승인 순간)
+--   트리거: works_apply_cert(… update of techniques, review_status) · cheer_work_approved(update of review_status) · works_resubmit(보완 요청 받은 인증을 본인이 고치면 pending 으로)
+--   work_set_story(p_post, {took,knowhow,regret}): 본인 인증만(authenticated)
+--   콘솔: admin_work_queue(p_tab pending|fix|done) · admin_work_review(p_work, approve|fix|reject, p_note) — 승인 = works approved + posts.hidden=false·created_at=now() + 알림. 보완·반려는 사유 필수 + 알림. admin_log
+--   크론: work-review-alert(15분마다, 올린 지 3분 지난 새 대기 → 텔레그램) · work-review-daily(09:00 KST, 하루 넘은 대기 → 텔레그램 / 보완 요청 3일 뒤 회원에게 remind 한 번)
+-- ============================================================
