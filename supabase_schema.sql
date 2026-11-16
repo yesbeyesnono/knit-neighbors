@@ -2084,3 +2084,10 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   콘솔: admin_work_queue(p_tab pending|fix|done) · admin_work_review(p_work, approve|fix|reject, p_note) — 승인 = works approved + posts.hidden=false·created_at=now() + 알림. 보완·반려는 사유 필수 + 알림. admin_log
 --   크론: work-review-alert(15분마다, 올린 지 3분 지난 새 대기 → 텔레그램) · work-review-daily(09:00 KST, 하루 넘은 대기 → 텔레그램 / 보완 요청 3일 뒤 회원에게 remind 한 번)
 -- ============================================================
+
+-- ============================================================
+-- 134. 앱 시작 공지 여러 개 (2026-11-16 대표 확정 시안 notice_carousel_v2, 마이그레이션 home_notices — 원본 supabase/home_notices.sql)
+--   app_config.home_notices = [{id, active, kicker, title, body, img(events/… 만), btn, link}] — 새 앱(1.0.9~)의 넘겨 보는 팝업. 처음 값: 뜨친 이벤트 · 완성작품 인증 안내(link view certguide)
+--   옛 앱은 app_config.home_notice(하나)를 계속 읽음 — 그대로 둠
+--   admin_home_notices_toggle(p_id, p_active): 관리자만, 공지 하나를 켜고 끔 + admin_log. 문구·그림 변경은 SQL
+-- ============================================================
