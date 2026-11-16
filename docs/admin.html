@@ -1191,67 +1191,67 @@ async function decideAuthor(id, ok){ let reason=null; if(!ok){ reason=prompt('�
 const INV_URL={author:'https://app.knitup.co.kr/author-invite.html', shop:'https://app.knitup.co.kr/shops.html'};
 let INV={kind:'author', last:null};
 const invLink=(k,n)=>INV_URL[k]+'#'+encodeURIComponent(n);
-// ===== 인증 확인 (2026-11-16 대표 확정 시안 cert_review_v3, schema 133) =====
-// 완성작품 인증은 올리면 '확인 중' — 여기서 [승인 · 게시]를 눌러야 커뮤니티에 올라간다. 보완 요청·반려는 사유가 회원에게 알림으로 간다
-const CERT={ tab:'pending', sel:null, items:[], counts:{} };
-const CERT_TOOK={ '1d':'하루', '3d':'2~3일', '1w':'일주일쯤', '2w':'2주쯤', '1m':'한 달쯤', 'long':'그보다 오래' };
-const CERT_REASONS=[['사진이 흐려요','가까이 찍은 사진이 조금 흐려서 코 모양이 잘 안 보여요. 밝은 곳에서 한 장만 다시 찍어 주시겠어요?'],
-  ['기법과 사진이 안 맞아요','고르신 기법이 사진에서 잘 확인되지 않아요. 그 기법이 보이는 부분을 가까이 찍어 주시거나, 기법을 다시 골라 주세요.'],
-  ['기법 표시가 빠졌어요','가까이 찍은 사진에 어떤 기법인지 표시가 없어요. 어떤 기법으로 뜨셨는지 알려 주세요.'],
-  ['완성작이 아니에요','완성된 작품의 전체 모습이 보이는 사진으로 올려 주세요.'],
-  ['이야기를 조금 더','뜨기 노하우를 한두 문장만 더 적어 주시면 같은 작품을 뜨는 분께 큰 도움이 돼요.']];
-async function certBadge(){ try{ const {count}=await sb.from('works').select('id',{count:'exact',head:true}).eq('review_status','pending'); const n=$('#nCert'); if(n){ n.hidden=!count; n.textContent=count||''; } }catch(e){} }
-VIEWS.certs = async(arg)=>{
-  if(['pending','fix','done'].includes(arg)) CERT.tab=arg;
-  const {data,error}=await sb.rpc('admin_work_queue',{p_tab:CERT.tab}); if(error) throw error;
-  CERT.items=(data&&data.items)||[]; CERT.counts=(data&&data.counts)||{};
-  if(!CERT.items.some(x=>x.id===CERT.sel)) CERT.sel=CERT.items[0]?CERT.items[0].id:null;
-  const n=$('#nCert'); if(n){ n.hidden=!CERT.counts.pending; n.textContent=CERT.counts.pending||''; }
-  const tabs=[['pending','확인 대기',CERT.counts.pending],['fix','보완 중',CERT.counts.fix],['done','끝난 것',null]];
-  $('#main').innerHTML=`<h1>인증 확인 <small>승인해야 커뮤니티에 올라가요 · 승인 전에는 올린 분에게만 보이고 인증 개수·자격에 들어가지 않아요</small></h1>
-  <div class="tabs">${tabs.map(([k,l,c])=>`<button class="${CERT.tab===k?'on':''}" onclick="location.hash='certs:${k}'">${l}${c?` ${c}`:''}</button>`).join('')}</div>
-  <div class="cq"><div class="cql" id="cqList"></div><div class="cqd" id="cqDetail"></div></div>`;
-  certDraw();
-};
-function certWhen(t){ if(!t) return ''; const d=new Date(t); return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
-function certDraw(){
-  const L=$('#cqList'), D=$('#cqDetail'); if(!L||!D) return;
-  if(!CERT.items.length){ L.innerHTML=''; D.innerHTML=`<div class="muted" style="padding:30px 0;text-align:center">${CERT.tab==='pending'?'확인을 기다리는 인증이 없어요':CERT.tab==='fix'?'보완을 기다리는 인증이 없어요':'아직 끝난 것이 없어요'}</div>`; return; }
-  L.innerHTML=CERT.items.map(x=>`<div class="cqi ${x.id===CERT.sel?'on':''}" onclick="certPick('${x.id}')"><div class="th" style="background-image:url('${esc((x.photos||[])[0]||'')}')"></div><div><b>${esc(x.title||'(이름 없음)')}</b><small>${esc(x.nickname||'회원')} · ${certWhen(CERT.tab==='done'?x.reviewed_at:(x.submitted_at||x.created_at))}${x.has5?' · 5단계 기법':''}${x.no_story?' · 옛 버전':''}${CERT.tab==='done'?(x.status==='approved'?' · 승인':' · 반려'):''}</small></div></div>`).join('');
-  const x=CERT.items.find(y=>y.id===CERT.sel); if(!x){ D.innerHTML=''; return; }
-  const tn={}; (x.techs||[]).forEach(t=>tn[t.id]=t.name);
-  const tp={}; (Array.isArray(x.tech_photos)?x.tech_photos:[]).forEach(t=>{ tp[t.photo]=((t.techniques||[]).map(id=>tn[id]||id).join(' · '))+(t.memo?' — '+t.memo:''); });
-  const pics=(x.photos||[]).map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener" style="background-image:url('${esc(u)}')"><em>${esc(i===0?'전체':(tp[u]||'기법 표시 없음'))}</em></a>`).join('');
-  const needles=(Array.isArray(x.needles)?x.needles:[]).map(n=>[n.type,n.size].filter(Boolean).join(' ')).join(', ');
-  const facts=[x.took&&CERT_TOOK[x.took]?['걸린 시간',CERT_TOOK[x.took]]:null, x.yarn_info?['실',x.yarn_info]:null, needles?['바늘',needles]:null, x.gauge?['게이지',x.gauge]:null, x.finished_size?['크기',x.finished_size]:null].filter(Boolean);
-  const hasClose=(x.photos||[]).length>1, allTagged=!x.no_tech_photo && (x.photos||[]).slice(1).every(u=>tp[u]);
-  const chk=[[hasClose,'전체 사진 · 가까운 사진 있음','가까이 찍은 사진이 없어요'],[hasClose&&allTagged,'가까운 사진마다 기법 표시 있음','기법 표시가 없는 사진이 있어요'],[!!(x.took&&x.knowhow),'뜨개 이야기 필수 2개 채움',x.no_story?'뜨개 이야기 없음 — 옛 버전 앱으로 올린 인증(앱에 칸이 없어요)':'뜨개 이야기가 덜 채워졌어요']];
-  const open=x.status==='pending'||x.status==='fix';
-  D.innerHTML=`<div class="cqh"><b>${esc(x.title||'(이름 없음)')}</b> <a href="javascript:void 0" onclick="openUserPanel('${x.profile_id}')">${esc(x.nickname||'회원')}</a> <span class="muted">코바늘 ${x.level_crochet||0}단계 · 대바늘 ${x.level_knit||0}단계 · 승인된 인증 ${x.cert_count||0}개</span>
-      ${x.is_test?'<span class="chip y">테스트 계정</span>':''}${x.is_author?'<span class="chip g">작가</span>':''}${x.sponsored?'<span class="chip y">샘플 제공</span>':''}${x.status==='fix'?'<span class="chip y">보완 요청함</span>':''}${x.status==='approved'?'<span class="chip g">승인</span>':''}${x.status==='rejected'?'<span class="chip r">반려</span>':''}</div>
-    <div class="cqb"><div class="cqm"><div class="cqp">${pics}</div>
-      <div class="cqt">${(x.techs||[]).map(t=>`<span class="chip ${t.level>=5?'y':'g'}">${esc(t.name)} · ${t.level}단계</span>`).join('')}${(x.custom||[]).map(t=>`<span class="chip">${esc(t)} · 직접 입력</span>`).join('')}</div>
-      ${facts.length?`<div class="cqf">${facts.map(([k,v])=>`<span>${k} <b>${esc(v)}</b></span>`).join('')}</div>`:''}
-      ${x.knowhow?`<div class="cqk">뜨기 노하우</div><div class="cqv">${esc(x.knowhow)}</div>`:''}${x.regret?`<div class="cqk">아쉬운 점</div><div class="cqv">${esc(x.regret)}</div>`:''}${x.memo?`<div class="cqk">한 줄 소감</div><div class="cqv">${esc(x.memo)}</div>`:''}</div>
-    <div class="cqr"><b class="cqs">자동 점검</b>
-      <div class="cqc">${chk.map(([ok,a,b])=>`<div><i class="${ok?'y':'n'}">${ok?'✓':'!'}</i>${ok?a:b}</div>`).join('')}${x.has5?'<div><i class="n">!</i>전문(5단계) 기법 포함 — 작가 자격에 들어가는 인증</div>':''}</div>
-      ${x.note&&x.status!=='approved'?`<b class="cqs">${x.status==='rejected'?'반려 사유':'보낸 보완 요청'} <small class="muted">${certWhen(x.reviewed_at)}</small></b><div class="cqn">${esc(x.note)}</div>`:''}
-      ${open?`<b class="cqs">보완 요청·반려 사유 <small class="muted">고르면 문구가 채워져요 · 고쳐 쓸 수 있어요</small></b>
-      <div class="cqrs">${CERT_REASONS.map((r,i)=>`<button type="button" onclick="certReason(${i})">${r[0]}</button>`).join('')}</div>
-      <textarea id="cqNote" maxlength="300" placeholder="회원에게 보낼 말 (승인할 때는 비워 두세요)"></textarea>
-      <div class="cqa"><button class="p" onclick="certDo('approve')">승인 · 게시</button><button class="w" onclick="certDo('fix')">보완 요청</button><button class="r" onclick="certDo('reject')">반려</button></div>
-      <p class="muted" style="font-size:12px;margin:8px 0 0;line-height:1.5">보완 요청을 받은 회원이 고쳐서 저장하면 '확인 대기'로 다시 돌아와요.${x.no_story?' 옛 버전 앱에서는 사진·이름만 고칠 수 있어요(기법 표시·뜨개 이야기 칸이 없어요).':''}</p>`:''}
-    </div></div>`;
-}
-function certPick(id){ CERT.sel=id; certDraw(); }
-function certReason(i){ const t=$('#cqNote'); if(t){ t.value=CERT_REASONS[i][1]; t.focus(); } }
-async function certDo(action){
-  const id=CERT.sel, x=CERT.items.find(y=>y.id===id); if(!x) return; const note=($('#cqNote')?.value||'').trim();
-  if(action!=='approve' && !note) return toast('회원에게 보낼 사유를 적어 주세요');
-  if(!confirm(action==='approve'?`「${x.title||''}」 인증을 승인해 커뮤니티에 올릴까요?`:action==='fix'?'이 내용으로 보완을 요청할까요? 회원에게 알림이 가요.':'이 인증을 반려할까요? 글은 올라가지 않고 사유가 회원에게 전달돼요.')) return;
-  const {error}=await sb.rpc('admin_work_review',{ p_work:id, p_action:action, p_note:action==='approve'?null:note }); if(error) return toast(error.message);
-  toast(action==='approve'?'승인했어요 · 커뮤니티에 올라갔어요':action==='fix'?'보완을 요청했어요':'반려했어요'); CERT.sel=null; route();
-}
+// ===== 인증 확인 (2026-11-16 대표 확정 시안 cert_review_v3, schema 133) =====
+// 완성작품 인증은 올리면 '확인 중' — 여기서 [승인 · 게시]를 눌러야 커뮤니티에 올라간다. 보완 요청·반려는 사유가 회원에게 알림으로 간다
+const CERT={ tab:'pending', sel:null, items:[], counts:{} };
+const CERT_TOOK={ '1d':'하루', '3d':'2~3일', '1w':'일주일쯤', '2w':'2주쯤', '1m':'한 달쯤', 'long':'그보다 오래' };
+const CERT_REASONS=[['사진이 흐려요','가까이 찍은 사진이 조금 흐려서 코 모양이 잘 안 보여요. 밝은 곳에서 한 장만 다시 찍어 주시겠어요?'],
+  ['기법과 사진이 안 맞아요','고르신 기법이 사진에서 잘 확인되지 않아요. 그 기법이 보이는 부분을 가까이 찍어 주시거나, 기법을 다시 골라 주세요.'],
+  ['기법 표시가 빠졌어요','가까이 찍은 사진에 어떤 기법인지 표시가 없어요. 어떤 기법으로 뜨셨는지 알려 주세요.'],
+  ['완성작이 아니에요','완성된 작품의 전체 모습이 보이는 사진으로 올려 주세요.'],
+  ['이야기를 조금 더','뜨기 노하우를 한두 문장만 더 적어 주시면 같은 작품을 뜨는 분께 큰 도움이 돼요.']];
+async function certBadge(){ try{ const {count}=await sb.from('works').select('id',{count:'exact',head:true}).eq('review_status','pending'); const n=$('#nCert'); if(n){ n.hidden=!count; n.textContent=count||''; } }catch(e){} }
+VIEWS.certs = async(arg)=>{
+  if(['pending','fix','done'].includes(arg)) CERT.tab=arg;
+  const {data,error}=await sb.rpc('admin_work_queue',{p_tab:CERT.tab}); if(error) throw error;
+  CERT.items=(data&&data.items)||[]; CERT.counts=(data&&data.counts)||{};
+  if(!CERT.items.some(x=>x.id===CERT.sel)) CERT.sel=CERT.items[0]?CERT.items[0].id:null;
+  const n=$('#nCert'); if(n){ n.hidden=!CERT.counts.pending; n.textContent=CERT.counts.pending||''; }
+  const tabs=[['pending','확인 대기',CERT.counts.pending],['fix','보완 중',CERT.counts.fix],['done','끝난 것',null]];
+  $('#main').innerHTML=`<h1>인증 확인 <small>승인해야 커뮤니티에 올라가요 · 승인 전에는 올린 분에게만 보이고 인증 개수·자격에 들어가지 않아요</small></h1>
+  <div class="tabs">${tabs.map(([k,l,c])=>`<button class="${CERT.tab===k?'on':''}" onclick="location.hash='certs:${k}'">${l}${c?` ${c}`:''}</button>`).join('')}</div>
+  <div class="cq"><div class="cql" id="cqList"></div><div class="cqd" id="cqDetail"></div></div>`;
+  certDraw();
+};
+function certWhen(t){ if(!t) return ''; const d=new Date(t); return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function certDraw(){
+  const L=$('#cqList'), D=$('#cqDetail'); if(!L||!D) return;
+  if(!CERT.items.length){ L.innerHTML=''; D.innerHTML=`<div class="muted" style="padding:30px 0;text-align:center">${CERT.tab==='pending'?'확인을 기다리는 인증이 없어요':CERT.tab==='fix'?'보완을 기다리는 인증이 없어요':'아직 끝난 것이 없어요'}</div>`; return; }
+  L.innerHTML=CERT.items.map(x=>`<div class="cqi ${x.id===CERT.sel?'on':''}" onclick="certPick('${x.id}')"><div class="th" style="background-image:url('${esc((x.photos||[])[0]||'')}')"></div><div><b>${esc(x.title||'(이름 없음)')}</b><small>${esc(x.nickname||'회원')} · ${certWhen(CERT.tab==='done'?x.reviewed_at:(x.submitted_at||x.created_at))}${x.has5?' · 5단계 기법':''}${x.no_story?' · 옛 버전':''}${CERT.tab==='done'?(x.status==='approved'?' · 승인':' · 반려'):''}</small></div></div>`).join('');
+  const x=CERT.items.find(y=>y.id===CERT.sel); if(!x){ D.innerHTML=''; return; }
+  const tn={}; (x.techs||[]).forEach(t=>tn[t.id]=t.name);
+  const tp={}; (Array.isArray(x.tech_photos)?x.tech_photos:[]).forEach(t=>{ tp[t.photo]=((t.techniques||[]).map(id=>tn[id]||id).join(' · '))+(t.memo?' — '+t.memo:''); });
+  const pics=(x.photos||[]).map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener" style="background-image:url('${esc(u)}')"><em>${esc(i===0?'전체':(tp[u]||'기법 표시 없음'))}</em></a>`).join('');
+  const needles=(Array.isArray(x.needles)?x.needles:[]).map(n=>[n.type,n.size].filter(Boolean).join(' ')).join(', ');
+  const facts=[x.took&&CERT_TOOK[x.took]?['걸린 시간',CERT_TOOK[x.took]]:null, x.yarn_info?['실',x.yarn_info]:null, needles?['바늘',needles]:null, x.gauge?['게이지',x.gauge]:null, x.finished_size?['크기',x.finished_size]:null].filter(Boolean);
+  const hasClose=(x.photos||[]).length>1, allTagged=!x.no_tech_photo && (x.photos||[]).slice(1).every(u=>tp[u]);
+  const chk=[[hasClose,'전체 사진 · 가까운 사진 있음','가까이 찍은 사진이 없어요'],[hasClose&&allTagged,'가까운 사진마다 기법 표시 있음','기법 표시가 없는 사진이 있어요'],[!!(x.took&&x.knowhow),'뜨개 이야기 필수 2개 채움',x.no_story?'뜨개 이야기 없음 — 옛 버전 앱으로 올린 인증(앱에 칸이 없어요)':'뜨개 이야기가 덜 채워졌어요']];
+  const open=x.status==='pending'||x.status==='fix';
+  D.innerHTML=`<div class="cqh"><b>${esc(x.title||'(이름 없음)')}</b> <a href="javascript:void 0" onclick="openUserPanel('${x.profile_id}')">${esc(x.nickname||'회원')}</a> <span class="muted">코바늘 ${x.level_crochet||0}단계 · 대바늘 ${x.level_knit||0}단계 · 승인된 인증 ${x.cert_count||0}개</span>
+      ${x.is_test?'<span class="chip y">테스트 계정</span>':''}${x.is_author?'<span class="chip g">작가</span>':''}${x.sponsored?'<span class="chip y">샘플 제공</span>':''}${x.status==='fix'?'<span class="chip y">보완 요청함</span>':''}${x.status==='approved'?'<span class="chip g">승인</span>':''}${x.status==='rejected'?'<span class="chip r">반려</span>':''}</div>
+    <div class="cqb"><div class="cqm"><div class="cqp">${pics}</div>
+      <div class="cqt">${(x.techs||[]).map(t=>`<span class="chip ${t.level>=5?'y':'g'}">${esc(t.name)} · ${t.level}단계</span>`).join('')}${(x.custom||[]).map(t=>`<span class="chip">${esc(t)} · 직접 입력</span>`).join('')}</div>
+      ${facts.length?`<div class="cqf">${facts.map(([k,v])=>`<span>${k} <b>${esc(v)}</b></span>`).join('')}</div>`:''}
+      ${x.knowhow?`<div class="cqk">뜨기 노하우</div><div class="cqv">${esc(x.knowhow)}</div>`:''}${x.regret?`<div class="cqk">아쉬운 점</div><div class="cqv">${esc(x.regret)}</div>`:''}${x.memo?`<div class="cqk">한 줄 소감</div><div class="cqv">${esc(x.memo)}</div>`:''}</div>
+    <div class="cqr"><b class="cqs">자동 점검</b>
+      <div class="cqc">${chk.map(([ok,a,b])=>`<div><i class="${ok?'y':'n'}">${ok?'✓':'!'}</i>${ok?a:b}</div>`).join('')}${x.has5?'<div><i class="n">!</i>전문(5단계) 기법 포함 — 작가 자격에 들어가는 인증</div>':''}</div>
+      ${x.note&&x.status!=='approved'?`<b class="cqs">${x.status==='rejected'?'반려 사유':'보낸 보완 요청'} <small class="muted">${certWhen(x.reviewed_at)}</small></b><div class="cqn">${esc(x.note)}</div>`:''}
+      ${open?`<b class="cqs">보완 요청·반려 사유 <small class="muted">고르면 문구가 채워져요 · 고쳐 쓸 수 있어요</small></b>
+      <div class="cqrs">${CERT_REASONS.map((r,i)=>`<button type="button" onclick="certReason(${i})">${r[0]}</button>`).join('')}</div>
+      <textarea id="cqNote" maxlength="300" placeholder="회원에게 보낼 말 (승인할 때는 비워 두세요)"></textarea>
+      <div class="cqa"><button class="p" onclick="certDo('approve')">승인 · 게시</button><button class="w" onclick="certDo('fix')">보완 요청</button><button class="r" onclick="certDo('reject')">반려</button></div>
+      <p class="muted" style="font-size:12px;margin:8px 0 0;line-height:1.5">보완 요청을 받은 회원이 고쳐서 저장하면 '확인 대기'로 다시 돌아와요.${x.no_story?' 옛 버전 앱에서는 사진·이름만 고칠 수 있어요(기법 표시·뜨개 이야기 칸이 없어요).':''}</p>`:''}
+    </div></div>`;
+}
+function certPick(id){ CERT.sel=id; certDraw(); }
+function certReason(i){ const t=$('#cqNote'); if(t){ t.value=CERT_REASONS[i][1]; t.focus(); } }
+async function certDo(action){
+  const id=CERT.sel, x=CERT.items.find(y=>y.id===id); if(!x) return; const note=($('#cqNote')?.value||'').trim();
+  if(action!=='approve' && !note) return toast('회원에게 보낼 사유를 적어 주세요');
+  if(!confirm(action==='approve'?`「${x.title||''}」 인증을 승인해 커뮤니티에 올릴까요?`:action==='fix'?'이 내용으로 보완을 요청할까요? 회원에게 알림이 가요.':'이 인증을 반려할까요? 글은 올라가지 않고 사유가 회원에게 전달돼요.')) return;
+  const {error}=await sb.rpc('admin_work_review',{ p_work:id, p_action:action, p_note:action==='approve'?null:note }); if(error) return toast(error.message);
+  toast(action==='approve'?'승인했어요 · 커뮤니티에 올라갔어요':action==='fix'?'보완을 요청했어요':'반려했어요'); CERT.sel=null; route();
+}
 VIEWS.invites = async()=>{
   const {data,error}=await sb.rpc('admin_partner_list'); if(error) throw error; const rows=data||[];
   const md=t=>{ if(!t) return ''; const d=new Date(t); return (d.getMonth()+1)+'/'+d.getDate(); };
@@ -1660,11 +1660,13 @@ let YCOLS=[], yTab='dash', yFam='', yColBrand='';
 const Y_TABS=[['dash','대시보드'],['demand','수요'],['list','실 목록'],['colors','색상'],['brands','브랜드'],['reco','추천·호환'],['quality','품질 점검'],['alias','브랜드 별칭']];
 function yCount(list, key){ const m={}; list.forEach(y=>{ const k=key(y)||'(없음)'; m[k]=(m[k]||0)+1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]); }
 function yBars(pairs, onClick, max){ const top=Math.max(1,...pairs.map(p=>+p[1]||0)); return pairs.slice(0,max||12).map(([k,n])=>`<div class="hbar" ${onClick?`style="cursor:pointer" onclick="${onClick}(this.dataset.k)" data-k="${esc(k)}"`:''}><span title="${esc(k)}">${esc(k)}</span><span class="w"><b style="width:${Math.round(n/top*100)}%"></b></span><span class="muted">${n}</span></div>`).join('')||'<div class="muted">없음</div>'; }
+// 서버(PostgREST)는 한 번에 1,000줄까지만 준다 → 1,000줄씩 8개씩 동시에 받아 끝까지 모은다(실 1,000종·색 1,000개에서 멈추던 문제, 2026-11-16)
+async function sbAll(mk){ const P=1000; let out=[], from=0; for(;;){ const rs=await Promise.all([...Array(8)].map((_,i)=>mk().range(from+i*P, from+i*P+P-1))); for(const r of rs){ if(r.error){ if(r.error.code!=='PGRST103' && r.status!==416) toast(r.error.message); return {data:out}; } out=out.concat(r.data||[]); } if(rs.some(r=>(r.data||[]).length<P)) return {data:out}; from+=8*P; } }
 VIEWS.yarns = async(arg)=>{
   if(arg && Y_TABS.some(t=>t[0]===arg)) yTab=arg;
   const [{data}, {data:cols}, {data:st}] = await Promise.all([
-    sb.from('yarn_catalog').select('*').is('merged_into', null).order('status').order('uses',{ascending:false}).limit(2000),
-    sb.from('yarn_colors').select('id,catalog_id,no,name,family,photo,color_hex,color_mode').limit(8000),
+    sbAll(()=>sb.from('yarn_catalog').select('*').is('merged_into', null).order('status').order('uses',{ascending:false}).order('id')),
+    sbAll(()=>sb.from('yarn_colors').select('id,catalog_id,no,name,family,photo,color_hex,color_mode').order('id')),
     sb.rpc('admin_yarn_stats') ]);
   YARNS=data||[]; YST=st||{}; YCOL={}; YCOLS=cols||[];
   YCOLS.forEach(c=>{ const o=YCOL[c.catalog_id]||(YCOL[c.catalog_id]={n:0,p:0,first:null}); o.n++; if(c.photo){ o.p++; if(!o.first) o.first=c.photo; } });
@@ -1878,7 +1880,7 @@ async function yAliasInline(){
 }
 function yExport(kind){
   if(kind==='yarns'){ const rows=YARNS.map(y=>({...y, fibers:y.fibers?JSON.stringify(y.fibers):'', aliases:(y.aliases||[]).join('|'), use_tags:(y.use_tags||[]).join('|'), colors:(YCOL[y.id]||{}).n||0, colors_photo:(YCOL[y.id]||{}).p||0})); download('yarn_catalog.csv', '\ufeff'+csv(rows, ['id','brand','product','product_en','aliases','ball_g','ball_m','m_per_100g','weight_class','fiber_main','fibers','texture','use_tags','season','needle_knit','needle_crochet','gauge','put_up','shop','source_url','status','uses','colors','colors_photo','created_at'])); return; }
-  sb.from('yarn_colors').select('catalog_id,no,name,family,color_hex,color_mode,photo').limit(10000).then(({data})=>{ const nm={}; YARNS.forEach(y=>nm[y.id]=yName(y)); const rows=(data||[]).map(c=>({yarn:nm[c.catalog_id]||c.catalog_id, no:c.no, name:c.name, family:c.family, hex:(c.color_hex||[]).join('|'), mode:c.color_mode, photo:c.photo?yPhoto(c.photo):''})); download('yarn_colors.csv', '\ufeff'+csv(rows, ['yarn','no','name','family','hex','mode','photo'])); });
+  sbAll(()=>sb.from('yarn_colors').select('catalog_id,no,name,family,color_hex,color_mode,photo').order('id')).then(({data})=>{ const nm={}; YARNS.forEach(y=>nm[y.id]=yName(y)); const rows=(data||[]).map(c=>({yarn:nm[c.catalog_id]||c.catalog_id, no:c.no, name:c.name, family:c.family, hex:(c.color_hex||[]).join('|'), mode:c.color_mode, photo:c.photo?yPhoto(c.photo):''})); download('yarn_colors.csv', '\ufeff'+csv(rows, ['yarn','no','name','family','hex','mode','photo'])); });
 }
 async function openYarnForm(id){
   const y = id ? YARNS.find(v=>v.id===id) : {aliases:[],status:'verified'};
