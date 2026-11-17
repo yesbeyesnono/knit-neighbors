@@ -28,3 +28,6 @@ resources/author-guide/
 
 # 특허 상담 자료(공개 저장소에 올리지 않는다)
 resources/patent/
+
+# 공개하면 안 되는 내부 문서(전략·조사) — 이 PC에만 둠
+resources/private/
