@@ -2119,3 +2119,9 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   shop_post_comment(p_post, p_body): 소식 글만(클래스 불가) · 링크·계좌번호·금칙어 거름 · 하루 40개 · 가게 주인에게(주인이 쓰면 그 글에 댓글 쓴 분들에게) notice 알림(link shop)
 --   shop_post_like(p_post, p_on) → 좋아요 수
 -- ============================================================
+
+-- ============================================================
+-- 139. 시작 공지 v2 (2026-11-17 대표 확정, 마이그레이션 home_notices_v2 — 원본 supabase/home_notices_v2.sql)
+--   app_config.home_notices_v2: 1.0.10 부터 먼저 읽는 목록. 처음 값 = home_notices 의 두 장 + 미미살롱 연희점 소식(그림 app.knitup.co.kr/images/notice-mimisalon.jpg, link {type:shop,id,post})
+--   admin_home_notices_toggle(p_id, p_active): 두 목록(home_notices · home_notices_v2) 모두에서 같은 id 를 켜고 끔
+-- ============================================================

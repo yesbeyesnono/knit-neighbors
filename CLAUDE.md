@@ -31,7 +31,7 @@
 - GitHub Pages(main `/docs`) → https://yesbeyesnono.github.io/knit-neighbors/ (웹 앱·콘솔 `…/admin.html`)
 - 홈페이지 https://app.knitup.co.kr = 저장소 `yesbeyesnono/knitup-home`. **홈페이지 수정·올리기는 이 세션에서만.** 법적 문서 5개의 원본은 이 저장소 `docs/` — 고쳐 푸시한 날 `gh workflow run sync-legal.yml -R yesbeyesnono/knitup-home` 후 `curl` 확인. 초대장·사용법: `author-invite.html` · `authors.html` · `shops.html` · `shop-guide.html`(주소 끝 `#이름`)
 - **회원 데이터 백업**: 비공개 저장소 `yesbeyesnono/knitup-backup` 의 Actions `daily-db-backup` 이 매일 03:30 KST 전체 사본(pg_dump)을 받아 30일 보관(대표 결정 2026-11-16). 열쇠 `SUPABASE_DB_URL`·`BACKUP_PASSPHRASE` 는 대표가 넣음. 사진 파일 자체는 백업에 없음
-- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 138) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(10개: jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow)
+- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 139) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(10개: jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow)
 - 네이티브: Capacitor 8(`android/`, `ios/`), 로컬 플러그인 `plugins/capacitor-meta-events`. iOS 빌드 = Codemagic(`codemagic.yaml`: main 푸시 → `ios-public` → TestFlight / `lab-*` 태그 → `ios-lab`). Android = 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk, R8 켬) → `.aab`
 - 에디션: 코드 하나, `docs/edition.js` 의 `KN_EDITION`(meet = 공개 앱, full = Lab). Lab 전용은 `FULL` 로 감싼다. 브랜치를 가르지 말 것
 
@@ -51,7 +51,7 @@
 ## 6. 말·화면 규칙
 - **'댓글'**(답글이라고 쓰지 않음) · **'완성작품 인증'**(탭 이름처럼 짧게 쓴 '인증'은 그대로) · 뜨개 실력은 **'N단계'**, 'Lv.'는 활동 레벨에만
 - **창 규칙(2026-11-16 대표 확정 A안)**: 한 줄 알림 = `toast` · 확인(예/아니오) = `askOk`/`askConfirm`(가운데 작은 창, 왼쪽 취소·오른쪽 실행, 지우는 일은 빨강 — 휴대폰 기본 confirm 금지, 취소하는 동작이면 닫는 버튼은 '닫기') · 읽기(공지·안내·축하) = `askNote` 또는 `openSheet(html,'c')`(가운데 카드) · **고르기·입력만** `openSheet`(아래에서 올라옴) · 길게 적는 것 = 전체 화면. 새 창을 만들 때 이 규칙으로 고를 것
-- **앱 시작 공지(2026-11-16 대표 확정)**: `app_config.home_notices`(여러 개) → 좌우로 넘겨 보는 가운데 팝업(`homeNoticePop`), 처음 카드는 무작위, ✕ 는 그날만 닫힘, 버튼으로 본 공지는 그날만 빠지고 남은 공지는 다음에 열 때 계속 뜸, '이 공지 다시 보지 않기'는 그 공지만. 두 카드는 같은 크기·글은 줄 넘김 없이(제목 한 줄·문구 두 줄). 옛 앱은 `home_notice`(하나)를 계속 읽으니 둘 다 관리할 것. 문구·그림을 바꾸는 일은 SQL(콘솔은 켜고 끄기만)
+- **앱 시작 공지(2026-11-17 대표 확정)**: 가운데 팝업(`homeNoticePop`), 처음 카드는 무작위, **3초마다 자동으로 넘어감**(손을 대면 멈춤), 카드 아래 **[오늘 그만 보기](그날 쉼) · [닫기](이번만)**, 위치는 점, 버튼으로 본 공지는 그날만 빠지고 남은 공지는 계속 뜸. ✕ 와 '다시 보지 않기'는 없앰. 두 카드는 같은 크기·글은 줄 넘김 없이(제목 한 줄·문구 두 줄). 목록은 셋: `home_notices_v2`(1.0.10~ — 홈페이지 `images/` 나 우리 저장소 사진도 됨, 링크 `{type:shop,id,post}` 는 그 소식을 펼친 채로) · `home_notices`(1.0.9 — 앱에 든 `events/` 그림만) · `home_notice`(옛 앱, 하나). 공지를 바꿀 때 셋을 함께 볼 것. 문구·그림·새 카드는 SQL(콘솔은 켜고 끄기만)
 - **활동에서 누른 알림은 지우지 않는다**(2026-11-16 대표 확정): 새 알림 / 지난 활동(누른 것은 흐리게, 30일 동안 보임)으로 나눠 보여 주고, 지우는 것은 옆으로 밀기와 '모두 지우기'로만. · **가게 소식(클래스 제외)에는 좋아요·댓글**(글만, 링크·계좌번호 금지, 쓰기는 `shop_post_comment` 함수로) · 커뮤니티 '친구' 탭 맨 위에 팔로우한 가게·작가의 최근 14일 소식 줄(`#fnStrip`)
 - 활동 목록: 지기가 보낸 안내(`cheer`·`remind`·`notice`)는 글 전체를 보여 주고, 누르면 글 전체 카드 먼저([닫기]는 알림을 지우지 않음)
 - `onclick` 등 속성 안에 `JSON.stringify` 로 글자를 넣지 말 것 → `data-` 속성으로
@@ -80,8 +80,8 @@
 - 스토어 링크: App Store https://apps.apple.com/kr/app/knitup/id6811913066 · Play https://play.google.com/store/apps/details?id=kr.co.firmtech.knitneighbors
 
 ## 9. 지금 상태 (2026-11-16)
-- 버전: 저장소 **1.0.9 / versionCode 17**. 스토어: **1.0.9 양쪽 심사 중**(2026-11-16 밤 제출 — iOS 빌드 2611161347, Play vc17 `knitup-1.0.9-vc17-play.aab`). 1.0.8 은 양쪽 승인(Play 공개 11-15 밤 · App Store '배포 준비됨'). 1.0.9 가 승인되기 전에는 다음 버전을 스토어에 낼 수 없음 — 그 사이 앱을 고쳐 올리면 TestFlight 에만 쌓임
-- 진행 중: **뜨친 이벤트**(~11-30, 12-01 00:00 뒤 `ddeuchin_event.active=false`·공지 내리기(`home_notice` 와 `home_notices` 의 뜨친 칸 둘 다), 12-01~04 콘솔에서 쌍마다 쿠폰 2장 발송) · 「미피 인형」 신고 건(11-18 11:35 KST 까지 답 없으면 자동 임시 숨김) · 채팅 성탄 배경(~12-31)
+- 버전: 저장소 **1.0.10 / versionCode 18**(TestFlight 만 — 시작 공지 자동 넘김·공방 소식 카드). 스토어: **1.0.9 양쪽 심사 중**(2026-11-16 밤 제출 — iOS 빌드 2611161347, Play vc17 `knitup-1.0.9-vc17-play.aab`). 1.0.8 은 양쪽 승인(Play 공개 11-15 밤 · App Store '배포 준비됨'). 1.0.9 가 승인되기 전에는 다음 버전을 스토어에 낼 수 없음 — 그 사이 앱을 고쳐 올리면 TestFlight 에만 쌓임
+- 진행 중: **뜨친 이벤트**(~11-30, 12-01 00:00 뒤 `ddeuchin_event.active=false`·공지 내리기(`home_notice` · `home_notices` · `home_notices_v2` 의 뜨친 칸 모두), 12-01~04 콘솔에서 쌍마다 쿠폰 2장 발송) · 「미피 인형」 신고 건(11-18 11:35 KST 까지 답 없으면 자동 임시 숨김) · 채팅 성탄 배경(~12-31)
 - 대표 확인 대기: 실제 기기에서 — 가입 동네 화면의 위치 허용/거절, 가게 계정으로 링크 든 소식 올리기, 콘솔 초대·안내 눌러 보기, 작가 지정 때 자동 안내 푸시, 지도 핀 벌리기, 안드로이드 1.0.8
 - 승인 대기(시안 보여 줌): 업데이트 소식 1.0.6~1.0.8(`resources/home-news/`) — 스토어에 나온 버전부터 "소식 올려줘"
 - **대표가 할 일(백업)**: `knitup-backup` 저장소에 열쇠 2개 넣고 한 번 실행해 초록 체크 확인(그 저장소 README '처음 한 번') — 넣기 전에는 매일 실패 메일이 옴. 첫 성공 뒤 Claude 가 백업 내용(표 수·크기)을 확인할 것
