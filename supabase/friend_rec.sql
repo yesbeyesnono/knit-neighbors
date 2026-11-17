@@ -105,6 +105,13 @@ begin
   if coalesce(pb.beginner_ok,false) and greatest(coalesce(pa.level_knit,0), coalesce(pa.level_crochet,0)) <= 2 then
     items := items || jsonb_build_object('k','beginner','s',55,'t','초보도 반겨요','one',true); end if;
 
+  -- ⑧-2 다른 종목을 같이 배워 볼 수 있음(한쪽 이유, 2026-11-18 대표): 나는 한 종목만 하고 상대는 다른 종목이 3단계 이상
+  if coalesce(pa.level_knit,0) = 0 and coalesce(pa.level_crochet,0) > 0 and coalesce(pb.level_knit,0) >= 3 then
+    items := items || jsonb_build_object('k','cross','s',case when coalesce(pb.beginner_ok,false) then 60 else 45 end,'t','대바늘을 같이 배워 볼 수 있어요 — 대바늘 '||pb.level_knit||'단계','one',true);
+  elsif coalesce(pa.level_crochet,0) = 0 and coalesce(pa.level_knit,0) > 0 and coalesce(pb.level_crochet,0) >= 3 then
+    items := items || jsonb_build_object('k','cross','s',case when coalesce(pb.beginner_ok,false) then 60 else 45 end,'t','코바늘을 같이 배워 볼 수 있어요 — 코바늘 '||pb.level_crochet||'단계','one',true);
+  end if;
+
   -- ⑨ 함께 아는 뜨친
   select count(*)::int into n from
     (select case when requester_id = a then addressee_id else requester_id end x from public.friendships where status = 'accepted' and a in (requester_id, addressee_id)) fa
