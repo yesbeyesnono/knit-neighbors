@@ -269,6 +269,7 @@ begin
   out := pg_temp.must_fail(out, 'friend_want_set(anon)', 'select public.friend_want_set(array[''near''], null)');   -- schema 144
   out := pg_temp.must_fail(out, 'friend_rec_refresh(anon)', 'select public.friend_rec_refresh()');
   out := pg_temp.must_fail(out, 'admin_friend_wants(anon)', 'select public.admin_friend_wants()');
+  out := pg_temp.must_fail(out, 'friend_rec_weekly(anon)', 'select public.friend_rec_weekly()');   -- schema 145
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;

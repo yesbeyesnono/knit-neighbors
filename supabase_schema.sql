@@ -2163,3 +2163,6 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   friend_want_set(조건, 글): 저장(링크·연락처·금칙어 막기) · friend_rec_refresh(): 오늘의 추천 다시 고르기(하루 2번, 이미 인사했으면 그대로) · friend_rec_today(): 이유가 {t, want} · friend_rec_reasons(): {reasons, looking}
 --   admin_friend_wants(): 콘솔 › 찾는 뜨친(고른 조건 비율 · 모르는 조건 묶음 · 직접 쓴 글 200건 · 최근 7일 추천/인사 수)
 -- ============================================================
+-- 145. 추천 뜨친 주 1회 알림 (2026-11-18 대표 지시, 원본 supabase/friend_rec_weekly.sql)
+--   friend_recs.pushed_at · friend_rec_weekly(): 최근 30일 접속 + 지난 7일 신청 없음 + 추천 켬 → 그날의 추천 한 명을 알림(remind, 링크 = 그 사람 프로필). cron friend-rec-weekly 0 1 * * 6(토 10:00 KST)
+-- ============================================================
