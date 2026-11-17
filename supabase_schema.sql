@@ -2157,3 +2157,9 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --     회원에게 가는 말은 이 함수의 고정 문구뿐. 확정(verified) 실은 고치지 않음. 바꾼 내용은 yarn_asks.result
 --   스위치 jigi_config.yarn_ask = on|off — **처음 값 off, 대표가 켜라고 할 때 켠다**
 -- ============================================================
+-- 144. 어떤 뜨친을 찾으시나요? (2026-11-18 대표 확정 시안 friend_want_v2, 마이그레이션 friend_want — 원본 supabase/friend_want.sql)
+--   profiles.rec_want(text[] 3개까지: near·level·same·senior·junior·cross·time·chat) · rec_want_text(50자) · rec_want_ai(Edge Function friend-want 가 적음) · rec_want_at · friend_recs.rerolls
+--   _friend_rec_score: 고른 조건에 맞는 항목 1.5배(want 표시) · 새 항목 junior(내가 알려 줄 수 있는 초보)·wtext(글에서 읽은 작품 종류)·cross(다른 종목, 142 뒤 추가)·match(서로 찾는 것이 맞음 +30)
+--   friend_want_set(조건, 글): 저장(링크·연락처·금칙어 막기) · friend_rec_refresh(): 오늘의 추천 다시 고르기(하루 2번, 이미 인사했으면 그대로) · friend_rec_today(): 이유가 {t, want} · friend_rec_reasons(): {reasons, looking}
+--   admin_friend_wants(): 콘솔 › 찾는 뜨친(고른 조건 비율 · 모르는 조건 묶음 · 직접 쓴 글 200건 · 최근 7일 추천/인사 수)
+-- ============================================================

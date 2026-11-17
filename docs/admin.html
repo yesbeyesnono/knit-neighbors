@@ -242,6 +242,7 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
     <a href="#users" data-v="users">회원</a>
     <a href="#content" data-v="content">글·인증</a>
     <a href="#meetups" data-v="meetups">모임</a>
+    <a href="#wants" data-v="wants">찾는 뜨친</a>
     <div class="grp">알리기</div>
     <a href="#broadcast" data-v="broadcast">공지·알림 보내기</a>
     <a href="#automsg" data-v="automsg">자동 메시지</a>
@@ -324,7 +325,7 @@ function route(){ const [v,arg]=(location.hash||'#today').slice(1).split(':'); d
 // 위쪽 가로 메뉴: 묶음 → 탭 → (있으면) 작은 알약. 숫자 배지는 서랍 메뉴(aside)의 #nMod·#nRep·#nSup 값을 그대로 읽는다
 const NAV=[
   {l:'오늘', items:[['today','오늘 (지기 AI)'],['reports','신고함'],['support','지기 문의함'],['certs','인증 확인']]},
-  {l:'회원·커뮤니티', items:[['users','회원'],['content','글·인증'],['meetups','모임']]},
+  {l:'회원·커뮤니티', items:[['users','회원'],['content','글·인증'],['meetups','모임'],['wants','찾는 뜨친']]},
   {l:'알리기', items:[['broadcast','공지·알림 보내기'],['automsg','자동 메시지'],['events','이벤트']]},
   {l:'가게·작가·도안', items:[['shops','파트너 가게'],['authors','작가 신청'],['invites','초대·안내'],['patterns','도안'],['store','상점 (Lab)']]},
   {l:'실 데이터', items:[['yarns','실 사전'],['stash','회원 실 현황']]},
@@ -1377,6 +1378,27 @@ const AUTO_MSGS=[
 function autoSched(c){ const m=String(c||'').split(' '); if(m.length!==5) return c||'';
   if(/^\*\/\d+$/.test(m[0]) && m[1]==='*') return m[0].slice(2)+'분마다'; if(/^\d+$/.test(m[0]) && m[1]==='*') return '매시 '+m[0]+'분';
   if(/^\d+$/.test(m[0]) && /^\d+$/.test(m[1])){ const h=(+m[1]+9)%24; const t=String(h).padStart(2,'0')+':'+String(m[0]).padStart(2,'0'); return (m[4]==='*'&&m[2]==='*'?'매일 ':m[4]!=='*'?'매주 ':'매월 ')+t; } return c; }
+// 회원이 찾는 뜨친 (2026-11-18 대표 확정 시안 friend_want_v2): '어떤 뜨친을 찾으시나요?'에 고른 것과 직접 쓴 글. 직접 쓴 글에서 우리가 모르는 조건을 모아 본다
+VIEWS.wants = async()=>{
+  const { data:d, error }=await sb.rpc('admin_friend_wants');
+  if(error || !d){ $('#main').innerHTML='<h1>회원이 찾는 뜨친</h1><p class="muted">불러오지 못했어요'+(error?' · '+esc(error.message):'')+'</p>'; return; }
+  const L={ near:'가까이 살아서 만날 수 있는 이웃', level:'나와 실력이 비슷한 사람', same:'같은 걸 뜨는 사람', senior:'배울 수 있는 선배', junior:'내가 알려 줄 수 있는 초보', cross:'다른 종목을 같이 배울 사람', time:'시간대가 맞는 사람', chat:'편하게 뜨개 수다 나눌 사람' };
+  const pct=n=>d.answered?Math.round(n*100/d.answered)+'%':'-'; const rc=d.recs||{};
+  const day=t=>t?new Date(t).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'}):'';
+  const known=a=>{ if(!a) return '<span class="muted">읽는 중이거나 읽지 못함</span>'; const k=[...(a.item_types||[]), a.craft==='knitting'?'대바늘':a.craft==='crochet'?'코바늘':'', ...(a.avail||[]).map(x=>({weekday_day:'평일 낮',weekday_evening:'평일 저녁',weekend:'주말'})[x]||x)].filter(Boolean);
+    return (k.length?k.map(x=>`<span class="chip g">${esc(x)}</span>`).join(' '):'')+((a.unknown||[]).length?' '+a.unknown.map(x=>`<span class="chip y">${esc(x)}</span>`).join(' '):'')||'<span class="muted">없음</span>'; };
+  $('#main').innerHTML=`<h1>회원이 찾는 뜨친 <small>'어떤 뜨친을 찾으시나요?'에 답한 회원 ${d.answered}명 / 전체 ${d.total}명 · 추천을 끈 회원 ${d.off}명</small></h1>
+  <p class="muted" style="margin:-6px 0 14px;font-size:13px;line-height:1.6">최근 7일: 추천한 날 ${rc.days7||0}건 · 소개할 이웃이 없던 날 ${rc.none7||0}건 · 추천받은 사람에게 인사를 건넨 것 ${rc.hello7||0}건</p>
+  <h2 style="font-size:16px;margin:18px 0 8px">고른 조건</h2>
+  <div class="tblwrap"><table><thead><tr><th>조건</th><th style="width:90px">회원</th><th style="width:90px">답한 회원 중</th></tr></thead><tbody>
+  ${(d.opts||[]).map(o=>`<tr><td>${esc(L[o.k]||o.k)}</td><td>${o.n}명</td><td>${pct(o.n)}</td></tr>`).join('')||'<tr><td colspan="3" class="muted">아직 답한 회원이 없어요</td></tr>'}</tbody></table></div>
+  <h2 style="font-size:16px;margin:22px 0 8px">우리가 모르는 조건 <small class="muted" style="font-weight:500">직접 쓴 글에서 AI 가 묶은 것 — 자주 나오면 프로필 항목이나 선택지로</small></h2>
+  <div class="tblwrap"><table><thead><tr><th>조건</th><th style="width:90px">건</th></tr></thead><tbody>
+  ${(d.unknown||[]).map(o=>`<tr><td>${esc(o.label)}</td><td>${o.n}</td></tr>`).join('')||'<tr><td colspan="2" class="muted">아직 없어요</td></tr>'}</tbody></table></div>
+  <h2 style="font-size:16px;margin:22px 0 8px">직접 쓴 글 <small class="muted" style="font-weight:500">최근 200건 · 초록 = 추천에 반영 · 노랑 = 모르는 조건</small></h2>
+  <div class="tblwrap"><table><thead><tr><th style="width:70px">날짜</th><th style="width:130px">회원</th><th>쓴 글</th><th style="width:34%">AI 가 읽은 것</th></tr></thead><tbody>
+  ${(d.texts||[]).map(t=>`<tr><td>${day(t.at)}</td><td>${esc(t.nickname||'')}</td><td>${esc(t.text||'')}</td><td>${known(t.ai)}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">아직 없어요</td></tr>'}</tbody></table></div>`;
+};
 VIEWS.automsg = async()=>{
   let jobs=[]; try{ const {data}=await sb.rpc('admin_auto_jobs'); jobs=data||[]; }catch(e){}
   const J={}; jobs.forEach(j=>J[j.name]=j);

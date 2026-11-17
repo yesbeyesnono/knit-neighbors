@@ -1031,6 +1031,11 @@ body.kb #nav{display:none!important}
 .frwhy{background:var(--color-bg);border-radius:12px;padding:11px 12px 6px;margin-top:11px}.frwhy h4{margin:0 0 7px;font-size:.78rem;color:var(--color-text-muted);font-weight:700}.frwhy div{display:flex;gap:8px;align-items:flex-start;font-size:.84rem;line-height:1.45;margin-bottom:6px}.frwhy div i{flex:none;width:18px;height:18px;border-radius:50%;background:var(--color-primary);color:#fff;font-style:normal;font-size:.68rem;font-weight:700;text-align:center;line-height:18px;margin-top:1px}
 .frbt{display:flex;gap:8px;margin-top:11px}.frbt button{flex:1;border-radius:12px;padding:10px;font:inherit;font-size:.86rem;font-weight:700;cursor:pointer;border:1.5px solid var(--line);background:var(--color-surface);color:var(--ink)}.frbt button.g{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
 .froff{display:block;width:100%;border:0;background:none;font:inherit;font-size:.78rem;color:var(--color-text-muted);padding:9px 0 0;cursor:pointer}
+.froff2{display:flex;justify-content:center;gap:7px;font-size:.78rem;color:var(--color-text-muted);padding:9px 0 0}.froff2 button{border:0;background:none;font:inherit;color:inherit;cursor:pointer;padding:0}
+.frask{background:var(--color-primary-light);border-radius:16px;padding:14px}.frask b{display:block;font-size:.95rem;margin-bottom:3px}.frask span{display:block;font-size:.82rem;color:var(--color-text-muted);line-height:1.5;margin-bottom:11px}.frask button{display:block;width:100%;border:0;border-radius:12px;padding:10px;font:inherit;font-size:.88rem;font-weight:700;background:var(--color-primary);color:#fff;cursor:pointer}
+.frwhy em{font-style:normal;background:var(--color-primary-light);color:var(--color-primary);border-radius:6px;padding:0 5px;font-size:.7rem;font-weight:700;margin-left:5px;white-space:nowrap}
+.frwant{display:flex;flex-direction:column;gap:5px}.frwant button{display:flex;justify-content:space-between;text-align:left;border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;font:inherit;font-size:.86rem;background:var(--color-surface);color:var(--ink);cursor:pointer}.frwant button.on{border-color:var(--color-primary);background:var(--color-primary-light);font-weight:700}.frwant button.on::after{content:"✓";color:var(--color-primary)}
+#frWantTxt{min-height:44px;height:44px;resize:none}
 .frchips{display:flex;flex-direction:column;gap:7px}.frchips button{text-align:left;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:.88rem;background:var(--color-surface);color:var(--ink);cursor:pointer}.frchips button.on{border-color:var(--color-primary);background:var(--color-primary-light);font-weight:700}
 #commTabs button{position:relative}#commTabs button.dot::after{content:"";position:absolute;top:5px;right:calc(50% - 21px);width:7px;height:7px;border-radius:50%;background:#C8402F}
 #fqpop .fqwhy{text-align:left;background:#FFF6DA;border-radius:12px;padding:9px 11px 4px;margin-top:8px}#fqpop .fqwhy h4{margin:0 0 5px;font-size:.74rem;color:#7a6a4a;font-weight:700}#fqpop .fqwhy div{font-size:.8rem;color:#4a3a2a;line-height:1.45;margin-bottom:5px}
@@ -2239,17 +2244,39 @@ async function frFetch(force){ if(!me || !myProfile?.onboarded_at || myProfile.r
   try{ const { data, error }=await sb.rpc('friend_rec_today'); if(error) return frRec; frRec=data||null; frRecAt=d; }catch(e){} return frRec; }
 function frDot(){ const b=$('#commTabs button[data-f="friends"]'); if(!b) return; let seen=''; try{ seen=localStorage.getItem('kn_frrec_seen')||''; }catch(e){} b.classList.toggle('dot', !!(frRec && frRec.state==='none' && seen!==frDay())); }
 async function frInit(){ await frFetch(); frDot(); }
-async function loadFriendRec(force){ const box=$('#frRec'); if(!box) return; box.hidden=true; const r=await frFetch(force); if(!r || !r.p || commFilter!=='friends') return;
+async function loadFriendRec(force){ const box=$('#frRec'); if(!box) return; box.hidden=true; if(!me || !myProfile?.onboarded_at || myProfile.rec_off) return;
+  // 처음 한 번: 어떤 뜨친을 찾는지 묻는다(2026-11-18 대표 확정 시안 friend_want_v2 · schema 144). '나중에'는 7일 쉼
+  if(!myProfile.rec_want_at && !frLater()){ if(commFilter!=='friends') return;
+    box.innerHTML=`<div class="frhd"><b>오늘의 추천 뜨친</b><small>내일 또 한 분</small></div><div class="frask"><b>어떤 뜨친을 찾으시나요?</b><span>알려 주시면 더 잘 맞는 이웃을 소개해 드릴게요. 3개까지 고를 수 있어요.</span><button type="button" onclick="frWant()">골라 볼게요</button></div><button type="button" class="froff" onclick="frLaterSet()">나중에 할게요</button>`;
+    box.hidden=false; return; }
+  const r=await frFetch(force); if(!r || !r.p || commFilter!=='friends') return;
   try{ localStorage.setItem('kn_frrec_seen', frDay()); }catch(e){} frDot();
   const p=r.p, sub=[r.near, lvShort(p)].filter(Boolean).join(' · ');
   const btn = r.state==='accepted' ? `<button type="button" class="g" onclick="openDirectRoom('${p.id}')">대화하기</button>` : r.state==='pending' ? `<button type="button" class="g" onclick="requestFriend('${p.id}')">인사 중이에요</button>` : r.state==='none' ? `<button type="button" class="g" onclick="frHello()">인사하기</button>` : '';
   box.innerHTML=`<div class="frhd"><b>오늘의 추천 뜨친</b><small>내일 또 한 분</small></div><div class="frone">
     <div class="froh" onclick="openProfile('${p.id}')">${avatar(p)}<div><b>${esc(p.nickname||'이웃')}</b><span>${esc(sub)}</span></div></div>
     ${(r.photos||[]).length?`<div class="frwk">${r.photos.map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join('')}</div>`:''}
-    ${(r.reasons||[]).length?`<div class="frwhy"><h4>knitup 이 이 분을 소개한 이유</h4>${r.reasons.map((t,i)=>`<div><i>${i+1}</i><span>${esc(t)}</span></div>`).join('')}</div>`:''}
+    ${(r.reasons||[]).length?`<div class="frwhy"><h4>knitup 이 이 분을 소개한 이유</h4>${r.reasons.map((x,i)=>{ const o=typeof x==='string'?{t:x}:(x||{}); return `<div><i>${i+1}</i><span>${esc(o.t||'')}${o.want?'<em>찾으시는 조건</em>':''}</span></div>`; }).join('')}</div>`:''}
     <div class="frbt">${btn}<button type="button" onclick="openProfile('${p.id}')">프로필 보기</button></div></div>
-    <button type="button" class="froff" onclick="frOff()">추천받고 싶지 않다면 ›</button>`;
+    <div class="froff2"><button type="button" onclick="frWant()">찾는 뜨친 바꾸기</button><span>·</span><button type="button" onclick="frOff()">추천 끄기</button></div>`;
   box.hidden=false; }
+const FR_WANT=[['near','가까이 살아서 만날 수 있는 이웃'],['level','나와 실력이 비슷한 사람'],['same','같은 걸 뜨는 사람'],['senior','배울 수 있는 선배'],['junior','내가 알려 줄 수 있는 초보'],['cross','다른 종목을 같이 배울 사람'],['time','시간대가 맞는 사람'],['chat','편하게 뜨개 수다 나눌 사람']];
+const frLater=()=>{ try{ return Date.now()-(+localStorage.getItem('kn_frwant_later')||0) < 7*864e5; }catch(e){ return false; } };
+function frLaterSet(){ try{ localStorage.setItem('kn_frwant_later', String(Date.now())); }catch(e){} loadFriendRec(); }
+function frWant(){ const cur=new Set(myProfile?.rec_want||[]);
+  openSheet(`<b>어떤 뜨친을 찾으시나요?</b><p class="muted" style="margin:0">3개까지 골라 주세요</p>
+    <div class="frwant">${FR_WANT.map(([k,l])=>`<button type="button" data-k="${k}" class="${cur.has(k)?'on':''}" onclick="frWantPick(this)">${l}</button>`).join('')}</div>
+    <textarea id="frWantTxt" maxlength="50" rows="1" placeholder="직접 쓰기 (선택, 50자) 예: 인형 뜨는 분이면 좋겠어요">${esc(myProfile?.rec_want_text||'')}</textarea><button class="btn" id="frWantBtn" onclick="frWantSave()">이렇게 찾아 주세요</button>`); }
+function frWantPick(b){ if(!b.classList.contains('on') && document.querySelectorAll('.frwant button.on').length>=3) return toast('3개까지 고를 수 있어요'); b.classList.toggle('on'); }
+async function frWantSave(){ const want=[...document.querySelectorAll('.frwant button.on')].map(x=>x.dataset.k), text=($('#frWantTxt')?.value||'').replace(/\s+/g,' ').trim(); const btn=$('#frWantBtn');
+  if(btn){ if(btn.disabled) return; btn.disabled=true; btn.textContent='찾고 있어요…'; }
+  const { data, error }=await sb.rpc('friend_want_set', { p_want:want, p_text:text||null });
+  if(error){ if(btn){ btn.disabled=false; btn.textContent='이렇게 찾아 주세요'; } return toast(error.message.replace(/^.*?: /,'')); }
+  myProfile.rec_want=want; myProfile.rec_want_text=text||null; myProfile.rec_want_at=new Date().toISOString();
+  // 직접 쓴 글은 서버의 AI 가 읽어 조건으로 나눈다(2~3초). 늦으면 기다리지 않고 고른 조건만으로 추천
+  if(data && data.parse){ try{ await Promise.race([sb.functions.invoke('friend-want', { body:{} }), new Promise(r=>setTimeout(r, 6000))]); }catch(e){} }
+  try{ const r=await sb.rpc('friend_rec_refresh'); if(!r.error){ frRec=r.data||null; frRecAt=frDay(); } }catch(e){}
+  closeSheet(); toast('찾는 뜨친을 기억했어요'); frDot(); loadFriendRec(); }
 function frHello(){ const r=frRec; if(!r || !r.p) return; const p=r.p;
   openSheet(`<b>${esc(p.nickname||'이웃')} 님에게 인사하기</b><p class="muted" style="margin:0">인사말을 고르거나 직접 써 주세요 (100자)</p>
     <div class="frchips">${FR_HI.map((t,i)=>`<button type="button" class="${i?'':'on'}" onclick="frPick(this)">${esc(t)}</button>`).join('')}</div>
@@ -2973,7 +3000,8 @@ function fqChips(p){ const my=myProfile||{}, c=[]; if(p.dong_name && p.dong_name
   const near=(a,b)=>a>0&&b>0&&Math.abs(a-b)<=1; if(near(p.level_crochet,my.level_crochet)||near(p.level_knit,my.level_knit)) c.push('단계 비슷해요');
   const ex=fq.extra[p.id]; if(ex && Array.isArray(ex.available) && Array.isArray(my.available)){ const k=ex.available.find(a=>my.available.includes(a)); if(k && AVAIL[k]) c.push(AVAIL[k]+'에 떠요'); }
   return c.length?`<div class="fqchips">${c.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''; }
-function fqWhy(id){ const ex=fq.extra[id]; return ex && ex.why && ex.why.length ? `<div class="fqwhy"><h4>knitup 이 두 분을 소개한 이유</h4>${ex.why.map(t=>`<div>· ${esc(t)}</div>`).join('')}</div>` : ''; }
+function fqWhy(id){ const ex=fq.extra[id]; if(!ex) return '';
+  return (ex.why && ex.why.length ? `<div class="fqwhy"><h4>knitup 이 두 분을 소개한 이유</h4>${ex.why.map(t=>`<div>· ${esc(t)}</div>`).join('')}</div>` : '') + (ex.looking ? `<div class="fqwhy"><h4>이런 뜨친을 찾고 있어요</h4><div>${esc(ex.looking)}</div></div>` : ''); }
 function fqDraw(step){
   const r=fq.rows[fq.i]; if(!r) return fqClose(); const p=r.requester, id=r.requester_id;
   if(step==='intro') return fqWrap(`<div class="fqc tk"><div class="fqpop-img"><img src="events/ddeuchin-wave.webp" alt=""></div><button type="button" class="fqx" aria-label="닫기" onclick="fqClose()">✕</button>
@@ -2991,7 +3019,7 @@ function fqDraw(step){
 }
 async function fqLoadExtra(id){ if(fq.extra[id]) return fq.extra[id];
   const ex={ open:false, bio:'', available:null, photos:[], why:[] }; fq.extra[id]=ex;
-  try{ const { data:why }=await sb.rpc('friend_rec_reasons', { p_other:id }); if(Array.isArray(why)) ex.why=why; }catch(e){}
+  try{ const { data:why }=await sb.rpc('friend_rec_reasons', { p_other:id }); if(why && Array.isArray(why.reasons)){ ex.why=why.reasons; ex.looking=why.looking||''; } else if(Array.isArray(why)) ex.why=why; }catch(e){}
   try{ const [{ data:pr }, { data:ws }] = await Promise.all([sb.from('profiles').select('bio,now_making,available').eq('id', id).maybeSingle(), sb.from('posts').select('photos').eq('author_id', id).is('parent_id', null).not('work_id','is',null).order('created_at',{ascending:false}).limit(3)]);
     ex.bio = pr?.bio || (pr?.now_making?`지금 뜨는 것: ${pr.now_making}`:''); ex.available=pr?.available||null; ex.photos=(ws||[]).map(w=>(w.photos||[])[0]).filter(Boolean); }catch(e){}
   return ex; }
