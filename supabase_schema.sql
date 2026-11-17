@@ -2125,3 +2125,12 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   app_config.home_notices_v2: 1.0.10 부터 먼저 읽는 목록. 처음 값 = home_notices 의 두 장 + 미미살롱 연희점 소식(그림 app.knitup.co.kr/images/notice-mimisalon.jpg, link {type:shop,id,post})
 --   admin_home_notices_toggle(p_id, p_active): 두 목록(home_notices · home_notices_v2) 모두에서 같은 id 를 켜고 끔
 -- ============================================================
+
+-- ============================================================
+-- 140. 콘솔 › 회원 실 현황 (2026-11-17 대표 확정 시안 console_stash_v3, 마이그레이션 yarn_overview — 원본 supabase/yarn_overview.sql)
+--   admin_yarn_overview(p_days): 관리자만. 실함(yarn_stash, 테스트 계정 제외)과 완성작품 인증에 쓴 실(yarn_entries source=work, 승인된 인증만 · 인증이 지워져 남은 익명 기록 포함)을 한 번에 집계
+--     tiles(요약) · months(최근 12달, 실의 계절별 담은 볼·쓴 양 g·작품 수 — 기간과 무관) · items(작품 종류별 쓴 양) · yarns(실별 한 줄 최대 600: 담은 회원·볼·남은 볼 / 쓴 작품·쓴 양·주로 만든 것 / 색 6개 / 12달 쓰임)
+--     쓴 양 g = 볼 수 × 1볼 무게(본인 입력 → 사전 규격). 1볼 무게를 모르는 것은 g 에 넣지 않고 g_unknown 으로 셈. 계절 = 실 사전의 season(여름·겨울·사계절, 없으면 미정)
+--   콘솔: 메뉴 '회원 실함' → '회원 실 현황'. 탭 한눈에 · 실별 보기 · 정리할 것(옛 처리할 묶음, admin_yarn_queue 그대로) · 회원 찾기(admin_stash_search 그대로). 화면 코드 svOverHtml·svYarnsHtml·svQueueHtml·svFindHtml, 스타일은 sv 로 시작
+--   '담은 실'은 실함에 넣은 날 기준(판매·구매 기록은 없음). 실이 많아지면 yarns 의 12달 쓰임(실마다 달별 조회)이 느려질 수 있음 — 그때 달별 집계를 한 번에 뽑도록 바꿀 것
+-- ============================================================

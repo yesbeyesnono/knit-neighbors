@@ -105,6 +105,7 @@ begin
   out := pg_temp.must_fail(out, 'admin_stats', 'select public.admin_stats()');
   out := pg_temp.must_fail(out, 'admin_broadcast_send', 'select public.admin_broadcast_send(''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'admin_yarn_update', 'select public.admin_yarn_update(''{}''::jsonb)');
+  out := pg_temp.must_fail(out, 'admin_yarn_overview', 'select public.admin_yarn_overview(365)');   -- schema 140
   out := pg_temp.must_fail(out, 'cheer_send', format('select public.cheer_send(%L, ''x'', ''x'')', d1));   -- schema 72
   out := pg_temp.must_fail(out, 'support_msg', format('select public.support_msg(%L, ''x'', ''x'')', d1));
   out := pg_temp.must_fail(out, 'cheer_daily', 'select public.cheer_daily()');
