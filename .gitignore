@@ -25,3 +25,6 @@ android/app/google-services.json
 *firebase-adminsdk*.json
 
 resources/author-guide/
+
+# 특허 상담 자료(공개 저장소에 올리지 않는다)
+resources/patent/
