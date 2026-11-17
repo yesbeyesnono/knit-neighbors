@@ -259,6 +259,10 @@ begin
   out := pg_temp.cnt(out, 'admin_auto_jobs(anon)', 'select jsonb_array_length(public.admin_auto_jobs())', 0);   -- schema 136
   out := pg_temp.cnt(out, 'shop_post_comments(anon)', 'select count(*) from public.shop_post_comments', 0);   -- schema 138
   out := pg_temp.cnt(out, 'shop_post_likes(anon)', 'select count(*) from public.shop_post_likes', 0);
+  out := pg_temp.must_fail(out, 'friend_recs(anon)', 'select count(*) from public.friend_recs');   -- schema 142
+  out := pg_temp.must_fail(out, '_friend_rec_make', 'select public._friend_rec_make(gen_random_uuid(), current_date)');
+  out := pg_temp.must_fail(out, '_friend_rec_score', 'select public._friend_rec_score(gen_random_uuid(), gen_random_uuid())');
+  out := pg_temp.must_fail(out, 'friend_rec_today(anon)', 'select public.friend_rec_today()');
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;
