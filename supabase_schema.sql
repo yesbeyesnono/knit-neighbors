@@ -2146,3 +2146,14 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   friend_rec_today(): 앱 카드 · friend_rec_reasons(상대): 두 사람을 소개한 이유(받은 쪽에는 한쪽 이유 제외). 함수의 search_path 는 public, extensions(PostGIS)
 --   friend_request_remind(): 3일 → 24시간 뒤, 문구 '○○ 님이 인사를 기다리고 있어요 “인사말”', cron friend-remind 를 30 0-12 * * *(09:30~21:30 KST 매시 30분)로
 -- ============================================================
+
+-- ============================================================
+-- 143. 실 정보 되묻기 — 지기 채팅으로 묻고 답을 받아 실 사전에 채움 (2026-11-17 대표 지시, 마이그레이션 yarn_ask — 원본 supabase/yarn_ask.sql · Edge supabase/functions/yarn-ask)
+--   yarn_asks(profile_id, work_id, items, status asked|done|unknown|expired, turns, answer, result): 관리자 열람만
+--   yarn_ask_check(work, force): 인증이 승인될 때(트리거 works_yarn_ask) 쓴 실이 사전에 '후보'로만 있고 브랜드·1볼 g·m·소재가 비면 _jigi_say 로 한 번 물음
+--     · 한 인증에 한 번 · 회원마다 jigi_config.yarn_ask_cooldown_days(7)에 한 번 · 열린 질문이 있으면 건너뜀 · 14일 뒤 닫힘
+--   support_on_message: 열린 실 질문이 있는 회원의 답은 Edge yarn-ask 가 먼저 봄(실 이야기가 아니면 지기 1차 응대로 넘김). 신고 사건이 열려 있으면 지금처럼
+--   yarn_ask_apply(ask, answer): 값 범위 검사 → 확정 실과 맞으면(브랜드+이름 또는 브랜드+규격) 그 기록만 연결 / 아니면 후보의 빈 칸만 채움(같은 후보를 다른 기록도 쓰면 새 후보) / 모르면 닫음
+--     회원에게 가는 말은 이 함수의 고정 문구뿐. 확정(verified) 실은 고치지 않음. 바꾼 내용은 yarn_asks.result
+--   스위치 jigi_config.yarn_ask = on|off — **처음 값 off, 대표가 켜라고 할 때 켠다**
+-- ============================================================

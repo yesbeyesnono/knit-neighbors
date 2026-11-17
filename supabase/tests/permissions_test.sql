@@ -107,6 +107,9 @@ begin
   out := pg_temp.must_fail(out, 'admin_yarn_update', 'select public.admin_yarn_update(''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'admin_yarn_overview', 'select public.admin_yarn_overview(365)');   -- schema 140
   out := pg_temp.must_fail(out, 'admin_yarn_color_summary', 'select public.admin_yarn_color_summary()');   -- schema 141
+  out := pg_temp.must_fail(out, 'yarn_ask_check', 'select public.yarn_ask_check(gen_random_uuid(), true)');   -- schema 143
+  out := pg_temp.must_fail(out, 'yarn_ask_apply', $q$select public.yarn_ask_apply(1, '{}'::jsonb)$q$);   -- schema 143
+  out := pg_temp.must_fail(out, 'yarn_asks', 'select count(*) from public.yarn_asks where status is not null having count(*) > 0');   -- schema 143
   out := pg_temp.must_fail(out, 'cheer_send', format('select public.cheer_send(%L, ''x'', ''x'')', d1));   -- schema 72
   out := pg_temp.must_fail(out, 'support_msg', format('select public.support_msg(%L, ''x'', ''x'')', d1));
   out := pg_temp.must_fail(out, 'cheer_daily', 'select public.cheer_daily()');
