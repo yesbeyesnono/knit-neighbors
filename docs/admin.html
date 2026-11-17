@@ -1855,7 +1855,10 @@ const yPhoto=path=>`${SB_URL}/storage/v1/object/public/yarn-colors/${encodeURI(p
 const yName=y=>(y.brand?y.brand+' ':'')+y.product;
 function yChipCss(c){ return c.photo?`url(${yPhoto(c.photo)}) center/cover`:(c.color_hex&&c.color_hex.length? (c.color_hex.length>1&&c.color_mode==='mix'?`radial-gradient(circle at 30% 35%, ${c.color_hex[1]} 14%, transparent 15%), radial-gradient(circle at 68% 64%, ${c.color_hex[2]||c.color_hex[1]} 12%, transparent 13%), ${c.color_hex[0]}`:c.color_hex[0]) : 'var(--soft)'); }
 const YFAM={'화이트·아이보리':'#F7F3EA','베이지·크림':'#E3D2B4','브라운':'#8A5A3B','블랙':'#2B2B2B','그레이':'#9A9DA1','레드':'#C0392B','와인·버건디':'#7B2D3A','핑크':'#E8A0B4','오렌지':'#E58A3C','옐로·머스터드':'#D9A520','그린':'#4F8A4B','카키·올리브':'#7A7A45','민트·청록':'#58B7A8','블루·스카이':'#5C9BD6','네이비':'#27365E','퍼플·라벤더':'#9077B8','멀티·믹스':'linear-gradient(135deg,#E8A0B4,#D9A520,#58B7A8,#5C9BD6)'};
-let YCOLS=[], yTab='dash', yFam='', yColBrand='';
+let YCOLS=[], YCOLS_OK=false, YCSUM={tot:0,photos:0,fam_n:0,fam:[]}, yTab='dash', yFam='', yColBrand='';
+// 탭을 바꿀 때(ySetTab)는 받은 데이터를 그대로 쓰고, 메뉴로 다시 들어오거나 [새로고침]을 누를 때만 다시 받는다(2026-11-17 느림 해결)
+let yKeep=false;
+function yReload(){ YCOLS_OK=false; route(); }
 const Y_TABS=[['dash','대시보드'],['demand','수요'],['list','실 목록'],['colors','색상'],['brands','브랜드'],['reco','추천·호환'],['quality','품질 점검'],['alias','브랜드 별칭']];
 function yCount(list, key){ const m={}; list.forEach(y=>{ const k=key(y)||'(없음)'; m[k]=(m[k]||0)+1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]); }
 function yBars(pairs, onClick, max){ const top=Math.max(1,...pairs.map(p=>+p[1]||0)); return pairs.slice(0,max||12).map(([k,n])=>`<div class="hbar" ${onClick?`style="cursor:pointer" onclick="${onClick}(this.dataset.k)" data-k="${esc(k)}"`:''}><span title="${esc(k)}">${esc(k)}</span><span class="w"><b style="width:${Math.round(n/top*100)}%"></b></span><span class="muted">${n}</span></div>`).join('')||'<div class="muted">없음</div>'; }
@@ -1863,18 +1866,24 @@ function yBars(pairs, onClick, max){ const top=Math.max(1,...pairs.map(p=>+p[1]|
 async function sbAll(mk){ const P=1000; let out=[], from=0; for(;;){ const rs=await Promise.all([...Array(8)].map((_,i)=>mk().range(from+i*P, from+i*P+P-1))); for(const r of rs){ if(r.error){ if(r.error.code!=='PGRST103' && r.status!==416) toast(r.error.message); return {data:out}; } out=out.concat(r.data||[]); } if(rs.some(r=>(r.data||[]).length<P)) return {data:out}; from+=8*P; } }
 VIEWS.yarns = async(arg)=>{
   if(arg && Y_TABS.some(t=>t[0]===arg)) yTab=arg;
-  const [{data}, {data:cols}, {data:st}] = await Promise.all([
-    sbAll(()=>sb.from('yarn_catalog').select('*').is('merged_into', null).order('status').order('uses',{ascending:false}).order('id')),
-    sbAll(()=>sb.from('yarn_colors').select('id,catalog_id,no,name,family,photo,color_hex,color_mode').order('id')),
-    sb.rpc('admin_yarn_stats') ]);
-  YARNS=data||[]; YST=st||{}; YCOL={}; YCOLS=cols||[];
-  YCOLS.forEach(c=>{ const o=YCOL[c.catalog_id]||(YCOL[c.catalog_id]={n:0,p:0,first:null}); o.n++; if(c.photo){ o.p++; if(!o.first) o.first=c.photo; } });
-  $('#main').innerHTML=`<h1>실 사전 <small>표준 실 데이터 — 추천·판매의 바탕 · 실 ${YARNS.length} · 색 ${YCOLS.length.toLocaleString()}</small></h1>
-  <div class="tabs">${Y_TABS.map(([k,l])=>`<button class="${yTab===k?'on':''}" onclick="ySetTab('${k}')">${l}</button>`).join('')}<span style="flex:1"></span><button class="p" onclick="openYarnForm()">실 직접 추가</button><button onclick="yExport('yarns')">CSV(실)</button><button onclick="yExport('colors')">CSV(색)</button></div>
+  const keep=yKeep && YARNS.length; yKeep=false;
+  if(!keep){
+    // 색 3만여 개를 다 받지 않고, 실마다 색 수·사진 수·첫 사진과 계열별 개수만 서버에서 세어 받는다(schema 141)
+    const [{data}, cs, {data:st}] = await Promise.all([
+      sbAll(()=>sb.from('yarn_catalog').select('*').is('merged_into', null).order('status').order('uses',{ascending:false}).order('id')),
+      sb.rpc('admin_yarn_color_summary'),
+      sb.rpc('admin_yarn_stats') ]);
+    if(cs.error) toast(cs.error.message);
+    YARNS=data||[]; YST=st||{}; YCOL={}; YCOLS=[]; YCOLS_OK=false;
+    YCSUM=cs.data||{tot:0,photos:0,fam_n:0,fam:[],per:[]};
+    (YCSUM.per||[]).forEach(o=>{ YCOL[o.c]={n:o.n, p:o.p, first:o.f||null}; });
+  }
+  $('#main').innerHTML=`<h1>실 사전 <small>표준 실 데이터 — 추천·판매의 바탕 · 실 ${YARNS.length} · 색 ${(YCSUM.tot||0).toLocaleString()}</small></h1>
+  <div class="tabs">${Y_TABS.map(([k,l])=>`<button class="${yTab===k?'on':''}" onclick="ySetTab('${k}')">${l}</button>`).join('')}<span style="flex:1"></span><button class="p" onclick="openYarnForm()">실 직접 추가</button><button onclick="yExport('yarns')">CSV(실)</button><button onclick="yExport('colors')">CSV(색)</button><button onclick="yReload()" title="실·색을 서버에서 다시 받아요">새로고침</button></div>
   <div id="yBody"></div>`;
   renderYarnTab();
 };
-function ySetTab(t){ yTab=t; location.hash='#yarns:'+t; }
+function ySetTab(t){ yTab=t; if(location.hash==='#yarns:'+t) return renderYarnTab(); yKeep=true; location.hash='#yarns:'+t; }
 function renderYarnTab(){
   const el=$('#yBody'); if(!el) return;
   if(yTab==='dash') el.innerHTML=yDashHtml();
@@ -1889,11 +1898,11 @@ function renderYarnTab(){
 // ---- 대시보드
 function yDashHtml(){
   const ok=YARNS.filter(y=>y.status==='verified'), cand=YARNS.filter(y=>y.status==='auto');
-  const famCnt=yCount(YCOLS.filter(c=>c.family), c=>c.family); const famTot=YCOLS.length||1;
+  const famCnt=(YCSUM.fam||[]).map(([k,n])=>[k,n]); const famTot=YCSUM.tot||1;
   const brands=(YST.brands_tbl||[]);
   return `<div class="hero3">
     <div class="card"><div class="muted">등록된 실</div><div class="big">${YARNS.length}</div><div class="muted">확정 ${ok.length} · 후보 ${cand.length} · 브랜드 ${yCount(YARNS,y=>y.brand).filter(([k])=>k!=='(없음)').length}</div></div>
-    <div class="card"><div class="muted">색상</div><div class="big">${YCOLS.length.toLocaleString()}</div><div class="muted">실물 사진 ${YCOLS.filter(c=>c.photo).length.toLocaleString()}장 · 계열 판정 ${YCOLS.filter(c=>c.family).length.toLocaleString()}</div></div>
+    <div class="card"><div class="muted">색상</div><div class="big">${(YCSUM.tot||0).toLocaleString()}</div><div class="muted">실물 사진 ${(YCSUM.photos||0).toLocaleString()}장 · 계열 판정 ${(YCSUM.fam_n||0).toLocaleString()}</div></div>
     <div class="card"><div class="muted">회원 입력(원문)</div><div class="big">${(YST.entries||0).toLocaleString()}</div><div class="muted">최근 30일 ${YST.entries_30d||0} · 실함에서 ${YST.entries_stash||0} · 실함 보유 ${YST.stash_rows||0}</div></div>
   </div>
   <div class="row"><span class="muted">바로 손볼 것:</span>
@@ -1912,9 +1921,9 @@ function yDashHtml(){
     <div class="card"><b>촉감·구조별</b> <span class="muted">호환 추천의 1순위 축</span>${yBars(yCount(YARNS,y=>y.texture))}</div>
     <div class="card"><b>맞는 작품별</b>${yBars(yCount(YARNS.flatMap(y=>(y.use_tags||[]).map(u=>({u}))),x=>x.u))}</div>
   </div>
-  <div class="card" style="margin-bottom:12px"><b>색 계열 분포</b> <span class="muted">색상 ${YCOLS.length.toLocaleString()}개 기준 · 누르면 색상 탭</span>
+  <div class="card" style="margin-bottom:12px"><b>색 계열 분포</b> <span class="muted">색상 ${(YCSUM.tot||0).toLocaleString()}개 기준 · 누르면 색상 탭</span>
     <div style="display:flex;height:22px;border-radius:8px;overflow:hidden;margin:8px 0;border:1px solid var(--line)">${famCnt.map(([k,n])=>`<div title="${esc(k)} ${n}" onclick="yGoFam(this.dataset.k)" data-k="${esc(k)}" style="width:${n/famTot*100}%;background:${YFAM[k]||'#ddd'};cursor:pointer"></div>`).join('')}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px">${famCnt.map(([k,n])=>`<span style="cursor:pointer" onclick="yGoFam(this.dataset.k)" data-k="${esc(k)}"><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${YFAM[k]||'#ddd'};border:1px solid var(--line);vertical-align:-1px"></i> ${esc(k)} ${n}</span>`).join('')}${YCOLS.length-YCOLS.filter(c=>c.family).length?`<span class="muted">미판정 ${YCOLS.length-YCOLS.filter(c=>c.family).length}</span>`:''}</div></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px">${famCnt.map(([k,n])=>`<span style="cursor:pointer" onclick="yGoFam(this.dataset.k)" data-k="${esc(k)}"><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${YFAM[k]||'#ddd'};border:1px solid var(--line);vertical-align:-1px"></i> ${esc(k)} ${n}</span>`).join('')}${(YCSUM.tot||0)-(YCSUM.fam_n||0)?`<span class="muted">미판정 ${(YCSUM.tot||0)-(YCSUM.fam_n||0)}</span>`:''}</div></div>
   <div class="hero3" style="grid-template-columns:1fr 1fr 1fr">
     <div class="card"><b>최근 30일 많이 적힌 실</b>${yBars((YST.top_30d||[]).map(t=>[t.name,t.n]))}</div>
     <div class="card"><b>작품 종류별 실 사용</b>${yBars((YST.items||[]).map(t=>[t.k,t.n]))}</div>
@@ -2018,6 +2027,10 @@ function renderYarnTable(){
 }
 // ---- 색상 탐색: 계열·브랜드로 걸러 실물 사진 격자, 누르면 그 실
 function yColorsHtml(){
+  if(!YCOLS_OK){
+    if(!window._ycLoading){ window._ycLoading=1; sbAll(()=>sb.from('yarn_colors').select('id,catalog_id,no,name,family,photo,color_hex,color_mode').order('id')).then(({data})=>{ YCOLS=data||[]; YCOLS_OK=true; window._ycLoading=0; if(yTab==='colors') renderYarnTab(); }); }
+    return `<div class="muted">색 ${(YCSUM.tot||0).toLocaleString()}개 불러오는 중… (처음 한 번만)</div>`;
+  }
   const nm={}; YARNS.forEach(y=>nm[y.id]=y);
   const fams=yCount(YCOLS.filter(c=>c.family), c=>c.family); const brands=yCount(YCOLS, c=>(nm[c.catalog_id]||{}).brand);
   let list=YCOLS.filter(c=>(!yFam || (yFam==='(미판정)'?!c.family:c.family===yFam)) && (!yColBrand || ((nm[c.catalog_id]||{}).brand||'(없음)')===yColBrand));
