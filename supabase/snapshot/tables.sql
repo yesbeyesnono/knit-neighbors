@@ -1,4 +1,4 @@
--- 표 93개: 칸·제약·RLS·권한. (만드는 순서와 외래 키 순서는 보장하지 않음 — 복구할 때는 supabase_migrations 기록이 원본)
+-- 표 101개: 칸·제약·RLS·권한. (만드는 순서와 외래 키 순서는 보장하지 않음 — 복구할 때는 supabase_migrations 기록이 원본)
 
 create table access_logs (
   id bigint not null default nextval('access_logs_id_seq'::regclass),
@@ -446,6 +446,26 @@ alter table feedback_reports add constraint feedback_reports_user_id_fkey FOREIG
 alter table feedback_reports enable row level security;
 -- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres,authenticated=r/postgres}
 
+create table friend_recs (
+  id bigint not null,
+  profile_id uuid not null,
+  rec_id uuid,
+  day date not null,
+  score integer not null default 0,
+  near text,
+  reasons jsonb not null default '[]'::jsonb,
+  items jsonb not null default '[]'::jsonb,
+  created_at timestamp with time zone not null default now(),
+  rerolls integer not null default 0,
+  pushed_at timestamp with time zone
+);
+alter table friend_recs add constraint friend_recs_pkey PRIMARY KEY (id);
+alter table friend_recs add constraint friend_recs_profile_id_day_key UNIQUE (profile_id, day);
+alter table friend_recs add constraint friend_recs_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE;
+alter table friend_recs add constraint friend_recs_rec_id_fkey FOREIGN KEY (rec_id) REFERENCES profiles(id) ON DELETE CASCADE;
+alter table friend_recs enable row level security;
+-- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}
+
 create table friendships (
   requester_id uuid not null,
   addressee_id uuid not null,
@@ -453,7 +473,8 @@ create table friendships (
   message text,
   created_at timestamp with time zone not null default now(),
   responded_at timestamp with time zone,
-  reminded_at timestamp with time zone
+  reminded_at timestamp with time zone,
+  chat_nudged_at timestamp with time zone
 );
 alter table friendships add constraint friendships_addressee_id_fkey FOREIGN KEY (addressee_id) REFERENCES profiles(id) ON DELETE CASCADE;
 alter table friendships add constraint friendships_check CHECK ((requester_id <> addressee_id));
@@ -538,7 +559,8 @@ create table meetups (
   hidden boolean not null default false,
   fee_note text,
   refund_note text,
-  join_mode text not null default 'open'::text
+  join_mode text not null default 'open'::text,
+  nearby_notified_at timestamp with time zone
 );
 alter table meetups add constraint meetups_address_check CHECK (((address IS NULL) OR (char_length(address) <= 200)));
 alter table meetups add constraint meetups_bring_check CHECK (((bring IS NULL) OR (char_length(bring) <= 120)));
@@ -752,6 +774,18 @@ alter table partner_guides add constraint partner_guides_profile_id_fkey FOREIGN
 alter table partner_guides enable row level security;
 -- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}
 
+create table partner_invite_hits (
+  invite_id uuid not null,
+  profile_id uuid not null,
+  via text not null,
+  created_at timestamp with time zone not null default now()
+);
+alter table partner_invite_hits add constraint partner_invite_hits_invite_id_fkey FOREIGN KEY (invite_id) REFERENCES partner_invites(id) ON DELETE CASCADE;
+alter table partner_invite_hits add constraint partner_invite_hits_pkey PRIMARY KEY (invite_id, profile_id);
+alter table partner_invite_hits add constraint partner_invite_hits_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE;
+alter table partner_invite_hits enable row level security;
+-- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}
+
 create table partner_invites (
   id uuid not null default gen_random_uuid(),
   kind text not null,
@@ -760,7 +794,8 @@ create table partner_invites (
   sent_at timestamp with time zone,
   profile_id uuid,
   created_by uuid,
-  created_at timestamp with time zone not null default now()
+  created_at timestamp with time zone not null default now(),
+  keys text[]
 );
 alter table partner_invites add constraint partner_invites_kind_check CHECK ((kind = ANY (ARRAY['author'::text, 'shop'::text])));
 alter table partner_invites add constraint partner_invites_memo_check CHECK (((memo IS NULL) OR (char_length(memo) <= 300)));
@@ -936,7 +971,8 @@ create table posts (
   reply_to uuid,
   edited_at timestamp with time zone,
   archived_at timestamp with time zone,
-  pinned_at timestamp with time zone
+  pinned_at timestamp with time zone,
+  video jsonb
 );
 alter table posts add constraint posts_author_id_fkey FOREIGN KEY (author_id) REFERENCES profiles(id) ON DELETE CASCADE;
 alter table posts add constraint posts_body_check CHECK (((body IS NULL) OR (char_length(body) <= 500)));
@@ -1001,7 +1037,13 @@ create table profiles (
   cover_url text,
   author_links jsonb,
   is_test boolean not null default false,
-  onboard_step smallint
+  onboard_step smallint,
+  rec_off boolean not null default false,
+  rec_want text[] not null default '{}'::text[],
+  rec_want_text text,
+  rec_want_ai jsonb,
+  rec_want_at timestamp with time zone,
+  feature_off boolean not null default false
 );
 alter table profiles add constraint profiles_author_link_check CHECK (((author_link IS NULL) OR ((char_length(author_link) <= 300) AND (author_link ~* '^https?://'::text))));
 alter table profiles add constraint profiles_bio_check CHECK (((bio IS NULL) OR (char_length(bio) <= 300)));
@@ -1155,6 +1197,31 @@ alter table shop_follows add constraint shop_follows_shop_id_fkey FOREIGN KEY (s
 alter table shop_follows enable row level security;
 -- acl: {postgres=arwdDxtm/postgres,authenticated=arwdm/postgres,service_role=arwdDxtm/postgres}
 
+create table shop_post_comments (
+  id uuid not null default gen_random_uuid(),
+  post_id uuid not null,
+  author_id uuid not null,
+  body text not null,
+  created_at timestamp with time zone not null default now()
+);
+alter table shop_post_comments add constraint shop_post_comments_author_id_fkey FOREIGN KEY (author_id) REFERENCES profiles(id) ON DELETE CASCADE;
+alter table shop_post_comments add constraint shop_post_comments_body_check CHECK (((char_length(btrim(body)) >= 1) AND (char_length(btrim(body)) <= 300)));
+alter table shop_post_comments add constraint shop_post_comments_pkey PRIMARY KEY (id);
+alter table shop_post_comments add constraint shop_post_comments_post_id_fkey FOREIGN KEY (post_id) REFERENCES shop_posts(id) ON DELETE CASCADE;
+alter table shop_post_comments enable row level security;
+-- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres,authenticated=rd/postgres}
+
+create table shop_post_likes (
+  post_id uuid not null,
+  profile_id uuid not null,
+  created_at timestamp with time zone not null default now()
+);
+alter table shop_post_likes add constraint shop_post_likes_pkey PRIMARY KEY (post_id, profile_id);
+alter table shop_post_likes add constraint shop_post_likes_post_id_fkey FOREIGN KEY (post_id) REFERENCES shop_posts(id) ON DELETE CASCADE;
+alter table shop_post_likes add constraint shop_post_likes_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE;
+alter table shop_post_likes enable row level security;
+-- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres,authenticated=r/postgres}
+
 create table shop_posts (
   id uuid not null default gen_random_uuid(),
   shop_id uuid,
@@ -1169,7 +1236,9 @@ create table shop_posts (
   extra jsonb not null default '{}'::jsonb,
   room_id uuid,
   edited_at timestamp with time zone,
-  link text
+  link text,
+  like_count integer not null default 0,
+  comment_count integer not null default 0
 );
 alter table shop_posts add constraint shop_posts_author_id_fkey FOREIGN KEY (author_id) REFERENCES profiles(id) ON DELETE SET NULL;
 alter table shop_posts add constraint shop_posts_kind_check CHECK ((kind = ANY (ARRAY['sale'::text, 'new'::text, 'meetup'::text, 'class'::text, 'notice'::text])));
@@ -1257,6 +1326,20 @@ alter table skill_events add constraint skill_events_pkey PRIMARY KEY (id);
 alter table skill_events add constraint skill_events_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE;
 alter table skill_events enable row level security;
 -- acl: {postgres=arwdDxtm/postgres,authenticated=arwdm/postgres,service_role=arwdDxtm/postgres}
+
+create table storage_trash (
+  id bigint not null,
+  bucket text not null,
+  path text not null,
+  reason text,
+  created_at timestamp with time zone not null default now(),
+  done_at timestamp with time zone,
+  tries integer not null default 0
+);
+alter table storage_trash add constraint storage_trash_bucket_path_key UNIQUE (bucket, path);
+alter table storage_trash add constraint storage_trash_pkey PRIMARY KEY (id);
+alter table storage_trash enable row level security;
+-- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}
 
 create table studio_inbox (
   id uuid not null default gen_random_uuid(),
@@ -1501,6 +1584,40 @@ alter table techniques add constraint techniques_pkey PRIMARY KEY (id);
 alter table techniques enable row level security;
 -- acl: {postgres=arwdDxtm/postgres,authenticated=rm/postgres,service_role=arwdDxtm/postgres}
 
+create table video_uploads (
+  uid text not null,
+  owner uuid,
+  created_at timestamp with time zone not null default now(),
+  ready_at timestamp with time zone,
+  duration numeric
+);
+alter table video_uploads add constraint video_uploads_pkey PRIMARY KEY (uid);
+alter table video_uploads enable row level security;
+-- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}
+
+create table work_reviews (
+  id bigint not null,
+  work_id uuid,
+  profile_id uuid,
+  admin_id uuid,
+  action text not null,
+  round integer not null default 1,
+  note text,
+  raw_note text,
+  reason text,
+  ai_used boolean not null default false,
+  snapshot jsonb not null default '{}'::jsonb,
+  source text not null default 'console'::text,
+  created_at timestamp with time zone not null default now(),
+  ai_action text
+);
+alter table work_reviews add constraint work_reviews_action_check CHECK ((action = ANY (ARRAY['approve'::text, 'fix'::text, 'reject'::text])));
+alter table work_reviews add constraint work_reviews_pkey PRIMARY KEY (id);
+alter table work_reviews add constraint work_reviews_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE SET NULL;
+alter table work_reviews add constraint work_reviews_work_id_fkey FOREIGN KEY (work_id) REFERENCES works(id) ON DELETE SET NULL;
+alter table work_reviews enable row level security;
+-- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}
+
 create table works (
   id uuid not null default gen_random_uuid(),
   profile_id uuid not null,
@@ -1524,7 +1641,19 @@ create table works (
   event_id uuid,
   sponsored boolean not null default false,
   tech_scanned_at timestamp with time zone,
-  tech_photos jsonb
+  tech_photos jsonb,
+  review_status text not null default 'approved'::text,
+  review_note text,
+  reviewed_at timestamp with time zone,
+  reviewed_by uuid,
+  submitted_at timestamp with time zone,
+  review_alerted_at timestamp with time zone,
+  fix_reminded_at timestamp with time zone,
+  took text,
+  knowhow text,
+  regret text,
+  feature boolean not null default true,
+  featured_at timestamp with time zone
 );
 alter table works add constraint works_event_id_fkey FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL;
 alter table works add constraint works_finished_size_check CHECK (((finished_size IS NULL) OR (char_length(finished_size) <= 60)));
@@ -1533,9 +1662,30 @@ alter table works add constraint works_item_type_check CHECK (((item_type IS NUL
 alter table works add constraint works_note_check CHECK (((note IS NULL) OR (char_length(note) <= 300)));
 alter table works add constraint works_pkey PRIMARY KEY (id);
 alter table works add constraint works_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE;
+alter table works add constraint works_review_status_chk CHECK ((review_status = ANY (ARRAY['pending'::text, 'fix'::text, 'approved'::text, 'rejected'::text])));
+alter table works add constraint works_story_chk CHECK ((((took IS NULL) OR (took = ANY (ARRAY['1d'::text, '3d'::text, '1w'::text, '2w'::text, '1m'::text, 'long'::text]))) AND ((knowhow IS NULL) OR (char_length(knowhow) <= 500)) AND ((regret IS NULL) OR (char_length(regret) <= 300)) AND ((review_note IS NULL) OR (char_length(review_note) <= 300))));
 alter table works add constraint works_title_check CHECK (((title IS NULL) OR (char_length(title) <= 60)));
 alter table works enable row level security;
 -- acl: {postgres=arwdDxtm/postgres,authenticated=arwdm/postgres,service_role=arwdDxtm/postgres}
+
+create table yarn_asks (
+  id bigint not null default nextval('yarn_asks_id_seq'::regclass),
+  profile_id uuid not null,
+  work_id uuid,
+  items jsonb not null,
+  status text not null default 'asked'::text,
+  turns integer not null default 0,
+  asked_at timestamp with time zone not null default now(),
+  answered_at timestamp with time zone,
+  answer jsonb,
+  result jsonb
+);
+alter table yarn_asks add constraint yarn_asks_pkey PRIMARY KEY (id);
+alter table yarn_asks add constraint yarn_asks_profile_id_fkey FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE;
+alter table yarn_asks add constraint yarn_asks_status_check CHECK ((status = ANY (ARRAY['asked'::text, 'done'::text, 'unknown'::text, 'expired'::text])));
+alter table yarn_asks add constraint yarn_asks_work_id_fkey FOREIGN KEY (work_id) REFERENCES works(id) ON DELETE SET NULL;
+alter table yarn_asks enable row level security;
+-- acl: {postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres,authenticated=r/postgres}
 
 create table yarn_brand_aliases (
   brand text not null,
@@ -1578,7 +1728,8 @@ END,
   texture text,
   use_tags text[] not null default '{}'::text[],
   gauge_knit jsonb,
-  gauge_crochet jsonb
+  gauge_crochet jsonb,
+  weight_est boolean not null default false
 );
 alter table yarn_catalog add constraint yarn_catalog_brand_check CHECK ((char_length(brand) <= 40));
 alter table yarn_catalog add constraint yarn_catalog_merged_into_fkey FOREIGN KEY (merged_into) REFERENCES yarn_catalog(id) ON DELETE SET NULL;

@@ -37,7 +37,7 @@
 
 ## 4. 공개 뒤 원칙·보안
 - **양쪽 스토어 공개 중.** DB 변경은 추가만(옛 앱이 계속 동작해야 함), 기존 칼럼·함수 삭제 금지. 구버전 차단은 `app_config.min_version`
-- 모든 표 RLS. 새 표는 같은 마이그레이션에서 `revoke all … from anon, authenticated` + 필요한 만큼만 grant + `grant all … to service_role`. SECURITY DEFINER 함수는 `revoke … from public, anon` 뒤 필요한 역할에만. profiles 는 칼럼 단위 UPDATE grant. 새 표·함수는 `supabase/tests/permissions_test.sql` 에 한 줄
+- 모든 표 RLS. 새 표는 같은 마이그레이션에서 `revoke all … from anon, authenticated` + 필요한 만큼만 grant + `grant all … to service_role`. SECURITY DEFINER 함수는 `revoke … from public, anon` 뒤 필요한 역할에만. profiles 는 칼럼 단위 UPDATE grant. 새 표·함수는 `supabase/tests/permissions_test.sql` 에 한 줄(**더한 뒤 그 묶음을 실제로 한 번 돌려 볼 것** — 2026-11-19: 줄만 더하다 묶음 3개가 통째로 멈춰 있었음. 결과의 `blocked(42501·P0001)` 만 권한 거절, 그 밖의 숫자는 점검 줄이 틀린 것)
 - 값이 곧 권리인 것(점수·레벨·자격·금액)은 서버가 계산. 알림 링크는 서버가 만든 것만, 앱 `openLink` 는 정해진 종류만
 - 외부 링크는 확인 시트(`openExt`)로. **클래스·모임 안내에는 링크·계좌번호 금지**(신청·결제 안내는 채팅방에서). 가게 소식만 링크 한 개 허용
 - 1급 데이터(이메일·배송지)를 내보내는 관리자 함수는 `log_access` 한 줄. `admins` 변경은 텔레그램 경보

@@ -1,4 +1,4 @@
--- public 스키마 함수 363개 (pg_get_functiondef 그대로). 권한(acl)은 각 함수 위 주석
+-- public 스키마 함수 401개 (pg_get_functiondef 그대로). 권한(acl)은 각 함수 위 주석
 
 -- _admin_meetup_base()  acl: {postgres=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public._admin_meetup_base()
@@ -383,6 +383,234 @@ AS $function$
     and not exists (select 1 from public.admins a where a.profile_id = p.id);
 $function$;
 
+-- _friend_rec_make(p uuid, d date)  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public._friend_rec_make(p uuid, d date)
+ RETURNS bigint
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare
+  pme public.profiles; c record; sc jsonb; best jsonb; best_id uuid; best_s numeric := -1; cur numeric; found_any boolean := false;
+  seen int; tier int; rid bigint; rs jsonb; k int;
+  sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e';
+begin
+  select * into pme from public.profiles where id = p;
+  if pme.id is null then return null; end if;
+  select id into rid from public.friend_recs where profile_id = p and day = d;
+  if rid is not null then return rid; end if;
+
+  foreach seen in array array[7, 30] loop
+    for tier in 1..3 loop
+      continue when tier < 3 and pme.location is null;
+      continue when tier = 3 and coalesce(pme.dong_code,'') = '';
+      for c in
+        select q.id from public.profiles q
+         where q.id <> p and q.id <> sup and q.is_test = pme.is_test
+           and q.onboarded_at is not null and q.deleted_at is null and q.suspended_at is null
+           and coalesce(q.is_visible, true) and not q.rec_off and not coalesce(q.is_author, false)
+           and q.last_seen_at > now() - make_interval(days => seen)
+           and (case tier when 1 then q.location is not null and ST_DWithin(q.location, pme.location, 3000)
+                          when 2 then q.location is not null and ST_DWithin(q.location, pme.location, 5000)
+                          else left(q.dong_code, 5) = left(pme.dong_code, 5) end)
+           and not exists (select 1 from public.shops sh where sh.owner_id = q.id)
+           and not exists (select 1 from public.friendships f
+                            where ((f.requester_id = p and f.addressee_id = q.id) or (f.requester_id = q.id and f.addressee_id = p))
+                              and (f.status in ('pending','accepted','blocked') or (f.status = 'declined' and f.responded_at > now() - interval '30 days')))
+           and not exists (select 1 from public.friend_recs fr where fr.profile_id = p and fr.rec_id = q.id and fr.day > d - 30)
+           and (select count(*) from public.friend_recs fr where fr.rec_id = q.id and fr.day = d) < 3
+         order by case when pme.location is not null and q.location is not null then ST_Distance(q.location, pme.location) else 0 end
+         limit 40
+      loop
+        found_any := true;
+        sc := public._friend_rec_score(p, c.id);
+        continue when sc is null;
+        cur := (sc->>'score')::numeric + random();   -- 같은 점수면 무작위
+        if cur > best_s then best_s := cur; best := sc; best_id := c.id; end if;
+      end loop;
+      exit when found_any;
+    end loop;
+    exit when found_any;
+  end loop;
+
+  if best_id is null then
+    insert into public.friend_recs(profile_id, rec_id, day) values (p, null, d) on conflict (profile_id, day) do nothing returning id into rid;
+    return rid;
+  end if;
+
+  -- 보여 줄 이유: 50점 이상 가운데 높은 3개(거리·MBTI 제외). 모자라면 MBTI 를 덧붙인다
+  select coalesce(jsonb_agg(x order by (x->>'s')::int desc), '[]'::jsonb) into rs from (
+    select x from jsonb_array_elements(best->'items') x where x->>'k' not in ('near','mbti') and (x->>'s')::int >= 50 order by (x->>'s')::int desc limit 3) q;
+  k := jsonb_array_length(rs);
+  if k < 3 then
+    select rs || coalesce(jsonb_agg(x), '[]'::jsonb) into rs from jsonb_array_elements(best->'items') x where x->>'k' = 'mbti';
+  end if;
+
+  insert into public.friend_recs(profile_id, rec_id, day, score, near, reasons, items)
+    values (p, best_id, d, (best->>'score')::int, best->>'near', rs, best->'items')
+    on conflict (profile_id, day) do nothing returning id into rid;
+  return rid;
+end $function$;
+
+-- _friend_rec_score(a uuid, b uuid)  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public._friend_rec_score(a uuid, b uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare
+  pa public.profiles; pb public.profiles;
+  items jsonb := '[]'::jsonb; s int; n int; t text; names text; recent boolean; d double precision; total int := 0; near text;
+  sa text[]; sb text[]; com text[]; want text[]; ai jsonb; boost text[] := '{}';
+begin
+  select * into pa from public.profiles where id = a;
+  select * into pb from public.profiles where id = b;
+  if pa.id is null or pb.id is null then return null; end if;
+  sa := array(select distinct x from unnest(coalesce(pa.skills::text[], '{}') || coalesce(pa.verified_skills::text[], '{}')) x);
+  sb := array(select distinct x from unnest(coalesce(pb.skills::text[], '{}') || coalesce(pb.verified_skills::text[], '{}')) x);
+  com := array(select unnest(sa) intersect select unnest(sb));
+
+  -- ① 같은 기법: 어려운 기법일수록 더
+  select least(100, coalesce(sum(case tq.level when 1 then 3 when 2 then 8 when 3 then 15 when 4 then 22 else 30 end), 0))::int, count(*)::int
+    into s, n from public.techniques tq where tq.id = any(com) and not coalesce(tq.hidden, false);
+  if s > 0 then
+    select string_agg(x.name_ko, '·') into names from (select tq.name_ko from public.techniques tq where tq.id = any(com) and not coalesce(tq.hidden, false) order by tq.level desc, tq.sort nulls last limit 3) x;
+    items := items || jsonb_build_object('k','tech','s',s,'t','같은 기법을 떠요 — '||names||case when n > 3 then ' 등 '||n||'가지' else '' end);
+  end if;
+
+  -- ② 같은 종류의 작품
+  select w1.item_type, (max(w1.created_at) > now() - interval '90 days' and max(w2.created_at) > now() - interval '90 days')
+    into t, recent
+    from public.works w1 join public.works w2 on w2.item_type = w1.item_type
+   where w1.profile_id = a and w2.profile_id = b and w1.review_status = 'approved' and w2.review_status = 'approved'
+     and w1.item_type is not null and w1.item_type <> '기타'
+   group by 1 order by 2 desc, count(*) desc limit 1;
+  if t is not null then
+    items := items || jsonb_build_object('k','item','s',case when recent then 80 else 55 end,'t',case when recent then '요즘 뜬 작품이 같아요 — ' else '같은 종류를 떠 봤어요 — ' end||t);
+  end if;
+
+  -- ③ 단계가 비슷
+  s := 0; t := null;
+  if coalesce(pa.level_knit,0) > 0 and coalesce(pb.level_knit,0) > 0 and abs(pa.level_knit - pb.level_knit) <= 1 then
+    s := case when pa.level_knit = pb.level_knit then 70 else 40 end;
+    t := '대바늘 '||case when pa.level_knit = pb.level_knit then pa.level_knit::text else least(pa.level_knit,pb.level_knit)||'·'||greatest(pa.level_knit,pb.level_knit) end||'단계';
+  end if;
+  if coalesce(pa.level_crochet,0) > 0 and coalesce(pb.level_crochet,0) > 0 and abs(pa.level_crochet - pb.level_crochet) <= 1
+     and (case when pa.level_crochet = pb.level_crochet then 70 else 40 end) > s then
+    s := case when pa.level_crochet = pb.level_crochet then 70 else 40 end;
+    t := '코바늘 '||case when pa.level_crochet = pb.level_crochet then pa.level_crochet::text else least(pa.level_crochet,pb.level_crochet)||'·'||greatest(pa.level_crochet,pb.level_crochet) end||'단계';
+  end if;
+  if s > 0 then items := items || jsonb_build_object('k','level','s',s,'t','단계가 비슷해요 — '||t); end if;
+
+  -- ④ 내가 다음에 익힐 기법을 상대가 인증함(한쪽 이유)
+  select count(*)::int, string_agg(x.name_ko, '·') into n, names from (
+    select tq.name_ko from public.techniques tq
+     where tq.id = any(coalesce(pb.verified_skills::text[], '{}')) and not (tq.id = any(sa)) and not coalesce(tq.hidden, false)
+       and (case tq.craft when 'knitting' then coalesce(pa.level_knit,0) else coalesce(pa.level_crochet,0) end) > 0
+       and tq.level = (case tq.craft when 'knitting' then coalesce(pa.level_knit,0) else coalesce(pa.level_crochet,0) end) + 1
+     order by tq.sort nulls last limit 2) x;
+  if n > 0 then items := items || jsonb_build_object('k','learn','s',least(90, 50 + 15*n),'t','내가 다음에 익힐 기법을 인증했어요 — '||names,'one',true); end if;
+
+  -- ⑤ 같은 실
+  with ya as (
+      select lower(btrim(y->>'name')) k, y->>'name' nm from public.works w, jsonb_array_elements(case when jsonb_typeof(w.yarns) = 'array' then w.yarns else '[]'::jsonb end) y
+       where w.profile_id = a and w.review_status = 'approved' and coalesce(btrim(y->>'name'),'') <> ''
+      union select lower(btrim(coalesce(c.brand||' ','')||c.product)), coalesce(c.brand||' ','')||c.product from public.yarn_stash st join public.yarn_catalog c on c.id = st.catalog_id where st.owner_id = a),
+    yb as (
+      select lower(btrim(y->>'name')) k from public.works w, jsonb_array_elements(case when jsonb_typeof(w.yarns) = 'array' then w.yarns else '[]'::jsonb end) y
+       where w.profile_id = b and w.review_status = 'approved' and coalesce(btrim(y->>'name'),'') <> ''
+      union select lower(btrim(coalesce(c.brand||' ','')||c.product)) from public.yarn_stash st join public.yarn_catalog c on c.id = st.catalog_id where st.owner_id = b)
+  select count(distinct ya.k)::int, min(ya.nm) into n, names from ya join yb on yb.k = ya.k;
+  if n > 0 then items := items || jsonb_build_object('k','yarn','s',case n when 1 then 50 when 2 then 70 else 90 end,'t','같은 실을 써 봤어요 — '||left(names, 24)||case when n > 1 then ' 등 '||n||'가지' else '' end); end if;
+
+  -- ⑥ 시간이 겹침
+  select count(*)::int, string_agg(case x when 'weekend' then '주말' when 'weekday_evening' then '평일 저녁' when 'weekday_day' then '평일 낮' else x end, '·' order by x desc)
+    into n, names from (select unnest(coalesce(pa.available::text[], '{}')) intersect select unnest(coalesce(pb.available::text[], '{}'))) q(x);
+  if n > 0 then items := items || jsonb_build_object('k','time','s',case n when 1 then 50 when 2 then 65 else 75 end,'t','시간이 맞아요 — '||names); end if;
+
+  -- ⑦ 뜨친 찾는 중(한쪽 이유)
+  if pb.wave_until > now() then items := items || jsonb_build_object('k','wave','s',60,'t','뜨친을 찾고 있어요','one',true); end if;
+
+  -- ⑧ 초보 환영(한쪽 이유)
+  if coalesce(pb.beginner_ok,false) and greatest(coalesce(pa.level_knit,0), coalesce(pa.level_crochet,0)) <= 2 then
+    items := items || jsonb_build_object('k','beginner','s',55,'t','초보도 반겨요','one',true); end if;
+
+  -- ⑧-2 다른 종목을 같이 배워 볼 수 있음(한쪽 이유, 2026-11-18 대표): 나는 한 종목만 하고 상대는 다른 종목이 3단계 이상
+  if coalesce(pa.level_knit,0) = 0 and coalesce(pa.level_crochet,0) > 0 and coalesce(pb.level_knit,0) >= 3 then
+    items := items || jsonb_build_object('k','cross','s',case when coalesce(pb.beginner_ok,false) then 60 else 45 end,'t','대바늘을 같이 배워 볼 수 있어요 — 대바늘 '||pb.level_knit||'단계','one',true);
+  elsif coalesce(pa.level_crochet,0) = 0 and coalesce(pa.level_knit,0) > 0 and coalesce(pb.level_crochet,0) >= 3 then
+    items := items || jsonb_build_object('k','cross','s',case when coalesce(pb.beginner_ok,false) then 60 else 45 end,'t','코바늘을 같이 배워 볼 수 있어요 — 코바늘 '||pb.level_crochet||'단계','one',true);
+  end if;
+
+  -- ⑨ 함께 아는 뜨친
+  select count(*)::int into n from
+    (select case when requester_id = a then addressee_id else requester_id end x from public.friendships where status = 'accepted' and a in (requester_id, addressee_id)) fa
+    join (select case when requester_id = b then addressee_id else requester_id end x from public.friendships where status = 'accepted' and b in (requester_id, addressee_id)) fb on fb.x = fa.x;
+  if n > 0 then items := items || jsonb_build_object('k','mutual','s',case n when 1 then 50 when 2 then 80 else 90 end,'t','함께 아는 뜨친이 '||n||'명 있어요'); end if;
+
+  -- ⑩ 같은 모임
+  select count(*)::int into n from public.meetups m
+    join public.room_members x on x.room_id = m.room_id and x.profile_id = a
+    join public.room_members y on y.room_id = m.room_id and y.profile_id = b;
+  if n > 0 then items := items || jsonb_build_object('k','meetup','s',case when n = 1 then 60 else 80 end,'t','같은 모임에 나왔어요'); end if;
+
+  -- ⑪ 요즘 활발(한쪽 이유)
+  if exists (select 1 from public.works w where w.profile_id = b and w.review_status = 'approved' and w.created_at > now() - interval '14 days') then
+    items := items || jsonb_build_object('k','active','s',50,'t','최근에 완성작품을 올렸어요','one',true); end if;
+
+  -- ⑫ MBTI: 최대 30점 — 다른 이유가 모자랄 때만 이유로 올라온다
+  if length(btrim(coalesce(pa.mbti::text,''))) = 4 and length(btrim(coalesce(pb.mbti::text,''))) = 4 then
+    s := (case when substr(pa.mbti::text,2,1) = substr(pb.mbti::text,2,1) then 15 else 0 end) + (case when substr(pa.mbti::text,3,1) = substr(pb.mbti::text,3,1) then 15 else 0 end);
+    if s > 0 then items := items || jsonb_build_object('k','mbti','s',s,'t','MBTI 가 잘 맞아요 — '||upper(pa.mbti::text)||' · '||upper(pb.mbti::text)); end if;
+  end if;
+
+  -- ⑬ 거리: 합계에만 넣고 이유로는 쓰지 않는다(카드 맨 위에 늘 보이므로). 숫자 거리는 내보내지 않는다
+  if pa.location is not null and pb.location is not null then
+    d := ST_Distance(pa.location, pb.location);
+    s := case when d < 1000 then 60 when d < 2000 then 45 when d < 3000 then 30 when d < 5000 then 15 else 0 end;
+    if s > 0 then items := items || jsonb_build_object('k','near','s',s); end if;
+  end if;
+  near := case when pa.dong_name is not null and pa.dong_name = pb.dong_name then '같은 동네' when d is not null and d < 5000 then '가까운 이웃' else '같은 지역' end;
+
+  -- ── 회원이 찾는 뜨친(schema 144): 고른 조건 · 직접 쓴 글에서 AI 가 읽은 것 ──
+  want := coalesce(pa.rec_want, '{}'); ai := coalesce(pa.rec_want_ai, '{}'::jsonb);
+  -- 내가 알려 줄 수 있는 초보(이 조건을 고른 회원에게만, 한쪽 이유)
+  if 'junior' = any(want) then
+    if coalesce(pa.level_knit,0) > 0 and coalesce(pb.level_knit,0) > 0 and pa.level_knit - pb.level_knit >= 2 then
+      items := items || jsonb_build_object('k','junior','s',60,'t','내가 알려 줄 수 있어요 — 대바늘 '||pb.level_knit||'단계','one',true);
+    elsif coalesce(pa.level_crochet,0) > 0 and coalesce(pb.level_crochet,0) > 0 and pa.level_crochet - pb.level_crochet >= 2 then
+      items := items || jsonb_build_object('k','junior','s',60,'t','내가 알려 줄 수 있어요 — 코바늘 '||pb.level_crochet||'단계','one',true);
+    end if;
+  end if;
+  -- 글에서 읽은 작품 종류를 상대가 떴음(한쪽 이유)
+  if jsonb_typeof(ai->'item_types') = 'array' and jsonb_array_length(ai->'item_types') > 0 then
+    select string_agg(distinct w.item_type, '·') into names from public.works w
+     where w.profile_id = b and w.review_status = 'approved' and w.item_type in (select jsonb_array_elements_text(ai->'item_types'));
+    if names is not null then items := items || jsonb_build_object('k','wtext','s',75,'t','찾으시는 작품을 떠요 — '||names,'one',true,'want',true); end if;
+  end if;
+  -- 고른 조건에 해당하는 항목은 1.5배
+  if 'near'   = any(want) then boost := boost || array['near']; end if;
+  if 'level'  = any(want) then boost := boost || array['level']; end if;
+  if 'same'   = any(want) then boost := boost || array['tech','item','yarn']; end if;
+  if 'senior' = any(want) then boost := boost || array['learn','beginner']; end if;
+  if 'junior' = any(want) then boost := boost || array['junior']; end if;
+  if 'cross'  = any(want) then boost := boost || array['cross']; end if;
+  if 'time'   = any(want) or (jsonb_typeof(ai->'avail') = 'array' and jsonb_array_length(ai->'avail') > 0) then boost := boost || array['time']; end if;
+  if 'chat'   = any(want) then boost := boost || array['active','wave','mbti']; end if;
+  if cardinality(boost) > 0 then
+    select coalesce(jsonb_agg(case when (x->>'k') = any(boost) then x || jsonb_build_object('s', round((x->>'s')::int * 1.5)::int, 'want', true) else x end), '[]'::jsonb)
+      into items from jsonb_array_elements(items) x;
+  end if;
+  -- 서로 찾는 것이 맞음(선배 ↔ 알려 줄 초보): 합계에만
+  if ('senior' = any(want) and 'junior' = any(coalesce(pb.rec_want,'{}'))) or ('junior' = any(want) and 'senior' = any(coalesce(pb.rec_want,'{}'))) then
+    items := items || jsonb_build_object('k','match','s',30);
+  end if;
+
+  select coalesce(sum((x->>'s')::int), 0)::int into total from jsonb_array_elements(items) x;
+  return jsonb_build_object('score', total, 'items', items, 'near', near);
+end $function$;
+
 -- _jigi_say(p_user uuid, p_body text)  acl: {postgres=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public._jigi_say(p_user uuid, p_body text)
  RETURNS void
@@ -556,6 +784,30 @@ begin
   return rid;
 end $function$;
 
+-- _work_review_snap(p_work uuid)  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public._work_review_snap(p_work uuid)
+ RETURNS jsonb
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  select jsonb_build_object(
+    'title', left(coalesce(w.title,''), 80), 'item_type', w.item_type,
+    'techs', (select coalesce(jsonb_agg(jsonb_build_object('id', t.id, 'name', t.name_ko, 'level', t.level, 'craft', t.craft) order by t.sort), '[]'::jsonb) from public.techniques t where t.id = any(w.techniques)),
+    'max_level', (select max(t.level) from public.techniques t where t.id = any(w.techniques)),
+    'custom_n', coalesce(array_length(w.custom_techniques, 1), 0),
+    'photos_n', coalesce(array_length(w.photos, 1), 0),
+    'tagged_n', case when jsonb_typeof(w.tech_photos) = 'array' then jsonb_array_length(w.tech_photos) else 0 end,
+    'no_story', (w.took is null and w.knowhow is null), 'took', w.took,
+    'knowhow_len', char_length(coalesce(w.knowhow,'')), 'regret_len', char_length(coalesce(w.regret,'')),
+    'has_yarn', (w.yarns is not null and jsonb_typeof(w.yarns) = 'array' and jsonb_array_length(w.yarns) > 0) or coalesce(w.yarn_info,'') <> '',
+    'sponsored', coalesce(w.sponsored, false),
+    'status_before', w.review_status, 'submitted_at', w.submitted_at,
+    'member', jsonb_build_object('level_crochet', p.level_crochet, 'level_knit', p.level_knit, 'cert_count', p.cert_count, 'is_author', coalesce(p.is_author, false),
+                                 'days', greatest(0, (extract(epoch from now() - p.created_at) / 86400)::int)))
+  from public.works w left join public.profiles p on p.id = w.profile_id where w.id = p_work;
+$function$;
+
 -- _work_tags(p_work uuid)  acl: {postgres=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public._work_tags(p_work uuid)
  RETURNS text[]
@@ -569,6 +821,21 @@ AS $function$
     union select lower(left(regexp_replace(tq.name_ko, '[^가-힣A-Za-z0-9_]', '', 'g'), 20)) from public.works w join public.techniques tq on tq.id = any(w.techniques) where w.id = p_work
   ) s where t is not null and t <> '';
 $function$;
+
+-- admin_auto_jobs()  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.admin_auto_jobs()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare r jsonb;
+begin
+  if not public.is_admin() then raise exception '관리자만 가능합니다'; end if;
+  select coalesce(jsonb_agg(jsonb_build_object('name', j.jobname, 'schedule', j.schedule, 'active', j.active, 'last_at', d.start_time, 'last_status', d.status) order by j.jobname), '[]'::jsonb) into r
+    from cron.job j left join lateral (select x.start_time, x.status from cron.job_run_details x where x.jobid = j.jobid order by x.start_time desc limit 1) d on true;
+  return r;
+end $function$;
 
 -- admin_bad_word(p_word text, p_category text, p_add boolean)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.admin_bad_word(p_word text, p_category text, p_add boolean)
@@ -1278,6 +1545,30 @@ begin
     'chat_pct', case when v_pairs > 0 then round(100.0 * (r->>'chatted')::int / v_pairs) else 0 end, 'next_goal', public._friend_next_goal(v_pairs));
 end $function$;
 
+-- admin_friend_wants()  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.admin_friend_wants()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare r jsonb;
+begin
+  if not public.is_admin() then raise exception '관리자만 가능합니다'; end if;
+  with m as (select p.* from public.profiles p where not p.is_test and p.onboarded_at is not null and p.deleted_at is null)
+  select jsonb_build_object(
+    'total', (select count(*) from m),
+    'answered', (select count(*) from m where rec_want_at is not null),
+    'off', (select count(*) from m where rec_off),
+    'opts', (select coalesce(jsonb_agg(jsonb_build_object('k', k, 'n', n) order by n desc), '[]'::jsonb) from (select x k, count(*) n from m, unnest(m.rec_want) x group by 1) q),
+    'unknown', (select coalesce(jsonb_agg(jsonb_build_object('label', k, 'n', n) order by n desc, k), '[]'::jsonb) from (select x k, count(*) n from m, jsonb_array_elements_text(case when jsonb_typeof(m.rec_want_ai->'unknown') = 'array' then m.rec_want_ai->'unknown' else '[]'::jsonb end) x group by 1) q),
+    'texts', (select coalesce(jsonb_agg(jsonb_build_object('nickname', nickname, 'text', rec_want_text, 'at', rec_want_at, 'ai', rec_want_ai) order by rec_want_at desc), '[]'::jsonb) from (select * from m where rec_want_text is not null order by rec_want_at desc limit 200) q),
+    'recs', (select jsonb_build_object('days7', count(*) filter (where fr.day > current_date - 7 and fr.rec_id is not null), 'none7', count(*) filter (where fr.day > current_date - 7 and fr.rec_id is null),
+              'hello7', (select count(*) from public.friend_recs f2 join public.friendships fs on fs.requester_id = f2.profile_id and fs.addressee_id = f2.rec_id where f2.day > current_date - 7 and fs.created_at::date >= f2.day)) from public.friend_recs fr)
+  ) into r;
+  return r;
+end $function$;
+
 -- admin_hide_post(p_post uuid, p_hidden boolean, p_reason text)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.admin_hide_post(p_post uuid, p_hidden boolean, p_reason text DEFAULT NULL::text)
  RETURNS void
@@ -1290,6 +1581,29 @@ begin
   update public.posts set hidden = p_hidden where id = p_post;
   update public.post_reports set reviewed_at = now() where post_id = p_post and reviewed_at is null;
   perform public.admin_log(case when p_hidden then 'hide_post' else 'unhide_post' end, 'post', p_post::text, jsonb_build_object('reason', p_reason));
+end $function$;
+
+-- admin_home_notices_toggle(p_id text, p_active boolean)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.admin_home_notices_toggle(p_id text, p_active boolean)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare v jsonb; n jsonb; k text; hit boolean := false; last jsonb;
+begin
+  if not public.is_admin() then raise exception '관리자만 가능합니다'; end if;
+  foreach k in array array['home_notices','home_notices_v2'] loop
+    select value into v from public.app_config where key = k for update;
+    if v is null or jsonb_typeof(v) <> 'array' or not exists (select 1 from jsonb_array_elements(v) e where e->>'id' = p_id) then continue; end if;
+    select jsonb_agg(case when e->>'id' = p_id then e || jsonb_build_object('active', coalesce(p_active, false)) else e end order by ord) into n
+      from jsonb_array_elements(v) with ordinality as t(e, ord);
+    update public.app_config set value = n, updated_at = now() where key = k;
+    hit := true; last := n;
+  end loop;
+  if not hit then raise exception '공지를 찾을 수 없어요'; end if;
+  perform public.admin_log('home_notices_toggle', 'app_config', 'home_notices', jsonb_build_object('id', p_id, 'active', coalesce(p_active, false)));
+  return last;
 end $function$;
 
 -- admin_jigi_tool(p_name text, p_args jsonb)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
@@ -2369,6 +2683,111 @@ begin
   return sid;
 end $function$;
 
+-- admin_work_feature(p_work uuid, p_on boolean)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.admin_work_feature(p_work uuid, p_on boolean)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  if not public.is_admin() then raise exception '관리자만 가능합니다'; end if;
+  update public.works set feature = coalesce(p_on, true) where id = p_work and review_status in ('pending','fix');
+  return found;
+end $function$;
+
+-- admin_work_queue(p_tab text)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.admin_work_queue(p_tab text DEFAULT 'pending'::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare r jsonb;
+begin
+  if not public.is_admin() then raise exception '관리자만 가능합니다'; end if;
+  select jsonb_build_object(
+    'counts', (select jsonb_build_object('pending', count(*) filter (where w.review_status = 'pending'), 'fix', count(*) filter (where w.review_status = 'fix')) from public.works w),
+    'items', coalesce((select jsonb_agg(to_jsonb(x)) from (
+      select w.id, po.id as post_id, w.title, w.review_status as status, w.review_note as note, w.created_at, w.submitted_at, w.reviewed_at,
+        coalesce(po.photos, w.photos) as photos, w.tech_photos, w.custom_techniques as custom, w.took, w.knowhow, w.regret, w.note as memo, w.yarn_info, w.needles, w.gauge, w.finished_size, w.sponsored,
+        (select coalesce(jsonb_agg(jsonb_build_object('id', t.id, 'name', t.name_ko, 'level', t.level) order by t.sort), '[]'::jsonb) from public.techniques t where t.id = any(w.techniques)) as techs,
+        exists (select 1 from public.techniques t where t.id = any(w.techniques) and t.level >= 5) as has5,
+        (w.took is null and w.knowhow is null) as no_story, (w.tech_photos is null) as no_tech_photo,
+        p.id as profile_id, p.nickname, p.level_crochet, p.level_knit, p.cert_count, coalesce(p.is_test, false) as is_test, coalesce(p.is_author, false) as is_author
+      from public.works w join public.profiles p on p.id = w.profile_id
+        left join lateral (select q.id, q.photos from public.posts q where q.work_id = w.id and q.parent_id is null order by q.created_at limit 1) po on true
+      where case p_tab when 'fix' then w.review_status = 'fix'
+                       when 'done' then w.review_status in ('approved','rejected') and w.reviewed_at is not null
+                       else w.review_status = 'pending' end
+      order by case when p_tab = 'done' then w.reviewed_at end desc nulls last, w.submitted_at asc nulls last
+      limit 100) x), '[]'::jsonb)) into r;
+  return r;
+end $function$;
+
+-- admin_work_review(p_work uuid, p_action text, p_note text)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.admin_work_review(p_work uuid, p_action text, p_note text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare w public.works; v_post uuid; v_note text := nullif(left(btrim(coalesce(p_note,'')), 300), ''); v_title text; sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e';
+  v_snap jsonb; v_rev bigint;
+begin
+  if not public.is_admin() then raise exception '관리자만 가능합니다'; end if;
+  select * into w from public.works where id = p_work for update;
+  if not found then raise exception '인증을 찾을 수 없어요'; end if;
+  v_snap := public._work_review_snap(w.id);
+  select q.id into v_post from public.posts q where q.work_id = w.id and q.parent_id is null order by q.created_at limit 1;
+  v_title := '「'||coalesce(nullif(btrim(w.title),''),'작품')||'」';
+  if p_action = 'approve' then
+    if w.review_status = 'approved' then raise exception '이미 승인된 인증이에요'; end if;
+    update public.works set review_status = 'approved', reviewed_at = now(), reviewed_by = auth.uid() where id = w.id;
+    update public.posts set hidden = false, created_at = now() where id = v_post and hidden and not coalesce(hidden_by_mod, false) and archived_at is null;
+    insert into public.notifications(recipient_id, actor_id, kind, post_id, snippet, link)
+      values (w.profile_id, sup, 'notice', v_post, left(v_title||' 완성작품 인증이 커뮤니티에 올라갔어요. '||coalesce(v_note, '적어 주신 이야기가 같은 작품을 뜨는 분께 큰 도움이 될 거예요.'), 400),
+              case when v_post is not null then jsonb_build_object('type','post','id',v_post) else jsonb_build_object('type','view','view','my') end);
+  elsif p_action = 'fix' then
+    if w.review_status not in ('pending','fix') then raise exception '확인 중인 인증만 보완을 요청할 수 있어요'; end if;
+    if v_note is null then raise exception '무엇을 채워야 하는지 적어 주세요'; end if;
+    update public.works set review_status = 'fix', review_note = v_note, reviewed_at = now(), reviewed_by = auth.uid(), fix_reminded_at = null where id = w.id;
+    insert into public.notifications(recipient_id, actor_id, kind, post_id, snippet, link)
+      values (w.profile_id, sup, 'notice', v_post, left(v_title||' 인증을 올리기 전에 하나만 부탁드려요. '||v_note||' 글을 눌러 고친 뒤 저장하면 다시 확인해 드려요.', 400),
+              case when v_post is not null then jsonb_build_object('type','post','id',v_post) else jsonb_build_object('type','view','view','my') end);
+  elsif p_action = 'reject' then
+    if w.review_status not in ('pending','fix') then raise exception '확인 중인 인증만 반려할 수 있어요'; end if;
+    if v_note is null then raise exception '사유를 적어 주세요'; end if;
+    update public.works set review_status = 'rejected', review_note = v_note, reviewed_at = now(), reviewed_by = auth.uid() where id = w.id;
+    insert into public.notifications(recipient_id, actor_id, kind, post_id, snippet, link)
+      values (w.profile_id, sup, 'notice', v_post, left(v_title||' 인증은 커뮤니티에 올리지 못했어요. 사유: '||v_note||' 궁금한 점은 마이 › 설정 › 지기에게 말하기로 물어봐 주세요.', 400),
+              jsonb_build_object('type','view','view','support'));
+  else raise exception '알 수 없는 동작입니다'; end if;
+  perform public.admin_log('work_'||p_action, 'work', w.id::text, jsonb_build_object('title', w.title, 'profile', w.profile_id, 'note', v_note));
+  insert into public.work_reviews(work_id, profile_id, admin_id, action, round, note, snapshot)
+    values (w.id, w.profile_id, auth.uid(), p_action, (select count(*) + 1 from public.work_reviews r where r.work_id = w.id), v_note, coalesce(v_snap, '{}'::jsonb))
+    returning id into v_rev;
+  return jsonb_build_object('ok', true, 'status', (select review_status from public.works where id = w.id), 'review', v_rev);
+end $function$;
+
+-- admin_work_review_meta(p_review bigint, p_meta jsonb)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.admin_work_review_meta(p_review bigint, p_meta jsonb)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  if not public.is_admin() then raise exception '관리자만 가능합니다'; end if;
+  update public.work_reviews set
+      raw_note  = nullif(left(btrim(coalesce(p_meta->>'raw','')), 800), ''),
+      reason    = nullif(left(btrim(coalesce(p_meta->>'reason','')), 40), ''),
+      ai_used   = coalesce((p_meta->>'ai')::boolean, false),
+      ai_action = case when p_meta->>'ai_action' in ('fix','reject','approve') then p_meta->>'ai_action' end
+    where id = p_review and admin_id = auth.uid() and created_at > now() - interval '10 minutes';
+  return found;
+end $function$;
+
 -- admin_yarn_bulk_upsert(p jsonb)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.admin_yarn_bulk_upsert(p jsonb)
  RETURNS jsonb
@@ -2435,6 +2854,28 @@ begin
   if p_photo is not null and p_photo !~ '^[A-Za-z0-9_./-]+\.(jpg|webp|png)$' then raise exception 'photo path'; end if;
   insert into public.yarn_colors(catalog_id, no, name, photo, color_hex, color_mode) values (p_catalog, nullif(p_no,''), left(coalesce(nullif(p_name,''), p_no),40), p_photo, public.color_hex_clean(p_hex), p_mode)
   on conflict (catalog_id, no, name) do update set photo = excluded.photo, color_hex = excluded.color_hex, color_mode = excluded.color_mode;
+end $function$;
+
+-- admin_yarn_color_summary()  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.admin_yarn_color_summary()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare out jsonb;
+begin
+  if not public.is_admin() then raise exception '관리자만 가능합니다'; end if;
+  select jsonb_build_object(
+    'tot', (select count(*) from public.yarn_colors),
+    'photos', (select count(*) from public.yarn_colors where photo is not null),
+    'fam_n', (select count(*) from public.yarn_colors where family is not null),
+    'fam', coalesce((select jsonb_agg(jsonb_build_array(family, n) order by n desc) from (select family, count(*) n from public.yarn_colors where family is not null group by family) f), '[]'::jsonb),
+    'per', coalesce((select jsonb_agg(jsonb_build_object('c', catalog_id, 'n', n, 'p', p, 'f', f)) from (
+        select catalog_id, count(*) n, count(photo) p, (array_agg(photo order by id) filter (where photo is not null))[1] f
+        from public.yarn_colors group by catalog_id) x), '[]'::jsonb)
+  ) into out;
+  return out;
 end $function$;
 
 -- admin_yarn_delete(p_ids uuid[], p_reason text)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
@@ -2545,6 +2986,65 @@ begin
     from public.yarn_catalog f where t.id = p_into and f.id = p_from;
   update public.yarn_catalog set merged_into = p_into, updated_at = now() where id = p_from;
   perform public.admin_log('yarn_merge', 'yarn', p_from::text, jsonb_build_object('into', p_into));
+end $function$;
+
+-- admin_yarn_overview(p_days integer)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.admin_yarn_overview(p_days integer DEFAULT 365)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare since timestamptz := case when p_days is null or p_days <= 0 then '-infinity'::timestamptz else now() - make_interval(days => p_days) end;
+  m0 timestamp := date_trunc('month', now() at time zone 'Asia/Seoul') - interval '11 months';
+  m1 timestamp := date_trunc('month', now() at time zone 'Asia/Seoul');
+  out jsonb;
+begin
+  if not public.is_admin() then raise exception '관리자만 가능합니다'; end if;
+  with st as (
+    select coalesce(c.id::text, 'raw:'||lower(btrim(coalesce(s.raw_name,'')))) k, c.id catalog_id, coalesce(c.brand, s.brand) brand, coalesce(c.product, s.raw_name) product,
+           case when c.season in ('여름','겨울','사계절') then c.season else '미정' end season, c.weight_class w, c.fiber_main f,
+           s.owner_id, coalesce(s.bought_balls,0) bought, coalesce(s.left_balls,0) left_b, s.color_hex[1] hex, s.created_at,
+           date_trunc('month', s.created_at at time zone 'Asia/Seoul') mon
+    from public.yarn_stash s join public.profiles p on p.id = s.owner_id and not coalesce(p.is_test,false)
+      left join public.yarn_catalog c0 on c0.id = s.catalog_id left join public.yarn_catalog c on c.id = coalesce(c0.merged_into, c0.id)
+  ), us as (
+    select coalesce(c.id::text, 'raw:'||coalesce(e.norm_name, lower(btrim(coalesce(e.raw_name,''))))) k, c.id catalog_id, c.brand, coalesce(c.product, e.raw_name) product,
+           case when c.season in ('여름','겨울','사계절') then c.season else '미정' end season, c.weight_class w, c.fiber_main f,
+           coalesce(e.work_id::text, 'gone:'||e.id::text) wk, e.item_type, e.color_hex[1] hex, e.created_at,
+           date_trunc('month', e.created_at at time zone 'Asia/Seoul') mon,
+           case when e.amount is null then null when e.unit = 'g' then e.amount else e.amount * coalesce(e.ball_g, c.ball_g) end g,
+           (e.amount is not null and coalesce(e.unit,'') <> 'g' and coalesce(e.ball_g, c.ball_g) is null) g_unknown
+    from public.yarn_entries e left join public.works w on w.id = e.work_id left join public.profiles p on p.id = w.profile_id
+      left join public.yarn_catalog c0 on c0.id = e.catalog_id left join public.yarn_catalog c on c.id = coalesce(c0.merged_into, c0.id)
+    where coalesce(e.source,'work') = 'work' and (e.work_id is null or (w.review_status = 'approved' and not coalesce(p.is_test,false)))
+  ), mons as (select g.m from generate_series(m0, m1, interval '1 month') g(m)),
+  yr as (
+    select a.k, max(a.catalog_id::text) id, max(a.brand) brand, max(a.product) name, max(a.season) season, max(a.w) w, max(a.f) f,
+           count(distinct a.owner_id) members, sum(a.bought) bought, sum(a.left_b) left_b, count(distinct a.wk) works, round(sum(a.g)) g,
+           mode() within group (order by a.item_type) item,
+           (array_agg(distinct a.hex) filter (where a.hex is not null))[1:6] colors, count(distinct a.hex) ncolors
+    from (select k, catalog_id, brand, product, season, w, f, owner_id, bought, left_b, null::text wk, null::numeric g, null::text item_type, hex from st where created_at >= since
+          union all select k, catalog_id, brand, product, season, w, f, null, null, null, wk, g, item_type, hex from us where created_at >= since) a
+    group by a.k order by round(sum(a.g)) desc nulls last, sum(a.bought) desc nulls last limit 600
+  )
+  select jsonb_build_object(
+    'days', p_days,
+    'tiles', jsonb_build_object(
+      'stash_rows', (select count(*) from st where created_at >= since), 'stash_members', (select count(distinct owner_id) from st where created_at >= since),
+      'bought', (select coalesce(sum(bought),0) from st where created_at >= since), 'left', (select coalesce(sum(left_b),0) from st where created_at >= since),
+      'use_rows', (select count(*) from us where created_at >= since), 'use_works', (select count(distinct wk) from us where created_at >= since),
+      'g', (select coalesce(round(sum(g)),0) from us where created_at >= since), 'g_unknown', (select count(*) from us where created_at >= since and g_unknown)),
+    'months', (select jsonb_agg(jsonb_build_object('m', to_char(mons.m,'YYYY-MM'),
+        'stash', (select coalesce(jsonb_object_agg(x.season, x.v), '{}'::jsonb) from (select season, sum(bought) v from st where st.mon = mons.m group by 1) x),
+        'g', (select coalesce(jsonb_object_agg(x.season, x.v), '{}'::jsonb) from (select season, round(sum(g)) v from us where us.mon = mons.m and g is not null group by 1) x),
+        'works', (select coalesce(jsonb_object_agg(x.season, x.v), '{}'::jsonb) from (select season, count(distinct wk) v from us where us.mon = mons.m group by 1) x)) order by mons.m) from mons),
+    'items', (select coalesce(jsonb_agg(to_jsonb(x) order by x.g desc nulls last, x.works desc), '[]'::jsonb) from (select coalesce(item_type,'미정') item, round(sum(g)) g, count(distinct wk) works from us where created_at >= since group by 1) x),
+    'yarns', (select coalesce(jsonb_agg(jsonb_strip_nulls(to_jsonb(yr) || jsonb_build_object('spark',
+        (select jsonb_agg((select count(distinct u.wk) from us u where u.k = yr.k and u.mon = mons.m) order by mons.m) from mons)))
+        order by yr.g desc nulls last, yr.bought desc nulls last), '[]'::jsonb) from yr)
+  ) into out;
+  return out;
 end $function$;
 
 -- admin_yarn_photos_apply(p jsonb)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
@@ -2863,7 +3363,7 @@ CREATE OR REPLACE FUNCTION public.author_adv_count(p_user uuid)
  STABLE SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-  select count(*)::int from public.works w where w.profile_id = p_user
+  select count(*)::int from public.works w where w.profile_id = p_user and w.review_status = 'approved'
     and exists (select 1 from public.techniques t where t.id = any(w.techniques) and t.level >= 5);
 $function$;
 
@@ -3386,8 +3886,10 @@ CREATE OR REPLACE FUNCTION public.cheer_on_work()
 AS $function$
 declare p public.profiles; c text; nx jsonb; lv int;
 begin
+  if new.review_status <> 'approved' then return null; end if;
+  if tg_op = 'UPDATE' then if old.review_status = 'approved' then return null; end if; end if;
   select * into p from public.profiles where id = new.profile_id;
-  if (select count(*) from public.works where profile_id = new.profile_id) = 1 then
+  if (select count(*) from public.works where profile_id = new.profile_id and review_status = 'approved') = 1 then
     c := case when p.craft::text = 'knitting' then 'knitting' else 'crochet' end; lv := public.lv_of(new.profile_id, c); nx := public.next_tech(new.profile_id, c);
     perform public.cheer_send(new.profile_id, 'a5', format('첫 인증 축하해요, Lv.1이 됐어요! 인증한 기법은 내 뜨개 단계에 ''인증'' 표시가 붙어요.%s',
       case when nx is not null then format(' 다음엔 %s을(를) 떠 보면 %s단계에 가까워져요.', nx->>'name_ko', greatest(lv, (nx->>'level')::int)) else '' end), '{"type":"view","view":"skills"}'::jsonb);
@@ -3607,7 +4109,7 @@ AS $function$
 declare v_room uuid; v_meetup uuid; v_post uuid; v_loc geography; v_existing uuid; v_techs text[];
 begin
   if auth.uid() is null then raise exception '로그인이 필요해요'; end if;
-  if not exists (select 1 from public.works where profile_id = auth.uid()) then raise exception '모임을 열려면 완성작품 인증이 1회 이상 필요해요'; end if;
+  if not exists (select 1 from public.works where profile_id = auth.uid() and review_status = 'approved') then raise exception '모임을 열려면 확인이 끝난 완성작품 인증이 1회 이상 필요해요'; end if;
   if p_starts_at < now() then raise exception '일시를 지금 이후로 정해 주세요'; end if;
   if p_lat is not null and p_lng is not null then v_loc := st_setsrid(st_makepoint(p_lng, p_lat), 4326)::geography;
   else select location into v_loc from public.profiles where id = auth.uid(); end if;
@@ -3669,6 +4171,10 @@ declare v_work uuid; v_post uuid; v_known text[]; v_custom text[]; v_yarns jsonb
   num constant text := '^[0-9]{1,5}(\.[0-9]{1,2})?$';
 begin
   if auth.uid() is null then raise exception '로그인이 필요해요'; end if;
+  if not coalesce((select pr.is_test from public.profiles pr where pr.id = auth.uid()), false)
+     and exists (select 1 from public.works w0 where w0.profile_id = auth.uid() and public.kst_date(w0.created_at) = public.kst_date(now())) then
+    raise exception '완성작품 인증은 하루에 하나씩 올릴 수 있어요. 내일 다시 올려 주세요';
+  end if;
   if p_photos is null or cardinality(p_photos) = 0 then raise exception '작품 사진이 필요해요'; end if;
   v_known := array(select t.id from public.techniques t where t.id = any(coalesce(p_techniques,'{}')) order by t.sort);
   v_custom := array(select distinct left(btrim(x), 30) from unnest(coalesce(p_custom,'{}')) x where btrim(x) <> '' limit 20);
@@ -3701,8 +4207,8 @@ begin
     into v_needles
     from (select t.n, t.ord from jsonb_array_elements(case when jsonb_typeof(p_yarn_meta->'needles')='array' then p_yarn_meta->'needles' else '[]'::jsonb end) with ordinality as t(n, ord)
           where jsonb_typeof(t.n)='object' and btrim(coalesce(t.n->>'size','')) <> '' limit 4) q;
-  insert into public.works (profile_id, photo_url, photos, title, yarn_info, techniques, custom_techniques, note, yarn_name, yarn_weight, needle_size, yarns, needles, gauge, finished_size, item_type)
-    values (auth.uid(), p_photos[1], p_photos, p_title, left(p_yarn, 200), v_known, v_custom, p_note,
+  insert into public.works (review_status, submitted_at, profile_id, photo_url, photos, title, yarn_info, techniques, custom_techniques, note, yarn_name, yarn_weight, needle_size, yarns, needles, gauge, finished_size, item_type)
+    values ('pending', now(), auth.uid(), p_photos[1], p_photos, p_title, left(p_yarn, 200), v_known, v_custom, p_note,
             nullif(left(btrim(coalesce(p_yarn_meta->>'name','')),60),''), nullif(left(btrim(coalesce(p_yarn_meta->>'weight','')),20),''), nullif(left(btrim(coalesce(p_yarn_meta->>'needle','')),40),''),
             v_yarns, v_needles, v_gauge, nullif(left(btrim(coalesce(p_yarn_meta->>'size','')),60),''), v_item)
     returning id into v_work;
@@ -3714,8 +4220,12 @@ begin
     perform public.yarn_log_entry(v_work, jsonb_build_object('name', p_yarn_meta->>'name', 'weight', nullif(p_yarn_meta->>'weight','')), v_needles, v_gauge, v_known, v_item, v_level);
   end if;
   perform public.stash_consume(v_work);
-  insert into public.posts (author_id, body, photos, work_id)
-    values (auth.uid(), coalesce(nullif(p_note,''), p_title), p_photos, v_work) returning id into v_post;
+  insert into public.posts (author_id, body, photos, work_id, hidden)
+    values (auth.uid(), coalesce(nullif(p_note,''), p_title), p_photos, v_work, true) returning id into v_post;
+  insert into public.notifications(recipient_id, actor_id, kind, post_id, snippet, link)
+    values (auth.uid(), 'e120eb67-b254-4008-92d8-08c95c821e9e', 'notice', v_post,
+      left('「'||coalesce(nullif(btrim(p_title),''),'작품')||'」 완성작품 인증을 잘 받았어요. knitup 이 사진과 기법을 확인한 뒤 커뮤니티에 올려 드려요. 확인이 끝나면 알려 드릴게요.', 300),
+      jsonb_build_object('type','post','id',v_post,'push','0'));
   return v_post;
 end $function$;
 
@@ -4207,6 +4717,45 @@ AS $function$
     when p_kind = 'author' then (select count(*)::int from public.author_follows where author_id = p_id)
     else 0 end $function$;
 
+-- friend_chat_nudge()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.friend_chat_nudge()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare r record; n int := 0; sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e';
+begin
+  create temp table _fcn on commit drop as
+    select f.requester_id as a, f.addressee_id as b, coalesce(f.responded_at, f.created_at) as acc
+      from public.friendships f join public.profiles pa on pa.id = f.requester_id join public.profiles pb on pb.id = f.addressee_id
+     where f.status = 'accepted' and f.chat_nudged_at is null
+       and coalesce(f.responded_at, f.created_at) < now() - interval '24 hours' and coalesce(f.responded_at, f.created_at) > now() - interval '60 days'
+       and pa.deleted_at is null and pa.suspended_at is null and pb.deleted_at is null and pb.suspended_at is null
+       and f.requester_id <> sup and f.addressee_id <> sup
+       and not public.is_blocked(f.requester_id, f.addressee_id) and not public.is_blocked(f.addressee_id, f.requester_id)
+       and not exists (select 1 from public.rooms ro
+                         join public.room_members x on x.room_id = ro.id and x.profile_id = f.requester_id
+                         join public.room_members y on y.room_id = ro.id and y.profile_id = f.addressee_id
+                         join public.messages m on m.room_id = ro.id
+                        where ro.kind = 'direct');
+  for r in
+    select u.uid, count(*) as k, (array_agg(u.partner order by u.acc desc))[1] as p1, (array_agg(coalesce(nullif(btrim(pp.nickname),''),'이웃') order by u.acc desc))[1] as nick, max(u.acc) as acc
+      from (select a as uid, b as partner, acc from _fcn union all select b, a, acc from _fcn) u join public.profiles pp on pp.id = u.partner
+     group by u.uid
+  loop
+    insert into public.notifications(recipient_id, actor_id, kind, snippet, link)
+      values (r.uid, r.p1, 'remind',
+        left(case when r.k > 1 then r.nick||' 님 외 '||(r.k - 1)||'명과 뜨친이 됐어요. 아직 인사 전이에요. 먼저 인사해 볼까요? 👋'
+                  when r.acc > now() - interval '48 hours' then r.nick||' 님과 뜨친이 된 지 하루 됐어요. 먼저 인사해 볼까요? 👋'
+                  else r.nick||' 님과 뜨친이 됐어요. 아직 인사 전이에요. 먼저 인사해 볼까요? 👋' end, 120),
+        case when r.k > 1 then jsonb_build_object('type','view','view','chats') else jsonb_build_object('type','profile','id', r.p1) end);
+    n := n + 1;
+  end loop;
+  update public.friendships f set chat_nudged_at = now() from _fcn c where f.requester_id = c.a and f.addressee_id = c.b;
+  return n;
+end $function$;
+
 -- friend_milestone_check()  acl: {postgres=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.friend_milestone_check()
  RETURNS trigger
@@ -4239,27 +4788,172 @@ begin
   return null;
 end $function$;
 
+-- friend_rec_reasons(p_other uuid)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.friend_rec_reasons(p_other uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare me uuid := auth.uid(); d date := (now() at time zone 'Asia/Seoul')::date; r public.friend_recs; res jsonb; looking text; asked boolean;
+begin
+  if me is null or p_other is null then return null; end if;
+  asked := exists (select 1 from public.friendships f where f.requester_id = p_other and f.addressee_id = me and f.status in ('pending','accepted'));
+  select * into r from public.friend_recs
+   where ((profile_id = me and rec_id = p_other) or (profile_id = p_other and rec_id = me)) and day > d - 60
+   order by (profile_id = me) desc, day desc limit 1;
+  if r.id is not null then
+    if r.profile_id = me then
+      select jsonb_agg(x->>'t') into res from jsonb_array_elements(r.reasons) x;
+    elsif asked then
+      -- 상대가 추천을 받았다는 사실은, 그 사람이 나에게 신청했을 때만 알려 준다. 한쪽 이유는 뺀다
+      select jsonb_agg(x->>'t') into res from jsonb_array_elements(r.reasons) x where not coalesce((x->>'one')::boolean, false);
+    end if;
+  end if;
+  if asked then select nullif(btrim(coalesce(p.rec_want_text,'')),'') into looking from public.profiles p where p.id = p_other and p.deleted_at is null; end if;
+  if res is null and looking is null then return null; end if;
+  return jsonb_build_object('reasons', coalesce(res, '[]'::jsonb), 'looking', looking);
+end $function$;
+
+-- friend_rec_refresh()  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.friend_rec_refresh()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare me uuid := auth.uid(); d date := (now() at time zone 'Asia/Seoul')::date; r public.friend_recs; n int;
+begin
+  if me is null then return null; end if;
+  select * into r from public.friend_recs where profile_id = me and day = d;
+  if r.id is not null and r.rerolls < 2
+     and not exists (select 1 from public.friendships f where f.requester_id = me and f.addressee_id = r.rec_id and f.created_at > now() - interval '1 day') then
+    n := r.rerolls;
+    delete from public.friend_recs where id = r.id;
+    perform public._friend_rec_make(me, d);
+    update public.friend_recs set rerolls = n + 1 where profile_id = me and day = d;
+  end if;
+  return public.friend_rec_today();
+end $function$;
+
+-- friend_rec_today()  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.friend_rec_today()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare
+  me uuid := auth.uid(); d date := (now() at time zone 'Asia/Seoul')::date;
+  pme public.profiles; r public.friend_recs; pb public.profiles; st text; ph jsonb;
+begin
+  if me is null then return null; end if;
+  select * into pme from public.profiles where id = me;
+  if pme.id is null or pme.onboarded_at is null or pme.deleted_at is not null or pme.suspended_at is not null or pme.rec_off then return null; end if;
+  select * into r from public.friend_recs where profile_id = me and day = d;
+  if r.id is null then
+    perform public._friend_rec_make(me, d);
+    select * into r from public.friend_recs where profile_id = me and day = d;
+  end if;
+  if r.id is null or r.rec_id is null then return null; end if;
+  select * into pb from public.profiles where id = r.rec_id;
+  if pb.id is null or pb.deleted_at is not null or pb.suspended_at is not null then return null; end if;
+  select f.status::text into st from public.friendships f
+   where (f.requester_id = me and f.addressee_id = pb.id) or (f.requester_id = pb.id and f.addressee_id = me) limit 1;
+  if st = 'blocked' then return null; end if;
+  select coalesce(jsonb_agg(u), '[]'::jsonb) into ph from (
+    select po.photos[1] u from public.posts po
+     where po.author_id = pb.id and po.parent_id is null and po.work_id is not null and not po.hidden and not coalesce(po.hidden_by_mod, false) and po.archived_at is null
+       and po.photos[1] is not null
+     order by po.created_at desc limit 3) q;
+  return jsonb_build_object('id', r.id, 'day', r.day, 'near', r.near, 'state', coalesce(st, 'none'),
+    'p', jsonb_build_object('id', pb.id, 'nickname', pb.nickname, 'avatar_url', pb.avatar_url, 'level_knit', pb.level_knit, 'level_crochet', pb.level_crochet, 'wave', coalesce(pb.wave_until > now(), false)),
+    'reasons', (select coalesce(jsonb_agg(jsonb_build_object('t', x->>'t', 'want', coalesce((x->>'want')::boolean, false))), '[]'::jsonb) from jsonb_array_elements(r.reasons) x),
+    'photos', ph);
+end $function$;
+
+-- friend_rec_weekly()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.friend_rec_weekly()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare u record; r public.friend_recs; nick text; why text; n int := 0; d date := (now() at time zone 'Asia/Seoul')::date;
+begin
+  for u in
+    select p.id from public.profiles p
+     where p.onboarded_at is not null and p.deleted_at is null and p.suspended_at is null and not p.rec_off
+       and p.last_seen_at > now() - interval '30 days'
+       and not exists (select 1 from public.friendships f where f.requester_id = p.id and f.created_at > now() - interval '7 days')
+     order by p.last_seen_at desc limit 2000
+  loop
+    perform public._friend_rec_make(u.id, d);
+    select * into r from public.friend_recs where profile_id = u.id and day = d;
+    continue when r.id is null or r.rec_id is null or r.pushed_at is not null;
+    continue when exists (select 1 from public.friendships f where (f.requester_id = u.id and f.addressee_id = r.rec_id) or (f.requester_id = r.rec_id and f.addressee_id = u.id));
+    select coalesce(nullif(btrim(nickname), ''), '이웃') into nick from public.profiles where id = r.rec_id and deleted_at is null and suspended_at is null;
+    continue when nick is null;
+    select x->>'t' into why from jsonb_array_elements(r.reasons) x limit 1;
+    insert into public.notifications(recipient_id, actor_id, kind, snippet, link)
+      values (u.id, r.rec_id, 'remind', left('오늘의 추천 뜨친: ' || nick || ' 님 · ' || coalesce(r.near, '가까운 이웃') || coalesce(' · ' || why, ''), 120),
+              jsonb_build_object('type', 'profile', 'id', r.rec_id));
+    update public.friend_recs set pushed_at = now() where id = r.id;
+    n := n + 1;
+  end loop;
+  return n;
+end $function$;
+
 -- friend_request_remind()  acl: {postgres=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.friend_request_remind()
  RETURNS integer
  LANGUAGE plpgsql
  SECURITY DEFINER
- SET search_path TO 'public'
+ SET search_path TO 'public', 'extensions'
 AS $function$
 declare r record; n int := 0;
 begin
-  for r in select f.requester_id, f.addressee_id, p.nickname from public.friendships f
+  for r in select f.requester_id, f.addressee_id, p.nickname, f.message from public.friendships f
             join public.profiles p on p.id = f.requester_id join public.profiles a on a.id = f.addressee_id
-           where f.status = 'pending' and f.reminded_at is null and f.created_at < now() - interval '3 days' and f.created_at > now() - interval '60 days'
+           where f.status = 'pending' and f.reminded_at is null and f.created_at < now() - interval '24 hours' and f.created_at > now() - interval '60 days'
              and p.deleted_at is null and p.suspended_at is null and a.deleted_at is null and a.suspended_at is null
-             and not public.is_blocked(f.addressee_id, f.requester_id)
+             and not exists (select 1 from public.friendships b where b.status = 'blocked'
+                              and ((b.requester_id = f.requester_id and b.addressee_id = f.addressee_id) or (b.requester_id = f.addressee_id and b.addressee_id = f.requester_id)))
            order by f.created_at limit 200 loop
     insert into public.notifications(recipient_id, actor_id, kind, snippet, link)
-      values (r.addressee_id, r.requester_id, 'remind', left(coalesce(r.nickname,'이웃') || ' 님의 뜨친 신청이 기다리고 있어요', 80), jsonb_build_object('type','profile','id',r.requester_id));
+      values (r.addressee_id, r.requester_id, 'remind',
+        left(coalesce(nullif(btrim(r.nickname),''),'이웃') || ' 님이 인사를 기다리고 있어요' || case when coalesce(btrim(r.message),'') <> '' then ' “' || left(btrim(r.message), 60) || '”' else '' end, 120),
+        jsonb_build_object('type','profile','id',r.requester_id));
     update public.friendships set reminded_at = now() where requester_id = r.requester_id and addressee_id = r.addressee_id;
     n := n + 1;
   end loop;
   return n;
+end $function$;
+
+-- friend_want_set(p_want text[], p_text text)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.friend_want_set(p_want text[], p_text text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare me uuid := auth.uid(); w text[]; t text := nullif(btrim(coalesce(p_text,'')), ''); old text; changed boolean;
+begin
+  if me is null then raise exception '로그인이 필요해요'; end if;
+  w := array(select x from unnest(coalesce(p_want,'{}')) with ordinality u(x, o)
+              where x in ('near','level','same','senior','junior','cross','time','chat') group by x order by min(o) limit 3);
+  if t is not null then
+    if char_length(t) > 50 then raise exception '50자까지 쓸 수 있어요'; end if;
+    if t ~* '(https?://|www\.|[a-z0-9-]+\.(com|co\.kr|kr|net|io|me|shop)(/|\s|$))' or t ~ '[0-9]{2,6}[- ][0-9]{2,6}[- ][0-9]{2,8}' or t ~ '01[0-9][- .]?[0-9]{3,4}[- .]?[0-9]{4}' or t ~ '@' then
+      raise exception '링크나 연락처는 넣을 수 없어요'; end if;
+    if public.contains_banned(t) then raise exception '커뮤니티 가이드라인에 맞지 않는 표현이 있어요'; end if;
+  end if;
+  select rec_want_text into old from public.profiles where id = me;
+  changed := t is distinct from old;
+  update public.profiles set rec_want = w, rec_want_text = t, rec_want_at = now(),
+         rec_want_ai = case when changed then null else rec_want_ai end
+   where id = me;
+  return jsonb_build_object('ok', true, 'parse', changed and t is not null);
 end $function$;
 
 -- gauge_clean(g jsonb)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
@@ -5091,6 +5785,57 @@ begin
   return jsonb_build_object('ok', true, 'notified', n, 'changes', to_jsonb(ch));
 end $function$;
 
+-- meetup_nearby_notify()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.meetup_nearby_notify()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions'
+AS $function$
+declare
+  m record; n int; total int := 0; t timestamp; txt text; whn text; h int; mi int;
+  kst timestamp := now() at time zone 'Asia/Seoul';
+  sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e';
+begin
+  if extract(hour from kst) < 8 or extract(hour from kst) >= 22 then return 0; end if;
+  for m in
+    select mt.id, mt.title, mt.place_name, mt.location, mt.starts_at, mt.created_by, hp.is_test
+      from public.meetups mt join public.profiles hp on hp.id = mt.created_by
+     where mt.nearby_notified_at is null and mt.is_public and not coalesce(mt.hidden, false) and mt.mod_scanned_at is not null
+       and mt.location is not null and mt.starts_at > now() and mt.created_at > now() - interval '3 days'
+       and hp.deleted_at is null and hp.suspended_at is null
+     order by mt.created_at limit 10
+  loop
+    t := m.starts_at at time zone 'Asia/Seoul'; h := extract(hour from t)::int; mi := extract(minute from t)::int;
+    whn := extract(month from t)::int || '월 ' || extract(day from t)::int || '일(' || (array['일','월','화','수','목','금','토'])[extract(dow from t)::int + 1] || ') '
+        || case when h = 12 then '낮 12시' when h = 0 then '밤 12시' when h < 12 then '오전 ' || h || '시' else '오후 ' || (h - 12) || '시' end
+        || case when mi > 0 then ' ' || mi || '분' else '' end;
+    txt := left('가까운 곳에 뜨개 모임이 열렸어요 🧶 「' || coalesce(nullif(btrim(m.title), ''), '뜨개 모임') || '」 ' || whn
+        || coalesce(' · ' || nullif(btrim(m.place_name), ''), ''), 200);
+    with r as (
+      select p.id from public.profiles p
+       where p.id <> m.created_by and p.is_test = m.is_test and p.onboarded_at is not null and p.deleted_at is null and p.suspended_at is null
+         and p.location is not null and p.last_seen_at > now() - interval '30 days' and ST_DWithin(p.location, m.location, 5000)
+         and not exists (select 1 from public.friendships f where f.status = 'blocked'
+                          and ((f.requester_id = p.id and f.addressee_id = m.created_by) or (f.requester_id = m.created_by and f.addressee_id = p.id)))
+         and (select count(*) from public.notifications x where x.recipient_id = p.id and x.meetup_id is not null and x.kind = 'remind'
+                and x.snippet like '가까운 곳에 뜨개 모임이 열렸어요%' and x.created_at > now() - interval '20 hours') < 2
+    ), ins as (
+      insert into public.notifications(recipient_id, actor_id, kind, meetup_id, snippet, link)
+      select r.id, m.created_by, 'remind', m.id, txt, jsonb_build_object('type', 'meetup', 'id', m.id) from r returning 1
+    ) select count(*) into n from ins;
+    update public.meetups set nearby_notified_at = now() where id = m.id;
+    insert into public.notifications(recipient_id, actor_id, kind, meetup_id, snippet, link)
+      values (m.created_by, sup, 'notice', m.id,
+        left(case when n > 0
+          then '「' || coalesce(nullif(btrim(m.title), ''), '모임') || '」 모임을 가까운 이웃 ' || n || '명에게 알렸어요. 모임 장소에서 5km 안에 사는 분들께 "가까운 곳에 뜨개 모임이 열렸어요" 알림을 보냈어요. 모임 글에 사진을 한 장 넣으면 더 눈에 띄어요.'
+          else '「' || coalesce(nullif(btrim(m.title), ''), '모임') || '」 모임이 지도와 모임 탭에 올라갔어요. 아직 5km 안에 사는 이웃이 없어 알림은 보내지 못했어요. 모임 글에 사진을 한 장 넣으면 더 눈에 띄어요.' end, 300),
+        jsonb_build_object('type', 'meetup', 'id', m.id));
+    total := total + n;
+  end loop;
+  return total;
+end $function$;
+
 -- meetup_set_terms(p_meetup uuid, p_fee_note text, p_mode text, p_refund text)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.meetup_set_terms(p_meetup uuid, p_fee_note text, p_mode text, p_refund text)
  RETURNS void
@@ -5136,7 +5881,7 @@ CREATE OR REPLACE FUNCTION public.my_author_eligibility()
  STABLE SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-  select jsonb_build_object('adv', public.author_adv_count(auth.uid()), 'total', (select count(*) from public.works where profile_id = auth.uid()), 'needed', 3);
+  select jsonb_build_object('adv', public.author_adv_count(auth.uid()), 'total', (select count(*) from public.works where profile_id = auth.uid() and review_status = 'approved'), 'needed', 3);
 $function$;
 
 -- my_class_applications()  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
@@ -5567,6 +6312,62 @@ begin
   return null;
 end $function$;
 
+-- partner_invite_watch()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.partner_invite_watch()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare r record; n int := 0;
+begin
+  for r in
+    with inv as (
+      select i.id, i.kind, i.name, k.key,
+             lower(regexp_replace(k.key, '\s+', '', 'g')) as nk,
+             regexp_replace(lower(k.key), '[^a-z0-9]', '', 'g') as ak,
+             (lower(k.key) ~ '^[a-z0-9._ -]+$') as is_ascii
+        from public.partner_invites i
+        cross join lateral unnest(array[i.name] || coalesce(i.keys, '{}')) as k(key)
+       where i.profile_id is null and btrim(coalesce(k.key, '')) <> ''
+    ), cand as (
+      select p.id, p.nickname, p.created_at,
+             lower(regexp_replace(coalesce(p.nickname, ''), '\s+', '', 'g')) as nn,
+             regexp_replace(lower(split_part(coalesce(u.email, ''), '@', 1)), '[^a-z0-9]', '', 'g') as el
+        from public.profiles p join auth.users u on u.id = p.id
+       where p.deleted_at is null and not coalesce(p.is_test, false)
+    ), m as (
+      select distinct on (inv.id, c.id) inv.id as invite_id, inv.kind, inv.name, c.id as profile_id, c.nickname, c.created_at,
+             case when char_length(inv.nk) >= 2 and char_length(c.nn) >= 2
+                       and (c.nn like '%' || inv.nk || '%' or (char_length(c.nn) >= 3 and char_length(c.nn) * 2 >= char_length(inv.nk) and inv.nk like '%' || c.nn || '%')) then 'nickname'
+                  else 'email' end as via
+        from inv join cand c on
+             (char_length(inv.nk) >= 2 and char_length(c.nn) >= 2
+                and (c.nn like '%' || inv.nk || '%' or (char_length(c.nn) >= 3 and char_length(c.nn) * 2 >= char_length(inv.nk) and inv.nk like '%' || c.nn || '%')))
+          or (inv.is_ascii and char_length(inv.ak) >= 5 and c.el like '%' || inv.ak || '%')
+       where not exists (select 1 from public.partner_invite_hits h where h.invite_id = inv.id and h.profile_id = c.id)
+       order by inv.id, c.id, 7 desc
+    )
+    select * from m order by created_at
+  loop
+    insert into public.partner_invite_hits(invite_id, profile_id, via) values (r.invite_id, r.profile_id, r.via) on conflict do nothing;
+    if not found then continue; end if;
+    n := n + 1;
+    insert into public.jigi_reminders(due_at, text) values (now(),
+      '🔔 초대하신 분으로 보이는 가입이 있어요'||E'\n\n'||
+      '초대 기록: '||r.name||' ('||case r.kind when 'shop' then '공방·가게' else '작가' end||')'||E'\n'||
+      '가입한 회원: 닉네임 「'||coalesce(nullif(btrim(r.nickname), ''), '아직 없음')||'」 · 가입 '||to_char(r.created_at at time zone 'Asia/Seoul', 'MM-DD HH24:MI')||E'\n'||
+      '비슷한 점: '||case r.via when 'nickname' then '닉네임이 초대 기록의 이름과 비슷해요.' else '가입한 이메일 주소의 앞부분이 초대 기록에 적어 둔 계정 이름과 비슷해요(이메일 주소는 이 알림에 적지 않아요).' end||E'\n\n'||
+      '왜 알려 드리나요: 대표님이 초대장을 보낸 분과 비슷한 닉네임·이메일로 가입이 생기면 알려 달라고 하셨어요. 이름이 비슷할 뿐 같은 분인지는 제가 알 수 없으니, 프로필과 올린 글을 보고 확인해 주세요.'||E'\n\n'||
+      '지금 하실 수 있는 일:'||E'\n'||
+      '① 콘솔 › 초대·안내에서 「'||r.name||'」 줄의 ''닉네임 연결''에 이 닉네임을 넣으면 초대와 회원이 이어지고, 이 초대에 대한 알림은 더 오지 않아요.'||E'\n'||
+      case r.kind when 'shop' then '② 가게는 그분이 앱에서 가게 등록을 신청하시면 승인 알림이 따로 와요.'
+                  else '② 같은 분이 맞으면 콘솔 › 회원에서 이 닉네임을 찾아 작가로 지정해 주세요. 지정하는 순간 작가 사용법 안내가 그분께 자동으로 가요.' end||E'\n\n'||
+      '참고: 같은 초대·같은 회원에 대해서는 한 번만 알려요.');
+  end loop;
+  return n;
+end $function$;
+
 -- pattern_fee_calc(p_price integer)  acl: {=X/postgres,postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres,anon=X/postgres}
 CREATE OR REPLACE FUNCTION public.pattern_fee_calc(p_price integer)
  RETURNS jsonb
@@ -5793,6 +6594,24 @@ AS $function$
     select t, min(ord) ord from (select lower(m[1]) t, ord from regexp_matches(coalesce(p_body,''), '(?:^|\s)#([가-힣A-Za-z0-9_]{1,20})', 'g') with ordinality as x(m, ord)) a group by t order by min(ord) limit 10) s;
 $function$;
 
+-- post_video_set(p_post uuid, p_video jsonb)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.post_video_set(p_post uuid, p_video jsonb)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare me uuid := auth.uid(); po public.posts;
+begin
+  if me is null then raise exception '로그인이 필요해요'; end if;
+  select * into po from public.posts where id = p_post;
+  if po.id is null or po.author_id <> me then raise exception '내 글만 고칠 수 있어요'; end if;
+  if po.parent_id is not null or po.meetup_id is not null or po.work_id is not null or po.review_of is not null then
+    raise exception '영상은 일반 글에만 올릴 수 있어요'; end if;
+  update public.posts set video = case when p_video is null or jsonb_typeof(p_video) = 'null' then null else p_video end where id = p_post;
+  return true;
+end $function$;
+
 -- posts_archive_guard()  acl: {postgres=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.posts_archive_guard()
  RETURNS trigger
@@ -5887,6 +6706,67 @@ begin
   end if;
   new.tags := coalesce(v, '{}');
   return new;
+end $function$;
+
+-- posts_video_guard()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.posts_video_guard()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare u text; ps text; d numeric; c text; v jsonb;
+begin
+  if new.video is null then return new; end if;
+  if tg_op = 'UPDATE' and new.video is not distinct from old.video then return new; end if;
+  if jsonb_typeof(new.video) <> 'object' then raise exception '영상 정보가 올바르지 않아요'; end if;
+  if new.parent_id is not null or new.meetup_id is not null or new.work_id is not null or new.review_of is not null then
+    raise exception '영상은 일반 글에만 올릴 수 있어요'; end if;
+  u := new.video->>'url'; ps := new.video->>'poster'; c := new.video->>'cf';
+  if c is not null then
+    if c !~ '^[0-9a-f]{32}$' or not exists (select 1 from public.video_uploads vu where vu.uid = c and vu.owner = new.author_id) then
+      raise exception '영상 정보가 올바르지 않아요'; end if;
+    u := null;
+  elsif u is null or u !~ ('^https://api\.knitup\.co\.kr/storage/v1/object/public/videos/' || new.author_id::text || '/[A-Za-z0-9._-]+\.(mp4|mov|webm)$') then
+    raise exception '영상 주소가 올바르지 않아요';
+  end if;
+  if ps is not null and ps !~ ('^https://api\.knitup\.co\.kr/storage/v1/object/public/posts/' || new.author_id::text || '/[A-Za-z0-9._-]+\.jpg$') then
+    raise exception '영상 첫 장면 주소가 올바르지 않아요'; end if;
+  begin d := (new.video->>'dur')::numeric; exception when others then d := null; end;
+  if d is null or d <= 0 or d > 37 then raise exception '영상은 30초까지 올릴 수 있어요'; end if;
+  if (select count(*) from public.posts p where p.author_id = new.author_id and p.video is not null and p.created_at > now() - interval '1 day' and p.id <> new.id) >= 10 then
+    raise exception '영상은 하루에 10개까지 올릴 수 있어요'; end if;
+  v := jsonb_build_object('poster', ps, 'dur', round(d, 1),
+         'w', nullif(greatest(0, least(8000, coalesce((new.video->>'w')::int, 0))), 0),
+         'h', nullif(greatest(0, least(8000, coalesce((new.video->>'h')::int, 0))), 0));
+  new.video := jsonb_strip_nulls(case when c is not null then jsonb_build_object('cf', c) else jsonb_build_object('url', u) end || v);
+  return new;
+end $function$;
+
+-- posts_video_trash()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.posts_video_trash()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare u text; ps text; c text;
+begin
+  if old.video is null then return null; end if;
+  if tg_op = 'UPDATE' and new.video is not distinct from old.video then return null; end if;
+  u := old.video->>'url'; ps := old.video->>'poster'; c := old.video->>'cf';
+  if c ~ '^[0-9a-f]{32}$' and (tg_op = 'DELETE' or c is distinct from (new.video->>'cf')) then
+    insert into public.storage_trash(bucket, path, reason) values ('cf', c, lower(tg_op)) on conflict (bucket, path) do nothing;
+  end if;
+  if u ~ '/storage/v1/object/public/videos/' and (tg_op = 'DELETE' or u is distinct from (new.video->>'url')) then
+    insert into public.storage_trash(bucket, path, reason) values ('videos', split_part(u, '/storage/v1/object/public/videos/', 2), lower(tg_op))
+      on conflict (bucket, path) do nothing;
+  end if;
+  if ps ~ '/storage/v1/object/public/posts/' and (tg_op = 'DELETE' or ps is distinct from (new.video->>'poster')) then
+    insert into public.storage_trash(bucket, path, reason) values ('posts', split_part(ps, '/storage/v1/object/public/posts/', 2), lower(tg_op))
+      on conflict (bucket, path) do nothing;
+  end if;
+  return null;
 end $function$;
 
 -- profiles_apply_skills()  acl: {postgres=X/postgres,service_role=X/postgres}
@@ -6616,6 +7496,79 @@ begin
   return new;
 end $function$;
 
+-- shop_post_comment(p_post uuid, p_body text)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.shop_post_comment(p_post uuid, p_body text)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare sp public.shop_posts; v_owner uuid; v_shop text; v_nick text; v_body text := btrim(coalesce(p_body, '')); v_id uuid; v_until timestamptz; r record;
+begin
+  if auth.uid() is null then raise exception '로그인이 필요해요'; end if;
+  if not public.is_active_user() then raise exception '지금은 댓글을 쓸 수 없어요'; end if;
+  select post_restricted_until into v_until from public.profiles where id = auth.uid();
+  if v_until is not null and v_until > now() then raise exception '글쓰기가 제한된 동안에는 댓글을 쓸 수 없어요'; end if;
+  select * into sp from public.shop_posts where id = p_post and not hidden;
+  if not found then raise exception '소식을 찾을 수 없어요'; end if;
+  if sp.kind = 'class' then raise exception '클래스 문의는 신청한 뒤 채팅방에서 해 주세요'; end if;
+  if char_length(v_body) < 1 or char_length(v_body) > 300 then raise exception '댓글은 300자까지 쓸 수 있어요'; end if;
+  if v_body ~* '(https?://|www\.|[a-z0-9-]+\.(com|co\.kr|kr|net|io|me|shop)(/|\s|$))' or v_body ~ '[0-9]{2,6}[- ][0-9]{2,6}[- ][0-9]{2,8}' then raise exception '댓글에는 링크나 계좌번호를 넣을 수 없어요'; end if;
+  if public.contains_banned(v_body) then raise exception '커뮤니티 가이드라인에 맞지 않는 표현이 있어요'; end if;
+  if (select count(*) from public.shop_post_comments where author_id = auth.uid() and created_at > now() - interval '1 day') >= 40 then raise exception '오늘은 댓글을 더 쓸 수 없어요. 내일 다시 해 주세요'; end if;
+  select s.owner_id, s.name into v_owner, v_shop from public.shops s where s.id = sp.shop_id;
+  v_owner := coalesce(v_owner, sp.author_id);
+  if v_owner is not null and public.is_blocked(auth.uid(), v_owner) then raise exception '댓글을 쓸 수 없어요'; end if;
+  insert into public.shop_post_comments(post_id, author_id, body) values (p_post, auth.uid(), v_body) returning id into v_id;
+  select coalesce(nullif(btrim(nickname), ''), '이웃') into v_nick from public.profiles where id = auth.uid();
+  if auth.uid() <> v_owner then
+    insert into public.notifications(recipient_id, actor_id, kind, snippet, shop_id, link)
+      values (v_owner, auth.uid(), 'notice', left(v_nick||' 님이 「'||sp.title||'」 소식에 댓글을 남겼어요: '||v_body, 200), sp.shop_id,
+              case when sp.shop_id is not null then jsonb_build_object('type','shop','id', sp.shop_id) else jsonb_build_object('type','view','view','my') end);
+  else
+    for r in select distinct c.author_id from public.shop_post_comments c where c.post_id = p_post and c.author_id <> v_owner
+               and not public.is_blocked(c.author_id, v_owner) limit 50 loop
+      insert into public.notifications(recipient_id, actor_id, kind, snippet, shop_id, link)
+        values (r.author_id, v_owner, 'notice', left(coalesce(v_shop, v_nick)||'에서 「'||sp.title||'」 소식에 댓글을 남겼어요: '||v_body, 200), sp.shop_id,
+                case when sp.shop_id is not null then jsonb_build_object('type','shop','id', sp.shop_id) else jsonb_build_object('type','profile','id', v_owner) end);
+    end loop;
+  end if;
+  return v_id;
+end $function$;
+
+-- shop_post_counts()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.shop_post_counts()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare pid uuid := coalesce(new.post_id, old.post_id);
+begin
+  if tg_table_name = 'shop_post_comments' then
+    update public.shop_posts set comment_count = (select count(*) from public.shop_post_comments c where c.post_id = pid) where id = pid;
+  else
+    update public.shop_posts set like_count = (select count(*) from public.shop_post_likes l where l.post_id = pid) where id = pid;
+  end if;
+  return null;
+end $function$;
+
+-- shop_post_like(p_post uuid, p_on boolean)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.shop_post_like(p_post uuid, p_on boolean)
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  if auth.uid() is null then raise exception '로그인이 필요해요'; end if;
+  if not public.is_active_user() then raise exception '지금은 할 수 없어요'; end if;
+  if not exists (select 1 from public.shop_posts where id = p_post and not hidden) then raise exception '소식을 찾을 수 없어요'; end if;
+  if coalesce(p_on, true) then insert into public.shop_post_likes(post_id, profile_id) values (p_post, auth.uid()) on conflict do nothing;
+  else delete from public.shop_post_likes where post_id = p_post and profile_id = auth.uid(); end if;
+  return (select like_count from public.shop_posts where id = p_post);
+end $function$;
+
 -- shop_posts_class_changed()  acl: {postgres=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.shop_posts_class_changed()
  RETURNS trigger
@@ -6662,6 +7615,42 @@ begin
     'balls', coalesce((select sum((x->>'qty')::int) from public.orders o2, jsonb_array_elements(o2.items) x where o2.status in ('paid','shipped','done') and o2.created_at >= now() - make_interval(days => p_days)), 0)
   ) into out from public.orders where created_at >= now() - make_interval(days => p_days);
   return out;
+end $function$;
+
+-- start_works()  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.start_works()
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare me uuid := auth.uid(); mt boolean; d date := (now() at time zone 'Asia/Seoul')::date; res jsonb;
+begin
+  if me is null then return '[]'::jsonb; end if;
+  select is_test into mt from public.profiles where id = me;
+  if mt is null then return '[]'::jsonb; end if;
+  with base as (
+    select w.id, po.id as post, coalesce(w.photos[1], po.photos[1]) as photo, p.nickname, p.avatar_url, w.profile_id, w.featured_at,
+           ((w.featured_at at time zone 'Asia/Seoul')::date >= d - 1) as fresh
+      from public.works w
+      join public.profiles p on p.id = w.profile_id
+      join public.posts po on po.work_id = w.id and po.parent_id is null
+     where w.featured_at is not null and w.featured_at <= now() and w.featured_at > now() - interval '7 days'
+       and w.review_status = 'approved' and w.feature
+       and not po.hidden and not coalesce(po.hidden_by_mod, false) and po.archived_at is null
+       and p.deleted_at is null and p.suspended_at is null and not p.feature_off and p.is_test = mt
+       and coalesce(w.photos[1], po.photos[1]) is not null
+       and not exists (select 1 from public.friendships f where f.status = 'blocked'
+                        and ((f.requester_id = me and f.addressee_id = w.profile_id) or (f.requester_id = w.profile_id and f.addressee_id = me)))
+  ), pick as (
+    (select * from base where fresh order by featured_at desc limit 12)
+    union all
+    (select * from base where not fresh order by featured_at desc
+      limit greatest(0, 3 - (select count(*) from base where fresh)::int))
+  )
+  select coalesce(jsonb_agg(jsonb_build_object('id', id, 'post', post, 'photo', photo, 'nickname', nickname, 'avatar_url', avatar_url, 'mine', profile_id = me) order by featured_at desc), '[]'::jsonb)
+    into res from pick;
+  return res;
 end $function$;
 
 -- stash_apply_read(p_id uuid, p_json jsonb, p_ok boolean)  acl: {postgres=X/postgres,service_role=X/postgres}
@@ -6773,6 +7762,24 @@ begin
   end loop;
   return n;
 end $function$;
+
+-- storage_trash_due(p_limit integer)  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.storage_trash_due(p_limit integer DEFAULT 50)
+ RETURNS TABLE(id bigint, bucket text, path text)
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  select t.id, t.bucket, t.path from public.storage_trash t
+   where t.done_at is null and t.tries < 5 and t.created_at < now() - interval '10 minutes'
+     and not exists (select 1 from public.posts p where p.video is not null
+                       and ((t.bucket = 'cf' and p.video->>'cf' = t.path)
+                         or (t.bucket <> 'cf' and (p.video->>'url' like '%/' || t.bucket || '/' || t.path or p.video->>'poster' like '%/' || t.bucket || '/' || t.path))))
+     and not exists (select 1 from public.posts p where t.bucket = 'posts' and p.photos is not null
+                       and exists (select 1 from unnest(p.photos) ph where ph like '%/posts/' || t.path)
+                       and (p.video is null or p.video->>'poster' not like '%/posts/' || t.path))
+   order by t.id limit greatest(1, least(coalesce(p_limit, 50), 200));
+$function$;
 
 -- studio_claim_code()  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.studio_claim_code()
@@ -6918,13 +7925,23 @@ CREATE OR REPLACE FUNCTION public.support_on_message()
  SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-declare sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e'; cid bigint; v_secret text;
+declare sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e'; cid bigint; v_secret text; v_ask bigint;
 begin
   begin
     if new.sender_id <> sup and exists (select 1 from public.room_members m where m.room_id = new.room_id and m.profile_id = sup)
        and exists (select 1 from public.rooms r where r.id = new.room_id and r.kind = 'direct') then
-      perform public.jigi_call('support');
       select id into cid from public.report_cases where author_id = new.sender_id and status in ('ask','review','hidden') order by id desc limit 1;
+      if cid is null then
+        select id into v_ask from public.yarn_asks where profile_id = new.sender_id and status = 'asked' and asked_at > now() - interval '14 days' order by id desc limit 1;
+      end if;
+      if v_ask is not null then
+        select value into v_secret from public.jigi_config where key = 'hook_secret';
+        perform net.http_post(url := 'https://thfcrodfaitzrzlrxyir.supabase.co/functions/v1/yarn-ask',
+          body := jsonb_build_object('ask', v_ask, 'msg', new.id),
+          headers := jsonb_build_object('Content-Type','application/json','x-jigi-secret', v_secret), timeout_milliseconds := 30000);
+      else
+        perform public.jigi_call('support');
+      end if;
       if cid is not null then
         update public.report_cases set replied_at = now(), reply_msg = new.id where id = cid;
         if new.photo_url is not null then
@@ -7123,6 +8140,104 @@ AS $function$
   delete from public.device_tokens where token = lower(p_token) and profile_id = auth.uid();
 $function$;
 
+-- video_uploads_orphans()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.video_uploads_orphans()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare n int;
+begin
+  with o as (
+    select vu.uid from public.video_uploads vu
+     where vu.created_at < now() - interval '1 day'
+       and not exists (select 1 from public.posts p where p.video->>'cf' = vu.uid)
+       and not exists (select 1 from public.storage_trash t where t.bucket = 'cf' and t.path = vu.uid)
+     limit 200)
+  insert into public.storage_trash(bucket, path, reason) select 'cf', uid, 'orphan' from o on conflict (bucket, path) do nothing;
+  get diagnostics n = row_count;
+  return n;
+end $function$;
+
+-- work_review_alert()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.work_review_alert()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare ids uuid[]; lines text; n int; tot int; oldest int;
+begin
+  select array_agg(w.id), string_agg('· '||coalesce(p.nickname,'회원')||' 「'||coalesce(nullif(btrim(w.title),''),'작품')||'」'
+      ||case when exists (select 1 from public.techniques t where t.id = any(w.techniques) and t.level >= 5) then ' — 전문(5단계) 기법 포함' else '' end
+      ||case when w.took is null and w.knowhow is null then ' — 옛 버전 앱(뜨개 이야기 없음)' else '' end, E'\n' order by w.submitted_at)
+    into ids, lines
+    from public.works w join public.profiles p on p.id = w.profile_id
+   where w.review_status = 'pending' and w.review_alerted_at is null and not coalesce(p.is_test, false) and coalesce(w.submitted_at, w.created_at) < now() - interval '3 minutes';
+  n := coalesce(array_length(ids, 1), 0);
+  if n = 0 then return 0; end if;
+  select count(*), coalesce(max(extract(epoch from now() - coalesce(w.submitted_at, w.created_at)) / 3600)::int, 0) into tot, oldest
+    from public.works w join public.profiles p on p.id = w.profile_id where w.review_status = 'pending' and not coalesce(p.is_test, false);
+  update public.works set review_alerted_at = now() where id = any(ids);
+  insert into public.jigi_reminders(due_at, text) values (now(),
+    '🧶 완성작품 인증 확인 대기 '||n||'건이 새로 들어왔어요'||E'\n\n'||lines||E'\n\n'||
+    '지금 확인을 기다리는 인증은 모두 '||tot||'건이고, 가장 오래 기다린 것은 약 '||oldest||'시간 됐어요.'||E'\n\n'||
+    '왜 알려 드리나요: 완성작품 인증은 대표님이 승인해야 커뮤니티에 올라가요. 승인 전에는 올린 분에게만 보이고, 인증 개수·기법·모임·작가 자격에도 들어가지 않아요.'||E'\n\n'||
+    '지금 하실 수 있는 일:'||E'\n'||
+    '① 콘솔 › 인증 확인(https://yesbeyesnono.github.io/knit-neighbors/admin.html#certs)에서 사진과 고른 기법, 뜨개 이야기를 보고 [승인 · 게시]를 눌러 주세요.'||E'\n'||
+    '② 사진이 흐리거나 기법 표시가 맞지 않으면 [보완 요청] — 사유를 고르면 회원에게 보낼 문구가 만들어져요. 회원이 고쳐서 저장하면 다시 확인 대기로 돌아와요.'||E'\n'||
+    '③ 완성작이 아니거나 가이드라인에 맞지 않으면 [반려] — 글은 올라가지 않고 사유가 회원에게 전달돼요.');
+  return n;
+end $function$;
+
+-- work_review_daily()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.work_review_daily()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare n int; r record; k int := 0; sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e';
+begin
+  select count(*) into n from public.works w join public.profiles p on p.id = w.profile_id
+   where w.review_status = 'pending' and not coalesce(p.is_test, false) and coalesce(w.submitted_at, w.created_at) < now() - interval '24 hours';
+  if n > 0 then
+    insert into public.jigi_reminders(due_at, text) values (now(),
+      '⏰ 하루 넘게 확인을 기다리는 완성작품 인증이 '||n||'건 있어요'||E'\n\n'||
+      '올린 분들은 "확인 중"이라는 안내만 받고 기다리고 있어요. 승인 전에는 커뮤니티에 보이지 않고 인증 개수에도 들어가지 않아요.'||E'\n\n'||
+      '콘솔 › 인증 확인(https://yesbeyesnono.github.io/knit-neighbors/admin.html#certs)에서 [승인 · 게시], [보완 요청], [반려] 중 하나를 눌러 주세요.');
+  end if;
+  for r in select w.id, w.profile_id, w.title, w.review_note,
+             (select q.id from public.posts q where q.work_id = w.id and q.parent_id is null order by q.created_at limit 1) as post_id
+           from public.works w where w.review_status = 'fix' and w.fix_reminded_at is null and w.reviewed_at < now() - interval '3 days' loop
+    update public.works set fix_reminded_at = now() where id = r.id;
+    insert into public.notifications(recipient_id, actor_id, kind, post_id, snippet, link)
+      values (r.profile_id, sup, 'remind', r.post_id, left('「'||coalesce(nullif(btrim(r.title),''),'작품')||'」 인증이 아직 기다리고 있어요. '||coalesce(r.review_note,'')||' 글을 눌러 고친 뒤 저장하면 다시 확인해 드려요.', 400),
+              case when r.post_id is not null then jsonb_build_object('type','post','id',r.post_id) else jsonb_build_object('type','view','view','my') end);
+    k := k + 1;
+  end loop;
+  return k;
+end $function$;
+
+-- work_set_story(p_post uuid, p_story jsonb)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.work_set_story(p_post uuid, p_story jsonb)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare v_work uuid; v_took text := nullif(btrim(coalesce(p_story->>'took','')), '');
+  v_know text := nullif(left(btrim(coalesce(p_story->>'knowhow','')), 500), ''); v_reg text := nullif(left(btrim(coalesce(p_story->>'regret','')), 300), '');
+begin
+  if auth.uid() is null then raise exception '로그인이 필요해요'; end if;
+  select w.id into v_work from public.posts po join public.works w on w.id = po.work_id where po.id = p_post and w.profile_id = auth.uid();
+  if v_work is null then raise exception '내 완성작품 인증이 아니에요'; end if;
+  if v_took is not null and v_took not in ('1d','3d','1w','2w','1m','long') then v_took := null; end if;
+  if public.contains_banned(coalesce(v_know,'')||' '||coalesce(v_reg,'')) then raise exception '커뮤니티 가이드라인에 맞지 않는 표현이 있어요'; end if;
+  update public.works set took = v_took, knowhow = v_know, regret = v_reg where id = v_work;
+end $function$;
+
 -- work_set_tech_photos(p_post uuid, p_items jsonb)  acl: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.work_set_tech_photos(p_post uuid, p_items jsonb)
  RETURNS integer
@@ -7160,13 +8275,59 @@ AS $function$
 declare pid uuid := coalesce(new.profile_id, old.profile_id); v_ver text[]; v_cnt integer; v_lv integer;
 begin
   select coalesce(array_agg(distinct t), '{}'), count(distinct w.id) into v_ver, v_cnt
-    from public.works w left join lateral unnest(w.techniques) t on true where w.profile_id = pid;
-  select count(distinct (w.created_at at time zone 'Asia/Seoul')::date) into v_lv from public.works w where w.profile_id = pid;
+    from public.works w left join lateral unnest(w.techniques) t on true where w.profile_id = pid and w.review_status = 'approved';
+  select count(distinct (w.created_at at time zone 'Asia/Seoul')::date) into v_lv from public.works w where w.profile_id = pid and w.review_status = 'approved';
   v_ver := array(select x from unnest(v_ver) x where x is not null);
   update public.profiles p set verified_skills = v_ver, cert_count = v_cnt, act_level = v_lv,
     skills = (select array(select distinct s from unnest(p.skills || public.expand_prereqs(v_ver)) s))
     where p.id = pid;
   return null;
+end $function$;
+
+-- works_feature_on_approve()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.works_feature_on_approve()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  pr record; v_post uuid; v_at timestamptz; cnt int; d date := (now() at time zone 'Asia/Seoul')::date;
+  sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e';
+begin
+  if new.review_status <> 'approved' or old.review_status not in ('pending','fix') or not new.feature or new.featured_at is not null then return null; end if;
+  select p.deleted_at, p.suspended_at, p.feature_off into pr from public.profiles p where p.id = new.profile_id;
+  if not found or pr.deleted_at is not null or pr.suspended_at is not null or pr.feature_off then return null; end if;
+  if coalesce(new.photos[1], '') = '' then return null; end if;
+  -- 같은 회원은 7일에 한 번
+  if exists (select 1 from public.works w where w.profile_id = new.profile_id and w.id <> new.id and w.featured_at > now() - interval '7 days') then return null; end if;
+  select id into v_post from public.posts where work_id = new.id and parent_id is null order by created_at limit 1;
+  if v_post is null then return null; end if;
+  -- 하루 12건까지. 넘으면 다음 날 0시(한국 시간)부터
+  select count(*) into cnt from public.works w where w.featured_at is not null and (w.featured_at at time zone 'Asia/Seoul')::date = d;
+  v_at := case when cnt >= 12 then ((d + 1)::timestamp at time zone 'Asia/Seoul') else now() end;
+  update public.works set featured_at = v_at where id = new.id;
+  insert into public.notifications(recipient_id, actor_id, kind, post_id, snippet, link)
+    values (new.profile_id, sup, 'notice', v_post,
+      left(case when cnt >= 12 then '내일의 완성작품에 올랐어요 🎉 ' else '오늘의 완성작품에 올랐어요 🎉 ' end
+           || coalesce('「' || nullif(btrim(new.title), '') || '」 — ', '') || '앱 첫 화면에서 이웃들에게 소개돼요.', 300),
+      jsonb_build_object('type', 'post', 'id', v_post));
+  return null;
+end $function$;
+
+-- works_resubmit()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.works_resubmit()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'public'
+AS $function$
+begin
+  if old.review_status = 'fix' and new.review_status = 'fix' and auth.uid() = old.profile_id
+     and (new.title, new.note, new.photos, new.techniques, new.custom_techniques, new.tech_photos, new.took, new.knowhow, new.regret)
+         is distinct from (old.title, old.note, old.photos, old.techniques, old.custom_techniques, old.tech_photos, old.took, old.knowhow, old.regret) then
+    new.review_status := 'pending'; new.submitted_at := now(); new.review_alerted_at := null;
+  end if;
+  return new;
 end $function$;
 
 -- works_stash_restore()  acl: {postgres=X/postgres,service_role=X/postgres}
@@ -7177,6 +8338,21 @@ CREATE OR REPLACE FUNCTION public.works_stash_restore()
  SET search_path TO 'public'
 AS $function$
 begin perform public.stash_restore(old.id); return old; end $function$;
+
+-- works_yarn_ask()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.works_yarn_ask()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  begin
+    if new.review_status = 'approved' and old.review_status is distinct from 'approved' then perform public.yarn_ask_check(new.id, false); end if;
+  exception when others then null;
+  end;
+  return null;
+end $function$;
 
 -- yarn_add_alias(p_catalog uuid, p_alias text)  acl: {postgres=X/postgres,service_role=X/postgres}
 CREATE OR REPLACE FUNCTION public.yarn_add_alias(p_catalog uuid, p_alias text)
@@ -7194,6 +8370,146 @@ begin
     norm_keys = (select array_agg(distinct x) from unnest(coalesce(norm_keys,'{}') || array[k, public.yarn_norm(coalesce(c.brand,'')||a)]) x where x is not null),
     updated_at = now()
   where id = p_catalog;
+end $function$;
+
+-- yarn_ask_apply(p_ask bigint, p_answer jsonb)  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.yarn_ask_apply(p_ask bigint, p_answer jsonb)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare a public.yarn_asks; it jsonb; an jsonb; i int; c public.yarn_catalog; e public.yarn_entries; v_brand text; v_prod text; v_g numeric; v_m numeric; v_f jsonb; v_fm text; v_sum numeric;
+  v_match uuid; v_new uuid; n_link int := 0; n_fill int := 0; v_res jsonb := '[]'::jsonb; v_name text; v_linked text; v_reply text; v_status text; sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e'; v_others int; v_k text;
+begin
+  select * into a from public.yarn_asks where id = p_ask for update;
+  if a.id is null or a.status <> 'asked' then return jsonb_build_object('status', 'closed'); end if;
+  if coalesce((p_answer->>'unknown')::boolean, false) is not true then
+    for an in select * from jsonb_array_elements(case when jsonb_typeof(p_answer->'items') = 'array' then p_answer->'items' else '[]'::jsonb end) loop
+      i := coalesce(nullif(an->>'i','')::int, 0); it := a.items->i; if it is null then continue; end if;
+      select * into e from public.yarn_entries where id = (it->>'entry_id')::bigint; if e.id is null then continue; end if;
+      select * into c from public.yarn_catalog where id = e.catalog_id; if c.id is null or c.status <> 'auto' then continue; end if;   -- 확정 실은 손대지 않는다
+      -- 값 검사(범위를 벗어나면 버림)
+      v_brand := nullif(left(btrim(regexp_replace(coalesce(an->>'brand',''), '[<>{}\[\]\\]', '', 'g')), 30), '');
+      v_prod  := nullif(left(btrim(regexp_replace(coalesce(an->>'product',''), '[<>{}\[\]\\]', '', 'g')), 50), '');
+      v_g := case when (an->>'ball_g') ~ '^\d+(\.\d+)?$' and (an->>'ball_g')::numeric between 5 and 2000 then (an->>'ball_g')::numeric end;
+      v_m := case when (an->>'ball_m') ~ '^\d+(\.\d+)?$' and (an->>'ball_m')::numeric between 5 and 5000 then (an->>'ball_m')::numeric end;
+      v_f := null;
+      if jsonb_typeof(an->'fibers') = 'object' then
+        select jsonb_object_agg(left(k, 12), v::numeric), sum(v::numeric) into v_f, v_sum from jsonb_each_text(an->'fibers') t(k, v) where v ~ '^\d+(\.\d+)?$' and v::numeric > 0 and v::numeric <= 100 and length(btrim(k)) between 1 and 12;
+        if v_f is null or v_sum < 95 or v_sum > 105 then v_f := null; end if;
+      end if;
+      if v_brand is null and v_prod is null and v_g is null and v_m is null and v_f is null then continue; end if;
+      v_fm := case when v_f is not null then (select k from jsonb_each_text(v_f) t(k, v) order by v::numeric desc limit 1) end;
+      -- ① 사전의 확정 실과 맞는지: 이름으로, 안 되면 규격으로
+      v_match := null; v_name := btrim(coalesce(v_brand||' ','')||coalesce(v_prod, ''));
+      if v_prod is not null and v_brand is not null then   -- 브랜드 없이 실 이름만으로는 맞추지 않는다(같은 이름의 다른 실일 수 있음)
+        v_k := public.yarn_norm(v_name);
+        select t.id into v_match from public.yarn_catalog t where t.merged_into is null and t.status = 'verified' and t.id <> c.id
+          and (t.norm_keys @> array[v_k] or (t.norm_keys @> array[public.yarn_norm(v_prod)] and t.brand = v_brand)) order by t.uses desc limit 1;
+      end if;
+      if v_match is null and v_brand is not null and coalesce(v_g, c.ball_g, e.ball_g) is not null and coalesce(v_m, c.ball_m, e.ball_m) is not null then
+        v_match := public.yarn_match_spec_one(v_brand, coalesce(v_g, c.ball_g, e.ball_g), coalesce(v_m, c.ball_m, e.ball_m), coalesce(v_f, c.fibers, e.fibers), null);
+        if v_match = c.id or exists (select 1 from public.yarn_catalog t where t.id = v_match and t.status <> 'verified') then v_match := null; end if;
+      end if;
+      update public.yarn_entries set ball_g = coalesce(ball_g, v_g), ball_m = coalesce(ball_m, v_m), fibers = coalesce(fibers, v_f), fiber = coalesce(fiber, v_fm) where id = e.id;
+      if v_match is not null then
+        -- 이 기록만 옮긴다(같은 이름을 쓴 다른 회원의 기록은 다른 실일 수 있다)
+        update public.yarn_entries set catalog_id = v_match where id = e.id;
+        update public.yarn_catalog t set uses = (select count(*) from public.yarn_entries x where x.catalog_id = t.id), updated_at = now() where t.id in (c.id, v_match);
+        if not exists (select 1 from public.yarn_entries x where x.catalog_id = c.id) and not exists (select 1 from public.yarn_stash s where s.catalog_id = c.id) then
+          update public.yarn_catalog set merged_into = v_match where id = c.id; end if;
+        select coalesce(t.brand||' ','')||t.product into v_linked from public.yarn_catalog t where t.id = v_match;
+        n_link := n_link + 1;
+        v_res := v_res || jsonb_build_object('entry_id', e.id, 'action', 'link', 'from', c.id, 'to', v_match);
+      else
+        select count(*) into v_others from public.yarn_entries x where x.catalog_id = c.id and x.id <> e.id;
+        if v_others > 0 or exists (select 1 from public.yarn_stash s where s.catalog_id = c.id) then
+          -- 같은 후보를 다른 기록도 쓰고 있으면 그 후보를 고치지 않고 새 후보를 만든다(브랜드나 실 이름을 새로 알았을 때만)
+          if v_brand is null and v_prod is null then
+            v_res := v_res || jsonb_build_object('entry_id', e.id, 'action', 'entry_only'); n_fill := n_fill + 1; continue;
+          end if;
+          v_k := public.yarn_norm(coalesce(v_brand||' ','')||coalesce(v_prod, c.product));
+          insert into public.yarn_catalog(brand, product, aliases, norm_keys, ball_g, ball_m, fibers, fiber_main, uses)
+            values (v_brand, coalesce(v_prod, c.product), array[left(e.raw_name, 60)], array_remove(array[v_k], null), coalesce(v_g, e.ball_g), coalesce(v_m, e.ball_m), coalesce(v_f, e.fibers), v_fm, 1) returning id into v_new;
+          update public.yarn_entries set catalog_id = v_new where id = e.id;
+          update public.yarn_catalog t set uses = (select count(*) from public.yarn_entries x where x.catalog_id = t.id) where t.id = c.id;
+          v_res := v_res || jsonb_build_object('entry_id', e.id, 'action', 'new_candidate', 'from', c.id, 'to', v_new);
+        else
+          v_res := v_res || jsonb_build_object('entry_id', e.id, 'action', 'fill', 'catalog', c.id,
+            'before', jsonb_build_object('brand', c.brand, 'product', c.product, 'ball_g', c.ball_g, 'ball_m', c.ball_m, 'fibers', c.fibers, 'fiber_main', c.fiber_main));
+          v_k := public.yarn_norm(coalesce(coalesce(c.brand, v_brand)||' ','')||coalesce(v_prod, c.product));
+          update public.yarn_catalog t set brand = coalesce(t.brand, v_brand),
+              product = case when v_prod is not null and t.brand is null then v_prod else t.product end,
+              aliases = case when v_prod is not null and not (t.product = any(t.aliases)) and cardinality(t.aliases) < 30 then t.aliases || t.product else t.aliases end,
+              norm_keys = case when v_k is not null and not (t.norm_keys @> array[v_k]) then t.norm_keys || v_k else t.norm_keys end,
+              ball_g = coalesce(t.ball_g, v_g), ball_m = coalesce(t.ball_m, v_m), fibers = coalesce(t.fibers, v_f), fiber_main = coalesce(t.fiber_main, v_fm), updated_at = now()
+            where t.id = c.id;
+        end if;
+        n_fill := n_fill + 1;
+      end if;
+    end loop;
+  end if;
+  -- 굵기: 1볼 g·m 이 생긴 후보는 규격으로 정한다(schema 137 과 같은 기준)
+  update public.yarn_catalog t set weight_class = case when t.m_per_100g >= 600 then '레이스·극세' when t.m_per_100g >= 350 then '합세(Fingering)' when t.m_per_100g >= 250 then '중세(Sport)'
+      when t.m_per_100g >= 200 then '합태(DK)' when t.m_per_100g >= 120 then '병태(Worsted)' when t.m_per_100g >= 60 then '극태(Bulky)' else '초극태' end
+    where t.status = 'auto' and t.weight_class is null and t.m_per_100g is not null
+      and t.id in (select (r->>'catalog')::uuid from jsonb_array_elements(v_res) r where r ? 'catalog' union select (r->>'to')::uuid from jsonb_array_elements(v_res) r where r->>'action' = 'new_candidate');
+  if n_link + n_fill > 0 then
+    v_status := 'done';
+    v_reply := case when n_link > 0 and n_fill = 0 then '고마워요! 「'||v_linked||'」(으)로 실 사전에 연결했어요. 덕분에 같은 실을 찾는 분들이 이 작품을 볼 수 있어요.'
+                    else '고마워요! 알려 주신 내용을 실 사전에 적어 두었어요. 확인을 거쳐 정식으로 올라가요. 덕분에 같은 실을 찾는 분들께 도움이 돼요.' end;
+  elsif coalesce((p_answer->>'unknown')::boolean, false) or a.turns >= 1 then
+    v_status := 'unknown'; v_reply := '괜찮아요, 답해 주셔서 고마워요. 즐거운 뜨개 되세요.';
+  else
+    v_status := 'asked'; v_reply := '말씀해 주신 내용에서 실 정보를 찾지 못했어요. 브랜드와 실 이름을 한 번만 더 적어 주시겠어요? 모르시면 "몰라요"라고만 답해 주세요.';
+  end if;
+  update public.yarn_asks set status = v_status, turns = turns + 1, answered_at = now(), answer = p_answer - 'raw', result = v_res where id = a.id;
+  insert into public.messages(room_id, sender_id, body, by_ai, support_seen) values (public._support_room(a.profile_id), sup, v_reply, true, true);
+  return jsonb_build_object('status', v_status, 'linked', n_link, 'filled', n_fill, 'reply', v_reply);
+end $function$;
+
+-- yarn_ask_check(p_work uuid, p_force boolean)  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.yarn_ask_check(p_work uuid, p_force boolean DEFAULT false)
+ RETURNS bigint
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare w public.works; v_items jsonb; v_names text; v_miss text[]; v_id bigint; v_cool int; sup constant uuid := 'e120eb67-b254-4008-92d8-08c95c821e9e'; v_what text;
+begin
+  if not p_force and coalesce((select value from public.jigi_config where key = 'yarn_ask'), 'off') <> 'on' then return null; end if;
+  select * into w from public.works where id = p_work;
+  if w.id is null or w.review_status <> 'approved' or w.profile_id = sup then return null; end if;
+  update public.yarn_asks set status = 'expired' where profile_id = w.profile_id and status = 'asked' and asked_at < now() - interval '14 days';
+  if exists (select 1 from public.yarn_asks where work_id = p_work) then return null; end if;
+  if exists (select 1 from public.yarn_asks where profile_id = w.profile_id and status = 'asked') then return null; end if;
+  v_cool := coalesce(nullif((select value from public.jigi_config where key = 'yarn_ask_cooldown_days'), '')::int, 7);
+  if not p_force and exists (select 1 from public.yarn_asks where profile_id = w.profile_id and asked_at > now() - make_interval(days => v_cool)) then return null; end if;
+  -- 물어볼 실: 사전에 후보로만 있고 필수 항목이 빈 것(가장 많이 빈 것부터 2개까지)
+  select jsonb_agg(jsonb_build_object('entry_id', x.id, 'catalog_id', x.cid, 'name', x.raw_name, 'missing', to_jsonb(x.miss)) order by cardinality(x.miss) desc, x.id),
+         string_agg('「'||x.raw_name||'」', ', ' order by cardinality(x.miss) desc, x.id)
+    into v_items, v_names
+  from (
+    select y.* from (
+      select e.id, c.id cid, e.raw_name,
+             array_remove(array[case when c.brand is null then 'brand' end, case when coalesce(c.ball_g, e.ball_g) is null then 'ball_g' end,
+                                case when coalesce(c.ball_m, e.ball_m) is null then 'ball_m' end, case when coalesce(c.fibers, e.fibers) is null and c.fiber_main is null then 'fibers' end], null) miss
+      from public.yarn_entries e join public.yarn_catalog c on c.id = e.catalog_id
+      where e.work_id = p_work and c.status = 'auto' and c.merged_into is null
+    ) y where cardinality(y.miss) > 0 order by cardinality(y.miss) desc, y.id limit 2
+  ) x;
+  if v_items is null then return null; end if;
+  select array_agg(distinct m) into v_miss from jsonb_array_elements(v_items) it, jsonb_array_elements_text(it->'missing') m;
+  v_what := array_to_string(array_remove(array[
+      case when 'brand' = any(v_miss) then '브랜드(만든 곳)와 실 이름' end,
+      case when 'ball_g' = any(v_miss) or 'ball_m' = any(v_miss) then '1볼의 무게(g)와 길이(m)' end,
+      case when 'fibers' = any(v_miss) then '소재(혼용률)' end], null), ', ');
+  insert into public.yarn_asks(profile_id, work_id, items) values (w.profile_id, p_work, v_items) returning id into v_id;
+  perform public._jigi_say(w.profile_id,
+    '「'||coalesce(nullif(btrim(w.title),''),'작품')||'」 인증 잘 봤어요. 쓰신 실 '||v_names||' 정보가 실 사전에 아직 없어서 여쭤봐요. '||v_what||
+    ' 가운데 아시는 것만 이 채팅에 적어 주시겠어요? 볼밴드(띠지) 사진을 보내 주셔도 돼요. 같은 실을 찾는 분들께 도움이 돼요. 모르시면 "몰라요"라고만 답해 주세요.');
+  return v_id;
 end $function$;
 
 -- yarn_auto_merge(p_from uuid, p_into uuid, p_reason text)  acl: {postgres=X/postgres,service_role=X/postgres}
@@ -7681,3 +8997,21 @@ AS $function$
            (c.status='verified') desc, c.uses desc, c.brand, c.product, c.id
   offset greatest(coalesce(p_offset,0),0) limit 9
 $function$;
+
+-- yarn_weight_from_spec()  acl: {postgres=X/postgres,service_role=X/postgres}
+CREATE OR REPLACE FUNCTION public.yarn_weight_from_spec()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'public'
+AS $function$
+declare per numeric;
+begin
+  -- m_per_100g 는 계산되는 칸이라 BEFORE 트리거에서는 아직 비어 있다 → 1볼 g·m 으로 직접 계산
+  if new.weight_est and new.ball_g > 0 and new.ball_m > 0 then
+    per := round(new.ball_m / new.ball_g * 100);
+    new.weight_class := case when per >= 600 then '레이스·극세' when per >= 350 then '합세(Fingering)' when per >= 250 then '중세(Sport)'
+      when per >= 200 then '합태(DK)' when per >= 120 then '병태(Worsted)' when per >= 60 then '극태(Bulky)' else '초극태' end;
+    new.weight_est := false;
+  end if;
+  return new;
+end $function$;

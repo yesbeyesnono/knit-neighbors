@@ -24,15 +24,6 @@
   "title": "뜨친 생겼다 축하 이벤트 ☕",
   "active": true
  },
- "chat_theme": {
-  "bg": "#22384A",
-  "id": "xmas2026",
-  "img": "https://yesbeyesnono.github.io/knit-neighbors/chat-themes/xmas2026.svg",
-  "dark": true,
-  "from": "2026-11-15T00:00:00+09:00",
-  "until": "2027-01-01T00:00:00+09:00",
-  "active": true
- },
  "guides": {
   "topics": [
    {
@@ -261,5 +252,18 @@
    }
   ]
  },
- "shops_everywhere": true
+ "shops_everywhere": true,
+ "home_notices": null,
+ "chat_theme": {
+  "bg": "#22384A",
+  "id": "xmas2026",
+  "img": "https://yesbeyesnono.github.io/knit-neighbors/chat-themes/xmas2026.svg",
+  "dark": true,
+  "from": "2026-11-15T00:00:00+09:00",
+  "img2": "https://yesbeyesnono.github.io/knit-neighbors/chat-themes/xmas2026b.svg",
+  "snow": true,
+  "until": "2027-01-01T00:00:00+09:00",
+  "active": true
+ },
+ "home_notices_v2": null
 }

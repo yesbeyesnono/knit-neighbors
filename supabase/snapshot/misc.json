@@ -223,6 +223,18 @@
    "g": "authenticated"
   },
   {
+   "t": "profiles",
+   "c": "feature_off",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "feature_off",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
    "t": "shops",
    "c": "hours",
    "p": "INSERT",
@@ -560,6 +572,42 @@
   },
   {
    "t": "profiles",
+   "c": "rec_off",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "rec_off",
+   "p": "UPDATE",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "rec_want",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "rec_want_ai",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "rec_want_at",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
+   "c": "rec_want_text",
+   "p": "SELECT",
+   "g": "authenticated"
+  },
+  {
+   "t": "profiles",
    "c": "referred_by",
    "p": "SELECT",
    "g": "authenticated"
@@ -749,17 +797,27 @@
     "application/json",
     "text/plain"
    ]
+  },
+  {
+   "id": "videos",
+   "public": true,
+   "limit": 52428800,
+   "mime": [
+    "video/mp4",
+    "video/quicktime",
+    "video/webm"
+   ]
   }
  ],
  "extensions": [
-  "pg_cron 1.6.4 @pg_catalog",
   "plpgsql 1.0 @pg_catalog",
-  "postgis 3.3.7 @extensions",
-  "pgcrypto 1.3 @extensions",
-  "uuid-ossp 1.1 @extensions",
   "pg_stat_statements 1.11 @extensions",
+  "uuid-ossp 1.1 @extensions",
+  "pgcrypto 1.3 @extensions",
   "supabase_vault 0.3.1 @vault",
-  "pg_net 0.20.4 @public"
+  "postgis 3.3.7 @extensions",
+  "pg_net 0.20.4 @public",
+  "pg_cron 1.6.4 @pg_catalog"
  ],
  "views": [
   {
@@ -993,6 +1051,28 @@
   "20261115132049 partner_invites",
   "20261115145930 onboard_step",
   "20261115150725 shop_post_link",
-  "20261115154440 cleanup_20261116"
+  "20261115154440 cleanup_20261116",
+  "20261116072126 partner_invite_watch",
+  "20261116072232 partner_invite_watch_tighten",
+  "20261116100739 work_review",
+  "20261116105433 home_notices",
+  "20261116112531 friend_chat_nudge",
+  "20261116113016 admin_auto_jobs",
+  "20261116113402 yarn_weight_est",
+  "20261116115048 shop_post_comments",
+  "20261117012829 home_notices_v2",
+  "20261117131549 yarn_overview",
+  "20261117135852 yarn_color_summary",
+  "20261117145555 friend_rec",
+  "20261117150030 yarn_ask",
+  "20261117151624 friend_want",
+  "20261119053418 start_works",
+  "20261119055036 work_reviews",
+  "20261119061357 work_reviews_ai_action",
+  "20261119063402 work_review_approve_note",
+  "20261119065405 post_video",
+  "20261119081152 post_video_clean",
+  "20261119111316 post_video_stream",
+  "20261119113042 meetup_nearby"
  ]
 }

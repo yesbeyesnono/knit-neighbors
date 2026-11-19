@@ -35,6 +35,8 @@ CREATE TRIGGER posts_reply_count AFTER INSERT OR DELETE ON public.posts FOR EACH
 CREATE TRIGGER posts_reply_to_guard BEFORE INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION posts_reply_to_guard();
 CREATE TRIGGER posts_review_count AFTER INSERT OR DELETE ON public.posts FOR EACH ROW EXECUTE FUNCTION posts_review_count();
 CREATE TRIGGER posts_tags BEFORE INSERT OR UPDATE OF body, work_id, tags ON public.posts FOR EACH ROW EXECUTE FUNCTION posts_set_tags();
+CREATE TRIGGER posts_video_guard BEFORE INSERT OR UPDATE OF video ON public.posts FOR EACH ROW EXECUTE FUNCTION posts_video_guard();
+CREATE TRIGGER posts_video_trash AFTER DELETE OR UPDATE OF video ON public.posts FOR EACH ROW EXECUTE FUNCTION posts_video_trash();
 CREATE TRIGGER supporter_post_del BEFORE DELETE ON public.posts FOR EACH ROW EXECUTE FUNCTION supporter_on_post();
 CREATE TRIGGER supporter_post_ins AFTER INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION supporter_on_post();
 CREATE TRIGGER cheer_profile AFTER UPDATE OF onboarded_at, level_crochet, level_knit, skills, act_level, trait ON public.profiles FOR EACH ROW EXECUTE FUNCTION cheer_on_profile();
@@ -51,6 +53,8 @@ CREATE TRIGGER room_members_meetup_gate BEFORE INSERT ON public.room_members FOR
 CREATE TRIGGER room_members_notify AFTER INSERT ON public.room_members FOR EACH ROW EXECUTE FUNCTION notify_on_meetup_join();
 CREATE TRIGGER jigi_shop_claim AFTER INSERT ON public.shop_claims FOR EACH ROW EXECUTE FUNCTION jigi_on_shop_claim();
 CREATE TRIGGER cheer_follow AFTER INSERT ON public.shop_follows FOR EACH ROW EXECUTE FUNCTION cheer_on_follow();
+CREATE TRIGGER shop_post_comments_count AFTER INSERT OR DELETE ON public.shop_post_comments FOR EACH ROW EXECUTE FUNCTION shop_post_counts();
+CREATE TRIGGER shop_post_likes_count AFTER INSERT OR DELETE ON public.shop_post_likes FOR EACH ROW EXECUTE FUNCTION shop_post_counts();
 CREATE TRIGGER shop_posts_class_changed AFTER UPDATE OF extra ON public.shop_posts FOR EACH ROW EXECUTE FUNCTION shop_posts_class_changed();
 CREATE TRIGGER shop_posts_notify AFTER INSERT ON public.shop_posts FOR EACH ROW EXECUTE FUNCTION notify_on_shop_post();
 CREATE CONSTRAINT TRIGGER shops_partner_guide AFTER INSERT OR UPDATE OF is_active, owner_id ON public.shops DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION partner_guide_trg();
@@ -66,10 +70,15 @@ CREATE TRIGGER wake_lifecycle_on_versioning_enable AFTER UPDATE OF versioning_st
 CREATE TRIGGER protect_objects_delete BEFORE DELETE ON storage.objects FOR EACH STATEMENT EXECUTE FUNCTION storage.protect_delete();
 CREATE TRIGGER update_objects_updated_at BEFORE UPDATE ON storage.objects FOR EACH ROW EXECUTE FUNCTION storage.update_updated_at_column();
 CREATE TRIGGER cheer_work AFTER INSERT ON public.works FOR EACH ROW EXECUTE FUNCTION cheer_on_work();
+CREATE TRIGGER cheer_work_approved AFTER UPDATE OF review_status ON public.works FOR EACH ROW EXECUTE FUNCTION cheer_on_work();
 CREATE TRIGGER supporter_work_del BEFORE DELETE ON public.works FOR EACH ROW EXECUTE FUNCTION supporter_on_work();
 CREATE TRIGGER supporter_work_ins AFTER INSERT ON public.works FOR EACH ROW EXECUTE FUNCTION supporter_on_work();
-CREATE TRIGGER works_apply_cert AFTER INSERT OR DELETE OR UPDATE OF techniques ON public.works FOR EACH ROW EXECUTE FUNCTION works_apply_cert();
+CREATE TRIGGER works_apply_cert AFTER INSERT OR DELETE OR UPDATE OF techniques, review_status ON public.works FOR EACH ROW EXECUTE FUNCTION works_apply_cert();
+CREATE TRIGGER works_feature_on_approve AFTER UPDATE OF review_status ON public.works FOR EACH ROW EXECUTE FUNCTION works_feature_on_approve();
+CREATE TRIGGER works_resubmit BEFORE UPDATE ON public.works FOR EACH ROW EXECUTE FUNCTION works_resubmit();
 CREATE TRIGGER works_stash_restore BEFORE DELETE ON public.works FOR EACH ROW EXECUTE FUNCTION works_stash_restore();
+CREATE TRIGGER works_yarn_ask AFTER UPDATE OF review_status ON public.works FOR EACH ROW EXECUTE FUNCTION works_yarn_ask();
+CREATE TRIGGER yarn_catalog_weight_from_spec BEFORE UPDATE OF ball_g, ball_m ON public.yarn_catalog FOR EACH ROW EXECUTE FUNCTION yarn_weight_from_spec();
 CREATE TRIGGER yarn_colors_family BEFORE INSERT ON public.yarn_colors FOR EACH ROW EXECUTE FUNCTION yarn_colors_set_family();
 CREATE TRIGGER yarn_entries_family BEFORE INSERT OR UPDATE OF color, color_hex, color_families ON public.yarn_entries FOR EACH ROW EXECUTE FUNCTION yarn_entries_set_family();
 CREATE TRIGGER yarn_stash_fill BEFORE INSERT OR UPDATE ON public.yarn_stash FOR EACH ROW EXECUTE FUNCTION yarn_stash_fill();

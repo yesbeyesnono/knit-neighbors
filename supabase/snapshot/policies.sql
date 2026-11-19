@@ -106,6 +106,14 @@ create policy "shop_follows_own" on public.shop_follows for ALL to authenticated
 create policy "shop_follows_shop_owner_select" on public.shop_follows for SELECT to authenticated using (((EXISTS ( SELECT 1
    FROM shops s
   WHERE ((s.id = shop_follows.shop_id) AND (s.owner_id = ( SELECT auth.uid() AS uid))))) OR is_admin()));
+create policy "shop_post_comments_delete" on public.shop_post_comments for DELETE to authenticated using (((author_id = ( SELECT auth.uid() AS uid)) OR is_admin() OR (EXISTS ( SELECT 1
+   FROM (shop_posts sp
+     LEFT JOIN shops s ON ((s.id = sp.shop_id)))
+  WHERE ((sp.id = shop_post_comments.post_id) AND ((s.owner_id = ( SELECT auth.uid() AS uid)) OR ((sp.shop_id IS NULL) AND (sp.author_id = ( SELECT auth.uid() AS uid)))))))));
+create policy "shop_post_comments_select" on public.shop_post_comments for SELECT to authenticated using (((NOT is_blocked(( SELECT auth.uid() AS uid), author_id)) AND (EXISTS ( SELECT 1
+   FROM shop_posts sp
+  WHERE (sp.id = shop_post_comments.post_id)))));
+create policy "shop_post_likes_select_own" on public.shop_post_likes for SELECT to authenticated using ((profile_id = ( SELECT auth.uid() AS uid)));
 create policy "shop_posts_delete_author" on public.shop_posts for DELETE to authenticated using (((shop_id IS NULL) AND (author_id = ( SELECT auth.uid() AS uid))));
 create policy "shop_posts_delete_owner" on public.shop_posts for DELETE to authenticated using ((EXISTS ( SELECT 1
    FROM shops s
@@ -148,7 +156,8 @@ create policy "technique_candidates_admin_read" on public.technique_candidates f
 create policy "techniques_read" on public.techniques for SELECT to authenticated using (true);
 create policy "works_admin_select" on public.works for SELECT to authenticated using (is_admin());
 create policy "works_delete_own" on public.works for DELETE to authenticated using ((profile_id = ( SELECT auth.uid() AS uid)));
-create policy "works_select" on public.works for SELECT to authenticated using ((NOT is_blocked(( SELECT auth.uid() AS uid), profile_id)));
+create policy "works_select" on public.works for SELECT to authenticated using (((NOT is_blocked(( SELECT auth.uid() AS uid), profile_id)) AND ((review_status = 'approved'::text) OR (profile_id = ( SELECT auth.uid() AS uid)))));
+create policy "yarn_asks_admin_select" on public.yarn_asks for SELECT to authenticated using (is_admin());
 create policy "yba_admin" on public.yarn_brand_aliases for ALL to authenticated using (is_admin()) with check (is_admin());
 create policy "yba_admin_read" on public.yarn_brand_aliases for SELECT to authenticated using (is_admin());
 create policy "yarn_catalog_admin_read" on public.yarn_catalog for SELECT to authenticated using (is_admin());
@@ -189,6 +198,9 @@ create policy "storage_shop_docs_delete" on storage.objects for DELETE to authen
 create policy "storage_shop_docs_insert" on storage.objects for INSERT to authenticated with check (((bucket_id = 'shop-docs'::text) AND ((storage.foldername(name))[1] = (( SELECT auth.uid() AS uid))::text)));
 create policy "storage_shop_docs_read" on storage.objects for SELECT to authenticated using (((bucket_id = 'shop-docs'::text) AND (((storage.foldername(name))[1] = (( SELECT auth.uid() AS uid))::text) OR is_admin())));
 create policy "storage_update_own_folder" on storage.objects for UPDATE to authenticated using (((storage.foldername(name))[1] = (( SELECT auth.uid() AS uid))::text));
+create policy "storage_videos_delete_own" on storage.objects for DELETE to authenticated using (((bucket_id = 'videos'::text) AND ((storage.foldername(name))[1] = (( SELECT auth.uid() AS uid))::text)));
+create policy "storage_videos_insert_own" on storage.objects for INSERT to authenticated with check (((bucket_id = 'videos'::text) AND ((storage.foldername(name))[1] = (( SELECT auth.uid() AS uid))::text)));
+create policy "storage_videos_read" on storage.objects for SELECT to public using ((bucket_id = 'videos'::text));
 create policy "yarn_colors_admin_write" on storage.objects for ALL to authenticated using (((bucket_id = 'yarn-colors'::text) AND is_admin())) with check (((bucket_id = 'yarn-colors'::text) AND is_admin()));
 create policy "yarn_colors_read" on storage.objects for SELECT to public using ((bucket_id = 'yarn-colors'::text));
 create policy "yarn_import_read" on storage.objects for SELECT to public using ((bucket_id = 'yarn-import'::text));

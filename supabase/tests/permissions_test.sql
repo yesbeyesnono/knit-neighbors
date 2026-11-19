@@ -1,4 +1,5 @@
 -- 권한 전수 점검 (2026-09-30, schema 66). 각 블록은 raise exception 'RESULT(rolled back): ...' 로 끝나 아무것도 남기지 않는다.
+-- 블록마다 헬퍼 chk·must_fail·cnt 를 모두 만든다(어느 블록에 줄을 더해도 되게 — 2026-11-19: 헬퍼가 없는 블록에 줄이 섞여 P1·P3·P4 가 통째로 멈춰 있었음)
 -- 실행: MCP execute_sql / SQL 에디터에 블록 하나씩(각 블록이 자기 헬퍼를 pg_temp 에 만든다). 통과 = RESULT 에 FAIL 이 없음.
 -- demo1 = 공격자, demo2 = 피해자. 새 마이그레이션마다 다시 돌리고, 새 테이블·함수를 만들면 여기 한 줄씩 추가.
 
@@ -6,6 +7,8 @@
 do $do$ declare d1 uuid; d2 uuid; ev uuid; app uuid; rid uuid; n int; out text := '';
 begin
   execute $f$create function pg_temp.chk(o text, label text, got int, want int) returns text language sql as 'select $1 || '' | '' || case when $3 = $4 then $2||'' ok'' else ''FAIL ''||$2||'' got=''||$3 end'$f$;
+  execute $f$create function pg_temp.must_fail(o text, label text, q text) returns text language plpgsql as $b$ begin begin execute q; return o || ' | FAIL '||label||' (allowed)'; exception when others then return o || ' | '||label||' blocked('||sqlstate||')'; end; end $b$$f$;
+  execute $f$create function pg_temp.cnt(o text, label text, q text, want int) returns text language plpgsql as $b$ declare k int; begin begin execute q into k; return o || ' | ' || case when k = want then label||' ok' else 'FAIL '||label||' got='||k end; exception when others then return o || ' | '||label||' blocked('||sqlstate||')'; end; end $b$$f$;
   select id into d1 from auth.users where email='demo1@knit.local'; select id into d2 from auth.users where email='demo2@knit.local';
   -- 피해자 데이터 심기(postgres 권한)
   insert into public.events(title, kind, status, needs_shipping, apply_from, apply_until) values ('perm-test', 'sample', 'open', true, now()-interval '1 day', now()+interval '1 day') returning id into ev;
@@ -62,6 +65,7 @@ do $do$ declare d1 uuid; d2 uuid; p2 uuid; w2 uuid; s2 uuid; r2 uuid; n int; out
 begin
   execute $f$create function pg_temp.chk(o text, label text, got int, want int) returns text language sql as 'select $1 || '' | '' || case when $3 = $4 then $2||'' ok'' else ''FAIL ''||$2||'' got=''||$3 end'$f$;
   execute $f$create function pg_temp.must_fail(o text, label text, q text) returns text language plpgsql as $b$ begin begin execute q; return o || ' | FAIL '||label||' (allowed)'; exception when others then return o || ' | '||label||' blocked('||sqlstate||')'; end; end $b$$f$;
+  execute $f$create function pg_temp.cnt(o text, label text, q text, want int) returns text language plpgsql as $b$ declare k int; begin begin execute q into k; return o || ' | ' || case when k = want then label||' ok' else 'FAIL '||label||' got='||k end; exception when others then return o || ' | '||label||' blocked('||sqlstate||')'; end; end $b$$f$;
   select id into d1 from auth.users where email='demo1@knit.local'; select id into d2 from auth.users where email='demo2@knit.local';
   insert into public.posts(author_id, body) values (d2, 'victim post') returning id into p2;
   insert into public.works(profile_id, photo_url, title) values (d2, 'x', 'victim work') returning id into w2;
@@ -96,10 +100,12 @@ end $do$;
 -- [P3] 회원(demo1)이 관리자 함수·권한 상승 함수를 부를 수 없는가
 do $do$ declare d1 uuid; d2 uuid; out text := ''; v jsonb; n int;
 begin
-  execute $f$create function pg_temp.must_fail(o text, label text, q text) returns text language plpgsql as $b$ begin begin execute q; return o || ' | FAIL '||label||' (allowed)'; exception when others then return o || ' | '||label||' blocked'; end; end $b$$f$;
+  execute $f$create function pg_temp.must_fail(o text, label text, q text) returns text language plpgsql as $b$ begin begin execute q; return o || ' | FAIL '||label||' (allowed)'; exception when others then return o || ' | '||label||' blocked('||sqlstate||')'; end; end $b$$f$;
+  execute $f$create function pg_temp.chk(o text, label text, got int, want int) returns text language sql as 'select $1 || '' | '' || case when $3 = $4 then $2||'' ok'' else ''FAIL ''||$2||'' got=''||$3 end'$f$;
+  execute $f$create function pg_temp.cnt(o text, label text, q text, want int) returns text language plpgsql as $b$ declare k int; begin begin execute q into k; return o || ' | ' || case when k = want then label||' ok' else 'FAIL '||label||' got='||k end; exception when others then return o || ' | '||label||' blocked('||sqlstate||')'; end; end $b$$f$;
   select id into d1 from auth.users where email='demo1@knit.local'; select id into d2 from auth.users where email='demo2@knit.local';
   perform set_config('request.jwt.claims', json_build_object('sub',d1,'role','authenticated')::text, true); set local role authenticated;
-  begin select count(*) into n from public.admin_find_users('demo', 5); out := out || ' | ' || case when n = 0 then 'admin_find_users empty' else 'FAIL admin_find_users rows='||n end; exception when others then out := out || ' | admin_find_users blocked'; end;
+  begin select count(*) into n from public.admin_find_users('demo', 5); out := out || ' | ' || case when n = 0 then 'admin_find_users empty' else 'FAIL admin_find_users rows='||n end; exception when others then out := out || ' | admin_find_users blocked('||sqlstate||')'; end;
   out := pg_temp.must_fail(out, 'admin_set_admin', format('select public.admin_set_admin(%L, true)', d1));
   out := pg_temp.must_fail(out, 'admin_suspend_user', format('select public.admin_suspend_user(%L, true, ''x'')', d2));
   out := pg_temp.must_fail(out, 'admin_stats', 'select public.admin_stats()');
@@ -111,7 +117,7 @@ begin
   out := pg_temp.must_fail(out, 'admin_yarn_color_summary', 'select public.admin_yarn_color_summary()');   -- schema 141
   out := pg_temp.must_fail(out, 'yarn_ask_check', 'select public.yarn_ask_check(gen_random_uuid(), true)');   -- schema 143
   out := pg_temp.must_fail(out, 'yarn_ask_apply', $q$select public.yarn_ask_apply(1, '{}'::jsonb)$q$);   -- schema 143
-  out := pg_temp.must_fail(out, 'yarn_asks', 'select count(*) from public.yarn_asks where status is not null having count(*) > 0');   -- schema 143
+  out := pg_temp.cnt(out, 'yarn_asks', 'select count(*) from public.yarn_asks', 0);   -- schema 143
   out := pg_temp.must_fail(out, 'cheer_send', format('select public.cheer_send(%L, ''x'', ''x'')', d1));   -- schema 72
   out := pg_temp.must_fail(out, 'support_msg', format('select public.support_msg(%L, ''x'', ''x'')', d1));
   out := pg_temp.must_fail(out, 'cheer_daily', 'select public.cheer_daily()');
@@ -178,7 +184,7 @@ begin
   out := pg_temp.must_fail(out, 'insert tag_hidden', 'insert into public.tag_hidden(tag) values (''x'')');
   out := pg_temp.must_fail(out, '_work_tags(내부용)', 'select public._work_tags(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'read yarn_guess_log', 'select 1 from public.yarn_guess_log limit 1');   -- schema 98
-  out := pg_temp.must_fail(out, 'insert yarn_guess_log', 'insert into public.yarn_guess_log(user_id, name_key) values (auth.uid(), ''x'')');
+  out := pg_temp.must_fail(out, 'insert yarn_guess_log', 'insert into public.yarn_guess_log(norm_name, raw_name, picked, profile_id) values (''x'', ''x'', false, auth.uid())');
   out := pg_temp.must_fail(out, 'admin_report_case_decide', 'select public.admin_report_case_decide(1, true)');   -- schema 124
   out := pg_temp.cnt(out, 'report_cases(read)', 'select count(*) from public.report_cases', 0);
   out := pg_temp.must_fail(out, 'admin_talk_room', 'select public.admin_talk_room(auth.uid())');   -- schema 123
@@ -228,7 +234,9 @@ end $do$;
 -- [P4] 비로그인(anon)은 아무것도 못 읽는가 (app_config 만 허용)
 do $do$ declare n int; out text := '';
 begin
-  execute $f$create function pg_temp.cnt(o text, label text, q text, want int) returns text language plpgsql as $b$ declare k int; begin begin execute q into k; return o || ' | ' || case when k = want then label||' ok' else 'FAIL '||label||' got='||k end; exception when others then return o || ' | '||label||' blocked'; end; end $b$$f$;
+  execute $f$create function pg_temp.cnt(o text, label text, q text, want int) returns text language plpgsql as $b$ declare k int; begin begin execute q into k; return o || ' | ' || case when k = want then label||' ok' else 'FAIL '||label||' got='||k end; exception when others then return o || ' | '||label||' blocked('||sqlstate||')'; end; end $b$$f$;
+  execute $f$create function pg_temp.chk(o text, label text, got int, want int) returns text language sql as 'select $1 || '' | '' || case when $3 = $4 then $2||'' ok'' else ''FAIL ''||$2||'' got=''||$3 end'$f$;
+  execute $f$create function pg_temp.must_fail(o text, label text, q text) returns text language plpgsql as $b$ begin begin execute q; return o || ' | FAIL '||label||' (allowed)'; exception when others then return o || ' | '||label||' blocked('||sqlstate||')'; end; end $b$$f$;
   perform set_config('request.jwt.claims', '{"role":"anon"}', true); set local role anon;
   out := pg_temp.cnt(out, 'profiles', 'select count(*) from public.profiles', 0);
   out := pg_temp.cnt(out, 'posts', 'select count(*) from public.posts', 0);

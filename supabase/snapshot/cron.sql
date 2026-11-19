@@ -10,8 +10,12 @@ select cron.schedule('cheer-daily', '30 23 * * *', $cron$select public.cheer_dai
 select cron.schedule('cron-log-clean', '50 18 * * *', $cron$delete from cron.job_run_details where start_time < now() - interval '14 days'$cron$);
 -- dong-fix
 select cron.schedule('dong-fix', '20 * * * *', $cron$select public.dong_fix_call() where exists (select 1 from public.dong_autofix_candidates())$cron$);
+-- friend-chat-nudge
+select cron.schedule('friend-chat-nudge', '0 1 * * *', $cron$select public.friend_chat_nudge()$cron$);
+-- friend-rec-weekly
+select cron.schedule('friend-rec-weekly', '0 1 * * 6', $cron$select public.friend_rec_weekly()$cron$);
 -- friend-remind
-select cron.schedule('friend-remind', '30 10 * * *', $cron$select public.friend_request_remind()$cron$);
+select cron.schedule('friend-remind', '30 0-12 * * *', $cron$select public.friend_request_remind()$cron$);
 -- jigi-brief
 select cron.schedule('jigi-brief', '0 23 * * *', $cron$select public.jigi_call('brief')$cron$);
 -- jigi-clean
@@ -34,13 +38,23 @@ select cron.schedule('jigi-tech', '30 19 * * *', $cron$select public.jigi_call('
 select cron.schedule('jigi-yarn', '0 20 * * *', $cron$select public.jigi_call('yarn')$cron$);
 -- last-seen-sync
 select cron.schedule('last-seen-sync', '12 * * * *', $cron$select public.sync_last_seen()$cron$);
+-- meetup-nearby
+select cron.schedule('meetup-nearby', '*/10 * * * *', $cron$select public.meetup_nearby_notify()$cron$);
 -- partner-guide-nudge
 select cron.schedule('partner-guide-nudge', '0 1 * * *', $cron$select public.partner_guide_nudge()$cron$);
+-- partner-invite-watch
+select cron.schedule('partner-invite-watch', '*/10 * * * *', $cron$select public.partner_invite_watch()$cron$);
 -- remind-daily
 select cron.schedule('remind-daily', '0 9 * * *', $cron$select public.remind_daily()$cron$);
 -- remind-tick
 select cron.schedule('remind-tick', '*/30 * * * *', $cron$select public.remind_tick()$cron$);
 -- report-case-tick
 select cron.schedule('report-case-tick', '7 * * * *', $cron$select public.report_case_tick()$cron$);
+-- storage-sweep
+select cron.schedule('storage-sweep', '10 * * * *', $cron$select public.jigi_remind_call('sweep')$cron$);
 -- trait-index-nightly
 select cron.schedule('trait-index-nightly', '40 15 * * *', $cron$select public.refresh_all_trait_index()$cron$);
+-- work-review-alert
+select cron.schedule('work-review-alert', '*/15 * * * *', $cron$select public.work_review_alert()$cron$);
+-- work-review-daily
+select cron.schedule('work-review-daily', '0 0 * * *', $cron$select public.work_review_daily()$cron$);
