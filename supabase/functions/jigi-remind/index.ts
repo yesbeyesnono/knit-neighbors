@@ -6,6 +6,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const env = (k: string) => Deno.env.get(k) ?? "";
 const HOOK = `${Deno.env.get("SUPABASE_URL")}/functions/v1/jigi?fn=tg`;
+const CF_STREAM = "https://api.cloudflare.com/client/v4/accounts/3a6c5f3a6735255b1e3b87fe35250e19/stream";
+const cfStream = (path: string, method = "GET") => fetch(CF_STREAM + path, { method, headers: { Authorization: `Bearer ${env("CF_STREAM_TOKEN")}`, "Content-Type": "application/json" } });
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json" } });
 async function tg(method: string, body: unknown) {
   const r = await fetch(`https://api.telegram.org/bot${env("TG_BOT_TOKEN")}/${method}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -34,6 +36,10 @@ Deno.serve(async (req: Request) => {
             const names = (files ?? []).filter((f) => f.name).map((f) => `${r.user_id}/${f.name}`);
             if (names.length) await db.storage.from(bucket).remove(names);
           }
+          if (env("CF_STREAM_TOKEN")) {   // Cloudflare Stream 에 올린 영상도 지운다(schema 152)
+            const { data: vids } = await db.from("video_uploads").select("uid").eq("owner", r.user_id).limit(500);
+            for (const v of vids ?? []) { const d = await cfStream(`/${v.uid}`, "DELETE"); if (d.ok || d.status === 404) await db.from("video_uploads").delete().eq("uid", v.uid); }
+          }
           const { error } = await db.auth.admin.deleteUser(r.user_id);
           if (error) throw error;
           n++;
@@ -45,17 +51,31 @@ Deno.serve(async (req: Request) => {
       return json({ purged: n, failed: fails });
     }
 
-    if (body.route === "sweep") {   // 지울 파일 목록(storage_trash) 정리: 글이 지워졌거나 영상이 바뀐 뒤 남은 영상·첫 장면 사진 (schema 151)
+    if (body.route === "sweep") {   // 지울 파일 목록(storage_trash) 정리: 글이 지워졌거나 영상이 바뀐 뒤 남은 영상·첫 장면 사진 (schema 151·152)
+      await db.rpc("video_uploads_orphans");   // 올리다 만 영상도 목록에
       const { data: due } = await db.rpc("storage_trash_due", { p_limit: 100 });
-      const rows = ((due ?? []) as { id: number; bucket: string; path: string }[]).filter((r) => /^[0-9a-f-]{36}\/[A-Za-z0-9._-]+$/.test(r.path));
+      const all = (due ?? []) as { id: number; bucket: string; path: string }[];
       let swept = 0, failed = 0;
       for (const bucket of ["videos", "posts"]) {
-        const part = rows.filter((r) => r.bucket === bucket);
+        const part = all.filter((r) => r.bucket === bucket && /^[0-9a-f-]{36}\/[A-Za-z0-9._-]+$/.test(r.path));
         if (!part.length) continue;
         const { error } = await db.storage.from(bucket).remove(part.map((r) => r.path));
         if (error) { failed += part.length; continue; }
         await db.from("storage_trash").update({ done_at: new Date().toISOString() }).in("id", part.map((r) => r.id));
         swept += part.length;
+      }
+      if (env("CF_STREAM_TOKEN")) {
+        for (const r of all.filter((x) => x.bucket === "cf" && /^[0-9a-f]{32}$/.test(x.path))) {
+          const d = await cfStream(`/${r.path}`, "DELETE");
+          if (d.ok || d.status === 404) { await db.from("storage_trash").update({ done_at: new Date().toISOString() }).eq("id", r.id); await db.from("video_uploads").delete().eq("uid", r.path); swept++; }
+          else failed++;
+        }
+        // 올린 사람이 앱을 일찍 닫아 마무리(MP4 켜기)가 안 된 영상을 챙긴다
+        const { data: pend } = await db.from("video_uploads").select("uid").is("ready_at", null).gte("created_at", new Date(Date.now() - 2 * 864e5).toISOString()).limit(30);
+        for (const v of pend ?? []) {
+          const g = await cfStream(`/${v.uid}`); const j = await g.json().catch(() => null);
+          if (g.ok && j?.result?.readyToStream) { await cfStream(`/${v.uid}/downloads`, "POST"); await db.from("video_uploads").update({ ready_at: new Date().toISOString(), duration: j.result.duration ?? null }).eq("uid", v.uid); }
+        }
       }
       return json({ swept, failed });
     }

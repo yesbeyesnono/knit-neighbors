@@ -2203,3 +2203,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   storage_trash_due(): 목록에 오른 지 10분 지났고 지금 어떤 글에서도 쓰지 않는 것 · cron storage-sweep 10 * * * * → jigi_remind_call('sweep') → Edge Function jigi-remind 의 sweep 이 Storage API 로 삭제
 --   post_video_set(글, 영상|null): 내 일반 글의 영상을 바꾸거나 뺌(주소·길이는 posts_video_guard). jigi-remind 의 계정 삭제(purge)에 보관함 videos 추가
 -- ============================================================
+-- 152. 글의 영상을 Cloudflare Stream 으로 (2026-11-19 대표: 큰 영상도 자동 압축, 마이그레이션 post_video_stream — 원본 supabase/post_video_stream.sql)
+--   표 video_uploads(Stream 영상 id · 올린 회원, 회원 접근 불가) · posts.video = {cf, poster, dur, w, h}(옛 {url} 도 받음)
+--   posts_video_guard: cf 는 video_uploads 에서 주인 확인 · posts_video_trash/storage_trash_due: bucket 'cf' · video_uploads_orphans(): 글에 붙지 않은 채 하루 지난 영상을 지울 목록에
+--   Edge Function video-upload(create = 바로 올리는 주소, finish = MP4 켜기) · jigi-remind sweep 이 Cloudflare 에서 삭제 · 열쇠 CF_STREAM_TOKEN(대표가 넣음)
+-- ============================================================
