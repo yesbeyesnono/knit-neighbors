@@ -2198,3 +2198,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   보관함 videos(공개 · 50MB · mp4/mov/webm · 내 폴더에만 올리고 지움) · posts.video = {url, poster, dur, w, h}
 --   트리거 posts_video_guard: 내 폴더의 우리 저장소 주소만 · 30초까지 · 일반 글만(댓글·모임·인증·후기 거절) · 하루 10개. 첫 장면 사진은 posts.photos 의 첫 장(옛 앱·지기 점검용)
 -- ============================================================
+-- 151. 글의 영상: 지울 때 파일도 지우기 · 고치기에서 영상 바꾸기 (2026-11-19 대표 지시, 마이그레이션 post_video_clean — 원본 supabase/post_video_clean.sql)
+--   표 storage_trash(지울 파일 목록, 회원 접근 불가) · 트리거 posts_video_trash(글 삭제·영상 바뀜 → 옛 영상·첫 장면 사진을 목록에)
+--   storage_trash_due(): 목록에 오른 지 10분 지났고 지금 어떤 글에서도 쓰지 않는 것 · cron storage-sweep 10 * * * * → jigi_remind_call('sweep') → Edge Function jigi-remind 의 sweep 이 Storage API 로 삭제
+--   post_video_set(글, 영상|null): 내 일반 글의 영상을 바꾸거나 뺌(주소·길이는 posts_video_guard). jigi-remind 의 계정 삭제(purge)에 보관함 videos 추가
+-- ============================================================

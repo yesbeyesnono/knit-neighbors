@@ -29,7 +29,7 @@ Deno.serve(async (req: Request) => {
       let n = 0; const fails: string[] = [];
       for (const r of due ?? []) {
         try {
-          for (const bucket of ["posts", "avatars", "works", "chat-photos", "shop-docs", "bands"]) {
+          for (const bucket of ["posts", "videos", "avatars", "works", "chat-photos", "shop-docs", "bands"]) {
             const { data: files } = await db.storage.from(bucket).list(r.user_id, { limit: 1000 });
             const names = (files ?? []).filter((f) => f.name).map((f) => `${r.user_id}/${f.name}`);
             if (names.length) await db.storage.from(bucket).remove(names);
@@ -43,6 +43,21 @@ Deno.serve(async (req: Request) => {
         await send(`🗑 계정 삭제 유예(20일)가 끝난 계정을 정리했어요.\n완전히 지운 계정: ${n}건 (프로필·글·사진·채팅·모임 기록·Storage 파일 전부, 복구 불가)` + (fails.length ? `\n\n실패 ${fails.length}건 — 내일 같은 시간에 다시 시도해요. 계속 실패하면 Supabase › Authentication › Users 에서 직접 삭제해 주세요.\n` + fails.join("\n") : ""));
       }
       return json({ purged: n, failed: fails });
+    }
+
+    if (body.route === "sweep") {   // 지울 파일 목록(storage_trash) 정리: 글이 지워졌거나 영상이 바뀐 뒤 남은 영상·첫 장면 사진 (schema 151)
+      const { data: due } = await db.rpc("storage_trash_due", { p_limit: 100 });
+      const rows = ((due ?? []) as { id: number; bucket: string; path: string }[]).filter((r) => /^[0-9a-f-]{36}\/[A-Za-z0-9._-]+$/.test(r.path));
+      let swept = 0, failed = 0;
+      for (const bucket of ["videos", "posts"]) {
+        const part = rows.filter((r) => r.bucket === bucket);
+        if (!part.length) continue;
+        const { error } = await db.storage.from(bucket).remove(part.map((r) => r.path));
+        if (error) { failed += part.length; continue; }
+        await db.from("storage_trash").update({ done_at: new Date().toISOString() }).in("id", part.map((r) => r.id));
+        swept += part.length;
+      }
+      return json({ swept, failed });
     }
 
     if (!env("TG_BOT_TOKEN") || !env("TG_ADMIN_CHAT_ID")) return json({ error: "no_telegram" });

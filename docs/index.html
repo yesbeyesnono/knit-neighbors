@@ -4437,7 +4437,8 @@ async function editPostOpen(id, focus){
   if(p.work_id) return editWorkOpen(p, focus);
   await openCompose('post'); editPostId=id;
   $('#composeTitle').textContent='글 수정'; $('#sPost').textContent='저장';
-  $('#sText').value=p.body||''; autoGrow($('#sText')); sPhotos=(p.photos||[]).map(u=>({ url:u, old:true })); renderPv('s');
+  $('#sText').value=p.body||''; autoGrow($('#sText')); sVideo=(p.video && p.video.url)?{ old:true, url:p.video.url, purl:p.video.poster||'', poster:p.video.poster||null, dur:p.video.dur, w:p.video.w, h:p.video.h }:null;   // 고치기: 지금 영상을 그대로 보여 주고, ✕ 로 빼거나 새 영상으로 바꿀 수 있다(schema 151)
+  sPhotos=(p.photos||[]).filter(u=>!(sVideo && sVideo.poster && u===sVideo.poster)).map(u=>({ url:u, old:true })); renderPv('s');
   $('#sHint').textContent='좋아요·댓글은 그대로 남아요. 고친 글에는 \'수정됨\'이 붙어요';
 }
 async function editWorkOpen(p, focus){
@@ -4542,10 +4543,11 @@ let sPhotos=[];   // ＋ 작성 시트용 사진
 let sVideo=null;
 const VID_MAX_S=30, VID_MAX_B=50*1024*1024, VID_URL=/^https:\/\/api\.knitup\.co\.kr\/storage\/v1\/object\/public\/videos\/[0-9a-f-]{36}\/[A-Za-z0-9._-]+\.(mp4|mov|webm)$/;
 const vidDur=s=>{ s=Math.max(0, Math.round(+s||0)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
-function vidClear(){ if(sVideo){ try{ URL.revokeObjectURL(sVideo.url); if(sVideo.purl) URL.revokeObjectURL(sVideo.purl); }catch(e){} } sVideo=null; renderPv('s'); }
+function vidClear(){ if(sVideo && !sVideo.old){ try{ URL.revokeObjectURL(sVideo.url); if(sVideo.purl) URL.revokeObjectURL(sVideo.purl); }catch(e){} } sVideo=null; renderPv('s'); }
+async function vidUp(v){ const hint=$('#sHint'), was=hint?hint.textContent:''; const prog=n=>{ if(hint) hint.textContent=`영상을 올리고 있어요 · ${n}%`; }; prog(0); try{ return await uploadVideo(v, prog); } finally { if(hint) hint.textContent=was; } }
 async function pickVideo(file){
   if(!file) return;
-  if(composeKind!=='post' || editPostId) return toast('영상은 새 글에서만 올릴 수 있어요');
+  if(composeKind!=='post') return toast('영상은 일반 글에만 올릴 수 있어요');
   if(!/^video\//.test(file.type||'') && !/\.(mp4|mov|webm|m4v)$/i.test(file.name||'')) return toast('영상 파일을 골라 주세요');
   if(file.size>VID_MAX_B) return toast('영상이 너무 커요(50MB 까지). 더 짧게 찍어 주세요');
   if(sPhotos.length>3) return toast('영상과 함께는 사진을 3장까지 올릴 수 있어요');
@@ -5663,16 +5665,18 @@ async function submitCompose(){
       if(error) throw new Error(error.message);
       sPhotos=[]; toast('소식을 올렸어요'); composeBack=null; return openShop(myShop.id);
     } else if(editPostId){
-      if(!body && !sPhotos.length) throw new Error('내용이나 사진을 넣어 주세요');
-      const photos = await uploadPhotos(sPhotos); const old=pmFind(editPostId);
+      if(!body && !sPhotos.length && !sVideo) throw new Error('내용이나 사진을 넣어 주세요');
+      const old=pmFind(editPostId), ov=(old && old.video && old.video.url)?old.video:null;
+      let nv;   // undefined = 영상 그대로 · null = 영상 빼기 · 객체 = 새 영상으로 바꾸기
+      if(sVideo && !sVideo.old) nv=await vidUp(sVideo); else if(!sVideo && ov) nv=null;
+      const photos = await uploadPhotos(sPhotos); const ps = nv ? nv.poster : (nv===null ? null : (ov && ov.poster)); if(ps) photos.unshift(ps);
       const { error } = await sb.rpc('edit_post', { p_post: editPostId, p_body: body||null, p_photos: photos, p_mentions: [...new Set([...(old?.mentions||[]), ...mentionsFor('compose', body||'')])] });
       if(error) throw new Error(error.message.replace(/^.*?: /,''));
-      sPhotos=[]; editPostId=null; toast('고쳤어요'); return editBackGo();
+      if(nv!==undefined){ const r=await sb.rpc('post_video_set', { p_post: editPostId, p_video: nv }); if(r.error) throw new Error(r.error.message.replace(/^.*?: /,'')); }
+      sPhotos=[]; vidClear(); editPostId=null; toast('고쳤어요'); return editBackGo();
     } else {
       if(!body && !sPhotos.length && !sVideo) throw new Error('내용이나 사진을 넣어 주세요');
-      let video=null;
-      if(sVideo){ const hint=$('#sHint'), was=hint?hint.textContent:''; const prog=n=>{ if(hint) hint.textContent=`영상을 올리고 있어요 · ${n}%`; }; prog(0);
-        try{ video=await uploadVideo(sVideo, prog); } finally { if(hint) hint.textContent=was; } }
+      const video = sVideo ? await vidUp(sVideo) : null;
       const photos = await uploadPhotos(sPhotos); if(video && video.poster) photos.unshift(video.poster);   // 첫 장면 사진을 맨 앞에(옛 앱에서는 이 사진이 보인다)
       const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos, mentions: mentionsFor('compose', body||''), ...(video?{ video }:{}) });
       if(error) throw new Error(error.message.replace(/^.*?: /,''));

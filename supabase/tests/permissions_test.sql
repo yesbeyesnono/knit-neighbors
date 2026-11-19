@@ -275,6 +275,9 @@ begin
   out := pg_temp.must_fail(out, 'start_works(anon)', 'select public.start_works()');   -- schema 146
   out := pg_temp.must_fail(out, 'admin_work_feature(anon)', 'select public.admin_work_feature(gen_random_uuid(), false)');
   out := pg_temp.must_fail(out, 'posts.video (anon insert)', 'insert into public.posts(author_id, body, video) values (gen_random_uuid(), ''x'', ''{}''::jsonb)');   -- schema 150
+  out := pg_temp.must_fail(out, 'storage_trash(anon)', 'select count(*) from public.storage_trash');   -- schema 151
+  out := pg_temp.must_fail(out, 'storage_trash_due(anon)', 'select count(*) from public.storage_trash_due(10)');
+  out := pg_temp.must_fail(out, 'post_video_set(anon)', 'select public.post_video_set(gen_random_uuid(), null)');
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;
