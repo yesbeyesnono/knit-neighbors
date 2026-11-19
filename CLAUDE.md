@@ -24,7 +24,7 @@
 - 연락처: 앱·스토어·법적 문서 = knitup.official@gmail.com(바꾸지 말 것). support@knitup.co.kr 은 Play 조직 계정에만
 - 색 = 숲 그린 토큰(`--color-primary:#3E6B48` · `-dark:#22362A` · `-light:#DDE8D6` · `--color-bg:#F3F1EA` · `--color-surface:#fff` · `--color-text-muted:#55604F`). **색은 CSS 변수로만**, 큰 변경은 시안 확정 뒤. Apple 로그인 버튼은 검정. 되돌리기 `?theme=pistachio|graphite|forest`
 - 맨 윗줄 제목은 털실체(`TS.svg`, 자동 변환). 지도는 `MAP_STYLE`(선화), 축소 한계 `minZoom:5`
-- 뜨친 신청·축하 팝업만 버터 옐로(평소 색과 별개)
+- 버터 옐로(평소 색과 별개)는 뜨친 신청·축하 팝업과 **지도의 모임 핀**에만(2026-11-20 대표 확정 시안 `map_meetpin_v3` B안: 노란 카드에 '모임' + 날짜 크게 "○월 ○일" + 요일·시간, 이름은 눌러서 봄, 회원 핀보다 항상 위)
 
 ## 3. 구조
 - 앱: `docs/index.html` 한 파일 · 콘솔: `docs/admin.html`(관리자: knitup.official, yesbeyesnono, cocos.jay) · 법적 문서 5개 `docs/*.html` · 뷰어 `docs/viewer.html`(직접 수정 금지, `node tools/build-viewer.js`)
