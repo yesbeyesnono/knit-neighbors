@@ -270,6 +270,8 @@ begin
   out := pg_temp.must_fail(out, 'friend_rec_refresh(anon)', 'select public.friend_rec_refresh()');
   out := pg_temp.must_fail(out, 'admin_friend_wants(anon)', 'select public.admin_friend_wants()');
   out := pg_temp.must_fail(out, 'friend_rec_weekly(anon)', 'select public.friend_rec_weekly()');   -- schema 145
+  out := pg_temp.must_fail(out, 'start_works(anon)', 'select public.start_works()');   -- schema 146
+  out := pg_temp.must_fail(out, 'admin_work_feature(anon)', 'select public.admin_work_feature(gen_random_uuid(), false)');
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;

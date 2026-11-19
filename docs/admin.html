@@ -1338,6 +1338,7 @@ function certDraw(){
       ${open?`<b class="cqs">보완 요청·반려 사유 <small class="muted">고르면 문구가 채워져요 · 고쳐 쓸 수 있어요</small></b>
       <div class="cqrs">${CERT_REASONS.map((r,i)=>`<button type="button" onclick="certReason(${i})">${r[0]}</button>`).join('')}</div>
       <textarea id="cqNote" maxlength="300" placeholder="회원에게 보낼 말 (승인할 때는 비워 두세요)"></textarea>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin:10px 0 2px;font-size:13.5px;line-height:1.5;cursor:pointer"><input type="checkbox" id="cqFeat" ${x.feature===false?'':'checked'} style="margin-top:3px"><span>앱 첫 화면에 소개하기 <small class="muted" style="display:block">승인하면 앱 시작 카드에 이틀 동안 나와요. 사진이 어둡거나 작품이 잘 안 보이면 끄고 승인하세요</small></span></label>
       <div class="cqa"><button class="p" onclick="certDo('approve')">승인 · 게시</button><button class="w" onclick="certDo('fix')">보완 요청</button><button class="r" onclick="certDo('reject')">반려</button></div>
       <p class="muted" style="font-size:12px;margin:8px 0 0;line-height:1.5">보완 요청을 받은 회원이 고쳐서 저장하면 '확인 대기'로 다시 돌아와요.${x.no_story?' 옛 버전 앱에서는 사진·이름만 고칠 수 있어요(기법 표시·뜨개 이야기 칸이 없어요).':''}</p>`:''}
     </div></div>`;
@@ -1348,6 +1349,7 @@ async function certDo(action){
   const id=CERT.sel, x=CERT.items.find(y=>y.id===id); if(!x) return; const note=($('#cqNote')?.value||'').trim();
   if(action!=='approve' && !note) return toast('회원에게 보낼 사유를 적어 주세요');
   if(!confirm(action==='approve'?`「${x.title||''}」 인증을 승인해 커뮤니티에 올릴까요?`:action==='fix'?'이 내용으로 보완을 요청할까요? 회원에게 알림이 가요.':'이 인증을 반려할까요? 글은 올라가지 않고 사유가 회원에게 전달돼요.')) return;
+  if(action==='approve' && $('#cqFeat')){ const r=await sb.rpc('admin_work_feature',{ p_work:id, p_on:!!$('#cqFeat').checked }); if(r.error) return toast(r.error.message); }   // 앱 첫 화면에 소개할지(schema 146)
   const {error}=await sb.rpc('admin_work_review',{ p_work:id, p_action:action, p_note:action==='approve'?null:note }); if(error) return toast(error.message);
   toast(action==='approve'?'승인했어요 · 커뮤니티에 올라갔어요':action==='fix'?'보완을 요청했어요':'반려했어요'); CERT.sel=null; route();
 }
@@ -1365,6 +1367,7 @@ const AUTO_MSGS=[
  ['완성작품 인증', [
   ['인증을 올린 순간','올린 회원','알림 (푸시 없음)','「작품 이름」 완성작품 인증을 잘 받았어요. knitup 이 사진과 기법을 확인한 뒤 커뮤니티에 올려 드려요. 확인이 끝나면 알려 드릴게요.'],
   ['대표가 [승인 · 게시]를 누른 순간','올린 회원','알림','「작품 이름」 완성작품 인증이 커뮤니티에 올라갔어요. 적어 주신 이야기가 같은 작품을 뜨는 분께 큰 도움이 될 거예요.'],
+  ['승인할 때 「앱 첫 화면에 소개하기」가 켜져 있으면(같은 회원은 7일에 한 번 · 하루 12건까지)','올린 회원','알림','오늘의 완성작품에 올랐어요 🎉 「작품 이름」 — 앱 첫 화면에서 이웃들에게 소개돼요.'],
   ['첫 인증이 승인된 순간','올린 회원','알림','첫 인증 축하해요, Lv.1이 됐어요! 인증한 기법은 내 뜨개 단계에 \'인증\' 표시가 붙어요.'],
   ['전문(5단계) 기법 인증이 3개가 된 순간','올린 회원','알림','전문(5단계) 기법 작품 3개를 인증했어요. 작가 신청이 열렸어요 — 설정 › 작가 신청에서 할 수 있어요.'],
   ['대표가 [보완 요청]을 누른 순간','올린 회원','알림','「작품 이름」 인증을 올리기 전에 하나만 부탁드려요. (대표가 고른 사유) 글을 눌러 고친 뒤 저장하면 다시 확인해 드려요.'],

@@ -2166,3 +2166,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 145. 추천 뜨친 주 1회 알림 (2026-11-18 대표 지시, 원본 supabase/friend_rec_weekly.sql)
 --   friend_recs.pushed_at · friend_rec_weekly(): 최근 30일 접속 + 지난 7일 신청 없음 + 추천 켬 → 그날의 추천 한 명을 알림(remind, 링크 = 그 사람 프로필). cron friend-rec-weekly 0 1 * * 6(토 10:00 KST)
 -- ============================================================
+-- 146. 앱 시작 카드에 회원의 완성작품 (2026-11-19 대표 확정 시안 start_works_v4, 마이그레이션 start_works — 원본 supabase/start_works.sql)
+--   works.feature(콘솔 승인 화면의 체크, 기본 켬)·featured_at · profiles.feature_off(회원 설정)
+--   트리거 works_feature_on_approve: 확인 대기 → 승인되는 순간 featured_at 을 적고 회원에게 알림('오늘의 완성작품에 올랐어요'). 같은 회원은 7일에 한 번, 하루 12건까지(넘으면 다음 날 0시)
+--   start_works(): 승인한 날 + 다음 날의 작품 묶음(3건이 안 되면 최근 7일에서 채움) · admin_work_feature(인증, 켬/끔): 승인 전에 콘솔이 부름
+-- ============================================================

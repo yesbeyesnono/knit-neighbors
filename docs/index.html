@@ -1011,6 +1011,11 @@ body.kb #nav{display:none!important}
 #hnpop .hnslide{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;justify-content:center;padding:0 26px}
 #hnpop .hncard{position:relative;width:100%;max-width:340px;background:var(--color-surface);border-radius:22px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.3);text-align:center}
 #hnpop .hnimg{height:0;padding-bottom:70%;background:var(--color-primary-light) center/cover no-repeat}
+#hnpop .hncard.hnw{background:var(--color-primary-dark) center/cover no-repeat;aspect-ratio:340/446;cursor:pointer}
+#hnpop .hnw::before{content:"";position:absolute;left:0;right:0;top:0;height:84px;background:linear-gradient(rgba(0,0,0,.42),rgba(0,0,0,0))}#hnpop .hnw::after{content:"";position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.3))}
+#hnpop .hnwho{position:absolute;left:14px;top:13px;z-index:1;display:flex;align-items:center;gap:8px;max-width:calc(100% - 28px);color:#fff;font-weight:700;font-size:.95rem;text-shadow:0 1px 3px rgba(0,0,0,.45)}#hnpop .hnwho .ava{width:32px;height:32px;font-size:.8rem;border:1.5px solid #fff;text-shadow:none}#hnpop .hnwho span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#hnpop .hnmine{position:absolute;left:14px;top:53px;z-index:1;background:var(--color-primary);color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:4px 10px}
+#hnpop .hnw .hndots{position:absolute;left:0;right:0;bottom:14px;margin:0;z-index:1}#hnpop .hnw .hndots i{background:rgba(255,255,255,.6)}#hnpop .hnw .hndots i.on{background:#fff}
 
 #hnpop .hntx{padding:14px 14px 4px}#hnpop .hnk{font-size:.78rem;font-weight:700;color:var(--color-primary);height:1.3em;overflow:hidden;white-space:nowrap}
 #hnpop .hntx b{display:block;font-size:1.12rem;line-height:1.35;margin:3px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.02em;color:var(--ink)}
@@ -3175,7 +3180,8 @@ async function loadHomeNotice(){
   const box=$('#homeNotice'); if(!box) return;
   try{ const { data:cfg } = await sb.from('app_config').select('key,value').in('key',['home_notice','home_notices','home_notices_v2']); const n=(cfg||[]).find(r=>r.key==='home_notice')?.value;
     const ls=(cfg||[]).find(r=>r.key==='home_notices_v2')?.value || (cfg||[]).find(r=>r.key==='home_notices')?.value; homeNotices=(Array.isArray(ls)?ls:[]).filter(x=>x && x.active && x.id && x.title);
-    if(homeNotices.length){ homeNoticeCur=n&&n.active?n:null; box.hidden=true; return homeNoticePop(); }   // 공지 여러 개(schema 134): 넘겨 보는 팝업만 쓰고 옛 카드·시트는 띄우지 않는다
+    try{ const r=await sb.rpc('start_works'); startWorks=Array.isArray(r.data)?r.data:[]; }catch(e){ startWorks=[]; }   // 회원의 완성작품 카드(schema 146)
+    if(homeNotices.length || startWorks.length){ homeNoticeCur=n&&n.active?n:null; box.hidden=true; return homeNoticePop(); }   // 공지 여러 개(schema 134): 넘겨 보는 팝업만 쓰고 옛 카드·시트는 띄우지 않는다
     if(!n || !n.active || !n.body){ homeNoticeCur=null; box.hidden=true; return; }
     homeNoticeCur=n; const id=String(n.id);
     if(n.card===false || hnSeen('kn_notice_x', id)) box.hidden=true;   // card:false = 팝업(시트)만 띄우고 카드는 남기지 않음(이벤트 줄과 겹치지 않게)
@@ -3198,7 +3204,24 @@ function homeNoticeGo(){ const n=homeNoticeCur; if(n && n.link && typeof n.link=
 // ---- 앱 시작 공지: 좌우로 넘겨 보는 팝업 (2026-11-16 대표 확정 시안 notice_carousel_v2, schema 134 — app_config.home_notices)
 //      처음 보이는 카드는 무작위 · 3초마다 자동으로 넘어감 · [오늘 그만 보기] = 그날은 쉼 · [닫기](바깥 누르기 포함) = 이번만 · 버튼으로 본 공지는 그날만 빠지고 남은 공지는 계속 뜸 · 버튼은 서버가 정해 준 link 만(openLink)
 //      1.0.10 부터 app_config.home_notices_v2 를 먼저 읽는다(바깥 그림 허용). 1.0.9 는 home_notices 만 읽음
-let homeNotices=[];
+let homeNotices=[], startWorks=[];
+// ---- 시작 카드에 회원의 완성작품 (2026-11-19 대표 확정 시안 start_works_v4, schema 146 — start_works())
+//      공지 카드와 같은 틀·같은 크기. 카드 전체가 사진(가운데 기준으로 자름), 왼쪽 위에 닉네임. 누르면 그 작품 글.
+//      한 번에 아직 안 본 작품 5장까지 + 공지 1장(4번째 자리). 공지가 여럿이면 열 때마다 하나씩 돌아가며(pin 이 붙은 공지 먼저). 본 작품은 기기에 적는다(kn_sw_seen)
+function swSeen(){ try{ const a=JSON.parse(localStorage.getItem('kn_sw_seen')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function swMark(id){ try{ const a=swSeen(); if(id && !a.includes(id)){ a.push(id); localStorage.setItem('kn_sw_seen', JSON.stringify(a.slice(-300))); } }catch(e){} }
+function hnDeck(){ const left=hnLeft(), seen=swSeen();
+  let ws=startWorks.filter(w=>w && w.id && w.post && w.photo && !seen.includes(w.id));
+  if(!ws.length) return { ls:left, start:left.length?Math.floor(Math.random()*left.length):0 };   // 작품이 없으면 지금처럼 남은 공지만
+  for(let i=ws.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ws[i],ws[j]]=[ws[j],ws[i]]; }
+  ws=[...ws.filter(w=>w.mine), ...ws.filter(w=>!w.mine)].slice(0,5).map(w=>({ ...w, work:true }));
+  let n=null;
+  if(left.length){ let shown=[]; try{ const o=JSON.parse(localStorage.getItem('kn_notice_shown')||'{}'); if(o && o.day===hnDay() && Array.isArray(o.ids)) shown=o.ids.map(String); }catch(e){}
+    let pool=left.filter(x=>!shown.includes(String(x.id))); if(!pool.length){ pool=left; shown=[]; }
+    n=pool.find(x=>x.pin)||pool[0]; shown.push(String(n.id)); try{ localStorage.setItem('kn_notice_shown', JSON.stringify({ day:hnDay(), ids:shown })); }catch(e){} }
+  const ls=ws.slice(0,3); if(n) ls.push(n); ls.push(...ws.slice(3)); return { ls, start:0 }; }
+function hnWork(i){ const n=($('#hnpop')?._ls||[])[i]; hnShut(); if(n && n.post){ swMark(n.id); openLink({ type:'post', id:n.post }); } }
+async function toggleFeature(v){ const { error }=await sb.from('profiles').update({ feature_off:!v }).eq('id', me.id); if(error) return toast('실패: '+error.message); myProfile.feature_off=!v; toast(v?'승인된 작품을 첫 화면에 소개해요':'첫 화면에 소개하지 않아요'); }
 const hnDay=()=>{ const t=new Date(Date.now()+9*36e5); return t.toISOString().slice(0,10); };
 function hnNever(){ try{ const a=JSON.parse(localStorage.getItem('kn_notice_never')||'[]'); return Array.isArray(a)?a.map(String):[]; }catch(e){ return []; } }
 function hnSeenToday(){ try{ const o=JSON.parse(localStorage.getItem('kn_notice_seen')||'{}'); return o && o.day===hnDay() && Array.isArray(o.ids) ? o.ids.map(String) : []; }catch(e){ return []; } }
@@ -3207,19 +3230,24 @@ function homeNoticePop(){
   if(!me || !myProfile?.onboarded_at || !myProfile?.terms_agreed_at) return;
   if(!['map','comm'].includes(view) || $('#sheetwrap').classList.contains('on') || $('#hnpop') || $('#askdlg')) return;
   try{ if(localStorage.getItem('kn_notice_day')===hnDay()) return; }catch(e){ return; }
-  const ls=hnLeft(); if(!ls.length) return;
-  hnDraw(ls, Math.floor(Math.random()*ls.length));
+  const k=hnDeck(); if(!k.ls.length) return;
+  hnDraw(k.ls, k.start);
 }
 function hnDraw(ls, start){ $('#hnpop')?.remove(); const d=document.createElement('div'); d.id='hnpop';
   // 그림: 앱에 든 것(events/…) · 홈페이지 images · 우리 저장소의 공개 사진만
   const img=u=>{ u=String(u||''); return (/^events\/[a-z0-9._-]+\.(jpg|webp|png)$/.test(u) || /^https:\/\/(app\.knitup\.co\.kr\/images\/[A-Za-z0-9._-]+|api\.knitup\.co\.kr\/storage\/v1\/object\/public\/(posts|shops)\/[A-Za-z0-9._\/-]+)\.(jpg|jpeg|webp|png)$/.test(u)) ? u : ''; };
-  d.innerHTML=`<div class="hntrack">${ls.map((n,i)=>{ const go=!!(n.btn && n.link && typeof n.link==='object'); return `<div class="hnslide"><div class="hncard"><div class="hnimg"${img(n.img)?` style="background-image:url('${img(n.img)}')"`:''}></div>
+  d.innerHTML=`<div class="hntrack">${ls.map((n,i)=>{ const go=!!(n.btn && n.link && typeof n.link==='object');
+      if(n.work) return `<div class="hnslide"><div class="hncard hnw" onclick="hnWork(${i})"${img(n.photo)?` style="background-image:url('${img(n.photo)}')"`:''}><div class="hnwho">${avatar({ nickname:n.nickname, avatar_url:n.avatar_url })}<span>${esc(n.nickname||'이웃')}</span></div>${n.mine?'<div class="hnmine">내 작품이에요</div>':''}<div class="hndots">${ls.length>1?ls.map((_,j)=>`<i class="${j===i?'on':''}"></i>`).join(''):''}</div></div></div>`;
+      return `<div class="hnslide"><div class="hncard"><div class="hnimg"${img(n.img)?` style="background-image:url('${img(n.img)}')"`:''}></div>
       <div class="hntx"><div class="hnk">${esc(n.kicker||'')}</div><b>${esc(n.title)}</b><p>${esc(n.body||'')}</p></div>
       <button type="button" class="btn" onclick="hnGo(${i})">${esc(go?n.btn:'확인했어요')}</button>
       <div class="hndots">${ls.length>1?ls.map((_,j)=>`<i class="${j===i?'on':''}"></i>`).join(''):''}</div></div></div>`; }).join('')}</div>
     <div class="hnbar"><button type="button" onclick="hnClose()">오늘 그만 보기</button><button type="button" onclick="hnShut()">닫기</button></div>`;
   d._ls=ls; d.onclick=e=>{ if(e.target===d || e.target.classList.contains('hnslide') || e.target.classList.contains('hntrack')) hnShut(); };
   document.body.appendChild(d); const tr=d.querySelector('.hntrack'); tr.scrollLeft=start*tr.clientWidth;
+  // 화면에 지나간 작품 카드는 본 것으로 적는다(다음에 열면 아직 안 본 작품부터)
+  const mark=()=>{ const n=ls[Math.round(tr.scrollLeft/(tr.clientWidth||1))]; if(n && n.work) swMark(n.id); }; mark();
+  tr.addEventListener('scroll', ()=>{ clearTimeout(d._m); d._m=setTimeout(mark, 250); }, {passive:true});
   // 3초마다 다음 카드로(마지막 다음은 처음). 손을 대고 있는 동안에는 멈춘다
   if(ls.length>1){ let hold=false; const step=()=>{ if(!document.body.contains(d)){ clearInterval(d._t); return; } if(hold || document.hidden) return; const w=tr.clientWidth||1, i=(Math.round(tr.scrollLeft/w)+1)%ls.length; tr.scrollTo({ left:i*w, behavior:i===0?'auto':'smooth' }); };
     d._t=setInterval(step, 3000);
@@ -6084,6 +6112,7 @@ function openSettingsInner(){
       <button class="srow" onclick="relocateNow()"><span>현위치로 동네 다시 설정<br><span class="muted">지금 ${esc(p.dong_name||'미설정')} · 가입한 위치로 고정돼 있어요</span></span><span class="car">›</span></button>
       <label class="srow"><span>지도에 내 핀 보이기<br><span class="muted">위치는 200m 격자로 흐려진 좌표만 저장돼요</span></span><input type="checkbox" ${p.is_visible?'checked':''} onchange="toggleVisible(this.checked)"></label>
       <label class="srow"><span>뜨친 추천 받기<br><span class="muted">하루 한 명, 가까운 뜨개 이웃을 소개해요. 끄면 나도 추천되지 않아요</span></span><input type="checkbox" ${p.rec_off?'':'checked'} onchange="toggleRec(this.checked)"></label>
+      <label class="srow"><span>내 작품을 첫 화면에 소개<br><span class="muted">승인된 완성작품이 앱을 여는 이웃들에게 소개돼요</span></span><input type="checkbox" ${p.feature_off?'':'checked'} onchange="toggleFeature(this.checked)"></label>
     </div>
     <div class="sgrp">가게·공방</div>
     <div class="slist">
