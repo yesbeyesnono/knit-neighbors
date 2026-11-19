@@ -221,6 +221,32 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
 .svtw{overflow-x:auto}.svtb{width:100%}.svtb td,.svtb th{font-size:13px;white-space:nowrap}.svtb th.gA,.svtb td.gA{background:#F6F4EC}.svtb th.gB,.svtb td.gB{background:#EEF4EA}.svtb tr.grp th{font-size:11.5px;text-align:center;padding:4px}.svtb tr[onclick]:hover td{filter:brightness(.98)}
 @media(max-width:1100px){.svg4{grid-template-columns:1fr 1fr}.svg2{grid-template-columns:1fr}}
 @media(max-width:760px){.svg4{grid-template-columns:1fr}.svrk{grid-template-columns:60px minmax(0,1fr) 52px 56px}.svrk>:nth-child(4),.svrk>:nth-child(5),.svrk>:nth-child(7){display:none}.svbars{gap:4px}}
+
+/* 휴대폰: 표 한 줄 = 카드 한 장(mc*) — 2026-11-19 대표 확정. 표에 nomc 를 붙이면 그대로 둔다 */
+@media(max-width:760px){
+  #main table.mc{display:block;border:0;background:none;width:100%;min-width:0!important;white-space:normal;overflow:visible;border-radius:0}
+  #main table.mc colgroup,#main table.mc tr.mch{display:none}
+  #main table.mc thead,#main table.mc tbody{display:block}
+  #main table.mc tr{display:block;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 10px;height:auto!important}
+  #main table.mc td{display:flex;gap:10px;align-items:baseline;border:0!important;padding:3px 0!important;width:auto!important;max-width:none!important;min-width:0!important;height:auto!important;min-height:0!important;white-space:normal!important;text-align:left!important;font-size:14px;line-height:1.45;overflow-wrap:anywhere;background:none!important;position:static!important}
+  #main table.mc td>*{min-width:0}
+  #main table.mc td[data-l]::before{content:attr(data-l);flex:none;width:72px;font-size:12px;color:var(--ink3);font-weight:400}
+  #main table.mc td.mc1{display:block;font-size:15.5px;font-weight:700;padding-bottom:6px!important}
+  #main table.mc td.mce{display:none}
+  #main table.mc td.mcb{flex-wrap:wrap;gap:8px;padding-top:8px!important}
+  #main table.mc td.mcb button,#main table.mc td.mcb select{min-height:40px;flex:1 1 30%}
+  #main table.mc td input:not([type=checkbox]):not([type=radio]),#main table.mc td textarea,#main table.mc td select{max-width:100%;min-width:0;flex:1 1 auto}
+  #main table.mc td img{max-width:100%;height:auto}
+  #main .mcwrap{overflow:visible!important;border:0!important;background:none!important;box-shadow:none!important;padding:0!important}
+  #main table.mcw{display:block;width:100%;min-width:0!important;white-space:normal}
+  #main table.mcw tbody,#main table.mcw thead,#main table.mcw tr,#main table.mcw td,#main table.mcw th{display:block;white-space:normal!important;overflow-wrap:anywhere;width:auto!important;max-width:none!important;height:auto!important}
+  #main button,#main select{min-height:38px}
+  #main .card,#main section.card{max-width:100%;min-width:0;overflow-wrap:anywhere}
+  #main .mbtiles{grid-template-columns:1fr 1fr!important;gap:10px}#main .mbtile{padding:12px 14px;height:auto;min-width:0}
+  #main .hero3[style*="1fr 1fr 1fr"]{grid-template-columns:minmax(0,1fr)!important}#main .hero3[style*="repeat(4"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .bcfields{grid-template-columns:minmax(0,1fr)!important}.bcfield{min-width:0}.bcfield select,.bcfield input{min-width:0!important;max-width:100%;box-sizing:border-box}.bcfield .row{flex-wrap:wrap}.bcfield .row>input{flex:1 1 84px;min-width:84px!important}
+  .mbseg{scrollbar-width:none}.mbseg::-webkit-scrollbar{display:none}
+}
 </style></head>
 <body>
 <div id="gate">
@@ -342,6 +368,34 @@ function renderNav(v){ if(v) navCur=v; v=navCur; const has=(it,k)=>it[0]===k||(i
   $('#navtabs').innerHTML=`<div class="t">${g.items.map(it=>`<a href="#${it[0]}" class="${it===cur?'on':''}">${it[1]}${navBadge(it[0])?`<span class="n">${navBadge(it[0])}</span>`:''}</a>`).join('')}</div>`+(cur[2]?`<div class="p">${cur[2].map(x=>`<a href="#${x[0]}" class="${x[0]===v?'on':''}">${x[1]}</a>`).join('')}</div>`:'');
 }
 new MutationObserver(()=>renderNav()).observe(document.querySelector('aside'),{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden']});
+// ===== 휴대폰: 표 → 카드 (2026-11-19) — 화면이 그려질 때마다 #main 안의 표에 이름표(data-l)를 붙인다. 모양은 CSS(.mc)
+const MC_MQ=matchMedia('(max-width:760px)'); let mcT=0;
+function mcApply(){
+  document.querySelectorAll('#main table').forEach(t=>{
+    if(t.classList.contains('nomc')||t.classList.contains('mcw')) return;
+    const rows=[...t.rows]; if(!rows.length) return;
+    const heads=rows.filter(r=>r.cells.length && [...r.cells].every(c=>c.tagName==='TH'));
+    if(!t.classList.contains('mc')){
+      if(heads.length>1){ t.classList.add('nomc'); return; }                       // 머리줄이 두 줄인 표는 그대로
+      if(!heads.length || heads[0].cells.length<3){ t.classList.add('mcw'); return; }  // 칸이 한두 개면 줄만 바꿔 준다
+      if(rows.some(r=>!heads.includes(r) && r.cells.length>1 && [...r.cells].some(c=>c.colSpan>1||c.rowSpan>1))){ t.classList.add('nomc'); return; }
+      heads[0].classList.add('mch'); t.classList.add('mc');
+      const w=t.parentElement; if(w && w.id!=='main' && getComputedStyle(w).overflowX!=='visible') w.classList.add('mcwrap');
+    }
+    const hr=t.querySelector('tr.mch'); if(!hr) return;
+    const lab=[...hr.cells].map(h=>h.textContent.replace(/[\u2195\u2193\u2191]/g,'').trim());
+    rows.forEach(tr=>{ if(tr===hr || tr.dataset.mc) return; tr.dataset.mc='1'; const tds=[...tr.cells];
+      if(tds.length===1){ tds[0].classList.add('mc1'); return; }
+      tds.forEach((td,i)=>{ const tx=td.textContent.trim(), ctl=td.querySelector('img,button,select,input,textarea,a');
+        if(i===0){ td.classList.add('mc1'); return; }
+        if((!tx && !ctl) || tx==='\u2013' || tx==='\u2014' || tx==='-'){ td.classList.add('mce'); return; }
+        if(td.querySelector('button,select') && (!lab[i] || i===tds.length-1)){ td.classList.add('mcb'); return; }
+        if(lab[i]) td.setAttribute('data-l',lab[i]); }); });
+  });
+}
+new MutationObserver(()=>{ if(!MC_MQ.matches) return; clearTimeout(mcT); mcT=setTimeout(mcApply,40); }).observe(document.querySelector('#main'),{childList:true,subtree:true});
+MC_MQ.addEventListener('change',()=>{ if(MC_MQ.matches) mcApply(); });
+if(MC_MQ.matches) mcApply();
 function drawer(on){ document.querySelector('aside').classList.toggle('open', on); $('#drawerScrim').classList.toggle('on', on); }
 document.addEventListener('click', e=>{ const l=e.target.closest('aside a'); if(l) drawer(false); });
 function openPanel(html){ $('#panelBody').innerHTML=html; $('#panel').classList.add('on'); $('#scrim').classList.add('on'); }
