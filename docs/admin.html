@@ -1552,7 +1552,7 @@ const WARN_TXT=n=>`${n||'회원'}님, 다른 이웃을 향한 표현 때문에 �
 let MOD_ITEMS=[];
 function modButtons(it){
   const pid=it.target_type==='post'?it.target_id:null, b=[];
-  if(pid && ['abuse','report','risk'].includes(it.kind)){ b.push(['경고 보내고 숨김','warn','p']); b.push(['숨김 해제','ok','']); }
+  if(pid && ['abuse','report','risk'].includes(it.kind)){ b.push(['경고 보내고 숨김','warn','p']); b.push(['문제 없음','ok','']); }
   else if(pid && ['spam','scam'].includes(it.kind)){ b.push(['제안대로 처리 (숨김+7일 제한)','spam','p']); b.push(['문제 없음','ok','']); }
   else if(pid && it.kind==='app_complaint'){ b.push(['댓글 보내기','reply','p']); b.push(['확인함','seen','']); }
   else if(it.kind==='tech_candidate'){ b.push(['후보 보기','tech','p']); b.push(['나중에','seen','']); }
@@ -1566,7 +1566,7 @@ async function modAct(id, act){
   const it=MOD_ITEMS.find(x=>x.id===id)||(await sb.from('mod_items').select('*').eq('id',id).single()).data; if(!it) return; const pid=it.target_id;
   try{
     if(act==='warn'){ const t=prompt('작성자에게 보낼 경고 문구 (숨김은 유지돼요)', it.ai_suggestion?.warning_text||WARN_TXT(it.evidence?.nickname)); if(t===null) return; await jsteps(it,[['hide_temp',{post_id:pid}],['send_warning',{user_id:it.author_id,text:t}],['notify_reporter',{post_id:pid}]]); }
-    else if(act==='ok'){ if(!confirm('숨김을 풀고 문제 없음으로 닫을까요?')) return; await jsteps(it,[['unhide',{post_id:pid}],['dismiss_item',{note:'문제 없음'}]]); }
+    else if(act==='ok'){ if(!confirm('문제 없음으로 닫을까요? (숨겨진 글이었다면 다시 보이게 돼요)')) return; await jsteps(it,[['unhide',{post_id:pid}],['dismiss_item',{note:'문제 없음'}]]); }
     else if(act==='spam'){ if(!confirm('글을 숨기고 작성자의 글쓰기를 7일 제한할까요?')) return; await jsteps(it,[['hide_temp',{post_id:pid}],['restrict_posting',{user_id:it.author_id,days:7}]]); }
     else if(act==='restrict'){ if(!confirm('작성자의 글쓰기를 7일 제한할까요?')) return; await jtool('restrict_posting',{user_id:it.author_id,days:7,item_id:it.id}); }
     else if(act==='keep'){ await jsteps(it,[['hide_temp',{post_id:pid}]]); }
