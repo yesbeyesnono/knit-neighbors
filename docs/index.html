@@ -5825,8 +5825,8 @@ let TECH = [], skills = new Set(), skillCraft = 'crochet', skillTimer = null, op
 async function loadTech(){ if(TECH.length) return; const { data, error } = await sb.from('techniques').select('*').order('sort'); if(error) toast('기법 목록 로드 실패: '+error.message); TECH = (data||[]).filter(t=>!t.hidden); fillTechCounts(); }
 function fillTechCounts(){ const n={crochet:techOf('crochet').length, knitting:techOf('knitting').length}; n.all=n.crochet+n.knitting; if(!n.all) return; document.querySelectorAll('.tcnt').forEach(el=>{ el.textContent=n[el.dataset.k]||''; }); }
 function techOf(craft){ return TECH.filter(t=>t.craft===craft); }
-function lvStats(craft, set){ // 단계별 {done,total}
-  const s = {}; techOf(craft).forEach(t=>{ s[t.level] = s[t.level]||{done:0,total:0}; s[t.level].total++; if(set.has(t.id)) s[t.level].done++; }); return s;
+function lvStats(craft, set){ // 단계별 {done,total} — 나중에 추가한 기법(extra)은 체크하면 한 것으로 세지만 기준 수(total)에는 넣지 않는다(기법이 늘어도 단계가 내려가지 않게, schema 154)
+  const s = {}; techOf(craft).forEach(t=>{ s[t.level] = s[t.level]||{done:0,total:0}; if(!t.extra) s[t.level].total++; if(set.has(t.id)) s[t.level].done++; }); Object.values(s).forEach(x=>{ x.done=Math.min(x.done,x.total); }); return s;
 }
 function lvOf(craft, set){ const s = lvStats(craft,set); let lv=0; for(let l=1;l<=5;l++){ if(s[l] && s[l].done*2 >= s[l].total) lv=l; } return lv; }
 function prereqClosure(id, acc){ acc.add(id); const t=TECH.find(x=>x.id===id); (t?.prereq||[]).forEach(p=>{ if(!acc.has(p)) prereqClosure(p, acc); }); return acc; }
@@ -5878,7 +5878,7 @@ function techBoard(craft, cls, onClick, ver){
   const maxN = Math.max(1, ...Object.values(cols).map(a=>a.length));
   const H = headH + maxN*rowH + 8, W = 5*(colW+gapX) - gapX;
   const pos={}, st={};
-  for(let L=1; L<=5; L++){ const arr=cols[L]||[]; const y0=headH+(maxN-arr.length)*rowH/2; arr.forEach((t,i)=>{ pos[t.id]={x:(L-1)*(colW+gapX), y:y0+i*rowH}; }); st[L]={done:arr.filter(t=>cls(t)==='done').length,total:arr.length}; }
+  for(let L=1; L<=5; L++){ const arr=cols[L]||[]; const y0=headH+(maxN-arr.length)*rowH/2; arr.forEach((t,i)=>{ pos[t.id]={x:(L-1)*(colW+gapX), y:y0+i*rowH}; }); const tot=arr.filter(t=>!t.extra).length; st[L]={done:Math.min(tot,arr.filter(t=>cls(t)==='done').length),total:tot}; }
   const byId={}; list.forEach(t=>byId[t.id]=t);
   let svg = `<svg class="tmedges" width="${W}" height="${H}">`;
   list.forEach(t=>(t.prereq||[]).forEach(q=>{ const a=pos[q], b=pos[t.id]; if(!a||!b) return;
