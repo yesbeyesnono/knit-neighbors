@@ -215,6 +215,7 @@ details .seg{margin-top:8px;justify-content:center}
 .rthread{margin:0 0 0 62px;padding:2px 16px 10px 12px;border-left:2px solid var(--line);background:var(--surface);border-bottom:1px solid var(--line)}
 .rpost{display:flex;gap:8px;padding:8px 0 2px}
 .rpost .ava.sm,.rrow .ava.sm{width:28px;height:28px;font-size:.7rem;flex:none}
+#v-post .compose{background:var(--color-surface)}#v-post .compose .ava{width:28px;height:28px;font-size:.7rem;flex:none;margin-bottom:5px}#v-post .compose .btn{background:var(--color-primary);color:#fff;border-radius:999px;padding:8px 14px;font-size:.85rem;flex:none}#v-post .compose textarea{flex:1;min-width:0;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:inherit;padding:9px 14px;font-family:inherit;font-size:16px;line-height:1.4;height:42px;min-height:42px;max-height:112px;width:auto;resize:none;overflow-y:auto;outline:0;display:block}
 .rpost .rb{flex:1;min-width:0}
 .rpost .who{display:flex;align-items:baseline;gap:6px;overflow:hidden}
 .rpost .who b{font-weight:700;font-size:15px;white-space:nowrap;cursor:pointer}
@@ -1759,7 +1760,7 @@ sb.auth.onAuthStateChange(async (ev, session) => {
   await loadMe();
   if(myProfile?.deleted_at){ initStarted=false; openRestoreSheet(); return; }   // 삭제 유예 중(schema 77)
   if(!myProfile?.onboarded_at){ openOnboard(false); }
-  else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); else setTimeout(pushSetup, 1500); setTimeout(studioImportCheck, 900); setTimeout(loadHomeNotice, 4000); }
+  else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); else setTimeout(pushSetup, 1500); setTimeout(studioImportCheck, 900); hnPrefetch(); setTimeout(loadHomeNotice, 1500); }
 });
 function openConsent(){
   openSheet(`<b style="font-size:1.05rem">이용약관 동의</b>
@@ -3178,9 +3179,8 @@ let homeNoticeCur=null;
 function hnSeen(k, id){ try{ return localStorage.getItem(k)===id; }catch(e){ return true; } }
 async function loadHomeNotice(){
   const box=$('#homeNotice'); if(!box) return;
-  try{ const { data:cfg } = await sb.from('app_config').select('key,value').in('key',['home_notice','home_notices','home_notices_v2']); const n=(cfg||[]).find(r=>r.key==='home_notice')?.value;
+  try{ const [cfg, sw] = await hnData(); startWorks=sw; const n=(cfg||[]).find(r=>r.key==='home_notice')?.value;
     const ls=(cfg||[]).find(r=>r.key==='home_notices_v2')?.value || (cfg||[]).find(r=>r.key==='home_notices')?.value; homeNotices=(Array.isArray(ls)?ls:[]).filter(x=>x && x.active && x.id && x.title);
-    try{ const r=await sb.rpc('start_works'); startWorks=Array.isArray(r.data)?r.data:[]; }catch(e){ startWorks=[]; }   // 회원의 완성작품 카드(schema 146)
     if(homeNotices.length || startWorks.length){ homeNoticeCur=n&&n.active?n:null; box.hidden=true; return homeNoticePop(); }   // 공지 여러 개(schema 134): 넘겨 보는 팝업만 쓰고 옛 카드·시트는 띄우지 않는다
     if(!n || !n.active || !n.body){ homeNoticeCur=null; box.hidden=true; return; }
     homeNoticeCur=n; const id=String(n.id);
@@ -3208,12 +3208,23 @@ let homeNotices=[], startWorks=[];
 // ---- 시작 카드에 회원의 완성작품 (2026-11-19 대표 확정 시안 start_works_v4, schema 146 — start_works())
 //      공지 카드와 같은 틀·같은 크기. 카드 전체가 사진(가운데 기준으로 자름), 왼쪽 위에 닉네임. 누르면 그 작품 글.
 //      한 번에 아직 안 본 작품 5장까지 + 공지 1장(4번째 자리). 공지가 여럿이면 열 때마다 하나씩 돌아가며(pin 이 붙은 공지 먼저). 본 작품은 기기에 적는다(kn_sw_seen)
+// 공지와 작품을 한 번에 받는다(1분 동안은 받은 것을 다시 씀). 작품 순서는 받을 때 한 번 섞고, 먼저 나올 카드의 그림을 미리 받아 둔다
+let hnDataP=null, hnDataAt=0;
+function hnData(){ if(hnDataP && Date.now()-hnDataAt<60000) return hnDataP; hnDataAt=Date.now();
+  const p=Promise.all([ sb.from('app_config').select('key,value').in('key',['home_notice','home_notices','home_notices_v2']).then(r=>r.data||[]),
+      sb.rpc('start_works').then(r=>Array.isArray(r.data)?r.data:[], ()=>[]) ]).then(([cfg, ws])=>{
+    for(let i=ws.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ws[i],ws[j]]=[ws[j],ws[i]]; }
+    try{ const seen=swSeen(); const first=[...ws.filter(w=>w.mine), ...ws.filter(w=>!w.mine)].filter(w=>w && w.photo && !seen.includes(w.id)).slice(0,5);
+      const ns=(cfg.find(r=>r.key==='home_notices_v2')?.value || cfg.find(r=>r.key==='home_notices')?.value || []);
+      [...first.map(w=>w.photo), ...(Array.isArray(ns)?ns:[]).filter(n=>n && n.active && n.img).map(n=>n.img)].forEach(u=>{ const im=new Image(); im.src=u; }); }catch(e){}
+    return [cfg, ws]; });
+  hnDataP=p; p.catch(()=>{ if(hnDataP===p) hnDataP=null; }); return p; }
+function hnPrefetch(){ try{ if(me) hnData().catch(()=>{}); }catch(e){} }
 function swSeen(){ try{ const a=JSON.parse(localStorage.getItem('kn_sw_seen')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
 function swMark(id){ try{ const a=swSeen(); if(id && !a.includes(id)){ a.push(id); localStorage.setItem('kn_sw_seen', JSON.stringify(a.slice(-300))); } }catch(e){} }
 function hnDeck(){ const left=hnLeft(), seen=swSeen();
   let ws=startWorks.filter(w=>w && w.id && w.post && w.photo && !seen.includes(w.id));
   if(!ws.length) return { ls:left, start:left.length?Math.floor(Math.random()*left.length):0 };   // 작품이 없으면 지금처럼 남은 공지만
-  for(let i=ws.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ws[i],ws[j]]=[ws[j],ws[i]]; }
   ws=[...ws.filter(w=>w.mine), ...ws.filter(w=>!w.mine)].slice(0,5).map(w=>({ ...w, work:true }));
   let n=null;
   if(left.length){ let shown=[]; try{ const o=JSON.parse(localStorage.getItem('kn_notice_shown')||'{}'); if(o && o.day===hnDay() && Array.isArray(o.ids)) shown=o.ids.map(String); }catch(e){}
@@ -3228,7 +3239,7 @@ function hnSeenToday(){ try{ const o=JSON.parse(localStorage.getItem('kn_notice_
 function hnLeft(){ const nv=hnNever(), sn=hnSeenToday(); return homeNotices.filter(n=>!nv.includes(String(n.id)) && !sn.includes(String(n.id))); }   // 다시 보지 않기로 끈 것 · 오늘 이미 눌러 본 것은 뺀다
 function homeNoticePop(){
   if(!me || !myProfile?.onboarded_at || !myProfile?.terms_agreed_at) return;
-  if(!['map','comm'].includes(view) || $('#sheetwrap').classList.contains('on') || $('#hnpop') || $('#askdlg')) return;
+  if(!['map','comm'].includes(view) || $('#sheetwrap').classList.contains('on') || $('#hnpop') || $('#askdlg') || $('#fqpop')) return;
   try{ if(localStorage.getItem('kn_notice_day')===hnDay()) return; }catch(e){ return; }
   const k=hnDeck(); if(!k.ls.length) return;
   hnDraw(k.ls, k.start);
@@ -6170,7 +6181,7 @@ async function openRestoreSheet(){
 async function restoreAccount(){
   const { error } = await sb.rpc('restore_my_account'); if(error) return toast('복구 실패: '+error.message);
   closeSheet(); toast('계정을 복구했어요'); await loadMe();
-  if(!myProfile?.onboarded_at){ openOnboard(false); } else { go('map'); watchFriends(); loadMyRooms(); setTimeout(pushSetup, 1500); setTimeout(loadHomeNotice, 4000); }
+  if(!myProfile?.onboarded_at){ openOnboard(false); } else { go('map'); watchFriends(); loadMyRooms(); setTimeout(pushSetup, 1500); hnPrefetch(); setTimeout(loadHomeNotice, 1500); }
 }
 async function toggleVisible(v){ await sb.from('profiles').update({is_visible:v}).eq('id',me.id); myProfile.is_visible=v; toast(v?'지도에 보여요':'지도에서 숨겼어요'); }
 
