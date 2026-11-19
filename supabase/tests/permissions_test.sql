@@ -280,6 +280,7 @@ begin
   out := pg_temp.must_fail(out, 'post_video_set(anon)', 'select public.post_video_set(gen_random_uuid(), null)');
   out := pg_temp.must_fail(out, 'video_uploads(anon)', 'select count(*) from public.video_uploads');   -- schema 152
   out := pg_temp.must_fail(out, 'video_uploads_orphans(anon)', 'select public.video_uploads_orphans()');
+  out := pg_temp.must_fail(out, 'meetup_nearby_notify(anon)', 'select public.meetup_nearby_notify()');   -- schema 153
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;

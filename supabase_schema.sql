@@ -2208,3 +2208,7 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   posts_video_guard: cf 는 video_uploads 에서 주인 확인 · posts_video_trash/storage_trash_due: bucket 'cf' · video_uploads_orphans(): 글에 붙지 않은 채 하루 지난 영상을 지울 목록에
 --   Edge Function video-upload(create = 바로 올리는 주소, finish = MP4 켜기) · jigi-remind sweep 이 Cloudflare 에서 삭제 · 열쇠 CF_STREAM_TOKEN(대표가 넣음)
 -- ============================================================
+-- 153. 모임이 열리면 가까운 회원에게 알리기 (2026-11-19 대표 확정 문구 A안 · 5km, 원본 supabase/meetup_nearby.sql)
+--   meetups.nearby_notified_at · meetup_nearby_notify(): 지기 점검을 통과한 공개 모임을 5km 안의 회원(최근 30일 접속)에게 한 번(remind, 링크 = 모임), 08~22시에만, 한 사람 하루 2건까지. 알린 뒤 모임을 연 회원에게 '○명에게 알렸어요'(notice)
+--   cron meetup-nearby */10 * * * *
+-- ============================================================
