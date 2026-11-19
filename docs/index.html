@@ -306,6 +306,10 @@ nav button[data-v="plus"] svg{stroke-width:2.2}
 .cbox .tools .cnt{margin-left:auto;font-size:.75rem;color:var(--ink3);font-variant-numeric:tabular-nums}
 .pv{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .pv div{width:64px;height:64px;border-radius:8px;background:center/cover;position:relative}
+.pv div.pvv{background-color:var(--color-primary-dark)}.pv div.pvv i{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:rgba(0,0,0,.5)}.pv div.pvv i::after{content:"";position:absolute;left:10px;top:7px;border-left:9px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent}.pv div.pvv em{position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.6);color:#fff;border-radius:5px;font-size:.62rem;font-style:normal;padding:0 4px}
+.pvid{position:relative;margin:6px 0;border-radius:14px;overflow:hidden;background:var(--color-primary-dark) center/cover no-repeat;max-height:440px;cursor:pointer}.pvid video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+.pvid .pvplay{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(0,0,0,.5)}.pvid .pvplay::after{content:"";position:absolute;left:21px;top:15px;border-left:17px solid #fff;border-top:11px solid transparent;border-bottom:11px solid transparent}
+.pvid em{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.6);color:#fff;border-radius:6px;font-size:.75rem;font-style:normal;padding:1px 7px}
 .pv div b{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--sel);color:#fff;font-size:.7rem;display:grid;place-items:center;cursor:pointer}
 .feed{display:flex;flex-direction:column}
 .post{display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--surface);cursor:pointer}
@@ -1205,6 +1209,8 @@ body.kb #nav{display:none!important}
       <div class="tools">
         <button type="button" class="ib" title="사진" onclick="$('#sFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5" width="17.2" height="14" rx="2"></rect><circle cx="8.6" cy="9.4" r="1.5"></circle><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"></path></svg></button>
         <input id="sFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
+        <button type="button" class="ib" id="sVidBtn" title="영상" onclick="$('#sVid').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="12.5" height="12" rx="2.5"></rect><path d="m15.5 10.4 5-3v9.2l-5-3"></path></svg></button>
+        <input id="sVid" type="file" accept="video/*" hidden onchange="pickVideo(this.files[0]);this.value=''">
         <span id="sHint"></span>
       </div>
     </div>
@@ -4351,7 +4357,8 @@ function agoShort(t){ const d=(Date.now()-new Date(t))/1000; if(d<60)return '방
 function tphLabel(w, u, full){ const L=w && Array.isArray(w.tech_photos) ? w.tech_photos : null; if(!L) return ''; const x=L.find(y=>y && y.photo===u); if(!x || !Array.isArray(x.techniques) || !x.techniques.length) return ''; const nm=x.techniques.map(techName); if(full) return nm.join(' · ')+(x.memo?` — ${x.memo}`:''); return nm.slice(0,3).join(' · ')+(nm.length>3?` 외 ${nm.length-3}`:''); }
 function postCard(p, opts={}){
   const a = p.author||{}; const mine = p.author_id===me.id;
-  const n = (p.photos||[]).length;
+  const vd = p.video && p.video.url ? p.video : null, phs = (p.photos||[]).filter(u=>!(vd && vd.poster && u===vd.poster));
+  const n = phs.length;
   const sub = p.author_id===SUPPORT_ID ? '운영진' : [a.dong_name, lvShort(a)].filter(Boolean).join(' · ');   // 지기 계정은 동네·단계 대신 '운영진'
   const showLine = opts.line || (!opts.noLine && p.reply_count>0);
   return `<div class="post ${opts.cls||''}" onclick="postTap('${p.id}')">
@@ -4362,7 +4369,8 @@ function postCard(p, opts={}){
       ${p.review_meetup?`<div class="rvtag" onclick="event.stopPropagation();openMeetup('${p.review_of}')">${ico('yarn')} 모임 후기 · ${esc(p.review_meetup.title)}</div>`:''}
       <div class="who"><b onclick="event.stopPropagation();openProfile('${a.id}')">${esc(a.nickname||'알 수 없음')}</b>${lvBadge(a)}<time>${agoShort(p.created_at)}${p.edited_at?' · 수정됨':''}</time>${sub?`<span class="sub">${esc(sub)}</span>`:''}<button class="menu" onclick="event.stopPropagation();postMenu('${p.id}','${a.id}')">···</button></div>
       ${p.body?`<div class="txt">${bodyHtml(p)}</div>`:''}
-      ${n?`<div class="pgrid n${n}">${p.photos.map(u=>{ const im=`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`; const lb=tphLabel(p.work, u); return lb?`<span class="tph">${im}<em data-f="${esc(tphLabel(p.work, u, true))}">${esc(lb)}</em></span>`:im; }).join('')}</div>`:''}
+      ${vd?postVideoHtml(vd):''}
+      ${n?`<div class="pgrid n${n}">${phs.map(u=>{ const im=`<img src="${esc(u)}" alt="" loading="lazy" onclick="event.stopPropagation();openPhoto(this.src)">`; const lb=tphLabel(p.work, u); return lb?`<span class="tph">${im}<em data-f="${esc(tphLabel(p.work, u, true))}">${esc(lb)}</em></span>`:im; }).join('')}</div>`:''}
       ${p.meetup?meetupCard(p.meetup):''}${p.work?workCard(p.work, p):''}${mine && p.work && !p.parent_id && !p.work.sponsored && !(Array.isArray(p.work.yarns)&&p.work.yarns.length) && !p.work.yarn_info ? `<div class="addy" onclick="event.stopPropagation();editPostOpen('${p.id}','yarn')"><span>＋ 어떤 실로 떴는지 적기</span><small>나에게만 보여요</small></div>` : ''}
       <div class="acts">
         <button class="${likedSet.has(p.id)?'on':''}" onclick="event.stopPropagation();toggleLike('${p.id}',this)">${ICON.heart}<span>${p.like_count||''}</span></button>
@@ -4529,9 +4537,57 @@ async function toggleLike(id, btn){
 }
 // 사진 선택 → 1280px 리사이즈 → 미리보기
 let sPhotos=[];   // ＋ 작성 시트용 사진
+// ---- 일반 글의 짧은 영상 (2026-11-19 대표 확정 시안 post_video_v1 · schema 150): 30초까지 한 개 · 50MB 까지 · 눌러야 재생(소리 꺼진 채 시작)
+//      파일은 보관함 videos 에, 첫 장면 사진은 posts 에(옛 앱은 이 사진만 보인다). 글에는 posts.video = {url, poster, dur, w, h} — 서버가 주소·길이를 확인(posts_video_guard)
+let sVideo=null;
+const VID_MAX_S=30, VID_MAX_B=50*1024*1024, VID_URL=/^https:\/\/api\.knitup\.co\.kr\/storage\/v1\/object\/public\/videos\/[0-9a-f-]{36}\/[A-Za-z0-9._-]+\.(mp4|mov|webm)$/;
+const vidDur=s=>{ s=Math.max(0, Math.round(+s||0)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
+function vidClear(){ if(sVideo){ try{ URL.revokeObjectURL(sVideo.url); if(sVideo.purl) URL.revokeObjectURL(sVideo.purl); }catch(e){} } sVideo=null; renderPv('s'); }
+async function pickVideo(file){
+  if(!file) return;
+  if(composeKind!=='post' || editPostId) return toast('영상은 새 글에서만 올릴 수 있어요');
+  if(!/^video\//.test(file.type||'') && !/\.(mp4|mov|webm|m4v)$/i.test(file.name||'')) return toast('영상 파일을 골라 주세요');
+  if(file.size>VID_MAX_B) return toast('영상이 너무 커요(50MB 까지). 더 짧게 찍어 주세요');
+  if(sPhotos.length>3) return toast('영상과 함께는 사진을 3장까지 올릴 수 있어요');
+  const url=URL.createObjectURL(file), v=document.createElement('video'); v.muted=true; v.playsInline=true; v.setAttribute('playsinline',''); v.preload='auto';
+  const once=(ev,ms)=>new Promise((res,rej)=>{ const t=setTimeout(()=>rej(new Error('t')), ms); v.addEventListener(ev, ()=>{ clearTimeout(t); res(); }, { once:true }); v.addEventListener('error', ()=>{ clearTimeout(t); rej(new Error('e')); }, { once:true }); });
+  toast('영상을 확인하고 있어요');
+  try{ v.src=url; await once('loadedmetadata', 12000); }catch(e){ URL.revokeObjectURL(url); return toast('이 영상은 읽을 수 없어요. 다른 영상을 골라 주세요'); }
+  let dur=v.duration; if(!isFinite(dur) || dur<=0){ try{ v.currentTime=1e7; await once('seeked', 4000); dur=v.duration; }catch(e){} }   // 길이를 늦게 알려 주는 파일
+  if(!isFinite(dur) || dur<=0){ URL.revokeObjectURL(url); return toast('영상 길이를 알 수 없어요. 다른 영상을 골라 주세요'); }
+  if(dur>VID_MAX_S+0.6){ URL.revokeObjectURL(url); return toast(`영상은 ${VID_MAX_S}초까지 올릴 수 있어요 (이 영상은 ${Math.round(dur)}초)`); }
+  // 첫 장면 사진(목록의 미리 보기 · 옛 앱에서 보이는 사진 · 지기의 점검)
+  let pblob=null, w=v.videoWidth||0, h=v.videoHeight||0;
+  try{ v.currentTime=Math.min(0.2, dur/2); await once('seeked', 5000); if(v.readyState<2) await once('loadeddata', 3000).catch(()=>{});
+    const k=Math.min(1, 1280/Math.max(w||1, h||1)), c=document.createElement('canvas'); c.width=Math.max(2, Math.round((w||720)*k)); c.height=Math.max(2, Math.round((h||1280)*k));
+    c.getContext('2d').drawImage(v, 0, 0, c.width, c.height); pblob=await new Promise(r=>c.toBlob(r, 'image/jpeg', .85)); }catch(e){ pblob=null; }
+  v.removeAttribute('src'); try{ v.load(); }catch(e){}
+  vidClear(); sVideo={ file, url, dur, w, h, pblob, purl:pblob?URL.createObjectURL(pblob):'' }; renderPv('s');
+}
+async function uploadVideo(v, onProg){
+  const mov=/quicktime/i.test(v.file.type||'') || /\.mov$/i.test(v.file.name||''), webm=/webm/i.test(v.file.type||'') || /\.webm$/i.test(v.file.name||'');
+  const ext=mov?'mov':webm?'webm':'mp4', ct=mov?'video/quicktime':webm?'video/webm':'video/mp4', path=`${me.id}/${Date.now()}-v.${ext}`;
+  const { data:ss }=await sb.auth.getSession(); const tok=ss?.session?.access_token; if(!tok) throw new Error('다시 로그인해 주세요');
+  await new Promise((res,rej)=>{ const x=new XMLHttpRequest(); x.open('POST', `${SB_URL}/storage/v1/object/videos/${path}`);
+    x.setRequestHeader('Authorization', 'Bearer '+tok); x.setRequestHeader('apikey', SB_KEY); x.setRequestHeader('Content-Type', ct); x.setRequestHeader('x-upsert', 'false');
+    x.upload.onprogress=e=>{ if(e.lengthComputable && onProg) onProg(Math.round(e.loaded*100/e.total)); };
+    x.onload=()=> x.status>=200 && x.status<300 ? res() : rej(new Error(x.status===413?'영상이 너무 커요. 더 짧게 찍어 주세요':'영상을 올리지 못했어요. 잠시 뒤 다시 해 주세요'));
+    x.onerror=()=>rej(new Error('영상을 올리지 못했어요. 연결을 확인해 주세요')); x.send(v.file); });
+  let poster=null;
+  if(v.pblob){ const pp=`${me.id}/${Date.now()}-vp.jpg`; const { error }=await sb.storage.from('posts').upload(pp, v.pblob, { contentType:'image/jpeg', upsert:false }); if(!error) poster=sb.storage.from('posts').getPublicUrl(pp).data.publicUrl; }
+  return { url:sb.storage.from('videos').getPublicUrl(path).data.publicUrl, poster, dur:Math.round(v.dur*10)/10, w:v.w||null, h:v.h||null };
+}
+// 목록의 영상: 첫 장면 + ▶. 누르면 그 자리에서 재생(소리 꺼진 채 시작 — 소리는 재생 막대에서 켠다)
+function postVideoHtml(vd){ if(!vd || !VID_URL.test(String(vd.url||''))) return ''; const ps=/^https:\/\/api\.knitup\.co\.kr\/storage\/v1\/object\/public\/posts\/[A-Za-z0-9._\/-]+\.jpg$/.test(String(vd.poster||''))?vd.poster:'';
+  const ar=(vd.w>0 && vd.h>0)?Math.min(16/9, Math.max(3/4, vd.w/vd.h)):3/4;
+  return `<div class="pvid" data-v="${esc(vd.url)}" data-p="${esc(ps)}" style="aspect-ratio:${ar.toFixed(3)}${ps?`;background-image:url('${ps}')`:''}" onclick="event.stopPropagation();pvPlay(this)"><i class="pvplay"></i><em>${vidDur(vd.dur)}</em></div>`; }
+function pvPlay(el){ if(!el || el.querySelector('video')) return; const u=el.dataset.v; if(!VID_URL.test(u)) return;
+  document.querySelectorAll('.pvid video').forEach(o=>{ try{ o.pause(); }catch(e){} });
+  const v=document.createElement('video'); v.src=u; v.controls=true; v.muted=true; v.autoplay=true; v.loop=true; v.playsInline=true; v.setAttribute('playsinline',''); if(el.dataset.p) v.poster=el.dataset.p;
+  el.innerHTML=''; el.appendChild(v); v.play().catch(()=>{}); }
 async function pickPhotos(files, which){
   const arr = which==='s' ? sPhotos : cPhotos;
-  for(const f of [...files].slice(0, 4 - arr.length)){
+  for(const f of [...files].slice(0, Math.max(0, (which==='s' && sVideo ? 3 : 4) - arr.length))){
     try{ const blob = await shrinkImage(f, 1280); arr.push({ blob, url: URL.createObjectURL(blob) }); }
     catch(e){ toast(e.message||'사진을 불러오지 못했어요'); }
   }
@@ -4541,7 +4597,7 @@ async function pickPhotos(files, which){
 function renderPv(which){
   if(which==='s'){ renderCertPhotos(); renderClassPhotos(); renderShopNewsPhotos(); }
   const arr = which==='s' ? sPhotos : cPhotos, el = which==='s' ? $('#sPv') : $('#cPv'); if(!el) return;
-  el.innerHTML = arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">${ico('close')}</b></div>`).join('');
+  el.innerHTML = (which==='s' && sVideo ? `<div class="pvv"${sVideo.purl?` style="background-image:url(${sVideo.purl})"`:''}><i></i><em>${vidDur(sVideo.dur)}</em><b onclick="vidClear()">${ico('close')}</b></div>` : '') + arr.map((p,i)=>`<div style="background-image:url(${p.url})"><b onclick="${which==='s'?'sPhotos':'cPhotos'}.splice(${i},1);renderPv('${which||''}')">${ico('close')}</b></div>`).join('');
 }
 // ============ Phase 1 (2026-09-20 시안): ＋ 선택 팝업 · 완성작품 인증 페이지 · 모임 만들기 페이지 · 보조 화면 ============
 const SVG_CAL = '<i class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></i>';
@@ -5542,7 +5598,7 @@ async function openCompose(kind, meetupId){
   if(kind==='work') return openCert();
   if(kind==='meetup') return openMeetForm();
   if(kind==='shop') return openShopNewsForm();
-  sPhotos=[]; composeKind = kind||'post'; reviewMeetup=null; delete mentionMap.compose; editPostId=null;
+  sPhotos=[]; sVideo=null; composeKind = kind||'post'; reviewMeetup=null; delete mentionMap.compose; editPostId=null; { const vb=$('#sVidBtn'); if(vb) vb.hidden=(kind||'post')!=='post'; }
   if(kind==='review' && meetupId){ const { data:m } = await sb.from('meetups').select('id,title,place_name,starts_at').eq('id', meetupId).single(); reviewMeetup=m; }
   if(!['compose','cert','meetform','classform','shopform'].includes(view)) composeBack = view;
   $('#sAva').innerHTML = avatar(myProfile||{}); $('#sName').textContent = myProfile?.nickname||'';
@@ -5613,11 +5669,14 @@ async function submitCompose(){
       if(error) throw new Error(error.message.replace(/^.*?: /,''));
       sPhotos=[]; editPostId=null; toast('고쳤어요'); return editBackGo();
     } else {
-      if(!body && !sPhotos.length) throw new Error('내용이나 사진을 넣어 주세요');
-      const photos = await uploadPhotos(sPhotos);
-      const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos, mentions: mentionsFor('compose', body||'') });
-      if(error) throw new Error(error.message);
-      sPhotos=[]; toast('게시했어요'); maybeSupporterPrompt();
+      if(!body && !sPhotos.length && !sVideo) throw new Error('내용이나 사진을 넣어 주세요');
+      let video=null;
+      if(sVideo){ const hint=$('#sHint'), was=hint?hint.textContent:''; const prog=n=>{ if(hint) hint.textContent=`영상을 올리고 있어요 · ${n}%`; }; prog(0);
+        try{ video=await uploadVideo(sVideo, prog); } finally { if(hint) hint.textContent=was; } }
+      const photos = await uploadPhotos(sPhotos); if(video && video.poster) photos.unshift(video.poster);   // 첫 장면 사진을 맨 앞에(옛 앱에서는 이 사진이 보인다)
+      const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos, mentions: mentionsFor('compose', body||''), ...(video?{ video }:{}) });
+      if(error) throw new Error(error.message.replace(/^.*?: /,''));
+      sPhotos=[]; vidClear(); toast('게시했어요'); maybeSupporterPrompt();
     }
     composeBack=null; commFilter='all'; [...$('#commTabs').children].forEach(x=>x.classList.toggle('on',x.dataset.f==='all')); go('comm');
   }catch(e){ toast(e.message); $('#sPost').disabled=false; }
