@@ -668,6 +668,9 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 #fqpop .fqpair{display:flex;justify-content:center;align-items:center;margin-top:12px}#fqpop .fqpair .ava{width:70px;height:70px;border:4px solid #fff;font-size:1.5rem}#fqpop .fqpair b{width:32px;height:32px;border-radius:50%;background:var(--fb);color:#fff;display:grid;place-items:center;margin:0 -8px;z-index:2;font-size:1rem;border:3px solid var(--fy)}
 #fqpop .fqcf i{position:absolute;display:block;animation:fqcf 1.1s ease-out both}@keyframes fqcf{from{transform:translateY(-60px) rotate(0);opacity:0}30%{opacity:1}to{transform:translateY(0) rotate(200deg);opacity:1}}
 .fqbar{position:sticky;bottom:0;z-index:5;background:#FFD95C;color:#3B1D08;padding:12px 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.14);margin-top:8px}.fqbar>b{display:block;font-size:.9rem;margin-bottom:8px}.fqbar .fqtwo{display:flex;gap:8px}
+#v-room.cth{isolation:isolate}#ctSnow{position:sticky;top:0;height:0;flex:none;z-index:-1;pointer-events:none}#ctSnow>div{position:absolute;left:0;right:0;top:0;height:100vh;overflow:hidden}
+#ctSnow i{position:absolute;top:-8px;border-radius:50%;background:#fff;animation:ctfall linear infinite;will-change:transform}@keyframes ctfall{0%{transform:translate(0,0)}50%{transform:translate(14px,52vh)}100%{transform:translate(-6px,104vh)}}
+@media (prefers-reduced-motion:reduce){#ctSnow i{animation:none;top:var(--y)}}
 #v-room.cth .bub{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.10)}#v-room.cth .bub.ph{box-shadow:none}#v-room.cthd .bub.ph time{color:#C9D6E0}#v-room.cth .top{border-bottom-color:transparent}
 #v-room .kkbox textarea{flex:1;min-width:0;width:auto;display:block;border:0;border-radius:0;background:transparent;box-shadow:none;outline:0;resize:none;padding:8px 0;margin:0;font-family:inherit;font-size:16px;line-height:22px;height:38px;min-height:38px;max-height:104px;overflow-y:auto;color:inherit}
 html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app{height:var(--vvh)!important}html.vvk #v-room .compose.kk,body.kb #v-room .compose.kk{padding-bottom:8px}
@@ -3562,9 +3565,15 @@ let chatTheme=null, chatThemeAt=0;
 async function chatThemeLoad(){ if(Date.now()-chatThemeAt<30*60*1000) return; chatThemeAt=Date.now(); try{ const { data } = await sb.from('app_config').select('value').eq('key','chat_theme').maybeSingle(); chatTheme=data?.value||null; }catch(e){} chatThemeApply(); }
 function chatThemeApply(){ const v=$('#v-room'); if(!v) return; const t=chatTheme, now=Date.now();
   const ok = t && t.active && CT_IMG.test(String(t.img||'')) && (!t.from || now>=Date.parse(t.from)) && (!t.until || now<Date.parse(t.until));
-  if(!ok){ v.style.background=''; v.classList.remove('cth','cthd'); return; }
+  if(!ok){ v.style.background=''; v.classList.remove('cth','cthd'); $('#ctSnow')?.remove(); return; }
   const bg=/^#[0-9a-fA-F]{6}$/.test(String(t.bg||''))?t.bg:'transparent';
-  v.style.background=`${bg} url("${t.img}") right bottom / cover no-repeat`; v.classList.add('cth'); v.classList.toggle('cthd', !!t.dark); }
+  // 내리는 눈은 앱이 직접 그린다(2026-11-19: 그림 파일 안의 움직임이 기기에서 멈춰 눈이 보이지 않던 것). snow:true 이고 눈 없는 그림(img2)이 있으면 그것을 쓴다. 옛 앱은 img 를 그대로 씀
+  const own=!!t.snow && CT_IMG.test(String(t.img2||'')), img=own?t.img2:t.img;
+  v.style.background=`${bg} url("${img}") right bottom / cover no-repeat`; v.classList.add('cth'); v.classList.toggle('cthd', !!t.dark);
+  if(!own){ $('#ctSnow')?.remove(); return; }
+  if(!$('#ctSnow')){ const w=document.createElement('div'); w.id='ctSnow'; w.setAttribute('aria-hidden','true'); const r=(a,b)=>a+Math.random()*(b-a);
+    w.innerHTML='<div>'+Array.from({length:40},()=>{ const z=r(2,3.6).toFixed(1), d=r(26,56).toFixed(1); return `<i style="left:${r(0,100).toFixed(1)}%;width:${z}px;height:${z}px;opacity:${r(.4,.78).toFixed(2)};animation-duration:${d}s;animation-delay:-${r(0,+d).toFixed(1)}s;--y:${r(2,92).toFixed(0)}vh"></i>`; }).join('')+'</div>';
+    v.insertBefore(w, v.firstChild); } }
 async function openRoom(id){
   chatThemeApply(); chatThemeLoad();
   if(['comm','my','profile','map','chats','post'].includes(view)) roomBack=view;
