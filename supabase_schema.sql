@@ -2171,3 +2171,11 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   트리거 works_feature_on_approve: 확인 대기 → 승인되는 순간 featured_at 을 적고 회원에게 알림('오늘의 완성작품에 올랐어요'). 같은 회원은 7일에 한 번, 하루 12건까지(넘으면 다음 날 0시)
 --   start_works(): 승인한 날 + 다음 날의 작품 묶음(3건이 안 되면 최근 7일에서 채움) · admin_work_feature(인증, 켬/끔): 승인 전에 콘솔이 부름
 -- ============================================================
+
+-- ============================================================
+-- 147. 완성작품 인증 판단 기록 (2026-11-19 대표 지시: 직접 보고 적은 내용을 데이터로 → 나중에 자동 집행, 마이그레이션 work_reviews — 원본 supabase/work_reviews.sql)
+--   work_reviews: 승인·보완 요청·반려 한 번마다 한 줄(그때의 인증 모습 snapshot · 나간 글 note · 대표 원문 raw_note · 고른 사유 reason · AI 다듬기 ai_used · 몇 번째 판단 round). 회원·관리자 직접 접근 없음
+--   admin_work_review: 인자 그대로, 끝에 기록 한 줄 + 결과에 review(기록 번호) / admin_work_review_meta(p_review, p_meta): 콘솔이 원문·사유를 덧붙임
+--   _work_review_snap(p_work): 기법·단계·사진 수·기법 표시 수·이야기 길이·회원 단계 등(회원이 쓴 긴 글은 길이만). 옛 판단은 admin_logs 에서 옮김(source=backfill, 모습은 옮긴 날 기준)
+--   콘솔 › 인증 확인: [AI로 다듬기](jigi 의 cert_polish) — 대표가 적은 메모를 회원에게 보낼 글로. 보내는 것은 [보완 요청]·[반려] 버튼으로만
+-- ============================================================

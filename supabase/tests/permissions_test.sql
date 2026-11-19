@@ -106,6 +106,8 @@ begin
   out := pg_temp.must_fail(out, 'admin_broadcast_send', 'select public.admin_broadcast_send(''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'admin_yarn_update', 'select public.admin_yarn_update(''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'admin_yarn_overview', 'select public.admin_yarn_overview(365)');   -- schema 140
+  out := pg_temp.must_fail(out, 'admin_work_review_meta', 'select public.admin_work_review_meta(1, ''{}''::jsonb)');   -- schema 147
+  out := pg_temp.must_fail(out, 'work_reviews', 'select count(*) from public.work_reviews');   -- schema 147
   out := pg_temp.must_fail(out, 'admin_yarn_color_summary', 'select public.admin_yarn_color_summary()');   -- schema 141
   out := pg_temp.must_fail(out, 'yarn_ask_check', 'select public.yarn_ask_check(gen_random_uuid(), true)');   -- schema 143
   out := pg_temp.must_fail(out, 'yarn_ask_apply', $q$select public.yarn_ask_apply(1, '{}'::jsonb)$q$);   -- schema 143

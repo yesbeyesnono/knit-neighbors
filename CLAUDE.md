@@ -31,7 +31,7 @@
 - GitHub Pages(main `/docs`) → https://yesbeyesnono.github.io/knit-neighbors/ (웹 앱·콘솔 `…/admin.html`)
 - 홈페이지 https://app.knitup.co.kr = 저장소 `yesbeyesnono/knitup-home`. **홈페이지 수정·올리기는 이 세션에서만.** 법적 문서 5개의 원본은 이 저장소 `docs/` — 고쳐 푸시한 날 `gh workflow run sync-legal.yml -R yesbeyesnono/knitup-home` 후 `curl` 확인. 초대장·사용법: `author-invite.html` · `authors.html` · `shops.html` · `shop-guide.html`(주소 끝 `#이름`)
 - **회원 데이터 백업**: 비공개 저장소 `yesbeyesnono/knitup-backup` 의 Actions `daily-db-backup` 이 매일 03:30 KST 전체 사본(pg_dump)을 받아 30일 보관(대표 결정 2026-11-16). 열쇠 `SUPABASE_DB_URL`·`BACKUP_PASSPHRASE` 는 대표가 넣음. **사진 파일**은 같은 실행이 새로 올라온 것만 받아 Cloudflare R2 보관함 `knitup-backup`(대표 계정, 10GB 까지 무료)에 쌓는다(2026-11-17~, 회원 사진은 같은 암호로 잠금) — 그 저장소 README
-- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 146) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow, yarn-ask, friend-want)
+- 서버: Supabase `thfcrodfaitzrzlrxyir`(Pro, 서울, 주소 `https://api.knitup.co.kr`). 기록 `supabase_schema.sql`(절 번호 = 마이그레이션, 지금 147) · **구조 사본 `supabase/snapshot/`**(`tools/backup/snapshot.sql` → `make_snapshot.py`) · Edge Function 원본 `supabase/functions/`(jigi, jigi-remind, push-send, read-band, pattern-ai, juso-search, chat-scan, ddeuchin-check, dong-fix, report-flow, yarn-ask, friend-want)
 - 네이티브: Capacitor 8(`android/`, `ios/`), 로컬 플러그인 `plugins/capacitor-meta-events`. iOS 빌드 = Codemagic(`codemagic.yaml`: main 푸시 → `ios-public` → TestFlight / `lab-*` 태그 → `ios-lab`). Android = 이 PC 에서 `npx cap sync android` → `cd android && ./gradlew bundleRelease --no-daemon`(ANDROID_HOME=C:/Android/Sdk, R8 켬) → `.aab`
 - 에디션: 코드 하나, `docs/edition.js` 의 `KN_EDITION`(meet = 공개 앱, full = Lab). Lab 전용은 `FULL` 로 감싼다. 브랜치를 가르지 말 것
 
@@ -65,7 +65,7 @@
 - 콘솔에 새 화면을 만들면 `NAV` 와 aside 두 곳에. 기능을 끄는 스위치에 접속 기록 같은 공용 호출을 묶지 말 것
 - 큰 묶음과 그 안의 항목을 같은 칩 모양으로 나란히 두지 말 것 · 탭으로 내용이 바뀌는 창은 높이 고정 · 자판을 쓰는 입력 창은 자판에 가리는지 확인 · 전체 화면 위에 뜨는 창의 z-index 확인
 - 한 화면에 할 일 하나·큰 버튼 하나(촬영 흐름). 실은 하나씩만 담는다. `<datalist>` 금지
-- **완성작품 인증은 확인 뒤 게시**(2026-11-16 대표 확정, schema 133): 올리면 '확인 중'(본인만 보임, 개수·기법·자격 미반영) → 대표가 콘솔 › 인증 확인에서 [승인·게시]/[보완 요청]/[반려]. 하루 1개(테스트 계정 제외). 질문은 걸린 시간·**뜨기 노하우**(필수)·아쉬운 점(선택) — '떠 보니 어땠나요'는 넣지 않는다. 승인은 대표만(지기 AI 가 하지 않음)
+- **완성작품 인증은 확인 뒤 게시**(2026-11-16 대표 확정, schema 133): 올리면 '확인 중'(본인만 보임, 개수·기법·자격 미반영) → 대표가 콘솔 › 인증 확인에서 [승인·게시]/[보완 요청]/[반려]. 하루 1개(테스트 계정 제외). 질문은 걸린 시간·**뜨기 노하우**(필수)·아쉬운 점(선택) — '떠 보니 어땠나요'는 넣지 않는다. 승인은 대표만(지기 AI 가 하지 않음). **판단 기록(2026-11-19 대표, schema 147)**: 승인·보완·반려마다 `work_reviews` 에 그때의 인증 모습·나간 글·대표 원문·사유를 쌓는다(나중에 자동 집행의 재료). 콘솔의 [AI로 다듬기]는 글만 다듬고 보내는 것은 대표가 버튼으로
 - **실 정보 되묻기(2026-11-17 대표 지시, schema 143)**: 인증이 승인될 때 쓴 실이 사전에 없고 정보가 비면 지기 채팅으로 한 번 묻고(화면·문구는 바꾸지 않음), 답에서 AI 가 값만 읽어 사전의 '후보' 실에 채운다. 확정은 대표가 콘솔에서. 한 인증에 한 번·회원마다 7일에 한 번·되묻기 한 번. 스위치 `jigi_config.yarn_ask`(**지금 off — 대표가 "실 질문 시작해줘" 하면 켠다**)
 - 샘플 체험단 인증의 「샘플 제공」 표시는 빼지 말 것(표시광고법). 앱 어디에도 특정 업체 '제휴' 표시를 하지 않는다
 
