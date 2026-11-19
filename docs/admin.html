@@ -43,6 +43,20 @@ textarea{width:100%;min-height:90px}
 .panel{position:fixed;top:0;right:0;width:min(560px,100%);height:100vh;background:#fff;border-left:1px solid var(--line);box-shadow:-10px 0 30px rgba(0,0,0,.08);padding:20px 22px;overflow-y:auto;display:none;z-index:50}
 .panel.on{display:block}.panel .x{position:fixed;top:12px;right:18px;z-index:60;width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 #scrim{position:fixed;inset:0;background:rgba(0,0,0,.12);z-index:49;display:none}#scrim.on{display:block}
+/* 회원 창: 기법표(앱 '내 뜨개 단계'의 표를 기호·체크 없이, 칸 너비 74) · 프로필 보기 — 시안 console_member_tech_v6 · console_member_profile_v1 */
+.utbh{display:flex;align-items:center;gap:8px;margin:14px 0 2px;font-size:14.5px;font-weight:700}.utbh i{font-style:normal;font-size:12px;color:#fff;background:var(--color-primary);border-radius:999px;padding:2px 9px}.utbh span{font-weight:400;color:var(--ink2);font-size:12.5px}
+.utbwrap{overflow-x:auto;padding:10px 0 6px}.utb{position:relative}.utb svg{position:absolute;left:0;top:0;pointer-events:none}
+.utb .h{position:absolute;top:0;text-align:center;font-size:11px;line-height:1.15;font-weight:700;padding:4px 0;border-radius:9px;background:var(--bg2);color:var(--ink2)}.utb .h.done{background:var(--color-primary);color:#fff}.utb .h span{display:block;font-weight:500;opacity:.8}
+.utb .n{position:absolute;display:flex;align-items:center;justify-content:center;padding:0 6px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:11.5px;font-weight:600;line-height:1.12;text-align:center;word-break:keep-all}
+.utb .n.done{background:var(--color-primary);border-color:var(--color-primary);color:#fff}.utb .n.ready{border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(0,0,0,.08)}.utb .n.far{opacity:.5}
+.utb .n .vb{position:absolute;top:-8px;right:6px;font-size:10px;background:var(--color-primary-dark);color:#fff;padding:1px 6px;border-radius:999px}
+.upgo{font-size:12.5px;font-weight:600;color:var(--color-primary);border:1px solid var(--color-primary-light);background:#F4F8F1;border-radius:999px;padding:3px 10px}
+.upvback{display:inline-block;font-size:13.5px;color:var(--color-primary);font-weight:600;margin-bottom:10px;cursor:pointer}
+.upvpf{text-align:center;padding:6px 0 14px;border-bottom:1px solid var(--line)}.upvpf .av{width:84px;height:84px;border-radius:50%;object-fit:cover;border:1px solid var(--line);background:var(--chip);display:inline-grid;place-items:center;font-size:28px}.upvpf .nm{font-size:19px;font-weight:700;margin-top:6px}.upvpf .bio{font-size:14px;margin-top:6px;white-space:pre-wrap}
+.upvcnt{display:flex;justify-content:center;gap:26px;margin-top:12px;font-size:13px;color:var(--ink2)}.upvcnt b{display:block;font-size:17px;color:var(--ink)}
+.upvtabs{display:flex;gap:6px;margin:14px 0 12px;flex-wrap:wrap}.upvtabs button{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13.5px;min-height:0;flex:none}.upvtabs button.on{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+.upvpost{border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:8px;display:flex;gap:11px;font-size:13.5px;line-height:1.5;cursor:pointer}.upvpost img{width:58px;height:58px;border-radius:8px;object-fit:cover;flex:none}.upvpost .m{color:var(--ink3);font-size:12px;margin-top:3px}.upvpost .b{min-width:0;overflow-wrap:anywhere}
+.upvgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.upvw{aspect-ratio:1;border-radius:10px;position:relative;overflow:hidden;background:var(--bg2);cursor:pointer}.upvw img{width:100%;height:100%;object-fit:cover;display:block}.upvw i{position:absolute;left:6px;bottom:6px;right:6px;font-style:normal;font-size:11px;color:#fff;background:rgba(0,0,0,.5);padding:2px 7px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:fit-content;max-width:calc(100% - 12px)}.upvw em{position:absolute;right:6px;top:6px;font-style:normal;font-size:11px;font-weight:700;color:#7A5A00;background:#FFE9A3;padding:2px 7px;border-radius:999px}
 .ph{display:flex;gap:6px;flex-wrap:wrap}.ph img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 .bar{display:flex;align-items:flex-end;gap:2px;height:80px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px}
 .bar i{flex:1;background:var(--olive);border-radius:2px 2px 0 0;min-height:1px;position:relative}
@@ -335,7 +349,7 @@ async function init(){
   const { data:ok, error } = await sb.rpc('is_admin');
   if(error||!ok){ $('#gateMsg').textContent='이 계정('+me.email+')은 관리자가 아니에요. 설정에서 관리자로 등록된 계정으로 로그인하세요.'; $('#gateBtn').style.display='none'; return; }
   $('#gate').style.display='none'; $('#app').style.display='grid'; $('#who').textContent=me.email;
-  const { data:t } = await sb.from('techniques').select('id,name_ko,craft,level'); (t||[]).forEach(x=>TECH[x.id]=x);
+  const { data:t } = await sb.from('techniques').select('id,name_ko,craft,level,prereq,sort,hidden,extra'); (t||[]).forEach(x=>TECH[x.id]=x);
   refreshBadges(); route();
 }
 sb.auth.onAuthStateChange((ev)=>{ if(ev==='SIGNED_IN' && !me) init(); });
@@ -688,20 +702,25 @@ async function memDongSearch(id){
 function memDongPick(id, i){ const c=mbDongCands[i]; if(!c) return; const sp=c.sgg.split(' '); const code=[sp[0], sp.slice(1).join(' '), c.dong].filter(Boolean).join('|'); if(!confirm(`동네를 「${c.dong}」(${c.sgg})(으)로 바꾸고 지도 핀을 그 동네 가운데로 옮겨요. 계속할까요?`)) return; memEdit(id,'dong',{dong_name:c.dong,dong_code:code,lat:c.lat,lng:c.lng}, !!$('#mbDongNotify')?.checked); }
 async function upAuthorClasses(id){ const el=$('#upAuthorCls'); if(!el) return; const {data}=await sb.from('shop_posts').select('id,title,created_at,hidden,extra').eq('author_id',id).eq('kind','class').order('created_at',{ascending:false}).limit(10); if(!$('#upAuthorCls')) return; el.innerHTML=(data||[]).length?'연 클래스 '+data.length+'개: '+data.map(c=>esc(c.title||'(제목 없음)')+(c.extra?.starts_at?' ('+fmtd(c.extra.starts_at)+')':'')+(c.hidden?' · 숨김':'')).join(' / '):'연 클래스 없음'; }
 async function openUserPanel(id){
-  const [{data:p},{data:posts},{data:works},{data:reps},{data:ev},{data:adm},{data:mlog}] = await Promise.all([
+  const [{data:p},{data:posts},{data:works},{data:reps},{data:ev},{data:adm},{data:mlog},{data:frs}] = await Promise.all([
     sb.from('profiles').select('*').eq('id',id).single(),
-    sb.from('posts').select('id,body,parent_id,hidden,created_at,like_count,reply_count').eq('author_id',id).order('created_at',{ascending:false}).limit(30),
-    sb.from('works').select('id,title,photos,techniques,custom_techniques,yarn_info,created_at').eq('profile_id',id).order('created_at',{ascending:false}),
+    sb.from('posts').select('id,body,photos,parent_id,hidden,created_at,like_count,reply_count').eq('author_id',id).order('created_at',{ascending:false}).limit(100),
+    sb.from('works').select('id,title,photos,techniques,custom_techniques,yarn_info,created_at,review_status').eq('profile_id',id).order('created_at',{ascending:false}),
     sb.from('reports').select('reason,detail,created_at,reviewed_at,reporter:profiles!reports_reporter_id_fkey(nickname)').eq('reported_id',id).order('created_at',{ascending:false}),
     sb.from('skill_events').select('kind,technique_id,craft,level,source,created_at').eq('profile_id',id).order('created_at',{ascending:false}).limit(60),
     sb.from('admins').select('profile_id').eq('profile_id',id),
-    sb.from('admin_logs').select('action,detail,created_at').eq('target_id',id).order('created_at',{ascending:false}).limit(8)
+    sb.from('admin_logs').select('action,detail,created_at').eq('target_id',id).order('created_at',{ascending:false}).limit(8),
+    sb.from('friendships').select('requester_id,status,created_at,responded_at').or(`requester_id.eq.${id},addressee_id.eq.${id}`).limit(500)
   ]);
   if(!p) return toast('사용자를 찾을 수 없어요');
   const isAdm=!!(adm&&adm.length);
-  openPanel(`<h2 style="margin-top:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap">${p.avatar_url&&/^https:\/\//.test(p.avatar_url)?`<img src="${esc(p.avatar_url)}" alt="" referrerpolicy="no-referrer" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:1px solid var(--line)" onerror="this.remove()">`:`<span style="width:56px;height:56px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-size:20px">${esc((p.nickname||'?').slice(0,1))}</span>`}<span>${esc(p.nickname)} ${p.is_author?'<span class="chip" style="background:#FFF3C4;color:#7A5A00">작가</span>':''} ${p.suspended_at?'<span class="chip r">정지 중</span>':''} ${isAdm?'<span class="chip">관리자</span>':''}</span></h2>${p.is_author?`<div id="upAuthor" class="card" style="margin:8px 0;font-size:13.5px"><b>작가 프로필</b><div class="muted" style="margin-top:4px">승인 ${p.author_since?fmtd(p.author_since):'-'} · 프로필 사진 ${p.avatar_url?'있음':'<b style="color:var(--red)">없음</b>'} · 소개 ${p.bio?'있음':'<b style="color:var(--red)">없음</b>'} · 지도 핀 ${p.is_visible&&p.location?'보임':'<b style="color:var(--red)">안 보임</b>'}</div><div style="margin-top:6px">작가 링크: ${p.author_link?`<a href="${esc(p.author_link)}" target="_blank" rel="noopener noreferrer">${esc(p.author_link.replace(/^https?:\/\//,'').slice(0,60))}</a>`:'<span class="muted">아직 안 넣음</span>'}</div><div id="upAuthorCls" class="muted" style="margin-top:6px">연 클래스 불러오는 중…</div></div>`:''}
+  UPV={id,p,posts:posts||[],works:works||[],friends:frs?frs.filter(f=>f.status==='accepted').length:'-',tab:'post'};
+  const acts=userActs(id, posts||[], works||[], ev||[], frs||[]);
+  openPanel(`<h2 style="margin-top:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer" title="프로필 보기" onclick="userProfileView()">${p.avatar_url&&/^https:\/\//.test(p.avatar_url)?`<img src="${esc(p.avatar_url)}" alt="" referrerpolicy="no-referrer" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:1px solid var(--line)" onerror="this.remove()">`:`<span style="width:56px;height:56px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-size:20px">${esc((p.nickname||'?').slice(0,1))}</span>`}<span>${esc(p.nickname)} ${p.is_author?'<span class="chip" style="background:#FFF3C4;color:#7A5A00">작가</span>':''} ${p.suspended_at?'<span class="chip r">정지 중</span>':''} ${isAdm?'<span class="chip">관리자</span>':''}</span><span class="upgo">프로필 보기 ›</span></h2>${p.is_author?`<div id="upAuthor" class="card" style="margin:8px 0;font-size:13.5px"><b>작가 프로필</b><div class="muted" style="margin-top:4px">승인 ${p.author_since?fmtd(p.author_since):'-'} · 프로필 사진 ${p.avatar_url?'있음':'<b style="color:var(--red)">없음</b>'} · 소개 ${p.bio?'있음':'<b style="color:var(--red)">없음</b>'} · 지도 핀 ${p.is_visible&&p.location?'보임':'<b style="color:var(--red)">안 보임</b>'}</div><div style="margin-top:6px">작가 링크: ${p.author_link?`<a href="${esc(p.author_link)}" target="_blank" rel="noopener noreferrer">${esc(p.author_link.replace(/^https?:\/\//,'').slice(0,60))}</a>`:'<span class="muted">아직 안 넣음</span>'}</div><div id="upAuthorCls" class="muted" style="margin-top:6px">연 클래스 불러오는 중…</div></div>`:''}
     <div class="muted">${MEMROWS[id]?.email?esc(MEMROWS[id].email)+' · ':''}${esc(p.dong_name||'동네 미설정')} · ${lv(p)||'단계 없음'} · 가입 ${fmtd(p.created_at)} · 인증 ${p.cert_count||0} · Lv.${p.act_level||0} · MBTI ${esc(p.mbti||'-')}</div>
     <p style="white-space:pre-wrap">${esc(p.bio||'')}${p.now_making?'\n지금 뜨는 것: '+esc(p.now_making):''}${p.stuck_on?'\n막히는 부분: '+esc(p.stuck_on):''}</p>
+    <div class="mblab">최근 활동</div>
+    <div class="muted" style="font-size:13px;margin-bottom:4px">마지막 접속 <b style="color:var(--ink)">${p.last_seen_at?fmt(p.last_seen_at):'기록 없음'}</b></div>${acts.map(a=>`<div class="muted" style="font-size:13px;padding:2px 0">${fmt(a.t)} · <span style="color:var(--ink)">${a.h}</span></div>`).join('')||'<div class="muted">아직 활동이 없어요</div>'}
     <div class="mblab">정보 고치기</div>
     <div class="mbrows"><div class="mbr"><span>동네</span><b>${esc(p.dong_name||'미설정')}${p.location?'':' <span class="chip y">지도 핀 없음</span>'}</b><a onclick="memDongOpen('${id}')">바꾸기</a></div>
       <div class="mbr"><span>지도 공개</span><b>${p.is_visible===false?'꺼짐':'켜짐'}</b><a onclick="memVisible('${id}',${p.is_visible===false})">${p.is_visible===false?'켜기':'끄기'}</a></div>
@@ -711,12 +730,61 @@ async function openUserPanel(id){
     <div class="mbacts"><button data-n="${esc(p.nickname||'')}" onclick="talkWith('${id}', this.dataset.n)" style="background:var(--color-primary,#3E6B48);color:#fff;border-color:transparent">대화하기</button><button onclick="broadcastTo('${id}','${esc(p.nickname)}')">알림 보내기</button><button onclick="suspendUser('${id}',${!p.suspended_at})">${p.suspended_at?'정지 해제':'정지'}</button>${isAdm?'<button disabled>계정 삭제</button>':`<button class="r" onclick="deleteUser('${id}','${esc(p.nickname)}')">계정 삭제</button>`}</div>
     <div class="muted"><a href="#" onclick="event.preventDefault();setAdmin('${id}',${!isAdm})">${isAdm?'관리자 해제':'관리자로 지정'}</a></div>
     <div class="mblab">관리 기록</div>${(mlog||[]).map(l=>`<div class="muted">${fmt(l.created_at)} · ${esc(({member_edit:'정보 고침',suspend_user:'정지',unsuspend_user:'정지 해제',broadcast:'알림 보냄',set_admin:'관리자 지정'})[l.action]||l.action)}${l.detail?.action?' ('+esc(({dong:'동네',visible:'지도 공개',clear_nick:'닉네임',clear_bio:'소개'})[l.detail.action]||l.detail.action)+(l.detail.to!=null?' → '+esc(String(l.detail.to)):'')+')':''}</div>`).join('')||'<div class="muted">아직 없어요</div>'}
-    <h2>기법 (${(p.skills||[]).length}) · 인증된 기법 (${(p.verified_skills||[]).length})</h2><div>${(p.skills||[]).map(t=>`<span class="chip ${(p.verified_skills||[]).includes(t)?'y':''}">${esc(TECH[t]?.name_ko||t)}</span>`).join('')||'<span class="muted">없음</span>'}</div>
+    <h2>기법 (${(p.skills||[]).length}) · 인증된 기법 (${(p.verified_skills||[]).length})</h2>${userTechBoard('crochet','코바늘',p)}${userTechBoard('knitting','대바늘',p)}
     <h2>받은 신고 ${(reps||[]).length}</h2>${(reps||[]).map(r=>`<div class="muted">${esc(r.reporter?.nickname)} · ${esc(r.reason)} ${r.detail?'· '+esc(r.detail):''} · ${fmt(r.created_at)} ${r.reviewed_at?'· 처리됨':''}</div>`).join('')||'<div class="muted">없음</div>'}
     <h2>완성작품 인증 ${(works||[]).length}</h2>${(works||[]).map(w=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><b>${esc(w.title)}</b> <span class="muted">${fmtd(w.created_at)} · ${esc(w.yarn_info||'')}</span><div class="ph" style="margin:4px 0">${(w.photos||[]).slice(0,4).map(u=>`<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" style="width:64px;height:64px"></a>`).join('')}</div><div>${(w.techniques||[]).map(t=>`<span class="chip">${esc(TECH[t]?.name_ko||t)}</span>`).join('')}${(w.custom_techniques||[]).map(t=>`<span class="chip y">${esc(t)}</span>`).join('')}</div></div>`).join('')}
-    <h2>글·댓글 ${(posts||[]).length}</h2>${(posts||[]).map(x=>`<div style="padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer" onclick="openPostPanel('${x.parent_id||x.id}')">${x.parent_id?'<span class="chip">댓글</span>':''}${x.hidden?'<span class="chip y">숨김</span>':''}${esc((x.body||'').slice(0,100))||'<span class="muted">(사진)</span>'} <span class="muted">${fmt(x.created_at)}</span></div>`).join('')}
-    <h2>기법 체크 이력</h2>${(ev||[]).map(e=>`<div class="muted">${fmt(e.created_at)} · ${e.kind==='level'?`${e.craft==='crochet'?'코바늘':'대바늘'} → ${e.level}단계`:`${e.kind==='add'?'체크':'해제'} ${esc(TECH[e.technique_id]?.name_ko||e.technique_id)}`} (${e.source})</div>`).join('')||'<div class="muted">없음</div>'}`);
+    <h2>글·댓글 ${(posts||[]).length}</h2>${(posts||[]).map(x=>`<div style="padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer" onclick="openPostPanel('${x.parent_id||x.id}')">${x.parent_id?'<span class="chip">댓글</span>':''}${x.hidden?'<span class="chip y">숨김</span>':''}${esc((x.body||'').slice(0,100))||'<span class="muted">(사진)</span>'} <span class="muted">${fmt(x.created_at)}</span></div>`).join('')}`);
   if(p.is_author) upAuthorClasses(id);
+}
+// ---- 회원 창의 기법표(2026-11-20 대표 확정 시안 console_member_tech_v6): 앱 techBoard 와 같은 배치·연결선, 기호·체크 없이 이름만(가운데, 두 줄). 보기 전용
+function userTechBoard(craft, label, p){
+  const done=new Set(p.skills||[]), ver=new Set(p.verified_skills||[]);
+  const list=Object.values(TECH).filter(t=>t.craft===craft&&!t.hidden).sort((a,b)=>(a.sort||0)-(b.sort||0)); if(!list.length) return '';
+  const colW=74, gapX=34, rowH=54, headH=40, nodeH=44, cols={}; list.forEach(t=>{ (cols[t.level] ||= []).push(t); });
+  const maxN=Math.max(1,...Object.values(cols).map(a=>a.length)), H=headH+maxN*rowH+8, W=5*(colW+gapX)-gapX, pos={}, byId={}; list.forEach(t=>byId[t.id]=t);
+  const cls=t=>done.has(t.id)?'done':(t.prereq||[]).every(q=>done.has(q))?'ready':'far';
+  const nm=n=>esc(n).replace(/·/g,'·<wbr>').replace(/^([^ ]{4,})(뜨기)$/,'$1<wbr>$2');
+  let heads='', nodes='', svg=`<svg width="${W}" height="${H}">`;
+  for(let L=1;L<=5;L++){ const arr=cols[L]||[], y0=headH+(maxN-arr.length)*rowH/2; arr.forEach((t,i)=>{ pos[t.id]={x:(L-1)*(colW+gapX),y:y0+i*rowH}; });
+    const tot=arr.filter(t=>!t.extra).length, dn=Math.min(tot,arr.filter(t=>done.has(t.id)).length);
+    heads+=`<div class="h ${tot>0&&dn*2>=tot?'done':''}" style="left:${(L-1)*(colW+gapX)}px;width:${colW}px">${L}단계 ${['','입문','초급','중급','상급','전문'][L]}<span>${dn}/${tot}</span></div>`; }
+  list.forEach(t=>(t.prereq||[]).forEach(q=>{ const a=pos[q], b=pos[t.id]; if(!a||!b) return; const x1=a.x+colW,y1=a.y+nodeH/2,x2=b.x,y2=b.y+nodeH/2,mx=(x1+x2)/2;
+    const cq=byId[q]?cls(byId[q]):'far', ct=cls(t), hot=cq==='done'&&ct==='done', warm=!hot&&cq!=='far'&&ct!=='far';
+    svg+=`<path d="M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" fill="none" stroke="${hot||warm?'var(--ink)':'var(--line)'}" stroke-width="${hot?2.2:1.1}" ${warm?'stroke-dasharray="4 4"':''}/>`; }));
+  list.forEach(t=>{ const q=pos[t.id]; nodes+=`<div class="n ${cls(t)}" style="left:${q.x}px;top:${q.y}px;width:${colW}px;height:${nodeH}px"><span>${nm(t.name_ko)}</span>${ver.has(t.id)?'<span class="vb">인증</span>':''}</div>`; });
+  const lvl=craft==='crochet'?p.level_crochet:p.level_knit;
+  return `<div class="utbh">${label} ${lvl>0?`<i>${lvl}단계</i>`:''}<span>체크 ${list.filter(t=>done.has(t.id)).length} · 인증 ${list.filter(t=>ver.has(t.id)).length}</span></div><div class="utbwrap"><div class="utb" style="width:${W}px;height:${H}px">${svg}</svg>${heads}${nodes}</div></div>`;
+}
+// ---- 프로필 보기(2026-11-20 대표 확정 시안 console_member_profile_v1): 회원 창 맨 위 사진·이름을 누르면. 글·완성작품·댓글을 탭으로, 누르면 지금의 글 창·인증 창
+// 회원 창 '최근 활동' 5건(2026-11-20 대표: 기법 체크 이력은 기록만 하고 화면에는 최근에 무엇을 했는지만) — 글·댓글·완성작품 인증·기법 체크(하루치를 한 줄로)·뜨친
+function userActs(id, posts, works, ev, frs){
+  const a=[], cut=x=>esc(String(x||'').replace(/\s+/g,' ').slice(0,30));
+  posts.forEach(x=>a.push({t:x.created_at, h:(x.parent_id?'댓글 씀':'글 올림')+(x.body?` — ${cut(x.body)}`:'')}));
+  works.forEach(w=>a.push({t:w.created_at, h:`완성작품 인증 올림 — ${cut(w.title)}`}));
+  const days={}; ev.filter(e=>e.kind!=='level').forEach(e=>{ const d=new Date(e.created_at).toDateString(); (days[d] ||= {t:e.created_at,n:0}).n++; }); Object.values(days).forEach(d=>a.push({t:d.t, h:`기법 체크 ${d.n}개 바꿈`}));
+  frs.forEach(f=>{ if(f.requester_id===id) a.push({t:f.created_at, h:'뜨친 신청 보냄'}); if(f.status==='accepted'&&f.responded_at) a.push({t:f.responded_at, h:f.requester_id===id?'뜨친이 됨(상대가 수락)':'뜨친 신청 수락'}); });
+  return a.filter(x=>x.t).sort((x,y)=>new Date(y.t)-new Date(x.t)).slice(0,5);
+}
+let UPV=null;
+function userProfileView(){
+  const u=UPV; if(!u) return; const p=u.p;
+  const n={post:u.posts.filter(x=>!x.parent_id).length, work:u.works.length, reply:u.posts.filter(x=>x.parent_id).length};
+  const av=p.avatar_url&&/^https:\/\//.test(p.avatar_url)?`<img class="av" src="${esc(p.avatar_url)}" alt="" referrerpolicy="no-referrer">`:`<span class="av">${esc((p.nickname||'?').slice(0,1))}</span>`;
+  openPanel(`<a class="upvback" onclick="openUserPanel('${u.id}')">‹ 관리 화면으로</a>
+    <div class="upvpf">${av}<div class="nm">${esc(p.nickname||'')} ${p.is_author?'<span class="chip" style="background:#FFF3C4;color:#7A5A00">작가</span>':''}${p.suspended_at?'<span class="chip r">정지 중</span>':''}</div>
+      <div class="muted" style="font-size:13px">${[esc(p.dong_name||'동네 미설정'), p.level_crochet>0?`코바늘 ${p.level_crochet}단계`:'', p.level_knit>0?`대바늘 ${p.level_knit}단계`:'', esc(p.mbti||'')].filter(Boolean).join(' · ')}</div>
+      ${p.bio?`<div class="bio">${esc(p.bio)}</div>`:''}${p.now_making?`<div class="muted" style="margin-top:4px;font-size:13px">지금 뜨는 것: ${esc(p.now_making)}</div>`:''}
+      <div class="upvcnt"><span><b>${n.post}</b>글</span><span><b>${n.work}</b>완성작품</span><span><b>${n.reply}</b>댓글</span><span><b>${u.friends}</b>뜨친</span></div></div>
+    <div class="upvtabs">${[['post','글'],['work','완성작품'],['reply','댓글']].map(([k,l])=>`<button data-k="${k}" onclick="upvTab('${k}')">${l} ${n[k]}</button>`).join('')}</div>
+    <div id="upvList" style="min-height:320px"></div>`);
+  upvTab(u.tab);
+}
+function upvTab(k){
+  const u=UPV, box=$('#upvList'); if(!u||!box) return; u.tab=k; document.querySelectorAll('.upvtabs button').forEach(b=>b.classList.toggle('on', b.dataset.k===k));
+  const none='<div class="muted" style="padding:20px 0;text-align:center">없어요</div>';
+  if(k==='work'){ box.innerHTML = u.works.length?`<div class="upvgrid">${u.works.map(w=>{ const ph=(w.photos||[])[0]; return `<div class="upvw" onclick="openWorkPanel('${w.id}')">${ph&&/^https:\/\//.test(ph)?`<img src="${esc(ph)}" alt="" loading="lazy">`:''}${w.review_status==='pending'?'<em>확인 중</em>':w.review_status==='fix'?'<em>보완 중</em>':w.review_status&&w.review_status!=='approved'?`<em>${esc(w.review_status)}</em>`:''}<i>${esc(w.title||'(제목 없음)')}</i></div>`; }).join('')}</div>`:none; return; }
+  const list=u.posts.filter(x=>k==='reply'?x.parent_id:!x.parent_id);
+  box.innerHTML = list.length?list.map(x=>{ const ph=(x.photos||[])[0]; return `<div class="upvpost" onclick="openPostPanel('${x.parent_id||x.id}')">${ph&&/^https:\/\//.test(ph)?`<img src="${esc(ph)}" alt="" loading="lazy">`:''}<div class="b">${x.hidden?'<span class="chip y">숨김</span>':''}${esc((x.body||'').slice(0,140))||'<span class="muted">(사진)</span>'}<div class="m">${fmt(x.created_at)}${k==='reply'?'':` · 좋아요 ${x.like_count||0} · 댓글 ${x.reply_count||0}`}</div></div></div>`; }).join(''):none;
 }
 async function setAdmin(id, add){ if(!confirm(add?'이 사용자를 관리자로 지정할까요? 모든 데이터를 보고 처리할 수 있게 돼요.':'관리자 권한을 해제할까요?')) return; const {error}=await sb.rpc('admin_set_admin',{p_user:id,p_add:add}); if(error) return toast(error.message); toast(add?'관리자로 지정했어요':'해제했어요'); openUserPanel(id); }
 // ===== 지기 문의함 =====
