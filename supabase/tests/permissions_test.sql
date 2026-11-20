@@ -224,6 +224,7 @@ begin
   out := pg_temp.must_fail(out, 'delete_my_shop(not owner)', format('select public.delete_my_shop((select id from public.shops where owner_id is distinct from %L limit 1))', d1));
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
   out := pg_temp.must_fail(out, 'jigi_on_shop_claim', 'select public.jigi_on_shop_claim()');
+  out := pg_temp.must_fail(out, 'friend_request_cleanup', 'select public.friend_request_cleanup()');   -- schema 160
   out := pg_temp.must_fail(out, 'yarn_add_alias', 'select public.yarn_add_alias(gen_random_uuid(), ''x'')');
   out := pg_temp.must_fail(out, 'work_sources (member direct)', 'select count(*) from public.work_sources');   -- schema 157
   out := pg_temp.must_fail(out, 'admin_source_list', 'select public.admin_source_list()');
