@@ -2247,3 +2247,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   work_source_search 는 합쳐진 다른 표기로 쳐도 합친 쪽이 나옴 · admin_source_list 에 ai_sim · ai_merged · admin_source_decide 에 unmerge(되돌리기)
 --   스위치 jigi_config.source_ai (on)
 -- ============================================================
+
+-- ============================================================
+-- 160. 보낸 뜨친 신청 취소 (2026-11-20 대표 확정 시안 friend_cancel_v1, 마이그레이션 friend_cancel — 원본 supabase/friend_cancel.sql)
+--   취소는 원래 정책 friendships_delete_own_request 로 됨(앱에 버튼이 없었음). 트리거 friendships_cancel_cleanup → friend_request_cleanup(): pending 줄이 지워지면 상대에게 갔던 friend_request 알림을 함께 지움
+-- ============================================================

@@ -592,6 +592,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .bub time{display:none}
 .bub .muted{color:inherit;opacity:.7}
 .compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 12px;align-items:center}
+.frcx{display:block;margin:10px auto 0;border:0;background:none;font:inherit;font-size:.82rem;font-weight:700;color:var(--color-text-muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;width:auto;padding:4px 8px}.pbtns:has(.frcx){flex-wrap:wrap}.pbtns .frcx{flex:0 0 100%;margin-top:4px}
 .compose{padding-bottom:max(10px,env(safe-area-inset-bottom,0px))}html.vvk .compose,body.kb .compose{padding-bottom:10px}
 #v-post #postBody{background:var(--color-surface);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}#postBody .post.dpost{border-bottom:0}
 .dthread{margin:0 13px 0 61px;padding:2px 0 10px;border-bottom:1px solid var(--line2)}.dthread .dempty{color:var(--ink3);font-size:14px;padding:10px 0 2px}
@@ -2926,7 +2927,7 @@ async function openProfile(id, back, own){
   if(staff) action = `<button class="btn primary" onclick="openSupportRoom()">지기에게 말하기</button>`;
   else if(!r) action = `<button class="btn primary" onclick="requestFriend('${id}')">친구 신청</button>`;
   else if(r.status==='accepted') action = `<button class="btn primary" onclick="openDirectRoom('${id}')">메시지</button>`;
-  else if(r.status==='pending' && r.requester_id===me.id) action = `<button class="btn o" disabled>친구 신청 보냄 · 수락을 기다려요</button>`;
+  else if(r.status==='pending' && r.requester_id===me.id) action = `<button class="btn o" disabled>친구 신청 보냄 · 수락을 기다려요</button><button type="button" class="frcx" data-n="${esc(p.nickname||'')}" onclick="friendCancel('${id}',this.dataset.n)">신청 취소</button>`;
   else if(r.status==='pending') action = '';   // 받은 신청: 화면 아래 노란 띠(.fqbar)에서 수락
   else if(r.status==='blocked') action = `<button class="btn o" disabled>차단됨</button>`;
   else action = `<button class="btn o" disabled>거절됨 · 30일 후 재신청</button>`;
@@ -3108,6 +3109,15 @@ async function fetchFriendships(){
   const { data } = await sb.from('friendships').select('*, requester:profiles!friendships_requester_id_fkey(id,nickname,avatar_url,dong_name,craft,now_making,level_crochet,level_knit,wave_until), addressee:profiles!friendships_addressee_id_fkey(id,nickname,avatar_url,dong_name,craft,now_making,level_crochet,level_knit,wave_until)').or(`requester_id.eq.${me.id},addressee_id.eq.${me.id}`).neq('status','blocked').order('created_at',{ascending:false});
   return data||[];
 }
+// 보낸 신청 취소: 내가 보낸 pending 줄을 지운다(정책 friendships_delete_own_request). 상대에게 갔던 신청 알림은 서버가 함께 지움(schema 160)
+async function friendCancel(id, nick){
+  if(!await askOk(`${nick?nick+' 님에게 보낸 ':''}뜨친 신청을 취소할까요?`, '신청 취소', '닫기')) return;
+  const { data, error } = await sb.from('friendships').delete().eq('requester_id', me.id).eq('addressee_id', id).eq('status','pending').select('addressee_id');
+  if(error) return toast(error.message.replace(/^.*?: /,''));
+  toast(data && data.length ? '신청을 취소했어요' : '이미 처리된 신청이에요');
+  if(view==='friends') renderFriends(); else if(view==='profile' && profId===id) openProfile(id, true);
+  if(typeof loadFriendRec==='function') loadFriendRec();
+}
 let friendTab = 'friends';
 async function renderFriends(){
   const rows = await fetchFriendships();
@@ -3117,7 +3127,7 @@ async function renderFriends(){
   const row = (p, act, extra, onclick)=>{ p=p||{nickname:'(탈퇴한 사용자)'}; const sub=[p.dong_name?`<span>${esc(p.dong_name)}</span>`:'', lvChips(p)].filter(Boolean).join(''); return `<div class="frow" onclick="${onclick}">${avatar(p)}<div class="tx"><b>${esc(p.nickname)}${isWaving(p)?' '+ico('wave'):''}</b><div class="sub">${sub||'<span>동네 미설정</span>'}</div>${extra||''}</div>${act?`<div class="act" onclick="event.stopPropagation()">${act}</div>`:''}</div>`; };
   let body;
   if(friendTab==='inbox') body = inbox.length ? inbox.map(r=>row(r.requester, `<button class="btn sm" onclick="respond('${r.requester_id}','accepted')">수락</button><button class="btn sm o" onclick="respond('${r.requester_id}','declined')">거절</button>`, r.message?`<div class="msg">${esc(r.message)}</div>`:'', `openProfile('${r.requester_id}')`)).join('') : '<div class="empty">받은 신청이 없어요</div>';
-  else if(friendTab==='sent') body = sent.length ? sent.map(r=>row(r.addressee, `<button class="btn sm o" disabled>대기 중</button>`, '', `openProfile('${r.addressee_id}')`)).join('') : '<div class="empty">보낸 신청이 없어요</div>';
+  else if(friendTab==='sent') body = sent.length ? sent.map(r=>row(r.addressee, `<button class="btn sm o" data-n="${esc(r.addressee?.nickname||'')}" onclick="event.stopPropagation();friendCancel('${r.addressee_id}',this.dataset.n)">신청 취소</button>`, '<div class="sub"><span>수락을 기다려요</span></div>', `openProfile('${r.addressee_id}')`)).join('') : '<div class="empty">보낸 신청이 없어요</div>';
   else body = friends.length ? friends.map(r=>{ const p=(r.requester_id===me.id?r.addressee:r.requester)||{}; const id=r.requester_id===me.id?r.addressee_id:r.requester_id; return row(p, `<button class="btn sm o" onclick="openDirectRoom('${id}')">메시지</button>`, '', `openProfile('${id}')`); }).join('') : `<div class="empty">아직 친구가 없어요<br><span class="muted">지도에서 ${ico('wave')} 손 든 이웃에게 먼저 인사해 보세요</span><br><br><button class="btn sm" onclick="go('map')">지도에서 이웃 찾기</button></div>`;
   $('#friendsBody').innerHTML = `<div class="fseg"><button class="${friendTab==='friends'?'on':''}" onclick="friendTab='friends';renderFriends()">친구 ${friends.length}</button><button class="${friendTab==='inbox'?'on':''}" onclick="friendTab='inbox';renderFriends()">받은 신청${inbox.length?` <span class="chip r">${inbox.length}</span>`:''}</button><button class="${friendTab==='sent'?'on':''}" onclick="friendTab='sent';renderFriends()">보낸 신청${sent.length?' '+sent.length:''}</button></div><div class="list">${body}</div>`;
 }
