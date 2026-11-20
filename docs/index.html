@@ -1796,7 +1796,7 @@ sb.auth.onAuthStateChange(async (ev, session) => {
   await loadMe();
   if(myProfile?.deleted_at){ initStarted=false; openRestoreSheet(); return; }   // 삭제 유예 중(schema 77)
   if(!myProfile?.onboarded_at){ openOnboard(false); }
-  else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); else setTimeout(pushSetup, 1500); setTimeout(studioImportCheck, 900); hnPrefetch(); setTimeout(loadHomeNotice, 1500); }
+  else { go('map'); watchFriends(); loadMyRooms(); if(!myProfile.terms_agreed_at) setTimeout(openConsent, 600); else setTimeout(pushSetup, 1500); setTimeout(studioImportCheck, 900); hnPrefetch(); setTimeout(()=>loadHomeNotice(true), 400); }
 });
 function openConsent(){
   openSheet(`<b style="font-size:1.05rem">이용약관 동의</b>
@@ -1888,7 +1888,7 @@ function renderObReady(){
   $('#obRing').className='ring'+(done?'':' wait'); $('#obRing').textContent = done?'✓':'3'; $('#obFootT').textContent = done?'4단계 중 4단계':'4단계 중 3단계'; $('#obFootS').textContent = done?'모두 준비됐어요':'내 뜨개 단계만 남았어요'; $('#obStart').disabled=!done;
 }
 function obSkills(){ obReturn=true; openSlides(()=>openSkills()); }
-function obStart(){ if(!(myProfile?.skills||[]).length) return toast('내 뜨개 단계를 먼저 체크해 주세요'); obReturn=false; go('map'); setTimeout(pushSetup, 2500); setTimeout(loadHomeNotice, 6000); supCheckIn().then(maybeSupporterPrompt); }
+function obStart(){ if(!(myProfile?.skills||[]).length) return toast('내 뜨개 단계를 먼저 체크해 주세요'); obReturn=false; go('map'); setTimeout(pushSetup, 2500); setTimeout(()=>loadHomeNotice(true), 6000); supCheckIn().then(maybeSupporterPrompt); }
 async function pickAvatar(file){
   if(!file) return; try{
     const blob=await shrinkImage(file, 640); const path=`${me.id}/${Date.now()}.jpg`;
@@ -3225,11 +3225,11 @@ const EV_STATE_TXT = { applied:'신청 완료 · 발표를 기다려 주세요',
 //      시트의 버튼(btn)은 서버가 정해 준 link 만 연다(openLink — 정해진 종류만)
 let homeNoticeCur=null;
 function hnSeen(k, id){ try{ return localStorage.getItem(k)===id; }catch(e){ return true; } }
-async function loadHomeNotice(){
+async function loadHomeNotice(pop){   // pop = 앱을 연 직후 한 번만 true(그때만 시작 팝업을 띄운다)
   const box=$('#homeNotice'); if(!box) return;
   try{ const [cfg, sw] = await hnData(); startWorks=sw; const n=(cfg||[]).find(r=>r.key==='home_notice')?.value;
     const ls=(cfg||[]).find(r=>r.key==='home_notices_v2')?.value || (cfg||[]).find(r=>r.key==='home_notices')?.value; homeNotices=(Array.isArray(ls)?ls:[]).filter(x=>x && x.active && x.id && x.title);
-    if(homeNotices.length || startWorks.length){ homeNoticeCur=n&&n.active?n:null; box.hidden=true; return homeNoticePop(); }   // 공지 여러 개(schema 134): 넘겨 보는 팝업만 쓰고 옛 카드·시트는 띄우지 않는다
+    if(homeNotices.length || startWorks.length){ homeNoticeCur=n&&n.active?n:null; box.hidden=true; if(pop) homeNoticePop(); return; }   // 공지 여러 개(schema 134): 넘겨 보는 팝업만 쓰고 옛 카드·시트는 띄우지 않는다
     if(!n || !n.active || !n.body){ homeNoticeCur=null; box.hidden=true; return; }
     homeNoticeCur=n; const id=String(n.id);
     if(n.card===false || hnSeen('kn_notice_x', id)) box.hidden=true;   // card:false = 팝업(시트)만 띄우고 카드는 남기지 않음(이벤트 줄과 겹치지 않게)
@@ -3262,7 +3262,7 @@ function hnData(){ if(hnDataP && Date.now()-hnDataAt<60000) return hnDataP; hnDa
   const p=Promise.all([ sb.from('app_config').select('key,value').in('key',['home_notice','home_notices','home_notices_v2']).then(r=>r.data||[]),
       sb.rpc('start_works').then(r=>Array.isArray(r.data)?r.data:[], ()=>[]) ]).then(([cfg, ws])=>{
     for(let i=ws.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ws[i],ws[j]]=[ws[j],ws[i]]; }
-    try{ const seen=swSeen(); const first=[...ws.filter(w=>w.mine), ...ws.filter(w=>!w.mine)].filter(w=>w && w.photo && !seen.includes(w.id)).slice(0,5);
+    try{ const seen=swSeen(); const first=[...ws.filter(w=>w.mine), ...ws.filter(w=>!w.mine)].filter(w=>w && w.photo && !seen.includes(w.id)).slice(0,10);
       const ns=(cfg.find(r=>r.key==='home_notices_v2')?.value || cfg.find(r=>r.key==='home_notices')?.value || []);
       [...first.map(w=>w.photo), ...(Array.isArray(ns)?ns:[]).filter(n=>n && n.active && n.img).map(n=>n.img)].forEach(u=>{ const im=new Image(); im.src=u; }); }catch(e){}
     return [cfg, ws]; });
@@ -3273,26 +3273,30 @@ function swMark(id){ try{ const a=swSeen(); if(id && !a.includes(id)){ a.push(id
 function hnDeck(){ const left=hnLeft(), seen=swSeen();
   let ws=startWorks.filter(w=>w && w.id && w.post && w.photo && !seen.includes(w.id));
   if(!ws.length) return { ls:left, start:left.length?Math.floor(Math.random()*left.length):0 };   // 작품이 없으면 지금처럼 남은 공지만
-  ws=[...ws.filter(w=>w.mine), ...ws.filter(w=>!w.mine)].slice(0,5).map(w=>({ ...w, work:true }));
-  let n=null;
+  // 공지·소개는 세 장까지(3·7·10번째 자리). 여럿이면 열 때마다 돌아가며(pin 이 붙은 것 먼저)
+  let ns=[];
   if(left.length){ let shown=[]; try{ const o=JSON.parse(localStorage.getItem('kn_notice_shown')||'{}'); if(o && o.day===hnDay() && Array.isArray(o.ids)) shown=o.ids.map(String); }catch(e){}
-    let pool=left.filter(x=>!shown.includes(String(x.id))); if(!pool.length){ pool=left; shown=[]; }
-    n=pool.find(x=>x.pin)||pool[0]; shown.push(String(n.id)); try{ localStorage.setItem('kn_notice_shown', JSON.stringify({ day:hnDay(), ids:shown })); }catch(e){} }
-  const ls=ws.slice(0,3); if(n) ls.push(n); ls.push(...ws.slice(3)); return { ls, start:0 }; }
+    let pool=left.filter(x=>!shown.includes(String(x.id))); if(pool.length<Math.min(3,left.length)){ pool=left; shown=[]; }
+    ns=[...pool.filter(x=>x.pin), ...pool.filter(x=>!x.pin)].slice(0,3); shown.push(...ns.map(x=>String(x.id))); try{ localStorage.setItem('kn_notice_shown', JSON.stringify({ day:hnDay(), ids:shown })); }catch(e){} }
+  const ls=[...ws.filter(w=>w.mine), ...ws.filter(w=>!w.mine)].slice(0, 10-ns.length).map(w=>({ ...w, work:true }));
+  [2,6,9].forEach((pos,i)=>{ if(ns[i]) ls.splice(Math.min(pos, ls.length), 0, ns[i]); });
+  return { ls, start:0 }; }
 function hnWork(i){ const n=($('#hnpop')?._ls||[])[i]; hnShut(); if(n && n.post){ swMark(n.id); openLink({ type:'post', id:n.post }); } }
 async function toggleFeature(v){ const { error }=await sb.from('profiles').update({ feature_off:!v }).eq('id', me.id); if(error) return toast('실패: '+error.message); myProfile.feature_off=!v; toast(v?'승인된 작품을 첫 화면에 소개해요':'첫 화면에 소개하지 않아요'); }
 const hnDay=()=>{ const t=new Date(Date.now()+9*36e5); return t.toISOString().slice(0,10); };
 function hnNever(){ try{ const a=JSON.parse(localStorage.getItem('kn_notice_never')||'[]'); return Array.isArray(a)?a.map(String):[]; }catch(e){ return []; } }
 function hnSeenToday(){ try{ const o=JSON.parse(localStorage.getItem('kn_notice_seen')||'{}'); return o && o.day===hnDay() && Array.isArray(o.ids) ? o.ids.map(String) : []; }catch(e){ return []; } }
 function hnLeft(){ const nv=hnNever(), sn=hnSeenToday(); return homeNotices.filter(n=>!nv.includes(String(n.id)) && !sn.includes(String(n.id))); }   // 다시 보지 않기로 끈 것 · 오늘 이미 눌러 본 것은 뺀다
-let hnOnce=false;   // 이번에 앱을 연 뒤 시작 팝업을 이미 띄웠는지(닫은 뒤 홈으로 돌아와도 다시 띄우지 않는다)
+let hnOnce=false;   // 이번에 앱을 연 뒤 시작 팝업의 차례가 이미 지났는지. 차례는 앱을 연 직후 한 번뿐 — 그때 못 띄웠어도(다른 창이 떠 있음 등) 다시 시도하지 않는다
+try{ hnOnce = sessionStorage.getItem('kn_hn_once')==='1'; }catch(e){}   // 화면이 다시 불려도(웹뷰 새로 고침) 같은 실행 안에서는 한 번
 function homeNoticePop(){
   if(hnOnce) return;
+  hnOnce=true; try{ sessionStorage.setItem('kn_hn_once','1'); }catch(e){}
   if(!me || !myProfile?.onboarded_at || !myProfile?.terms_agreed_at) return;
   if(!['map','comm'].includes(view) || $('#sheetwrap').classList.contains('on') || $('#hnpop') || $('#askdlg') || $('#fqpop')) return;
   try{ if(localStorage.getItem('kn_notice_day')===hnDay()) return; }catch(e){ return; }
   const k=hnDeck(); if(!k.ls.length) return;
-  hnOnce=true; hnDraw(k.ls, k.start);
+  hnDraw(k.ls, k.start);
 }
 function hnDraw(ls, start){ $('#hnpop')?.remove(); const d=document.createElement('div'); d.id='hnpop';
   // 그림: 앱에 든 것(events/…) · 홈페이지 images · 우리 저장소의 공개 사진만
@@ -6403,7 +6407,7 @@ async function openRestoreSheet(){
 async function restoreAccount(){
   const { error } = await sb.rpc('restore_my_account'); if(error) return toast('복구 실패: '+error.message);
   closeSheet(); toast('계정을 복구했어요'); await loadMe();
-  if(!myProfile?.onboarded_at){ openOnboard(false); } else { go('map'); watchFriends(); loadMyRooms(); setTimeout(pushSetup, 1500); hnPrefetch(); setTimeout(loadHomeNotice, 1500); }
+  if(!myProfile?.onboarded_at){ openOnboard(false); } else { go('map'); watchFriends(); loadMyRooms(); setTimeout(pushSetup, 1500); hnPrefetch(); setTimeout(()=>loadHomeNotice(true), 400); }
 }
 async function toggleVisible(v){ await sb.from('profiles').update({is_visible:v}).eq('id',me.id); myProfile.is_visible=v; toast(v?'지도에 보여요':'지도에서 숨겼어요'); }
 
