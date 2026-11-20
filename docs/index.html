@@ -593,6 +593,12 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .bub .muted{color:inherit;opacity:.7}
 .compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 12px;align-items:center}
 .compose{padding-bottom:max(10px,env(safe-area-inset-bottom,0px))}html.vvk .compose,body.kb .compose{padding-bottom:10px}
+#v-post #postBody{background:var(--color-surface);padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}#postBody .post.dpost{border-bottom:0}
+.dthread{margin:0 13px 0 61px;padding:2px 0 10px;border-bottom:1px solid var(--line2)}.dthread .dempty{color:var(--ink3);font-size:14px;padding:10px 0 2px}
+.dthread .cmt{padding:8px 0;border-radius:8px}.dthread .cmt.on{margin:0 -6px;padding:8px 6px}.dthread .csub{margin:0 0 4px 13px;padding-left:10px}.dthread .csub .cmt{padding:6px 0}.dthread .cmore{margin:0 0 6px 0}
+.dthread #replyBar{background:transparent}.dthread #replyTo{border-radius:10px;margin-top:6px}
+#v-post .dthread .compose{border-top:0;background:transparent;padding:8px 0 4px;align-items:center}#v-post .dthread .compose .ava{width:26px;height:26px;font-size:.66rem;margin-bottom:0}
+#v-post .dthread .compose textarea{background:var(--bg);border-color:transparent;font-size:15px;line-height:22px}#v-post .dthread .compose textarea:focus{border-color:var(--color-primary);background:var(--surface)}
 .compose input{border:1px solid var(--tline);border-radius:999px;background:var(--tbg);padding:10px 16px;font-family:inherit;font-size:16px}
 .compose input::placeholder{color:var(--tmute)}
 .compose .btn{background:transparent;color:var(--tink);font-weight:600;padding:8px 4px 8px 8px;width:auto}
@@ -629,9 +635,9 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 /* 댓글 입력칸: 여러 줄(엔터 = 줄바꿈, 등록은 게시 버튼만) — 2026-11-12 */
 .compose textarea,.rrow textarea{flex:1;min-width:0;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:inherit;padding:9px 14px;font-family:inherit;font-size:16px;line-height:1.4;height:42px;min-height:42px;max-height:112px;width:auto;resize:none;overflow-y:auto;outline:0;display:block}
 .compose textarea:focus,.rrow textarea:focus{border-color:var(--color-primary)}.compose textarea::placeholder,.rrow textarea::placeholder{color:var(--ink3)}
-#v-post{overflow:hidden}#v-post #postBody{flex:1 1 0;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--color-bg)}#v-post .compose{flex:none}#v-post .compose,.rrow{align-items:flex-end}.rrow .ava{margin-bottom:5px}#v-post .compose .ava{margin-bottom:3px}
+#v-post{overflow:hidden}#v-post #postBody{flex:1 1 0;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--color-surface)}#v-post .compose{flex:none}#v-post .compose,.rrow{align-items:flex-end}.rrow .ava{margin-bottom:5px}#v-post .compose .ava{margin-bottom:3px}
 /* 글 상세(2026-11-12 대표 확정 시안): 본문은 흰 카드에 크게 · 댓글은 작게 · 대댓글은 한 단계 들여쓰기 · 댓글 사진 1장 · 링크는 확인 시트로 */
-#postBody .post.dpost{background:var(--color-surface);border-bottom:1px solid var(--line);cursor:default}#postBody .post.dpost .txt{font-size:1.06rem;line-height:1.6}
+#postBody .post.dpost{background:var(--color-surface);border-bottom:0;cursor:default}#postBody .post.dpost .txt{font-size:1.06rem;line-height:1.6}
 .cmt-head{padding:14px 16px 4px;font-size:.88rem;font-weight:700;color:var(--color-text-muted)}
 .cmt{display:flex;gap:8px;padding:8px 16px}.cmt.on{background:#F2F6EE}.cmt .ava{width:28px;height:28px;font-size:.68rem;flex:none}.cmt .cb{flex:1;min-width:0}
 .cmt .cw{display:flex;align-items:center;gap:6px;font-size:.84rem}.cmt .cw b{font-weight:700;cursor:pointer}.cmt .cw time{color:var(--ink3);font-size:.76rem}.cmt .cw .menu{margin-left:auto;border:0;background:none;color:var(--ink3);padding:0 2px;cursor:pointer;font:inherit}
@@ -1177,7 +1183,7 @@ body.kb #nav{display:none!important}
     <div class="top"><button class="back" onclick="closePost()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1>글</h1></div>
     <div class="feed" id="postBody"></div>
     <div id="replyBar"><div id="replyTo" hidden><span id="replyToTxt"></span><button type="button" aria-label="댓글 대상 지우기" onclick="setReplyTo(null)">✕</button></div><div id="replyPv" hidden><img id="replyPvImg" alt=""><button type="button" onclick="rpPhotoClear()">사진 빼기</button></div>
-    <div class="compose"><div id="replyAva"></div><div class="mpop" id="mpop-detail" hidden></div><textarea id="replyIn" rows="1" placeholder="댓글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'detail')"></textarea><button class="btn" id="replyBtn" disabled onclick="submitReply()">게시</button></div></div>
+    <div class="compose"><div id="replyAva"></div><div class="mpop" id="mpop-detail" hidden></div><textarea id="replyIn" rows="1" placeholder="댓글을 남겨보세요…" maxlength="500" oninput="rpIn(this);mentionInput(this,'detail')" onfocus="setTimeout(()=>this.scrollIntoView({block:'center'}),350)"></textarea><button class="btn" id="replyBtn" disabled onclick="submitReply()">게시</button></div></div>
   </section>
 
   <!-- 친구 -->
@@ -5858,7 +5864,10 @@ function renderPostDetail(){
   const tops=rs.filter(r=>!r.reply_to || !ids.has(r.reply_to)); const kids={}; rs.forEach(r=>{ if(r.reply_to && ids.has(r.reply_to)) (kids[r.reply_to] ||= []).push(r); });
   const sub=t=>{ const k=kids[t.id]||[]; if(!k.length) return ''; const open=subOpen.has(t.id) || k.length<=2; const show=open?k:k.slice(0,1);
     return `<div class="csub">${show.map(cmtCard).join('')}</div>${open?'':`<button type="button" class="cmore" onclick="subOpen.add('${t.id}');renderPostDetail()">댓글 ${k.length-1}개 더 보기</button>`}`; };
-  $('#postBody').innerHTML = postCard(p,{noLine:true, cls:'dpost'}) + `<div class="cmt-head">댓글 ${rs.length||''}</div>` + (rs.length ? tops.map(t=>cmtCard(t)+sub(t)).join('') : '<div class="empty">첫 댓글을 남겨 보세요</div>');
+  // 입력 줄(#replyBar)은 댓글 바로 밑에 둔다 — 다시 그릴 때 지워지지 않게 잠깐 떼었다가 붙인다(적던 글·자판 유지)
+  const bar=$('#replyBar'), foc=document.activeElement===$('#replyIn'); bar?.remove();
+  $('#postBody').innerHTML = postCard(p,{noLine:true, cls:'dpost'}) + `<div class="dthread">` + (rs.length ? tops.map(t=>cmtCard(t)+sub(t)).join('') : '<div class="dempty">첫 댓글을 남겨 보세요</div>') + `</div>`;
+  if(bar){ $('#postBody .dthread').appendChild(bar); if(foc) $('#replyIn')?.focus({preventScroll:true}); }
 }
 // [답글 달기]: 대상 댓글을 기억하고 입력칸 위에 '○○ 님에게 답글 다는 중'. 대댓글에 답하면 같은 윗댓글 아래로 가고 @닉네임을 미리 적어 준다
 function setReplyTo(x){
