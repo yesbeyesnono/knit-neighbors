@@ -2265,3 +2265,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   _src_maker_find 가 (o_profile, o_shop, o_guess) 를 돌려줌: 끝의 '작가·님' 등은 떼고, 확실하면 묶고 두 글자만 겹치는 것 등은 guess 로만
 --   콘솔: admin_source_makers(rows · makers · aliases) · admin_maker_alias(넣기·지우기) · admin_source_maker_link([맞아요]·손으로 잇기 → 그 표기를 다른 이름으로)
 -- ============================================================
+
+-- ============================================================
+-- 163. 도안 찾기: 맞는 앱 작가 한 줄 + 그 작가의 도안 + 도안마다 작품 사진 (2026-11-20 대표 확정 시안 cert_maker_suggest_v2 ②, 마이그레이션 source_suggest — 원본 supabase/source_suggest.sql)
+--   work_source_suggest(p_q): 이름이 앞에서부터 맞는 작가·공방 두 곳까지 + 그 작가의 도안(다른 이름은 똑같이 적었을 때만) · _src_photo(도안의 대표 작품 사진) · work_source_search 결과에 photo 추가
+-- ============================================================

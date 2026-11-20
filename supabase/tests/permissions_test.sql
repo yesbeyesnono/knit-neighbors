@@ -295,6 +295,8 @@ begin
   out := pg_temp.must_fail(out, 'work_sources(anon)', 'select count(*) from public.work_sources');   -- schema 157
   out := pg_temp.must_fail(out, 'work_source_search(anon)', 'select public.work_source_search(''pattern'', ''x'')');
   out := pg_temp.must_fail(out, 'work_source_add(anon)', 'select public.work_source_add(''pattern'', ''a'', ''bb'')');
+  out := pg_temp.must_fail(out, 'work_source_suggest(anon)', 'select public.work_source_suggest(''xx'')');   -- schema 163
+  out := pg_temp.must_fail(out, '_src_photo(anon)', 'select public._src_photo(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'source_ai_pending(anon)', 'select public.source_ai_pending(1)');   -- schema 159
   out := pg_temp.must_fail(out, 'source_ai_apply(anon)', 'select public.source_ai_apply(gen_random_uuid(), ''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'friend_rec_refresh(anon)', 'select public.friend_rec_refresh()');
