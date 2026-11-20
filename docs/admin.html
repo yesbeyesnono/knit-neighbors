@@ -1373,6 +1373,7 @@ VIEWS.certs = async(arg)=>{
   if(['pending','fix','done'].includes(arg)) CERT.tab=arg;
   const {data,error}=await sb.rpc('admin_work_queue',{p_tab:CERT.tab}); if(error) throw error;
   CERT.items=(data&&data.items)||[]; CERT.counts=(data&&data.counts)||{};
+    try{ const ids=CERT.items.map(x=>x.id); if(ids.length){ const yr=await sb.from('works').select('id,yarns').in('id', ids); const m={}; (yr.data||[]).forEach(w=>m[w.id]=w.yarns); CERT.items.forEach(x=>{ x.yarns=Array.isArray(m[x.id])?m[x.id]:[]; }); } }catch(e){}
   try{ const ids=CERT.items.map(x=>x.id); if(ids.length){ const r=await sb.from('works').select('id,made_how,pattern_source,source_note').in('id',ids); const m={}; (r.data||[]).forEach(w=>m[w.id]=w); CERT.items.forEach(x=>Object.assign(x, m[x.id]||{})); } }catch(e){}
   if(!CERT.items.some(x=>x.id===CERT.sel)) CERT.sel=CERT.items[0]?CERT.items[0].id:null;
   const n=$('#nCert'); if(n){ n.hidden=!CERT.counts.pending; n.textContent=CERT.counts.pending||''; }
@@ -1392,7 +1393,7 @@ function certDraw(){
   const tp={}; (Array.isArray(x.tech_photos)?x.tech_photos:[]).forEach(t=>{ tp[t.photo]=((t.techniques||[]).map(id=>tn[id]||id).join(' · '))+(t.memo?' — '+t.memo:''); });
   const pics=(x.photos||[]).map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener" style="background-image:url('${esc(u)}')"><em>${esc(i===0?'전체':(tp[u]||'기법 표시 없음'))}</em></a>`).join('');
   const needles=(Array.isArray(x.needles)?x.needles:[]).map(n=>[n.type,n.size].filter(Boolean).join(' ')).join(', ');
-  const facts=[x.made_how&&SRC_KIND[x.made_how]?[SRC_KIND[x.made_how], x.made_how==='original'?(x.source_note||'직접 만든 작품'):(x.pattern_source||'')]:null, x.took&&CERT_TOOK[x.took]?['걸린 시간',CERT_TOOK[x.took]]:null, x.yarn_info?['실',x.yarn_info]:null, needles?['바늘',needles]:null, x.gauge?['게이지',x.gauge]:null, x.finished_size?['크기',x.finished_size]:null].filter(Boolean);
+  const facts=[x.made_how&&SRC_KIND[x.made_how]?[SRC_KIND[x.made_how], x.made_how==='original'?(x.source_note||'직접 만든 작품'):(x.pattern_source||'')]:null, x.took&&CERT_TOOK[x.took]?['걸린 시간',CERT_TOOK[x.took]]:null, certYarn(x)?['실',certYarn(x)]:null, needles?['바늘',needles]:null, x.gauge?['게이지',x.gauge]:null, x.finished_size?['크기',x.finished_size]:null].filter(Boolean);
   const hasClose=(x.photos||[]).length>1, allTagged=!x.no_tech_photo && (x.photos||[]).slice(1).every(u=>tp[u]);
   const chk=[[hasClose,'전체 사진 · 가까운 사진 있음','가까이 찍은 사진이 없어요'],[hasClose&&allTagged,'가까운 사진마다 기법 표시 있음','기법 표시가 없는 사진이 있어요'],[!!(x.took&&x.knowhow),'뜨개 이야기 필수 2개 채움',x.no_story?'뜨개 이야기 없음 — 옛 버전 앱으로 올린 인증(앱에 칸이 없어요)':'뜨개 이야기가 덜 채워졌어요']];
   const open=x.status==='pending'||x.status==='fix';
@@ -1432,6 +1433,9 @@ function certChatDraw(keep){ const C=$('#cqChat'); if(!C) return; if(CERT_CHAT.i
   C.scrollTop=C.scrollHeight; }
 function certChatAct(k){ const T=CERT_CHAT.turns, last=T.map(t=>t.role==='jigi'&&!!t.act).lastIndexOf(true); if(last<0) return; T[last].msg=$('#cqNote')?$('#cqNote').value:T[last].msg; T[last].act=k; certChatDraw(); }
 function certManual(){ if(CERT_CHAT.id!==CERT.sel) CERT_CHAT={id:CERT.sel,turns:[],busy:false}; certChatDraw(true); CERT_CHAT.turns.push({role:'jigi',text:'직접 쓰실 수 있게 열어 드렸어요. 처리 방법을 고르고 글을 적어 주세요.',act:'fix',msg:'',local:true}); certChatDraw(); $('#cqNote')?.focus(); }
+function certYarn(x){ const ys=Array.isArray(x.yarns)?x.yarns:[]; if(!ys.length) return x.yarn_info||'';
+  return ys.map(y=>{ const a=parseFloat(y.amount), u=y.unit||'볼', g=parseFloat(y.ball_g), amt=!isFinite(a)||a<=0?'사용량 안 적음':u==='g'?`${a}g${g>0?` (약 ${Math.round(a/g*10)/10}볼)`:''}`:`${a}볼${g>0?` (약 ${Math.round(a*g)}g)`:''}`;
+    return [[y.brand&&!(y.name||'').includes(y.brand)?y.brand:'', y.name].filter(Boolean).join(' '), y.color, amt, y.weight, y.stash_id?'내 실함에서':''].filter(Boolean).join(' · '); }).join(' / '); }
 function certCtx(x){ const tn={}; (x.techs||[]).forEach(t=>tn[t.id]=t.name); const tp={}; (Array.isArray(x.tech_photos)?x.tech_photos:[]).forEach(t=>{ tp[t.photo]=(t.techniques||[]).map(id=>tn[id]||id).join('·'); });
   return { title:x.title||'', status:x.status, photo_urls:(x.photos||[]).slice(0,4), member:'코바늘 '+(x.level_crochet||0)+'단계, 대바늘 '+(x.level_knit||0)+'단계, 승인된 인증 '+(x.cert_count||0)+'개'+(x.is_author?', 작가':'')+(x.no_story?', 옛 버전 앱으로 올림':''), techs:(x.techs||[]).map(t=>t.name+' '+t.level+'단계').concat((x.custom||[]).map(t=>t+'(직접 입력)')).join(', '),
     photos:(x.photos||[]).map((u,i)=>(i+1)+'번째: '+(i===0?'전체 사진':(tp[u]?'가까이 찍은 사진, 기법 표시 '+tp[u]:'가까이 찍은 사진, 기법 표시 없음'))).join(' / '),
