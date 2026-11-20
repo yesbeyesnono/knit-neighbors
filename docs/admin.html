@@ -1366,7 +1366,7 @@ const invLink=(k,n)=>INV_URL[k]+'#'+encodeURIComponent(n);
 // ===== 인증 확인 (2026-11-16 대표 확정 시안 cert_review_v3, schema 133) =====
 // 완성작품 인증은 올리면 '확인 중' — 여기서 [승인 · 게시]를 눌러야 커뮤니티에 올라간다. 보완 요청·반려는 사유가 회원에게 알림으로 간다
 const CERT={ tab:'pending', sel:null, items:[], counts:{} };
-const CERT_TOOK={ '1d':'하루', '3d':'2~3일', '1w':'일주일쯤', '2w':'2주쯤', '1m':'한 달쯤', 'long':'그보다 오래' };
+const CERT_TOOK={ '1d':'하루', '3d':'2~3일', '1w':'일주일쯤', '2w':'2주쯤', '1m':'한 달쯤', 'long':'한 달 넘게' };
 async function certBadge(){ try{ const {count}=await sb.from('works').select('id',{count:'exact',head:true}).eq('review_status','pending'); const n=$('#nCert'); if(n){ n.hidden=!count; n.textContent=count||''; } }catch(e){} }
 VIEWS.certs = async(arg)=>{
   if(['pending','fix','done'].includes(arg)) CERT.tab=arg;

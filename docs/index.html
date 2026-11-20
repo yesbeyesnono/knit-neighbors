@@ -4169,7 +4169,7 @@ function wYarnPayload(){
 }
 // ===== 완성작품 인증: 확인 뒤 게시 + 뜨개 이야기 (2026-11-16 대표 확정 시안 cert_review_v3, schema 133) =====
 // 올리면 '확인 중' — 본인에게만 보이다가 대표가 콘솔에서 승인하면 커뮤니티에 올라간다. 보완 요청을 받으면 고쳐서 저장하는 순간 다시 확인 대기(서버 트리거)
-const TOOK={ '1d':'하루', '3d':'2~3일', '1w':'일주일쯤', '2w':'2주쯤', '1m':'한 달쯤', 'long':'그보다 오래' };
+const TOOK={ '1d':'하루', '3d':'2~3일', '1w':'일주일쯤', '2w':'2주쯤', '1m':'한 달쯤', 'long':'한 달 넘게' };
 let wStory={ took:'', knowhow:'', regret:'' };
 const storyPayload=()=>({ took:wStory.took||null, knowhow:(wStory.knowhow||'').trim(), regret:(wStory.regret||'').trim() });
 async function certToday(){ try{ const t=new Date(Date.now()+9*36e5); t.setUTCHours(0,0,0,0); const since=new Date(t.getTime()-9*36e5).toISOString(); const { count }=await sb.from('works').select('id',{count:'exact',head:true}).eq('profile_id', me.id).gte('created_at', since); return count||0; }catch(e){ return 0; } }
