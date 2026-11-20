@@ -1028,6 +1028,7 @@ body.kb #nav{display:none!important}
 .hwslot.a{border:1.5px dashed var(--color-primary);color:var(--color-primary);font-weight:600;background:var(--color-surface);cursor:pointer}
 .hwslot.v{background:var(--color-bg);border:1px solid var(--color-primary-light);color:var(--ink)}.hwslot.v b,.hwslot.v small,.hwslot.v span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.hwslot.v small{color:var(--ink3);font-size:.78rem}.hwslot.v a{margin-left:auto;color:var(--color-primary);font-size:.78rem;font-weight:600;flex:none;cursor:pointer;padding:8px 0 8px 8px}
 .hwtag{font-size:.68rem;font-weight:700;border-radius:6px;padding:2px 7px;background:var(--color-primary-light);color:var(--color-primary);flex:none;overflow:visible!important}
+.ydhint{margin:10px 0 0;font-size:.8rem;line-height:1.55;color:var(--color-primary);background:var(--color-bg);border-radius:10px;padding:9px 12px}.slrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.slrow .tx{flex:1;min-width:0;display:flex;flex-direction:column}.slrow .tx b{font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slrow .tx span{font-size:.76rem;color:var(--ink3)}.slrow .ychip{flex:none}
 .hwex{font-size:.8rem;color:var(--color-text-muted);line-height:1.7;margin:0}.hwex b{color:var(--ink);font-weight:600}
 .hwres{max-height:42vh;overflow-y:auto}.hwres button{display:flex;width:100%;align-items:center;gap:8px;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 2px;font:inherit;font-size:.92rem;text-align:left;cursor:pointer;color:var(--ink)}
 .hwres .hwlab{font-size:.74rem;font-weight:700;color:var(--color-text-muted);margin:12px 2px 6px}.hwres .hwlab:first-child{margin-top:4px}
@@ -4157,7 +4158,7 @@ async function wqStash(id){
   const i=wYarns.findIndex(y=>y.stashId===id); if(i>=0){ wYarns.splice(i,1); renderWYarns(); return renderWQuick(); }
   if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요');
   const sr=stashRows.find(x=>x.id===id); if(!sr) return;
-  const y=await stashYarn(sr); if(y.amount===''||y.amount==null) y.amount='1'; wYarns.push(y); renderWYarns(); renderWQuick();
+  const y=await stashYarn(sr); ydOpen(y, -1); subOnBack=null;
 }
 async function wqRecentPick(i){
   const r=($('#wQuick')._rc||[])[i]; if(!r) return;
@@ -4166,7 +4167,7 @@ async function wqRecentPick(i){
   let y=null; try{ const { data } = await sb.rpc('yarn_suggest', { p_q:r.name }); const hit=(data||[]).find(x=>x.name===r.name); if(hit) y=await yarnFromDict(hit); }catch(e){}
   if(!y){ y=wyBlank(); y.name=r.name; if(r.ball_g) y.ball_g=String(r.ball_g); if(r.ball_m) y.ball_m=String(r.ball_m); y.weight=r.weight||''; y.weightManual=!!r.weight; y.fiber=r.fiber||''; if(r.fibers) y.mix=Object.entries(r.fibers).map(([k,v])=>k+' '+v).join(', '); }
   y.color=r.color||''; if(Array.isArray(r.color_hex)&&r.color_hex.length){ y.colorHex=r.color_hex; y.colorMode=r.color_mode||'solid'; y.colorFamilies=Array.isArray(r.color_families)?r.color_families:[]; }
-  y.amount='1'; wYarns.push(y); renderWYarns(); renderWQuick();
+  y.amount=''; ydOpen(y, -1); subOnBack=null;
 }
 function wyAddSame(){ if(wYarns.length>=6) return toast('실은 6개까지 적을 수 있어요'); const last=wYarns[wYarns.length-1]; if(!last) return openYarnPick(-1); const y=Object.assign(wyBlank(), {name:last.name, catalogId:last.catalogId, colors:last.colors, spec:last.spec, ball_g:last.ball_g, ball_m:last.ball_m, weight:last.weight, weightManual:last.weightManual, fiber:last.fiber, unit:last.unit, mix:last.mix, fromDict:last.fromDict}); ydOpen(y, -1); }
 // 실 사전 한 줄(yarn_suggest 결과) → 입력용 실 객체. 색 목록도 같이 불러온다
@@ -4907,9 +4908,10 @@ async function submitCert(){
     if(newPost && wShotTech.size){ const items=sPhotos.map((p,i)=>{ const x=wShotTech.get(p.url); return x?{ photo:photos[i], techniques:x.techs.filter(id=>wTechSel.has(id)), memo:x.memo||undefined }:null; }).filter(Boolean); if(items.length){ try{ await sb.rpc('work_set_tech_photos', { p_post:newPost, p_items:items }); }catch(e){} } wShotTech=new Map(); }
     if(newPost){ const r3=await sb.rpc('work_set_story', { p_post:newPost, p_story: storyPayload() }); if(r3.error) toast('뜨개 이야기를 저장하지 못했어요: '+r3.error.message.replace(/^.*?: /,'')); }
     let evDone=false; if(evId && newPost){ const r2 = await sb.rpc('link_work_event', { p_post:newPost, p_event:evId }); if(r2.error) toast('이벤트 연결 실패: '+r2.error.message); else evDone=true; }
+    const leftYs=wYarns.filter(y=>y && !y.stashId && (y.name||'').trim()).map(y=>Object.assign({}, y));
     await loadMe(); sPhotos=[]; cdClear(); composeBack=null; goMy('thread','posts');   // 확인 뒤 게시(schema 133): 바로 올라가지 않는다 — 마이에서 '확인 중'으로 보임
     askNote('확인 요청을 보냈어요', (evDone?'이벤트 인증으로 접수했어요. ':'')+'knitup 이 사진과 기법을 확인한 뒤 커뮤니티에 올려 드려요. 확인이 끝나면 알림으로 알려 드릴게요.');
-    $('#askdlg')?.querySelector('button')?.addEventListener('click', ()=>setTimeout(showRecsAfterWork, 400));
+    $('#askdlg')?.querySelector('button')?.addEventListener('click', ()=>setTimeout(()=>{ if(leftYs.length) stashLeftAsk(leftYs); else showRecsAfterWork(); }, 400));
   }catch(e){ toast(e.message); }
   certCheck.busy=false; certCheck();
 }
@@ -5233,7 +5235,7 @@ async function ygPick(i){ const r=ygRows[i], q=ygName; closeSheet(); sb.rpc('yar
 let yd=null, ydIdx=-1, ydFam='', ydSpecOpen=false;
 const Y_REASONS=['부드러움','색감','가성비','뜨기 편함','갈라짐','보풀','뻣뻣함'];
 function openYarnDetail(i){ const y=wYarns[i]; if(!y) return; ydOpen(JSON.parse(JSON.stringify(y)), i); }
-function ydOpen(y, idx, specOpen){ yd=y; ydIdx=idx; ydFam=''; ydSpecOpen=!!specOpen || !(y.ball_g||y.ball_m||y.fiber||y.mix); if(yd.amount===''||yd.amount==null){ yd.amount = yd.unit==='g'?'':'1'; } ydRender(); subOnBack = idx>=0 ? null : ()=>openYarnPick(idx); }
+function ydOpen(y, idx, specOpen){ yd=y; ydIdx=idx; ydFam=''; ydSpecOpen=!!specOpen || !(y.ball_g||y.ball_m||y.fiber||y.mix); if((yd.amount===''||yd.amount==null) && ypStashMode==='manual'){ yd.amount = yd.unit==='g'?'':'1'; } ydRender(); subOnBack = idx>=0 ? null : ()=>openYarnPick(idx); }
 function ydRender(){
   const y=yd; const fams=[...new Set((y.colors||[]).map(c=>c.family).filter(Boolean))];
   const cols=(y.colors||[]).filter(c=>!ydFam || c.family===ydFam);
@@ -5251,30 +5253,40 @@ function ydRender(){
     ${fams.length>1?`<div class="seg" style="margin-top:0"><button type="button" class="${ydFam?'':'on'}" onclick="ydFam='';ydRender()">전체</button>${fams.map(f=>`<button type="button" class="${ydFam===f?'on':''}" data-f="${esc(f)}" onclick="ydFam=this.dataset.f;ydRender()">${esc(f)}</button>`).join('')}</div>`:''}
     ${cols.length?`<div class="cgrid">${cols.map((c,ci)=>`<button type="button" class="${y.color===label(c)?'on':''}" data-i="${ci}" onclick="ydColorAt(+this.dataset.i)"><i style="background:${c.photo?`url(${colorPhotoUrl(c.photo)}) center/cover`:(colorCss(c.color_hex,c.color_mode)||famBg(c.family))}"></i>${esc(label(c))}</button>`).join('')}</div>`:''}
     <div class="ycrow" onclick="ydPickColor()"><i class="ychip" style="background:${yColorCss(y)}"></i><div class="tx"><b>${esc(y.color||'색 고르기')}</b><span>${y.colorHex&&y.colorHex.length?(COLOR_MODES[y.colorMode]||'단색')+(y.colorFamily?' · '+esc(y.colorFamily):''):(cols.length?'목록에 없으면 팔레트에서 직접 골라요':'팔레트에서 고르면 이름이 자동으로 붙어요 · 여러 색 실도 돼요')}</span></div><span class="car">›</span></div>
-    <div class="cfl">${ypStashMode==='manual'?'몇 볼 샀나요?':'사용량'}</div>
-    <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button type="button" onclick="ydStep(-1)">−</button><input id="ydAmt" inputmode="decimal" maxlength="7" value="${esc(y.amount)}" placeholder="0" onfocus="this.select()" oninput="yd.amount=this.value.replace(',', '.')"><button type="button" onclick="ydStep(1)">＋</button></div>
+    <div class="cfl">${ypStashMode==='manual'?'몇 볼 샀나요?':`몇 ${y.unit==='g'?'g':'볼'} 쓰셨나요? <span class="muted">대략이어도 좋아요</span>`}</div>
+    <div style="display:flex;gap:12px;align-items:center"><div class="stepper"><button type="button" onclick="ydStep(-1)">−</button><input id="ydAmt" inputmode="decimal" maxlength="7" value="${esc(y.amount)}" placeholder="0" onfocus="this.select()" oninput="yd.amount=this.value.replace(',', '.');ydHint()"><button type="button" onclick="ydStep(1)">＋</button></div>
       <div class="seg" style="margin:0">${['볼','g'].map(u=>`<button type="button" class="${y.unit===u?'on':''}" onclick="ydUnit('${u}')">${u}</button>`).join('')}</div></div>
-    <p class="muted" style="font-size:.78rem;margin:6px 0 0">숫자를 눌러 1.3처럼 직접 적을 수 있어요.</p>
+    <p class="ydhint" id="ydHint" hidden></p>
+    <p class="muted" style="font-size:.78rem;margin:6px 0 0">숫자를 눌러 1.3처럼 직접 적을 수 있어요.${ypStashMode==='manual'?'':` <a onclick="ydSkip()" style="text-decoration:underline;white-space:nowrap;cursor:pointer">잘 모르겠어요</a>`}</p>
     <div class="cfl">이 실 어땠나요? <span class="muted">선택</span></div>
     <div class="seg" style="margin-top:0">${[['1','또 쓸래요'],['0','보통'],['-1','비추']].map(([v,l])=>`<button type="button" class="${String(y.rating)===v?'on':''}" onclick="yd.rating=(String(yd.rating)==='${v}'?'':'${v}');ydRender()">${l}</button>`).join('')}</div>
     ${y.rating!==''&&y.rating!=null?`<div class="cfl">이유</div><div class="seg" style="margin-top:0">${Y_REASONS.map(r=>`<button type="button" class="${y.rating_reason===r?'on':''}" onclick="yd.rating_reason=(yd.rating_reason==='${r}'?'':'${r}');ydRender()">${r}</button>`).join('')}</div>`:''}
   `, { label: ypStashMode==='manual'?'실함에 담기':'완료', fn:ydDone });
+  ydHint();
 }
+// 적은 양을 g·m 로 풀어 보여 주고, 실함의 실이면 인증 뒤 몇 볼 남는지 알려 준다
+function ydHint(){ const el=$('#ydHint'); if(!el) return; const a=parseFloat(yd.amount), g=parseFloat(yd.ball_g), m=parseFloat(yd.ball_m), n=v=>Math.round(v).toLocaleString(); let t='';
+  if(a>0){ if(yd.unit==='g'){ if(g>0) t=`${fmtBalls(a)}g = 약 ${Math.round(a/g*10)/10}볼${m>0?` · ${n(a/g*m)}m`:''}`; } else { const p=[g>0?`약 ${n(a*g)}g`:'', m>0?`${n(a*m)}m`:''].filter(Boolean); if(p.length) t=`${fmtBalls(a)}볼 = ${p.join(' · ')}`; }
+    if(yd.stashId && ypStashMode!=='manual'){ const b=yd.unit==='g'?(g>0?a/g:null):a; if(b!=null) t+=(t?'<br>':'')+`인증을 올리면 실함에 <b>${fmtBalls(Math.max(0,(+yd.stashLeft||0)-b))}볼</b> 남아요.`; } }
+  el.innerHTML=t; el.hidden=!t; }
+function ydSkip(){ yd.amount=''; yd.amountSkip=true; const el=$('#ydAmt'); if(el) el.value=''; ydDone(); }
 // 사전 색 목록에서 고름: 사진이 있는 색은 대표색(hex)·섞임 방식도 함께 저장 → 계열 집계·검색에 쓰임
 function ydColorAt(i){ const cols=(yd.colors||[]).filter(c=>!ydFam || c.family===ydFam); const c=cols[i]; if(!c) return; const label=(c.no?c.no+' ':'')+c.name; const fam=c.family||(c.color_hex&&c.color_hex[0]?(hexFamily(c.color_hex[0])||{}).fam:'')||''; yd.color=label; yd.colorFamily=fam; yd.colorHex=(c.color_hex&&c.color_hex.length)?c.color_hex:null; yd.colorMode=c.color_mode||'solid'; yd.colorFamilies=fam?[fam]:[]; ydRender(); }
 function colorPhotoUrl(path){ return `${SB_URL}/storage/v1/object/public/yarn-colors/${encodeURI(path)}`; }   // 쇼핑몰 사진은 한글 파일명
 function ydPickColor(){ openColorPick({ name:yd.color, family:yd.colorFamily, hex:yd.colorHex, mode:yd.colorMode }, r=>{ yd.color=r.name; yd.colorFamily=r.family; yd.colorFamilies=r.families; yd.colorHex=r.hex; yd.colorMode=r.mode; ydRender(); }); }
-function ydUnit(u){ if(yd.unit===u) return; yd.unit=u; yd.amount = u==='g' ? '' : '1'; ydRender(); }
-function ydStep(d){ const step = yd.unit==='g'?10:0.5; let v=parseFloat(yd.amount)||0; v=Math.max(0, Math.round((v+d*step)*100)/100); yd.amount = v?String(v):''; const el=$('#ydAmt'); if(el) el.value=yd.amount; }
+function ydUnit(u){ if(yd.unit===u) return; yd.unit=u; yd.amount = (u!=='g' && ypStashMode==='manual') ? '1' : ''; ydRender(); }
+function ydStep(d){ const step = yd.unit==='g'?10:0.5; let v=parseFloat(yd.amount)||0; v=Math.max(0, Math.round((v+d*step)*100)/100); yd.amount = v?String(v):''; const el=$('#ydAmt'); if(el) el.value=yd.amount; ydHint(); }
 function ydDone(){
   const y=yd; y.name=(y.name||'').trim(); if(!y.name) return toast('실 이름을 적어 주세요');
   y.amount=String(y.amount||'').trim(); if(y.amount && !/^\d{1,4}(\.\d{1,2})?$/.test(y.amount)) return toast('사용량은 1.5처럼 소수 둘째 자리까지 적을 수 있어요');
   for(const k of ['ball_g','ball_m']){ y[k]=String(y[k]||'').trim().replace(',', '.'); if(y[k] && !/^\d{1,5}(\.\d{1,2})?$/.test(y[k])) return toast('1볼 중량·길이는 숫자로 적어 주세요'); }
   wyAutoWeight(y);
   if(ypStashMode==='manual'){ if(!(+y.amount>0) || y.unit!=='볼') return toast('산 볼 수를 적어 주세요'); return stashAddFromDict(y); }
+  if(!(+y.amount>0) && !y.amountSkip) return toast(`몇 ${y.unit==='g'?'g':'볼'} 쓰셨는지 적어 주세요 · 모르면 '잘 모르겠어요'`);
+  if(+y.amount>0) y.amountSkip=false;
   if(y.stashId && y.unit==='볼' && +y.amount > y.stashLeft) toast(`실함에는 ${fmtBalls(y.stashLeft)}볼 남아 있어요 · 남은 만큼만 차감돼요`);
   if(ydIdx>=0) wYarns[ydIdx]=y; else wYarns.push(y);
-  closeSub(); renderWYarns();
+  closeSub(); renderWYarns(); if($('#wQuick')) renderWQuick();
 }
 
 // ============ Phase 2: 내 실함 (볼밴드 찍어 보관 → 완성작품 인증에서 고르면 자동 차감) ============
@@ -5508,6 +5520,20 @@ async function stashYarn(s){   // 실함의 실 → 인증 입력용 실
   if(s.ball_g) y.ball_g=fmtBalls(s.ball_g); if(s.ball_m) y.ball_m=fmtBalls(s.ball_m); if(s.fiber) y.fiber=s.fiber; if(s.fibers) y.mix=Object.entries(s.fibers).map(([k,v])=>k+' '+v).join(', ');
   wyAutoWeight(y); return y;
 }
+// 인증에 쓴 실 가운데 실함에 없던 것: 남은 볼 수만 적어 실함에 담는다(실 정보는 인증에서 그대로)
+let slYs=[];
+async function stashLeftAsk(ys){ slYs=ys.map(y=>Object.assign({}, y, { leftN:0 }));
+  const nm=slYs[0].name+(slYs.length>1?` 외 ${slYs.length-1}개`:'');
+  if(!await askOk(`「${nm}」 남은 실이 있나요? 실함에 담아 두면 다음 인증 때 바로 골라 써요.`, '남은 실 담기', '다 썼어요')) return showRecsAfterWork();
+  stashLeftDraw(); }
+function stashLeftDraw(){ openSheet(`<b>남은 실 담기</b><p class="muted" style="font-size:.82rem;margin:4px 0 10px">남은 볼 수를 적어 주세요. 0 인 실은 담지 않아요.</p>${slYs.map((y,i)=>`<div class="slrow"><i class="ychip" style="background:${yColorCss(y)}"></i><div class="tx"><b>${esc(y.name)}</b><span>${esc(y.color||'')}</span></div><div class="stepper"><button type="button" onclick="stashLeftStep(${i},-1)">−</button><input id="slN${i}" inputmode="decimal" maxlength="5" value="${y.leftN||''}" placeholder="0" onfocus="this.select()" oninput="slYs[${i}].leftN=parseFloat(this.value.replace(',', '.'))||0"><button type="button" onclick="stashLeftStep(${i},1)">＋</button></div></div>`).join('')}<button class="btn" id="slGo" onclick="stashLeftSave()">실함에 담기</button>`); }
+function stashLeftStep(i, d){ const y=slYs[i]; if(!y) return; y.leftN=Math.max(0, Math.round(((+y.leftN||0)+d*0.5)*100)/100); const el=$('#slN'+i); if(el) el.value=y.leftN||''; }
+async function stashLeftSave(){ const rows=slYs.filter(y=>+y.leftN>0 && +y.leftN<1000); if(!rows.length){ closeSheet(); return showRecsAfterWork(); }
+  const b=$('#slGo'); if(b) b.disabled=true; let n=0;
+  for(const y of rows){ const g=parseFloat(y.ball_g)||null, m=parseFloat(y.ball_m)||null, k=Math.round(+y.leftN*100)/100;
+    const { data:row, error } = await sb.from('yarn_stash').insert({ catalog_id:y.catalogId||null, raw_name:y.name.slice(0,60), brand:(y.brand||ybSplit(y.name)[0]||'').slice(0,40)||null, color:(y.color||'').slice(0,40)||null, color_hex:(y.colorHex&&y.colorHex.length)?y.colorHex:null, color_mode:(y.colorHex&&y.colorHex.length)?(y.colorMode||'solid'):null, color_families:(y.colorFamilies&&y.colorFamilies.length)?y.colorFamilies:null, ball_g:g, ball_m:m, fiber:y.fiber||null, fibers:parseMix(y.mix), weight:y.weight||null, bought_balls:k, left_balls:k, read_status:'manual' }).select('id').single();
+    if(error){ toast(error.message); continue; } n++; if(!y.catalogId) sb.rpc('stash_link_catalog', { p_id:row.id }).then(()=>{}); }
+  closeSheet(); if(n) toast(`내 실함에 ${n}개 담았어요`); showRecsAfterWork(); }
 async function stashAddFromDict(y){   // 실 사전·직접 입력으로 고른 실을 실함에 담기
   const g=parseFloat(y.ball_g)||null, m=parseFloat(y.ball_m)||null;
   const { data:row, error } = await sb.from('yarn_stash').insert({ catalog_id:y.catalogId||null, raw_name:y.name.slice(0,60), brand:(y.brand||ybSplit(y.name)[0]||'').slice(0,40)||null, color:(y.color||'').slice(0,40)||null, color_hex:(y.colorHex&&y.colorHex.length)?y.colorHex:null, color_mode:(y.colorHex&&y.colorHex.length)?(y.colorMode||'solid'):null, color_families:(y.colorFamilies&&y.colorFamilies.length)?y.colorFamilies:null, ball_g:g, ball_m:m, fiber:y.fiber||null, fibers:parseMix(y.mix), weight:y.weight||null, bought_balls:+y.amount||1, left_balls:+y.amount||1, read_status:'manual' }).select('id').single();
