@@ -1491,7 +1491,8 @@ const AUTO_MSGS=[
   ['뜨친이 된 뒤 하루가 지나도 채팅이 없을 때','양쪽 회원','알림','○○ 님과 뜨친이 된 지 하루 됐어요. 먼저 인사해 볼까요? 👋','friend-chat-nudge'],
   ['뜨친이 된 순간 (이벤트 기간 ~11/30)','양쪽 회원','알림','뜨친이 생겼어요! 🎉 뜨친과 만나 함께 뜨고, 사진에 @뜨친 과 #뜨친인증 을 적어 올리면 두 분 모두 커피 쿠폰을 드려요.',null,'ev'],
   ['#뜨친인증 글에 함께 뜬 뜨친으로 적혔을 때 (이벤트 기간)','적힌 회원','알림','○○ 님이 뜨친 인증 글에 회원님을 함께 뜬 뜨친으로 적었어요. 확인되면 두 분 모두 커피 쿠폰을 받아요.',null,'ev'],
-  ['#뜨친인증 글이 조건에 안 맞을 때 (이벤트 기간)','글쓴 회원','알림 (푸시 없음)','뜨친 인증 이벤트: 이번 글은 대상이 아니에요 — (이유). 사진과 @뜨친 닉네임, #뜨친인증을 함께 적어 새 글로 올려 주세요.',null,'ev']]],
+  ['#뜨친인증 글이 조건에 안 맞을 때 (이벤트 기간)','글쓴 회원','알림 (푸시 없음)','뜨친 인증 이벤트: 이번 글은 대상이 아니에요 — (이유). 사진과 @뜨친 닉네임, #뜨친인증을 함께 적어 새 글로 올려 주세요.',null,'ev'],
+  ['대표가 뜨친 인증을 [통과]시켰을 때 (그 글에 한 번)','글쓴 회원','지기 댓글 + 댓글 알림','뜨친 생기신 것 축하드려요 🎉 #뜨친인증 확인했어요. 커피 쿠폰은 이벤트가 끝난 뒤(12월 1~4일) 두 분께 지기 채팅으로 보내드릴게요 ☕',null,'ev']]],
  ['모임 · 클래스', [
   ['모임 전날','참여자','알림','내일 14:00 \'모임 이름\' — 장소. (준비물)','remind-daily'],
   ['클래스 전날','확정된 신청자','알림','내일 \'클래스 이름\' — 장소. (준비물)','remind-daily'],
@@ -1879,8 +1880,8 @@ function ddDraw(){ const box=$('#ddBox'), d=DD.d; if(!box||!d) return; const st=
     ${rows.length?`<table><tr><th></th><th>올린 회원 · 뜨친</th><th>올린 날</th><th>글</th><th>사진(AI)</th><th>${DD.tab==='excluded'?'제외 이유':'상태'}</th><th></th></tr>${rows.map(r=>`<tr><td>${r.photo?`<img src="${esc(r.photo)}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;display:block" loading="lazy">`:''}</td><td><b>${esc(r.author||'?')}</b> · ${esc(r.friend||'—')}</td><td class="muted">${fmtd(r.created_at)}</td><td class="muted" style="max-width:260px">${esc((r.body||'').slice(0,60))}</td><td>${ai(r)}</td><td>${r.status==='excluded'?esc(r.reason||''):r.status==='sent'?'보냄 '+fmtd(r.sent_at):DD_ST[r.status]}</td><td style="white-space:nowrap">${act(r)}</td></tr>`).join('')}</table>`:`<p class="muted" style="margin:8px 0 0">${DD.tab==='ok'?'쿠폰을 보낼 쌍이 아직 없어요.':'해당하는 글이 없어요.'}</p>`}
     <p class="muted" style="margin:10px 0 0;font-size:12.5px">서버가 확인하는 것: #뜨친인증 글 · 사진 있음 · 적힌 @닉네임이 실제 뜨친 · 기간 안 · 같은 두 분은 한 번. 사진은 AI 가 통과/애매함만 나눠요. 쿠폰은 한 장에 한 번만 쓸 수 있으니 두 분에게 서로 다른 이미지를 보내 주세요.</p></div>`; }
 function ddPost(id){ openPostPanel(id); }
-async function ddDecide(id, pass){ let reason=null; if(!pass){ reason=prompt('제외하는 이유를 적어 주세요(회원에게 알림으로 가요)', '사진에서 함께 뜬 모습을 확인하지 못했어요'); if(reason===null) return; } else if(!confirm('이 글을 통과로 바꿀까요?')) return;
-  const {error}=await sb.rpc('admin_ddeuchin_decide',{p_id:id,p_pass:pass,p_reason:reason}); if(error) return toast(error.message); toast(pass?'통과로 바꿨어요':'제외했어요'); ddLoad(); }
+async function ddDecide(id, pass){ let reason=null; if(!pass){ reason=prompt('제외하는 이유를 적어 주세요(회원에게 알림으로 가요)', '사진에서 함께 뜬 모습을 확인하지 못했어요'); if(reason===null) return; } else if(!confirm('이 글을 통과로 바꿀까요?\n\n그 글에 지기 계정으로 축하 댓글이 달려요(쿠폰은 12월 1~4일 안내).')) return;
+  const {error}=await sb.rpc('admin_ddeuchin_decide',{p_id:id,p_pass:pass,p_reason:reason}); if(error) return toast(error.message); toast(pass?'통과로 바꿨어요 · 축하 댓글을 달았어요':'제외했어요'); ddLoad(); }
 function ddSendOpen(id){ const r=(DD.d?.rows||[]).find(x=>x.id===id); if(!r) return;
   openPanel(`<h2 style="margin-top:0">쿠폰 보내기</h2><p class="muted">두 분의 지기 채팅으로 쿠폰 이미지를 한 장씩 보내요. 🔔 알림과 푸시도 함께 가요. 보낸 뒤에는 되돌릴 수 없어요.</p>
     <div style="display:grid;gap:16px;margin:16px 0"><label><b>${esc(r.author||'올린 회원')}</b> 님에게 보낼 쿠폰<br><input type="file" id="ddFa" accept="image/*" style="margin-top:6px"></label><label><b>${esc(r.friend||'뜨친')}</b> 님에게 보낼 쿠폰<br><input type="file" id="ddFb" accept="image/*" style="margin-top:6px"></label></div>
