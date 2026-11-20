@@ -43,9 +43,10 @@ begin
   ), k as (select * from m where exact or not exists (select 1 from m where exact)
   ), sure as (
     select count(distinct coalesce(pid::text, sid::text)) n, (array_agg(pid) filter (where pid is not null))[1] p, (array_agg(sid) filter (where sid is not null))[1] s from k
-  ), g as (   -- 확인 필요: 두 글자만 앞에서 겹치거나, 세 글자 이상이 이름 가운데에 들어 있음
+  ), g as (   -- 확인 필요: 두 글자만 앞·뒤에서 겹치거나(예: '스완' ↔ '니팅스완'), 세 글자 이상이 이름 가운데에 들어 있음. 흔한 낱말은 뺀다
     select count(distinct pid) n, (array_agg(pid))[1] p from c
-     where pid is not null and (left(nn, length(mn)) = mn or left(mn, length(nn)) = nn
+     where pid is not null and mn <> all (array['공방','작업실','작업소','뜨개','니트','니팅','코바늘','대바늘','아뜰리에','살롱','스튜디오','knit','knitting','studio','atelier'])
+       and (left(nn, length(mn)) = mn or left(mn, length(nn)) = nn or right(nn, length(mn)) = mn
         or (length(mn) >= 3 and position(mn in nn) > 0) or (length(nn) >= 3 and position(nn in mn) > 0))
   )
   select sure.n, sure.p, sure.s, g.n, g.p into n, o_profile, o_shop, gn, o_guess from sure, g;
