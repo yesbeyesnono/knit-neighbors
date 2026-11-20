@@ -1031,6 +1031,14 @@ body.kb #nav{display:none!important}
 .ydhint{margin:10px 0 0;font-size:.8rem;line-height:1.55;color:var(--color-primary);background:var(--color-bg);border-radius:10px;padding:9px 12px}.slrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.slrow .tx{flex:1;min-width:0;display:flex;flex-direction:column}.slrow .tx b{font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slrow .tx span{font-size:.76rem;color:var(--ink3)}.slrow .ychip{flex:none}
 .nearbar{display:flex;align-items:center;gap:8px;margin:6px 14px 2px;padding:10px 12px;background:var(--color-bg);border-radius:12px;font-size:.82rem;color:var(--color-text-muted)}.nearbar svg{width:16px;height:16px;flex:none;color:var(--color-primary)}.nearbar b{color:var(--ink)}.nearbar a{margin-left:auto;color:var(--color-primary);font-weight:700;font-size:.78rem;white-space:nowrap;cursor:pointer}
 .dcopt{display:flex;width:100%;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;background:var(--color-surface);font:inherit;text-align:left;cursor:pointer;color:var(--ink)}.dcopt svg{width:22px;height:22px;flex:none;color:var(--color-primary)}.dcopt .tx{display:flex;flex-direction:column;gap:2px;flex:1}.dcopt b{font-size:.94rem}.dcopt small{font-size:.78rem;color:var(--color-text-muted)}.dcopt i{margin-left:auto;font-style:normal;color:var(--color-text-muted)}
+.tsrch{margin-left:auto;flex:none;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:var(--hdr-ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.srin{display:flex;align-items:center;gap:8px;margin-top:8px;background:var(--color-surface);border:1.5px solid var(--color-primary);border-radius:999px;padding:0 14px;color:var(--color-text-muted)}.srin #srQ{flex:1;border:0;background:none;box-shadow:none;border-radius:0;margin:0;padding:11px 0;font:inherit;font-size:1rem;min-width:0;outline:0}.srin button{border:0;background:none;color:var(--ink3);font-size:.95rem;padding:6px;cursor:pointer}
+.srsec{display:flex;font-size:.76rem;font-weight:700;color:var(--color-text-muted);margin:18px 2px 8px}.srsec a{margin-left:auto;color:var(--color-primary);cursor:pointer}.srtags{display:flex;flex-wrap:wrap;gap:8px}.srtags .tagchip{padding:7px 13px;font-size:.84rem}
+.srrc{display:flex;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);font-size:.92rem;cursor:pointer}.srrc i{margin-left:auto;font-style:normal;color:var(--ink3);padding:0 6px}
+.srseg{display:flex;gap:8px;margin:14px 0 0}.srseg button{border:1.5px solid var(--line);background:var(--color-surface);border-radius:999px;padding:7px 14px;font:inherit;font-size:.8rem;font-weight:700;color:var(--color-text-muted);cursor:pointer}.srseg button.on{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
+.srmem,.srpost{display:flex;width:100%;gap:10px;align-items:center;border:0;border-bottom:1px solid var(--line);background:none;padding:10px 2px;font:inherit;text-align:left;cursor:pointer;color:var(--ink)}.srpost{align-items:flex-start}.srmem .ava,.srpost .ava{flex:none}
+.srmem span,.srpost span{display:flex;flex-direction:column;min-width:0;flex:1}.srmem b,.srpost b{font-size:.92rem}.srmem small,.srpost small{font-size:.76rem;color:var(--ink3);font-weight:400}.srpost b small{margin-left:6px}.srpost em{font-style:normal;font-size:.9rem;line-height:1.5;margin-top:3px;word-break:break-all}
+.srmem i{font-style:normal;font-size:.72rem;font-weight:700;color:var(--color-primary);background:var(--color-primary-light);border-radius:999px;padding:4px 9px;flex:none}.srmem mark,.srpost mark{background:#FFE9A8;color:inherit;border-radius:3px}.srmore{display:block;margin-top:10px;font-size:.82rem;font-weight:700;color:var(--color-primary);cursor:pointer}
 .hwex{font-size:.8rem;color:var(--color-text-muted);line-height:1.7;margin:0}.hwex b{color:var(--ink);font-weight:600}
 .hwres{max-height:42vh;overflow-y:auto}.hwres button{display:flex;width:100%;align-items:center;gap:8px;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 2px;font:inherit;font-size:.92rem;text-align:left;cursor:pointer;color:var(--ink)}
 .hwres .hwlab{font-size:.74rem;font-weight:700;color:var(--color-text-muted);margin:12px 2px 6px}.hwres .hwlab:first-child{margin-top:4px}
@@ -1160,7 +1168,7 @@ body.kb #nav{display:none!important}
 
   <!-- 커뮤니티 (Threads 스타일) -->
   <section class="view" id="v-comm">
-    <div class="top tsl"><div class="tshead"><h1>우리 동네 뜨개 이야기</h1><i class="yarn"></i></div></div>
+    <div class="top tsl"><div class="tshead"><h1>우리 동네 뜨개 이야기</h1><i class="yarn"></i></div><button type="button" class="tsrch" onclick="openSearch()" aria-label="검색"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></button></div>
     <div class="subtabs" id="commTabs"><button data-f="rank" class="on">추천</button><button data-f="all">최신</button><button data-f="meet">모임</button><button data-f="work">작품</button><button data-f="dong">동네</button><button data-f="friends">친구</button></div>
     <div class="cbox" id="cbox" hidden>
       <div id="cboxAva"></div>
@@ -4751,6 +4759,40 @@ function openMeetGate(){
 
 // ----- 보조 화면(한 장 덮기)
 let subOnBack=null;
+// ===== 검색: 글(본문·#태그) + 회원(닉네임). 두 글자부터. 최근에 찾은 말은 이 기기에만(kn_search_recent)
+let srQ='', srSeg='all', srSeq=0, srT=null, srRes=null;
+function srRecent(){ try{ const a=JSON.parse(localStorage.getItem('kn_search_recent')||'[]'); return Array.isArray(a)?a.filter(x=>typeof x==='string' && x).slice(0,8):[]; }catch(e){ return []; } }
+function srRemember(q){ try{ if(q) localStorage.setItem('kn_search_recent', JSON.stringify([q, ...srRecent().filter(x=>x!==q)].slice(0,8))); }catch(e){} }
+function srForget(q){ try{ if(q) localStorage.setItem('kn_search_recent', JSON.stringify(srRecent().filter(x=>x!==q))); else localStorage.removeItem('kn_search_recent'); }catch(e){} srHome(); }
+function openSearch(){
+  openSub('검색', `<div class="srin">${SVG_SEARCH}<input id="srQ" maxlength="40" placeholder="글 · 닉네임 찾기" autocomplete="off" autocorrect="off" enterkeyhint="search" value="${esc(srQ)}" oninput="srInput(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();srGo(this.value,true);this.blur()}"><button type="button" id="srX" onclick="srPick('')" ${srQ?'':'hidden'}>✕</button></div><div id="srBody"></div>`);
+  if(srQ) srGo(srQ); else { srHome(); setTimeout(()=>$('#srQ')?.focus(), 300); } }
+function srInput(v){ const x=$('#srX'); if(x) x.hidden=!v; clearTimeout(srT); srT=setTimeout(()=>srGo(v), 300); }
+function srPick(q){ const i=$('#srQ'); if(i){ i.value=q; if(!q) i.focus(); } const x=$('#srX'); if(x) x.hidden=!q; srGo(q, !!q); }
+async function srHome(){ const box=$('#srBody'); if(!box) return; srRes=null; const my=++srSeq, rc=srRecent(); let tags=[];
+  const draw=()=>{ box.innerHTML=(tags.length?`<div class="srsec">요즘 많이 쓰는 태그</div><div class="srtags">${tags.map(t=>`<button type="button" class="tagchip" data-t="${esc(t.tag)}" onclick="closeSub();openTag(this.dataset.t)">#${esc(t.tag)}</button>`).join('')}</div>`:'')
+      +(rc.length?`<div class="srsec">최근에 찾은 말<a onclick="srForget()">모두 지우기</a></div>${rc.map(q=>`<div class="srrc" data-q="${esc(q)}" onclick="srPick(this.dataset.q)"><span>${esc(q)}</span><i onclick="event.stopPropagation();srForget(this.parentNode.dataset.q)">✕</i></div>`).join('')}`:'')
+      || '<p class="muted" style="margin:18px 2px;font-size:.88rem">글 내용이나 닉네임을 두 글자 이상 적어 보세요.</p>'; };
+  draw(); try{ const {data}=await sb.rpc('tag_popular',{p_limit:8}); if(my===srSeq && $('#srBody')){ tags=data||[]; draw(); } }catch(e){} }
+async function srGo(v, keep){ const q=String(v||'').trim().replace(/\s+/g,' '); if(q.replace(/\s/g,'').length<2){ srQ=''; return srHome(); }
+  const box=$('#srBody'); if(!box) return; if(q!==srQ) srSeg='all'; srQ=q; if(keep) srRemember(q); const my=++srSeq; if(!srRes || srRes.q!==q) box.innerHTML='<div class="empty">찾는 중…</div>';
+  let mem={n:0,rows:[]}, post={n:0,ids:[]}, rows=[];
+  try{ const [a,b]=await Promise.all([sb.rpc('search_members',{ p_q:q, p_limit:20 }), sb.rpc('search_posts',{ p_q:q, p_limit:20 })]); if(a.data) mem=a.data; if(b.data) post=b.data;
+    if((post.ids||[]).length){ const r=await sb.from('posts').select('id,body,created_at,'+AUTHOR_SEL).in('id', post.ids); rows=(r.data||[]).sort((x,y)=>new Date(y.created_at)-new Date(x.created_at)); } }catch(e){}
+  if(my!==srSeq || !$('#srBody')) return; srRes={ q, mem, n:post.n||0, rows }; srDraw(); }
+async function srMore(){ const R=srRes; if(!R || !R.rows.length) return; const b=$('#srMore'); if(b) b.disabled=true;
+  try{ const p=await sb.rpc('search_posts',{ p_q:R.q, p_before:R.rows[R.rows.length-1].created_at, p_limit:20 }); const ids=(p.data&&p.data.ids)||[];
+    if(ids.length){ const r=await sb.from('posts').select('id,body,created_at,'+AUTHOR_SEL).in('id', ids); if(srRes===R){ R.rows=R.rows.concat((r.data||[]).sort((x,y)=>new Date(y.created_at)-new Date(x.created_at))); } } else R.n=R.rows.length; }catch(e){}
+  if(srRes===R) srDraw(); }
+function srSnip(body, q){ const b=String(body||'').replace(/\s+/g,' ').trim(), i=b.toLowerCase().indexOf(q.toLowerCase()), st=Math.max(0, i-16); return (st>0?'…':'')+b.slice(st, st+72)+(b.length>st+72?'…':'')+(i<0?' #'+q.replace(/\s/g,''):''); }   // 본문에 없으면 #태그로 맞은 글
+function srDraw(){ const box=$('#srBody'), R=srRes; if(!box || !R) return; const toks=[R.q], all=srSeg==='all';
+  const memH=(all?R.mem.rows.slice(0,3):R.mem.rows).map(p=>`<button type="button" class="srmem" onclick="srRemember(srQ);closeSub();openProfile('${p.id}')">${avatar(p)}<span><b>${howMark(p.nickname,toks)}</b><small>${esc([p.dong_name, lvShort(p)].filter(Boolean).join(' · '))}</small></span>${p.is_author?'<i>작가</i>':''}</button>`).join('');
+  const postH=(all?R.rows.slice(0,6):R.rows).map(p=>`<button type="button" class="srpost" onclick="srRemember(srQ);closeSub();openLink({type:'post',id:'${p.id}'})">${avatar(p.author||{})}<span><b>${esc(p.author?.nickname||'')}<small>${ago(p.created_at)}</small></b><small>${esc(p.author?.dong_name||'')}</small><em>${howMark(srSnip(p.body,R.q),toks)}</em></span></button>`).join('');
+  const seg=`<div class="srseg">${[['all','전체'],['post','글 '+R.n],['mem','회원 '+R.mem.n]].map(([k,l])=>`<button type="button" class="${srSeg===k?'on':''}" onclick="srSeg='${k}';srDraw()">${l}</button>`).join('')}</div>`;
+  if(!R.n && !R.mem.n){ box.innerHTML=seg+'<div class="empty">찾은 것이 없어요.<br>다른 낱말로 찾아 보세요</div>'; return; }
+  box.innerHTML=seg
+    +(srSeg!=='post' && memH?`<div class="srsec">회원</div>${memH}${all&&R.mem.n>3?`<a class="srmore" onclick="srSeg='mem';srDraw()">회원 ${R.mem.n-3}명 더 보기 ›</a>`:''}`:(srSeg==='mem'?'<div class="empty">닉네임이 맞는 회원이 없어요</div>':''))
+    +(srSeg!=='mem' && postH?`<div class="srsec">글</div>${postH}${all&&R.n>6?`<a class="srmore" onclick="srSeg='post';srDraw()">글 ${R.n-6}개 더 보기 ›</a>`:(!all&&R.rows.length<R.n?`<button type="button" class="btn o" id="srMore" style="margin-top:12px" onclick="srMore()">더 보기</button>`:'')}`:(srSeg==='post'?'<div class="empty">낱말이 든 글이 없어요</div>':'')); }
 function openSub(title, html, act){ $('#subTitle').textContent=title; $('#subBody').innerHTML=html; const b=$('#subAct'); b.hidden=!act; if(act){ b.textContent=act.label; b.onclick=act.fn; } $('#subpg').hidden=false; $('#subBody').scrollTop=0; }
 function closeSub(){ $('#subpg').hidden=true; $('#subBody').innerHTML=''; subOnBack=null; }
 function subBack(){ const f=subOnBack; subOnBack=null; if(f) return f(); closeSub(); }

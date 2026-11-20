@@ -2275,3 +2275,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 164. 커뮤니티 '동네' 탭을 핀 위치 기준으로 (2026-11-21 대표 확정 시안 dong_tab_near_v1 A안 · v2, 마이그레이션 feed_near — 원본 supabase/feed_near.sql)
 --   feed_near_ids(p_before, p_limit): 내 핀에서 3km 안의 글, 5개가 안 되면 5 → 10 → 30km. 범위(km)와 글 id 만 돌려줌(위치·거리는 내보내지 않음)
 -- ============================================================
+
+-- ============================================================
+-- 165. 검색 — 글 + 회원 (2026-11-21 대표 확정 시안 search_v1, 마이그레이션 search — 원본 supabase/search.sql)
+--   search_posts(p_q, p_before, p_limit): 본문·#태그, 호출한 회원의 권한으로(RLS 그대로) 개수와 글 id · search_members(p_q, p_limit): 닉네임(테스트·정지·삭제 유예·가입 미완료 제외)
+-- ============================================================
