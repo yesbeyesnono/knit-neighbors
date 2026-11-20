@@ -1011,6 +1011,7 @@ body.kb #nav{display:none!important}
 .sheetwrap.ctr .sheet .card .muted{font-size:.84rem!important}
 .sheetwrap.ctr .cbs .btn,.sheetwrap.ctr .sheet>button.btn,#askdlg .bs button{font-size:1rem;height:48px}
 #askdlg .bx{max-width:340px;padding:22px 18px 16px}
+.tkbar{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;align-items:end}.tkbar button{border:0;background:none;padding:0;font:inherit;font-size:.76rem;color:var(--color-text-muted);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;white-space:nowrap;cursor:pointer;min-height:64px}.tkbar button i{display:block;width:100%;border-radius:6px;background:var(--color-primary-light)}.tkbar button.on{color:var(--color-primary);font-weight:700}.tkbar button.on i{background:var(--color-primary)}
 .hwseg{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;background:var(--color-bg);border-radius:12px;padding:3px}
 .hwseg button{border:0;background:none;border-radius:9px;padding:8px 0 6px;font:inherit;font-size:.8rem;color:var(--color-text-muted);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
 .hwseg button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -4182,7 +4183,8 @@ function wYarnPayload(){
 }
 // ===== 완성작품 인증: 확인 뒤 게시 + 뜨개 이야기 (2026-11-16 대표 확정 시안 cert_review_v3, schema 133) =====
 // 올리면 '확인 중' — 본인에게만 보이다가 대표가 콘솔에서 승인하면 커뮤니티에 올라간다. 보완 요청을 받으면 고쳐서 저장하는 순간 다시 확인 대기(서버 트리거)
-const TOOK={ '1d':'하루', '3d':'2~3일', '1w':'일주일쯤', '2w':'2주쯤', '1m':'한 달쯤', 'long':'한 달 넘게' };
+const TOOK={ '1d':'하루', '3d':'2~3일', '1w':'일주일쯤', '2w':'2주쯤', '3w':'3주쯤', '1m':'한 달쯤', 'long':'한 달 넘게' };   // 보여 줄 때의 말(옛 답 '2~3일' 포함)
+const TOOK_PICK=[['1d','하루'],['1w','1주'],['2w','2주'],['3w','3주'],['1m','한 달'],['long','더 오래']];   // 고르는 칸(2026-11-20 대표 확정 시안 took_scale_v2 C안, schema 158): 한 줄 · 오른쪽으로 갈수록 막대가 높아짐
 let wStory={ took:'', knowhow:'', regret:'', how:'', src:null, note:'' };
 const storyPayload=()=>({ took:wStory.took||null, knowhow:(wStory.knowhow||'').trim(), regret:(wStory.regret||'').trim(), how:wStory.how||'', src:(wStory.src&&wStory.src.id)||null, note:(wStory.note||'').trim() });
 // ---- 어떻게 뜬 작품인가요?(2026-11-20 대표 확정 시안 cert_pattern_v3 · v4 B안, schema 157): 도안 · 영상 · 수업 · 창작 중 하나(선택). 도안·영상·수업은 '만든 곳 + 이름'을 서버 사전(work_sources)에서 찾아 고르거나 새로 적는다(새로 적은 것은 후보 → 대표가 콘솔에서 확인). 카드 높이는 무엇을 골라도 같다. 찾기·적기는 아래 창(자판에 가리지 않게 위쪽에 뜸)
@@ -4204,13 +4206,21 @@ function howDraw(){ const b=$('#hwBox'); if(b) b.innerHTML=howHtml(); }
 function howPick(k){ if(wStory.how===k){ if(k!=='original' && !wStory.src) return howOpen(); wStory.how=''; wStory.src=null; wStory.note=''; howDraw(); return; }   // 고른 칸을 다시 누르면 빼기
   wStory.how=k; wStory.src=null; wStory.note=''; howDraw(); if(k!=='original') howOpen(); }
 function howOpen(){ const k=wStory.how; if(!HOW[k] || k==='original') return; if(k!=='pattern') return howWrite(k);
-  openSheet(`<b>도안 찾기</b><input id="hwQ" maxlength="40" autocomplete="off" placeholder="브랜드(작가) 이름 + 도안 이름" oninput="howSearch()"><div id="hwRes" class="hwres">${howEx()}</div>`); setTimeout(()=>{ const q=$('#hwQ'); if(q) q.focus(); }, 280); }
+  openSheet(`<b>도안 찾기</b><input id="hwQ" maxlength="40" autocomplete="off" placeholder="브랜드(작가) 이름 + 도안 이름" oninput="howSearch()" onkeydown="if(event.key==='Enter'){event.preventDefault();howGo()}" enterkeyhint="done"><div id="hwRes" class="hwres">${howEx()}</div><button class="btn" id="hwGo" onclick="howGo()" hidden>이 이름으로 넣기</button>`); setTimeout(()=>{ const q=$('#hwQ'); if(q) q.focus(); }, 280); }
 const howEx=()=>'<p class="hwex">예: <b>쁘띠니트 에바 가디건</b><br>예: <b>바늘이야기 꽈배기 조끼</b><br>브랜드나 도안 이름 하나만 적어도 찾아요.</p>';
 let howRows=[], howT=null, howSeq=0;
 function howMark(t, toks){ let h=esc(t||''); toks.forEach(k=>{ const e=esc(k).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); if(e) h=h.replace(new RegExp(e,'gi'), m=>'\u0001'+m+'\u0002'); }); return h.replace(/\u0001/g,'<mark>').replace(/\u0002/g,'</mark>'); }
-function howSearch(){ clearTimeout(howT); howT=setTimeout(async()=>{ const el=$('#hwQ'), box=$('#hwRes'); if(!el||!box) return; const q=el.value.trim(); if(q.replace(/\s/g,'').length<2){ box.innerHTML=howEx(); return; }
+function howSearch(){ clearTimeout(howT); howT=setTimeout(async()=>{ const el=$('#hwQ'), box=$('#hwRes'); if(!el||!box) return; const q=el.value.trim(); const go=$('#hwGo'); if(go) go.hidden=q.replace(/\s/g,'').length<2; if(q.replace(/\s/g,'').length<2){ howRows=[]; box.innerHTML=howEx(); return; }
   const my=++howSeq; let rows=[]; try{ const {data}=await sb.rpc('work_source_search',{ p_kind:'pattern', p_q:q }); rows=data||[]; }catch(e){} if(my!==howSeq || !$('#hwRes')) return; howRows=rows; const toks=q.split(/\s+/).filter(Boolean);
-  box.innerHTML=rows.map((r,i)=>`<button type="button" onclick="howTake(${i})"><span><b>${howMark(r.title,toks)}</b> ${r.maker?`<small>${howMark(r.maker,toks)}</small>`:''}</span>${r.n?`<span class="n">작품 ${r.n}</span>`:''}</button>`).join('')+`<button type="button" class="add" onclick="howWrite('pattern', true)">＋ 「${esc(q)}」 새 도안으로 적기</button>`; }, 260); }
+  box.innerHTML=rows.map((r,i)=>`<button type="button" onclick="howTake(${i})"><span><b>${howMark(r.title,toks)}</b> ${r.maker?`<small>${howMark(r.maker,toks)}</small>`:''}</span>${r.n?`<span class="n">작품 ${r.n}</span>`:''}</button>`).join('')+`<p class="hwex" style="padding:10px 2px 0">${rows.length?'찾는 도안이 없으면 이름을 끝까지 적고 아래 버튼을 눌러 주세요.':'아직 없는 도안이에요. 이름을 끝까지 적고 아래 버튼을 눌러 주세요.'} <a onclick="howWrite('pattern', true)" style="color:var(--color-primary);font-weight:600;white-space:nowrap">브랜드와 이름 나눠 적기</a></p>`; }, 260); }
+// 적은 그대로 넣기: 목록에 같은 것이 있으면 그것을, 없으면 "브랜드 도안이름" 의 첫 낱말을 브랜드로 보고 새로 넣는다(한 낱말이면 도안 이름만). 잘못 나뉜 것은 [바꾸기]나 콘솔에서 고친다
+async function howGo(){ const q=($('#hwQ')?.value||'').trim().replace(/\s+/g,' '); if(q.replace(/\s/g,'').length<2) return toast('도안 이름을 적어 주세요');
+  const nz=x=>String(x||'').toLowerCase().replace(/[^0-9a-z가-힣]/g,''), hit=howRows.findIndex(r=>nz(r.maker+r.title)===nz(q) || nz(r.title)===nz(q)); if(hit>=0) return howTake(hit);
+  const i=q.indexOf(' '), m=i>0?q.slice(0,i):'', t=i>0?q.slice(i+1):q;
+  await loadBanned(); if(hasBanned(q)) return toast('커뮤니티 가이드라인에 맞지 않는 표현이 있어요');
+  const b=$('#hwGo'); if(b) b.disabled=true; const { data, error }=await sb.rpc('work_source_add',{ p_kind:'pattern', p_maker:m, p_title:t }); if(b) b.disabled=false;
+  if(error || !data) return toast(error?error.message.replace(/^.*?: /,''):'넣지 못했어요');
+  wStory.how='pattern'; wStory.src={ id:data.id, maker:data.maker||'', title:data.title||'' }; closeSheet(); howDraw(); }
 function howTake(i){ const r=howRows[i]; if(!r) return; wStory.how='pattern'; wStory.src={ id:r.id, maker:r.maker||'', title:r.title||'' }; closeSheet(); howDraw(); }
 function howWrite(k, fromQ){ const c=HOW[k]; if(!c) return; let m='', t='';
   if(fromQ){ const q=($('#hwQ')?.value||'').trim().replace(/\s+/g,' '), i=q.indexOf(' '); if(i>0){ m=q.slice(0,i); t=q.slice(i+1); } else t=q; }   // "브랜드 도안이름" 으로 친 것을 두 칸에 나눠 넣어 준다(고칠 수 있음)
@@ -4232,7 +4242,7 @@ function storyRead(){ const k=$('#stKnow'), r=$('#stReg'); if(k) wStory.knowhow=
 function certNext(){ if($('#certPost').disabled) return;
   openSub('뜨개 이야기', `<div class="stq"><p class="muted" style="margin:0;font-size:.84rem;line-height:1.5">같은 작품을 뜨는 분이 읽고 배워 가는 부분이에요.</p>
     <div class="ccard"><div class="cfl">어떻게 뜬 작품인가요? <span class="muted">선택</span></div><div id="hwBox">${howHtml()}</div></div>
-    <div class="ccard"><div class="cfl">얼마나 걸렸나요? <span class="req">필수</span></div><div class="stchips">${Object.entries(TOOK).map(([k,l])=>`<button type="button" class="${wStory.took===k?'on':''}" data-k="${k}" onclick="wStory.took=this.dataset.k;[...this.parentNode.children].forEach(b=>b.classList.toggle('on',b===this))">${l}</button>`).join('')}</div></div>
+    <div class="ccard"><div class="cfl">얼마나 걸렸나요? <span class="req">필수</span></div><div class="tkbar">${TOOK_PICK.map(([k,l],i)=>`<button type="button" class="${wStory.took===k?'on':''}" data-k="${k}" onclick="wStory.took=this.dataset.k;[...this.parentNode.children].forEach(b=>b.classList.toggle('on',b===this))"><i style="height:${10+6*i}px"></i>${l}</button>`).join('')}</div></div>
     <div class="ccard"><div class="cfl">뜨기 노하우 <span class="req">필수</span></div><p class="muted" style="margin:0 0 8px;font-size:.8rem;line-height:1.5">어려웠던 곳과 이렇게 하니 됐다는 방법을 적어 주세요. 같은 작품을 뜨는 분께 가장 도움이 돼요.</p><textarea id="stKnow" maxlength="500" placeholder="예: 소매 코 줍기에서 구멍이 생겨서, 한 코 더 주워 다음 단에 모아떴어요" style="min-height:96px" oninput="wStory.knowhow=this.value">${esc(wStory.knowhow||'')}</textarea></div>
     <div class="ccard"><div class="cfl">아쉬운 점 · 다음엔 이렇게 <span class="muted">선택</span></div><textarea id="stReg" maxlength="300" placeholder="예: 실을 한 호수 굵게 쓸걸 그랬어요" style="min-height:72px" oninput="wStory.regret=this.value">${esc(wStory.regret||'')}</textarea></div>
     <p class="muted" style="margin:0;font-size:.78rem;text-align:center;line-height:1.5">${editWorkPost?'저장하면 바로 반영돼요.':'확인 요청을 보내면 knitup 이 확인한 뒤 커뮤니티에 올려 드려요.'}</p></div>`, { label: editWorkPost?'저장':'확인 요청', fn: storySubmit });

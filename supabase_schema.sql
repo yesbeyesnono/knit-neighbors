@@ -2235,3 +2235,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   work_set_story 가 p_story 의 how · src · note 를 받는다(옛 앱은 보내지 않아 그대로) · 콘솔 admin_source_list · admin_source_decide(ok · merge · exclude · reopen)
 --   works.pattern_source 에는 보여 줄 글("만든 곳 · 이름" 또는 "창작")을 함께 적어 둔다
 -- ============================================================
+
+-- ============================================================
+-- 158. 걸린 시간에 '3주'(3w) 받기 (2026-11-20 대표 확정 시안 took_scale_v2 C안, 마이그레이션 took_3w — 원본 supabase/took_3w.sql)
+--   works_story_chk 와 work_set_story 가 3w 를 받는다. 앱의 고르는 칸: 하루 · 1주 · 2주 · 3주 · 한 달 · 더 오래(옛 답 3d '2~3일'은 그대로 보임)
+-- ============================================================
