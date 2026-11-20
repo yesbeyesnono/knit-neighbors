@@ -229,6 +229,10 @@ begin
   out := pg_temp.must_fail(out, 'work_sources (member direct)', 'select count(*) from public.work_sources');   -- schema 157
   out := pg_temp.must_fail(out, 'admin_source_list', 'select public.admin_source_list()');
   out := pg_temp.must_fail(out, 'admin_source_decide', 'select public.admin_source_decide(gen_random_uuid(), ''exclude'')');
+  out := pg_temp.must_fail(out, 'admin_source_makers', 'select public.admin_source_makers()');   -- schema 161
+  out := pg_temp.must_fail(out, 'admin_source_maker_set', 'select public.admin_source_maker_set(gen_random_uuid(), true)');
+  out := pg_temp.must_fail(out, 'work_source_relink', 'select public.work_source_relink()');
+  out := pg_temp.must_fail(out, '_src_maker_find', 'select public._src_maker_find(''x'')');
   out := pg_temp.must_fail(out, '_src_norm', 'select public._src_norm(''x'')');
   out := pg_temp.must_fail(out, 'source_ai_pending', 'select public.source_ai_pending(1)');   -- schema 159
   out := pg_temp.must_fail(out, 'source_ai_apply', 'select public.source_ai_apply(gen_random_uuid(), ''{}''::jsonb)');

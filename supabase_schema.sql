@@ -2252,3 +2252,9 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 160. 보낸 뜨친 신청 취소 (2026-11-20 대표 확정 시안 friend_cancel_v1, 마이그레이션 friend_cancel — 원본 supabase/friend_cancel.sql)
 --   취소는 원래 정책 friendships_delete_own_request 로 됨(앱에 버튼이 없었음). 트리거 friendships_cancel_cleanup → friend_request_cleanup(): pending 줄이 지워지면 상대에게 갔던 friend_request 알림을 함께 지움
 -- ============================================================
+
+-- ============================================================
+-- 161. 도안의 '만든 곳'을 앱 작가·공방과 자동으로 잇기 (2026-11-20 대표 지시, 마이그레이션 source_maker — 원본 supabase/source_maker.sql)
+--   work_sources.maker_profile · maker_shop · maker_fixed. 이름(공백·기호 뺀 것)이 같거나 세 글자 이상 앞에서 겹치면 묶음(_src_maker_find), 둘 이상 맞으면 묶지 않음
+--   트리거 work_sources_maker(새로 적힐 때) · profiles_source_relink · shops_source_relink(작가 지정·이름 변경 때 다시 맞춤). 콘솔: admin_source_makers · admin_source_maker_set([끊기])
+-- ============================================================
