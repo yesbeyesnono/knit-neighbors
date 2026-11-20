@@ -1802,7 +1802,7 @@ async function techExclude(id){ try{ await jtool('exclude_candidate',{candidate_
 const SRC_KIND={ pattern:'도안', video:'영상', class:'수업', original:'창작' };
 let SRC={ rows:[], tab:'candidate' };
 VIEWS.sources = async()=>{ const {data,error}=await sb.rpc('admin_source_list'); if(error){ $('#main').innerHTML=`<h1>도안 후보</h1><div class="card muted">${esc(error.message)}</div>`; return; }
-  SRC.mk=(await sb.rpc('admin_source_makers')).data||{}; SRC.rows=data.rows||[]; SRC.ai=data.ai_merged||[]; SRC.originals=data.originals||0; SRC.top=data.top_original||[]; srcDraw(); };
+  { const mk=(await sb.rpc('admin_source_makers')).data||{}; SRC.mk=mk.rows||{}; SRC.makers=mk.makers||[]; SRC.aliases=mk.aliases||[]; } SRC.rows=data.rows||[]; SRC.ai=data.ai_merged||[]; SRC.originals=data.originals||0; SRC.top=data.top_original||[]; srcDraw(); };
 function srcDraw(){ const R=SRC.rows, n=k=>R.filter(r=>r.status===k).length, rows=R.filter(r=>r.status===SRC.tab), oks=R.filter(r=>r.status==='ok');
   const nm=r=>`${esc(r.title||'')}${r.maker?` <span class="muted">· ${esc(r.maker)}</span>`:''}`;
   $('#main').innerHTML=`<h1>도안 후보 <small>회원이 완성작품 인증에서 적은 도안 · 영상 · 수업 — 확인 대기 ${n('candidate')}</small></h1>
@@ -1815,7 +1815,8 @@ function srcDraw(){ const R=SRC.rows, n=k=>R.filter(r=>r.status===k).length, row
       ${oks.filter(o=>o.kind===r.kind).length?`<div class="row" style="margin-top:6px;gap:6px"><select id="srcTo-${r.id}" style="max-width:190px"><option value="">다른 것에 합치기…</option>${oks.filter(o=>o.kind===r.kind).map(o=>`<option value="${o.id}">${esc(o.title)}${o.maker?' · '+esc(o.maker):''}</option>`).join('')}</select><button onclick="srcMergeTo('${r.id}')">합치기</button></div>`:''}`
       :r.status==='ok'?`<button onclick="srcOk('${r.id}')">이름 고치기</button> <button onclick="srcAct('${r.id}','exclude')">제외</button>`:`<button onclick="srcAct('${r.id}','reopen')">다시 후보로</button>`}</td></tr>`).join('')}</table>`
     :`<div class="card muted">${SRC.tab==='candidate'?'확인을 기다리는 후보가 없어요':'해당하는 것이 없어요'}</div>`}
-  <p class="muted" style="margin-top:10px">새 후보는 AI 가 먼저 봐서, 이름도 작품 사진도 같은 것은 바로 묶어요(한글·영문 표기가 달라도). 묶은 것은 'AI 가 묶은 것'에서 되돌릴 수 있어요. 만든 곳 이름이 앱에 있는 작가·공방과 맞으면 자동으로 그 계정과 묶어 둬요(틀리면 [끊기]). [확인]하면 이름을 다듬어 사전에 올리고, [합치기]하면 그 이름으로 뜬 작품이 합친 쪽으로 옮겨져요. [제외]하면 그 작품들의 도안 표시가 빠져요(작품은 그대로).</p>
+  <p class="muted" style="margin-top:10px">새 후보는 AI 가 먼저 봐서, 이름도 작품 사진도 같은 것은 바로 묶어요(한글·영문 표기가 달라도). 묶은 것은 'AI 가 묶은 것'에서 되돌릴 수 있어요. 만든 곳 이름이 앱에 있는 작가·공방(또는 아래의 다른 이름)과 맞으면 자동으로 그 계정과 묶어 둬요(틀리면 [끊기]). 확실하지 않으면 '같아 보여요'로만 알리고, [맞아요]를 누르면 그 이름은 다음부터 자동으로 묶여요.</p>
+  ${srcAliasHtml()} [확인]하면 이름을 다듬어 사전에 올리고, [합치기]하면 그 이름으로 뜬 작품이 합친 쪽으로 옮겨져요. [제외]하면 그 작품들의 도안 표시가 빠져요(작품은 그대로).</p>
   <h2>창작 작품 <small class="muted" style="font-weight:400">직접 만든 작품이라고 표시한 인증 ${SRC.originals}건</small></h2>
   <div class="card">${SRC.top.length?SRC.top.map(t=>`<a href="#" onclick="openUserPanel('${t.id}');return false" style="margin-right:12px">${esc(t.nick||'회원')} <b>${t.n}</b></a>`).join(''):'<span class="muted">아직 없어요</span>'}<div class="muted" style="margin-top:6px">창작 작품이 많은 회원 — 도안을 낼 수 있는 분을 찾는 자료예요.</div></div>`;
   if(typeof mcApply==='function') mcApply(); }
@@ -1827,9 +1828,20 @@ function srcAiHtml(){ const A=SRC.ai||[], ph=a=>(a||[]).filter(Boolean).length?`
     <td class="muted">${esc(r.why||'')}</td><td class="muted">${r.at?fmtd(r.at):''}</td>
     <td><button onclick="srcAct('${r.id}','unmerge')">되돌리기</button></td></tr>`).join('')}</table>`:`<div class="card muted">AI 가 묶은 것이 아직 없어요</div>`; }
 // 만든 곳이 앱 작가·공방과 이름이 맞으면 서버가 묶어 둔다(schema 161). [끊기]하면 자동이 다시 묶지 않는다
-function srcMk(r){ const m=(SRC.mk||{})[r.id]; if(!m) return ''; if(m.profile) return `<div style="font-size:.8rem;color:var(--green,#3E6B48);margin-top:2px">앱 ${m.shop?'공방':'작가'}: <a href="#" onclick="openUserPanel('${m.profile}');return false">${esc(m.shop||m.nick||'')}</a> <button style="padding:1px 7px;font-size:.74rem" onclick="srcMkSet('${r.id}',true)">끊기</button></div>`;
-  return m.fixed?`<div class="muted" style="font-size:.8rem;margin-top:2px">앱 작가와 묶지 않음 <button style="padding:1px 7px;font-size:.74rem" onclick="srcMkSet('${r.id}',false)">다시 맞추기</button></div>`:''; }
-async function srcMkSet(id, off){ if(off && !confirm('이 이름과 앱 작가·공방의 연결을 끊을까요? 자동으로 다시 묶지 않아요.')) return; const {error}=await sb.rpc('admin_source_maker_set',{ p_id:id, p_off:off }); if(error) return toast(error.message); toast(off?'끊었어요':'다시 맞췄어요'); route(); }
+function srcMk(r){ const m=(SRC.mk||{})[r.id]||{}, sm='padding:1px 7px;font-size:.74rem', opts=(SRC.makers||[]).map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('');
+  if(m.profile) return `<div style="font-size:.8rem;color:var(--green,#3E6B48);margin-top:2px">앱 ${m.shop?'공방':'작가'}: <a href="#" onclick="openUserPanel('${m.profile}');return false">${esc(m.shop||m.nick||'')}</a> <button style="${sm}" onclick="srcMkSet('${r.id}',true)">끊기</button></div>`;
+  if(m.guess) return `<div style="font-size:.8rem;color:var(--amber);margin-top:2px">앱 작가 「${esc(m.guess_nick||'')}」 같아 보여요 <button class="p" style="${sm}" onclick="srcMkLink('${r.id}','${m.guess}')">맞아요</button> <button style="${sm}" onclick="srcMkSet('${r.id}',true)">아니에요</button></div>`;
+  if(!r.maker) return '';
+  return `<div class="muted" style="font-size:.8rem;margin-top:2px">${m.fixed?'앱 작가와 묶지 않음 ':''}<select id="srcMk-${r.id}" style="max-width:150px;font-size:.78rem;padding:1px 4px"><option value="">앱 작가와 잇기…</option>${opts}</select> <button style="${sm}" onclick="srcMkLink('${r.id}',$('#srcMk-${r.id}').value)">잇기</button></div>`; }
+async function srcMkSet(id, off){ if(off && !confirm('이 이름을 앱 작가·공방과 묶지 않을까요? 자동으로 다시 묶지 않아요.')) return; const {error}=await sb.rpc('admin_source_maker_set',{ p_id:id, p_off:off }); if(error) return toast(error.message); toast(off?'묶지 않기로 했어요':'다시 맞췄어요'); route(); }
+async function srcMkLink(id, pid){ if(!pid) return toast('작가를 골라 주세요'); const {error}=await sb.rpc('admin_source_maker_link',{ p_id:id, p_profile:pid }); if(error) return toast(error.message); toast('이었어요 — 같은 이름은 다음부터 자동으로 묶여요'); route(); }
+// 작가의 다른 이름(브랜드 이름 · 풀어 쓴 이름 · 본명): 회원이 이 이름으로 적어도 그 작가와 묶인다
+function srcAliasHtml(){ const A=SRC.aliases||[], opts=(SRC.makers||[]).map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('');
+  return `<h2>작가의 다른 이름 <small class="muted" style="font-weight:400">회원이 이렇게 적어도 그 작가와 묶어요 (끝의 '작가'·'님'은 빼고 적어요)</small></h2>
+  <div class="card"><div class="row" style="flex-wrap:wrap;gap:6px"><select id="alWho" style="max-width:200px"><option value="">작가·공방…</option>${opts}</select><input id="alName" placeholder="다른 이름 (예: 풀어 쓴 이름)" maxlength="40" style="max-width:220px"><button class="p" onclick="srcAliasAdd()">넣기</button></div>
+  <div style="margin-top:10px">${A.length?A.map(a=>`<span class="chip" style="margin:0 6px 6px 0">${esc(a.nick||'')} ← <b>${esc(a.alias)}</b> <a href="#" data-a="${esc(a.alias)}" onclick="srcAliasDel(this.dataset.a);return false" style="margin-left:4px">지우기</a></span>`).join(''):'<span class="muted">아직 없어요</span>'}</div></div>`; }
+async function srcAliasAdd(){ const p=$('#alWho').value, v=$('#alName').value.trim(); if(!p||!v) return toast('작가와 이름을 넣어 주세요'); const {error}=await sb.rpc('admin_maker_alias',{ p_profile:p, p_alias:v }); if(error) return toast(error.message); toast('넣었어요'); route(); }
+async function srcAliasDel(v){ if(!confirm(`다른 이름 「${v}」을 지울까요?`)) return; const {error}=await sb.rpc('admin_maker_alias',{ p_profile:null, p_alias:v }); if(error) return toast(error.message); toast('지웠어요'); route(); }
 async function srcAct(id, action, into){ const msg={ unmerge:'되돌릴까요? 묶였던 작품이 원래 이름으로 돌아가고, 이 이름은 다시 확인 대기로 가요.', merge:'이 후보를 비슷한 것에 합칠까요? 이 이름으로 뜬 작품이 합친 쪽으로 옮겨져요.', exclude:'제외할까요? 이 이름으로 뜬 작품의 도안 표시가 빠져요.', reopen:'다시 후보로 돌릴까요?' }[action]; if(msg && !confirm(msg)) return;
   const {error}=await sb.rpc('admin_source_decide',{ p_id:id, p_action:action, p_into:into||null }); if(error) return toast(error.message); toast({merge:'합쳤어요',unmerge:'되돌렸어요',exclude:'제외했어요',reopen:'후보로 돌렸어요'}[action]||'처리했어요'); route(); }
 function srcMergeTo(id){ const v=$('#srcTo-'+id)?.value; if(!v) return toast('합칠 곳을 골라 주세요'); srcAct(id,'merge',v); }

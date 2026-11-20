@@ -2258,3 +2258,10 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   work_sources.maker_profile · maker_shop · maker_fixed. 이름(공백·기호 뺀 것)이 같거나 세 글자 이상 앞에서 겹치면 묶음(_src_maker_find), 둘 이상 맞으면 묶지 않음
 --   트리거 work_sources_maker(새로 적힐 때) · profiles_source_relink · shops_source_relink(작가 지정·이름 변경 때 다시 맞춤). 콘솔: admin_source_makers · admin_source_maker_set([끊기])
 -- ============================================================
+
+-- ============================================================
+-- 162. 만든 곳 ↔ 앱 작가: 다른 이름 · '같아 보여요'는 대표 확인 (2026-11-20 대표 지시, 마이그레이션 source_maker_alias — 원본 supabase/source_maker_alias.sql)
+--   표 work_maker_aliases(작가의 다른 이름 — 본명이 들어갈 수 있어 관리자 함수로만) · work_sources.maker_guess
+--   _src_maker_find 가 (o_profile, o_shop, o_guess) 를 돌려줌: 끝의 '작가·님' 등은 떼고, 확실하면 묶고 두 글자만 겹치는 것 등은 guess 로만
+--   콘솔: admin_source_makers(rows · makers · aliases) · admin_maker_alias(넣기·지우기) · admin_source_maker_link([맞아요]·손으로 잇기 → 그 표기를 다른 이름으로)
+-- ============================================================
