@@ -3248,12 +3248,14 @@ const hnDay=()=>{ const t=new Date(Date.now()+9*36e5); return t.toISOString().sl
 function hnNever(){ try{ const a=JSON.parse(localStorage.getItem('kn_notice_never')||'[]'); return Array.isArray(a)?a.map(String):[]; }catch(e){ return []; } }
 function hnSeenToday(){ try{ const o=JSON.parse(localStorage.getItem('kn_notice_seen')||'{}'); return o && o.day===hnDay() && Array.isArray(o.ids) ? o.ids.map(String) : []; }catch(e){ return []; } }
 function hnLeft(){ const nv=hnNever(), sn=hnSeenToday(); return homeNotices.filter(n=>!nv.includes(String(n.id)) && !sn.includes(String(n.id))); }   // 다시 보지 않기로 끈 것 · 오늘 이미 눌러 본 것은 뺀다
+let hnOnce=false;   // 이번에 앱을 연 뒤 시작 팝업을 이미 띄웠는지(닫은 뒤 홈으로 돌아와도 다시 띄우지 않는다)
 function homeNoticePop(){
+  if(hnOnce) return;
   if(!me || !myProfile?.onboarded_at || !myProfile?.terms_agreed_at) return;
   if(!['map','comm'].includes(view) || $('#sheetwrap').classList.contains('on') || $('#hnpop') || $('#askdlg') || $('#fqpop')) return;
   try{ if(localStorage.getItem('kn_notice_day')===hnDay()) return; }catch(e){ return; }
   const k=hnDeck(); if(!k.ls.length) return;
-  hnDraw(k.ls, k.start);
+  hnOnce=true; hnDraw(k.ls, k.start);
 }
 function hnDraw(ls, start){ $('#hnpop')?.remove(); const d=document.createElement('div'); d.id='hnpop';
   // 그림: 앱에 든 것(events/…) · 홈페이지 images · 우리 저장소의 공개 사진만
