@@ -229,6 +229,9 @@ begin
   out := pg_temp.must_fail(out, 'admin_source_list', 'select public.admin_source_list()');
   out := pg_temp.must_fail(out, 'admin_source_decide', 'select public.admin_source_decide(gen_random_uuid(), ''exclude'')');
   out := pg_temp.must_fail(out, '_src_norm', 'select public._src_norm(''x'')');
+  out := pg_temp.must_fail(out, 'source_ai_pending', 'select public.source_ai_pending(1)');   -- schema 159
+  out := pg_temp.must_fail(out, 'source_ai_apply', 'select public.source_ai_apply(gen_random_uuid(), ''{}''::jsonb)');
+  out := pg_temp.must_fail(out, 'source_ai_tick', 'select public.source_ai_tick()');
   out := pg_temp.must_fail(out, 'set_pattern_pkg(any)', 'select public.set_pattern_pkg((select id from public.patterns limit 1), null)');
   v := public.supporter_stats(); out := out || ' | ' || case when v is null then 'supporter_stats hidden' else 'FAIL supporter_stats visible' end;
   reset role;
@@ -284,6 +287,8 @@ begin
   out := pg_temp.must_fail(out, 'work_sources(anon)', 'select count(*) from public.work_sources');   -- schema 157
   out := pg_temp.must_fail(out, 'work_source_search(anon)', 'select public.work_source_search(''pattern'', ''x'')');
   out := pg_temp.must_fail(out, 'work_source_add(anon)', 'select public.work_source_add(''pattern'', ''a'', ''bb'')');
+  out := pg_temp.must_fail(out, 'source_ai_pending(anon)', 'select public.source_ai_pending(1)');   -- schema 159
+  out := pg_temp.must_fail(out, 'source_ai_apply(anon)', 'select public.source_ai_apply(gen_random_uuid(), ''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'friend_rec_refresh(anon)', 'select public.friend_rec_refresh()');
   out := pg_temp.must_fail(out, 'admin_friend_wants(anon)', 'select public.admin_friend_wants()');
   out := pg_temp.must_fail(out, 'friend_rec_weekly(anon)', 'select public.friend_rec_weekly()');   -- schema 145

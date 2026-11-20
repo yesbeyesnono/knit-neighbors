@@ -2240,3 +2240,10 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 158. 걸린 시간에 '3주'(3w) 받기 (2026-11-20 대표 확정 시안 took_scale_v2 C안, 마이그레이션 took_3w — 원본 supabase/took_3w.sql)
 --   works_story_chk 와 work_set_story 가 3w 를 받는다. 앱의 고르는 칸: 하루 · 1주 · 2주 · 3주 · 한 달 · 더 오래(옛 답 3d '2~3일'은 그대로 보임)
 -- ============================================================
+
+-- ============================================================
+-- 159. 도안 후보를 AI 가 자동으로 묶기 (2026-11-20 대표 지시, 마이그레이션 source_ai — 원본 supabase/source_ai.sql · Edge supabase/functions/source-match)
+--   work_sources.ai_at / ai_result / merged_by · source_ai_pending(볼 후보) · source_ai_apply(판단 받아 적기 — 이름도 사진도 같을 때만 합침) · source_ai_tick(크론 source-ai, 10분마다)
+--   work_source_search 는 합쳐진 다른 표기로 쳐도 합친 쪽이 나옴 · admin_source_list 에 ai_sim · ai_merged · admin_source_decide 에 unmerge(되돌리기)
+--   스위치 jigi_config.source_ai (on)
+-- ============================================================
