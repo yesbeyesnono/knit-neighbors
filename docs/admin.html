@@ -312,6 +312,7 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
     <a href="#badwords" data-v="badwords">금지어 · 욕설 사전</a>
     <a href="#banned" data-v="banned">금지어 · 금칙어</a>
     <a href="#techcand" data-v="techcand">기법 후보</a>
+    <a href="#sources" data-v="sources">도안 후보</a>
     <div class="grp">시스템</div>
     <a href="#logs" data-v="logs">관리자 로그</a>
     <a href="#settings" data-v="settings">설정</a>
@@ -371,7 +372,7 @@ const NAV=[
   {l:'가게·작가·도안', items:[['shops','파트너 가게'],['authors','작가 신청'],['invites','초대·안내'],['patterns','도안'],['store','상점 (Lab)']]},
   {l:'실 데이터', items:[['yarns','실 사전'],['stash','회원 실 현황']]},
   {l:'현황·분석', items:[['dash','대시보드'],['dong','동네 분포'],['ai-photos','AI 데이터',[['ai-photos','사진↔기법 라벨'],['ai-path','학습 경로'],['ai-qa','질문·해결 댓글'],['ai-yarn','실·바늘 통계']]],['export','내보내기']]},
-  {l:'지기 AI 관리', items:[['rules','규칙'],['modlog','기록·되돌리기'],['kb','지식 창고'],['badwords','금지어',[['badwords','욕설 사전 (지기 AI 감지)'],['banned','금칙어 (글쓰기 차단)']]],['techcand','기법 후보']]},
+  {l:'지기 AI 관리', items:[['rules','규칙'],['modlog','기록·되돌리기'],['kb','지식 창고'],['badwords','금지어',[['badwords','욕설 사전 (지기 AI 감지)'],['banned','금칙어 (글쓰기 차단)']]],['techcand','기법 후보'],['sources','도안 후보']]},
   {l:'시스템', items:[['logs','관리자 로그'],['settings','설정'],['supporters','1기 서포터즈 (중단)']]}
 ];
 let navCur='today';
@@ -1372,6 +1373,7 @@ VIEWS.certs = async(arg)=>{
   if(['pending','fix','done'].includes(arg)) CERT.tab=arg;
   const {data,error}=await sb.rpc('admin_work_queue',{p_tab:CERT.tab}); if(error) throw error;
   CERT.items=(data&&data.items)||[]; CERT.counts=(data&&data.counts)||{};
+  try{ const ids=CERT.items.map(x=>x.id); if(ids.length){ const r=await sb.from('works').select('id,made_how,pattern_source,source_note').in('id',ids); const m={}; (r.data||[]).forEach(w=>m[w.id]=w); CERT.items.forEach(x=>Object.assign(x, m[x.id]||{})); } }catch(e){}
   if(!CERT.items.some(x=>x.id===CERT.sel)) CERT.sel=CERT.items[0]?CERT.items[0].id:null;
   const n=$('#nCert'); if(n){ n.hidden=!CERT.counts.pending; n.textContent=CERT.counts.pending||''; }
   const tabs=[['pending','확인 대기',CERT.counts.pending],['fix','보완 중',CERT.counts.fix],['done','끝난 것',null]];
@@ -1390,7 +1392,7 @@ function certDraw(){
   const tp={}; (Array.isArray(x.tech_photos)?x.tech_photos:[]).forEach(t=>{ tp[t.photo]=((t.techniques||[]).map(id=>tn[id]||id).join(' · '))+(t.memo?' — '+t.memo:''); });
   const pics=(x.photos||[]).map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener" style="background-image:url('${esc(u)}')"><em>${esc(i===0?'전체':(tp[u]||'기법 표시 없음'))}</em></a>`).join('');
   const needles=(Array.isArray(x.needles)?x.needles:[]).map(n=>[n.type,n.size].filter(Boolean).join(' ')).join(', ');
-  const facts=[x.took&&CERT_TOOK[x.took]?['걸린 시간',CERT_TOOK[x.took]]:null, x.yarn_info?['실',x.yarn_info]:null, needles?['바늘',needles]:null, x.gauge?['게이지',x.gauge]:null, x.finished_size?['크기',x.finished_size]:null].filter(Boolean);
+  const facts=[x.made_how&&SRC_KIND[x.made_how]?[SRC_KIND[x.made_how], x.made_how==='original'?(x.source_note||'직접 만든 작품'):(x.pattern_source||'')]:null, x.took&&CERT_TOOK[x.took]?['걸린 시간',CERT_TOOK[x.took]]:null, x.yarn_info?['실',x.yarn_info]:null, needles?['바늘',needles]:null, x.gauge?['게이지',x.gauge]:null, x.finished_size?['크기',x.finished_size]:null].filter(Boolean);
   const hasClose=(x.photos||[]).length>1, allTagged=!x.no_tech_photo && (x.photos||[]).slice(1).every(u=>tp[u]);
   const chk=[[hasClose,'전체 사진 · 가까운 사진 있음','가까이 찍은 사진이 없어요'],[hasClose&&allTagged,'가까운 사진마다 기법 표시 있음','기법 표시가 없는 사진이 있어요'],[!!(x.took&&x.knowhow),'뜨개 이야기 필수 2개 채움',x.no_story?'뜨개 이야기 없음 — 옛 버전 앱으로 올린 인증(앱에 칸이 없어요)':'뜨개 이야기가 덜 채워졌어요']];
   const open=x.status==='pending'||x.status==='fix';
@@ -1796,6 +1798,32 @@ VIEWS.techcand = async()=>{
 };
 async function techLink(id){ const t=$('#tc-'+id).value; if(!t) return toast('기존 기법을 골라 주세요'); try{ await jtool('link_technique_alias',{candidate_id:id,technique_id:t}); toast('연결했어요'); route(); }catch(e){ toast(e.message); } }
 async function techExclude(id){ try{ await jtool('exclude_candidate',{candidate_id:id}); route(); }catch(e){ toast(e.message); } }
+// ===== 도안 후보(2026-11-20 대표 확정, schema 157): 회원이 인증에서 새로 적은 도안·영상·수업 — [확인] / [합치기] / [제외]. 비슷한 이름은 서버가 찾아 준다(글자 비교 — 한글·영문 표기가 다른 것은 '합칠 곳'을 직접 골라 합친다)
+const SRC_KIND={ pattern:'도안', video:'영상', class:'수업', original:'창작' };
+let SRC={ rows:[], tab:'candidate' };
+VIEWS.sources = async()=>{ const {data,error}=await sb.rpc('admin_source_list'); if(error){ $('#main').innerHTML=`<h1>도안 후보</h1><div class="card muted">${esc(error.message)}</div>`; return; }
+  SRC.rows=data.rows||[]; SRC.originals=data.originals||0; SRC.top=data.top_original||[]; srcDraw(); };
+function srcDraw(){ const R=SRC.rows, n=k=>R.filter(r=>r.status===k).length, rows=R.filter(r=>r.status===SRC.tab), oks=R.filter(r=>r.status==='ok');
+  const nm=r=>`${esc(r.title||'')}${r.maker?` <span class="muted">· ${esc(r.maker)}</span>`:''}`;
+  $('#main').innerHTML=`<h1>도안 후보 <small>회원이 완성작품 인증에서 적은 도안 · 영상 · 수업 — 확인 대기 ${n('candidate')}</small></h1>
+  <div class="tabs">${[['candidate','확인 대기'],['ok','확인한 것'],['excluded','제외']].map(([k,l])=>`<button class="${SRC.tab===k?'on':''}" onclick="SRC.tab='${k}';srcDraw()">${l} ${n(k)}</button>`).join('')}</div>
+  ${rows.length?`<table><tr><th>종류</th><th>이름 · 만든 곳</th><th>작품</th><th>비슷한 것</th><th>적은 회원</th><th></th></tr>${rows.map(r=>`<tr><td><span class="chip">${SRC_KIND[r.kind]||r.kind}</span></td>
+    <td><b>${esc(r.title||'')}</b><div class="muted">${esc(r.maker||'(만든 곳 없음)')}</div>${(r.photos||[]).length?`<div style="display:flex;gap:4px;margin-top:4px">${r.photos.filter(Boolean).map(u=>`<img src="${esc(u)}" loading="lazy" style="width:44px;height:44px;object-fit:cover;border-radius:6px">`).join('')}</div>`:''}</td>
+    <td>${r.n||0}</td><td>${r.sim?`<span style="color:var(--amber)">「${esc(r.sim.title)}${r.sim.maker?' · '+esc(r.sim.maker):''}」와 같아 보여요</span>`:'<span class="muted">없음</span>'}</td>
+    <td class="muted">${esc(r.by_nick||'')}<br>${fmtd(r.created_at)}</td>
+    <td>${r.status==='candidate'?`<div class="row" style="flex-wrap:wrap;gap:6px">${r.sim?`<button class="p" onclick="srcAct('${r.id}','merge','${r.sim.id}')">합치기</button>`:''}<button class="${r.sim?'':'p'}" onclick="srcOk('${r.id}')">확인</button><button onclick="srcAct('${r.id}','exclude')">제외</button></div>
+      ${oks.filter(o=>o.kind===r.kind).length?`<div class="row" style="margin-top:6px;gap:6px"><select id="srcTo-${r.id}" style="max-width:190px"><option value="">다른 것에 합치기…</option>${oks.filter(o=>o.kind===r.kind).map(o=>`<option value="${o.id}">${esc(o.title)}${o.maker?' · '+esc(o.maker):''}</option>`).join('')}</select><button onclick="srcMergeTo('${r.id}')">합치기</button></div>`:''}`
+      :r.status==='ok'?`<button onclick="srcOk('${r.id}')">이름 고치기</button> <button onclick="srcAct('${r.id}','exclude')">제외</button>`:`<button onclick="srcAct('${r.id}','reopen')">다시 후보로</button>`}</td></tr>`).join('')}</table>`
+    :`<div class="card muted">${SRC.tab==='candidate'?'확인을 기다리는 후보가 없어요':'해당하는 것이 없어요'}</div>`}
+  <p class="muted" style="margin-top:10px">[확인]하면 이름을 다듬어 사전에 올리고, [합치기]하면 그 이름으로 뜬 작품이 합친 쪽으로 옮겨져요. [제외]하면 그 작품들의 도안 표시가 빠져요(작품은 그대로).</p>
+  <h2>창작 작품 <small class="muted" style="font-weight:400">직접 만든 작품이라고 표시한 인증 ${SRC.originals}건</small></h2>
+  <div class="card">${SRC.top.length?SRC.top.map(t=>`<a href="#" onclick="openUserPanel('${t.id}');return false" style="margin-right:12px">${esc(t.nick||'회원')} <b>${t.n}</b></a>`).join(''):'<span class="muted">아직 없어요</span>'}<div class="muted" style="margin-top:6px">창작 작품이 많은 회원 — 도안을 낼 수 있는 분을 찾는 자료예요.</div></div>`;
+  if(typeof mcApply==='function') mcApply(); }
+async function srcAct(id, action, into){ const msg={ merge:'이 후보를 비슷한 것에 합칠까요? 이 이름으로 뜬 작품이 합친 쪽으로 옮겨져요.', exclude:'제외할까요? 이 이름으로 뜬 작품의 도안 표시가 빠져요.', reopen:'다시 후보로 돌릴까요?' }[action]; if(msg && !confirm(msg)) return;
+  const {error}=await sb.rpc('admin_source_decide',{ p_id:id, p_action:action, p_into:into||null }); if(error) return toast(error.message); toast({merge:'합쳤어요',exclude:'제외했어요',reopen:'후보로 돌렸어요'}[action]||'처리했어요'); route(); }
+function srcMergeTo(id){ const v=$('#srcTo-'+id)?.value; if(!v) return toast('합칠 곳을 골라 주세요'); srcAct(id,'merge',v); }
+async function srcOk(id){ const r=SRC.rows.find(x=>x.id===id); if(!r) return; const t=prompt('이름 (도안 이름 · 영상에서 뜬 작품 · 배운 작품)', r.title||''); if(t===null) return; const m=prompt('만든 곳 (브랜드·작가 · 채널 · 가르친 곳) — 없으면 비워 두세요', r.maker||''); if(m===null) return;
+  const {error}=await sb.rpc('admin_source_decide',{ p_id:id, p_action:'ok', p_maker:m.trim(), p_title:t.trim() }); if(error) return toast(error.message); toast('사전에 올렸어요'); route(); }
 VIEWS.badwords = async()=>{
   const {data}=await sb.from('bad_words').select('*').order('word');
   $('#main').innerHTML=`<h1>욕설 사전 <small>지기 AI 1단계 감지용 · 일치하면 임시 숨김 + 즉시 알림</small></h1>

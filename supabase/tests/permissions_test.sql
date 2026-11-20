@@ -225,6 +225,10 @@ begin
   out := pg_temp.must_fail(out, 'open_support_room(other member)', format('select public.open_support_room(%L)', d2));
   out := pg_temp.must_fail(out, 'jigi_on_shop_claim', 'select public.jigi_on_shop_claim()');
   out := pg_temp.must_fail(out, 'yarn_add_alias', 'select public.yarn_add_alias(gen_random_uuid(), ''x'')');
+  out := pg_temp.must_fail(out, 'work_sources (member direct)', 'select count(*) from public.work_sources');   -- schema 157
+  out := pg_temp.must_fail(out, 'admin_source_list', 'select public.admin_source_list()');
+  out := pg_temp.must_fail(out, 'admin_source_decide', 'select public.admin_source_decide(gen_random_uuid(), ''exclude'')');
+  out := pg_temp.must_fail(out, '_src_norm', 'select public._src_norm(''x'')');
   out := pg_temp.must_fail(out, 'set_pattern_pkg(any)', 'select public.set_pattern_pkg((select id from public.patterns limit 1), null)');
   v := public.supporter_stats(); out := out || ' | ' || case when v is null then 'supporter_stats hidden' else 'FAIL supporter_stats visible' end;
   reset role;
@@ -277,6 +281,9 @@ begin
   out := pg_temp.must_fail(out, '_friend_rec_score', 'select public._friend_rec_score(gen_random_uuid(), gen_random_uuid())');
   out := pg_temp.must_fail(out, 'friend_rec_today(anon)', 'select public.friend_rec_today()');
   out := pg_temp.must_fail(out, 'friend_want_set(anon)', 'select public.friend_want_set(array[''near''], null)');   -- schema 144
+  out := pg_temp.must_fail(out, 'work_sources(anon)', 'select count(*) from public.work_sources');   -- schema 157
+  out := pg_temp.must_fail(out, 'work_source_search(anon)', 'select public.work_source_search(''pattern'', ''x'')');
+  out := pg_temp.must_fail(out, 'work_source_add(anon)', 'select public.work_source_add(''pattern'', ''a'', ''bb'')');
   out := pg_temp.must_fail(out, 'friend_rec_refresh(anon)', 'select public.friend_rec_refresh()');
   out := pg_temp.must_fail(out, 'admin_friend_wants(anon)', 'select public.admin_friend_wants()');
   out := pg_temp.must_fail(out, 'friend_rec_weekly(anon)', 'select public.friend_rec_weekly()');   -- schema 145

@@ -2228,3 +2228,10 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 156. 뜨친 인증을 통과시키면 그 글에 지기가 축하 댓글 (2026-11-20 대표 확정 문구, 마이그레이션 ddeuchin_pass_comment — 원본 supabase/ddeuchin_pass_comment.sql)
 --   admin_ddeuchin_decide: 통과 때 지기 계정으로 댓글 한 번(다시 통과해도 두 번 달지 않음). 문구의 날짜는 이번 이벤트 것
 -- ============================================================
+
+-- ============================================================
+-- 157. 완성작품 인증 — "어떻게 뜬 작품인가요?" 도안 · 영상 · 수업 · 창작 (2026-11-20 대표 확정 시안 cert_pattern_v3 · v4 B안, 마이그레이션 work_source — 원본 supabase/work_source.sql)
+--   work_sources(도안·영상·수업 사전: 만든 곳 + 이름, 새로 적힌 것은 후보) · works.made_how / source_id / source_note · 찾기 work_source_search · 새로 적기 work_source_add
+--   work_set_story 가 p_story 의 how · src · note 를 받는다(옛 앱은 보내지 않아 그대로) · 콘솔 admin_source_list · admin_source_decide(ok · merge · exclude · reopen)
+--   works.pattern_source 에는 보여 줄 글("만든 곳 · 이름" 또는 "창작")을 함께 적어 둔다
+-- ============================================================
