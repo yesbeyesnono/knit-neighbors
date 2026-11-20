@@ -1029,6 +1029,8 @@ body.kb #nav{display:none!important}
 .hwslot.v{background:var(--color-bg);border:1px solid var(--color-primary-light);color:var(--ink)}.hwslot.v b,.hwslot.v small,.hwslot.v span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.hwslot.v small{color:var(--ink3);font-size:.78rem}.hwslot.v a{margin-left:auto;color:var(--color-primary);font-size:.78rem;font-weight:600;flex:none;cursor:pointer;padding:8px 0 8px 8px}
 .hwtag{font-size:.68rem;font-weight:700;border-radius:6px;padding:2px 7px;background:var(--color-primary-light);color:var(--color-primary);flex:none;overflow:visible!important}
 .ydhint{margin:10px 0 0;font-size:.8rem;line-height:1.55;color:var(--color-primary);background:var(--color-bg);border-radius:10px;padding:9px 12px}.slrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.slrow .tx{flex:1;min-width:0;display:flex;flex-direction:column}.slrow .tx b{font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slrow .tx span{font-size:.76rem;color:var(--ink3)}.slrow .ychip{flex:none}
+.nearbar{display:flex;align-items:center;gap:8px;margin:6px 14px 2px;padding:10px 12px;background:var(--color-bg);border-radius:12px;font-size:.82rem;color:var(--color-text-muted)}.nearbar svg{width:16px;height:16px;flex:none;color:var(--color-primary)}.nearbar b{color:var(--ink)}.nearbar a{margin-left:auto;color:var(--color-primary);font-weight:700;font-size:.78rem;white-space:nowrap;cursor:pointer}
+.dcopt{display:flex;width:100%;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;background:var(--color-surface);font:inherit;text-align:left;cursor:pointer;color:var(--ink)}.dcopt svg{width:22px;height:22px;flex:none;color:var(--color-primary)}.dcopt .tx{display:flex;flex-direction:column;gap:2px;flex:1}.dcopt b{font-size:.94rem}.dcopt small{font-size:.78rem;color:var(--color-text-muted)}.dcopt i{margin-left:auto;font-style:normal;color:var(--color-text-muted)}
 .hwex{font-size:.8rem;color:var(--color-text-muted);line-height:1.7;margin:0}.hwex b{color:var(--ink);font-weight:600}
 .hwres{max-height:42vh;overflow-y:auto}.hwres button{display:flex;width:100%;align-items:center;gap:8px;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 2px;font:inherit;font-size:.92rem;text-align:left;cursor:pointer;color:var(--ink)}
 .hwres .hwlab{font-size:.74rem;font-weight:700;color:var(--color-text-muted);margin:12px 2px 6px}.hwres .hwlab:first-child{margin-top:4px}
@@ -2039,7 +2041,7 @@ async function saveProfile(){
   if(error){ toast('저장 실패: '+error.message); return false; }
   // 위치: 새로 잡은 GPS만 흐려서 저장 (원본은 서버에 남지 않음). 직접 입력만 했으면 기존 좌표 유지
   if(loc.lat && (loc.verified || loc.manual)){ const r = await sb.rpc('set_fuzzy_location', { p_lat:loc.lat, p_lng:loc.lng }); if(r.error) toast('위치 저장 실패: '+r.error.message); }
-  await loadMe(); toast('저장했어요'); watchFriends(); loadMyRooms();
+  await loadMe(); toast('저장했어요'); watchFriends(); loadMyRooms(); if(commFilter==='dong') loadFeed();
   if(!edit) applyReferrer();
   if(!edit){ try{ if(!localStorage.getItem('kn_meta_reg')){ localStorage.setItem('kn_meta_reg','1'); metaEvent('fb_mobile_complete_registration', { fb_registration_method:'app' }); } }catch(e){} }
   if(edit) go('my');
@@ -2169,7 +2171,7 @@ function relocateNow(){
     if(!await askOk(`내 동네를 "${d.dong_name}"(으)로 바꿀까요? 지도의 내 핀도 이 동네로 옮겨져요.`, '바꾸기')) return;
     const r = await sb.rpc('set_fuzzy_location', { p_lat:lat, p_lng:lng }); if(r.error) return toast('위치 저장 실패: '+r.error.message);
     const u = await sb.from('profiles').update({ dong_name:d.dong_name, dong_code:d.dong_code, dong_verified_at:new Date().toISOString() }).eq('id', me.id); if(u.error) return toast('저장 실패: '+u.error.message);
-    await loadMe(); toast(`동네를 ${d.dong_name}(으)로 바꿨어요`);
+    await loadMe(); toast(`동네를 ${d.dong_name}(으)로 바꿨어요`); if(commFilter==='dong') loadFeed();
     if(view==='my') renderMy(); if(MapAdapter.ready){ if(myProfile._c) MapAdapter.setCenter(myProfile._c); loadPins(); }
   }, err=>toast(err.code===1 ? '위치 권한이 꺼져 있어요. 기기 설정에서 허용해 주세요' : '위치를 가져오지 못했어요. 잠시 후 다시 시도해 주세요'), { enableHighAccuracy:false, timeout:10000, maximumAge:60000 });
 }
@@ -3787,7 +3789,11 @@ async function loadFeed(more){
     $('#feed').innerHTML = feedRows.length ? feedRows.map(p=>postGroup(p)).join('') : '<div class="empty">아직 인증된 작품이 없어요.<br>＋ 버튼 › 완성작품 인증에서 첫 작품을 올려 보세요</div>';
     return;
   }
-  if(commFilter==='dong'){ if(!myProfile?.dong_code){ $('#feed').innerHTML='<div class="empty">프로필에서 동네를 먼저 정해 주세요</div>'; return; } q = q.eq('dong_code', myProfile.dong_code); }
+  if(commFilter==='dong'){ if(!myProfile?.dong_code){ $('#feed').innerHTML='<div class="empty">프로필에서 동네를 먼저 정해 주세요</div>'; return; }
+    // 내 핀에서 가까운 글(3 → 5 → 10 → 30km, 서버가 범위를 정한다). 핀이 없거나 함수를 못 부르면 예전처럼 동네 이름으로
+    let nr=null; try{ const r=await sb.rpc('feed_near_ids', { p_before:feedCursor||null, p_limit:FEED_PAGE }); if(!r.error && r.data && !r.data.noloc) nr=r.data; }catch(e){}
+    if(nr){ if(!more) feedNear=nr; if(!(nr.ids||[]).length){ $('#feedMore').hidden=true; if(!feedRows.length) renderFeed(); return; } q = q.in('id', nr.ids); }
+    else { feedNear=null; q = q.eq('dong_code', myProfile.dong_code); } }
   if(commFilter==='friends'){ const ids=await friendIds(); ids.push(me.id); q = q.in('author_id', ids); if(!feedRows.length){ loadFriendRec(); loadFollowNews(); } }
   const { data, error } = await q;
   if(error){ $('#feed').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
@@ -3885,9 +3891,17 @@ function pickMention(key, id, nick){
 function prefillMention(key, id, nick){ const inp=mentionInputEl(key); if(!inp||!nick) return; if(!inp.value.includes('@'+nick)) inp.value='@'+nick+' '+inp.value; (mentionMap[key] ||= {})[nick]=id; inp.focus(); }
 function mentionsFor(key, text){ const map=mentionMap[key]||{}; return Object.keys(map).filter(n=>text.includes('@'+n)).map(n=>map[n]).filter((v,i,a)=>a.indexOf(v)===i); }
 function replyTo(rootId, id, nick){ prefillMention(rootId, id, nick); }
+let feedNear=null;   // '동네' 탭: 서버가 정한 범위 {km, dong}
 function renderFeed(){
-  $('#feed').innerHTML = feedRows.length ? feedRows.map((p,i)=>postGroup(p)+((i%8===5)?recCard((i-5)/8*3):'')).join('') : `<div class="empty">아직 글이 없어요.<br>지금 뜨는 것, 막힌 부분, 완성작을 올려 보세요</div>`;
+  const dong = commFilter==='dong' && !commTag;
+  const bar = dong ? `<div class="nearbar">${ico('location')}<span><b>${esc(myProfile?.dong_name||'내 동네')}</b>${feedNear?` 주변 ${feedNear.km}km 안의 글`:'의 글'}</span><a onclick="dongChange()">내 동네 바꾸기 ›</a></div>` : '';
+  $('#feed').innerHTML = bar + (feedRows.length ? feedRows.map((p,i)=>postGroup(p)+((i%8===5)?recCard((i-5)/8*3):'')).join('') : (dong ? `<div class="empty">${feedNear?`주변 ${feedNear.km}km 안에 아직 글이 없어요.`:'아직 글이 없어요.'}<br>첫 글을 올려 이웃에게 인사해 보세요</div>` : `<div class="empty">아직 글이 없어요.<br>지금 뜨는 것, 막힌 부분, 완성작을 올려 보세요</div>`));
 }
+// 내 동네 바꾸기: 현재 위치로(relocateNow) / 직접 찾기(프로필 수정의 동네 카드). 어느 쪽이든 동네 이름과 지도 핀이 함께 바뀐다
+function dongChange(){ openSheet(`<b>내 동네 바꾸기</b><p class="muted" style="font-size:.84rem;margin:2px 0 12px">지금 <b style="color:var(--ink)">${esc(myProfile?.dong_name||'미설정')}</b> · 지도의 내 핀도 여기에 있어요</p>
+  <button type="button" class="dcopt" onclick="relocateNow()">${ico('location')}<div class="tx"><b>현재 위치로 바꾸기</b><small>지금 있는 곳의 동네로</small></div><i>›</i></button>
+  <button type="button" class="dcopt" onclick="closeSheet();openOnboard(true);setTimeout(()=>$('#locStatus')?.scrollIntoView({block:'center'}),350)">${SVG_SEARCH}<div class="tx"><b>동네 직접 찾기</b><small>이름으로 찾거나 지도에서 고르기</small></div><i>›</i></button>
+  <p class="muted" style="font-size:.78rem;line-height:1.55;margin:8px 0 0">한 번 정하면 그대로예요. 어디로 이동해도 따라오지 않아요.<br>동네 이름만 보이고, 정확한 위치는 저장하지 않아요.</p>`); }
 // 글 + (펼친 경우) 답글 목록 + 답글 입력을 한 묶음으로. 접힌 상태에선 첫 답글 1개만 미리보기
 function postGroup(p, opts={}){
   const open = expandedReplies.has(p.id) && Array.isArray(p.replies);

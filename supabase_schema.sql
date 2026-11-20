@@ -2270,3 +2270,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 163. 도안 찾기: 맞는 앱 작가 한 줄 + 그 작가의 도안 + 도안마다 작품 사진 (2026-11-20 대표 확정 시안 cert_maker_suggest_v2 ②, 마이그레이션 source_suggest — 원본 supabase/source_suggest.sql)
 --   work_source_suggest(p_q): 이름이 앞에서부터 맞는 작가·공방 두 곳까지 + 그 작가의 도안(다른 이름은 똑같이 적었을 때만) · _src_photo(도안의 대표 작품 사진) · work_source_search 결과에 photo 추가
 -- ============================================================
+
+-- ============================================================
+-- 164. 커뮤니티 '동네' 탭을 핀 위치 기준으로 (2026-11-21 대표 확정 시안 dong_tab_near_v1 A안 · v2, 마이그레이션 feed_near — 원본 supabase/feed_near.sql)
+--   feed_near_ids(p_before, p_limit): 내 핀에서 3km 안의 글, 5개가 안 되면 5 → 10 → 30km. 범위(km)와 글 id 만 돌려줌(위치·거리는 내보내지 않음)
+-- ============================================================

@@ -296,6 +296,7 @@ begin
   out := pg_temp.must_fail(out, 'work_source_search(anon)', 'select public.work_source_search(''pattern'', ''x'')');
   out := pg_temp.must_fail(out, 'work_source_add(anon)', 'select public.work_source_add(''pattern'', ''a'', ''bb'')');
   out := pg_temp.must_fail(out, 'work_source_suggest(anon)', 'select public.work_source_suggest(''xx'')');   -- schema 163
+  out := pg_temp.must_fail(out, 'feed_near_ids(anon)', 'select public.feed_near_ids()');   -- schema 164
   out := pg_temp.must_fail(out, '_src_photo(anon)', 'select public._src_photo(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'source_ai_pending(anon)', 'select public.source_ai_pending(1)');   -- schema 159
   out := pg_temp.must_fail(out, 'source_ai_apply(anon)', 'select public.source_ai_apply(gen_random_uuid(), ''{}''::jsonb)');
