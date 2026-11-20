@@ -5261,7 +5261,8 @@ function ydRender(){
     <div class="cfl">이 실 어땠나요? <span class="muted">선택</span></div>
     <div class="seg" style="margin-top:0">${[['1','또 쓸래요'],['0','보통'],['-1','비추']].map(([v,l])=>`<button type="button" class="${String(y.rating)===v?'on':''}" onclick="yd.rating=(String(yd.rating)==='${v}'?'':'${v}');ydRender()">${l}</button>`).join('')}</div>
     ${y.rating!==''&&y.rating!=null?`<div class="cfl">이유</div><div class="seg" style="margin-top:0">${Y_REASONS.map(r=>`<button type="button" class="${y.rating_reason===r?'on':''}" onclick="yd.rating_reason=(yd.rating_reason==='${r}'?'':'${r}');ydRender()">${r}</button>`).join('')}</div>`:''}
-  `, { label: ypStashMode==='manual'?'실함에 담기':'완료', fn:ydDone });
+    <button type="button" class="btn" style="width:100%;margin:22px 0 calc(10px + env(safe-area-inset-bottom,0px))" onclick="ydDone()">${ypStashMode==='manual'?'실함에 담기':'저장'}</button>
+  `, { label: ypStashMode==='manual'?'실함에 담기':'저장', fn:ydDone });
   ydHint();
 }
 // 적은 양을 g·m 로 풀어 보여 주고, 실함의 실이면 인증 뒤 몇 볼 남는지 알려 준다
