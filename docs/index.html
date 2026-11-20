@@ -592,6 +592,7 @@ body.icons .ico[data-ico="ruler"]{background-image:url(icons/ruler.svg)}
 .bub time{display:none}
 .bub .muted{color:inherit;opacity:.7}
 .compose{border-top:1px solid var(--tline);background:var(--tbg);padding:10px 12px;align-items:center}
+.compose{padding-bottom:max(10px,env(safe-area-inset-bottom,0px))}html.vvk .compose,body.kb .compose{padding-bottom:10px}
 .compose input{border:1px solid var(--tline);border-radius:999px;background:var(--tbg);padding:10px 16px;font-family:inherit;font-size:16px}
 .compose input::placeholder{color:var(--tmute)}
 .compose .btn{background:transparent;color:var(--tink);font-weight:600;padding:8px 4px 8px 8px;width:auto}
