@@ -2285,3 +2285,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 166. 도안 찾기: 앱 작가를 누르면 그것으로 선택 끝 (2026-11-21 대표 확정 시안 cert_flow_v1, 마이그레이션 source_maker_only — 원본 supabase/source_maker_only.sql)
 --   work_source_maker(p_kind, p_maker): 만든 곳만 있는 줄(title = '', 처음부터 ok) — 앱 작가·공방과 이름이 맞을 때만. 이런 줄은 도안 목록(work_source_search · work_source_suggest)과 AI 묶기의 견줄 대상(source_ai_pending)에서 뺌
 -- ============================================================
+
+-- ============================================================
+-- 167. 모임에 누가 참여하는지 보이게 (2026-11-21 대표 확정 시안 meet_people_v1, 마이그레이션 meetup_people — 원본 supabase/meetup_people.sql)
+--   meetup_people(p_ids, p_limit): 모임마다 참여자 수와 앞의 몇 명(주최자 먼저). 공개 모임은 회원 누구나, 초대만 모임은 참여자만. 정지·삭제 유예·차단·테스트 계정 제외
+-- ============================================================

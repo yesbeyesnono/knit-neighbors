@@ -300,6 +300,7 @@ begin
   out := pg_temp.must_fail(out, 'search_posts(anon)', 'select public.search_posts(''xx'')');   -- schema 165
   out := pg_temp.must_fail(out, 'search_members(anon)', 'select public.search_members(''xx'')');
   out := pg_temp.must_fail(out, 'work_source_maker(anon)', 'select public.work_source_maker(''pattern'', ''xx'')');   -- schema 166
+  out := pg_temp.must_fail(out, 'meetup_people(anon)', 'select public.meetup_people(array[gen_random_uuid()])');   -- schema 167
   out := pg_temp.must_fail(out, '_src_photo(anon)', 'select public._src_photo(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'source_ai_pending(anon)', 'select public.source_ai_pending(1)');   -- schema 159
   out := pg_temp.must_fail(out, 'source_ai_apply(anon)', 'select public.source_ai_apply(gen_random_uuid(), ''{}''::jsonb)');
