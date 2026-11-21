@@ -1039,6 +1039,7 @@ body.kb #nav{display:none!important}
 .srmem,.srpost{display:flex;width:100%;gap:10px;align-items:center;border:0;border-bottom:1px solid var(--line);background:none;padding:10px 2px;font:inherit;text-align:left;cursor:pointer;color:var(--ink)}.srpost{align-items:flex-start}.srmem .ava,.srpost .ava{flex:none}
 .srmem span,.srpost span{display:flex;flex-direction:column;min-width:0;flex:1}.srmem b,.srpost b{font-size:.92rem}.srmem small,.srpost small{font-size:.76rem;color:var(--ink3);font-weight:400}.srpost b small{margin-left:6px}.srpost em{font-style:normal;font-size:.9rem;line-height:1.5;margin-top:3px;word-break:break-all}
 .srmem i{font-style:normal;font-size:.72rem;font-weight:700;color:var(--color-primary);background:var(--color-primary-light);border-radius:999px;padding:4px 9px;flex:none}.srmem mark,.srpost mark{background:#FFE9A8;color:inherit;border-radius:3px}.srmore{display:block;margin-top:10px;font-size:.82rem;font-weight:700;color:var(--color-primary);cursor:pointer}
+.hwtt{margin-top:8px;width:100%;box-sizing:border-box}.hwslot.v .hwtag{flex:none}
 .hwex{font-size:.8rem;color:var(--color-text-muted);line-height:1.7;margin:0}.hwex b{color:var(--ink);font-weight:600}
 .hwres{max-height:42vh;overflow-y:auto}.hwres button{display:flex;width:100%;align-items:center;gap:8px;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 2px;font:inherit;font-size:.92rem;text-align:left;cursor:pointer;color:var(--ink)}
 .hwres .hwlab{font-size:.74rem;font-weight:700;color:var(--color-text-muted);margin:12px 2px 6px}.hwres .hwlab:first-child{margin-top:4px}
@@ -1254,7 +1255,7 @@ body.kb #nav{display:none!important}
 
   <!-- 완성작품 인증 (새 페이지) -->
   <section class="view" id="v-cert">
-    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>완성작품 인증</h1><button class="btn" id="certPost" onclick="certNext()" disabled>다음</button></div>
+    <div class="top"><button class="back" onclick="closeCompose()"><i class="ico" data-ico="close"><b>✕</b></i></button><h1>완성작품 인증</h1><button class="btn" id="certPost" onclick="certNext()" disabled style="display:none">다음</button></div>
     <div class="body" style="gap:10px">
       <div class="mhero" id="wHero" onclick="editWorkPost?$('#wFile').click():ccOpen()"><div class="cam"><svg viewBox="0 0 24 24"><rect x="3.4" y="5" width="17.2" height="14" rx="2"/><circle cx="8.6" cy="9.4" r="1.5"/><path d="m6.2 18.6 4.6-4.8 3.2 3.4 2-2.2 3.4 3.6"/></svg></div><span class="mhint">작품 사진 · 1~4장</span></div>
       <div class="cfphotos" id="cfPhotos" style="justify-content:center"></div><input id="wFile" type="file" accept="image/*" multiple hidden onchange="pickPhotos(this.files,'s')">
@@ -1276,8 +1277,8 @@ body.kb #nav{display:none!important}
       <div class="ccard ed-hide"><div class="cfl">바늘 <span class="muted">선택</span></div><div class="seg" id="wNeedlesBox"></div></div>
       <div class="ccard"><div class="cfl">기록 <span class="muted">선택</span></div>
         <div class="g2 ed-hide"><div><div class="cfl" style="margin-top:0">게이지</div><input id="wGauge" maxlength="60" placeholder="예: 20코 24단 (10cm)"><div id="wGaugeHint" class="muted" style="font-size:.74rem;margin-top:3px" hidden></div></div><div><div class="cfl" style="margin-top:0">완성 크기</div><input id="wSize" maxlength="60" placeholder="예: 지름 11cm"></div></div>
-        <div class="cfl">한 줄 소감</div><textarea id="wNote" maxlength="300" placeholder="예: 눈 위치 세 번 옮겼어요" style="min-height:64px"></textarea>
-        <button type="button" class="btn o cpv" onclick="certPreview()">미리 보기</button><p class="muted cpv" style="font-size:.75rem;text-align:center;margin:6px 0 0">올리기 전에 커뮤니티에 어떻게 보일지 확인해요</p>
+        <textarea id="wNote" maxlength="300" hidden style="display:none"></textarea>
+        <button type="button" class="btn" style="width:100%;margin-top:14px" onclick="certNext()">다음</button><p class="muted" style="font-size:.75rem;text-align:center;margin:6px 0 0">다음 화면에서 뜨개 이야기를 적어요</p>
         <p class="muted ed-hide" style="font-size:.78rem;margin:10px 0 0">적어 주신 실·바늘 정보는 실 사전과 추천을 만드는 데 쓰여요. 커뮤니티 "작품" 탭에 올라가요.</p>
       </div>
     </div>
@@ -4246,6 +4247,7 @@ function howHtml(){ const k=wStory.how||'', sr=wStory.src;
   const seg=`<div class="hwseg">${Object.keys(HOW).map(x=>`<button type="button" class="${k===x?'on':''}" onclick="howPick('${x}')"><svg viewBox="0 0 24 24">${HOW_SV[x]}</svg>${HOW[x].l}</button>`).join('')}</div>`;
   let slot='<div class="hwslot e">고르면 여기에 적는 칸이 나와요</div>';
   if(k==='original') slot=`<div class="hwslot v"><span class="hwtag">창작</span><span>${esc(wStory.note||'직접 만든 작품이에요')}</span><a onclick="howNote()">한 줄 설명</a></div>`;
+  else if(k && sr && !sr.title) slot=`<div class="hwslot v"><b>${esc(sr.maker||'')}</b><span class="hwtag">작가</span><a onclick="howOpen()">바꾸기</a></div><input class="hwtt" maxlength="40" autocomplete="off" placeholder="${esc(HOW[k].t||'이름')} (알면 적어 주세요 · 선택)" value="${esc(wStory.srcTitle||'')}" oninput="wStory.srcTitle=this.value">`;
   else if(k && sr) slot=`<div class="hwslot v"><b>${esc(sr.title||'')}</b>${sr.maker?`<small>${esc(sr.maker)}</small>`:''}<a onclick="howOpen()">바꾸기</a></div>`;
   else if(k) slot=`<button type="button" class="hwslot a" onclick="howOpen()">＋ ${HOW[k].add}</button>`;
   return seg+slot; }
@@ -4261,7 +4263,7 @@ function howSearch(){ clearTimeout(howT); howT=setTimeout(async()=>{ const el=$(
   const my=++howSeq; let rows=[], au=[]; try{ const [a,b]=await Promise.all([sb.rpc('work_source_search',{ p_kind:'pattern', p_q:q }), sb.rpc('work_source_suggest',{ p_q:q })]); rows=a.data||[]; au=Array.isArray(b.data)?b.data:[]; }catch(e){} if(my!==howSeq || !$('#hwRes')) return; const toks=q.split(/\s+/).filter(Boolean);
   // 맞는 앱 작가(두 곳까지)와 그 작가의 도안을 먼저, 그 아래에 나머지 도안. howRows 는 화면 순서대로(howTake 가 번호로 찾는다)
   const seen=new Set(); howRows=[]; const line=r=>{ const i=howRows.push(r)-1; seen.add(r.id); return `<button type="button" class="pi" onclick="howTake(${i})">${r.photo?`<img class="th" src="${esc(r.photo)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<span><b>${howMark(r.title,toks)}</b>${r.maker||r.n?`<small>${r.maker?howMark(r.maker,toks):''}${r.maker&&r.n?' · ':''}${r.n?`작품 ${r.n}`:''}</small>`:''}</span></button>`; };
-  const auH=au.map(a=>{ const rs=(a.rows||[]).filter(r=>!seen.has(r.id)); return `<button type="button" class="hwau" data-f="${esc(a.fill||a.nickname||'')}" onclick="howFill(this.dataset.f)">${avatar(a)}<span><b>${howMark(a.fill||a.nickname,toks)}</b><small>${a.sources?`도안 ${a.sources}개${a.works?` · 작품 ${a.works}`:''}`:'누르면 이름이 채워져요'}</small></span><i>${a.author?'작가':'공방'}</i></button>${rs.length?`<div class="hwlab">이 작가의 도안</div>${rs.map(line).join('')}`:''}`; }).join('');
+  const auH=au.map(a=>{ const rs=(a.rows||[]).filter(r=>!seen.has(r.id)); return `<button type="button" class="hwau" data-f="${esc(a.fill||a.nickname||'')}" onclick="howFill(this.dataset.f)">${avatar(a)}<span><b>${howMark(a.fill||a.nickname,toks)}</b><small>${a.sources?`도안 ${a.sources}개${a.works?` · 작품 ${a.works}`:''} · `:''}누르면 이 ${a.author?'작가':'공방'}의 도안으로 들어가요</small></span><i>${a.author?'작가':'공방'}</i></button>${rs.length?`<div class="hwlab">이 작가의 도안</div>${rs.map(line).join('')}`:''}`; }).join('');
   const rest=rows.filter(r=>!seen.has(r.id)), restH=rest.map(line).join('');
   if(au.length){ box.innerHTML=`<div class="hwlab">knitup 작가</div>${auH}${rest.length?`<div class="hwlab">다른 도안</div>${restH}`:''}<p class="hwex" style="padding:10px 2px 0">찾는 도안이 없으면 이름을 끝까지 적고 아래 [저장]을 눌러 주세요. <a onclick="howWrite('pattern', true)" style="color:var(--color-primary);font-weight:600;white-space:nowrap">브랜드와 이름 나눠 적기</a></p>`; return; }
   rows=rest; howRows=[]; seen.clear();
@@ -4274,7 +4276,10 @@ async function howGo(){ const q=($('#hwQ')?.value||'').trim().replace(/\s+/g,' '
   const b=$('#hwGo'); if(b) b.disabled=true; const { data, error }=await sb.rpc('work_source_add',{ p_kind:'pattern', p_maker:m, p_title:t }); if(b) b.disabled=false;
   if(error || !data) return toast(error?error.message.replace(/^.*?: /,''):'넣지 못했어요');
   wStory.how='pattern'; wStory.src={ id:data.id, maker:data.maker||'', title:data.title||'' }; closeSheet(); howDraw(); }
-function howFill(v){ const el=$('#hwQ'); if(!el) return; el.value=v+' '; el.focus(); howSearch(); }   // 작가 줄을 누르면 이름이 채워지고 이어서 도안 이름을 적는다
+// 작가 줄을 누르면 그 작가의 도안으로 바로 들어간다(이름 없는 줄 — schema 166). 도안 이름은 뜨개 이야기에서 알면 적는다
+async function howFill(v){ if(!v) return; const { data, error }=await sb.rpc('work_source_maker',{ p_kind:'pattern', p_maker:v });
+  if(error || !data){ const el=$('#hwQ'); if(el){ el.value=v+' '; el.focus(); howSearch(); } return; }   // 못 만들면 예전처럼 이름만 채운다
+  wStory.how='pattern'; wStory.src={ id:data.id, maker:data.maker||v, title:'' }; wStory.srcTitle=''; closeSheet(); howDraw(); }
 function howTake(i){ const r=howRows[i]; if(!r) return; wStory.how='pattern'; wStory.src={ id:r.id, maker:r.maker||'', title:r.title||'' }; closeSheet(); howDraw(); }
 function howWrite(k, fromQ){ const c=HOW[k]; if(!c) return; let m='', t='';
   if(fromQ){ const q=($('#hwQ')?.value||'').trim().replace(/\s+/g,' '), i=q.indexOf(' '); if(i>0){ m=q.slice(0,i); t=q.slice(i+1); } else t=q; }   // "브랜드 도안이름" 으로 친 것을 두 칸에 나눠 넣어 준다(고칠 수 있음)
@@ -4293,17 +4298,23 @@ async function howAdd(k){ const m=($('#hwM')?.value||'').trim(), t=($('#hwT')?.v
 function howNote(){ openSheet(`<b>창작 작품 한 줄 설명</b><label class="f">어떻게 구상했나요? (선택)<input id="hwN" maxlength="60" autocomplete="off" placeholder="예: 조카 인형 옷을 보고 구상했어요" value="${esc(wStory.note||'')}"></label><button class="btn" onclick="wStory.note=($('#hwN').value||'').trim();closeSheet();howDraw()">넣기</button>`); setTimeout(()=>{ const f=$('#hwN'); if(f) f.focus(); }, 280); }
 async function certToday(){ try{ const t=new Date(Date.now()+9*36e5); t.setUTCHours(0,0,0,0); const since=new Date(t.getTime()-9*36e5).toISOString(); const { count }=await sb.from('works').select('id',{count:'exact',head:true}).eq('profile_id', me.id).gte('created_at', since); return count||0; }catch(e){ return 0; } }
 function storyRead(){ const k=$('#stKnow'), r=$('#stReg'); if(k) wStory.knowhow=k.value; if(r) wStory.regret=r.value; }
-function certNext(){ if($('#certPost').disabled) return;
+function certNext(){ if($('#certPost').disabled){ const need=[[sPhotos.length>0,'사진'],[!!$('#wTitle')?.value.trim(),'작품 이름'],[(wTechSel.size+wCustom.length)>0,'기법'],[!!editWorkPost || sPhotos.some(p=>wShotTech.has(p.url)),'기법이 보이는 가까운 사진']].filter(x=>!x[0]).map(x=>x[1]); return toast(need.length?`먼저 넣어 주세요: ${need.join(' · ')}`:'잠시만요…'); }
   openSub('뜨개 이야기', `<div class="stq"><p class="muted" style="margin:0;font-size:.84rem;line-height:1.5">같은 작품을 뜨는 분이 읽고 배워 가는 부분이에요.</p>
     <div class="ccard"><div class="cfl">어떻게 뜬 작품인가요? <span class="muted">선택</span></div><div id="hwBox">${howHtml()}</div></div>
     <div class="ccard"><div class="cfl">얼마나 걸렸나요? <span class="req">필수</span></div><div class="tkbar">${TOOK_PICK.map(([k,l],i)=>`<button type="button" class="${wStory.took===k?'on':''}" data-k="${k}" onclick="wStory.took=this.dataset.k;[...this.parentNode.children].forEach(b=>b.classList.toggle('on',b===this))"><i style="height:${10+6*i}px"></i>${l}</button>`).join('')}</div></div>
     <div class="ccard"><div class="cfl">뜨기 노하우 <span class="req">필수</span></div><p class="muted" style="margin:0 0 8px;font-size:.8rem;line-height:1.5">어려웠던 곳과 이렇게 하니 됐다는 방법을 적어 주세요. 같은 작품을 뜨는 분께 가장 도움이 돼요.</p><textarea id="stKnow" maxlength="500" placeholder="예: 소매 코 줍기에서 구멍이 생겨서, 한 코 더 주워 다음 단에 모아떴어요" style="min-height:96px" oninput="wStory.knowhow=this.value">${esc(wStory.knowhow||'')}</textarea></div>
     <div class="ccard"><div class="cfl">아쉬운 점 · 다음엔 이렇게 <span class="muted">선택</span></div><textarea id="stReg" maxlength="300" placeholder="예: 실을 한 호수 굵게 쓸걸 그랬어요" style="min-height:72px" oninput="wStory.regret=this.value">${esc(wStory.regret||'')}</textarea></div>
-    <p class="muted" style="margin:0;font-size:.78rem;text-align:center;line-height:1.5">${editWorkPost?'저장하면 바로 반영돼요.':'확인 요청을 보내면 knitup 이 확인한 뒤 커뮤니티에 올려 드려요.'}</p></div>`, { label: editWorkPost?'저장':'확인 요청', fn: storySubmit });
+    <button type="button" class="btn" style="width:100%" onclick="${editWorkPost?'storySubmit()':'storyPreview()'}">${editWorkPost?'저장':'미리보기'}</button>
+    <p class="muted" style="margin:0 0 calc(8px + env(safe-area-inset-bottom,0px));font-size:.78rem;text-align:center;line-height:1.5">${editWorkPost?'저장하면 바로 반영돼요.':'올리기 전에 커뮤니티에 어떻게 보일지 확인해요.'}</p></div>`);
   subOnBack=()=>{ storyRead(); closeSub(); }; }
-function storySubmit(){ storyRead(); const need=!editWorkPost || (editWorkStatus && editWorkStatus!=='approved');   // 이미 올라간 옛 인증을 고칠 때는 이야기를 강요하지 않는다
-  if(need && !wStory.took) return toast('얼마나 걸렸는지 골라 주세요'); if(need && (wStory.knowhow||'').trim().length<5) return toast('뜨기 노하우를 한 줄 적어 주세요');
-  closeSub(); submitCert(); }
+function storyOk(){ storyRead(); const need=!editWorkPost || (editWorkStatus && editWorkStatus!=='approved');   // 이미 올라간 옛 인증을 고칠 때는 이야기를 강요하지 않는다
+  if(need && !wStory.took){ toast('얼마나 걸렸는지 골라 주세요'); return false; } if(need && (wStory.knowhow||'').trim().length<5){ toast('뜨기 노하우를 한 줄 적어 주세요'); return false; } return true; }
+async function storySubmit(){ if(!storyOk()) return; await howTitleSync(); closeSub(); submitCert(); }
+// 뜨개 이야기 → 미리보기 → [고치기](뜨개 이야기로 돌아감) / [확인 요청](여기서만 보냄)
+async function storyPreview(){ if(!storyOk()) return; await howTitleSync(); certPreview(); }
+// 작가만 고르고(이름 없는 줄) 도안 이름을 적었으면, 올리기 전에 '작가 + 이름' 줄로 바꿔 둔다
+async function howTitleSync(){ const sr=wStory.src, t=(wStory.srcTitle||'').trim(); if(!sr || sr.title || t.replace(/\s/g,'').length<2 || !['pattern','video','class'].includes(wStory.how)) return;
+  try{ const { data }=await sb.rpc('work_source_add',{ p_kind:wStory.how, p_maker:sr.maker||'', p_title:t }); if(data && data.id){ wStory.src={ id:data.id, maker:data.maker||'', title:data.title||'' }; wStory.srcTitle=''; } }catch(e){} }
 function workStory(w){ if(!(w.took && TOOK[w.took]) && !w.knowhow && !w.regret) return '';
   return `<div class="wstory">${w.took && TOOK[w.took]?`<span class="wfact">걸린 시간 <b>${TOOK[w.took]}</b></span>`:''}${w.knowhow?`<div class="wk">뜨기 노하우</div><div class="wv">${esc(w.knowhow)}</div>`:''}${w.regret?`<div class="wk">아쉬운 점</div><div class="wv">${esc(w.regret)}</div>`:''}</div>`; }
 function workReview(w, p){ const st=w.review_status; if(!st || st==='approved') return '';   // 승인 전 인증은 본인(과 관리자)에게만 내려온다
@@ -4852,8 +4863,10 @@ function certPreview(){ const title=$('#wTitle').value.trim(); if(!sPhotos.lengt
   const yp=wYarnPayload(); const p={ id:'preview', author_id:'preview', author:myProfile||{}, body:$('#wNote').value.trim(), photos:sPhotos.map(x=>x.url), created_at:new Date().toISOString(), like_count:0, reply_count:0,
     work:{ tech_photos:sPhotos.filter(x=>wShotTech.has(x.url)).map(x=>({ photo:x.url, techniques:wShotTech.get(x.url).techs })), title, yarn_info:yp.line, techniques:[...wTechSel], custom_techniques:wCustom, yarns:yp.meta.yarns, needles:yp.meta.needles, gauge:yp.meta.gauge, finished_size:yp.meta.size, took:wStory.took||null, knowhow:(wStory.knowhow||'').trim(), regret:(wStory.regret||'').trim() } };
   const ok=!$('#certPost').disabled;
-  openSub('미리 보기', `<div class="cpvlab">아직 올라가지 않았어요 · 커뮤니티에 이렇게 보여요</div><div id="cpvBody">${postCard(p,{noLine:true})}</div>
-    <div class="cpvtwo"><button type="button" class="btn o" onclick="closeSub()">고치기</button><button type="button" class="btn" ${ok?'':'disabled'} onclick="closeSub();certNext()">다음</button></div>${ok?'':'<p class="muted" style="font-size:.78rem;text-align:center;margin:0">사진·작품 이름·기법(가까이 찍은 사진)이 모두 있어야 다음으로 갈 수 있어요</p>'}`);
+  openSub('미리보기', `<div class="cpvlab">아직 올라가지 않았어요 · 커뮤니티에 이렇게 보여요</div><div id="cpvBody">${postCard(p,{noLine:true})}</div>
+    <p class="muted" style="font-size:.78rem;text-align:center;margin:12px 0 0;line-height:1.5">확인 요청을 보내면 knitup 이 확인한 뒤 커뮤니티에 올려 드려요.</p>
+    <div class="cpvtwo" style="margin-bottom:calc(8px + env(safe-area-inset-bottom,0px))"><button type="button" class="btn o" onclick="certNext()">고치기</button><button type="button" class="btn" ${ok?'':'disabled'} onclick="closeSub();submitCert()">확인 요청</button></div>`);
+  subOnBack=()=>certNext();
   const b=$('#cpvBody'); if(b) b.addEventListener('click', e=>{ if(e.target.closest('.wtg')) return; e.stopPropagation(); e.preventDefault(); }, true); }
 // ===== 완성작품 인증: 실 촬영처럼 한 장씩 안내하며 찍기 (2026-11-15 대표 확정 시안, schema 121) =====
 // ① 완성작 전체 → 확인 → ② 기법이 보이는 부분 가까이 → 확인 → 이 사진에 보이는 기법 고르기(+메모) → 더 있나요?(기법 사진 3장까지) → 폼(이름·실) → 게시
