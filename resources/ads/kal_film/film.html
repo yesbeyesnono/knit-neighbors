@@ -1,0 +1,102 @@
+<!doctype html><meta charset="utf-8">
+<!-- '함께 뜨기' 소개 영상(세로 1080×1920 = 360×640 ×3). 시간 t(초)를 받아 그 순간의 그림을 그린다: render(t).
+     가게 이름은 SHOP 한 곳만 고치면 전부 바뀐다. 찍는 법: tools/ads/kal_film_capture.mjs -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=block">
+<style>
+@font-face{font-family:Noto;font-weight:400;src:url('../../fonts/NotoSansKR-Regular.ttf')}
+@font-face{font-family:Noto;font-weight:700;src:url('../../fonts/NotoSansKR-Bold.ttf')}
+:root{--p:#3E6B48;--d:#22362A;--l:#DDE8D6;--y:#FFD95C}
+*{box-sizing:border-box}html,body{margin:0;background:#000}
+#st{width:360px;height:640px;position:relative;overflow:hidden;font-family:Noto,'Malgun Gothic',sans-serif;color:var(--d);background:var(--d)}
+.sc{position:absolute;inset:0;overflow:hidden;opacity:0;background:#F3DFBF}
+.dk{background:var(--d)}.gr{background:var(--p)}
+.art{position:absolute;left:0;right:0;bottom:0;height:540px;background-size:360px 540px;background-repeat:no-repeat;transform-origin:50% 70%}
+.cap{position:absolute;left:14px;right:14px;top:44px;text-align:center;font-family:Jua,Noto;font-size:38px;line-height:1.28;letter-spacing:-.3px}
+.cap span{display:block}.cap em{font-style:normal;color:var(--p)}.dk .cap,.gr .cap{color:#fff}.dk .cap em,.gr .cap em{color:var(--y)}
+.card{position:absolute;left:22px;right:22px;background:#fff;border-radius:20px;padding:13px 14px;box-shadow:0 10px 26px rgba(34,54,42,.22);font-size:14.5px;line-height:1.55}
+.band{display:inline-block;background:#FFF6DA;border:1.5px solid #F2DC8E;border-radius:9px;padding:4px 9px;font-size:11.5px;font-weight:700;color:#6B5200;margin-bottom:7px}
+.chip{display:inline-block;background:var(--l);border:2px solid var(--p);color:var(--p);border-radius:999px;font-size:13.5px;font-weight:700;padding:8px 14px}
+.send{float:right;background:var(--p);color:#fff;border-radius:999px;font-size:13.5px;font-weight:700;padding:9px 16px}
+.ring{position:absolute;border:4px solid var(--y);border-radius:999px;box-shadow:0 0 0 6px rgba(255,217,92,.3);opacity:0}
+.q{position:absolute;right:58px;top:186px;width:62px;height:62px;border-radius:50%;background:#fff;display:grid;place-items:center;font-family:Jua;font-size:40px;color:var(--p);box-shadow:0 6px 16px rgba(34,54,42,.2)}.q:after{content:'';position:absolute;left:8px;bottom:-6px;width:16px;height:16px;border-radius:50%;background:#fff}
+.ding{display:flex;gap:11px;align-items:center}.ding i{width:40px;height:40px;border-radius:11px;background:var(--p);flex:none;display:grid;place-items:center;color:#fff;font-family:Jua;font-size:19px;font-style:normal}.ding b{display:block;font-size:13px}.ding small{margin-left:auto;font-size:11px;color:#8B9285;align-self:flex-start}
+.wave{position:absolute;border:3px solid var(--y);border-radius:50%;opacity:0}
+.ans{background:#FBF4EA;border:2px solid #EEDCC2}.ans .lab{font-size:11.5px;font-weight:700;color:#8A5A2B;margin-bottom:4px}
+.vid{display:inline-block;width:64px;height:64px;border-radius:12px;background:#4A3A32;position:relative;margin-top:8px;vertical-align:top}.vid:after{content:'';position:absolute;left:25px;top:20px;border-left:18px solid #fff;border-top:11px solid transparent;border-bottom:11px solid transparent}.vid em{position:absolute;right:6px;bottom:4px;font-style:normal;font-size:10px;color:#fff}
+.pill{position:absolute;background:var(--p);color:#fff;border-radius:999px;font-family:Jua;font-size:23px;padding:8px 19px;box-shadow:0 6px 14px rgba(34,54,42,.25)}
+.wait{position:absolute;background:#FDEBD8;color:#9A5A16;border-radius:999px;font-size:14px;font-weight:700;padding:8px 15px;box-shadow:0 6px 14px rgba(34,54,42,.18)}
+.bub{position:absolute;background:#fff;border-radius:18px;padding:8px 14px;font-size:14.5px;font-weight:700;box-shadow:0 6px 14px rgba(34,54,42,.18)}
+.cf{position:absolute;top:0;width:7px;height:11px;border-radius:2px}
+.heart{position:absolute;font-size:34px}
+.three{position:absolute;left:26px;right:26px;top:232px;display:flex;flex-direction:column;gap:14px}.three div{background:rgba(255,255,255,.14);border-radius:18px;padding:17px 18px;color:#fff;font-family:Jua;font-size:25px;line-height:1.3}.three em{font-style:normal;color:var(--y)}
+.logo{position:absolute;left:0;right:0;top:214px;text-align:center;font-family:Jua;font-size:70px;color:#fff;letter-spacing:1px}
+.mail{position:absolute;left:0;right:0;bottom:96px;text-align:center;font-size:14px;line-height:1.7;color:#fff}
+.caret{display:inline-block;width:2px;height:1em;background:var(--p);vertical-align:-2px;margin-left:1px}
+</style>
+<div id="st">
+ <div class="sc dk" id="s1"><div class="cap" style="top:232px;font-size:40px"><span>키트를 산 손님,</span><span><em>잘 뜨고 계실까요?</em></span></div></div>
+ <div class="sc" id="s2"><div class="art" style="background-image:url('s02_knit.png')"></div><div class="cap"><span><b class="shop" style="font-weight:400"></b> 키트로</span><span><em>머플러 뜨는 중</em></span></div></div>
+ <div class="sc" id="s3"><div class="art" style="background-image:url('s03_stuck.png')"></div><div class="cap"><span>어? 코가</span><span><em>모자라네…</em></span></div><div class="q" id="s3q">?</div></div>
+ <div class="sc" id="s4"><div class="art" style="background-image:url('s04_ask.png')"></div><div class="cap" style="top:36px"><span>앱에서</span><span><em>바로 물어봐요</em></span></div>
+  <div class="card" id="s4card" style="top:140px"><span class="band" id="s4band">막혔어요 · 겨울 머플러 함께 뜨기</span><div id="s4txt" style="min-height:45px;white-space:pre-line"></div><div style="margin-top:9px;overflow:hidden"><span class="chip" id="s4chip">🧶 함께 뜨기에 묻기</span><span class="send" id="s4send">게시</span></div></div>
+  <div class="ring" id="s4ring1" style="left:28px;top:237px;width:176px;height:48px"></div><div class="ring" id="s4ring2" style="left:262px;top:237px;width:70px;height:48px"></div></div>
+ <div class="sc" id="s5" style="background:#EDDCC2"><div class="art" style="background-image:url('s05_ding.png')"></div><div class="cap" style="top:34px;font-size:60px"><span id="s5ding"><em>띵!</em></span></div>
+  <div class="wave" id="s5w1"></div><div class="wave" id="s5w2"></div>
+  <div class="card ding" id="s5card" style="top:138px"><i>k</i><div><b>knitup</b>연두 님이 질문했어요</div><small>지금</small></div></div>
+ <div class="sc" id="s6" style="background:#EAD6B5"><div class="art" style="background-image:url('s06_film.png')"></div><div class="cap" style="top:36px"><span><em>사진·영상</em>으로</span><span>바로 답해요</span></div>
+  <div class="card ans" id="s6card" style="top:140px"><div class="lab">공방의 답 · <span class="shop"></span></div><div id="s6txt" style="min-height:45px;white-space:pre-line"></div><div style="overflow:hidden"><span class="vid" id="s6vid"><em>0:24</em></span><span class="send" id="s6send" style="margin-top:36px">답 올리기</span></div></div>
+  <div class="ring" id="s6ring" style="left:232px;top:262px;width:100px;height:48px"></div></div>
+ <div class="sc" id="s7"><div class="art" style="background-image:url('s07_aha.png')"></div><div class="cap"><span><em>아하!</em></span><span>이렇게 하는구나</span></div><div class="wait" id="s7wait" style="right:26px;top:178px">답 기다리는 중</div><div class="pill" id="s7pill" style="right:28px;top:174px">해결 ✓</div></div>
+ <div class="sc" id="s8"><div class="art" style="background-image:url('s08_group.png')"></div><div class="cap"><span>같은 곳에서 막힌</span><span><em>이웃도 함께 봐요</em></span></div><div class="bub" id="s8b1" style="left:20px;top:168px">나도 여기서!</div><div class="bub" id="s8b2" style="right:18px;top:210px">덕분에 풀었어요</div></div>
+ <div class="sc" id="s9"><div class="art" style="background-image:url('s09_done.png')"></div><div id="s9cf"></div><div class="cap"><span>다 떴어요!</span><span><em>완성작품 인증</em></span></div></div>
+ <div class="sc" id="s10" style="background:#EAD6B7"><div class="art" style="background-image:url('s10_gift.png')"></div><div class="cap"><span>직접 칭찬하고</span><span><em>선물해요</em></span></div><div class="heart" id="s10h1" style="left:54px;top:200px">🤎</div><div class="heart" id="s10h2" style="right:60px;top:176px;font-size:26px">🤎</div></div>
+ <div class="sc gr" id="s11"><div class="cap" style="top:86px"><span>공방에는</span><span><em>이런 점이 좋아요</em></span></div><div class="three"><div id="s11a">키트는 <em>내 스토어</em>에서</div><div id="s11b">질문은 <em>한곳에</em> 쌓이고</div><div id="s11c">완성작은 <em>후기</em>가 돼요</div></div></div>
+ <div class="sc dk" id="s12"><div class="logo" id="s12logo">knitup</div><div class="cap" style="top:316px;font-size:28px"><span><em>함께 뜨고 배우는 앱</em></span></div><div class="mail" id="s12mail">함께 뜨기를 열어 보세요<br>knitup.official@gmail.com</div></div>
+</div>
+<script>
+const SHOP='미미살롱';
+document.querySelectorAll('.shop').forEach(e=>e.textContent=SHOP);
+const $=id=>document.getElementById(id);
+// 장면: [id, 시작, 길이]
+const SC=[['s1',0,4],['s2',4,5],['s3',9,5],['s4',14,7.5],['s5',21.5,5],['s6',26.5,8],['s7',34.5,5],['s8',39.5,5],['s9',44.5,5],['s10',49.5,4.5],['s11',54,5.5],['s12',59.5,5]];
+const DUR=64.5, XF=0.45;
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), sg=(t,a,b)=>cl((t-a)/(b-a));
+const eo=x=>1-Math.pow(1-x,3), ei=x=>x*x*x;
+const back=x=>{ const c=1.70158; x=cl(x); return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2); };   // 톡 튀어나오는 느낌
+function pop(el,lt,at,d=0.38,extra=''){ const k=sg(lt,at,at+d); el.style.opacity=k>0?1:0; el.style.transform=`scale(${k>0?back(k):0}) ${extra}`; }
+function rise(el,lt,at,d=0.5,dy=26){ const k=eo(sg(lt,at,at+d)); el.style.opacity=k; el.style.transform=`translateY(${(1-k)*dy}px)`; }
+function tap(el,lt,at){ const k=sg(lt,at,at+0.7); el.style.opacity=k>0&&k<1?Math.sin(k*Math.PI):0; el.style.transform=`scale(${1.25-0.25*eo(k)})`; }
+function type(el,full,lt,at,cps=9,caret=true){ const n=Math.floor(cl((lt-at)*cps,0,full.length)); const done=n>=full.length; el.innerHTML=full.slice(0,n).replace(/\n/g,'<br>')+(caret&&lt>=at&&!(done&&lt>at+full.length/cps+0.6)?'<i class="caret"></i>':''); return at+full.length/cps; }
+function caps(sc,lt){ sc.querySelectorAll('.cap>span').forEach((s,i)=>rise(s,lt,0.2+i*0.55,0.5,16)); }
+function art(sc,lt,dur,bob=1){ const a=sc.querySelector('.art'); if(!a) return; a.style.transform=`translateY(${Math.sin(lt*2.1)*2.2*bob}px) scale(${1.01+0.035*sg(lt,0,dur)})`; }
+const Q='코 수가 2코 모자라요.\n어디서 빠진 걸까요?', A='늘림코 2코를 건너뛰셨어요.\n영상처럼 해 보세요.';
+// 색종이(완성 장면): 번호로 정해지는 자리·빛깔 — 언제 그려도 같은 모양
+const CFC=['#3E6B48','#FFD95C','#B4543F','#DDE8D6','#D9A441']; { const h=$('s9cf'); for(let i=0;i<34;i++){ const d=document.createElement('i'); d.className='cf'; d.style.left=((i*53)%350+4)+'px'; d.style.background=CFC[i%5]; h.appendChild(d); } }
+function render(t){
+  t=cl(t,0,DUR);
+  SC.forEach(([id,st,du],i)=>{ const sc=$(id), lt=t-st, on=lt>=0 && lt<du+XF; sc.style.zIndex=i+1; sc.style.opacity=on?(i===0?1:sg(lt,0,XF)):0; if(!on) return;
+    caps(sc,lt);
+    if(id==='s2') art(sc,lt,du);
+    if(id==='s3'){ art(sc,lt,du,1-sg(lt,0.9,1.4)); pop($('s3q'),lt,1.5,0.4,`rotate(${Math.sin(lt*3)*5}deg)`); }
+    if(id==='s4'){ art(sc,lt,du,0.5); const c=$('s4card'); const fly=ei(sg(lt,6.4,7.0)); const k=eo(sg(lt,1.0,1.5)); c.style.opacity=k*(1-sg(lt,6.4,6.9)); c.style.transform=`translate(${fly*220}px,${(1-k)*30-fly*260}px) rotate(${fly*14}deg) scale(${1-fly*0.5})`;
+      const tapped=lt>=2.2; $('s4chip').style.background=tapped?'var(--p)':'var(--l)'; $('s4chip').style.color=tapped?'#fff':'var(--p)'; $('s4chip').textContent=tapped?'🧶 함께 뜨기에 묻는 중':'🧶 함께 뜨기에 묻기';
+      $('s4band').style.opacity=sg(lt,2.3,2.6); tap($('s4ring1'),lt,1.7); const e=type($('s4txt'),Q,lt,2.9); $('s4send').style.opacity=0.45+0.55*sg(lt,e,e+0.2); tap($('s4ring2'),lt,5.75); }
+    if(id==='s5'){ art(sc,lt,du,0.6); const d=$('s5ding'); const k=sg(lt,0.25,0.6); d.style.transform=`scale(${k>0?back(k):0}) rotate(${lt<1.6?Math.sin(lt*26)*4*(1-sg(lt,0.6,1.6)):0}deg)`; d.style.display='inline-block';
+      const c=$('s5card'); const kk=eo(sg(lt,0.9,1.4)); c.style.opacity=kk; c.style.transform=`translateY(${(kk-1)*70}px)`;
+      [['s5w1',0],['s5w2',0.45]].forEach(([w,off])=>{ const p=((lt+off)%0.9)/0.9, e=$(w), r=10+p*34; e.style.left=(300-r)+'px'; e.style.top=(548-r)+'px'; e.style.width=e.style.height=(r*2)+'px'; e.style.opacity=lt<3.4?(1-p)*0.9:0; }); }
+    if(id==='s6'){ art(sc,lt,du,0.6); const c=$('s6card'); const fly=ei(sg(lt,6.9,7.5)); const k=eo(sg(lt,1.0,1.5)); c.style.opacity=k*(1-sg(lt,6.9,7.4)); c.style.transform=`translate(${-fly*220}px,${(1-k)*30-fly*260}px) rotate(${-fly*14}deg) scale(${1-fly*0.5})`;
+      const e=type($('s6txt'),A,lt,1.7); pop($('s6vid'),lt,e+0.25); $('s6send').style.opacity=0.45+0.55*sg(lt,e+0.7,e+0.9); tap($('s6ring'),lt,6.15); }
+    if(id==='s7'){ art(sc,lt,du); const w=$('s7wait'); w.style.opacity=sg(lt,0.5,0.8)*(1-sg(lt,1.7,1.9)); pop($('s7pill'),lt,1.9,0.42); }
+    if(id==='s8'){ art(sc,lt,du); pop($('s8b1'),lt,1.2); pop($('s8b2'),lt,2.3); }
+    if(id==='s9'){ art(sc,lt,du); [...$('s9cf').children].forEach((d,i)=>{ const delay=(i%9)*0.22, sp=150+((i*37)%120), y=-20+(lt-0.5-delay)*sp; d.style.transform=`translate(${Math.sin(lt*2+i)*12}px,${y}px) rotate(${lt*180+i*40}deg)`; d.style.opacity=y>-20&&y<660?0.9:0; }); }
+    if(id==='s10'){ art(sc,lt,du); pop($('s10h1'),lt,1.2,0.4,`translateY(${-sg(lt,1.2,4.5)*26}px)`); pop($('s10h2'),lt,1.8,0.4,`translateY(${-sg(lt,1.8,4.5)*20}px)`); }
+    if(id==='s11'){ [['s11a',1.2],['s11b',2.2],['s11c',3.2]].forEach(([e,at])=>{ const k=eo(sg(lt,at,at+0.5)); $(e).style.opacity=k; $(e).style.transform=`translateX(${(1-k)*-40}px)`; }); }
+    if(id==='s12'){ pop($('s12logo'),lt,0.15,0.5); $('s12mail').style.opacity=sg(lt,1.6,2.1)*0.9; }
+  });
+}
+window.render=render; window.DUR=DUR;
+const q=new URLSearchParams(location.search);
+if(q.has('t')) document.fonts.ready.then(()=>render(+q.get('t')));
+else if(q.has('play')){ const t0=performance.now(); (function loop(){ render(((performance.now()-t0)/1000)%DUR); requestAnimationFrame(loop); })(); }
+else document.fonts.ready.then(()=>render(0));
+</script>
