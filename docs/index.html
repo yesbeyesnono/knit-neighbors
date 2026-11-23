@@ -832,7 +832,7 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 .mirow{display:flex;gap:10px;align-items:flex-start;padding:4px 0}.mirow>i{flex:none;margin-top:2px;color:var(--ink3)}.mirow span{display:block;font-size:.85rem;color:var(--ink2)}
 /* 온보딩 4단계 (2026-09-26 시안) */
 #v-onboard .obs{display:none;flex:1}#v-onboard .obs.on{display:flex}#v-onboard.edit .obs{display:flex;flex:none;padding-top:8px;padding-bottom:8px}#v-onboard.edit .obs[data-s="4"],#v-onboard.edit .obnext,#v-onboard.edit .prog,#v-onboard.edit .obspacer,#v-onboard.edit .obttl,#v-onboard.edit .obsub,#v-onboard.edit #agreeWrap,#v-onboard.edit .obfoot{display:none}#v-onboard:not(.edit) #obSave{display:none}
-.prog{display:flex;gap:6px;padding:4px 16px 0}.prog i{flex:1;height:4px;border-radius:2px;background:var(--line)}.prog i.on{background:var(--acc)}
+.prog{display:flex;gap:6px;padding:4px 16px 0}.prog i{flex:1;height:4px;border-radius:2px;background:var(--line)}.prog i.on{background:var(--acc)}#v-onboard:not(.edit) .prog i:first-child{display:none}
 .obttl{font-size:1.35rem;font-weight:800;margin:10px 0 0;text-align:center;letter-spacing:-.02em}.obttl.l{text-align:left;margin-top:4px}.obsub{margin:-8px 0 0;color:var(--ink2);text-align:center;font-size:.92rem}.obsub.l{text-align:left}
 .oboval{width:220px;height:300px;border-radius:120px;margin:6px auto 0;position:relative;box-shadow:0 14px 30px rgba(34,54,42,.18);background:var(--btn) center/cover no-repeat;cursor:pointer;flex:none}
 .oboval .cam{position:absolute;right:14px;bottom:26px;width:48px;height:48px;border-radius:50%;background:var(--surface);box-shadow:0 3px 10px rgba(0,0,0,.15);display:grid;place-items:center;color:var(--olive)}.oboval svg,.obset .h svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -1122,7 +1122,7 @@ body.kb #nav{display:none!important}
     <p class="muted" style="font-size:.78rem;line-height:1.5">계속하면 <a href="terms.html" target="_blank" style="color:inherit">이용약관</a>과 <a href="privacy.html" target="_blank" style="color:inherit">개인정보처리방침</a>에 동의하는 것으로 봅니다.</p>
   </section>
 
-  <!-- 온보딩(4단계) / 프로필 편집(한 장) -->
+  <!-- 온보딩(동네 → 닉네임 → 준비, 3단계 — 사진 칸 data-s=1 은 프로필 편집에서만 보임) / 프로필 편집(한 장) -->
   <section class="view" id="v-onboard">
     <div class="top"><button class="back" id="obBack" onclick="go('my')" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.8 5l-7 7 7 7"></path></svg></button><h1 id="obTitle">프로필 만들기</h1></div>
     <div class="prog" id="obProg"><i></i><i></i><i></i><i></i></div>
@@ -1899,7 +1899,7 @@ function renderObReady(){
   const done=(p.skills||[]).length>0; const lv=lvShort(p);
   $('#obSkillChip').textContent = done?'완료':'필수'; $('#obSkillChip').style.cssText = done?'margin-left:auto':'margin-left:auto;background:var(--rose-soft);color:var(--rose)';
   const t=$('#obSkillTxt'); t.className='obdot'+(done?'':' warn'); t.textContent = done?`${lv||'체크 완료'} · 다시 눌러 고칠 수 있어요`:'아직 안 했어요 · 눌러서 기법 체크하기';
-  $('#obRing').className='ring'+(done?'':' wait'); $('#obRing').textContent = done?'✓':'3'; $('#obFootT').textContent = done?'4단계 중 4단계':'4단계 중 3단계'; $('#obFootS').textContent = done?'모두 준비됐어요':'내 뜨개 단계만 남았어요'; $('#obStart').disabled=!done;
+  $('#obRing').className='ring'+(done?'':' wait'); $('#obRing').textContent = done?'✓':'2'; $('#obFootT').textContent = done?'3단계 중 3단계':'3단계 중 2단계'; $('#obFootS').textContent = done?'모두 준비됐어요':'내 뜨개 단계만 남았어요'; $('#obStart').disabled=!done;
 }
 function obSkills(){ obReturn=true; openSlides(()=>openSkills()); }
 function obStart(){ if(!(myProfile?.skills||[]).length) return toast('내 뜨개 단계를 먼저 체크해 주세요'); obReturn=false; go('map'); setTimeout(pushSetup, 2500); setTimeout(()=>loadHomeNotice(true), 6000); supCheckIn().then(maybeSupporterPrompt); }
@@ -2035,7 +2035,7 @@ function openOnboard(edit, step){
   if(!edit) $('#f_agree').checked = !!p.terms_agreed_at; $('#refWrap').hidden = !SUPPORTERS || !!edit || !!p.referred_by; $('#f_ref').value='';
   show('onboard');
   if(edit){ document.querySelectorAll('#v-onboard .obs').forEach(el=>el.classList.remove('on')); $('#obFoot').classList.remove('on'); renderDong(); if(!loc.dong_name) detectLocation(); }
-  else obShow(step || (p.dong_name && p.nickname && p.terms_agreed_at ? 4 : 1));
+  else obShow(step || (p.dong_name && p.nickname && p.terms_agreed_at ? 4 : 2));   // 가입은 동네부터(2026-11-23 대표: 프로필 사진 단계는 순서에서 뺌 — 사진은 프로필 수정에서만. 안의 단계 번호 1~4 는 그대로 두고 1 을 건너뛴다)
 }
 // 닉네임(schema 101): 이미 쓰는 이름·30일 제한을 서버에 물어 칸 아래에 알려 준다. 막힌 이유가 있으면 그 글자를 돌려준다(없으면 null). 최종 판정은 서버 트리거
 const NICK_HINT='다른 분과 겹치지 않는 이름으로 정해 주세요. 정한 뒤에는 30일에 한 번 바꿀 수 있어요';
