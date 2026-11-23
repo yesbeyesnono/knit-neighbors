@@ -2290,3 +2290,9 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 167. 모임에 누가 참여하는지 보이게 (2026-11-21 대표 확정 시안 meet_people_v1, 마이그레이션 meetup_people — 원본 supabase/meetup_people.sql)
 --   meetup_people(p_ids, p_limit): 모임마다 참여자 수와 앞의 몇 명(주최자 먼저). 공개 모임은 회원 누구나, 초대만 모임은 참여자만. 정지·삭제 유예·차단·테스트 계정 제외
 -- ============================================================
+
+-- ============================================================
+-- 168. 내 도안으로 뜬 작품이 올라오면 작가에게 알린다 (2026-11-23 대표 지시, 마이그레이션 source_author_notify — 원본 supabase/source_author_notify.sql)
+--   works.maker_notified_at · source_author_notify(작품) · 트리거 works_source_author_notify(승인·도안 바뀜) · work_sources_author_notify(도안이 작가와 새로 묶임)
+--   작품마다 한 번 · 올린 지 14일 안 · 본인 작품·차단·테스트 계정 글은 제외
+-- ============================================================
