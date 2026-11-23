@@ -1,5 +1,5 @@
 // '함께 뜨기' 소개 영상 찍기: resources/ads/kal_film/film.html 의 render(t) 를 한 프레임씩 불러 JPEG 로 저장한다.
-//   node tools/ads/kal_film_capture.mjs <프레임 저장 폴더> [fps=30] [시작초] [끝초]
+//   node tools/ads/kal_film_capture.mjs <프레임 저장 폴더> [fps=30] [시작초] [끝초] [배속=1]
 // 그 뒤 ffmpeg 로 묶는다(끝에 명령 예시를 찍어 줌). Chrome 을 화면 없이 띄워 DevTools 로 조종(추가 설치 없음, Node 22+).
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
@@ -30,11 +30,11 @@ try {
   await ev("document.fonts.ready.then(()=>true)");
   // 그림 9장을 미리 불러 둔다(첫 프레임에 빈 그림이 찍히지 않게)
   await ev("Promise.all([...document.querySelectorAll('.art')].map(a=>new Promise(r=>{const im=new Image();im.onload=im.onerror=()=>r(1);im.src=a.style.backgroundImage.slice(5,-2);}))).then(()=>true)");
-  const dur = await ev('DUR'), from = +(process.argv[4] || 0), to = +(process.argv[5] || dur);
-  const n0 = Math.round(from * fps), n1 = Math.round(to * fps);
-  console.log(`길이 ${dur}s · ${fps}fps · 프레임 ${n0}~${n1 - 1}`);
+  const dur = await ev('DUR'), from = +(process.argv[4] || 0), to = +(process.argv[5] || dur), speed = +(process.argv[6] || 1);
+  const n0 = Math.round(from / speed * fps), n1 = Math.round(to / speed * fps);
+  console.log(`길이 ${dur}s · ${speed}배속 · ${fps}fps · 프레임 ${n0}~${n1 - 1}`);
   for (let i = n0; i < n1; i++) {
-    await ev(`render(${(i / fps).toFixed(4)}),1`);
+    await ev(`render(${(i / fps * speed).toFixed(4)}),1`);
     const { data } = await send('Page.captureScreenshot', { format: 'jpeg', quality: 93 });
     writeFileSync(join(out, 'f_' + String(i).padStart(5, '0') + '.jpg'), Buffer.from(data, 'base64'));
     if (i % 150 === 0) console.log('  ', i, '/', n1);
