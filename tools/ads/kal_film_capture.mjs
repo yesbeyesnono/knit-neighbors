@@ -8,7 +8,9 @@ import { pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
 
 const out = resolve(process.argv[2] || 'frames'), fps = +(process.argv[3] || 30);
-const page = pathToFileURL(resolve('resources/ads/kal_film/film.html')).href;
+// 가게 이름·종류는 환경 변수로: KAL_SHOP=이름 KAL_KIND=author|yarn
+const qs = new URLSearchParams(); if (process.env.KAL_SHOP) qs.set('shop', process.env.KAL_SHOP); if (process.env.KAL_KIND) qs.set('kind', process.env.KAL_KIND);
+const page = pathToFileURL(resolve('resources/ads/kal_film/film.html')).href + (qs.size ? '?' + qs : '');
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe', PORT = 9347;
 const prof = join(tmpdir(), 'kal_film_prof_' + Date.now());
 mkdirSync(out, { recursive: true });

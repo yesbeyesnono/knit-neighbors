@@ -69,5 +69,10 @@ b,.btn,.foot .mail{font-weight:400!important}
 <div class="foot"><div class="lg">knitup</div><p>함께 뜨고 배우는 뜨개 앱</p><p id="ask">첫 함께 뜨기를 같이 열어 보실 공방·작가님을 찾습니다</p><span class="mail">knitup.official@gmail.com</span></div>
 </div>
 <script>/* 주소 끝에 ?to=이름 을 붙이면 받는 곳 이름으로 바뀐다 */
-const to=new URLSearchParams(location.search).get('to'); if(to){ document.getElementById('to').textContent=to+' 님께'; document.getElementById('ask').textContent='첫 함께 뜨기를 '+to+' 님과 열고 싶습니다'; }</script>
+// 받는 곳에 따라 낱말을 바꾼다: ?kind=author(작가) · yarn(실 가게) · 없으면 공방
+const KIND=new URLSearchParams(location.search).get('kind')||'';
+const WMAP={author:[['우리 공방 키트,','작가님의 키트,'],['공방이','작가가'],['공방에는','작가님께는'],['공방','작가']],yarn:[['공방이','가게가'],['공방','가게']]}[KIND]||[];
+if(WMAP.length){ const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); const ns=[]; while(w.nextNode()) ns.push(w.currentNode);
+  ns.forEach(n=>{ if(n.parentNode.closest('script,style,.shop')) return; let t=n.nodeValue; WMAP.forEach(([a,b])=>{ t=t.split(a).join(b); }); if(t!==n.nodeValue) n.nodeValue=t; }); }
+const to=new URLSearchParams(location.search).get('to'); if(to){ document.getElementById('to').textContent=to+(KIND==='author'?' 작가님께':' 님께'); document.getElementById('ask').textContent='첫 함께 뜨기를 '+to+' 님과 열고 싶습니다'; }</script>
 </body></html>

@@ -55,8 +55,16 @@
  <div class="sc dk" id="s12"><div class="logo" id="s12logo">knitup</div><div class="cap" style="top:316px;font-size:28px"><span><em>함께 뜨고 배우는 앱</em></span></div><div class="mail" id="s12mail">함께 뜨기를 열어 보세요<br>knitup.official@gmail.com</div></div>
 </div>
 <script>
-const SHOP='미미살롱';
+const SHOP=new URLSearchParams(location.search).get('shop')||'미미살롱';   // 주소 끝에 ?shop=이름&kind=author 로도 바꾼다
 document.querySelectorAll('.shop').forEach(e=>e.textContent=SHOP);
+// 받는 곳에 따라 낱말을 바꾼다: ?kind=author(작가) · yarn(실 가게) · 없으면 공방
+const KIND=new URLSearchParams(location.search).get('kind')||'';
+const WMAP={author:[['우리 공방 키트,','작가님의 키트,'],['공방이','작가가'],['공방에는','작가님께는'],['공방','작가']],yarn:[['공방이','가게가'],['공방','가게']]}[KIND]||[];
+if(WMAP.length){ const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); const ns=[]; while(w.nextNode()) ns.push(w.currentNode);
+  ns.forEach(n=>{ if(n.parentNode.closest('script,style,.shop')) return; let t=n.nodeValue; WMAP.forEach(([a,b])=>{ t=t.split(a).join(b); }); if(t!==n.nodeValue) n.nodeValue=t; }); }
+// 이름이 길면 그 줄의 글씨를 줄여 한 줄에 넣는다
+function fitShop(){ document.querySelectorAll('.cap>span').forEach(sp=>{ if(!sp.querySelector('.shop')) return; sp.style.fontSize=''; sp.style.display='inline-block'; sp.style.whiteSpace='nowrap'; const w=sp.offsetWidth; sp.style.display=''; if(w>322) sp.style.fontSize=(38*322/w).toFixed(1)+'px'; }); }
+fitShop(); document.fonts.ready.then(fitShop);
 const $=id=>document.getElementById(id);
 // 장면: [id, 시작, 길이]
 const SC=[['s0',0,5],['s1',5,4],['s2',9,5],['s3',14,5],['s4',19,7.5],['s5',26.5,5],['s6',31.5,8],['s7',39.5,5],['s8',44.5,5],['s9',49.5,5],['s10',54.5,4.5],['s11',59,5.5],['s12',64.5,5]];

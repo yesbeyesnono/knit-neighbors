@@ -1,14 +1,14 @@
 # '함께 뜨기' 한 장 제안서를 그림으로 찍는다: resources/ads/kal_proposal/proposal.html
-#   python -X utf8 tools/ads/kal_proposal_shot.py <저장 폴더> [받는 곳 이름]
+#   python -X utf8 tools/ads/kal_proposal_shot.py <저장 폴더> [받는 곳 이름] [author|yarn]
 # 받는 곳 이름을 주면 맨 위 표시와 맨 아래 한 줄이 그 이름으로 바뀐다(없으면 '공방 · 작가님께').
 # 결과: 제안서_전체.png + 제안서_1.png(위) · 제안서_2.png(아래) — 가로 1260(420 x 3배)
 import os, subprocess, sys, urllib.parse
 from PIL import Image
 
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace('\\', '/')
-out = os.path.abspath(sys.argv[1]); to = sys.argv[2] if len(sys.argv) > 2 else ''
+out = os.path.abspath(sys.argv[1]); to = sys.argv[2] if len(sys.argv) > 2 else ''; kind = sys.argv[3] if len(sys.argv) > 3 else ''
 os.makedirs(out, exist_ok=True)
-url = 'file:///' + root + '/resources/ads/kal_proposal/proposal.html' + ('?to=' + urllib.parse.quote(to) if to else '')
+url = 'file:///' + root + '/resources/ads/kal_proposal/proposal.html' + ('?to=' + urllib.parse.quote(to) + ('&kind=' + kind if kind else '') if to else '')
 raw = os.path.join(out, '_raw.png')
 subprocess.run(['C:/Program Files/Google/Chrome/Application/chrome.exe', '--headless=new', '--no-sandbox', '--hide-scrollbars',
                 '--force-device-scale-factor=3', '--window-size=420,3000', '--screenshot=' + raw, url], capture_output=True)
