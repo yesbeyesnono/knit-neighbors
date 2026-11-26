@@ -992,6 +992,7 @@ body.kb #nav{display:none!important}
 /* 가게 소식 링크 (2026-11-16) */
 .nlink .pglinks{margin:10px 0 4px;border-color:var(--color-primary)}.nlink .pglinks a{color:var(--color-primary)}
 .nlpv{margin-top:8px;font-size:.78rem;color:var(--ink2)}.nlpv b{display:inline-block;background:var(--color-primary-light);color:var(--color-primary-dark);border-radius:999px;padding:3px 10px;margin-left:4px;font-size:.78rem}
+#askdlg .pnic{width:48px;height:48px;border-radius:50%;background:var(--color-primary-light);margin:0 auto 10px;display:grid;place-items:center;font-size:1.35rem}.pnbar{display:flex;align-items:center;gap:10px;background:var(--color-primary-light);color:var(--color-primary-dark);padding:11px 14px;font-size:.84rem;line-height:1.45}.pnbar button{margin-left:auto;flex:none;border:0;border-radius:999px;background:var(--color-primary);color:#fff;font:inherit;font-weight:700;font-size:.82rem;padding:7px 14px;cursor:pointer}
 #askdlg .bx>b{display:block;line-height:1.45}#askdlg .bx>b+.bs{margin-top:16px}
 /* 창 규칙 A안(2026-11-16): 읽기·확인은 가운데 카드 */
 .sheetwrap.ctr{align-items:center;justify-content:center;padding:28px}
@@ -2344,6 +2345,7 @@ function frPick(b){ [...b.parentNode.children].forEach(x=>x.classList.toggle('on
 async function frSend(){ const r=frRec; if(!r || !r.p) return; const typed=($('#reqMsg')?.value||'').trim(); const msg=typed || ($('.frchips button.on')?.textContent||'').trim() || null;
   const { error } = await sb.from('friendships').insert({ requester_id:me.id, addressee_id:r.p.id, message:msg });
   if(error){ if(error.code==='23505'){ closeSheet(); return toast('이미 친구 신청을 보냈어요. 상대가 확인할 때까지 기다려 주세요'); } return toast(error.message.replace(/^.*?: /,'')); }
+  setTimeout(()=>pushNudge('friend'), 1200);
   closeSheet(); toast('인사를 건넸어요'); metaEvent('friend_request'); r.state='pending'; loadFriendRec(); }
 function frOff(){ askConfirm('추천을 그만 받을까요?', '오늘의 추천 뜨친이 보이지 않고, 다른 분에게도 내가 추천되지 않아요. 마이 › 설정에서 다시 켤 수 있어요.', '그만 받기', ()=>toggleRec(false)); }
 async function toggleRec(v){ const { error }=await sb.from('profiles').update({ rec_off:!v }).eq('id', me.id); if(error) return toast('실패: '+error.message);
@@ -3017,6 +3019,7 @@ async function requestFriend(id, wave){
 async function sendRequest(id){
   const { error } = await sb.from('friendships').insert({ requester_id:me.id, addressee_id:id, message:$('#reqMsg').value.trim()||null });
   if(error){ if(error.code==='23505') { closeSheet(); return toast('이미 친구 신청을 보냈어요. 상대가 확인할 때까지 기다려 주세요'); } return toast(error.message.replace(/^.*?: /,'')); }
+  setTimeout(()=>pushNudge('friend'), 1200);
   toast('친구 신청을 보냈어요'); metaEvent('friend_request'); openProfile(id);
 }
 async function respond(id, status){
@@ -3186,9 +3189,10 @@ async function renderActivity(){
   if(error){ $('#actBody').innerHTML='<div class="empty">불러오기 실패: '+esc(error.message)+'</div>'; return; }
   actRows = (data||[]).filter(n=>SUPPORTERS || n.kind!=='supporter');   // 서포터즈 중단 뒤 옛 초대 알림은 숨김
   const ntfRow=(n,i)=>{ const a=n.kind==='supporter'?{nickname:'서포터즈'}:(n.actor||{nickname:(n.kind||'').startsWith('event_')?'뜨개동네 이벤트':'(탈퇴한 사용자)'}); const who = n.kind==='shop_post' && n.shop ? {nickname:n.shop.name} : a; const txt = n.kind==='shop_post' && n.shop ? '에 새 소식이 올라왔어요' : (NTF_TEXT[n.kind]||''); const jg=NTF_JG.has(n.kind); return `<div class="ntfrow" id="ntfr-${i}"><button type="button" class="ntfdel" onclick="event.stopPropagation();delNotif(${i})">지우기</button><div class="ntf ${n.read_at?'':'unread'}${n.clicked_at?' seen':''}${jg?' jg':''}" onclick="openNotif(${i})"><div class="k">${NTF_ICON[n.kind]||''}</div>${n.kind==='shop_post'?`<div class="ava">${SHOP_SVG}</div>`:avatar(a)}<div class="tx"><b>${esc(who.nickname)}</b>${txt}${n.snippet?`<span class="sn">${esc(n.snippet)}</span>`:''}${jg&&ntfDest(n)?'<span class="ngo">보러 가기 ›</span>':''}</div><time>${agoShort(n.created_at)}</time></div></div>`; };
+  const pst=await pushState(), pnBar=(pst==='prompt'||pst==='prompt-with-rationale'||pst==='denied')?'<div class="pnbar"><span>🔔 알림이 꺼져 있어요.<br>댓글·뜨친 소식을 놓칠 수 있어요</span><button type="button" onclick="pushBarOn()">켜기</button></div>':'';   // 알림을 켜지 않은 회원에게만(시안 push_ask_v1 ④)
   const nw=[], old=[]; actRows.forEach((n,i)=>(n.read_at?old:nw).push(ntfRow(n,i)));   // 새 알림 = 이번에 처음 보는 것 · 지난 활동 = 그 밖(누른 것은 흐리게) — 30일 동안 보관(2026-11-16 대표 확정 시안)
-  $('#actBody').innerHTML = actRows.length ? (nw.length?'<div class="ntfsec"><span>새 알림</span></div>'+nw.join(''):'') + (old.length?'<div class="ntfsec"><span>지난 활동 · 30일 동안 보관</span><button type="button" onclick="clearSeenNotifs()">모두 지우기</button></div>'+old.join(''):'')
-    : '<div class="empty">아직 활동이 없어요<br>글을 쓰거나 이웃에게 먼저 인사해 보세요</div>';
+  $('#actBody').innerHTML = pnBar + (actRows.length ? (nw.length?'<div class="ntfsec"><span>새 알림</span></div>'+nw.join(''):'') + (old.length?'<div class="ntfsec"><span>지난 활동 · 30일 동안 보관</span><button type="button" onclick="clearSeenNotifs()">모두 지우기</button></div>'+old.join(''):'')
+    : '<div class="empty">아직 활동이 없어요<br>글을 쓰거나 이웃에게 먼저 인사해 보세요</div>');
   actSwipeInit(); pushBadgeClear();
   if(actRows.some(n=>!n.read_at)){ await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',me.id).is('read_at',null); refreshBadge(); }
 }
@@ -3554,6 +3558,24 @@ async function pushSetup(){
 }
 async function pushAsk(){ if(!PushN) return; try{ const r = await PushN.requestPermissions(); if(r.receive === 'granted') pushRegister(); else toast('설정 › 뜨개동네 › 알림에서 켤 수 있어요'); }catch(e){} }
 function pushRegister(){ if(!PushN) return; PushN.register().catch(()=>{}); }
+// ---- 알림 허용 다시 묻기 (2026-11-26 대표 확정 시안 push_ask_v1): 알림을 켜지 않은 회원에게, 답을 기다리게 되는 순간(글·인증을 올린 뒤 · 뜨친 신청을 보낸 뒤 · 채팅을 보낸 뒤)에 가운데 작은 창으로.
+//      가입 직후의 한 번과 별도로 두 번까지, 한 번 뜬 뒤 7일은 쉰다(기기에 적음 kn_push_n · kn_push_nt). 휴대폰에서 이미 '허용 안 함'을 누른 분은 앱이 다시 물을 수 없어 켜는 곳만 알려 준다
+const PUSH_NUDGE={ post:['댓글이 달리면 알려 드릴까요?','이웃이 댓글이나 좋아요를 남기면 바로 알 수 있어요. 광고 알림은 없어요.'], friend:['수락하면 알려 드릴까요?','상대가 신청을 받아 주면 바로 알 수 있어요.'], chat:['답장이 오면 알려 드릴까요?','상대가 답장을 보내면 바로 알 수 있어요.'] };
+async function pushState(){ if(!PushN) return 'none'; try{ return (await PushN.checkPermissions()).receive||'none'; }catch(e){ return 'none'; } }
+function pushHow(){ askNote('알림 켜는 방법', `${PUSH_OS} 설정 › 뜨개동네 › 알림에서 켜 주세요.`); }
+function pushNudge(kind){ return new Promise(async res=>{ try{
+  if(!PushN || !me || !myProfile?.onboarded_at || $('#askdlg')) return res(false);
+  const st=await pushState(); if(st==='granted'){ pushRegister(); return res(false); } if(st==='none') return res(false);
+  const n=+(localStorage.getItem('kn_push_n')||0), t=+(localStorage.getItem('kn_push_nt')||0);
+  if(n>=2 || Date.now()-t < 7*864e5) return res(false);
+  localStorage.setItem('kn_push_n', String(n+1)); localStorage.setItem('kn_push_nt', String(Date.now()));
+  const [ttl, txt]=PUSH_NUDGE[kind]||PUSH_NUDGE.post;
+  const d=document.createElement('div'); d.id='askdlg'; d.innerHTML=`<div class="bx"><div class="pnic">🔔</div><b>${esc(ttl)}</b><p>${esc(txt)}</p><div class="bs"><button type="button">나중에</button><button type="button" class="gg">알림 받기</button></div></div>`; document.body.appendChild(d);
+  const [c,o]=d.querySelectorAll('button'); const done=v=>{ d.remove(); res(v); };
+  c.onclick=()=>done(false); d.onclick=e=>{ if(e.target===d) done(false); };
+  o.onclick=async()=>{ done(true); if(st==='denied') pushHow(); else await pushAsk(); };
+}catch(e){ res(false); } }); }
+async function pushBarOn(){ const st=await pushState(); if(st==='denied') return pushHow(); await pushAsk(); if(view==='activity') renderActivity(); }
 if(PushN){
   PushN.addListener('registration', async ({ value }) => {
     pushToken = value;
@@ -3692,6 +3714,7 @@ async function sendMsg(txt){ $('#greetBar')?.remove();   // txt 를 주면 입�
   if(typeof txt!=='string'){ $('#msgIn').value=''; kkGrow(); }
   const { error } = await sb.from('messages').insert({room_id:roomId,sender_id:me.id,body:t});
   if(error){ toast('전송 실패: '+error.message); $('#msgIn').value=t; kkGrow(); }
+  else if(typeof txt!=='string') setTimeout(()=>pushNudge('chat'), 600);
 }
 async function sendChatPhoto(file){
   if(!file||!roomId) return;
@@ -5001,7 +5024,7 @@ async function submitCert(){
     const leftYs=wYarns.filter(y=>y && !y.stashId && (y.name||'').trim()).map(y=>Object.assign({}, y));
     await loadMe(); sPhotos=[]; cdClear(); composeBack=null; goMy('thread','posts');   // 확인 뒤 게시(schema 133): 바로 올라가지 않는다 — 마이에서 '확인 중'으로 보임
     askNote('확인 요청을 보냈어요', (evDone?'이벤트 인증으로 접수했어요. ':'')+'knitup 이 사진과 기법을 확인한 뒤 커뮤니티에 올려 드려요. 확인이 끝나면 알림으로 알려 드릴게요.');
-    $('#askdlg')?.querySelector('button')?.addEventListener('click', ()=>setTimeout(()=>{ if(leftYs.length) stashLeftAsk(leftYs); else showRecsAfterWork(); }, 400));
+    $('#askdlg')?.querySelector('button')?.addEventListener('click', ()=>setTimeout(async()=>{ await pushNudge('post'); if(leftYs.length) stashLeftAsk(leftYs); else showRecsAfterWork(); }, 400));
   }catch(e){ toast(e.message); }
   certCheck.busy=false; certCheck();
 }
@@ -5933,7 +5956,7 @@ async function submitPost(){
     const { error } = await sb.from('posts').insert({ author_id: me.id, body: body||null, photos, mentions: mentionsFor('compose', body||'') });
     if(error) throw new Error(error.message);
     delete mentionMap.compose; $('#cText').value=''; autoGrow($('#cText')); updateCnt(); cPhotos=[]; renderPv();
-    toast('게시했어요'); loadFeed();
+    toast('게시했어요'); loadFeed(); setTimeout(()=>pushNudge('post'), 900);
   }catch(e){ toast(e.message); }
   $('#cPost').disabled = false;
 }
