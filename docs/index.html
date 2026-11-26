@@ -2499,7 +2499,8 @@ async function openPatternViewer(id){
   w.innerHTML='<iframe title="도안 뷰어" sandbox="allow-scripts"></iframe>'; w.classList.add('on');
   const f=w.querySelector('iframe');
   f.srcdoc=openPatternViewer.html;
-  f.onload=()=>f.contentWindow.postMessage({ type:'knitup-pkg', pkg:c.pkg, prog:pr?.prog||0, who:myProfile?.nickname||'', gauge:gctx||null }, '*');
+  pvDocPid='p_'+id;
+  f.onload=()=>f.contentWindow.postMessage({ type:'knitup-pkg', pkg:c.pkg, pid:pvDocPid, done:docProgGet(pvDocPid), prog:pr?.prog||0, who:myProfile?.nickname||'', gauge:gctx||null }, '*');
 }
 // 완성 모멘트(knitup v9 이식): 마지막 단까지 체크하면 축하 → 완성작품 인증(도안 제목·기법 자동) → 다음 도전(추천 도안)
 function openPatternDone(m){
@@ -2511,11 +2512,16 @@ function openPatternDone(m){
 }
 async function certFromPattern(){ const m=pvMeta; closeSheet(); await openCert(true); if(view!=='cert'||!m) return; $('#wTitle').value=(m.title||'').slice(0,40); if(m.craft==='knitting'||m.craft==='crochet') wCraft=m.craft; wTechSel=new Set((m.techniques||[]).filter(t=>TECH.find(x=>x.id===t))); renderCertTech(); certCheck(); toast('도안 이름과 기법이 채워졌어요 — 사진을 올려 주세요'); }
 async function openNextChallenge(){ await loadRecs(true); openSheet(`<b style="font-size:1.05rem">다음에 떠보면 좋아요</b><div class="muted" style="font-size:.82rem;margin-top:-6px">내 단계와 새로 배울 기법 1~2개를 기준으로 골랐어요</div><div class="patlist">${recs.slice(0,4).map(patItem).join('')||'<div class="empty">추천할 도안이 아직 없어요</div>'}</div>`); }
-function closePatternViewer(){ const w=$('#pviewer'); if(w){ w.classList.remove('on'); w.innerHTML=''; } pvId=null; }
+// 읽는 문서의 단별 체크(2026-11-26): 뷰어가 {type:'kn-docprog', pid, done} 을 보내면 기기에 적고, 열 때 done 으로 돌려준다(뜻은 풀지 않고 통째로)
+let pvDocPid=null;
+function docProgGet(pid){ try{ const j=JSON.parse(localStorage.getItem('kn_docprog_'+pid)||'null'); return (j && typeof j==='object' && !Array.isArray(j)) ? j : null; }catch(e){ return null; } }
+function docProgSet(pid, done){ try{ if(!pid || !done || typeof done!=='object' || Array.isArray(done)) return; const t=JSON.stringify(done); if(t.length>200000) return; localStorage.setItem('kn_docprog_'+pid, t); }catch(e){} }
+function closePatternViewer(){ pvDocPid=null; const w=$('#pviewer'); if(w){ w.classList.remove('on'); w.innerHTML=''; } pvId=null; }
 window.addEventListener('message', e=>{
   const w=$('#pviewer'); const f=w&&w.querySelector('iframe'); if(!f || e.source!==f.contentWindow) return;
   const d=e.data||{};
   if(d.type==='kn-close') return closePatternViewer();
+  if(d.type==='kn-docprog'){ if(pvDocPid && (d.pid==null || d.pid===pvDocPid)) docProgSet(pvDocPid, d.done); return; }
   if(d.type==='kn-ai-q' && pvId){ const q=String(d.q||'').slice(0,300); const id=pvId;   // 뷰어 'AI에게 묻기' → Edge Function pattern-ai(내 실함·실 사전·도안 게이지로 답)
     sb.functions.invoke('pattern-ai', { body:{ pattern_id:id, q, ctx:d.ctx||{} } }).then(async({ data, error })=>{ let r=data||{}; if(error){ let m='연결에 실패했어요'; try{ const j=await error.context.json(); m=j.error||m; }catch(e){} r={ error:m }; }
       try{ f.contentWindow.postMessage({ type:'kn-ai-r', q, answer:r.answer||'', yarns:r.yarns||[], error:r.error||null }, '*'); }catch(e){} }); return; }
@@ -2544,7 +2550,8 @@ async function openLabPattern(id){ toast('도안을 여는 중…');
   let w=$('#pviewer'); if(!w){ w=document.createElement('div'); w.id='pviewer'; document.body.appendChild(w); }
   w.innerHTML='<iframe title="도안 뷰어" sandbox="allow-scripts"></iframe>'; w.classList.add('on');
   const f=w.querySelector('iframe'); f.srcdoc=openPatternViewer.html;
-  f.onload=()=>f.contentWindow.postMessage({ type:'knitup-pkg', pkg:c.pkg, pid:'lab_'+id, prog:0, who:myProfile?.nickname||'' }, '*');
+  pvDocPid='lab_'+id;
+  f.onload=()=>f.contentWindow.postMessage({ type:'knitup-pkg', pkg:c.pkg, pid:pvDocPid, done:docProgGet(pvDocPid), prog:0, who:myProfile?.nickname||'' }, '*');
 }
 function readPkgFile(file){ return new Promise((res, rej)=>{ if(file.size>3*1024*1024) return rej(new Error('패키지가 너무 커요 (3MB 이하)')); const rd=new FileReader(); rd.onerror=()=>rej(new Error('파일을 읽지 못했어요')); rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='knitup-pattern-package' || !Array.isArray(j.charts) || !j.charts.length) throw 0; res(j); }catch(e){ rej(new Error('knitup 도안 패키지(.knitup-pkg.json)가 아니에요')); } }; rd.readAsText(file); }); }
 // ===== 커머스 데모(Lab, 2026-10-19 대표 지시: 작가 설명회용) — 실 판매(무통장) · 도안 구매(임시 무료) · 작가 정산 · 실함→도안 =====
