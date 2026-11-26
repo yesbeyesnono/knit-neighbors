@@ -327,7 +327,7 @@ begin
       update public.shops set owner_id = c.profile_id, links = coalesce(nullif(c.links,'{}'::jsonb), links), phone = coalesce(phone, c.phone) where id = sid;
     else
       insert into public.shops(name, kind, address, phone, owner_id, links, location, is_active)
-      values (c.name, c.kind, c.address, c.phone, c.profile_id, coalesce(c.links,'{}'::jsonb), loc, loc is not null) returning id into sid;
+      values (c.name, c.kind, c.address, c.phone, c.profile_id, coalesce(c.links,'{}'::jsonb), loc, true) returning id into sid;
     end if;
     update public.shop_claims set status='approved', shop_id=sid, decided_by=p_actor, decided_at=now() where id = p_id;
     insert into public.notifications(recipient_id, actor_id, kind, snippet, shop_id)

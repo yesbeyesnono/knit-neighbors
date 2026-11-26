@@ -2296,3 +2296,9 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   works.maker_notified_at · source_author_notify(작품) · 트리거 works_source_author_notify(승인·도안 바뀜) · work_sources_author_notify(도안이 작가와 새로 묶임)
 --   작품마다 한 번 · 올린 지 14일 안 · 본인 작품·차단·테스트 계정 글은 제외
 -- ============================================================
+
+-- ============================================================
+-- 169. 가게 등록을 승인하면 좌표가 없어도 켜진 채로 (2026-11-26 대표 지시, 마이그레이션 shop_claim_active — 원본 supabase/shop_claim_active.sql)
+--   _decide_shop_claim: 새 가게의 is_active 를 (좌표가 있을 때만 → 항상) true 로. 사용법 안내가 승인 때 바로 나감
+--   지도 핀은 좌표가 생기는 순간 보임(nearby_shops 는 location is not null 을 봄)
+-- ============================================================
