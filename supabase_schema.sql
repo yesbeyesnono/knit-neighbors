@@ -2302,3 +2302,10 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   _decide_shop_claim: 새 가게의 is_active 를 (좌표가 있을 때만 → 항상) true 로. 사용법 안내가 승인 때 바로 나감
 --   지도 핀은 좌표가 생기는 순간 보임(nearby_shops 는 location is not null 을 봄)
 -- ============================================================
+
+-- ============================================================
+-- 170. Lab 도안 미리 보기 (2026-11-26 대표 확정 시안 lab_pattern_preview_v1, 마이그레이션 lab_patterns — 원본 supabase/lab_patterns.sql)
+--   표 lab_patterns(Studio 가 올린 시험용 도안 꾸러미 — 관리자만 읽기·지우기) · lab_keys(연결 열쇠의 해시만, 함수로만)
+--   lab_key_new(관리자: 열쇠 새로 만들기, 값은 한 번만 돌려줌 · 옛 열쇠는 끊김) · lab_key_info · _lab_key_ok
+--   lab_pattern_put(열쇠, id, 제목, 요약, 꾸러미) · lab_pattern_drop(열쇠, id): Studio 가 로그인 없이 부름(anon 실행 가능 — 열쇠가 맞을 때만). 꾸러미 4MB · 200개까지
+-- ============================================================

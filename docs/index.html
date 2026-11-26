@@ -922,7 +922,11 @@ html.vvk,html.vvk body{height:var(--vvh)!important;overflow:hidden}html.vvk #app
 .pat .mt{font-size:12px;color:var(--ink3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pat .nw{font-size:11.5px;color:var(--ink);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .patlist .pat{width:auto;display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
-.patlist .pat .ph{width:64px;height:64px;flex:none}.patlist .pat .tt{margin-top:0}
+.patlist .pat .ph{width:64px;height:64px;flex:none}
+.labgrp{margin:0 16px 12px;padding:12px 12px 4px;border:1.5px dashed var(--line);border-radius:14px;background:var(--color-surface)}
+.labgrp .tg{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--bg2);color:var(--ink3);vertical-align:1px}
+.labgrp .pat:last-child{border-bottom:0}
+.labgrp .more{display:block;width:100%;border:0;border-top:1px solid var(--line);background:none;padding:10px 0;font:inherit;font-size:13px;font-weight:700;color:var(--color-primary);cursor:pointer}.patlist .pat .tt{margin-top:0}
 .patchips{display:flex;flex-wrap:wrap;gap:6px}.patchips span{font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink2)}
 .patchips span.new{border-color:var(--sel);color:var(--ink);font-weight:600}
 /* 커머스 데모(Lab, 2026-10-19): 뜨개 상점·장바구니·주문·정산 */
@@ -2522,6 +2526,26 @@ window.addEventListener('message', e=>{
     pvTimer=setTimeout(async()=>{ await sb.from('pattern_progress').upsert({ profile_id:me.id, pattern_id:id, prog, updated_at:new Date().toISOString(), done_at: finished ? new Date().toISOString() : null });
       if(finished && !pvDone && pvId===id){ pvDone=true; const m=pvMeta; closePatternViewer(); openPatternDone(m); } }, 600); }
 });
+// ===== Lab 도안 미리 보기(2026-11-26 대표 확정 시안 lab_pattern_preview_v1, schema 170) =====
+//   Studio 가 저장할 때마다 자동으로 올린 시험용 도안. 표 lab_patterns 는 관리자만 읽을 수 있어(RLS) 다른 계정에는 줄이 오지 않고 묶음도 안 보인다. Lab 판에만
+let labPats=null, labPatAll=false;
+async function loadLabPats(){ if(!FULL) return; const { data }=await sb.from('lab_patterns').select('id,title,meta,cover,updated_at').order('updated_at',{ascending:false}); labPats=data||[]; drawLabPats(); }
+function drawLabPats(){ const el=$('#labPats'); if(!el) return; const L=labPats||[]; if(!L.length){ el.innerHTML=''; return; }
+  const sub=p=>{ const m=p.meta||{}, a=[]; if(m.charts) a.push('기호도 '+m.charts+'장'); if(m.colorways) a.push('색 '+m.colorways+'가지'); return a.join(' · ')||'도안'; };
+  const cov=p=>/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(p.cover||'') ? `<img class="ph" src="${p.cover}" alt="">` : '<div class="ph">도안</div>';
+  el.innerHTML=`<div class="labgrp"><b>도안 미리 보기</b><span class="tg">관리자만 보여요</span><div class="muted" style="font-size:.78rem;margin-top:2px">Studio 에서 만든 시험용 도안 ${L.length}개</div>
+    <div class="patlist">${(labPatAll?L:L.slice(0,3)).map(p=>`<div class="pat" data-id="${esc(p.id)}" onclick="openLabPattern(this.dataset.id)">${cov(p)}<div style="min-width:0;flex:1"><div class="tt">${esc(p.title)}</div><div class="mt">${esc(sub(p))}</div></div></div>`).join('')}</div>
+    ${!labPatAll && L.length>3 ? `<button type="button" class="more" onclick="labPatAll=true;drawLabPats()">${L.length}개 모두 보기</button>` : ''}</div>`; }
+async function openLabPattern(id){ toast('도안을 여는 중…');
+  const { data:c, error }=await sb.from('lab_patterns').select('pkg,title').eq('id', id).maybeSingle();
+  if(error || !c) return toast('도안을 불러오지 못했어요');
+  if(!openPatternViewer.html){ try{ openPatternViewer.html = await (await fetch('viewer.html')).text(); }catch(e){ return toast('뷰어를 불러오지 못했어요'); } }
+  closeSheet(); pvId=null; pvMeta=null; pvTotal=0; pvDone=true;   // 미리 보기: 진도·완성 모멘트·AI 질문은 서버에 남기지 않는다(pvId 없음)
+  let w=$('#pviewer'); if(!w){ w=document.createElement('div'); w.id='pviewer'; document.body.appendChild(w); }
+  w.innerHTML='<iframe title="도안 뷰어" sandbox="allow-scripts"></iframe>'; w.classList.add('on');
+  const f=w.querySelector('iframe'); f.srcdoc=openPatternViewer.html;
+  f.onload=()=>f.contentWindow.postMessage({ type:'knitup-pkg', pkg:c.pkg, pid:'lab_'+id, prog:0, who:myProfile?.nickname||'' }, '*');
+}
 function readPkgFile(file){ return new Promise((res, rej)=>{ if(file.size>3*1024*1024) return rej(new Error('패키지가 너무 커요 (3MB 이하)')); const rd=new FileReader(); rd.onerror=()=>rej(new Error('파일을 읽지 못했어요')); rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='knitup-pattern-package' || !Array.isArray(j.charts) || !j.charts.length) throw 0; res(j); }catch(e){ rej(new Error('knitup 도안 패키지(.knitup-pkg.json)가 아니에요')); } }; rd.readAsText(file); }); }
 // ===== 커머스 데모(Lab, 2026-10-19 대표 지시: 작가 설명회용) — 실 판매(무통장) · 도안 구매(임시 무료) · 작가 정산 · 실함→도안 =====
 //   가격·배송비·재고·수수료는 서버 함수(place_order·purchase_pattern·pattern_fee_calc)가 계산. 화면은 보여 주기만.
@@ -2544,7 +2568,8 @@ function renderStore(){
 async function renderStorePatterns(){
   const [{ data }, { data:pp }]=await Promise.all([sb.from('patterns').select('id,title,craft,level,photos,price,has_viewer,author_id').eq('is_published',true).eq('hidden',false).order('created_at',{ascending:false}), sb.from('pattern_purchases').select('pattern_id').eq('profile_id',me.id)]);
   const own=new Set((pp||[]).map(x=>x.pattern_id));
-  $('#storeBody').innerHTML=storeTabs()+`<div class="card soft" style="margin:0 16px 10px;font-size:.85rem"><b>지금은 무료 체험</b> — 유료 도안도 결제 없이 열려요. 정식 출시 후에는 앱 내 결제로 바뀌고 작가에게 정산돼요.</div>
+  if(FULL) loadLabPats();
+  $('#storeBody').innerHTML=storeTabs()+`<div id="labPats"></div><div class="card soft" style="margin:0 16px 10px;font-size:.85rem"><b>지금은 무료 체험</b> — 유료 도안도 결제 없이 열려요. 정식 출시 후에는 앱 내 결제로 바뀌고 작가에게 정산돼요.</div>
     <div class="patlist" style="padding:0 16px">${(data||[]).map(p=>`<div class="pat" onclick="openPattern('${p.id}')">${patThumb(p)}<div style="min-width:0;flex:1"><div class="tt">${esc(p.title)}</div><div class="mt">${own.has(p.id)?'<span class="ostat" style="margin-right:4px">구매함</span>':''}${CRAFT_KO[p.craft]||''} ${p.level}단계 · ${priceKo(p)}${p.has_viewer?' · 앱에서 열기':''}</div></div></div>`).join('')||'<div class="empty">등록된 도안이 없어요</div>'}</div>`;
 }
 function openProduct(id){ const p=storeProducts.find(x=>x.id===id); if(!p) return; prSel={ id, color:(p.colors||[])[0]?.name||'', qty:1 }; renderProduct(); }

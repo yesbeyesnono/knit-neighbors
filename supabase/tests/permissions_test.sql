@@ -317,6 +317,13 @@ begin
   out := pg_temp.must_fail(out, 'video_uploads(anon)', 'select count(*) from public.video_uploads');   -- schema 152
   out := pg_temp.must_fail(out, 'video_uploads_orphans(anon)', 'select public.video_uploads_orphans()');
   out := pg_temp.must_fail(out, 'meetup_nearby_notify(anon)', 'select public.meetup_nearby_notify()');   -- schema 153
+  out := pg_temp.must_fail(out, 'lab_patterns(anon)', 'select count(*) from public.lab_patterns');   -- schema 170
+  out := pg_temp.must_fail(out, 'lab_keys(anon)', 'select count(*) from public.lab_keys');
+  out := pg_temp.must_fail(out, 'lab_key_new(anon)', 'select public.lab_key_new()');
+  out := pg_temp.must_fail(out, 'lab_key_info(anon)', 'select public.lab_key_info()');
+  out := pg_temp.must_fail(out, '_lab_key_ok(anon)', 'select public._lab_key_ok(repeat(''a'', 50))');
+  out := pg_temp.must_fail(out, 'lab_pattern_put(anon, 틀린 열쇠)', 'select public.lab_pattern_put(repeat(''a'', 50), ''x'', ''x'', null, ''{}''::jsonb)');
+  out := pg_temp.must_fail(out, 'lab_pattern_drop(anon, 틀린 열쇠)', 'select public.lab_pattern_drop(repeat(''a'', 50), ''x'')');
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;

@@ -293,6 +293,7 @@ label.ck{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6
     <a href="#authors" data-v="authors">작가 신청</a>
     <a href="#invites" data-v="invites">초대·안내</a>
     <a href="#patterns" data-v="patterns">도안</a>
+    <a href="#labpat" data-v="labpat">Lab 도안</a>
     <a href="#store" data-v="store">상점 (Lab 커머스)</a>
     <div class="grp">실 데이터</div>
     <a href="#yarns" data-v="yarns">실 사전 (표준화)</a>
@@ -369,7 +370,7 @@ const NAV=[
   {l:'오늘', items:[['today','오늘 (지기 AI)'],['reports','신고함'],['support','지기 문의함'],['certs','인증 확인']]},
   {l:'회원·커뮤니티', items:[['users','회원'],['content','글·인증'],['meetups','모임'],['wants','찾는 뜨친']]},
   {l:'알리기', items:[['broadcast','공지·알림 보내기'],['automsg','자동 메시지'],['events','이벤트']]},
-  {l:'가게·작가·도안', items:[['shops','파트너 가게'],['authors','작가 신청'],['invites','초대·안내'],['patterns','도안'],['store','상점 (Lab)']]},
+  {l:'가게·작가·도안', items:[['shops','파트너 가게'],['authors','작가 신청'],['invites','초대·안내'],['patterns','도안'],['labpat','Lab 도안'],['store','상점 (Lab)']]},
   {l:'실 데이터', items:[['yarns','실 사전'],['stash','회원 실 현황']]},
   {l:'현황·분석', items:[['dash','대시보드'],['dong','동네 분포'],['ai-photos','AI 데이터',[['ai-photos','사진↔기법 라벨'],['ai-path','학습 경로'],['ai-qa','질문·해결 댓글'],['ai-yarn','실·바늘 통계']]],['export','내보내기']]},
   {l:'지기 AI 관리', items:[['rules','규칙'],['modlog','기록·되돌리기'],['kb','지식 창고'],['badwords','금지어',[['badwords','욕설 사전 (지기 AI 감지)'],['banned','금칙어 (글쓰기 차단)']]],['techcand','기법 후보'],['sources','도안 후보']]},
@@ -1825,6 +1826,22 @@ async function techExclude(id){ try{ await jtool('exclude_candidate',{candidate_
 // ===== 도안 후보(2026-11-20 대표 확정, schema 157): 회원이 인증에서 새로 적은 도안·영상·수업 — [확인] / [합치기] / [제외]. 비슷한 이름은 서버가 찾아 준다(글자 비교 — 한글·영문 표기가 다른 것은 '합칠 곳'을 직접 골라 합친다)
 const SRC_KIND={ pattern:'도안', video:'영상', class:'수업', original:'창작' };
 let SRC={ rows:[], tab:'candidate' };
+// ===== Lab 도안(2026-11-26 대표 확정 시안 lab_pattern_preview_v1, schema 170): Studio 가 저장할 때마다 자동으로 올린 시험용 도안. Lab 앱에서 관리자 계정만 본다 =====
+//   올리기는 Studio 가 연결 열쇠로 한다(lab_pattern_put). 열쇠는 만들 때 한 번만 보이고 서버에는 해시만 남는다
+VIEWS.labpat = async()=>{ const [{data:rows,error},{data:ki}]=await Promise.all([sb.from('lab_patterns').select('id,title,meta,bytes,updated_at').order('updated_at',{ascending:false}), sb.rpc('lab_key_info')]);
+  if(error){ $('#main').innerHTML=`<h1>Lab 도안</h1><div class="card muted">${esc(error.message)}</div>`; return; }
+  const L=rows||[], k=ki||{}, mb=n=>n>=1048576?(n/1048576).toFixed(1)+'MB':Math.max(1,Math.round((n||0)/1024))+'KB';
+  $('#main').innerHTML=`<h1>Lab 도안 <small>Studio 에서 만든 시험용 도안 — Lab 앱의 스토어 › 도안 탭에서 관리자 계정만 보여요 · ${L.length}개</small></h1>
+  <div class="card"><b>Studio 연결</b><div class="muted" style="margin:4px 0 10px">${k.has?`연결 열쇠가 있어요 (만든 날 ${fmtd(k.created_at)} · ${k.last_used_at?'마지막으로 올라온 때 '+fmtd(k.last_used_at):'아직 올라온 도안이 없어요'})`:'아직 연결 열쇠가 없어요. 열쇠를 만들어 Studio 에 한 번 붙여 넣으면, 그 뒤로는 도안을 저장할 때마다 자동으로 올라와요.'}</div>
+    <button class="${k.has?'':'p'}" onclick="labKeyNew(${k.has?1:0})">${k.has?'열쇠 새로 만들기':'Studio 연결 열쇠 만들기'}</button><div id="labKeyBox"></div></div>
+  ${L.length?`<table><tr><th>도안</th><th>내용</th><th>크기</th><th>올라온 때</th><th></th></tr>${L.map(r=>`<tr><td><b>${esc(r.title)}</b></td><td class="muted">${(r.meta&&r.meta.charts)?'기호도 '+esc(r.meta.charts)+'장':''}${(r.meta&&r.meta.colorways)?' · 색 '+esc(r.meta.colorways)+'가지':''}</td><td class="muted">${mb(r.bytes)}</td><td class="muted">${fmtd(r.updated_at)}</td><td><button data-id="${esc(r.id)}" data-t="${esc(r.title)}" onclick="labPatDel(this)">지우기</button></td></tr>`).join('')}</table>`:'<div class="card muted">아직 올라온 도안이 없어요.</div>'}`; };
+async function labKeyNew(has){ if(has && !confirm('열쇠를 새로 만들면 전에 Studio 에 넣은 열쇠는 더 쓸 수 없어요. 새로 만들까요?')) return;
+  const {data,error}=await sb.rpc('lab_key_new'); if(error||!data) return toast('열쇠를 만들지 못했어요: '+((error&&error.message)||''));
+  const b=$('#labKeyBox'); b.innerHTML=`<div style="margin-top:12px;padding:12px;border:1.5px dashed var(--amber);border-radius:10px"><b>연결 열쇠</b> <span class="muted">— 지금 한 번만 보여요. 복사해서 Studio 의 'Lab 연결'에 붙여 넣으세요.</span><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><input id="labKeyVal" readonly style="flex:1;min-width:200px;font-family:monospace"><button class="p" onclick="labKeyCopy()">복사</button></div></div>`;
+  $('#labKeyVal').value=data; }
+async function labKeyCopy(){ const el=$('#labKeyVal'); try{ await navigator.clipboard.writeText(el.value); toast('복사했어요'); }catch(e){ el.select(); toast('칸을 길게 눌러 복사해 주세요'); } }
+async function labPatDel(btn){ if(!confirm('「'+btn.dataset.t+'」을(를) Lab 도안에서 지울까요?\nStudio 에서 다시 저장하면 또 올라와요.')) return;
+  const {error}=await sb.from('lab_patterns').delete().eq('id', btn.dataset.id); if(error) return toast('지우지 못했어요: '+error.message); toast('지웠어요'); VIEWS.labpat(); }
 VIEWS.sources = async()=>{ const {data,error}=await sb.rpc('admin_source_list'); if(error){ $('#main').innerHTML=`<h1>도안 후보</h1><div class="card muted">${esc(error.message)}</div>`; return; }
   { const mk=(await sb.rpc('admin_source_makers')).data||{}; SRC.mk=mk.rows||{}; SRC.makers=mk.makers||[]; SRC.aliases=mk.aliases||[]; } SRC.rows=data.rows||[]; SRC.ai=data.ai_merged||[]; SRC.originals=data.originals||0; SRC.top=data.top_original||[]; srcDraw(); };
 function srcDraw(){ const R=SRC.rows, n=k=>R.filter(r=>r.status===k).length, rows=R.filter(r=>r.status===SRC.tab), oks=R.filter(r=>r.status==='ok');
