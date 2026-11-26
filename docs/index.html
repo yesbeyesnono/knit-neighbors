@@ -2495,7 +2495,7 @@ async function openPatternViewer(id){
   closeSheet(); pvId=id;
   let w=$('#pviewer'); if(!w){ w=document.createElement('div'); w.id='pviewer'; document.body.appendChild(w); }
   // 격리: sandbox(allow-scripts만) + srcdoc → 도안 패키지 안의 내용이 앱 세션·저장소에 접근할 수 없음
-  if(!openPatternViewer.html){ try{ openPatternViewer.html = await (await fetch('viewer.html')).text(); }catch(e){ pvId=null; return toast('뷰어를 불러오지 못했어요'); } }
+  if(!openPatternViewer.html){ try{ openPatternViewer.html = await (await fetch('viewer.html', { cache:'no-cache' })).text(); }catch(e){ pvId=null; return toast('뷰어를 불러오지 못했어요'); } }
   w.innerHTML='<iframe title="도안 뷰어" sandbox="allow-scripts"></iframe>'; w.classList.add('on');
   const f=w.querySelector('iframe');
   f.srcdoc=openPatternViewer.html;
@@ -2545,7 +2545,7 @@ function drawLabPats(){ const el=$('#labPats'); if(!el) return; const L=labPats|
 async function openLabPattern(id){ toast('도안을 여는 중…');
   const { data:c, error }=await sb.from('lab_patterns').select('pkg,title').eq('id', id).maybeSingle();
   if(error || !c) return toast('도안을 불러오지 못했어요');
-  if(!openPatternViewer.html){ try{ openPatternViewer.html = await (await fetch('viewer.html')).text(); }catch(e){ return toast('뷰어를 불러오지 못했어요'); } }
+  if(!openPatternViewer.html){ try{ openPatternViewer.html = await (await fetch('viewer.html', { cache:'no-cache' })).text(); }catch(e){ return toast('뷰어를 불러오지 못했어요'); } }
   closeSheet(); pvId=null; pvMeta=null; pvTotal=0; pvDone=true;   // 미리 보기: 진도·완성 모멘트·AI 질문은 서버에 남기지 않는다(pvId 없음)
   let w=$('#pviewer'); if(!w){ w=document.createElement('div'); w.id='pviewer'; document.body.appendChild(w); }
   w.innerHTML='<iframe title="도안 뷰어" sandbox="allow-scripts"></iframe>'; w.classList.add('on');
