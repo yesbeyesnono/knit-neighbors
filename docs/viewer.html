@@ -16,7 +16,7 @@
 -->
 <style>
   /* 📖 읽는 문서 — 작가가 만든 그대로(휴대폰·태블릿·노트북) */
-  #docCard{padding:0; overflow:hidden;}
+  #docCard{padding:0; overflow:hidden; overflow:clip;}   /* clip = 모서리는 자르되, 기호도를 화면에 붙여 두는 것(sticky)은 막지 않음 */
   .dv{max-width:780px; margin:0 auto; padding:18px 18px 22px; font-size:16px; line-height:1.75; color:var(--ink);}
   .dv img{max-width:100%; border-radius:12px; display:block; margin:12px auto;}
   .dv .dv-cover{max-height:380px;}
@@ -34,7 +34,16 @@
   .dv .dv-chart{border:1px solid var(--line); border-radius:12px; overflow:auto; margin:10px 0 4px; background:#fff; -webkit-overflow-scrolling:touch; cursor:zoom-in; max-height:82vh;}
   .dv .dv-chart img{margin:0; border-radius:0; max-width:none; width:100%;}
   .dv .dv-chart.zoom{cursor:zoom-out;}
-  .dv .dv-chart.zoom img{width:260%;}
+  .dv .dv-chart{touch-action:pan-x pan-y; position:relative;}
+  .dv .dv-chart .dv-in{position:relative; width:100%;}
+  .dv .dv-chart.pin{position:sticky; top:6px; z-index:6; max-height:46vh; box-shadow:0 8px 22px rgba(0,0,0,.16);}
+  .dv .dv-tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; margin:0 0 12px; font-size:12.5px; color:var(--sub);}
+  .dv .dv-tools button{font:inherit; font-size:13px; padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer;}
+  .dv .dv-tools button.on{background:#3F4F22; border-color:#3F4F22; color:#fff;}
+  .dv .dv-chart .dv-num{position:absolute; top:0; height:100%; overflow:hidden; background:#fff; display:none; pointer-events:none; z-index:2;}
+  .dv .dv-chart .dv-num.l{box-shadow:6px 0 8px -6px rgba(0,0,0,.28);}
+  .dv .dv-chart .dv-num.r{box-shadow:-6px 0 8px -6px rgba(0,0,0,.28);}
+  .dv .dv-chart .dv-num img{position:absolute; top:0; max-width:none; margin:0;}
   .dv .dv-hint{font-size:12.5px; color:var(--sub); text-align:center; margin:0 0 10px;}
   .dv .dv-prog{position:sticky; top:0; background:#fff; padding:8px 0; font-size:13px; color:var(--accent); font-weight:700; z-index:2; border-bottom:1px solid var(--line);}
   #toolsBtn{display:block; margin:4px auto 20px; border:1.5px solid var(--line); background:#fff; color:var(--sub); border-radius:999px; padding:10px 18px; font:inherit; font-size:13px; cursor:pointer;}
@@ -535,7 +544,31 @@ function renderDoc(D,pid){ var wrapEl=document.querySelector('.wrap'), card=docu
     else if(b.type==='note'){ box.appendChild(el('div','dv-note',b.text)); }
     else if(b.type==='part'){ var h=el('div','dv-part',b.name||''); if(b.yarn) h.appendChild(el('small','',b.yarn)); box.appendChild(h); }
     else if(b.type==='img'){ var i2=el('img'); i2.src=b.src; i2.alt='그림'; box.appendChild(i2); }
-    else if(b.type==='chart'){ var w=el('div','dv-chart'), i3=el('img'); i3.src=b.src; i3.alt=b.cap||'기호도'; w.appendChild(i3); if(CW&&b.cols&&!b.noCw&&b.cols.indexOf(CW[0].cols[0])>=0) cwImgs.push({img:i3,src:b.src}); if(b.cap&&b.w){ w.style.maxWidth=Math.round(Math.max(260,b.w*1.4))+'px'; w.style.marginLeft='auto'; w.style.marginRight='auto'; } w.addEventListener('click',function(ev){ var was=w.classList.contains('zoom'); var fx=(ev.offsetX||0)/Math.max(1,i3.clientWidth), fy=(ev.offsetY||0)/Math.max(1,i3.clientHeight); w.classList.toggle('zoom'); if(!was){ w.scrollLeft=fx*i3.clientWidth-w.clientWidth/2; w.scrollTop=fy*i3.clientHeight-w.clientHeight/2; } }); box.appendChild(w); box.appendChild(el('div','dv-hint','기호도를 누르면 그 자리가 크게 보입니다. 다시 누르면 돌아옵니다.')); }
+    else if(b.type==='chart'){ (function(){ var w=el('div','dv-chart'), inner=el('div','dv-in'), i3=el('img'); i3.src=b.src; i3.alt=b.cap||'기호도'; inner.appendChild(i3); w.appendChild(inner);
+      if(CW&&b.cols&&!b.noCw&&b.cols.indexOf(CW[0].cols[0])>=0) cwImgs.push({img:i3,src:b.src});
+      if(b.cap&&b.w){ w.style.maxWidth=Math.round(Math.max(260,b.w*1.4))+'px'; w.style.marginLeft='auto'; w.style.marginRight='auto'; }
+      /* 크게 보기: 누르면 기호가 읽히는 크기(그림의 원래 크기)까지 · 두 손가락으로 더 키우고 줄임 · 키운 채 옆으로 밀어도 단 번호 띠가 양옆에 붙어 있음 */
+      var natW=b.w||0, zoomed=false, sL=null, sR=null, iL=null, iR=null;
+      if(b.numL||b.numR){ sL=el('div','dv-num l'); iL=el('img'); iL.src=b.src; sL.appendChild(iL); inner.appendChild(sL); sR=el('div','dv-num r'); iR=el('img'); iR.src=b.src; sR.appendChild(iR); inner.appendChild(sR); }
+      var strips=function(){ if(!sL) return; var W2=inner.clientWidth, cw=w.clientWidth, sl=w.scrollLeft, lw=Math.round((b.numL||0)*W2), rw=Math.round((b.numR||0)*W2); var l0=Math.round((b.numL0||0)*W2), r0=Math.round((b.numR0!=null?b.numR0:(1-(b.numR||0)))*W2); if(b.numR0!=null){ rw=Math.round((b.numR-b.numR0)*W2); } lw=lw-l0; var on=zoomed&&W2>cw+4;
+        if(on&&lw>6&&sl>l0+lw*0.5){ sL.style.display='block'; sL.style.width=lw+'px'; sL.style.left=sl+'px'; iL.style.width=W2+'px'; iL.style.left=(-l0)+'px'; } else sL.style.display='none';
+        if(on&&rw>6&&sl+cw<r0+rw*0.5){ sR.style.display='block'; sR.style.width=rw+'px'; sR.style.left=(sl+cw-rw)+'px'; iR.style.width=W2+'px'; iR.style.left=(-r0)+'px'; } else sR.style.display='none'; };
+      var setW=function(px,fx,fy,vx,vy){ var cw=w.clientWidth; px=Math.max(cw,Math.min(px,Math.max(cw*8,natW*3))); if(px<=cw+2){ inner.style.width='100%'; zoomed=false; w.classList.remove('zoom'); w.scrollLeft=0; strips(); return; } inner.style.width=px+'px'; zoomed=true; w.classList.add('zoom'); var hh=inner.clientHeight; w.scrollLeft=fx*px-vx; w.scrollTop=fy*hh-vy; strips(); };
+      var moved=false;
+      w.addEventListener('click',function(ev){ if(moved){ moved=false; return; } var r=inner.getBoundingClientRect(), wr=w.getBoundingClientRect(); var fx=(ev.clientX-r.left)/Math.max(1,r.width), fy=(ev.clientY-r.top)/Math.max(1,r.height); if(zoomed){ setW(0,0,0,0,0); return; } var cw=w.clientWidth; var target=Math.max(cw*1.8,natW?natW*1.1:cw*2.6); setW(target,fx,fy,ev.clientX-wr.left,ev.clientY-wr.top); });
+      var p0=null; var dist=function(t){ var dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY; return Math.sqrt(dx*dx+dy*dy); };
+      w.addEventListener('touchstart',function(ev){ if(ev.touches.length===2){ var r=inner.getBoundingClientRect(), wr=w.getBoundingClientRect(); var mx=(ev.touches[0].clientX+ev.touches[1].clientX)/2, my=(ev.touches[0].clientY+ev.touches[1].clientY)/2; p0={d:dist(ev.touches),w:r.width,fx:(mx-r.left)/Math.max(1,r.width),fy:(my-r.top)/Math.max(1,r.height),vx:mx-wr.left,vy:my-wr.top}; moved=true; } },{passive:true});
+      w.addEventListener('touchmove',function(ev){ if(p0&&ev.touches.length===2){ ev.preventDefault(); var k=dist(ev.touches)/Math.max(1,p0.d); setW(p0.w*k,p0.fx,p0.fy,p0.vx,p0.vy); } },{passive:false});
+      w.addEventListener('touchend',function(ev){ if(ev.touches.length<2) p0=null; if(!ev.touches.length) setTimeout(function(){ moved=false; },350); },{passive:true});
+      w.addEventListener('wheel',function(ev){ if(!(ev.ctrlKey||ev.metaKey)) return; ev.preventDefault(); var r=inner.getBoundingClientRect(), wr=w.getBoundingClientRect(); setW(r.width*(ev.deltaY<0?1.15:0.87),(ev.clientX-r.left)/Math.max(1,r.width),(ev.clientY-r.top)/Math.max(1,r.height),ev.clientX-wr.left,ev.clientY-wr.top); },{passive:false});
+      w.addEventListener('scroll',strips,{passive:true});
+      box.appendChild(w);
+      /* 넓은 화면(노트북): 글 폭(780)에 가두지 않고 카드 폭까지 넓혀 기호도를 원래 크기에 가깝게 */
+      var fitWide=function(){ if(b.cap&&b.w&&b.w<700) return; var card=document.getElementById('docCard'); var tw=box.clientWidth-36, av=(card?card.clientWidth:tw)-40; if(av>tw+80&&natW>tw){ var want=Math.min(av,Math.round(natW*1.02)); w.style.width=want+'px'; w.style.maxWidth='none'; w.style.marginLeft=(-(want-tw)/2)+'px'; } else { w.style.width=''; w.style.marginLeft=(b.cap&&b.w)?'auto':''; if(!(b.cap&&b.w)) w.style.maxWidth=''; } strips(); };
+      fitWide(); window.addEventListener('resize',fitWide); setTimeout(fitWide,400);
+      /* 붙여 두기: 기호도를 화면 위에 붙여 놓고 아래 단별 지시를 넘겨 봄 */
+      var tools=el('div','dv-tools'), pinB=el('button',null,'📌 기호도 붙여 두기'); pinB.type='button'; pinB.addEventListener('click',function(){ var on=!w.classList.contains('pin'); Array.prototype.forEach.call(box.querySelectorAll('.dv-chart.pin'),function(q){ q.classList.remove('pin'); }); Array.prototype.forEach.call(box.querySelectorAll('.dv-tools button.on'),function(q){ q.classList.remove('on'); q.textContent='📌 기호도 붙여 두기'; }); if(on){ w.classList.add('pin'); pinB.classList.add('on'); pinB.textContent='📌 붙여 둠 — 풀기'; } });
+      tools.appendChild(el('span',null,'누르면 크게 · 두 손가락으로 더 크게/작게')); tools.appendChild(pinB); box.appendChild(tools); })(); }
     else if(b.type==='instr'){ var t2=el('table'); (b.rows||[]).forEach(function(r,ri){ var id=bi+'-'+ri, tr=el('tr'); var c=el('td','c'), cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!done[id]; cb.setAttribute('aria-label',(r.no||'')+' 떴음'); c.appendChild(cb); tr.appendChild(c); tr.appendChild(el('td','k',r.no||'')); tr.appendChild(el('td','',r.text||'')); tr.appendChild(el('td','n',r.cnt?(r.cnt+'코'):'')); if(done[id]) tr.className='done'; total++;
         cb.addEventListener('change',function(){ done[id]=cb.checked; tr.className=cb.checked?'done':''; try{ localStorage.setItem(key,JSON.stringify(done)); }catch(e){} tellDone(); upd(); }); t2.appendChild(tr); }); box.appendChild(t2); }
   }); upd(); return true; }
