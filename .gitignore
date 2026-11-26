@@ -31,3 +31,10 @@ resources/patent/
 
 # 공개하면 안 되는 내부 문서(전략·조사) — 이 PC에만 둠
 resources/private/
+
+# 저장소에 올리지 않는 것(2026-11-26): 큰 영상 · 음악 파일 · 작가/공방마다 만든 제안 세트 · 남의 도안 사진이 든 시안 — 이 PC 에만 둔다
+resources/ads/kal_film/*.mp4
+resources/ads/kal_film/*.mp3
+resources/ads/함께뜨기_제안세트_20261123/작가/
+resources/ads/함께뜨기_제안세트_20261123/공방(가게)/
+resources/mockups/lab_pattern_preview_v1_20261126.png
