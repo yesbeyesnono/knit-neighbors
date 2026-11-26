@@ -15,6 +15,31 @@
   예시 도안: 코바늘 비니 (원본 기준 머리둘레 52cm · 깊이 19cm · 4.0mm 표준 게이지)
 -->
 <style>
+  /* 📖 읽는 문서 — 작가가 만든 그대로(휴대폰·태블릿·노트북) */
+  #docCard{padding:0; overflow:hidden;}
+  .dv{max-width:780px; margin:0 auto; padding:18px 18px 22px; font-size:16px; line-height:1.75; color:var(--ink);}
+  .dv img{max-width:100%; border-radius:12px; display:block; margin:12px auto;}
+  .dv .dv-cover{max-height:380px;}
+  .dv table{width:100%; border-collapse:collapse; margin:10px 0; font-size:15px;}
+  .dv td{padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:top;}
+  .dv td.k{width:5.5em; color:var(--sub); font-weight:700;}
+  .dv td.n{width:3.2em; text-align:right; color:var(--sub); white-space:nowrap;}
+  .dv td.c{width:40px; text-align:center;}
+  .dv td.c input{width:24px; height:24px; accent-color:var(--accent);}
+  .dv tr.done td{color:#9AA0A6;}
+  .dv .dv-part{margin:28px 0 8px; padding:10px 14px; background:var(--accent-soft); border-radius:12px; font-weight:800; font-size:18px; color:var(--accent);}
+  .dv .dv-part small{font-weight:500; font-size:13px; color:var(--sub); margin-left:8px;}
+  .dv p{white-space:pre-wrap; margin:10px 0;}
+  .dv .dv-note{background:var(--gold-soft); border-radius:12px; padding:12px 14px; white-space:pre-wrap; margin:12px 0; font-size:15px;}
+  .dv .dv-chart{border:1px solid var(--line); border-radius:12px; overflow:auto; margin:10px 0 4px; background:#fff; -webkit-overflow-scrolling:touch; cursor:zoom-in; max-height:82vh;}
+  .dv .dv-chart img{margin:0; border-radius:0; max-width:none; width:100%;}
+  .dv .dv-chart.zoom{cursor:zoom-out;}
+  .dv .dv-chart.zoom img{width:260%;}
+  .dv .dv-hint{font-size:12.5px; color:var(--sub); text-align:center; margin:0 0 10px;}
+  .dv .dv-prog{position:sticky; top:0; background:#fff; padding:8px 0; font-size:13px; color:var(--accent); font-weight:700; z-index:2; border-bottom:1px solid var(--line);}
+  #toolsBtn{display:block; margin:4px auto 20px; border:1.5px solid var(--line); background:#fff; color:var(--sub); border-radius:999px; padding:10px 18px; font:inherit; font-size:13px; cursor:pointer;}
+  .wrap.has-doc>.card:not(#docCard):not(#asmCard), .wrap.has-doc>.main{display:none;}
+  @media (max-width:520px){ .dv{padding:14px 12px 18px;} .dv td{padding:9px 5px;} .dv td.c{width:34px;} .dv td.k{width:4.2em;} .dv td.n{width:2.8em;} }
   :root{
     /* 뜨개동네 토큰(피스타치오) — 2026-10-10 UI 통일 */
     --bg:#F3F4EC; --card:#fff; --ink:#3C4043; --sub:#6A6E73; --line:#E4E6D9;
@@ -181,6 +206,8 @@
 </header>
 
 <div class="wrap">
+
+  <div class="card" id="docCard" style="display:none"><div class="dv" id="docView"></div><button id="toolsBtn">사이즈 바꿔 보기 · 실 소요량 계산 (참고용)</button></div>
 
   <!-- ══════ 상단: 실 소요량 (기본 노출) ══════ -->
   <div class="card">
@@ -483,6 +510,34 @@ function renderAsm(){
   card.querySelectorAll('input[type=checkbox]').forEach(function(cb){ cb.addEventListener('change',function(e){ e.stopPropagation(); if(cb.checked) asmDone[cb.dataset.k]=true; else delete asmDone[cb.dataset.k]; asmSave(); renderAsm(); }); });
   card.querySelectorAll('#asmParts .asm-it').forEach(function(el){ el.addEventListener('click',function(e){ if(e.target.tagName==='INPUT') return; e.preventDefault(); const i=+el.dataset.i; if(i!==curIdx) loadPackage(pkg,{chartIdx:i, keep:true, pid:asmKey.replace(/^knitup_asm_/,'')}); }); });
 }
+/* 📖 읽는 문서: 작가가 만든 블록을 그대로 — 기호도는 누르면 크게, 단별 지시는 뜬 곳을 표시(이 기기에 저장) */
+function renderDoc(D,pid){ var wrapEl=document.querySelector('.wrap'), card=document.getElementById('docCard'), box=document.getElementById('docView');
+  if(!D||!D.blocks||!D.blocks.length){ card.style.display='none'; wrapEl.classList.remove('has-doc'); return false; }
+  card.style.display='block'; wrapEl.classList.add('has-doc'); box.innerHTML='';
+  try{ document.getElementById('btnPkg').style.display='none'; }catch(e){}   /* 회원에게는 작가용 버튼을 보이지 않음 */
+  var key='knitup_docprog_'+(pid||D.title||''), done={}; try{ done=JSON.parse(localStorage.getItem(key)||'{}')||{}; }catch(e){ done={}; }
+  var el=function(t,c,x){ var e=document.createElement(t); if(c) e.className=c; if(x!=null) e.textContent=x; return e; };
+  var total=0, prog=el('div','dv-prog'); box.appendChild(prog);
+  /* 🎨 색 바꿔 보기: 작가가 적어 둔 색 조합(곰·토끼·개구리)을 누르면 기호도의 실 색이 그 색으로 바뀜 — 그림을 새로 받지 않고 화면에서 색만 바꿈 */
+  var CW=(D.colorways&&D.colorways.length>1)?D.colorways:null, cwImgs=[];
+  var hx=function(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; };
+  var cwPaint=function(it,ci){ if(ci===0){ it.img.src=it.src; return; } var im=new Image(); im.onload=function(){ var c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight; var x=c.getContext('2d'); x.drawImage(im,0,0); var id=x.getImageData(0,0,c.width,c.height), d=id.data; var B=CW[0].cols.map(hx), N=CW[ci].cols.map(hx); var mk=function(b){ var v=[255-b[0],255-b[1],255-b[2]], n=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])||1; return {v:v,n:n}; }; var V=B.map(mk), P=[[201,42,42],[92,122,76],[63,79,34]].map(mk);
+      for(var i=0;i<d.length;i+=4){ var a=255-d[i], b2=255-d[i+1], g=255-d[i+2], n=Math.sqrt(a*a+b2*b2+g*g); if(n<26) continue; var best=-1, bc=0, gray=(a+b2+g)/(n*1.7320508); for(var k=0;k<V.length&&k<N.length;k++){ var cs=(a*V[k].v[0]+b2*V[k].v[1]+g*V[k].v[2])/(n*V[k].n); if(cs>bc){ bc=cs; best=k; } } if(best<0||bc<0.93||bc<=gray+0.003) continue; var pr=0; for(var k2=0;k2<P.length;k2++){ var c2=(a*P[k2].v[0]+b2*P[k2].v[1]+g*P[k2].v[2])/(n*P[k2].n); if(c2>pr) pr=c2; } if(pr>=bc) continue;   /* 단 번호(빨강)·이름표(초록)는 그대로 */ var al=Math.min(1.15,n/V[best].n), q=N[best]; d[i]=Math.max(0,Math.round(255-al*(255-q[0]))); d[i+1]=Math.max(0,Math.round(255-al*(255-q[1]))); d[i+2]=Math.max(0,Math.round(255-al*(255-q[2]))); }
+      x.putImageData(id,0,0); it.img.src=c.toDataURL('image/jpeg',0.88); }; im.src=it.src; };
+  if(CW){ var bar=el('div','dv-cw'); bar.style.cssText='display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:6px 0 14px; font-size:14px'; bar.appendChild(el('span',null,'색 바꿔 보기')); CW.forEach(function(c,ci){ var b=el('button',null,c.name); b.type='button'; b.style.cssText='display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; border:1.5px solid '+(ci===0?'#3F4F22':'#E4E6D9')+'; background:#fff; font-size:14px; cursor:pointer'; c.cols.slice(0,2).forEach(function(h){ var sw=el('i'); sw.style.cssText='width:12px; height:12px; border-radius:50%; border:1px solid rgba(0,0,0,.15); background:'+h; b.insertBefore(sw,b.firstChild); }); b.addEventListener('click',function(){ Array.prototype.forEach.call(bar.querySelectorAll('button'),function(q){ q.style.borderColor='#E4E6D9'; }); b.style.borderColor='#3F4F22'; cwImgs.forEach(function(it){ cwPaint(it,ci); }); }); bar.appendChild(b); }); box.appendChild(bar); }
+  var upd=function(){ var n=0; Object.keys(done).forEach(function(k){ if(done[k]) n++; }); prog.textContent=total?('뜬 곳 '+n+' / '+total):''; prog.style.display=total?'':'none'; };
+  D.blocks.forEach(function(b,bi){
+    if(b.type==='cover'){ var im=el('img','dv-cover'); im.src=(b.imgs||[])[0]||''; im.alt='완성 사진'; box.appendChild(im); }
+    else if(b.type==='info'){ var t=el('table'); (b.rows||[]).forEach(function(r){ var tr=el('tr'); tr.appendChild(el('td','k',r[0])); tr.appendChild(el('td','',r[1])); t.appendChild(tr); }); box.appendChild(t); }
+    else if(b.type==='text'){ box.appendChild(el('p','',b.text)); }
+    else if(b.type==='note'){ box.appendChild(el('div','dv-note',b.text)); }
+    else if(b.type==='part'){ var h=el('div','dv-part',b.name||''); if(b.yarn) h.appendChild(el('small','',b.yarn)); box.appendChild(h); }
+    else if(b.type==='img'){ var i2=el('img'); i2.src=b.src; i2.alt='그림'; box.appendChild(i2); }
+    else if(b.type==='chart'){ var w=el('div','dv-chart'), i3=el('img'); i3.src=b.src; i3.alt=b.cap||'기호도'; w.appendChild(i3); if(CW&&b.cols&&!b.noCw&&b.cols.indexOf(CW[0].cols[0])>=0) cwImgs.push({img:i3,src:b.src}); if(b.cap&&b.w){ w.style.maxWidth=Math.round(Math.max(260,b.w*1.4))+'px'; w.style.marginLeft='auto'; w.style.marginRight='auto'; } w.addEventListener('click',function(ev){ var was=w.classList.contains('zoom'); var fx=(ev.offsetX||0)/Math.max(1,i3.clientWidth), fy=(ev.offsetY||0)/Math.max(1,i3.clientHeight); w.classList.toggle('zoom'); if(!was){ w.scrollLeft=fx*i3.clientWidth-w.clientWidth/2; w.scrollTop=fy*i3.clientHeight-w.clientHeight/2; } }); box.appendChild(w); box.appendChild(el('div','dv-hint','기호도를 누르면 그 자리가 크게 보입니다. 다시 누르면 돌아옵니다.')); }
+    else if(b.type==='instr'){ var t2=el('table'); (b.rows||[]).forEach(function(r,ri){ var id=bi+'-'+ri, tr=el('tr'); var c=el('td','c'), cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!done[id]; cb.setAttribute('aria-label',(r.no||'')+' 떴음'); c.appendChild(cb); tr.appendChild(c); tr.appendChild(el('td','k',r.no||'')); tr.appendChild(el('td','',r.text||'')); tr.appendChild(el('td','n',r.cnt?(r.cnt+'코'):'')); if(done[id]) tr.className='done'; total++;
+        cb.addEventListener('change',function(){ done[id]=cb.checked; tr.className=cb.checked?'done':''; try{ localStorage.setItem(key,JSON.stringify(done)); }catch(e){} upd(); }); t2.appendChild(tr); }); box.appendChild(t2); }
+  }); upd(); return true; }
+document.getElementById('toolsBtn').addEventListener('click',function(){ var wr=document.querySelector('.wrap'); wr.classList.toggle('has-doc'); this.textContent=wr.classList.contains('has-doc')?'사이즈 바꿔 보기 · 실 소요량 계산 (참고용)':'참고용 계산 접기'; try{ render(null); }catch(e){} });
 function loadPackage(pkg,opt){
   opt=opt||{};
   try{
@@ -499,7 +554,9 @@ function loadPackage(pkg,opt){
     if(pkg.level) document.getElementById('pLv').textContent='Lv.'+pkg.level;
     document.getElementById('subT').innerHTML='📦 작가 패키지 · '+(chart.part||'차트')
       +(chart.kind==='free'?' · 자유 그래프':'')+' · 4.0mm 표준 게이지 기준 — <b>대화로 치수·게이지를 알려주면 반영합니다</b>';
+    var hasDoc=false; try{ hasDoc=renderDoc(pkg.doc,opt.pid); }catch(e){} if(hasDoc) document.getElementById('subT').textContent='작가가 만든 도안입니다.';
     render(null); vzReset(); renderAsm();
+    if(hasDoc&&!opt.keep){ return; }
     if(!opt.keep){
       bubble('a','작가 패키지 「'+(pkg.title||'도안')+'」를 불러왔어요.'+(pkg.charts.length>1?' 파트 '+pkg.charts.length+'개예요 — 🧷 파트·조립 카드에서 파트를 고르고 완료를 체크하세요.':'')+' 바늘 호수나 스와치를 알려주시면 게이지를 반영해 치수·실 소요량을 다시 계산해 드릴게요.');
       toast('패키지 로드 완료 — 에디터 제작 도안이 View-only로 열렸습니다');
