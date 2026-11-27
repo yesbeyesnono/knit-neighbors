@@ -2326,3 +2326,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 173. 탈퇴할 때 이유 묻기 (2026-11-27 대표 확정 시안 leave_reason_v2, 마이그레이션 leave_reason — 원본 supabase/leave_reason.sql)
 --   account_deletions.reason / reason_text · request_account_deletion_v2(이유, 한 줄) — 옛 앱의 request_account_deletion() 은 그대로 · 콘솔 admin_leave_reasons(일수)
 -- ============================================================
+
+-- ============================================================
+-- 174. 도안 꾸러미 크기 한도 해제 (2026-11-27 대표 지시 "완전해제", 마이그레이션 pkg_limit_off — 원본 supabase/pkg_limit_off.sql)
+--   set_pattern_pkg(3MB) · studio_submit(3MB) · lab_pattern_put(4MB) 의 크기 검사 줄을 뺌(그 밖은 그대로, 권한 유지). 앱의 readPkgFile 3MB 검사도 뺌(1.0.13~)
+-- ============================================================

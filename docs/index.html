@@ -2578,7 +2578,7 @@ async function openLabPattern(id){ toast('도안을 여는 중…');
   pvDocPid='lab_'+id;
   f.onload=()=>f.contentWindow.postMessage({ type:'knitup-pkg', pkg:c.pkg, pid:pvDocPid, done:docProgGet(pvDocPid), prog:0, who:myProfile?.nickname||'' }, '*');
 }
-function readPkgFile(file){ return new Promise((res, rej)=>{ if(file.size>3*1024*1024) return rej(new Error('패키지가 너무 커요 (3MB 이하)')); const rd=new FileReader(); rd.onerror=()=>rej(new Error('파일을 읽지 못했어요')); rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='knitup-pattern-package' || !Array.isArray(j.charts) || !j.charts.length) throw 0; res(j); }catch(e){ rej(new Error('knitup 도안 패키지(.knitup-pkg.json)가 아니에요')); } }; rd.readAsText(file); }); }
+function readPkgFile(file){ return new Promise((res, rej)=>{ /* 크기 한도 없음(2026-11-27 대표: 완전 해제, schema 174) */ const rd=new FileReader(); rd.onerror=()=>rej(new Error('파일을 읽지 못했어요')); rd.onload=()=>{ try{ const j=JSON.parse(rd.result); if(j.app!=='knitup-pattern-package' || !Array.isArray(j.charts) || !j.charts.length) throw 0; res(j); }catch(e){ rej(new Error('knitup 도안 패키지(.knitup-pkg.json)가 아니에요')); } }; rd.readAsText(file); }); }
 // ===== 커머스 데모(Lab, 2026-10-19 대표 지시: 작가 설명회용) — 실 판매(무통장) · 도안 구매(임시 무료) · 작가 정산 · 실함→도안 =====
 //   가격·배송비·재고·수수료는 서버 함수(place_order·purchase_pattern·pattern_fee_calc)가 계산. 화면은 보여 주기만.
 // won(n) 은 아래(실 사전 호환 블록)에 이미 있음
