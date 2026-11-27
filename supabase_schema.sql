@@ -2314,3 +2314,10 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 -- 171. 인증을 올린 회원이 지도 핀을 꺼 두었으면 켜 보시라고 한 번 권한다 (2026-11-27 대표 지시, 마이그레이션 pin_nudge — 원본 supabase/pin_nudge.sql)
 --   pin_nudges(회원마다 한 번) · pin_nudge_send(회원) — 지기 채팅 글 + 그림(docs/guides/pin_on_v1.png) + 알림 · 트리거 works_pin_nudge(승인되는 순간)
 -- ============================================================
+
+-- ============================================================
+-- 172. 뜨친 100쌍 기념 (2026-11-27 대표 확정 시안 ddeuchin_100_v3, 마이그레이션 ddeuchin_100 — 원본 supabase/ddeuchin_100.sql)
+--   friend_request_remind_100(): 3일 넘게 답하지 않은 받은 신청이 있는 회원에게 한 번 더(회원마다 하나, 이미 받았으면 건너뜀) — 크론 friend-remind-100 이 2026-11-27 21:05 KST 에 한 번 돌리고 스스로 지워짐
+--   friend_rec_weekly(): app_config.friend_rec_prefix {text, until} 가 기한 안이면 알림 앞에 한마디(2026-11-28 토요일 한 번)
+--   시작 공지 카드(20261127-ddeuchin100, pin)는 크론 notice-ddeuchin100-on 이 2026-11-27 21:00 KST 에 home_notices_v2 · home_notices 에 넣고 인증 안내 카드를 내림
+-- ============================================================

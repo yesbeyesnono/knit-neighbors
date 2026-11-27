@@ -326,6 +326,7 @@ begin
   out := pg_temp.must_fail(out, '_lab_key_ok(anon)', 'select public._lab_key_ok(repeat(''a'', 50))');
   out := pg_temp.must_fail(out, 'lab_pattern_put(anon, 틀린 열쇠)', 'select public.lab_pattern_put(repeat(''a'', 50), ''x'', ''x'', null, ''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'lab_pattern_drop(anon, 틀린 열쇠)', 'select public.lab_pattern_drop(repeat(''a'', 50), ''x'')');
+  out := pg_temp.must_fail(out, 'friend_request_remind_100(anon)', 'select public.friend_request_remind_100()');   -- schema 172
   reset role;
   raise exception 'RESULT(rolled back): %', out;
 end $do$;
