@@ -2309,3 +2309,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   lab_key_new(관리자: 열쇠 새로 만들기, 값은 한 번만 돌려줌 · 옛 열쇠는 끊김) · lab_key_info · _lab_key_ok
 --   lab_pattern_put(열쇠, id, 제목, 요약, 꾸러미) · lab_pattern_drop(열쇠, id): Studio 가 로그인 없이 부름(anon 실행 가능 — 열쇠가 맞을 때만). 꾸러미 4MB · 200개까지
 -- ============================================================
+
+-- ============================================================
+-- 171. 인증을 올린 회원이 지도 핀을 꺼 두었으면 켜 보시라고 한 번 권한다 (2026-11-27 대표 지시, 마이그레이션 pin_nudge — 원본 supabase/pin_nudge.sql)
+--   pin_nudges(회원마다 한 번) · pin_nudge_send(회원) — 지기 채팅 글 + 그림(docs/guides/pin_on_v1.png) + 알림 · 트리거 works_pin_nudge(승인되는 순간)
+-- ============================================================

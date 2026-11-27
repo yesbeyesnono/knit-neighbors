@@ -241,6 +241,8 @@ begin
   out := pg_temp.must_fail(out, 'source_ai_apply', 'select public.source_ai_apply(gen_random_uuid(), ''{}''::jsonb)');
   out := pg_temp.must_fail(out, 'source_ai_tick', 'select public.source_ai_tick()');
   out := pg_temp.must_fail(out, 'source_author_notify', 'select public.source_author_notify(gen_random_uuid())');   -- schema 168
+  out := pg_temp.must_fail(out, 'pin_nudges (member direct)', 'select count(*) from public.pin_nudges');   -- schema 171
+  out := pg_temp.must_fail(out, 'pin_nudge_send', 'select public.pin_nudge_send(gen_random_uuid())');
   out := pg_temp.must_fail(out, 'set_pattern_pkg(any)', 'select public.set_pattern_pkg((select id from public.patterns limit 1), null)');
   v := public.supporter_stats(); out := out || ' | ' || case when v is null then 'supporter_stats hidden' else 'FAIL supporter_stats visible' end;
   reset role;
