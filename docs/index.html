@@ -58,6 +58,7 @@ nav .badge{position:absolute;top:6px;right:calc(50% - 18px);background:#ff3040;c
 .btn.m{background:var(--btn);color:var(--btn-ink)}
 .btn.sm{padding:7px 14px;font-size:.85rem;width:auto;border-radius:999px}
 .btn:disabled{opacity:.5;cursor:default}.btn.danger{background:#b3261e;color:#fff}
+.dlbox{display:flex;flex-direction:column;min-height:540px}.dlstp{display:flex;gap:5px;margin-bottom:10px}.dlstp i{width:18px;height:4px;border-radius:2px;background:var(--line)}.dlstp i.on{background:var(--color-primary)}.dllist{border:1px solid var(--line);border-radius:14px;overflow:hidden}.dlrow{display:flex;align-items:center;gap:11px;width:100%;height:46px;padding:0 14px;border:0;border-bottom:1px solid var(--line);background:var(--color-surface);font:inherit;font-size:.92rem;color:var(--ink);text-align:left;cursor:pointer}.dllist>:last-child{border-bottom:0}.dlrow i{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:none;box-sizing:border-box}.dlrow.on{background:var(--color-primary-light);font-weight:700;color:var(--color-primary-dark)}.dlrow.on i{border:6px solid var(--color-primary);background:var(--color-surface)}.dlhint{display:flex;align-items:center;gap:8px;padding:9px 14px 10px 45px;border-bottom:1px solid var(--line);background:var(--color-bg);font-size:.8rem;line-height:1.45;color:var(--color-primary-dark)}.dlhint button{margin-left:auto;flex:none;border:1.5px solid var(--color-primary);border-radius:999px;background:var(--color-surface);color:var(--color-primary);font:inherit;font-weight:700;font-size:.76rem;padding:6px 12px;cursor:pointer}.dlhint input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:.86rem;background:var(--color-surface)}.dlbtns{display:grid;grid-template-columns:1fr 1.6fr;gap:8px;margin-top:14px}.dlbtns .btn{margin:0}
 .btn[hidden]{display:none}
 .g{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px}
 .g img{width:18px;height:18px}
@@ -6531,17 +6532,32 @@ function openSettingsInner(){
 }
 const DEL_DAYS=20;
 const kdate=d=>new Date(d).toLocaleDateString('ko-KR',{month:'long',day:'numeric'});
-function deleteAccount(){   // 앱 안 시트(2026-11-04) — 20일 유예, 같은 계정으로 다시 로그인하면 복구
-  openSheet(`<b style="font-size:1.05rem;color:#b3261e">계정을 삭제할까요?</b>
-    <div class="card soft" style="font-size:.9rem;line-height:1.55"><div>삭제하면 <b>프로필·글·사진·채팅·모임 참여 기록</b>이 다른 회원에게 더 이상 보이지 않아요.</div>
+// 계정 삭제 — 두 단계(2026-11-27 대표 확정 시안 leave_reason_v2, schema 173): ① 떠나는 이유(하나 고르기 · 건너뛸 수 있음) → ② 삭제 확인(20일 유예, 같은 계정으로 다시 로그인하면 복구). 창 높이는 두 단계가 같다
+const DEL_WHY=[['no_neighbors','주변에 뜨개 이웃이 없어요'],['little_content','볼 것·할 것이 적어요'],['hard_to_use','쓰는 방법이 어려워요'],['location','위치가 보이는 게 부담돼요'],['too_many_notif','알림이 많아요'],['break','잠시 쉬려고요'],['other','기타']];
+let delWhy=null, delTxt='';
+function deleteAccount(){ delWhy=null; delTxt=''; delStep1(); }
+function delStep1(){
+  const hint=k=> k!==delWhy ? '' : k==='location' && myProfile?.is_visible!==false ? `<div class="dlhint"><span>지도에서 내 핀만 끄고 계속 쓰실 수도 있어요</span><button type="button" onclick="delPinOff()">핀 끄기</button></div>`
+    : k==='too_many_notif' ? `<div class="dlhint"><span>알림은 ${PUSH_OS} 설정 › 뜨개동네 › 알림에서 끌 수 있어요</span></div>`
+    : k==='other' ? `<div class="dlhint"><input id="delTxt" maxlength="100" placeholder="어떤 점이 아쉬우셨나요? (100자)" value="${esc(delTxt)}" oninput="delTxt=this.value"></div>` : '';
+  openSheet(`<div class="dlbox"><div class="dlstp"><i class="on"></i><i></i></div>
+    <b style="font-size:1.05rem">떠나시는 이유를 알려 주실 수 있나요?</b><p class="muted" style="margin:4px 0 12px;font-size:.84rem">더 나은 knitup 을 만드는 데만 써요. 건너뛰어도 괜찮아요.</p>
+    <div class="dllist">${DEL_WHY.map(([k,l])=>`<button type="button" class="dlrow${delWhy===k?' on':''}" data-k="${k}" onclick="delPick(this.dataset.k)"><i></i>${l}</button>${hint(k)}`).join('')}</div>
+    <span style="flex:1"></span><div class="dlbtns"><button class="btn o" onclick="delWhy=null;delTxt='';delStep2()">건너뛰기</button><button class="btn" ${delWhy?'':'disabled'} onclick="delStep2()">다음</button></div></div>`);
+}
+function delPick(k){ if(delWhy==='other'){ const e=$('#delTxt'); if(e) delTxt=e.value; } delWhy=k; delStep1(); }
+async function delPinOff(){ await toggleVisible(false); closeSheet(); }
+function delStep2(){ const e=$('#delTxt'); if(e) delTxt=e.value;
+  openSheet(`<div class="dlbox"><div class="dlstp"><i class="on"></i><i class="on"></i></div>
+    <b style="font-size:1.05rem;color:#b3261e">계정을 삭제할까요?</b>
+    <div class="card soft" style="font-size:.9rem;line-height:1.55;margin-top:10px"><div>삭제하면 <b>프로필·글·사진·채팅·모임 참여 기록</b>이 다른 회원에게 더 이상 보이지 않아요.</div>
     <div style="margin-top:8px">마음이 바뀌면 <b>${DEL_DAYS}일 안에 같은 계정으로 다시 로그인</b>하세요. 그대로 복구돼요. ${DEL_DAYS}일이 지나면 완전히 지워지고 되돌릴 수 없어요.</div></div>
     <label class="f">확인을 위해 "삭제"라고 적어 주세요<input id="delWord" placeholder="삭제" autocomplete="off" oninput="$('#delBtn').disabled=this.value.trim()!=='삭제'"></label>
-    <button class="btn danger" id="delBtn" disabled onclick="submitDeleteAccount()">삭제하기</button>
-    <button class="btn o" onclick="closeSheet()">그만두기</button>`);
+    <span style="flex:1"></span><div class="dlbtns"><button class="btn o" onclick="closeSheet()">그만두기</button><button class="btn danger" id="delBtn" disabled onclick="submitDeleteAccount()">삭제하기</button></div></div>`);
 }
 async function submitDeleteAccount(){
   const b=$('#delBtn'); b.disabled=true; b.textContent='처리 중…';
-  const { data, error } = await sb.rpc('request_account_deletion');
+  const { data, error } = await sb.rpc('request_account_deletion_v2', { p_reason: delWhy||null, p_text: delWhy==='other' ? ((delTxt||'').trim()||null) : null });
   if(error){ b.disabled=false; b.textContent='삭제하기'; return toast('삭제 실패: '+error.message); }
   closeSheet(); toast(`계정 삭제를 접수했어요 · ${kdate(data)}까지 다시 로그인하면 복구돼요`);
   try{ await pushUnregister(); }catch(e){} await sb.auth.signOut();

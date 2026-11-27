@@ -2321,3 +2321,8 @@ where exists (select 1 from public.posts where id = 'da81f326-e4e8-407c-8c89-50d
 --   friend_rec_weekly(): app_config.friend_rec_prefix {text, until} 가 기한 안이면 알림 앞에 한마디(2026-11-28 토요일 한 번)
 --   시작 공지 카드(20261127-ddeuchin100, pin)는 크론 notice-ddeuchin100-on 이 2026-11-27 21:00 KST 에 home_notices_v2 · home_notices 에 넣고 인증 안내 카드를 내림
 -- ============================================================
+
+-- ============================================================
+-- 173. 탈퇴할 때 이유 묻기 (2026-11-27 대표 확정 시안 leave_reason_v2, 마이그레이션 leave_reason — 원본 supabase/leave_reason.sql)
+--   account_deletions.reason / reason_text · request_account_deletion_v2(이유, 한 줄) — 옛 앱의 request_account_deletion() 은 그대로 · 콘솔 admin_leave_reasons(일수)
+-- ============================================================
